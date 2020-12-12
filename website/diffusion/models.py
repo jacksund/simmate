@@ -14,23 +14,12 @@ from django.db import models
 class Structure(models.Model):
     
     """ Base info """
-    # Materials Project ID
-    # Max length of 12 is overkill: 'mp-123456789'
-    material_id = models.CharField(max_length=12)
-    
-    # total number of sites in the unitcell
-    nsites = models.IntegerField()
     
     # The formatted formula of the structure for convenience
     pretty_formula = models.CharField(max_length=25)
     
-    # Final calculated energy by Materials Project
-    # Because Materials Project may be missing some of these values or we may add a 
-    # structure without a calc done, we set this column as optional.
-    final_energy = models.FloatField(blank=True, null=True)
-    final_energy_per_atom = models.FloatField(blank=True, null=True)
-    formation_energy_per_atom = models.FloatField(blank=True, null=True)
-    e_above_hull = models.FloatField(blank=True, null=True)
+    # total number of sites in the unitcell
+    nsites = models.IntegerField()
     
     # Density of the structure for convenience
     density = models.FloatField()
@@ -41,6 +30,21 @@ class Structure(models.Model):
     #!!! Postgres does support a dictionary type, but we don't use that here so that
     #!!! we can still test with SQLite3
     structure = models.TextField()
+    
+    #!!! In the future, Materials Project info will be better off in a separate table.
+    #!!! This is because not all structures will be from the Materials Project.
+    
+    # Materials Project ID
+    # Max length of 12 is overkill: 'mp-123456789'
+    material_id = models.CharField(max_length=12)
+    
+    # Final calculated energy by Materials Project
+    # Because Materials Project may be missing some of these values or we may add a 
+    # structure without a calc done, we set this column as optional.
+    final_energy = models.FloatField(blank=True, null=True)
+    final_energy_per_atom = models.FloatField(blank=True, null=True)
+    formation_energy_per_atom = models.FloatField(blank=True, null=True)
+    e_above_hull = models.FloatField(blank=True, null=True)
     
     """ Relationships """
     # Each structure will have many DiffusionPathway(s)
@@ -60,8 +64,9 @@ class Pathway(models.Model):
     # Note: do not confuse this will ion, which has charge
     element = models.CharField(max_length=2)
     
-    # The expected index in DistinctPathFinder.get_paths. The shortest path is zero.
-    index = models.IntegerField()
+    # The expected index in DistinctPathFinder.get_paths. The shortest path is index 0.
+    # index is a reserved keyword so I need to use dpf_index
+    dpf_index = models.IntegerField()
     
     # The length/distance of the pathway from start to end (linear measurement)
     distance = models.FloatField()
@@ -77,10 +82,10 @@ class Pathway(models.Model):
     
     """ Relationships """
     # Each Pathway corresponds to one Structure, which can have many Pathway(s)
-    exam = models.ForeignKey(
+    structure = models.ForeignKey(
         Structure,
         on_delete=models.CASCADE,
-        related_name='pathway',
+        related_name='pathways',
         )
     
     # Each Pathway will map to a row in the PathwayCalcs table. I keep this separate

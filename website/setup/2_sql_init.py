@@ -22,14 +22,15 @@ django's relative imports yet, and I really only need to run this script once.
 # Loading the csv file into Pandas dataframe and init pymatgen structure objects
 
 # Load dataframe from csv file
+import pandas
 df = pandas.read_csv('setup/db_santized.csv') # wStructDicts
 
-# change structure column from a json string to a dictionary
-import json
-df.structure = df.structure.apply(json.loads)
-# change structure column from dictionary to pymatgen structure object
-from pymatgen.core import Structure
-df.structure = df.structure.apply(Structure.from_dict)
+# # change structure column from a json string to a dictionary
+# import json
+# df.structure = df.structure.apply(json.loads)
+# # change structure column from dictionary to pymatgen structure object
+# from pymatgen.core import Structure
+# df.structure = df.structure.apply(Structure.from_dict)
 
 #--------------------------------------------------------------------------------------
 
@@ -52,6 +53,7 @@ from diffusion.models import Structure
     # using a faster sql database such as postgres
     # committing all saves at once to sql (use with transaction.atomic())
 for row in df.itertuples():
+    pass
     new_structure = Structure(
         material_id = row.material_id,
         nsites = row.nsites,
