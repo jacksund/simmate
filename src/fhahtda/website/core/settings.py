@@ -32,8 +32,8 @@ ALLOWED_HOSTS = []
 
 #!!! I can add "fhahtda.website." if I'm not using django within a package
 INSTALLED_APPS = [
-    'accounts.apps.AccountsConfig',
-    'diffusion.apps.DiffusionConfig',
+    'fhahtda.website.accounts.apps.AccountsConfig',
+    'fhahtda.website.diffusion.apps.DiffusionConfig',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',

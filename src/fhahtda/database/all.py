@@ -57,6 +57,11 @@ class Structure(models.Model):
     """ Restrictions """
     # none
 
+    """ For website compatibility"""
+
+    class Meta:
+        app_label = "fhahtda.website.diffusion"
+
 
 class Pathway(models.Model):
 
@@ -100,12 +105,17 @@ class Pathway(models.Model):
     """ Restrictions """
     # none
 
+    """ For website compatibility"""
+
+    class Meta:
+        app_label = "fhahtda.website.diffusion"
+
 
 class PathwayCalc(models.Model):
-    
+
     """ Base info """
 
-    # 
+    #
 
     """ Relationships """
     # Each PathwayCalcs corresponds to one Pathway, which can have many Pathway(s)
@@ -121,3 +131,8 @@ class PathwayCalc(models.Model):
 
     """ Restrictions """
     # none
+
+    """ For website compatibility"""
+
+    class Meta:
+        app_label = "fhahtda.website.diffusion"

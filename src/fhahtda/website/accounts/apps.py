@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
-#!!! I can add "fhahtda.website." if I'm using django within a package
 class AccountsConfig(AppConfig):
-    name = 'accounts'
+    
+    # use the full import path for this app b/c it's within a package
+    name = 'fhahtda.website.accounts'

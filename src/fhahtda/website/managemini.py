@@ -9,7 +9,6 @@ from django.conf import settings
 from fhahtda.website.core.settings import BASE_DIR, DATABASES, DEBUG
 # For speed, I only want this app installed
 # I also need to write out the full import path from django here.
-from fhahtda.website.diffusion.apps import DiffusionConfig
 INSTALLED_APPS = ('fhahtda.website.diffusion.apps.DiffusionConfig',)
 # INSTALLED_APPS = ('diffusion.apps.DiffusionConfig',)
 
