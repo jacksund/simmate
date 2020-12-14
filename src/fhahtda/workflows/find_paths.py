@@ -19,12 +19,37 @@ Example of running the code below:
 
 """
 
+# --------------------------------------------------------------------------------------
+
 import json
 from pymatgen.core.structure import Structure
 from prefect.tasks.database.sqlite import SQLiteQuery
+from fhahtda.website.core.settings import DATABASES
+db_filename = DATABASES["default"]["NAME"]
+
+def load_structure_from_db(structure_id):
+
+    # connect to the django database
+    from fhahtda.website.manage import connect_db
+
+    connect_db()
+
+    # import the django models
+    from fhahtda.database.all import Structure
+
+    # grab the proper Structure entry and we want only the structure column
+    structure_json = Structure.objects.get(id=structure_id).structure
+
+    # convert the output from a json string to python dictionary
+    structure_dict = json.loads(structure_json)
+    # convert the output from a dictionary to pymatgen Structure object
+    from pymatgen.core.structure import Structure
+    structure = Structure.from_dict(structure_dict)
+
+    return structure
 
 
-def load_structure_from_db(structure_id, database="db.sqlite3"):
+def load_structure_from_db_FAST(structure_id, database=db_filename):
 
     # format the query using the data. This is the raw SQL command.
     # This command is the django equivalent of...
@@ -51,6 +76,9 @@ def load_structure_from_db(structure_id, database="db.sqlite3"):
     return structure
 
 
+# --------------------------------------------------------------------------------------
+
+
 from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder
 
 
@@ -73,28 +101,48 @@ def find_paths(structure):
     return paths
 
 
-def add_paths_to_db(structure_id, paths, database="db.sqlite3"):
+# --------------------------------------------------------------------------------------
+
+
+def add_paths_to_db(structure_id, paths):
+
+    # paths are given a list of MigrationPath objects
+
+    # connect to the django database
+    from fhahtda.website.manage import connect_db
+
+    connect_db()
+
+    # import the django models
+    from fhahtda.database.all import Structure, Pathway
+
+    # grab the proper Structure entry
+    structure = Structure.objects.get(id=structure_id)
+
+    # now iterate through the pathways and save them to the database
+    # Note for the isite, msite, and esite storage:
+    # str(path.isite.frac_coords)[1:-1] takes a numpy array and converts it to a
+    # list with out brackets or commas. For example,
+    # array([0.25, 0.13, 0.61]) --> '0.25 0.13 0.61'
+    # To convert back, just use numpy.fromstring(string, , sep=' ') method
+    for path_index, path in enumerate(paths):
+        pathway = Pathway(
+            element="F",
+            dpf_index=path_index,
+            distance=path.length,
+            isite=str(path.isite.frac_coords)[1:-1],
+            msite=str(path.msite.frac_coords)[1:-1],
+            esite=str(path.esite.frac_coords)[1:-1],
+            structure=structure,
+        )
+        pathway.save()
+
+
+def add_paths_to_db_FAST(structure_id, paths, database=db_filename):
 
     # paths are given a list of MigrationPath objects
 
     # format the query using the data. This is the raw SQL command.
-    # This command is the django equivalent of...
-    #   import manageinpython
-    #   from diffusion.models import Structure
-    #   structure = Structure.objects.get(id=structure_id)
-    #   from diffusion.models import Pathway
-    #   for path_index, path in enumerate(paths):
-    #       pathway = Pathway(
-    #           element='F',
-    #           dpf_index = path_index,
-    #           distance = path.length,
-    #           isite = str(path.isite.frac_coords)[1:-1],
-    #           msite = str(path.msite.frac_coords)[1:-1],
-    #           esite = str(path.esite.frac_coords)[1:-1],
-    #           structure = structure,
-    #           )
-    #       pathway.save()
-
     # we want to build our SQL command such that all pathways are added at once
     # therefore we build up the query string from scratch:
     query = """
@@ -111,11 +159,6 @@ def add_paths_to_db(structure_id, paths, database="db.sqlite3"):
 
     # now iterate through the paths and add the proper VALUE to the sql query
     for path_index, path in enumerate(paths):
-        # Note for the isite, msite, and esite storage:
-        # str(path.isite.frac_coords)[1:-1] takes a numpy array and converts it to a
-        # list with out brackets or commas. For example,
-        # array([0.25, 0.13, 0.61]) --> '0.25 0.13 0.61'
-        # To convert back, just use numpy.fromstring(string, , sep=' ') method
         query += f"""
             ('F',
              {path_index},

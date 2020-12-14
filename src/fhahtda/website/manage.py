@@ -10,13 +10,20 @@ import django
 # --------------------------------------------------------------------------------------
 
 
-def setup_django_full():
+def setup_django_full(): # Wall time: 246 ms
+    
     # The code below is the equiv of running 'python manage.py shell'
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fhahtda.website.core.settings")
     django.setup()
 
 
-def setup_django_db():
+def connect_db(): # Wall time: 200 ms first time and 600 ns after
+    
+    # see if django has already been configured. If so, just exit this function
+    from django.conf import settings
+    if settings.configured:
+        return 
+    
     # import the settings I want from the actual django settings file
     from fhahtda.website.core.settings import BASE_DIR, DATABASES, DEBUG
 
@@ -24,8 +31,7 @@ def setup_django_db():
     # I also need to write out the full import path from django here.
     INSTALLED_APPS = ("fhahtda.website.diffusion.apps.DiffusionConfig",)
     # set these values
-    from django.conf import settings
-
+    
     settings.configure(
         BASE_DIR=BASE_DIR,
         DEBUG=DEBUG,

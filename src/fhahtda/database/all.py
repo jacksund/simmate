@@ -57,10 +57,13 @@ class Structure(models.Model):
     """ Restrictions """
     # none
 
-    """ For website compatibility"""
+    """ For website compatibility """
 
     class Meta:
         app_label = "diffusion"
+
+
+# --------------------------------------------------------------------------------------
 
 
 class Pathway(models.Model):
@@ -105,17 +108,34 @@ class Pathway(models.Model):
     """ Restrictions """
     # none
 
-    """ For website compatibility"""
+    """ For website compatibility """
 
     class Meta:
         app_label = "diffusion"
+
+
+# --------------------------------------------------------------------------------------
 
 
 class PathwayCalc(models.Model):
 
     """ Base info """
 
-    #
+    # Indicate what state the calculation is in. This exists to ensure we don't
+    # submit multiple to Prefect and also let's us check how many currently exist in
+    # the queue.
+    #!!! If you choose to change these, consider Prefect's different state labels:
+    #!!! https://docs.prefect.io/api/latest/engine/state.html
+    class StatusTypeOptions(models.TextChoices):
+        SCHEDULED = "S"
+        COMPLETED = "C"
+        FAILED = "F"
+
+    status = models.CharField(
+        max_length=1,
+        choices=StatusTypeOptions.choices,
+        default=StatusTypeOptions.SCHEDULED,
+    )
 
     """ Relationships """
     # Each PathwayCalcs corresponds to one Pathway, which can have many Pathway(s)
@@ -132,7 +152,34 @@ class PathwayCalc(models.Model):
     """ Restrictions """
     # none
 
-    """ For website compatibility"""
-
+    """ For website compatibility """
+    """ Set as Abstract Model """
+    # I have other model inherit from this one, while this model doesn't need its own
+    # table. Therefore, I set this as an abstract model. Should that change in the
+    # future, look here:
+    # https://docs.djangoproject.com/en/3.1/topics/db/models/#model-inheritance
     class Meta:
         app_label = "diffusion"
+        abstract = True
+
+
+# --------------------------------------------------------------------------------------
+
+
+class RelativeDistanceVsDmin(PathwayCalc):
+
+    # Distance of the pathway relative to the shortest pathway distance
+    # in the structure using the formula: (D - Dmin)/Dmin
+    distance_rel_min = models.FloatField(blank=True, null=True)
+
+
+# --------------------------------------------------------------------------------------
+
+
+class DimensionalityLarsen(PathwayCalc):
+
+    # Dimensionality of an individual pathway based on the Larsen Method
+    dimensionality = models.IntegerField()
+
+
+# --------------------------------------------------------------------------------------

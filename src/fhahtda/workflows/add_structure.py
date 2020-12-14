@@ -2,10 +2,6 @@
 
 """
 
-NOTE: This currently only works with C:\Users\jacks\Documents\GitHub\fhahtda\website
-as the working directory. I need to switch the database input parameter to a 
-full path to fix this.
-
 ETL (Extract, Transform, Load)
 E = load structure from mp, file, dict, etc. (in this project, I only do mp)
 T = santize structure
@@ -17,6 +13,9 @@ Example of running the code below:
     l = add_structure_from_mp(t)
 
 """
+
+# --------------------------------------------------------------------------------------
+
 
 from pymatgen import MPRester
 
@@ -64,6 +63,9 @@ def load_structure_from_mp(mp_id, api_key="2Tg7uUvaTAPHJQXl"):
     return data[0]
 
 
+# --------------------------------------------------------------------------------------
+
+
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 
@@ -105,10 +107,46 @@ def sanitize_structure(data):
     return data
 
 
+# --------------------------------------------------------------------------------------
+
+
+def add_structure_from_mp(data):
+
+    # make a copy of data because we are going to be changing things in-place
+    data = data.copy()
+
+    # convert the structure from pymatgen object to json string
+    structure_json = data["structure"].to_json()
+
+    # update the data dictionary
+    data.update({"structure": structure_json})
+
+    # connect to the django database
+    from fhahtda.website.manage import connect_db
+
+    connect_db()
+
+    # import the django model
+    from fhahtda.database.all import Structure
+
+    # initialize it using the data
+    structure = Structure(**data)
+
+    # save the data to the database
+    structure.save()
+
+
 from prefect.tasks.database.sqlite import SQLiteQuery
+from fhahtda.website.core.settings import DATABASES
+
+db_filename = DATABASES["default"]["NAME"]
 
 
-def add_structure_from_mp(data, database="db.sqlite3"):
+def add_structure_from_mp_RAW(data, database=db_filename):
+
+    # I intend for this script to be the much faster version add_structure_from_mp.
+    # It certainly is faster when it comes to setting up a connection and tearing it
+    # down, which may be useful moving forward.
 
     # make a copy of data because we are going to be changing things in-place
     data = data.copy()
@@ -120,11 +158,6 @@ def add_structure_from_mp(data, database="db.sqlite3"):
     data.update({"structure": structure_json})
 
     # format the query using the data. This is the raw SQL command.
-    # This command is the django equivalent of...
-    #       import manageinpython
-    #       from diffusion.models import Structure
-    #       structure = Structure(**data)
-    #       structure.save()
     query = f"""
         INSERT INTO diffusion_structure 
             (pretty_formula, 
@@ -154,3 +187,6 @@ def add_structure_from_mp(data, database="db.sqlite3"):
 
     # out has no use here, but may contain error information
     return out
+
+
+# --------------------------------------------------------------------------------------
