@@ -60,7 +60,7 @@ class Structure(models.Model):
     """ For website compatibility"""
 
     class Meta:
-        app_label = "fhahtda.website.diffusion"
+        app_label = "diffusion"
 
 
 class Pathway(models.Model):
@@ -108,7 +108,7 @@ class Pathway(models.Model):
     """ For website compatibility"""
 
     class Meta:
-        app_label = "fhahtda.website.diffusion"
+        app_label = "diffusion"
 
 
 class PathwayCalc(models.Model):
@@ -135,4 +135,4 @@ class PathwayCalc(models.Model):
     """ For website compatibility"""
 
     class Meta:
-        app_label = "fhahtda.website.diffusion"
+        app_label = "diffusion"
