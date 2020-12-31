@@ -4,6 +4,10 @@ This is a simple example package. You can use
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 to write your content.
 
+Simmate is the Simulated Materials Ecosystem (or Environment?) which has everything you need for materials chemistry research all in one repo. This includes a core material science framework, workflow management, database orm, and a website interface. 
+
+Fractured Hierarchical Architecture for High-Throughput Diffusion Analysis
+
 Component | Package | Other Packages (not used)
 ------------ | ------------- | -------------
 Materials Science | PyMatGen | ASE
