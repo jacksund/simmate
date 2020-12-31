@@ -1,0 +1,1 @@
+This module is empty at the moment, but I plan for it to be extremely similar to pymatgen.io's module. It will have classes for parse input and output files from other programs.

@@ -39,3 +39,4 @@ Reference Management | SciWheel | Mendeley, Zotero, EndNote
 SVG Editting | Inkscape | Adobe Illustrator
 Graphics Editting | GIMP | Adobe Photoshop
 Command Line Interface | Click | Argparse, Python-Fire
+Code Formatting | Black | PyLint

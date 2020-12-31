@@ -1,0 +1,1 @@
+This module hosts everything for SQL-type database access. Right now it's just the ORM, but I may make submodules of 'orm', 'api', and 'util' in the future.
