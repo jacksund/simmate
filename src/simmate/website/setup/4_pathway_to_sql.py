@@ -12,7 +12,7 @@ running...
     python manage.py makemigrations diffusion;
     python manage.py migrate;
 
-IMPORTANT: For the working directory (in Spyder) I set to /fhahtda/website, which 
+IMPORTANT: For the working directory (in Spyder) I set to /simmate/website, which 
 is one directory up from this one. I did this because I don't want to mess with 
 django's relative imports yet, and I really only need to run this script once.
 

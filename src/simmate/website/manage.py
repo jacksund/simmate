@@ -13,7 +13,7 @@ import django
 def setup_django_full(): # Wall time: 246 ms
     
     # The code below is the equiv of running 'python manage.py shell'
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fhahtda.website.core.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "simmate.website.core.settings")
     django.setup()
 
 
@@ -25,11 +25,11 @@ def connect_db(): # Wall time: 200 ms first time and 600 ns after
         return 
     
     # import the settings I want from the actual django settings file
-    from fhahtda.website.core.settings import BASE_DIR, DATABASES, DEBUG
+    from simmate.website.core.settings import BASE_DIR, DATABASES, DEBUG
 
     # For speed, I only want this app installed
     # I also need to write out the full import path from django here.
-    INSTALLED_APPS = ("fhahtda.website.diffusion.apps.DiffusionConfig",)
+    INSTALLED_APPS = ("simmate.website.diffusion.apps.DiffusionConfig",)
     # set these values
     
     settings.configure(
@@ -43,7 +43,7 @@ def connect_db(): # Wall time: 200 ms first time and 600 ns after
 
 def setup_django_cli():
     # This is if you call the file directory from the command line interface (cli)
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fhahtda.website.core.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "simmate.website.core.settings")
     from django.core.management import execute_from_command_line
 
     execute_from_command_line(sys.argv)
@@ -58,7 +58,7 @@ def reset_db(apps_to_migrate=["diffusion"]):
     #!!! maybe just grab all folders in the base directory via os.listdir()?
 
     # grab base directory and the location of the database file
-    from fhahtda.website.core.settings import BASE_DIR, DATABASES
+    from simmate.website.core.settings import BASE_DIR, DATABASES
 
     db_filename = DATABASES["default"]["NAME"]
 

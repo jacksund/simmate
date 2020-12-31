@@ -30,10 +30,10 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-#!!! I can add "fhahtda.website." if I'm not using django within a package
+#!!! I can add "simmate.website." if I'm not using django within a package
 INSTALLED_APPS = [
-    'fhahtda.website.accounts.apps.AccountsConfig',
-    'fhahtda.website.diffusion.apps.DiffusionConfig',
+    'simmate.website.accounts.apps.AccountsConfig',
+    'simmate.website.diffusion.apps.DiffusionConfig',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',

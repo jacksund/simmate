@@ -3,4 +3,4 @@ from django.apps import AppConfig
 class DiffusionConfig(AppConfig):
     
     # use the full import path for this app b/c it's within a package
-    name = 'fhahtda.website.diffusion'
+    name = 'simmate.website.diffusion'
