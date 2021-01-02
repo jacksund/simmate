@@ -1,3 +1,29 @@
-I have yet to pick a license agreement and won't commit to any until I make this repo public -- the MIT one shown before was really just a placeholder that came from a cookiecutter python project template. As no one can see this repo besides me, I don't see any harm in waiting until I'm ready to share the project with others (going Private to Public on github). They may be able to look back at these original commits, but I'd assume any code in past commits will be under the same restrictions as the release-day license that I choose. Here is what I'm considering now...
+BSD 3-Clause License
 
-Most popular python packages (such as Numpy, Scipy, Pandas) follow the BSD-3 license and it is the best option if I want minimal restrictions on my code. I would pick this over the MIT or Apache licenses if I had to choose now. On the other hand, I may want to restrict future works that try to spin off of this repo to make a profit. This codebase is extremely high-level and therefore close to what a marketed project would be. In fact, I may even try to profit off the repo or alternatively use it as a source of self-funding for the repo development -- I envision a number of ways where profits can be made off this code (such as simply linking to Sigma/Fischer webpages when proposing raw materials needed for a synthesis or maybe even teaming up with ICSD by wrapping their database while keeping such access behind user permissions, effectively advertising for other paid products). The counter argument against this is that such a license (like GNU General Public License) may complicate how user contributions work and cause a lot of headache down the road. 
+Copyright (c) 2021, Jack D. Sundberg
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
