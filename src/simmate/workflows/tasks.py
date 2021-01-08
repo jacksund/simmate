@@ -2,9 +2,9 @@
 
 """
 
-Prefect does have a built-in way to loop a certain task that I could use, but 
+Prefect does have a built-in way to loop a certain task that I could use, but
 I think it's cleaner and more robust (plus I can run it locally) when I write
-my own custom Task class. 
+my own custom Task class.
 
 For how it would be done in Prefect, see their example here:
     https://docs.prefect.io/core/examples/task_looping.html
@@ -12,7 +12,7 @@ For how it would be done in Prefect, see their example here:
 The organization of this class is largely a simplification of Custodian where
 I am running a single job with the following steps...
 - Write Input Files based on custom+defualt settings
-- Run the calculation by calling the program 
+- Run the calculation by calling the program
 - Load ouput files
 - check for errors
 - [correct them, rerun]
@@ -28,12 +28,12 @@ https://materialsproject.github.io/custodian/index.html#usage
 Also, this is really a subclass of the Prefect Task to allow for monitoring
 handlers. More specifically, we want to be able to run Handlers while the task
 is also running via some executor (subprocess or Dask). Monitors are currently
-for reading outputs files and I don't take into account accessing task local 
+for reading outputs files and I don't take into account accessing task local
 varaibles or even try to access those. Prefect already supports handlers when
 the task changes state via the Task(state_handlers=[]) option.
 
 Altogether, I should discuss with Prefect on monitor_handlers and being able
-to use their LOOP method outside of the flow.run() -- specifcally it does not 
+to use their LOOP method outside of the flow.run() -- specifcally it does not
 work for task.run()
 
 
@@ -47,18 +47,18 @@ state_handlers includes custodian types Handler(monitor=False) and Validator
 
 ##### notes while rewriting Custodian #####
 
-renamed some variables for clarity. 
-The most signicant renaming that I'd like to do (but don't yet) is the 
+renamed some variables for clarity.
+The most signicant renaming that I'd like to do (but don't yet) is the
 Job.correct() method to Job.fix(), which is entirely based on my
 personal preference.
 
-written for a single job, not a list of jobs. The list of jobs should be 
-specified at the Workflow level (higher level). Therefore run and _run_job 
+written for a single job, not a list of jobs. The list of jobs should be
+specified at the Workflow level (higher level). Therefore run and _run_job
 methods are effectively merged.
 
-Would it instead make sense to have checkpoint_input/output within 
+Would it instead make sense to have checkpoint_input/output within
 the setup and workup/postprocess methods of the Job object?
-checkpoint_input is only for the very start of the job (initial directory). If 
+checkpoint_input is only for the very start of the job (initial directory). If
 nothing works, we may want to recover the initial state of the directory.
 checkpoint_output is for the end of the job. You'll want to use this instead
 of checkpoint_input if there are multiple different tasks that follow it.
@@ -67,7 +67,7 @@ As a guide where each letter is a different supervised job:
         its up to the user whether the final finals are compressed
     A-B
         A and B have only input compressed but not output
-        or... 
+        or...
         A and B have only output compressed but not input
     A-[B,C,D]
         A has output compressed and [B,C,D] do not use compressed input as
@@ -79,7 +79,7 @@ As a guide where each letter is a different supervised job:
     When in doubt, compress both input and output! Setting either to False
     is really just a way to save time and disk space.
 
-no terminate_func option. Assumes the job's future has a cancel method which 
+no terminate_func option. Assumes the job's future has a cancel method which
 follows the concurrent.futures convention
 
 scratch_dir option is moved to run method to allow this task instance to be
@@ -88,46 +88,59 @@ directory
 
 
 SupervisedShellTask is a combination of:
-
-    prefect.tasks.shell.ShellTask 
-    https://github.com/PrefectHQ/prefect/blob/master/src/prefect/tasks/shell.py
-    
-    custodian.custodian.Custodian
-    https://github.com/materialsproject/custodian/blob/master/custodian/custodian.py
+prefect.tasks.shell.ShellTask
+https://github.com/PrefectHQ/prefect/blob/master/src/prefect/tasks/shell.py
+custodian.custodian.Custodian
+https://github.com/materialsproject/custodian/blob/master/custodian/custodian.py
 
 Guide on contributing a new task to Prefect:
     https://docs.prefect.io/core/task_library/contributing.html#task-structure
 
-skip_handler_errors is removed and the error is always raised. If you don't 
+skip_handler_errors is removed and the error is always raised. If you don't
 want it raised, then that should be done inside of the Handler class itself.
 
 monitors have the is_terminating option, which is really only used when we want
 to stop vasp naturally at the end of an ionic step using the STOPCAR. Further,
-we have a priority of Handlers where only the first is used. If this is the 
+we have a priority of Handlers where only the first is used. If this is the
 special case, it will prevent a lower priority one from making the fix. These
 special cases cause for extra messy code so I wonder if there's a better way
 to handle this, such as a different subclass of Handler. I don't do anything
 extra at the moment and just add the extra code.
 
 The Job class has a terminate method, but I only ever see it used in one case
-which is VASP's constrained_opt_run. I'm not sure what's happening here, but 
+which is VASP's constrained_opt_run. I'm not sure what's happening here, but
 I don't think this merits an added method for all Jobs. Perhaps this special
 termination should instead happen in the Job's postprocessing method.
 
-Custodian's Validator class is when the is_monitor=False and the correct() 
+Custodian's Validator class is when the is_monitor=False and the correct()
 method simply passes. Also based on Custodian, they only run them at the end
 of the a job (that is all handlers passed). Thus their third characteristic
 is that the are the lowest priority handlers. Because I am able to define a
 Validator completely in the context of a Handlers list, I choose to remove
 the validators input to avoid confusion. This does open validators up to being
-missused by beginners (by putting one before the a Handle), which might be why 
-they chose to separate them. I will therefore make one change to such 
-Validators in that their hidden correct() method is not just a pass, but 
-actually raises and error immediately. If you don't want it raised, see my 
+missused by beginners (by putting one before the a Handle), which might be why
+they chose to separate them. I will therefore make one change to such
+Validators in that their hidden correct() method is not just a pass, but
+actually raises and error immediately. If you don't want it raised, see my
 comment on why skip_handler_errors was removed.
 
-I still need to work in working directory (and tempdir) settings as well as 
+I still need to work in working directory (and tempdir) settings as well as
 where to saved the compresse output file
+
+Hanlders in Custodian save the errors to the class instance via self.errors and
+therefore only return a boolean with the check() method. Instead, I write
+Hanlders so that they support parallelization -- no single run saves to the
+class instance, but it is instead returned. Therefore, errors are instead
+return from the check() method and must be passed into the correct() method.
+As an example, Custiadian you would do...
+    has_error = handler.check()
+    error_and_correction = handler.correct()
+whereas with Simmate you would do...
+    error = handler.check()
+    correction = handler.correct(error)
+
+All handlers should have a Handler.name attribute for records. By default, this
+is just the class name (Handler.__class__.__name__)
 
 """
 
@@ -140,9 +153,11 @@ from tempfile import TemporaryDirectory
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
 
-#!!! I expect dir to be an input arg for job.run(dir=None), so I should pass
-#!!! that through. I need to consider possible overwriting but that may be
-#!!! fine based on priority.
+# !!! I expect dir to be an input arg for job.run(dir=None), so I should pass
+# !!! that through. I need to consider possible overwriting but that may be
+# !!! fine based on priority.
+
+
 class SupervisedJobTask(Task):
     def __init__(
         self,
@@ -196,13 +211,14 @@ class SupervisedJobTask(Task):
             dir = dir.name
         # otherwise make sure the directory the user provided exists
         else:
-            os.path.exists(dir)
+            assert os.path.exists(dir)
 
         # run the initial job setup
         job.setup()
 
-        # We start with zero corrections (empty list) that we slowly add to.
-        corrections = []
+        # We start with zero corrections that we slowly add to. The list only
+        # has the columns headers to start.
+        corrections = [("applied_handler_class", "correction_applied")]
 
         # we can try running the job up to max_corrections. Because only one
         # correction is applied per attempt, you can view this as the maximum
@@ -210,7 +226,7 @@ class SupervisedJobTask(Task):
         while len(corrections) < self.max_corrections:
 
             # launch the job
-            #!!! Am I able to do this in an asyncio mode? Because this is a
+            # !!! Am I able to do this in an asyncio mode? Because this is a
             # prefect task that is launched through an Executor, it is likely
             # this is running on a single thread worker -- so I'm not sure
             # that asyncio will work here... If I am able to do that, I should
@@ -226,9 +242,9 @@ class SupervisedJobTask(Task):
             # Go through the handlers to check for errors until the future
             # completes
             # Only does this if future is an instance of subprocess.Popen
-            #!!! elif it is a Dask future or Conncurrent future # TO-DO
-            #!!! I would want to run this in async mode so I know exactly when
-            #!!! the future completes though.
+            # !!! elif it is a Dask future or Conncurrent future # TO-DO
+            # !!! I would want to run this in async mode so I know exactly when
+            # !!! the future completes though.
             # if there aren't any monitors, just wait for the subprocess
             # otherwise loop through the monitors until the job completes
             if self.monitors and is_popen:
@@ -252,7 +268,9 @@ class SupervisedJobTask(Task):
                         # iterate through each monitor
                         for handler in self.monitors:
                             # check if there's an error with this handler
-                            if handler.check():
+                            # and grab the error if so
+                            error = handler.check()
+                            if error:
 
                                 # determine if it is_terminating
                                 if handler.is_terminating:
@@ -270,7 +288,9 @@ class SupervisedJobTask(Task):
                                     # apply the fix now
                                     correction = handler.correct()
                                     # record what's been changed
-                                    corrections.append(correction)
+                                    corrections.append(
+                                        (handler.name, error, correction)
+                                    )
 
                                 # there's no need to look at the other monitors
                                 # so break from the for-loop. We also don't
@@ -286,7 +306,7 @@ class SupervisedJobTask(Task):
                 future.wait()
                 # check if the return code is non-zero and
                 if future.returncode != 0 and self.terminate_on_nonzero_returncode:
-                    raise Exception  #!!! switch to a raising a custom error
+                    raise Exception  # !!! switch to a raising a custom error
 
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered about (if there was one).
@@ -299,8 +319,10 @@ class SupervisedJobTask(Task):
                 # I can see this being a source of bugs in the future so I
                 # need to reconsider subclassing this special case.
 
-                # check if there's an error with this handler
-                if handler.check():
+                # check if there's an error with this handler and grab the
+                # error if there is one
+                error = handler.check()
+                if error:
                     # record that the error in case it wasn't done so above
                     has_error = True
                     # And apply the proper correction if there is one.
@@ -308,7 +330,7 @@ class SupervisedJobTask(Task):
                     # that the job is unrecoverable and a lost cause.
                     correction = handler.correct()
                     # record what's been changed
-                    corrections.append(correction)
+                    corrections.append((handler.name, error, correction))
                     # break from the handler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break
@@ -336,11 +358,11 @@ class SupervisedJobTask(Task):
         if self.compress_output:
             make_archive(
                 # full path to where to save the archive
-                #!!! By default I choose within the current directory and save
-                #!!! it as the same name of the directory. This will be a
-                #!!! overwritten if I run another job right after it.
-                #!!! Consider using a unique filename for each save and returning
-                #!!! it, or just using a generic simmate_checkpoint name.
+                # !!! By default I choose within the current directory and save
+                # !!! it as the same name of the directory. This will be a
+                # !!! overwritten if I run another job right after it.
+                # !!! Consider using a unique filename for each save and returning
+                # !!! it, or just using a generic simmate_checkpoint name.
                 base_name=os.path.join(os.path.abspath(dir), os.path.basename(dir)),
                 # format to use switch to gztar after testing
                 format="zip",
@@ -356,6 +378,3 @@ class SupervisedJobTask(Task):
             return result, corrections
         else:
             return result
-
-
-# -----------------------------------------------------------------------------
