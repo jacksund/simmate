@@ -1,149 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-
-Prefect does have a built-in way to loop a certain task that I could use, but
-I think it's cleaner and more robust (plus I can run it locally) when I write
-my own custom Task class.
-
-For how it would be done in Prefect, see their example here:
-    https://docs.prefect.io/core/examples/task_looping.html
-
-The organization of this class is largely a simplification of Custodian where
-I am running a single job with the following steps...
-- Write Input Files based on custom+defualt settings
-- Run the calculation by calling the program
-- Load ouput files
-- check for errors
-- [correct them, rerun]
-- postprocess/analysis
-
-For a visual, it is the same as shown in this link except with only 1 job
-rather than a list of jobs. I limit it to one because I believe multiple jobs
-should be separate prefect tasks, not crammed into one task/job. Thus, there
-is no "All jobs done?" step as shown in the image.
-https://materialsproject.github.io/custodian/index.html#usage
-
-
-Also, this is really a subclass of the Prefect Task to allow for monitoring
-handlers. More specifically, we want to be able to run Handlers while the task
-is also running via some executor (subprocess or Dask). Monitors are currently
-for reading outputs files and I don't take into account accessing task local
-varaibles or even try to access those. Prefect already supports handlers when
-the task changes state via the Task(state_handlers=[]) option.
-
-Altogether, I should discuss with Prefect on monitor_handlers and being able
-to use their LOOP method outside of the flow.run() -- specifcally it does not
-work for task.run()
-
-
-
-The types of handlers if I split them up...
-    monitor_handlers=(),
-    state_handlers=(), # already done in the Prefect Task class
-state_handlers includes custodian types Handler(monitor=False) and Validator
-
-
-
-##### notes while rewriting Custodian #####
-
-renamed some variables for clarity.
-The most signicant renaming that I'd like to do (but don't yet) is the
-Job.correct() method to Job.fix(), which is entirely based on my
-personal preference.
-
-written for a single job, not a list of jobs. The list of jobs should be
-specified at the Workflow level (higher level). Therefore run and _run_job
-methods are effectively merged.
-
-Would it instead make sense to have checkpoint_input/output within
-the setup and workup/postprocess methods of the Job object?
-checkpoint_input is only for the very start of the job (initial directory). If
-nothing works, we may want to recover the initial state of the directory.
-checkpoint_output is for the end of the job. You'll want to use this instead
-of checkpoint_input if there are multiple different tasks that follow it.
-As a guide where each letter is a different supervised job:
-    A-done
-        its up to the user whether the final finals are compressed
-    A-B
-        A and B have only input compressed but not output
-        or...
-        A and B have only output compressed but not input
-    A-[B,C,D]
-        A has output compressed and [B,C,D] do not use compressed input as
-        that would give rise to duplicate compressed files
-    [A,B,C]-D
-        D has input compressed which is a combination of [A,B,C] outputs
-    [A,B,C]-[D,E,F]
-        depends... compressing outputs would be safest bet
-    When in doubt, compress both input and output! Setting either to False
-    is really just a way to save time and disk space.
-
-no terminate_func option. Assumes the job's future has a cancel method which
-follows the concurrent.futures convention
-
-scratch_dir option is moved to run method to allow this task instance to be
-ran in parallel if desired. Each invidual task run may want a different working
-directory
-
-
-SupervisedShellTask is a combination of:
-prefect.tasks.shell.ShellTask
-https://github.com/PrefectHQ/prefect/blob/master/src/prefect/tasks/shell.py
-custodian.custodian.Custodian
-https://github.com/materialsproject/custodian/blob/master/custodian/custodian.py
-
-Guide on contributing a new task to Prefect:
-    https://docs.prefect.io/core/task_library/contributing.html#task-structure
-
-skip_handler_errors is removed and the error is always raised. If you don't
-want it raised, then that should be done inside of the Handler class itself.
-
-monitors have the is_terminating option, which is really only used when we want
-to stop vasp naturally at the end of an ionic step using the STOPCAR. Further,
-we have a priority of Handlers where only the first is used. If this is the
-special case, it will prevent a lower priority one from making the fix. These
-special cases cause for extra messy code so I wonder if there's a better way
-to handle this, such as a different subclass of Handler. I don't do anything
-extra at the moment and just add the extra code.
-
-The Job class has a terminate method, but I only ever see it used in one case
-which is VASP's constrained_opt_run. I'm not sure what's happening here, but
-I don't think this merits an added method for all Jobs. Perhaps this special
-termination should instead happen in the Job's postprocessing method.
-
-Custodian's Validator class is when the is_monitor=False and the correct()
-method simply passes. Also based on Custodian, they only run them at the end
-of the a job (that is all handlers passed). Thus their third characteristic
-is that the are the lowest priority handlers. Because I am able to define a
-Validator completely in the context of a Handlers list, I choose to remove
-the validators input to avoid confusion. This does open validators up to being
-missused by beginners (by putting one before the a Handle), which might be why
-they chose to separate them. I will therefore make one change to such
-Validators in that their hidden correct() method is not just a pass, but
-actually raises and error immediately. If you don't want it raised, see my
-comment on why skip_handler_errors was removed.
-
-I still need to work in working directory (and tempdir) settings as well as
-where to saved the compresse output file
-
-Hanlders in Custodian save the errors to the class instance via self.errors and
-therefore only return a boolean with the check() method. Instead, I write
-Hanlders so that they support parallelization -- no single run saves to the
-class instance, but it is instead returned. Therefore, errors are instead
-return from the check() method and must be passed into the correct() method.
-As an example, Custiadian you would do...
-    has_error = handler.check()
-    error_and_correction = handler.correct()
-whereas with Simmate you would do...
-    error = handler.check()
-    correction = handler.correct(error)
-
-All handlers should have a Handler.name attribute for records. By default, this
-is just the class name (Handler.__class__.__name__)
-
-"""
-
 import os
 import time
 from shutil import make_archive
@@ -163,7 +19,7 @@ class SupervisedJobTask(Task):
         self,
         # core parts
         job,
-        handlers=(),
+        errorhandlers=[],
         dir=None,
         # return, cleanup, and file saving settings
         compress_output=False,
@@ -180,7 +36,7 @@ class SupervisedJobTask(Task):
 
         # save input values for reference
         self.job = job
-        self.handlers = handlers
+        self.errorhandlers = errorhandlers
         self.dir = dir
 
         self.max_corrections = max_corrections
@@ -192,9 +48,9 @@ class SupervisedJobTask(Task):
         self.save_corrections_tofile = save_corrections_tofile
         self.corrections_filename = corrections_filename
 
-        # some handlers run while the job is running. These are known as
+        # some errorhandlers run while the job is running. These are known as
         # Monitors and are labled via the is_monitor attribute.
-        self.monitors = [h for h in handlers if h.is_monitor]
+        self.monitors = [h for h in errorhandlers if h.is_monitor]
 
         # now inherit the parent Prefect Task class
         super().__init__(**kwargs)
@@ -218,7 +74,9 @@ class SupervisedJobTask(Task):
 
         # We start with zero corrections that we slowly add to. The list only
         # has the columns headers to start.
-        corrections = [("applied_handler_class", "correction_applied")]
+        # TODO - I took out the headers and may add them back in
+        # Headers are... ("applied_errorhandler", "correction_applied")
+        corrections = []
 
         # we can try running the job up to max_corrections. Because only one
         # correction is applied per attempt, you can view this as the maximum
@@ -231,7 +89,7 @@ class SupervisedJobTask(Task):
             # this is running on a single thread worker -- so I'm not sure
             # that asyncio will work here... If I am able to do that, I should
             # move this launch to a Job class method (job.run_aysnc)
-            future = job.run()
+            future = job.execute()
             # check that the future is a from subprocess.Popen subprocess
             # Popen returns a __ instead of waiting like subprocess.run()
             is_popen = isinstance(future, Popen)
@@ -239,7 +97,7 @@ class SupervisedJobTask(Task):
             # Assume the job has no errors until proven otherwise
             has_error = False
 
-            # Go through the handlers to check for errors until the future
+            # Go through the errorhandlers to check for errors until the future
             # completes
             # Only does this if future is an instance of subprocess.Popen
             # !!! elif it is a Dask future or Conncurrent future # TO-DO
@@ -256,7 +114,7 @@ class SupervisedJobTask(Task):
                 while not has_error:
                     monitor_freq_n += 1
                     # Sleep the set amount before checking the job status
-                    time.sleep(self.polling_time_step)
+                    time.sleep(self.polling_timestep)
 
                     # check if the jobs is complete. poll will return 0
                     # when it's done, in which case we break the loop
@@ -266,14 +124,14 @@ class SupervisedJobTask(Task):
                     # check whether we should run monitors on this poll loop
                     if monitor_freq_n % self.monitor_freq == 0:
                         # iterate through each monitor
-                        for handler in self.monitors:
-                            # check if there's an error with this handler
+                        for errorhandler in self.monitors:
+                            # check if there's an error with this errorhandler
                             # and grab the error if so
-                            error = handler.check()
+                            error = errorhandler.check()
                             if error:
 
                                 # determine if it is_terminating
-                                if handler.is_terminating:
+                                if errorhandler.is_terminating:
                                     # kill the process but don't apply the fix
                                     # quite yet. See below for more on this.
                                     future.terminate()
@@ -281,15 +139,15 @@ class SupervisedJobTask(Task):
                                 # naturally. An example of this is for codes
                                 # where you add a STOP file to get it to
                                 # finish rather than just killing the process.
-                                # This is the special case Handler that I talk
+                                # This is the special case errorhandler that I talk
                                 # about in my notes, where we really want to
                                 # end the job right away.
                                 else:
                                     # apply the fix now
-                                    correction = handler.correct()
+                                    correction = errorhandler.correct()
                                     # record what's been changed
                                     corrections.append(
-                                        (handler.name, error, correction)
+                                        (errorhandler.name, error, correction)
                                     )
 
                                 # there's no need to look at the other monitors
@@ -310,32 +168,32 @@ class SupervisedJobTask(Task):
 
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered about (if there was one).
-            # Since the handlers are in order of priority, only the first
+            # Since the errorhandlers are in order of priority, only the first
             # will actually be applied and then we can retry the calc.
-            for handler in self.handlers:
+            for errorhandler in self.errorhandlers:
 
                 # NOTE - The following special case is handled above:
-                #   handler.is_monitor and not handler.is_terminating
+                #   errorhandler.is_monitor and not errorhandler.is_terminating
                 # I can see this being a source of bugs in the future so I
                 # need to reconsider subclassing this special case.
 
-                # check if there's an error with this handler and grab the
+                # check if there's an error with this errorhandler and grab the
                 # error if there is one
-                error = handler.check()
+                error = errorhandler.check()
                 if error:
                     # record that the error in case it wasn't done so above
                     has_error = True
                     # And apply the proper correction if there is one.
-                    # Some Handlers will even raise an error here signaling
+                    # Some errorhandlers will even raise an error here signaling
                     # that the job is unrecoverable and a lost cause.
-                    correction = handler.correct()
+                    correction = errorhandler.correct()
                     # record what's been changed
-                    corrections.append((handler.name, error, correction))
-                    # break from the handler for-loop as we only apply the
+                    corrections.append((errorhandler.name, error, correction))
+                    # break from the errorhandler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break
 
-            # now that we've gone through the handlers, let's see if any
+            # now that we've gone through the errorhandlers, let's see if any
             # non-terminating errors were found (terminating ones would raise
             # an error above). If there are no errors, we've finished the
             # calculation and can exit the while loop. Otherwise, just leave
@@ -344,6 +202,10 @@ class SupervisedJobTask(Task):
             if not has_error:
                 # break the while-loop
                 break
+
+        # make sure the while loop didn't exit because of the correction limit
+        if len(corrections) >= self.max_corrections:
+            raise Exception  # TODO make this a custom exception
 
         # run the postprocess, which should return the result
         result = job.postprocess()
