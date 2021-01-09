@@ -35,7 +35,7 @@ class ErrorHandler(ABC):
     """
 
     @abstractmethod
-    def check(self):
+    def check(self, dir):
         """
         This method is called during the job (for monitors) or at the end of
         the job to check for errors. It searches for errors and returns the
@@ -44,10 +44,14 @@ class ErrorHandler(ABC):
         you should read through the files directly rather than use
         io.exampleapp.outputs which in many cases assumes a completed file.
         """
+        # NOTE TO USER: you will need this line if your function is directory
+        # specific and even if not, be sure to include dir (or **kwargs) as
+        # input argument for higher-levl compatibility with SupervisedStagedTask
+        # dir = get_directory(dir)
         pass
 
     @abstractmethod
-    def correct(self, error):
+    def correct(self, error, dir):
         """
         This method is called at the end of a job when an error is detected.
         It should perform any corrective measures relating to the detected
@@ -55,6 +59,10 @@ class ErrorHandler(ABC):
         that output, applies a proper fix. It then returns the fix or list
         of fixes made.
         """
+        # NOTE TO USER: you will need this line if your function is directory
+        # specific and even if not, be sure to include dir (or **kwargs) as
+        # input argument for higher-levl compatibility with SupervisedStagedTask
+        # dir = get_directory(dir)
         pass
 
     @property

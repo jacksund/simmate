@@ -17,54 +17,52 @@
 # catch error with a non-monitor
 # test max_errors limit
 
-from subprocess import Popen
+import os
+from subprocess import CalledProcessError
+from tempfile import TemporaryDirectory
 
 import pytest
 
+from simmate.workflows.core.tasks.shelltask import ShellTask
 from simmate.workflows.core.tasks.errorhandler import ErrorHandler
-from simmate.workflows.core.tasks.job import Job
-from simmate.workflows.core.tasks.supervisedjob import SupervisedJobTask
+from simmate.workflows.core.tasks.stagedshelltask import StagedShellTask
+from simmate.workflows.core.tasks.supervisedstagedtask import (
+    SupervisedStagedTask,
+    NonZeroExitError,
+    MaxCorrectionsError,
+)
 
 # ----------------------------------------------------------------------------
 
-# make some dummy Jobs to run tests with
+# make some simple StagedShellTasks for us to test with
 
 
-class DummyJob(Job):
-    def setup(self):
-        pass
-
-    def execute(self):
-        return "ExampleFuture"
-
-    def postprocess(self):
-        return "ExampleResult"
+class DummyTask(StagedShellTask):
+    command = "echo dummy"
 
 
-class PopenJob(DummyJob):
-    def execute(self):
-        return Popen("echo ExamplePopen", shell=True)
-
+class DummyAddFileTask(StagedShellTask):
+    command = "echo dummy > DummyFileTask.out"
 
 # ----------------------------------------------------------------------------
 
-# make some dummy Handlers to run tests with
+# make some simple Handlers to run tests with
 
 
 class AlwaysPassesHandler(ErrorHandler):
-    def check(self):
+    def check(self, dir):
         return None
 
-    def correct(self):
+    def correct(self, error, dir):
         # this should never be entered since check() never returns an error
         raise Exception
 
 
 class AlwaysFailsHandler(ErrorHandler):
-    def check(self):
+    def check(self, dir):
         return "ExampleError"
 
-    def correct(self):
+    def correct(self, error, dir):
         return "ExampleCorrection"
 
 
@@ -86,41 +84,35 @@ class AlwaysFailsSpecialMonitor(AlwaysFailsMonitor):
 
 # ----------------------------------------------------------------------------
 
-# !!! use itertools to make every combination of Handlers and Jobs?
 
-def test_basic_supervision():
+def test_shelltask():
+    task = ShellTask()
+    task.run(command="echo dummy")
+    # TODO - I should silence prefect logging at a higher level for all tests
+    pytest.raises(
+        CalledProcessError,
+        task.run,
+        command='NonexistantCommand 404',)
 
-    # test success
-    task = SupervisedJobTask(
-        job=DummyJob(), errorhandlers=[AlwaysPassesHandler(), AlwaysPassesHandler()]
-    )
-    assert task.run() == ("ExampleResult", [])
 
-    # test result-only return
-    task = SupervisedJobTask(
-        job=DummyJob(),
-        errorhandlers=[AlwaysPassesHandler(), AlwaysPassesHandler()],
-        return_corrections=False,
-    )
-    assert task.run() == "ExampleResult"
+def test_stagedshelltask():
 
-    # test max errors and failure
-    task = SupervisedJobTask(
-        job=DummyJob(),
-        errorhandlers=[AlwaysFailsHandler()],
-    )
-    pytest.raises(Exception, task.run)
+    # test individual methods
+    task = DummyTask()
+    task.setup()
+    task.execute()
+    task.postprocess()
+    task.run()
 
-    # test popen success
-    task = SupervisedJobTask(
-        job=PopenJob(),
-        errorhandlers=[AlwaysPassesHandler()],
-    )
-    assert task.run() == ("ExampleResult", [])
+    # test overwriting a kwarg
+    task.run(command='echo dummyoverride')
 
-    # test popen monitors and special monitors
-    task = SupervisedJobTask(
-        job=PopenJob(),
+
+def test_supervisedstagedtask():
+
+    # test success, handler, monitor, and special-monitor
+    task = SupervisedStagedTask(
+        stagedtask=DummyTask(),
         errorhandlers=[
             AlwaysPassesHandler(),
             AlwaysPassesMonitor(),
@@ -129,20 +121,63 @@ def test_basic_supervision():
         polling_timestep=0,
         monitor_freq=2,
     )
-    assert task.run() == ("ExampleResult", [])
+    assert task.run() == (None, [])
 
-    # test popen monitors and special monitors
-    task = SupervisedJobTask(
-        job=PopenJob(),
-        errorhandlers=[
-            AlwaysPassesHandler(),
-            AlwaysFailsMonitor(),
-            AlwaysPassesSpecialMonitor(),
-        ],
+    # test result-only return, compressed out, and tempdir
+    with TemporaryDirectory() as tempdir:
+        task = SupervisedStagedTask(
+            stagedtask=DummyTask(),
+            errorhandlers=[
+                AlwaysPassesHandler(),
+                AlwaysPassesMonitor(),
+                AlwaysPassesSpecialMonitor(),
+                ],
+            return_corrections=False,
+            compress_output=True,
+            polling_timestep=0,
+            monitor_freq=2,
+        )
+        assert task.run(dir=tempdir) is None
+        assert os.path.exists(tempdir)
+
+    # test nonzeo returncode
+    task = SupervisedStagedTask(
+        stagedtask=DummyTask(command='NonexistantCommand 404'),
+        errorhandlers=[AlwaysPassesHandler()],
         polling_timestep=0,
         monitor_freq=2,
     )
-    pytest.raises(Exception, task.run)
+    pytest.raises(NonZeroExitError, task.run)
 
+    # testing handler-triggered failures
+    task = SupervisedStagedTask(
+        stagedtask=DummyTask(),
+        errorhandlers=[AlwaysFailsHandler()],
+        return_corrections=False,
+        polling_timestep=0,
+        monitor_freq=2,
+    )
+    pytest.raises(MaxCorrectionsError, task.run)
 
-%time test_basic_supervision()
+    task = SupervisedStagedTask(
+        stagedtask=DummyTask(),
+        errorhandlers=[AlwaysFailsMonitor()],
+        return_corrections=False,
+        polling_timestep=0,
+        monitor_freq=2,
+    )
+    pytest.raises(MaxCorrectionsError, task.run)
+
+    task = SupervisedStagedTask(
+        stagedtask=DummyTask(),
+        errorhandlers=[AlwaysFailsSpecialMonitor()],
+        return_corrections=False,
+        polling_timestep=0,
+        monitor_freq=2,
+    )
+    pytest.raises(MaxCorrectionsError, task.run)
+
+# For manual testing
+# %time test_shelltask()
+# %time test_stagedshelltask()
+# %time test_supervisedstagedtask()
