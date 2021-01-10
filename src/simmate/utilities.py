@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 def get_directory(dir):
 
     # There are many cases where the user can choose their working directory
-    # for a given calculation, where they can pass a number of options into.
+    # for a given calculation, where they can pass a number of options in.
     # This includes... None, a string, or a TemporaryDirectory instance.
     # I consistently want to handle these inputs and thus make this utility.
     # Based on the input, I do the following:
