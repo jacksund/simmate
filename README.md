@@ -14,12 +14,15 @@ The dynamic badges are linked to pymatgen right now because I'm just testing out
 
 This readme is not complete yet. Read here for more info on markdown, badges, and more:
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-https://shields.io/
-https://github.com/badges/shields
+[Shields Badges](https://shields.io/)
 
-Simmate is the Simulated Materials Ecosystem (or Environment?) which has everything you need for materials chemistry research all in one repo. This includes a core material science framework, workflow management, database orm, and a website interface. 
+Simmate is the Simulated Materials Ecosystem which has everything you need for materials chemistry research all in one repo. This includes a core material science framework, workflow management, database orm, and a website interface. 
 
 Fractured Hierarchical Architecture for High-Throughput Diffusion Analysis
+
+“If I have seen further it is by standing on the shoulders of Giants” -Isaac Newton (1675)
+Though there's [more behind this quote](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants) that I might want to used instead.
+
 
 Component | Package | Other Packages (not used)
 ------------ | ------------- | -------------
