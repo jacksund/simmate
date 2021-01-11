@@ -26,9 +26,9 @@ Simmate has everything you need for materials chemistry research all in one repo
 
 ## Simmate is built for everyone
 
-**For Readers:** Not ready to download and try things yourself? No worries! Just take a look at our website [simmate.org](simmate.org) that shows all of the calculations that we've done already. Explore what we have to offer, and then come back to try it yourself when you're ready!
+_**For Readers:**_ Not ready to download and try things yourself? No worries! Just take a look at our website [simmate.org](simmate.org) that shows all of the calculations that we've done already. Explore what we have to offer, and then come back to try it yourself when you're ready!
 
-**For Beginners:** We were all first-year graduate students before too, so our guides are written with that in mind. Take your research question and look for a workflow we've prebuilt that does it for you. For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
+_**For Beginners:**_ We were all first-year graduate students before too, so our guides are written with that in mind. Take your research question and look for a workflow we've prebuilt that does it for you. For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
 ```python
 # Load the structure file you'd like to use
 from simmate import Structure
@@ -40,17 +40,32 @@ from simmate.workflows import RelaxStructure
 # Now run the workflow!
 result = RelaxStructure.run(structure=my_structure)
 ```
+
+_**For Experts:**_ Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
+
+## Are there similar codes to ours?
+
+While we give you the most common matsci analyses, there are always places where other codes offer more advanced customization for expert users. That's generally the case with high-level packages like ours. Simmate will teach you the basics and then tell you where to go from there. For example, we love pointing users to the codes that inspired us, where some of the big ones are [PyMatGen](https://github.com/materialsproject/pymatgen), [ASE](https://gitlab.com/ase/ase), [MatMiner](https://github.com/hackingmaterials/matminer), [Custodian](https://github.com/materialsproject/custodian), and [Fireworks](https://github.com/materialsproject/fireworks). You can think of Simmate as a combination of all of these, where the original codes have a lot more functionality. We are working hard to catch up, but they've had a decade headstart in most cases and we need to give credit to all of those contributors and their hard work. Simmate wouldn't be possible without their findings. We do believe the changes we've made are for the better and like to show our benchmarks and simple api to prove it.
+
+## Integrations and Core Components
+
+Table of external codes that we support like vasp, pymatgen, django... (see table below)
+
+## Installation
+
 If you're new to coding and Python, you should go through our walkthrough tutorial located here: [30min Start-Up Tutorial](google.com)
+Otherwise, you can install simmate quickly and easily with...
+```
+conda install -c conda-forge simmate
+```
 
-**For Experts:** Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
+## Need help?
 
-## Where does Simmate fall short?
+Post here in our github using [this link here](google.com)
 
-While we give you the most common materials science analysis, there are always places where other codes offer more advanced customization for expert users. Simmate will teach you the basics and then tell you where to go from there. For example, we love pointing users to the codes that inspired us, where some of the big ones are [PyMatGen](https://github.com/materialsproject/pymatgen), [ASE](https://gitlab.com/ase/ase), [MatMiner](https://github.com/hackingmaterials/matminer), [Custodian](https://github.com/materialsproject/custodian), and [Fireworks](https://github.com/materialsproject/fireworks).
+## Extra resources
 
-
-
-
+contributing, tutorials, docs, etc.
 
 
 Fractured Hierarchical Architecture for High-Throughput Diffusion Analysis
