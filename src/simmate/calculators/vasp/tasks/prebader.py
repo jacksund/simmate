@@ -5,7 +5,6 @@ import os
 from prefect.utilities.tasks import defaults_from_attrs
 
 from simmate.workflows.core.tasks.stagedshelltask import StagedShellTask
-from simmate.utilities import get_directory
 
 from pymatgen.io.vasp.sets import DictSet
 from pymatgen.io.vasp.outputs import Vasprun

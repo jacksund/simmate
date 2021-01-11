@@ -6,7 +6,6 @@ from prefect.utilities.tasks import defaults_from_attrs
 
 from simmate.workflows.core.tasks.shelltask import ShellTask
 from simmate.workflows.core.tasks.stagedshelltask import StagedShellTask
-from simmate.utilities import get_directory
 
 from simmate.calculators.bader.io.outputs.acf import parse_ACF
 from pymatgen.io.vasp.outputs import Chgcar
@@ -29,7 +28,8 @@ class BaderAnalysisTask(StagedShellTask):
 
         # Make sure that there are CHGCAR, AECCAR0, AECCAR2 files from a VASP calc
         files = ["CHGCAR", "AECCAR0", "AECCAR2"]
-        assert all(os.path.exists(os.path.join(dir, file)) for file in files)
+        filenames = [os.path.join(dir, file) for file in files]
+        assert all(os.path.exists(filename) for filename in filenames)
 
         # Make the CHGCAR_sum file using Bader's helper script
         CombineCHGCARsTask().run(dir=dir)
@@ -38,7 +38,8 @@ class BaderAnalysisTask(StagedShellTask):
     def postprocess(self, dir):
 
         # load the ACF.dat file
-        dataframe, extra_data = parse_ACF()
+        acf_filename = os.path.join(dir, "ACF.dat")
+        dataframe, extra_data = parse_ACF(filename=acf_filename)
 
         # load the electron counts used by VASP from the POTCAR files
         # OPTIMIZE this can be much faster if I have a reference file

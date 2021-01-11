@@ -1,18 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 import pandas
 
-from simmate.utilities import get_directory
 
-
-def parse_ACF(filename="ACF.dat", dir=None):
-
-    # Establish the working directory
-    dir = get_directory(dir)
-    # update filename to the full path
-    filename = os.path.join(dir, filename)
+def parse_ACF(filename="ACF.dat"):
 
     # open the file, grab the lines, and then close it
     file = open(filename)
