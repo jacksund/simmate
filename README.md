@@ -16,7 +16,44 @@ This readme is not complete yet. Read here for more info on markdown, badges, an
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 [Shields Badges](https://shields.io/)
 
-Simmate is the Simulated Materials Ecosystem which has everything you need for materials chemistry research all in one repo. This includes a core material science framework, workflow management, database orm, and a website interface. 
+## Welcome!
+
+There are tons of programs available in computational materials science, and it can become overwhelming to pick which to use and how to mix-and-match for your specific project. 
+
+That's why we've made Simmate! We are the glue between all these different programs.
+
+Simmate has everything you need for materials chemistry research all in one repo. Whether you're an experimental or computational scientist, this program is built to scale for your needs. Jumpstart your research from here and hit the ground running.
+
+## Built to Scale
+
+#### For Beginners:
+
+We were all first-year graduate students before too, so our guides are written with you in mind. Take your research question and look for a workflow we've prebuilt that does it for you. For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
+```python
+# Load the structure file you'd like to use
+from simmate import Structure
+my_structure = Structure.from_file('NaCl.cif')
+
+# Load the workflow you'd like to use
+from simmate.workflows import RelaxStructure
+
+# Now run the workflow!
+result = RelaxStructure.run(structure=my_structure)
+```
+If you're new to coding and Python, you should go through our walkthrough tutorial located here: [30min Start-Up Tutorial](google.com)
+
+#### For Experts:
+
+Simmate includes a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The three core "giants" that we build off of are Django and Prefect, while lower level utilies are sped up or parallelized by Numpy, Numba, and Dask.
+
+## Where does Simmate fall short?
+
+While we give you the most common materials science analysis, there are always places where other codes offer more advanced customization for expert users. Simmate will teach you the basics and then tell you where to go from there. For example, we love pointing users to the codes that inspired us, where some of the big ones are PyMatGen, ASE, MatMiner, Custodian, and Fireworks.
+
+
+
+
+
 
 Fractured Hierarchical Architecture for High-Throughput Diffusion Analysis
 
