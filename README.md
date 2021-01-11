@@ -18,17 +18,19 @@ This readme is not complete yet. Read here for more info on markdown, badges, an
 
 ## Welcome!
 
-There are tons of programs available in computational materials science, and it can become overwhelming to pick which to use and how to mix-and-match for your specific project. 
+There are tons of programs available in computational materials science, and it can become overwhelming to pick which to use and how to mix-and-match them for your specific project. 
 
-That's why we've made Simmate! We are the glue between all these different programs.
+That's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities.
 
 Simmate has everything you need for materials chemistry research all in one repo. Whether you're an experimental or computational scientist, this program is built to scale for your needs. Jumpstart your research from here and hit the ground running.
 
-## Built to Scale
+## Simmate is built for everyone
+
+#### For Readers:
+Not ready to download and try things yourself? No worries! Just take a look at our website [simmate.org](simmate.org) that shows all of the calculations that we've done already. Explore what we have to offer, and then come back to try it yourself when you're ready!
 
 #### For Beginners:
-
-We were all first-year graduate students before too, so our guides are written with you in mind. Take your research question and look for a workflow we've prebuilt that does it for you. For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
+We were all first-year graduate students before too, so our guides are written with that in mind. Take your research question and look for a workflow we've prebuilt that does it for you. For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
 ```python
 # Load the structure file you'd like to use
 from simmate import Structure
@@ -44,7 +46,7 @@ If you're new to coding and Python, you should go through our walkthrough tutori
 
 #### For Experts:
 
-Simmate includes a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The three core "giants" that we build off of are Django and Prefect, while lower level utilies are sped up or parallelized by Numpy, Numba, and Dask.
+Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are Django and Prefect, while lower level utilies are sped up or parallelized by Numpy, Numba, and Dask. The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
 
 ## Where does Simmate fall short?
 
