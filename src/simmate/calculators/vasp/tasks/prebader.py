@@ -67,9 +67,6 @@ class VASPPreBaderTask(StagedShellTask):
     @defaults_from_attrs("dir", "structure")
     def setup(self, dir, structure):
 
-        # Establish the working directory
-        dir = get_directory(dir)
-
         # TODO should I sanitize the structure first? primitive and LLL reduce?
 
         # write the input files
@@ -83,9 +80,6 @@ class VASPPreBaderTask(StagedShellTask):
         final energy, and confirm convergence. I will likely make this a common
         function for this vasp module down the road.
         """
-
-        # Establish the working directory
-        dir = get_directory(dir)
 
         # load the xml file and only parse the bare minimum
         xmlReader = Vasprun(

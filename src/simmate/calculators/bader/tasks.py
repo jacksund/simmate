@@ -27,9 +27,6 @@ class BaderAnalysisTask(StagedShellTask):
     @defaults_from_attrs("dir")
     def setup(self, dir):
 
-        # Establish the working directory
-        dir = get_directory(dir)
-
         # Make sure that there are CHGCAR, AECCAR0, AECCAR2 files from a VASP calc
         files = ["CHGCAR", "AECCAR0", "AECCAR2"]
         assert all(os.path.exists(os.path.join(dir, file)) for file in files)
@@ -39,9 +36,6 @@ class BaderAnalysisTask(StagedShellTask):
 
     @defaults_from_attrs("dir")
     def postprocess(self, dir):
-
-        # Establish the working directory
-        dir = get_directory(dir)
 
         # load the ACF.dat file
         dataframe, extra_data = parse_ACF()

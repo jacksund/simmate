@@ -43,7 +43,7 @@ class ShellTask(Task):
         if command:
             self.command = command
         # establish the working directory for this Task
-        self.dir = get_directory(dir)
+        self.dir = dir
         # whether to record the output
         self.capture_output = capture_output
 

@@ -19,6 +19,10 @@ def get_directory(dir):
     #   TemporaryDirectory --> I return the full path to this directory
     #   str --> I make the directory if it doesnt exist and then return the path
 
+    # Avoid overusing this! It should often only exist at the highest level
+    # for a Task! This means you'll want it in the Task.run() method and
+    # nowhere else.
+
     # if no directory was provided, use the current working directory
     if not dir:
         dir = os.getcwd()

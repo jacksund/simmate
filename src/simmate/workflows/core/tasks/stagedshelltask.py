@@ -71,7 +71,7 @@ class StagedShellTask(Task):
         if command:
             self.command = command
         # establish the working directory for this Task
-        self.dir = get_directory(dir)
+        self.dir = dir
 
         # and the optional input that isn't always used
         self.structure = structure
@@ -86,12 +86,9 @@ class StagedShellTask(Task):
         pre-processing. This includes creating a directory, writing input files
         or any other function ran before calling the executable.
         """
-        # NOTE TO USER: you will need this line if your function is directory
-        # specific and even if not, be sure to include dir (or **kwargs) as
-        # input argument for higher-levl compatibility with SupervisedStagedTask
-        # dir = get_directory(dir)
-        # The structure input option is not required and you can remove it
-        # from your setup method if you'd like.
+        # Be sure to include dir and structure (or **kwargs) as input arguments for
+        # higher-level compatibility with the run method and SupervisedStagedTask
+        # You should never need to call this method directly!
         pass
 
     @defaults_from_attrs("dir", "command")
@@ -127,10 +124,9 @@ class StagedShellTask(Task):
         etc. This should return the result of the entire job, such as a
         the final structure or final energy calculated.
         """
-        # NOTE TO USER: you will need this line if your function is directory
-        # specific and even if not, be sure to include dir (or **kwargs) as
-        # input argument for higher-levl compatibility with SupervisedStagedTask
-        # dir = get_directory(dir)
+        # Be sure to include dir (or **kwargs) as input argument for
+        # higher-level compatibility with the run method and SupervisedStagedTask
+        # You should never need to call this method directly!
         pass
 
     @defaults_from_attrs("dir", "command", "structure")
