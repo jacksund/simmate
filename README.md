@@ -26,11 +26,9 @@ Simmate has everything you need for materials chemistry research all in one repo
 
 ## Simmate is built for everyone
 
-#### For Readers:
-Not ready to download and try things yourself? No worries! Just take a look at our website [simmate.org](simmate.org) that shows all of the calculations that we've done already. Explore what we have to offer, and then come back to try it yourself when you're ready!
+**For Readers:** Not ready to download and try things yourself? No worries! Just take a look at our website [simmate.org](simmate.org) that shows all of the calculations that we've done already. Explore what we have to offer, and then come back to try it yourself when you're ready!
 
-#### For Beginners:
-We were all first-year graduate students before too, so our guides are written with that in mind. Take your research question and look for a workflow we've prebuilt that does it for you. For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
+**For Beginners:** We were all first-year graduate students before too, so our guides are written with that in mind. Take your research question and look for a workflow we've prebuilt that does it for you. For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
 ```python
 # Load the structure file you'd like to use
 from simmate import Structure
@@ -44,13 +42,11 @@ result = RelaxStructure.run(structure=my_structure)
 ```
 If you're new to coding and Python, you should go through our walkthrough tutorial located here: [30min Start-Up Tutorial](google.com)
 
-#### For Experts:
-
-Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are Django and Prefect, while lower level utilies are sped up or parallelized by Numpy, Numba, and Dask. The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
+**For Experts:** Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
 
 ## Where does Simmate fall short?
 
-While we give you the most common materials science analysis, there are always places where other codes offer more advanced customization for expert users. Simmate will teach you the basics and then tell you where to go from there. For example, we love pointing users to the codes that inspired us, where some of the big ones are PyMatGen, ASE, MatMiner, Custodian, and Fireworks.
+While we give you the most common materials science analysis, there are always places where other codes offer more advanced customization for expert users. Simmate will teach you the basics and then tell you where to go from there. For example, we love pointing users to the codes that inspired us, where some of the big ones are [PyMatGen](https://github.com/materialsproject/pymatgen), [ASE](https://gitlab.com/ase/ase), [MatMiner](https://github.com/hackingmaterials/matminer), [Custodian](https://github.com/materialsproject/custodian), and [Fireworks](https://github.com/materialsproject/fireworks).
 
 
 
