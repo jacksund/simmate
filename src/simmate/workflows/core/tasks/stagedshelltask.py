@@ -41,11 +41,20 @@ class StagedShellTask(Task):
     # command to use for the child class.
     command = None
 
+    # Indicates whether you need a structure if you want the run method to work.
+    # While it's not needed for a number of cases, it's extremely common for the
+    # setup method to need an input structure in matsci. I therefore include
+    # this rather than having a nearly identical subclass that could cause
+    # some confusion.
+    requires_structure = False
+
     def __init__(
         self,
         # optional setup parameters
         command=None,
         dir=None,
+        # this is a common input but not required for all StagedShellTasks
+        structure=None,
         # To support other Prefect input options
         **kwargs,
     ):
@@ -64,11 +73,14 @@ class StagedShellTask(Task):
         # establish the working directory for this Task
         self.dir = get_directory(dir)
 
+        # and the optional input that isn't always used
+        self.structure = structure
+
         # now inherit the parent Prefect Task class
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("dir")
-    def setup(self, dir):
+    @defaults_from_attrs("dir", "structure")
+    def setup(self, dir, structure):
         """
         This method is run before the start of a job. Allows for some
         pre-processing. This includes creating a directory, writing input files
@@ -78,6 +90,8 @@ class StagedShellTask(Task):
         # specific and even if not, be sure to include dir (or **kwargs) as
         # input argument for higher-levl compatibility with SupervisedStagedTask
         # dir = get_directory(dir)
+        # The structure input option is not required and you can remove it
+        # from your setup method if you'd like.
         pass
 
     @defaults_from_attrs("dir", "command")
@@ -119,16 +133,22 @@ class StagedShellTask(Task):
         # dir = get_directory(dir)
         pass
 
-    @defaults_from_attrs("dir", "command")
-    def run(self, dir, command):
+    @defaults_from_attrs("dir", "command", "structure")
+    def run(self, dir, command, structure):
         """
         Runs the entire job in the current working directory without any error
         handling. If you want robust error handling, then you should instead
         run this through the SupervisedJobTask class. This method should
         very rarely be used!
         """
+        if not structure and self.requires_structure:
+            raise StructureRequiredError
         dir = get_directory(dir)
-        self.setup(dir=dir)
+        self.setup(dir=dir, structure=structure)
         self.execute(command=command, dir=dir, wait_until_complete=True)
         result = self.postprocess(dir=dir)
         return result
+
+
+class StructureRequiredError(Exception):
+    pass

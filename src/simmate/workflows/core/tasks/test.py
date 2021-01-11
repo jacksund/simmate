@@ -25,7 +25,10 @@ import pytest
 
 from simmate.workflows.core.tasks.shelltask import ShellTask
 from simmate.workflows.core.tasks.errorhandler import ErrorHandler
-from simmate.workflows.core.tasks.stagedshelltask import StagedShellTask
+from simmate.workflows.core.tasks.stagedshelltask import (
+    StagedShellTask,
+    StructureRequiredError,
+    )
 from simmate.workflows.core.tasks.supervisedstagedtask import (
     SupervisedStagedTask,
     NonZeroExitError,
@@ -107,6 +110,10 @@ def test_stagedshelltask():
     # test overwriting a kwarg
     task.run(command='echo dummyoverride')
 
+    # requires structure failure
+    task.requires_structure = True
+    pytest.raises(StructureRequiredError, task.run)
+
 
 def test_supervisedstagedtask():
 
@@ -159,6 +166,7 @@ def test_supervisedstagedtask():
     )
     pytest.raises(MaxCorrectionsError, task.run)
 
+    # monitor failure
     task = SupervisedStagedTask(
         stagedtask=DummyTask(),
         errorhandlers=[AlwaysFailsMonitor()],
@@ -168,6 +176,7 @@ def test_supervisedstagedtask():
     )
     pytest.raises(MaxCorrectionsError, task.run)
 
+    # special-monitor failure
     task = SupervisedStagedTask(
         stagedtask=DummyTask(),
         errorhandlers=[AlwaysFailsSpecialMonitor()],
