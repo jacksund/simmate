@@ -51,7 +51,7 @@ class ShellTask(Task):
         super().__init__(**kwargs)
 
     @defaults_from_attrs("dir", "command", "capture_output")
-    def run(self, dir, command, capture_output):
+    def run(self, dir=None, command=None, capture_output=None):
         """
         Run a given command and wait for it to complete
         """

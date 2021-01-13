@@ -153,6 +153,7 @@ setup(
     #                   'django',
     #                   'django-crispy-forms',
     #                   'prefect',
+    #                   'graphviz',# python-graphviz on conda. For viewing prefect flows
     #                   'pymatgen',
     #                   'pymatgen-diffusion',
     #                   'custodian',

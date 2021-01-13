@@ -24,7 +24,7 @@ class BaderAnalysisTask(StagedShellTask):
     command = "./bader CHGCAR -ref CHGCAR_sum -b weight > bader.out"
 
     @defaults_from_attrs("dir")
-    def setup(self, dir):
+    def setup(self, dir=None):
 
         # Make sure that there are CHGCAR, AECCAR0, AECCAR2 files from a VASP calc
         files = ["CHGCAR", "AECCAR0", "AECCAR2"]
@@ -35,7 +35,7 @@ class BaderAnalysisTask(StagedShellTask):
         CombineCHGCARsTask().run(dir=dir)
 
     @defaults_from_attrs("dir")
-    def postprocess(self, dir):
+    def postprocess(self, dir=None):
 
         # load the ACF.dat file
         acf_filename = os.path.join(dir, "ACF.dat")

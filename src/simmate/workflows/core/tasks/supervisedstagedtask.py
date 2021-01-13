@@ -53,7 +53,7 @@ class SupervisedStagedTask(Task):
         super().__init__(**kwargs)
 
     @defaults_from_attrs("stagedtask", "dir")
-    def run(self, stagedtask, dir):
+    def run(self, stagedtask=None, dir=None):
 
         # Establish the working directory for this run.
         dir = get_directory(dir)

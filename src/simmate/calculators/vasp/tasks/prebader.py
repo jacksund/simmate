@@ -64,7 +64,7 @@ class VASPPreBaderTask(StagedShellTask):
     requires_structure = True
 
     @defaults_from_attrs("dir", "structure")
-    def setup(self, dir, structure):
+    def setup(self, dir=None, structure=None):
 
         # TODO should I sanitize the structure first? primitive and LLL reduce?
 
@@ -73,7 +73,7 @@ class VASPPreBaderTask(StagedShellTask):
         inputset.write_input(dir=dir)
 
     @defaults_from_attrs("dir")
-    def postprocess(self, dir):
+    def postprocess(self, dir=None):
         """
         This is the most basic VASP workup where I simply load the final structure,
         final energy, and confirm convergence. I will likely make this a common

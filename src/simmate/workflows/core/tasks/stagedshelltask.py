@@ -80,7 +80,7 @@ class StagedShellTask(Task):
         super().__init__(**kwargs)
 
     @defaults_from_attrs("dir", "structure")
-    def setup(self, dir, structure):
+    def setup(self, dir=None, structure=None):
         """
         This method is run before the start of a job. Allows for some
         pre-processing. This includes creating a directory, writing input files
@@ -92,7 +92,7 @@ class StagedShellTask(Task):
         pass
 
     @defaults_from_attrs("dir", "command")
-    def execute(self, dir, command, wait_until_complete=False):
+    def execute(self, dir=None, command=None, wait_until_complete=False):
         """
         This method performs the actual work for the job. If parallel error
         checking (monitoring) is desired, this must return a Popen process.
@@ -117,7 +117,7 @@ class StagedShellTask(Task):
         return future
 
     @defaults_from_attrs("dir")
-    def postprocess(self, dir):
+    def postprocess(self, dir=None):
         """
         This method is called at the end of a job, *after* error detection.
         This allows post-processing, such as cleanup, analysis of results,
@@ -130,7 +130,7 @@ class StagedShellTask(Task):
         pass
 
     @defaults_from_attrs("dir", "command", "structure")
-    def run(self, dir, command, structure):
+    def run(self, dir=None, command=None, structure=None):
         """
         Runs the entire job in the current working directory without any error
         handling. If you want robust error handling, then you should instead
