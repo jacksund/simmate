@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import pickle
 from concurrent.futures import Executor
+
+from simmate.configuration.manage_django import connect_db
+from simmate.workflows.core.execution.models import WorkItem
+from simmate.workflows.core.execution.future import DjangoFuture
 
 # This class is modeled after the following...
 # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/thread.py
@@ -27,22 +32,90 @@ class DjangoExecutor(Executor):
         add a "worker heartbeat" table to the queue database for the executor
         to read and run managerial tasks based off though.
         """
-        # connect to db
-        pass
+        # connect to the django database
+        connect_db()
 
-    def submit(self, fn, *args, **kwargs):
-        # with a lock
-        # add fn(*args, **kwargs) to queue
-        pass
+    def submit(self, fxn, /, *args, **kwargs):
 
-    def map(self, func, iterables, timeout=None, chunksize=100):
+        # The "/" in the input separates args into a tuple and kwargs into
+        # a dictionary for me, which makes their storage very easy!
+
+        # make the WorkItem where all of the provided inputs are pickled and
+        # save the workitem to the database.
+        # Pickling is just converting them to a byte string format
+        # No lock is needed to do this because adding a new row is handled
+        # by the database with ease, even if some different Executor is
+        # adding another WorkItem at the same time.
+        # TODO - should I put pickling in a "try" in case it fails?
+        workitem = WorkItem.objects.create(
+            fxn=pickle.dumps(fxn),
+            args=pickle.dumps(args),
+            kwargs=pickle.dumps(kwargs),
+        )
+
+        # create the future object
+        future = DjangoFuture(id=workitem.id)
+
+        # and return the future for use
+        return future
+
+    def map(self, fxn, iterables, timeout=None, chunksize=100):  # TODO
         # chunksize indicates how many to add at one
         # iterables is a list of (*args, **kwargs)
-        # with a lock
         # add many fn(*args, **kwargs) to queue
-        pass
 
-    def shutdown(self, wait=True, cancel_futures=False):
+        # TODO -- This is not supported at the moment. I should use the
+        # .bulk_create method to do this in the future:
+        # https://docs.djangoproject.com/en/3.1/ref/models/querysets/#bulk-create
+
+        # raise an error to ensure user sees this isn't supported yet.
+        raise Exception
+
+    def shutdown(self, wait=True, cancel_futures=False):  # TODO
         # whether to wait until the queue is empty
         # whether to cancel futures and clear database
         pass
+
+    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
+
+    # These methods are for managing and monitoring the queue
+    # I attach these directly to the Executor rather than having a separate
+    # DjangoQueue class that inherits from python's Queue module.
+    # If there is a good reason to make a separate class in the future,
+    # I can start from these methods here and the following link:
+    # https://docs.python.org/3/library/queue.html
+
+    def queue_size(self):
+        """
+        Return the approximate size of the queue.
+        """
+        # Count the number of WorkItem(s) that have a status of PENDING
+        # !!! Should I include RUNNING in the count? If so I do that with...
+        #   from django.db.models import Q
+        #   ...filter(Q(status="P") | Q(status="R"))
+        queue_size = WorkItem.objects.filter(status="P").count()
+        return queue_size
+
+    def clear_queue(self, are_you_sure=False):
+        """
+        Empties the WorkItem database table and delete everything. This will
+        not stop the workers if they are in the middle of a job though.
+        """
+        # Make sure the user ment to do this, otherwise raise an exception
+        if not are_you_sure:
+            raise Exception
+        else:
+            WorkItem.objects.all().delete()
+
+    def clear_finished(self, are_you_sure=False):
+        """
+        Empties the WorkItem database table and delete everything. This will
+        not stop the workers if they are in the middle of a job though.
+        """
+        # Make sure the user ment to do this, otherwise raise an exception
+        if not are_you_sure:
+            raise Exception
+        else:
+            WorkItem.objects.filter(status='F').delete()

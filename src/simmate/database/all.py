@@ -7,7 +7,7 @@ from django.db import models
 # TYPES OF RELATIONSHIPS:
 # ManyToMany - place in either but not both
 # ManyToOne (ForeignKey) - place in the many
-# OneToOne  - place in the one that has extra features (it's like setting a parent class)
+# OneToOne - place in the one that has extra features (it's like setting a parent class)
 
 # --------------------------------------------------------------------------------------
 
@@ -28,12 +28,12 @@ class Structure(models.Model):
     # The structure which is written as a json string from pymatgen's to_json method.
     # To convert back to Structure object, you need to apply json.loads to the string
     # and then Structure.from_dict
-    #!!! Postgres does support a dictionary type, but we don't use that here so that
-    #!!! we can still test with SQLite3
+    # !!! Postgres does support a dictionary type, but we don't use that here so that
+    # !!! we can still test with SQLite3
     structure = models.TextField()
 
-    #!!! In the future, Materials Project info will be better off in a separate table.
-    #!!! This is because not all structures will be from the Materials Project.
+    # !!! In the future, Materials Project info will be better off in a separate table.
+    # !!! This is because not all structures will be from the Materials Project.
 
     # Materials Project ID
     # Max length of 12 is overkill: 'mp-123456789'
@@ -83,9 +83,9 @@ class Pathway(models.Model):
 
     # the initial, midpoint, and end site fractional coordinates
     # Really, this is a list of float values, but I save it as a string.
-    #!!! for robustness, should I save cartesian coordinates and/or lattice as well?
-    #!!! Does the max length make sense here and below?
-    #!!! Consider switch msite to image in the future.
+    # !!! for robustness, should I save cartesian coordinates and/or lattice as well?
+    # !!! Does the max length make sense here and below?
+    # !!! Consider switch msite to image in the future.
     isite = models.CharField(max_length=100)
     msite = models.CharField(max_length=100)
     esite = models.CharField(max_length=100)
@@ -124,8 +124,8 @@ class PathwayCalc(models.Model):
     # Indicate what state the calculation is in. This exists to ensure we don't
     # submit multiple to Prefect and also let's us check how many currently exist in
     # the queue.
-    #!!! If you choose to change these, consider Prefect's different state labels:
-    #!!! https://docs.prefect.io/api/latest/engine/state.html
+    # !!! If you choose to change these, consider Prefect's different state labels:
+    # !!! https://docs.prefect.io/api/latest/engine/state.html
     class StatusTypeOptions(models.TextChoices):
         SCHEDULED = "S"
         COMPLETED = "C"
