@@ -1,6 +1,8 @@
+
 from django.apps import AppConfig
 
+
 class AccountsConfig(AppConfig):
-    
+
     # use the full import path for this app b/c it's within a package
-    name = 'fhahtda.website.accounts'
+    name = "fhahtda.website.accounts"

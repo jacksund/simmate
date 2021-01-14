@@ -10,20 +10,21 @@ import django
 # --------------------------------------------------------------------------------------
 
 
-def setup_django_full(): # Wall time: 246 ms
-    
+def setup_django_full():  # Wall time: 246 ms
+
     # The code below is the equiv of running 'python manage.py shell'
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "simmate.website.core.settings")
     django.setup()
 
 
-def connect_db(): # Wall time: 200 ms first time and 600 ns after
-    
+def connect_db():  # Wall time: 200 ms first time and 600 ns after
+
     # see if django has already been configured. If so, just exit this function
     from django.conf import settings
+
     if settings.configured:
-        return 
-    
+        return
+
     # import the settings I want from the actual django settings file
     from simmate.website.core.settings import BASE_DIR, DATABASES, DEBUG
 
@@ -31,7 +32,7 @@ def connect_db(): # Wall time: 200 ms first time and 600 ns after
     # I also need to write out the full import path from django here.
     INSTALLED_APPS = ("simmate.website.diffusion.apps.DiffusionConfig",)
     # set these values
-    
+
     settings.configure(
         BASE_DIR=BASE_DIR,
         DEBUG=DEBUG,
@@ -54,8 +55,8 @@ def setup_django_cli():
 
 def reset_db(apps_to_migrate=["diffusion"]):
     # Apps to init.
-    #!!! In the future, I should do a more robust search, rather than hardcode here.
-    #!!! maybe just grab all folders in the base directory via os.listdir()?
+    # !!! In the future, I should do a more robust search, rather than hardcode here.
+    # !!! maybe just grab all folders in the base directory via os.listdir()?
 
     # grab base directory and the location of the database file
     from simmate.website.core.settings import BASE_DIR, DATABASES
