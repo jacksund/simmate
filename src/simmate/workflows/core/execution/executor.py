@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import pickle
-from concurrent.futures import Executor
 
-from simmate.configuration.manage_django import connect_db
+# from concurrent.futures import Executor # No need to inherit at the moment
+
+from simmate.configuration import manage_django  # ensures setup
 from simmate.workflows.core.execution.models import WorkItem
 from simmate.workflows.core.execution.future import DjangoFuture
 
@@ -12,7 +13,7 @@ from simmate.workflows.core.execution.future import DjangoFuture
 # https://docs.python.org/3/library/concurrent.futures.html
 
 
-class DjangoExecutor(Executor):
+class DjangoExecutor:  # (Executor)
     def __init__(self):
         """
         Sets up connection to the queue database. Unlike normal executors,
@@ -32,8 +33,7 @@ class DjangoExecutor(Executor):
         add a "worker heartbeat" table to the queue database for the executor
         to read and run managerial tasks based off though.
         """
-        # connect to the django database
-        connect_db()
+        pass
 
     def submit(self, fxn, /, *args, **kwargs):
 
@@ -54,7 +54,7 @@ class DjangoExecutor(Executor):
         )
 
         # create the future object
-        future = DjangoFuture(id=workitem.id)
+        future = DjangoFuture(pk=workitem.pk)
 
         # and return the future for use
         return future
@@ -69,7 +69,7 @@ class DjangoExecutor(Executor):
         # https://docs.djangoproject.com/en/3.1/ref/models/querysets/#bulk-create
 
         # raise an error to ensure user sees this isn't supported yet.
-        raise Exception
+        raise Exception('This method is not supported yet')
 
     def shutdown(self, wait=True, cancel_futures=False):  # TODO
         # whether to wait until the queue is empty
@@ -118,4 +118,4 @@ class DjangoExecutor(Executor):
         if not are_you_sure:
             raise Exception
         else:
-            WorkItem.objects.filter(status='F').delete()
+            WorkItem.objects.filter(status="F").delete()

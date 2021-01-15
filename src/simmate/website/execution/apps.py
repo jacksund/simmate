@@ -1,8 +1,7 @@
-
 from django.apps import AppConfig
 
 
-class AccountsConfig(AppConfig):
+class ExecutionConfig(AppConfig):
 
     # use the full import path for this app b/c it's within a package
-    name = "simmate.website.accounts"
+    name = "simmate.website.execution"

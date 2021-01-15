@@ -138,7 +138,7 @@ class StagedShellTask(Task):
         very rarely be used!
         """
         if not structure and self.requires_structure:
-            raise StructureRequiredError
+            raise StructureRequiredError("a structure is required as an input")
         dir = get_directory(dir)
         self.setup(dir=dir, structure=structure)
         self.execute(command=command, dir=dir, wait_until_complete=True)

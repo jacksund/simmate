@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     "simmate.website.accounts.apps.AccountsConfig",
     "simmate.website.diffusion.apps.DiffusionConfig",
+    "simmate.website.execution.apps.ExecutionConfig",
     "crispy_forms",
     "django.contrib.admin",
     "django.contrib.auth",

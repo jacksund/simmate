@@ -1,4 +1,3 @@
-
 # --------------------------------------------------------------------------------------
 
 import pickle
@@ -51,12 +50,11 @@ class WorkItem(models.Model):
 
     # the status/state of the workitem
     # These states are based on the python queue module
-    # TODO - Job canceling is not supported yet
     class StatusOptions(models.TextChoices):
         PENDING = "P"
         RUNNING = "R"
-        # CANCELLED = "C"
-        # CANCELLED_AND_NOTIFIED = "N"
+        CANCELLED = "C"
+        # CANCELLED_AND_NOTIFIED = "N"  # !!! when should I use this?
         FINISHED = "F"
 
     # TODO -- I should consider indexing this column for speed because it's
@@ -67,8 +65,9 @@ class WorkItem(models.Model):
         default=StatusOptions.PENDING,
     )
 
+    # TODO -- This really should be a separate table with a relationship to WorkItem
     # the worker ID that grabbed the workitem
-    worker_id = models.CharField(max_length=50, blank=True, null=True)
+    # worker_id = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         app_label = "execution"

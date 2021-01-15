@@ -157,7 +157,7 @@ class SupervisedStagedTask(Task):
                 # exception here but instead let the monitor handle that
                 # error in the code below.
                 if future.returncode != 0 and not has_error:
-                    raise NonZeroExitError
+                    raise NonZeroExitError("command failed with non-zero exitcode")
 
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered about (if there was one).
@@ -198,7 +198,9 @@ class SupervisedStagedTask(Task):
 
         # make sure the while loop didn't exit because of the correction limit
         if len(corrections) >= self.max_corrections:
-            raise MaxCorrectionsError
+            raise MaxCorrectionsError(
+                "the number of maximum corrections has been exceeded"
+            )
 
         # run the postprocess, which should return the result
         result = stagedtask.postprocess(dir=dir)
