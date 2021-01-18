@@ -6,9 +6,8 @@ import pandas
 def parse_ACF(filename="ACF.dat"):
 
     # open the file, grab the lines, and then close it
-    file = open(filename)
-    lines = file.readlines()
-    file.close()
+    with open(filename) as file:        
+        lines = file.readlines()
 
     # establish the headers. Note that I ignore the '#' column as this is
     # just site index.

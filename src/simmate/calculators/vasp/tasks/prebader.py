@@ -27,7 +27,7 @@ class PreBaderInputSet(DictSet):
             "ISMEAR": 0,  # Guassian smearing #!!! read docs!
             "LCHARG": True,  # write CHGCAR
             "LAECHG": True,  # write AECCAR0, AECCAR1, and AECCAR2
-            "LWAVE": False,
+            "LWAVE": False,  # don't write the WAVECAR
             "NSW": 0,  # single energy calc
             "PREC": "Accurate",
             "SIGMA": 0.05,

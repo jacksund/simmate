@@ -20,17 +20,17 @@ class DjangoWorker:
     def __init__(
         self,
         # limit of tasks and lifetime of the worker
-        nitems_before_closing=None,
+        nitems_max=None,
         timeout=None,
         # wait_on_timeout=False, # TODO
         # settings on what to do when the queue is empty
         close_on_empty_queue=False,
-        close_wait=60,
+        waittime_on_empty_queue=60,
     ):
 
         # the maximum number of workitems to run before closing down
         # if no limit was set, we can go to infinity!
-        self.nitems_before_closing = nitems_before_closing or float("inf")
+        self.nitems_max = nitems_max or float("inf")
 
         # Don't start a new workitem after this time. The worker will be shut down.
         # if no timeout was set, use infinity so we wait forever.
@@ -45,7 +45,7 @@ class DjangoWorker:
         # if the queue is found to be empty, we will give it one last chance
         # to fill. Check the queue again after this time sleeping and if it is
         # still empty, close the worker.
-        self.close_wait = close_wait
+        self.waittime_on_empty_queue = waittime_on_empty_queue
 
     def start(self):
 
@@ -59,23 +59,29 @@ class DjangoWorker:
         #   the nitems limit is hit
         while True:
 
-            # check for timeout before starting a new workitem
-            if (time.time() - time_start) < self.timeout:
+            # check for timeout before starting a new workitem and exit
+            # if we've hit the limit.
+            if (time.time() - time_start) > self.timeout:
                 # TODO - check wait_on_timeout if running in parallel.
                 raise TimeoutError("The time-limit for this worker has been hit")
 
-            # check the number of jobs completed so far
-            if ntasks_finished > self.nitems_before_closing:
+            # check the number of jobs completed so far, and exit if we hit
+            # the limit
+            if ntasks_finished >= self.nitems_max:
                 raise MaxWorkItemsError(
                     "Maxium number of WorkItems hit for this worker"
                 )
 
-            # if we close on empty queues, we should check the queue size
-            if self.close_on_empty_queue:
-                # check the length of the queue
-                if self.queue_size() == 0:
-                    # if it is empty, we want to sleep for a little and check again
-                    time.sleep(self.close_wait)
+            # check the length of the queue and while it is empty, we want to
+            # loop. The exception of looping endlessly is if we want the worker
+            # to shutdown instead.
+            while self.queue_size() == 0:
+                # if it is empty, we want to sleep for a little and check again
+                time.sleep(self.waittime_on_empty_queue)
+
+                # This is a special condition where we may want to close the
+                # worker if the queue stays empty
+                if self.close_on_empty_queue:
                     if self.queue_size() == 0:
                         # if it's still empty, we should close the worker
                         raise EmptyQueueError(
@@ -86,7 +92,7 @@ class DjangoWorker:
             # and run it!
             # Query for PENDING WorkItems, lock it for editting, and update
             # the status to RUNNING
-            workitem = WorkItem.objects.select_for_update().first(status="P")
+            workitem = WorkItem.objects.select_for_update().filter(status="P").first()
 
             # our lock exists only within this transation
             with transaction.atomic():
@@ -127,7 +133,8 @@ class DjangoWorker:
                 workitem.status = "F"
                 workitem.save()
 
-        # if the loop exits and we reached this line, then we've hit the timeout
+            # mark down that we've completed one WorkItem
+            ntasks_finished += 1
 
     def queue_size(self):
         """

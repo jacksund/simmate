@@ -7,22 +7,29 @@ class MyCustomSet(DictSet):
 
     CONFIG = {'INCAR': {'EDIFF': 1.0e-07,
                         'EDIFFG': -1e-04, 
-                        'ENCUT': 500,
-                        # 'ISIF': 3, #!!! do I want this..?
+                        'ENCUT': 520,
+                        'ISIF': 3, #!!! do I want this..?
                         'ISMEAR': 0, # Guassian smearing #!!! read docs!
                         'LCHARG': True, # write CHGCAR
                         'LAECHG': True, # write AECCAR0, AECCAR1, and AECCAR2
                         'LWAVE': False,
                         'NSW': 0, # single energy calc
                         'PREC': 'Single', #!!! Testing: to get ELFCAR grid size to equal CHGCAR. Otherwise use 'Accurate'
-                        'SIGMA': 0.05,
+                        # 'SIGMA': 0.05, # !!! USING VALUE BELOW FOR TESTING
+                        
+                        # EXTRA TESTING
+                        'IVDW': 12, # van der waals correction
+                        'ISMEAR': 0, # Guassian smearing
+                        'SIGMA': 0.060,
+                        # 'NBANDS': 643, # Calculate more bands than normal (extra empty)
+                        
                         
                         # set FFT grid and fine FFT grid (note: start with fine!)
                         #!!! YOU SHOULD EXPERIMENT WITH THESE UNTIL THEY CONVERGE THE BADER CHARGES
                         # !!! SHOULD I MESS WITH NGX instead of NGXF???
-                        # 'NGX': 100,
-                        # 'NGY': 100,
-                        # 'NGZ': 100,
+                        'NGX': 100,
+                        'NGY': 100,
+                        'NGZ': 100,
                         # If prec = 'Single', then fine grid will automatically match
                         # the NGX,Y,Z above and you don't need to set these.
                         # 'NGXF': 100,
@@ -37,7 +44,7 @@ class MyCustomSet(DictSet):
                         # 'SYMPREC': 1e-8, #!!! CUSTODIAN FIX - dont use unless needed
                         
                         },
-              'KPOINTS': {'reciprocal_density': 25},
+              'KPOINTS': {'reciprocal_density': 50},
               'POTCAR_FUNCTIONAL': 'PBE',
               'POTCAR': {'Ac':'Ac','Ag':'Ag','Al':'Al','Ar':'Ar','As':'As',
                          'Au':'Au','B':'B','Ba':'Ba_sv','Be':'Be_sv','Bi':'Bi',
@@ -134,7 +141,7 @@ def parse_ACF(filename = "ACF.dat"):
     #         elif toks[0] == "NUMBER OF ELECTRONS":
     #             nelectrons = float(toks[1])
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 from pymatgen.io.vasp import Potcar
 
@@ -151,13 +158,13 @@ def get_nelectron_counts(filename='POTCAR'):
     
     return nelectron_data
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 print('Setting up...')
 
 # load structure
 from pymatgen.core.structure import Structure
-structure = Structure.from_file('1_POSCAR') ###################################################
+structure = Structure.from_file('2_POSCAR') ###################################################
 structure = structure.get_primitive_structure()
 
 # write the vasp input files
@@ -181,29 +188,29 @@ subprocess.run('./chgsum.pl AECCAR0 AECCAR2 > addingcharges.out', shell=True)
 #!!!    https://wiki.fysik.dtu.dk/gpaw/tutorials/bader/bader.html
 # "-b weight" throws some errors in a few cases (there's no refinement step like in the defualt)
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Load ELFCAR and add "empty" atom (I use Hydrogen)
 from pymatgen.io.vasp.outputs import Elfcar
 elfcar = Elfcar.from_file('ELFCAR')
 structure = elfcar.structure
-structure.append('H', [0.55555, 0.44444, 0.55555])  #!!! TEST MOVING 1_POSCAR UP
+structure.append('H', [0.55555, 0.77778, 0.53770])
 elfcar.write_file('ELFCAR_empty')
 
 # also write the crystal structure because it may differ from the input
-# elfcar.structure.to(filename='primitive_structure_empty.cif')
+elfcar.structure.to(filename='primitive_structure_empty.cif')
 
 # Load CHGCAR (valence e- only) and add "empty" atom (I use Hydrogen)
 from pymatgen.io.vasp.outputs import Chgcar
 chgcar = Chgcar.from_file('CHGCAR')
 structure = chgcar.structure
-structure.append('H', [0.55555, 0.44444, 0.55555])  #!!! TEST MOVING 1_POSCAR UP
+structure.append('H', [0.55555, 0.77778, 0.53770])
 chgcar.write_file('CHGCAR_empty')
 
 # Run bader analysis with ELFCAR_empty as the reference file
 subprocess.run('./bader CHGCAR_empty -ref ELFCAR_empty > bader.out', shell=True)
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # from pymatgen.core.structure import Structure
 # structure = Structure.from_file("1_POSCAR")
@@ -292,7 +299,7 @@ bulk_ref = {
 #     "H": 0,
 #     }
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # After bader is ran, we want to look at the data
 dataframe, extra_data = parse_ACF(filename = "ACF.dat")
@@ -339,130 +346,9 @@ for element_str in nelectron_data.keys():
     
     print('\n')
 
+print('Done!')
+
 # testing
 raise MemoryError
 
-#-----------------------------------------------------------------------------
-
-"""
-While this works, the scientific argument for it is much weaker. It's best to just use
-the ELFCAR as the reference file in bader analysis
-"""
-
-# TESTING -- Multiplying ELFCAR by CHGCAR or CHGCAR_sum
-
-# Load CHGCAR_sum (valence and core electrons) and add "empty" atom (I use Hydrogen)
-# chgcar_sum = Chgcar.from_file('CHGCAR_sum')
-# structure = chgcar_sum.structure
-# structure.append('H', [0.5,0.5,0.5])
-# chgcar_sum.write_file('CHGCAR_sum_empty') #!!! Bug -- data_aug should be {}
-
-#!!! NOTE: ELFCAR and CHGCAR voxel data must have the same dimensions (NGX - )
-# test = elfcar.data["total"] * chgcar.data["total"]
-# test = Elfcar(elfcar.structure, {"total": test})
-# test.write_file('TESTCAR')
-
-# subprocess.run('./bader CHGCAR -ref TESTCAR -b weight  > bader.out', shell=True)
-
-#-----------------------------------------------------------------------------
-
-"""
-Based on my testing in this section, scaling the ELFCAR to match the CHGCAR dimensions
-fails because we really have a step function in the scaled ELFCAR. I can get it to work
-by smoothing (guassian) the scaled ELFCAR, but I show that the choice of sigma does 
-affect the resultant oxidation states. Therefore, I can't use this approach.
-Instead, I need to set the FFT grid and fine grid to be the same size in VASP.
-"""
-
-# # TESTING -- I loop through different smoothing amounts for the ELFCAR data
-
-# def get_empty_charge(): #!!! I ASSUME 4 ATOMS TOTAL -- for Y2C testings
-#     # grab the vacuum charge
-#     file = open('ACF.dat', 'r')
-#     lines = file.readlines()
-#     # grab line 6
-#     line = lines[5] # 5, 4, 3
-#     # grab the proper column data
-#     charge = float(line.split(' ')[17]) # 17, 20, 17
-#     file.close()
-#     return charge
-
-# scale data of the Elfcar to the size of Chgcar using Kronecker product
-# The voxel data is not smoothed in any way, so we now have a step function.
-# I smooth below
-# import numpy as np
-# scale = [int(c/e) for c,e in zip(chgcar.data["total"].shape, elfcar.data["total"].shape)]
-# elfcar_scaled = np.kron(elfcar.data["total"], np.ones(scale))
-# 
-# x = np.linspace(0.5, 10, 100)
-# y = []
-
-# for sigma in x:
-#     # Smooth the voxel data
-#     from scipy.ndimage import gaussian_filter
-#     elfcar_smoothed_data = gaussian_filter(elfcar_scaled, sigma=sigma)
-    
-#     # Write the scaled&smoothed ELFCAR to file
-#     elfcar_smoothed = Elfcar(elfcar.structure, {"total": elfcar_smoothed_data})
-#     elfcar_smoothed.write_file('ELFCAR_smoothed')
-    
-#     # run the bader analysis using the new ELFCAR as the reference
-#     subprocess.run('./bader CHGCAR_empty -ref ELFCAR_smoothed -b weight > bader.out', shell=True)
-    
-#     try:
-#         vac_charge = get_empty_charge()
-#         y.append(vac_charge)
-#     except:
-#         y.append(None)
-    
-# print(y)
-# # e
-# y = [None, 0.992909, 0.992209, 0.991662, 0.991145, 0.990615, 0.990056, 0.990056, 0.98884, 0.988193, 0.988193, 0.98684, 0.98684, 0.985466, 0.984788, 0.984121, 0.984121, 0.982851, 0.982256, 0.981693, 0.981166, 0.980678, 0.980678, 0.980678, 0.980678, 0.979172, 0.978921, 0.978921, 0.978587, 0.978506, 0.97849, 0.978538, 0.978654, 0.978846, 0.979111, 0.979455, 0.979881, 0.980391, 0.980989, 0.981675, 0.982453, 0.983326, 0.984301, 0.985378, 0.986561, 0.987843, 0.989227, 0.990721, 0.992327, 0.994039, 0.995872, 0.997807, 0.999858, 1.002025, 1.004306, 1.006713, 1.009225, 1.011838, 1.014584, 1.017437, 1.020383, 1.02341, 1.026532, 1.029778, 1.033074, 1.036418, 1.039802, 1.043235, 1.046726, 1.050228, 1.053718, 1.057219, 1.060725, 1.064251, 1.067752, 1.071207, 1.074643, 1.078045, 1.081421, 1.084752, 1.088011, 1.091212, 1.094343, 1.097396, 1.10038, 1.103292, 1.106136, 1.108919, 1.111637, 1.114291, 1.116888, 1.119428, 1.121915, 1.124353, 1.126744, 1.129091, 1.131402, 1.133656, 1.135881, 1.138057]
-# # C
-# y = [None, 7.396851, 7.395889, 7.394598, 7.39312, 7.391522, 7.38985, 7.38985, 7.386323, 7.384511, 7.384511, 7.380842, 7.380842, 7.377237, 7.375487, 7.373776, 7.373776, 7.370608, 7.369179, 7.367864, 7.36668, 7.365641, 7.365641, 7.365641, 7.365641, 7.362932, 7.362617, 7.362617, 7.362477, 7.362658, 7.362997, 7.363492, 7.364137, 7.364923, 7.365858, 7.366935, 7.368155, 7.369517, 7.37101, 7.37262, 7.374327, 7.376119, 7.377964, 7.379852, 7.381786, 7.383743, 7.385726, 7.387721, 7.389733, 7.391748, 7.393759, 7.395763, 7.397751, 7.399697, 7.401578, 7.403364, 7.405066, 7.406717, 7.408297, 7.409819, 7.411305, 7.412722, 7.414123, 7.415479, 7.416784, 7.418011, 7.419202, 7.420367, 7.421503, 7.422647, 7.423685, 7.424675, 7.425707, 7.426722, 7.427743, 7.428884, 7.430021, 7.431037, 7.432156, 7.433463, 7.434781, 7.435971, 7.437295, 7.438744, 7.440297, 7.441632, 7.443059, 7.444757, 7.446546, 7.449092, 7.450574, 7.452824, 7.460178, 7.463841, 7.468499, 7.473979, 7.479626, 7.487133, 7.49945, 7.517937]
-# # Y
-# y = [None, 8.287864, 8.288695, 8.289602, 8.290587, 8.291641, 8.292744, 8.292744, 8.295078, 8.296275, 8.296275, 8.29868, 8.29868, 8.300985, 8.302075, 8.30312, 8.30312, 8.305012, 8.305842, 8.306589, 8.307241, 8.307784, 8.307784, 8.307784, 8.307784, 8.30888, 8.308888, 8.308888, 8.308537, 8.308181, 8.307703, 8.307111, 8.306407, 8.305589, 8.304658, 8.303622, 8.302479, 8.301235, 8.299892, 8.298456, 8.296938, 8.295343, 8.293688, 8.291978, 8.29021, 8.288392, 8.286534, 8.284634, 8.282679, 8.280676, 8.278635, 8.276564, 8.274455, 8.272311, 8.270145, 8.267981, 8.26583, 8.263642, 8.261414, 8.259126, 8.256784, 8.25443, 8.25205, 8.249604, 8.24715, 8.244716, 8.242264, 8.239781, 8.237296, 8.234788, 8.232305, 8.229801, 8.227243, 8.224628, 8.221934, 8.219171, 8.216279, 8.213283, 8.210157, 8.206906, 8.203531, 8.199971, 8.196206, 8.19227, 8.188098, 8.183801, 8.179244, 8.17438, 8.169046, 8.16299, 8.157541, 8.150598, 8.139021, 8.130364, 8.120871, 8.110239, 8.098494, 8.084827, 8.066644, 8.041329]
-
-#-----------------------------------------------------------------------------
-
-"""
-I was exploring a way to identify the electride charge here, but decided it wasn't worth
-pursuing anymore. 
-"""
-
-# # TESTING -- I loop through different vac values here
-# import numpy as np
-# x = np.linspace(1E-3, 1E-1, 100)
-# y = []
-# for vac_cutoff in x:
-#     # run bader with this cutoff
-#     subprocess.run(f'./bader CHGCAR -ref CHGCAR_sum -b weight -vac {vac_cutoff} > bader.out', shell=True)
-    
-#     # grab the vacuum charge
-#     file = open('ACF.dat', 'r')
-#     lines = file.readlines()
-#     for line in lines:
-#         if 'VACUUM CHARGE' in line:
-#             vac_charge = float(line.split(' ')[-1])
-#     file.close()
-#     y.append(vac_charge)
-
-# print(y)
-# # y = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0008, 0.0095, 0.0232, 0.0422, 0.0681, 0.1051, 0.164, 0.2886, 0.5189, 0.714, 0.7935, 0.8418, 0.8795, 0.9117, 0.9408, 0.9676, 0.9924, 1.0159, 1.0389, 1.0603, 1.0815, 1.1019, 1.1221, 1.1416, 1.161, 1.1798, 1.1993, 1.2172, 1.236, 1.2539, 1.2721, 1.2895, 1.3074, 1.3249, 1.3426, 1.3602, 1.377, 1.3944, 1.4119, 1.4287, 1.4458, 1.4631, 1.4806, 1.497, 1.5143, 1.5318, 1.549, 1.5662, 1.5825, 1.6007, 1.6185, 1.6361, 1.6531, 1.6709, 1.6893, 1.7089, 1.7282, 1.7466, 1.7648, 1.783, 1.8014, 1.8193, 1.8376, 1.8555, 1.8737, 1.8911, 1.9084, 1.9258, 1.9429, 1.9604, 1.9778, 1.9951]
-
-#-----------------------------------------------------------------------------
-
-# import matplotlib.pyplot as plt
-# plt.plot(x,y)
-
-# # take first derivative
-# der = (np.diff(y) / np.diff(x)) /200 # divide by 200 for scaling
-# x2 = (x[:-1] + x[1:]) / 2
-# plt.plot(x2, der, 'r', x, y, 'b')
-
-print('Done!')
-
-#-----------------------------------------------------------------------------
-
-
-
+# -----------------------------------------------------------------------------
