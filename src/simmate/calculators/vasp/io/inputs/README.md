@@ -40,3 +40,68 @@ keys in the order the user (or class) provided them, which often prefers logical
 ordering over alphabetical.
 
 proc_val is renamed to str_to_datatype.
+
+
+## POSCAR NOTES
+
+Rather than having a Poscar instance for each Structure object as pymatgen does,
+I want the Poscar to be a Converter. Therefore, this is a class that Structures
+pass through, rather than being loaded+initialized+written. For example, you would
+use the following code to write a series of Structures to POSCAR files:
+    in pymatgen... 
+        for structure in structures:
+            poscar = Poscar(structure)
+            poscar.write_file(filename)
+    in simmate...
+        for structure in structures:
+            Poscar.write_file(structure, filename)
+This may seem trivial, but it helps a lot with speed, and it also allows us to
+write a ton of Structures to files in parallel with Dask. For example:
+    Poscar.write_many_files([structure1, structure2, ...], [filename1, filename2, ...])
+
+set_temperature method is removed. I think this is a general method for structures
+and isn't specific to VASP. Therefore, this code should exist elsewhere. I need to
+revisit this code when I write velocity type methods or the Structure object.
+
+sort_structure parameter is removed. If you want the structure's sites to be sorted,
+this should be done before passing to the POSCAR class.
+
+__setattr__ method is removed. This looks like a spin-off of Structure.add_site_property()
+method and doesn't belong in this class, but in the Structure class.
+
+All of the property attributes are removed because this is now a Converter
+class and we no longer initialize a structure-specific Poscar.
+
+site_symbols and natoms methods are removed. These are easy one-liners when
+implemented through the Composition class.
+
+Removed as_dict and from_dict methods for now. Will reimplement later if it's
+even needed for this Converter class.
+
+__str__ method is removed. I could consider a to_string() method, but idk why
+anyone would ever use it besides in-terminal testing.
+
+Removed from_string method. This should be done inside the from_file method. Users
+should always init their own Incar object or read from an INCAR file. There's
+no good reason for a user to read and init the class from a string. The argument
+to have it is for testing only (pytest).
+
+In the from_file method, I do not check the POTCAR. Instead, Simmate users should
+follow the most current POSCAR format that lists the element types on the 6th line
+and/or at the end of each site's coordinates. This may cause issues if someone wants
+to read a really old VASP format, but it's probably too much for Simmate to always
+have legacy support for all the different calculators. It should be the current way,
+or the highway. If someone wants to load old structures, they should write their
+own script rather than muddying the code of Simmate. Also, thee is no "last-resort method"
+like in pymatgen. If the user isn't following VASP guidlines, an error will be raised
+or they should write their own method.
+
+It doesn't look like pymatgen saves the selective dynamics tags to site_properties,
+but I choose to.
+
+The read_velocities function I left as a to-do item as I didn't understand the MD
+formatting at a first glance, and I don't ever see an example of pymatgen, custodian,
+or atomate ever using this tag anyways.
+
+While I support loading a Poscar that has cartesian coordinates, I have users
+write all files in fractional (direct). 

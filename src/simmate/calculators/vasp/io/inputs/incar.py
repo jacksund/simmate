@@ -74,12 +74,12 @@ class Incar(dict):
                 # "x1 y1 z1 x2 y2 z2 x3 y3 z3"
                 # !!! Should I do "x1 y1 z1\tx2 y2 z2\tx3 y3 z3"
                 if isinstance(value[0], list):
-                    final_str += " ".join([str(n) for xyz in value for n in xyz])
+                    final_str += " ".join(str(n) for xyz in value for n in xyz)
 
                 # otherwise we just have a list of items
                 # converts [1, 2, 3] to "1 2 3"
                 else:
-                    final_str += " ".join([str(n) for n in value])
+                    final_str += " ".join(str(n) for n in value)
 
             # if it's not a list, we can just save the string of the value
             else:

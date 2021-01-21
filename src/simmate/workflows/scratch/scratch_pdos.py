@@ -22,6 +22,7 @@ class StaticEnergyCalc(DictSet):
             "SIGMA": 0.060,
             # 'NBANDS': 643, # Calculate more bands than normal (extra empty)
             "SYMPREC": 1e-8,  #!!! CUSTODIAN FIX - dont use unless needed
+            'ISYM': 0,
         },
         "KPOINTS": {"reciprocal_density": 100},
         "POTCAR_FUNCTIONAL": "PBE",
@@ -146,6 +147,7 @@ class NonSCFCalc(DictSet):
             # "SIGMA": 0.060,
             # # 'NBANDS': 643, # Calculate more bands than normal (extra empty)
             "SYMPREC": 1e-8,  #!!! CUSTODIAN FIX - dont use unless needed
+            'ISYM': 0,
             
             # # PDOS
             # "LORBIT": 11,
@@ -159,6 +161,7 @@ class NonSCFCalc(DictSet):
             "EINT": "-9999 0", # energy range to look at for decomposed charge density
             "ISYM": 0,  # turn off symmetry
             # "NBANDS": 50,
+            "LSEPK": True, # whether to combine all k-points to one file or separate
         },
         "KPOINTS": {"reciprocal_density": 100},
         "POTCAR_FUNCTIONAL": "PBE",
@@ -269,7 +272,7 @@ class NonSCFCalc(DictSet):
 # if this is the starting point...
 from pymatgen.core.structure import Structure
 
-structure = Structure.from_file("2_POSCAR")
+structure = Structure.from_file("Y2C.cif")
 structure = structure.get_primitive_structure()
 calc = StaticEnergyCalc(structure)
 
@@ -286,7 +289,7 @@ print("Running vasp...")
 import subprocess
 
 subprocess.run(
-    "module load vasp; mpirun -np 30 /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std > vasp.out",
+    "module load vasp; mpirun -np 20 /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std > vasp.out",
     shell=True,
 )
 
@@ -314,7 +317,7 @@ print("Running vasp...")
 import subprocess
 
 subprocess.run(
-    "module load vasp; mpirun -np 30 /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std > vasp.out",
+    "module load vasp; mpirun -np 20 /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std > vasp.out",
     shell=True,
 )
 
@@ -473,7 +476,7 @@ for parchg in all_parchgs:
     try:
         chgcar = Chgcar.from_file(parchg)
         structure = chgcar.structure
-        structure.append('H', [0.55555, 0.77778, 0.53770])
+        structure.append('H', [0.5,0.5,0.5]) # structure.append('H', [0.55555, 0.77778, 0.53770])
         chgcar.write_file(parchg + '_empty')
     except:
         pass
@@ -567,9 +570,11 @@ def get_nelectron_counts(filename='POTCAR'):
 nelectron_data = get_nelectron_counts()
 nelectron_data.update({'H': 0}) # I need to add this for the empty atoms
 
+
 def run_and_workup_bader(file, ref, savefile, nelectron_data=nelectron_data):
     
-    subprocess.run(f'./bader {file} -ref {ref} > bader.out', shell=True)
+    # delete the previous ACF.dat just in case
+    subprocess.run(f'rm ACF.dat; ./bader {file} -ref {ref} > bader.out', shell=True)
 
     # After bader is ran, we want to look at the data
     dataframe, extra_data = parse_ACF(filename = "ACF.dat")
@@ -610,7 +615,7 @@ all_parchgs = [
 ]
 
 import numpy
-test = numpy.array([0,0,0,0])
+test = numpy.array([0]*4) #!!!!!!!!!!!!!!!!!! 135
 for parchg in all_parchgs:
     dataframe, extra_data = run_and_workup_bader(parchg,parchg,parchg+"_result.csv")
     test = test + dataframe.charge.values

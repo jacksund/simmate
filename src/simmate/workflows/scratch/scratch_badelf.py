@@ -27,9 +27,9 @@ class MyCustomSet(DictSet):
                         # set FFT grid and fine FFT grid (note: start with fine!)
                         #!!! YOU SHOULD EXPERIMENT WITH THESE UNTIL THEY CONVERGE THE BADER CHARGES
                         # !!! SHOULD I MESS WITH NGX instead of NGXF???
-                        'NGX': 100,
-                        'NGY': 100,
-                        'NGZ': 100,
+                        # 'NGX': 100,
+                        # 'NGY': 100,
+                        # 'NGZ': 100,
                         # If prec = 'Single', then fine grid will automatically match
                         # the NGX,Y,Z above and you don't need to set these.
                         # 'NGXF': 100,
@@ -41,10 +41,11 @@ class MyCustomSet(DictSet):
                         'LELF': True, # write ELFCAR
                         'NPAR': 1, # Must be set if LELF is set to True
                         
-                        # 'SYMPREC': 1e-8, #!!! CUSTODIAN FIX - dont use unless needed
+                        'SYMPREC': 1e-8, #!!! CUSTODIAN FIX - dont use unless needed
+                        # 'ISYM': 0,
                         
                         },
-              'KPOINTS': {'reciprocal_density': 50},
+              'KPOINTS': {'reciprocal_density': 100},
               'POTCAR_FUNCTIONAL': 'PBE',
               'POTCAR': {'Ac':'Ac','Ag':'Ag','Al':'Al','Ar':'Ar','As':'As',
                          'Au':'Au','B':'B','Ba':'Ba_sv','Be':'Be_sv','Bi':'Bi',
@@ -164,7 +165,7 @@ print('Setting up...')
 
 # load structure
 from pymatgen.core.structure import Structure
-structure = Structure.from_file('2_POSCAR') ###################################################
+structure = Structure.from_file('Y2C.cif') ###################################################
 structure = structure.get_primitive_structure()
 
 # write the vasp input files
@@ -194,7 +195,7 @@ subprocess.run('./chgsum.pl AECCAR0 AECCAR2 > addingcharges.out', shell=True)
 from pymatgen.io.vasp.outputs import Elfcar
 elfcar = Elfcar.from_file('ELFCAR')
 structure = elfcar.structure
-structure.append('H', [0.55555, 0.77778, 0.53770])
+structure.append('H', [0.5,0.5,0.5])
 elfcar.write_file('ELFCAR_empty')
 
 # also write the crystal structure because it may differ from the input
@@ -204,7 +205,7 @@ elfcar.structure.to(filename='primitive_structure_empty.cif')
 from pymatgen.io.vasp.outputs import Chgcar
 chgcar = Chgcar.from_file('CHGCAR')
 structure = chgcar.structure
-structure.append('H', [0.55555, 0.77778, 0.53770])
+structure.append('H', [0.5,0.5,0.5])
 chgcar.write_file('CHGCAR_empty')
 
 # Run bader analysis with ELFCAR_empty as the reference file
@@ -283,13 +284,13 @@ subprocess.run('./bader CHGCAR_empty -ref ELFCAR_empty > bader.out', shell=True)
 #     "H": 0,
 #     }
 
-# Y2CF2
-bulk_ref = {
-    "Y": 2.386,
-    "C": -3.035,
-    "F": -0.868,
-    "H": 0,
-    }
+# # Y2CF2
+# bulk_ref = {
+#     "Y": 2.386,
+#     "C": -3.035,
+#     "F": -0.868,
+#     "H": 0,
+#     }
 
 # # Y2CCl2
 # bulk_ref = {
@@ -301,54 +302,54 @@ bulk_ref = {
 
 # -----------------------------------------------------------------------------
 
-# After bader is ran, we want to look at the data
-dataframe, extra_data = parse_ACF(filename = "ACF.dat")
-nelectron_data = get_nelectron_counts()
-nelectron_data.update({'H': 0}) # I need to add this for the empty atoms
+# # After bader is ran, we want to look at the data
+# dataframe, extra_data = parse_ACF(filename = "ACF.dat")
+# nelectron_data = get_nelectron_counts()
+# nelectron_data.update({'H': 0}) # I need to add this for the empty atoms
 
-# reload the structure used if I don't have it already
-from pymatgen.io.vasp.outputs import Elfcar
-elfcar = Elfcar.from_file('ELFCAR_empty')
+# # reload the structure used if I don't have it already
+# from pymatgen.io.vasp.outputs import Elfcar
+# elfcar = Elfcar.from_file('ELFCAR_empty')
 
-# Calculate the oxidation state of each site where it is simply the change in number of
-# electrons associated with it (from vasp potcar vs the bader charge)
-# I also add the element strings for filtering functionality
-elements = []
-oxi_state_data = []
-for site, site_charge in zip(elfcar.structure, dataframe.charge.values):
-    element_str = site.specie.name
-    elements.append(element_str)
-    oxi_state = nelectron_data[element_str] - site_charge
-    oxi_state_data.append(oxi_state)
-# add the new column to the dataframe
-#!!! There are multiple ways to do this, but I don't know which is best
-# dataframe["oxidation_state"] = pandas.Series(oxi_state_data, index=dataframe.index)
-dataframe = dataframe.assign(
-    oxidation_state = oxi_state_data,
-    element = elements
-    )
+# # Calculate the oxidation state of each site where it is simply the change in number of
+# # electrons associated with it (from vasp potcar vs the bader charge)
+# # I also add the element strings for filtering functionality
+# elements = []
+# oxi_state_data = []
+# for site, site_charge in zip(elfcar.structure, dataframe.charge.values):
+#     element_str = site.specie.name
+#     elements.append(element_str)
+#     oxi_state = nelectron_data[element_str] - site_charge
+#     oxi_state_data.append(oxi_state)
+# # add the new column to the dataframe
+# #!!! There are multiple ways to do this, but I don't know which is best
+# # dataframe["oxidation_state"] = pandas.Series(oxi_state_data, index=dataframe.index)
+# dataframe = dataframe.assign(
+#     oxidation_state = oxi_state_data,
+#     element = elements
+#     )
 
-# look at the median, max and min, for each element
-for element_str in nelectron_data.keys():
-    data_filtered = dataframe[dataframe.element == element_str]
-    oxi_states = data_filtered.oxidation_state
-    print("Summary for", element_str, "...")
-    print("Median:", oxi_states.median())
-    print("Max:", oxi_states.max())
-    print("Max:", oxi_states.min())
+# # look at the median, max and min, for each element
+# for element_str in nelectron_data.keys():
+#     data_filtered = dataframe[dataframe.element == element_str]
+#     oxi_states = data_filtered.oxidation_state
+#     print("Summary for", element_str, "...")
+#     print("Median:", oxi_states.median())
+#     print("Max:", oxi_states.max())
+#     print("Max:", oxi_states.min())
     
-    # output for my reference
-    # Format of dMedian (dMin to dMax)
-    print(oxi_states.median() - bulk_ref[element_str], 
-          oxi_states.max() - bulk_ref[element_str],
-          oxi_states.min() - bulk_ref[element_str],
-          )
+#     # output for my reference
+#     # Format of dMedian (dMin to dMax)
+#     print(oxi_states.median() - bulk_ref[element_str], 
+#           oxi_states.max() - bulk_ref[element_str],
+#           oxi_states.min() - bulk_ref[element_str],
+#           )
     
-    print('\n')
+#     print('\n')
 
-print('Done!')
+# print('Done!')
 
 # testing
-raise MemoryError
+# raise MemoryError
 
 # -----------------------------------------------------------------------------
