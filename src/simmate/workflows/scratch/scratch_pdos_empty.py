@@ -152,8 +152,8 @@ class NonSCFCalc(DictSet):
             "NSW": 0,  # single energy calc
             "PREC": "Accurate", # !!! USE Accurate WHEN NOT DOING BADELF
             "IVDW": 12,  # van der waals correction
-            "ISMEAR": -5,  # Guassian smearing
-            # "SIGMA": 0.060,
+            "ISMEAR": -5,  # Guassian smearing ##### <<<<<<<<< Changed from the first calc
+            # "SIGMA": 0.060, ##### <<<<<<<<< Changed from the first calc
             # 'NBANDS': 643, # Calculate more bands than normal (extra empty)
             "SYMPREC": 1e-8,  #!!! CUSTODIAN FIX - dont use unless needed
             'ISYM': 2,
@@ -169,12 +169,14 @@ class NonSCFCalc(DictSet):
             # 'NPAR': 1, # Must be set if LELF is set to True
             
             # PDOS
+            'ISTART': 1, # continuation file -- read the WAVECAR
             "ICHARG": 11,
-            'LORBIT': 2, #!!! use 11 if you don't want to set radii and 2 if you do
+            'LORBIT': 1, #!!! use 11 if you don't want to set radii and 1 if you do
             # 'RWIGS': '', #!!! SET BELOW AND SET RADII IN SAME ORDER AS POSCAR
             'NEDOS': 2001, # number of grid states for evaluating DOS
+            # NBANDS, EMIN/EMAX are some others parameters that I can consider
         },
-        "KPOINTS": {"reciprocal_density": 300},
+        "KPOINTS": {"reciprocal_density": 1000}, ##### <<<<<<<<< Changed from the first calc
         "POTCAR_FUNCTIONAL": "PBE",
         "POTCAR": {
             "Ac": "Ac",

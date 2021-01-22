@@ -105,3 +105,76 @@ or atomate ever using this tag anyways.
 
 While I support loading a Poscar that has cartesian coordinates, I have users
 write all files in fractional (direct). 
+
+
+## KPOINTS NOTES
+
+Removed as_dict and from_dict methods for now. Will reimplement later if it's
+even needed for this Converter class.
+
+For automatic generation of a kpts at a specific density, VASP now has a input
+parameter "KSPACING" that should be used and they recommend against using the
+automatic mode in the KPOINTS file. Thus this class should really only be used
+when you're doing a bandstructure calculation and need to set the specific path
+for your calculation. Still, I will support manual writing of KPOINTS files that
+specify an automatic mesh, but rarely use it elsewhere. Instead I will always
+perfer setting the kpoint denisty in the INCAR file.
+VASP also indicates there are some cells where their KSPACING tag will not work
+as described in the "Symmetry reduction of the mesh" section of the KPOINTS page.
+I think such errors can be handled by a VaspHandler by doing one of the following:
+- don't use the primitive cell, but the LLL reduced or conventional one instead
+- set the grid to N1xN2xN3 where N1=N2=N3  
+Thus I should still provide some support for writing a specific kpt grid. I can
+also use the KGAMMA parameter to change this as well.
+
+"automatic gamma density" is absorbed into "automatic density by volume"
+functionality. It's also never used by pymatgen.
+
+"automatic linemode" looks very useful for bandstructure calculations but is 
+never used anywhere... I remove it for now. It looks like this is a way to implement
+pymatgen.symmetry.bandstructure.HighSymmKpath objects, so I may reimplement this
+method when I get there. Alternatively, this method may belond on that class instead.
+
+pymatgen.symmetry.bandstructure.HighSymmKpath objects look to be a great way to
+implement kpath setting methods all in one place. I think all DFT calculators
+should extend to this module for bandstructures. I want to take this one step
+further and say I'll have two generic classes: KptPath and KptGrid that can
+be used. For now, KptGrid is just a float value with represent kpt density.
+
+Much like with Poscar, I think Kpoints class should be a converter for a pair of
+structures+HighSymmKpath or structure+kpoint_density. That is, you never initialize
+the class, but instead you just pass information through it and recieve your
+output. See POSCAR notes for more on this. Because of this, it may be useful to
+also incorporate a "KptGrid" class that has common methods for us. These
+will be used accross all DFT calculators, not just VASP, and it will reduce
+repeated code as a result.
+
+see POSCAR notes on from_string, to_string, __str__ methods. Same applies here.
+
+num_kpts, style, kpts, kpts_shift, labels, and kpts_weights are all removed and should
+be implemented in the KptGrid and/or KptPath classes.
+
+I didn't take the time to read on what tet_number, tet_weight, and tet_connections
+actually do -- but I presume these belong in the KptGrid and/or KptPath
+classes as well.
+
+Pymatgen's automatic_density_by_vol actually factors in the number of sites too
+so it's really not by volume... Why do they do this? This give density in units
+of kpts per atom A^-3. I would think you should choose one or the other.
+
+
+Ah... It looks like "grid density" they based off of "per atom" which is why
+they have all of those conversions. Makes sense. So kppa = kpts per atom.
+I still think it makes moresense to have kpt density per volume rather than per
+atom. Their method for automatic_density_by_vol is even "per (site * volume)"
+which is odd to me. In this case I think you should be able to specify Kpt
+density per site OR kpt density per volume -- maybe take the greater/lesser of
+the two. Either way, this can be implemented in the KptGrid class. In Simmate,
+I'm going to give preference to kpts per volume. Also note, volume here is the
+reciprocal space volume!
+
+## POTCAR NOTES
+
+Removed as_dict and from_dict methods for now. Will reimplement later if it's
+even needed for this Converter class.
+
