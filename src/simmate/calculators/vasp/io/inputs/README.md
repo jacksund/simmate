@@ -178,3 +178,102 @@ reciprocal space volume!
 Removed as_dict and from_dict methods for now. Will reimplement later if it's
 even needed for this Converter class.
 
+Pymatgen stores all of your vasp potcar files inside of a folder called my_psp
+and they save it to the module location. Because of this, I think conda envs
+actually get messed up when you try to initialize multiple enviornments for the
+potcar files. Instead, I think you should either 1) let the user indicate exactly
+where the files are located or 2) have a .simmate/ folder in their home directory.
+This makes it so users can see exactly where their files are located. I don't
+think you should mess with the site-packages folder as this could even cause issues
+on shared installs. There should instead be at .simmate configuration folder that
+is easily accessible.
+
+Vasp provides their POTCARs in a dist/Potentials folder. Pymatgen takes their
+format and changes it. I don't think this should be done. Instead I want to keep
+their original folder structure and just move it to /.simmate/vasp/Potentials
+This saves the user from having to rename anything and also saves us from having
+to code it and confuse the user where it's being stored
+
+Together, the .simmate folder means I can also just copy/paste a configuration
+folder to a new computer if I'd like.
+
+I need to learn more about other DFT programs but I'm sure there's a generic
+use for a Potential class. Then Potcar class is just a means to 1) copy the 
+proper potcar to the correct spot or 2) load data and metadata of the potcar
+into a Potential class. Pymatgen loads the entire Potcar data then writes the
+file, whereas this loading of data only needs to be done if you want a Potential
+object and will look at the data inside it. To write the file, we only need
+the potcars location -- nothing else!
+
+The Potential class that I would write would absorb the follow attributes and
+settings from this Potcar class: electron_configuration, element, atomic_no,
+nelectrons, symbol, potential_type, functional, functional_class
+
+I like how pymatgen hashes the potcar files, but I'm not sure this is needed.
+Is file corruption really that common? Also do we need to hash every time the
+file is loaded? The strongest argument I can see is to ensure users are providing
+POTCARs that are known and not some incorrect file. For now, I remove their
+hashing functionality and hash library, but I may add these back in later.
+
+Because hashing functionality was removed, so is the identify_potcar method. The
+mapping dictionary in this was very helpful though. I can add this method back
+in if I reimplement the hash.
+
+From the map in identify_potcar, it looks like a number of potentials are outdated
+and shouldn't be used. Therefore, I don't think Simmate should support them. It
+removed clutter for confused users and let's them focus on whats important and
+still relevent.
+    LDA/
+        potpaw_LDA/ >> outdated
+        potpaw_LDA.52/ >> supported but not latest version
+        potpaw_LDA.54/ >> most current version
+        potUSPP_LDA/ >> outdated
+    PBE/
+        potpaw_PBE/ >> outdated
+        potpaw_PBE.52/ >> supported but not latest version
+        potpaw_PBE.54/ >> most current version
+    PW91/
+        potpaw_GGA/ >> outdated
+        potUSPP_GGA/ >> outdated
+Pymatgen has mappings for unvie_potpaw* potcars as well. I dont see these in
+my VASP source files. What are they? 
+I think I've been using PBE instead of PBE.54 this entire time... wtf VASP and
+pymatgen. How is this not clearly written in documentation somewhere. Even
+searching it now I don't see this info. This is why Simmate is going to be
+opinionated. Users will be told their using PBE.54 from the start and can change
+it if they really want to.
+
+The metadata for the POTCAR (stored in potcar.keywords), should immediately be
+mapped to the Potential class keywords for consistency. Some of these I may
+need early on (such as ZVAL), so I may create this Potential class before even
+looking at other DFT calculators.
+
+In my mappings, I only map to the current versions of LDA and PBE to ensure
+users choose the correct POTCARs. I think supporting past versions will only
+create a tripping point for new users like it did for me. If an advanced user
+really wants to use a older poscar, they can "trick" simmate by renaming their
+folder or by writing their own custom class + mappings.
+
+Where should POTCAR_CONFIG go and take effect? I'm thinking that I should not
+have a user-set default potential at a low level, but instead have the potential
+used always set at the Task level. That way, it's right there for the user to
+see and they don't have to dig backwards for inheritance. The other thought is
+that the potential type (such as "PAW-GGA-PBE" or "PAW-GGA-PBE-GW") or similar
+flags should point straight to the proper POTCAR within the coordination at
+the bottom level and completely fixed/opinionated. I'm leaning towards the
+latter because I don't think mappings will change often for a given type
+and this allows us to just use the "PAW-GGA-PBE" flag at higher levels. This
+is what I implement for now.
+
+I still need a better understanding of the different types of Potentials and how
+to classify them (e.g. PAW > GGA > PBE). For example, I'm not sure what GW type
+potentials are. Are they their own subclass of GGA just like PBE and PBEsol? PBEgw
+potentials have their own potentials though, whereas other GGA types of
+exchange-correlation like PBEsol you still use PBE's POTCARs and then just 
+change a setting in the INCAR settings: https://www.vasp.at/wiki/index.php/GGA
+
+The separation of Potcar and PotcarSingle is removed. There is now only the
+Potcar class that handles both types. The key difference is that the input
+always takes a list of elements (or list of Potentials). The list gains preference
+because more often then not, we are working with >1 element compositions. I
+could allow a single input or a list input, but I just force list input for now.

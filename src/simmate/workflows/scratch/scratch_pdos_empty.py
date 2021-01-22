@@ -34,7 +34,7 @@ class StaticEnergyCalc(DictSet):
             # 'NPAR': 1, # Must be set if LELF is set to True
         },
         "KPOINTS": {"reciprocal_density": 300},
-        "POTCAR_FUNCTIONAL": "PBE",
+        "POTCAR_FUNCTIONAL": "PBE_54",
         "POTCAR": {
             "Ac": "Ac",
             "Ag": "Ag",
@@ -177,7 +177,7 @@ class NonSCFCalc(DictSet):
             # NBANDS, EMIN/EMAX are some others parameters that I can consider
         },
         "KPOINTS": {"reciprocal_density": 1000}, ##### <<<<<<<<< Changed from the first calc
-        "POTCAR_FUNCTIONAL": "PBE",
+        "POTCAR_FUNCTIONAL": "PBE_54",
         "POTCAR": {
             "Ac": "Ac",
             "Ag": "Ag",
