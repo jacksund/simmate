@@ -22,7 +22,8 @@ class Incar(dict):
         # VASP format that will be convert to python types here.
         # OPTIMIZE -- would it be faster if I only did this on from_file init?
         # and therefore assumed the user to initialize this with proper python
-        # datatypes and formatting?
+        # datatypes and formatting? Also will this behave properly if the value
+        # is already in the correct format?
         for parameter, value in self.items():
             formatted_value = self.str_to_datatype(parameter, value)
             self.update({parameter: formatted_value})
@@ -57,7 +58,8 @@ class Incar(dict):
         # Let's start with an empty string and build from there
         final_str = ""
 
-        # If we have a list, VASP wants everything flattened
+        # Iterate through each parameter and its set value. Each one will be
+        # put on a separate line.
         for parameter, value in self.items():
 
             # let's start by adding the parameter key to our output
@@ -99,6 +101,7 @@ class Incar(dict):
         Args:
             filename (str): filename to write to.
         """
+        # we just take the string format and put it in a file
         with open(filename, "w") as file:
             file.write(self.__str__())
 
@@ -265,11 +268,11 @@ class Incar(dict):
         else:
             return value
 
-    def diff(self, other_incar):
+    def compare_incars(self, other_incar):
         """
-        Diff function for Incar.  Compares two Incars and indicates which
-        parameters are the same and which are not. Useful for checking whether
-        two runs were done using the same parameters.
+        Compares two Incars and indicates which parameters are the same and
+        which are not. Useful for checking whether two runs were done using
+        the same parameters.
         Args:
             other (Incar): The other Incar object to compare to.
         Returns:

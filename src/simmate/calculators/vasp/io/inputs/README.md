@@ -2,9 +2,21 @@
 
 ## INCAR NOTES
 
+For all other input types (POSCAR, KPOINTS, POTCAR), I write these as Converters
+that take more generic objects such a Structure, KptGrid, and Potential and
+converts them into the VASP format. Should I do the same with INCAR? I would
+have a DftSettings or DftCalc class that the Incar would convert. This might
+make settings used confusing for users. VASP user would have to understand the
+mapping of ENCUT in Incar to energy_cutoff in DftCAlc, which I'm not sure would
+help or hurt. My initial thought is this is great for new users or those that 
+want to switch calculators, but bad for those that are experts in VASP and want
+to update a single flag. For example, if a user wanted to change a workflow's
+ISIF tag, they would first have to look up the respective tag. I don't
+implement this for that reason.
+
 Pymatgen has an incar_parameters.json file which lists all of the possible INCAR
 options. This is only ever used by vasp in the Incar.check_params method, which
-does the follow:
+does the following:
 """
         Raises a warning for nonsensical or non-existant INCAR tags and
         parameters. If a keyword doesn't exist (e.g. theres a typo in a
@@ -277,3 +289,15 @@ Potcar class that handles both types. The key difference is that the input
 always takes a list of elements (or list of Potentials). The list gains preference
 because more often then not, we are working with >1 element compositions. I
 could allow a single input or a list input, but I just force list input for now.
+
+I need to add symbols method to print what functionals would be used. 
+
+I should add a nelectrons method that indicates the normal amount of electrons
+used by the potcar. This can be used at a higher level to set NELECT in the Incar
+if we want to add/remove charge for doping experiments.
+
+## OTHER NOTES
+
+The final class in pymatgen.io.vasp.inputs is VaspInput. This is moved away
+from simmate's io and to setup. Look at simmate.calculators.vasp.stages.setup
+for notes on how I modified this class.

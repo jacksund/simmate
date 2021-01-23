@@ -47,3 +47,5 @@ class Potcar:
     # from_symbol_and_functional --> returns Potential object
     # from_file --> returns Potential object
     # write_from_potential --> takes a Potential object and write file in POTCAR format
+    # symbols --> gives list of potcar symbols (Ca, Y_sv, etc.)
+    # nelect --> gives total electron count from potcar
