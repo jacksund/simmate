@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import subprocess
 from pymatgen.io.vasp.sets import DictSet
 
 #!!! The warning that is raised here is because there is no YAML! It can be ignored
@@ -14,14 +15,14 @@ class StaticEnergyCalc(DictSet):
             "ISMEAR": 0,  # Guassian smearing #!!! read docs!
             "LCHARG": True,  # write CHGCAR
             "LAECHG": True,  # write AECCAR0, AECCAR1, and AECCAR2
-            # "LWAVE": True,
+            "LWAVE": True,  # write WAVECAR
             "NSW": 0,  # single energy calc
-            "PREC": "Accurate", # !!! USE Accurate WHEN NOT DOING BADELF
+            "PREC": "Accurate",  # !!! USE Accurate WHEN NOT DOING BADELF
             "IVDW": 12,  # van der waals correction
-            "ISMEAR": 0,  # Guassian smearing
+            "ISMEAR": 0,  # Guassian smearing = 0 if system unknown!!!!!!!!!!!
             "SIGMA": 0.060,
             # 'NBANDS': 643, # Calculate more bands than normal (extra empty)
-            "SYMPREC": 1e-8,  #!!! CUSTODIAN FIX - dont use unless needed
+            "SYMPREC": 1e-8,  # !!! CUSTODIAN FIX - dont use unless needed
             # 'ISYM': 0,
             
             'NGXF': 100,
@@ -326,10 +327,10 @@ def parse_ACF(filename = "ACF.dat"):
 # if this is the starting point...
 from pymatgen.core.structure import Structure
 
-structure = Structure.from_file("Y2CF2.cif")
+structure = Structure.from_file("GaAs.cif")
 structure = structure.get_primitive_structure()
-calc = StaticEnergyCalc(structure)
-
+structure = structure.copy(sanitize=True)
+calc = StaticEnergyCalc(structure, user_potcar_settings={"Ga": "Ga"})
 # save the calc files
 calc.write_input(".")
 
@@ -340,8 +341,6 @@ calc.write_input(".")
 print("Running vasp...")
 
 # run vasp
-import subprocess
-
 subprocess.run(
     "module load vasp; mpirun -np 20 /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std > vasp.out",
     shell=True,
@@ -371,7 +370,7 @@ NonSCFCalc.CONFIG["INCAR"].update({"RWIGS": str(radii_from_vol)[1:-1]})
 # -----------------------------------------------------------------------------
 
 structure = Structure.from_file("CONTCAR")
-calc = NonSCFCalc(structure)
+calc = NonSCFCalc(structure, user_potcar_settings={"Ga": "Ga"})
 
 # save the calc files
 calc.write_input(".")
@@ -398,17 +397,17 @@ subprocess.run(
 #!!! I need to set the RWIGS tag too so that it knows what radius the sphere has
 #######
 
-from pymatgen.io.vasp.outputs import Vasprun
+# from pymatgen.io.vasp.outputs import Vasprun
 
-xmlReader = Vasprun(filename= "vasprun.xml",
-                    parse_dos = True,
-                    parse_eigen = True,
-                    parse_projected_eigen = True, #!!! **Note that this can take an extreme amount of time and memory.** So use this wisely.
-                    parse_potcar_file = True,
-                    exception_on_bad_xml = True)
+# xmlReader = Vasprun(filename= "vasprun.xml",
+#                     parse_dos = True,
+#                     parse_eigen = True,
+#                     parse_projected_eigen = True, #!!! **Note that this can take an extreme amount of time and memory.** So use this wisely.
+#                     parse_potcar_file = True,
+#                     exception_on_bad_xml = True)
 
-# update the structure (really this should be the same)
-structure = xmlReader.structures[0]
+# # update the structure (really this should be the same)
+# structure = xmlReader.structures[0]
 
 # If you added an ampty sphere, we need to take that into accound here!
 # pymatgen doesn't add the empty atom so we must do that ourselves
@@ -417,11 +416,11 @@ structure = xmlReader.structures[0]
 # dummy_element = DummySpecie()
 # structure.append(dummy_element, [0.5,0.5,0.5])
 
-# grab both the total density of states and all the partial densitry of states
-complete_dos = xmlReader.complete_dos
+# # grab both the total density of states and all the partial densitry of states
+# complete_dos = xmlReader.complete_dos
 
-# now we want to plot the DOS
-from pymatgen.electronic_structure.plotter import DosPlotter
+# # now we want to plot the DOS
+# from pymatgen.electronic_structure.plotter import DosPlotter
 
 # ########## PLOT 1
 
@@ -449,47 +448,47 @@ from pymatgen.electronic_structure.plotter import DosPlotter
 # alternatively I can plot by site
 # I start by resetting the plot
 
-from scipy.integrate import trapz
+# from scipy.integrate import trapz
 
-plotter = DosPlotter(zero_at_efermi = True,
-                      stack = False,
-                      sigma=None) #!!! 0.05set to None if you dont want smoothing
+# plotter = DosPlotter(zero_at_efermi = True,
+#                       stack = False,
+#                       sigma=None) #!!! 0.05set to None if you dont want smoothing
 
-# plot the total DOS first
-plotter.add_dos("Total DOS", complete_dos)
+# # plot the total DOS first
+# plotter.add_dos("Total DOS", complete_dos)
 
-for i, site in enumerate(structure):
-    # grab the single element pdos
-    site_pdos = complete_dos.get_site_dos(site)
-    # add it to the plot
-    plotter.add_dos(i, site_pdos)
+# for i, site in enumerate(structure):
+#     # grab the single element pdos
+#     site_pdos = complete_dos.get_site_dos(site)
+#     # add it to the plot
+#     plotter.add_dos(i, site_pdos)
     
-    # INTEGRATE
-    den = site_pdos.densities # .get_smeared_densities(0.05)
-    den = [den[key] for key in den.keys()]
-    den = den[0] # + den[1] if spin polarized
-    eng = site_pdos.energies - site_pdos.efermi
-    eng = [value for value in eng if value < 0]
-    den = den[:len(eng)]
+#     # INTEGRATE
+#     den = site_pdos.densities # .get_smeared_densities(0.05)
+#     den = [den[key] for key in den.keys()]
+#     den = den[0] # + den[1] if spin polarized
+#     eng = site_pdos.energies - site_pdos.efermi
+#     eng = [value for value in eng if value < 0]
+#     den = den[:len(eng)]
     
     
-    # INTEGRATE
-    area = trapz(y=den, x=eng) 
+#     # INTEGRATE
+#     area = trapz(y=den, x=eng) 
     
-    symbol = site.specie.symbol
-    if symbol == 'F' or symbol == 'Cl' or symbol == 'Na':
-        print(site.specie.symbol  + ': ' + str(7 - area))
-    elif symbol == 'C':
-        print(site.specie.symbol  + ': ' + str(4 - area))
-    elif symbol == 'Y':
-        print(site.specie.symbol  + ': ' + str(11 - area))
-        # print(site.frac_coords)
+#     symbol = site.specie.symbol
+#     if symbol == 'F' or symbol == 'Cl' or symbol == 'Na':
+#         print(site.specie.symbol  + ': ' + str(7 - area))
+#     elif symbol == 'C':
+#         print(site.specie.symbol  + ': ' + str(4 - area))
+#     elif symbol == 'Y':
+#         print(site.specie.symbol  + ': ' + str(11 - area))
+#         # print(site.frac_coords)
 
-plot = plotter.get_plot()
-plot.savefig("pdos.png")    
+# plot = plotter.get_plot()
+# plot.savefig("pdos.png")    
 
-plot = plotter.get_plot(xlim=[-5,5], ylim=[-0.25,5])
-plot.savefig("pdos_zoom.png")
+# plot = plotter.get_plot(xlim=[-5,5], ylim=[-0.25,5])
+# plot.savefig("pdos_zoom.png")
 
 # ########## PLOT 3
 
