@@ -12,11 +12,28 @@ from simmate.calculators.vasp.io.inputs.potcar_mappings import (
 
 class Potcar:
     @staticmethod
-    def write_from_type(elements, functional, filename="POTCAR"):
+    def write_from_type(
+        elements,
+        functional,
+        filename="POTCAR",
+        element_mappings=ELEMENT_MAPPINGS,
+    ):
 
-        # an Element objects are passed along with a string representing the
+        # Element objects are passed along with a string representing the
         # desired functional ("PBE", "LDA", or "PBE_GW")
-        # !!! The order of the elements list MUST match the POSCAR!
+        # The order of the elements list MUST match the POSCAR!
+
+        # If the user wants to override the ELEMENT_MAPPINGS and use different
+        # VASP potentials than what we have picked, then they can provide their
+        # own dictionary OR pass in an update version of our. For example, they
+        # may want to use the PBE potential of "C_h" instead of "C" which uses
+        # a harder psuedopotential (useful in high-pressure and molecular
+        # calculations). Here, they can do something like...
+        #   element_mappings={"C": "C_h", ...} # with all of their other choices
+        # or...
+        #   element_mappings=ELEMENT_MAPPINGS[functional].update({"C": "C_h"})
+        # NOTE: remember whereever you do use update, be careful and make sure
+        # you update a copy of the imported dictionary and avoid logical bugs.
 
         # based on the functional, grab the proper folder location of all POTCARs
         folder_loc = FOLDER_MAPPINGS[functional]
@@ -27,7 +44,7 @@ class Potcar:
         for element in elements:
 
             # grab the proper POTCAR symbol based on the functional and element
-            potcar_symbol = ELEMENT_MAPPINGS[functional][element.symbol]
+            potcar_symbol = element_mappings[functional][element.symbol]
 
             # now let's combine this information for the full path to the POTCAR.
             # The file will be located at /folder_loc/element_symbol/POTCAR

@@ -19,7 +19,26 @@ FOLDER_MAPPINGS = {
 }
 
 # We need to map which POTCAR to grab for each element based off of the type
-# of calculation we are doing.
+# of calculation we are doing. To see how these were selected, you should look
+# at the following:
+#
+#   Material's Project rational
+#   https://wiki.materialsproject.org/Pseudopotentials_Choice
+#
+#   Pymatgen sets (look at the yaml files)
+#   https://github.com/materialsproject/pymatgen/tree/v2020.12.31/pymatgen/io/vasp
+#   For potential that use fewer electron (faster but lower quality), it's useful
+#   to look at the MITRelaxSet.yaml, but MPRelaxSet's choices of higher electron
+#   counts can give fast calculations (<1min) AND are appropriate for high-quality
+#   calculations. Thus we go ahead with the more accurate ones as the default choice.
+#
+#   VASP recommendations
+#   https://cms.mpi.univie.ac.at/vasp/vasp/Ultrasoft_pseudopotentials_supplied_with_VASP_package.html
+#   Note, this webpage is outdated, but I don't see them move this information
+#   into their new wiki...
+#
+#   Comparison of different potentials' accuracy
+#   https://molmod.ugent.be/deltacodesdft
 # TODO -- add LDA mappings. There's no example in Pymatgen that I see.
 ELEMENT_MAPPINGS = {
     "PBE": {
