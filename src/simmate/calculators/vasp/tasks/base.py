@@ -3,6 +3,8 @@
 import os
 
 from prefect.utilities.tasks import defaults_from_attrs
+
+# TODO: write my own vasp.outputs classes and remove pymatgen dependency
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
@@ -42,8 +44,10 @@ class VaspTask(StagedShellTask):
     # in simmate.calculators.vasp.inputs.potcar_mappings. You can supply your
     # own mapping dictionary or you can take ours and update the specific
     # potentials you'd like. For example:
-    #   from simmate.calculators.vasp.inputs.potcar_mappings import ELEMENT_MAPPINGS
-    #   potcar_mappings = ELEMENT_MAPPINGS[functional].update({"C": "C_h"})
+    #   from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
+    #   element_mappings = PBE_ELEMENT_MAPPINGS.copy().update({"C": "C_h"})
+    # or if you only use Carbon and don't care about other elements...
+    #   element_mappings = {"C": "C_h"}
     # Read more on this inside the Potcar class and be careful with updating!
     potcar_mappings = None
 
@@ -118,7 +122,7 @@ class VaspTask(StagedShellTask):
             )
 
         # write the POTCAR file
-        Potcar(
+        Potcar.write_from_type(
             structure.species,
             functional,
             os.path.join(dir, "POTCAR"),
@@ -185,7 +189,14 @@ class VaspTask(StagedShellTask):
         if not structure and self.requires_structure:
             raise StructureRequiredError("a structure is required as an input")
         dir = get_directory(dir)
-        self.setup(dir, structure, incar, kpoints, functional, potcar_mappings)
-        self.execute(command, dir, wait_until_complete=True)
-        result = self.postprocess(dir)
+        self.setup(
+            dir=dir,
+            structure=structure,
+            incar=incar,
+            kpoints=kpoints,
+            functional=functional,
+            potcar_mappings=potcar_mappings,
+        )
+        self.execute(command=command, dir=dir, wait_until_complete=True)
+        result = self.postprocess(dir=dir)
         return result

@@ -71,7 +71,7 @@ class StagedShellTask(Task):
         # if a command was given, overwrite the default
         if command:
             self.command = command
-        
+
         # establish the working directory for this Task
         self.dir = dir
 
@@ -113,6 +113,9 @@ class StagedShellTask(Task):
         # see if the user wants to wait until the command is completed
         if wait_until_complete:
             future.wait()
+            # check if the return code is non-zero and thus our command failed
+            if future.returncode != 0:
+                raise NonZeroExitError("command failed with non-zero exitcode")
 
         # return the popen instance
         return future
@@ -148,4 +151,8 @@ class StagedShellTask(Task):
 
 
 class StructureRequiredError(Exception):
+    pass
+
+
+class NonZeroExitError(Exception):
     pass

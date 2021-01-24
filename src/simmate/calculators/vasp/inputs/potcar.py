@@ -5,8 +5,10 @@ import os
 # These are dictionaries that tell us which POTCARs we should grab based on
 # the type of calculation as well as where to find them
 from simmate.calculators.vasp.inputs.potcar_mappings import (
-    ELEMENT_MAPPINGS,
     FOLDER_MAPPINGS,
+    PBE_ELEMENT_MAPPINGS,
+    PBE_GW_ELEMENT_MAPPINGS,
+    # TODO: LDA_ELEMENT_MAPPINGS
 )
 
 
@@ -16,7 +18,7 @@ class Potcar:
         elements,
         functional,
         filename="POTCAR",
-        element_mappings=ELEMENT_MAPPINGS,
+        element_mappings=None,  # actual default is ELEMENT_MAPPINGS
     ):
 
         # Element objects are passed along with a string representing the
@@ -31,9 +33,16 @@ class Potcar:
         # calculations). Here, they can do something like...
         #   element_mappings={"C": "C_h", ...} # with all of their other choices
         # or...
-        #   element_mappings=ELEMENT_MAPPINGS[functional].update({"C": "C_h"})
+        #   element_mappings = PBE_ELEMENT_MAPPINGS.copy().update({"C": "C_h"})
         # NOTE: remember whereever you use update(), be careful and make sure
         # you update a copy of the imported dictionary and avoid logical bugs.
+        # I don't do that here, but I know I'm not mutating the dictionary.
+        # Otherwise, if nothing was supplied use our defaults:
+        if not element_mappings:
+            if functional == "PBE":
+                element_mappings = PBE_ELEMENT_MAPPINGS
+            if functional == "PBE_GW":
+                element_mappings = PBE_GW_ELEMENT_MAPPINGS
 
         # based on the functional, grab the proper folder location of all POTCARs
         folder_loc = FOLDER_MAPPINGS[functional]
@@ -44,7 +53,7 @@ class Potcar:
         for element in elements:
 
             # grab the proper POTCAR symbol based on the functional and element
-            potcar_symbol = element_mappings[functional][element.symbol]
+            potcar_symbol = element_mappings[element.symbol]
 
             # now let's combine this information for the full path to the POTCAR.
             # The file will be located at /folder_loc/element_symbol/POTCAR

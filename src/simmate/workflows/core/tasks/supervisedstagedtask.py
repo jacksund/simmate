@@ -151,8 +151,8 @@ class SupervisedStagedTask(Task):
             if is_popen:
                 # Now just wait for the process to finish
                 future.wait()
-                # check if the return code is non-zero and
-                # The not has_error is because terminate() will give a nonzero
+                # check if the return code is non-zero and thus failed.
+                # The 'not has_error' is because terminate() will give a nonzero
                 # when a monitor is triggered. We don't want to raise that
                 # exception here but instead let the monitor handle that
                 # error in the code below.

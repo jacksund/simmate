@@ -130,10 +130,8 @@ class Incar(dict):
             for sub_line in line.split(";"):
                 # the PARAMETER and VALUE are separated by equal sign
                 parameter, value = line.split("=")
-                # TODO convert the value to float/list/bool if needed
-                # We now have the parameter (index 0) and value (index 1) so we
-                # can use those to update our dictionary. The last thing we
-                # do is remove leading/trailing whitespace with strip()
+                # we can use the parameter/value to update our dictionary. The
+                # last thing we do is remove leading/trailing whitespace with strip()
                 parameters[parameter.strip()] = value.strip()
 
         # return the final dictionary as an Incar object
@@ -219,6 +217,12 @@ class Incar(dict):
             "LDAUTYPE",
             "IVDW",
         )
+
+        # If the value is not a string, then assume we are already in the
+        # correct format. Note, an incorrect format will throw an error
+        # somewhere below, which may be tricky for beginners to traceback.
+        if not isinstance(value, str):
+            return value
 
         # if the parameter is in int_keys
         if parameter in int_keys:
