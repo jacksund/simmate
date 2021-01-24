@@ -60,7 +60,7 @@ class PreBaderInputSet(DictSet):
 
 
 class VASPPreBaderTask(StagedShellTask):
-    command = "./bader CHGCAR -ref CHGCAR_sum -b weight > bader.out"
+    command = "vasp > vasp.out; ./bader CHGCAR -ref CHGCAR_sum -b weight > bader.out"
     requires_structure = True
 
     @defaults_from_attrs("dir", "structure")

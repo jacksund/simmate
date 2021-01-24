@@ -4,7 +4,7 @@ import os
 
 # These are dictionaries that tell us which POTCARs we should grab based on
 # the type of calculation as well as where to find them
-from simmate.calculators.vasp.io.inputs.potcar_mappings import (
+from simmate.calculators.vasp.inputs.potcar_mappings import (
     ELEMENT_MAPPINGS,
     FOLDER_MAPPINGS,
 )
@@ -32,7 +32,7 @@ class Potcar:
         #   element_mappings={"C": "C_h", ...} # with all of their other choices
         # or...
         #   element_mappings=ELEMENT_MAPPINGS[functional].update({"C": "C_h"})
-        # NOTE: remember whereever you do use update, be careful and make sure
+        # NOTE: remember whereever you use update(), be careful and make sure
         # you update a copy of the imported dictionary and avoid logical bugs.
 
         # based on the functional, grab the proper folder location of all POTCARs

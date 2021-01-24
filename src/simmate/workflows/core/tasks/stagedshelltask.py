@@ -11,11 +11,11 @@ from simmate.utilities import get_directory
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
 # reset the working directory between task retries -- in some cases we may
 # want to delete the entire directory. As of now, I only ever use retries
-# on StagedTasks through the SupervisedStagedTask class's ErrorHandlers. Thus
+# on StagedShellTasks through the SupervisedStagedTask class's ErrorHandlers. Thus
 # you should look there for now if you'd like a cleanup_on_fail method.
 
 # from abc import ABC, abstractmethod
-# This really an abstract class that should be overwritten, but I can't have the
+# This is really an abstract class that should be overwritten, but I can't have the
 # class inherit from both prefect Task and abc's AbstractBaseClass. Therefore,
 # I don't strictly enforce writting new setup/execute/postprocess methods.
 # I instead trust the user to know what they are doing when inheriting from
@@ -31,7 +31,7 @@ class StagedShellTask(Task):
     to perform error correction on a running Task. 99% of the time you are doing
     this when you call some executable that creates a bunch of output files.
     For example, we may want to read VASP output files as the job runs and
-    also after it finishes to look for errors and then retry the calculation based
+    also after it finishes to look for errors. Then we retry the calculation based
     off of those errors with updated settings.
     """
 
@@ -48,6 +48,7 @@ class StagedShellTask(Task):
     # some confusion.
     requires_structure = False
 
+    @defaults_from_attrs("command")
     def __init__(
         self,
         # optional setup parameters
@@ -70,6 +71,7 @@ class StagedShellTask(Task):
         # if a command was given, overwrite the default
         if command:
             self.command = command
+        
         # establish the working directory for this Task
         self.dir = dir
 
@@ -104,7 +106,6 @@ class StagedShellTask(Task):
         # 99% of the time this class is used, the execute method should simply
         # start a subprocess and return the Popen "future". You can overwrite
         # this method if you'd like as its just a default function
-        dir = get_directory(dir)
 
         # run the command in the proper directory
         future = Popen(command, cwd=dir, shell=True)
