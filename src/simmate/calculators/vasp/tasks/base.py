@@ -24,6 +24,11 @@ class VaspTask(StagedShellTask):
     # Vasp calculations always need an input structure
     requires_structure = True
 
+    # TODO: add options for poscar formation
+    # add_selective_dynamics=False
+    # add_velocities=False
+    # significant_figures=6
+
     # set the default vasp settings from a dictionary. This is the one thing
     # you *must* set when subclassing VaspTask. An example is:
     #   incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
@@ -66,11 +71,12 @@ class VaspTask(StagedShellTask):
         **kwargs,
     ):
 
-        # if any of these input parameters was given, overwrite the default
+        # if any of these input parameters were given, overwrite the default
         # Note to python devs: this odd formatting is because we set our defaults
-        # to None in __init__ while our actualt default values are define above
+        # to None in __init__ while our actual default values are define above
         # as class attributes. This may seem funky at first glance, but it
         # makes inheriting from this class extremely pretty :)
+        # This code is effectively the same as @defaults_from_attrs(...)
         if command:
             self.command = command
         if structure:
