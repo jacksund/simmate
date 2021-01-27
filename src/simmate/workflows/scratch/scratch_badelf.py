@@ -5,70 +5,128 @@ from pymatgen.io.vasp.sets import DictSet
 #!!! The warning that is raised here is because there is no YAML! It can be ignored
 class MyCustomSet(DictSet):
 
-    CONFIG = {'INCAR': {'EDIFF': 1.0e-07,
-                        'EDIFFG': -1e-04, 
-                        'ENCUT': 520,
-                        'ISIF': 3, #!!! do I want this..?
-                        'ISMEAR': 0, # Guassian smearing #!!! read docs!
-                        'LCHARG': True, # write CHGCAR
-                        'LAECHG': True, # write AECCAR0, AECCAR1, and AECCAR2
-                        'LWAVE': False,
-                        'NSW': 0, # single energy calc
-                        'PREC': 'Single', #!!! Testing: to get ELFCAR grid size to equal CHGCAR. Otherwise use 'Accurate'
-                        # 'SIGMA': 0.05, # !!! USING VALUE BELOW FOR TESTING
-                        
-                        # EXTRA TESTING
-                        'IVDW': 12, # van der waals correction
-                        'ISMEAR': 0, # Guassian smearing
-                        'SIGMA': 0.060,
-                        # 'NBANDS': 643, # Calculate more bands than normal (extra empty)
-                        
-                        
-                        # set FFT grid and fine FFT grid (note: start with fine!)
-                        #!!! YOU SHOULD EXPERIMENT WITH THESE UNTIL THEY CONVERGE THE BADER CHARGES
-                        # !!! SHOULD I MESS WITH NGX instead of NGXF???
-                        # 'NGX': 100,
-                        # 'NGY': 100,
-                        # 'NGZ': 100,
-                        # If prec = 'Single', then fine grid will automatically match
-                        # the NGX,Y,Z above and you don't need to set these.
-                        # 'NGXF': 100,
-                        # 'NGYF': 100,
-                        # 'NGZF': 100,
-                        
-                        #!!! TESTING
-                        # ELFCAR (optional)
-                        'LELF': True, # write ELFCAR
-                        'NPAR': 1, # Must be set if LELF is set to True
-                        
-                        'SYMPREC': 1e-8, #!!! CUSTODIAN FIX - dont use unless needed
-                        # 'ISYM': 0,
-                        
-                        },
-              'KPOINTS': {'reciprocal_density': 100},
-              'POTCAR_FUNCTIONAL': 'PBE',
-              'POTCAR': {'Ac':'Ac','Ag':'Ag','Al':'Al','Ar':'Ar','As':'As',
-                         'Au':'Au','B':'B','Ba':'Ba_sv','Be':'Be_sv','Bi':'Bi',
-                         'Br':'Br','C':'C','Ca':'Ca_sv','Cd':'Cd','Ce':'Ce',
-                         'Cl':'Cl','Co':'Co','Cr':'Cr_pv','Cs':'Cs_sv',
-                         'Cu':'Cu_pv','Dy':'Dy_3','Er':'Er_3','Eu':'Eu',
-                         'F':'F','Fe':'Fe_pv','Ga':'Ga_d','Gd':'Gd','Ge':'Ge_d',
-                         'H':'H','He':'He','Hf':'Hf_pv','Hg':'Hg','Ho':'Ho_3',
-                         'I':'I','In':'In_d','Ir':'Ir','K':'K_sv','Kr':'Kr',
-                         'La':'La','Li':'Li_sv','Lu':'Lu_3','Mg':'Mg_pv',
-                         'Mn':'Mn_pv','Mo':'Mo_pv','N':'N','Na':'Na_pv',
-                         'Nb':'Nb_pv','Nd':'Nd_3','Ne':'Ne','Ni':'Ni_pv',
-                         'Np':'Np','O':'O','Os':'Os_pv','P':'P','Pa':'Pa',
-                         'Pb':'Pb_d','Pd':'Pd','Pm':'Pm_3','Pr':'Pr_3',
-                         'Pt':'Pt','Pu':'Pu','Rb':'Rb_sv','Re':'Re_pv',
-                         'Rh':'Rh_pv','Ru':'Ru_pv','S':'S','Sb':'Sb','Sc':'Sc_sv',
-                         'Se':'Se','Si':'Si','Sm':'Sm_3','Sn':'Sn_d','Sr':'Sr_sv',
-                         'Ta':'Ta_pv','Tb':'Tb_3','Tc':'Tc_pv','Te':'Te',
-                         'Th':'Th','Ti':'Ti_pv','Tl':'Tl_d','Tm':'Tm_3',
-                         'U':'U','V':'V_pv','W':'W_pv','Xe':'Xe','Y':'Y_sv',
-                         'Yb':'Yb_2','Zn':'Zn','Zr':'Zr_sv'}
-                 }
-    
+    CONFIG = {
+        "INCAR": {
+            "EDIFF": 1.0e-07,
+            "EDIFFG": -1e-04,
+            "ENCUT": 520,
+            "ISIF": 3,  # !!! do I want this..?
+            "ISMEAR": 0,  # Guassian smearing #!!! read docs!
+            "LCHARG": True,  # write CHGCAR
+            "LAECHG": True,  # write AECCAR0, AECCAR1, and AECCAR2
+            "LWAVE": True,  # write WAVECAR
+            "NSW": 0,  # single energy calc
+            "PREC": "Single",  # !!! USE Accurate WHEN NOT DOING BADELF
+            "IVDW": 12,  # van der waals correction
+            "ISMEAR": 0,  # Guassian smearing = 0 if system unknown!!!!!!!!!!!
+            "SIGMA": 0.060,
+            # 'NBANDS': 643, # Calculate more bands than normal (extra empty)
+            "SYMPREC": 1e-8,  # !!! CUSTODIAN FIX - dont use unless needed
+            # 'ISYM': 0,
+            'NGX': 75,
+            'NGY': 75,
+            'NGZ': 75,
+            "NCORE": 4,
+            #!!! TESTING
+            # ELFCAR (optional)
+            "LELF": True,  # write ELFCAR
+            "NPAR": 1,  # Must be set if LELF is set to True
+        },
+        "KPOINTS": {"reciprocal_density": 200},
+        "POTCAR_FUNCTIONAL": "PBE",
+        "POTCAR": {
+            "Ac": "Ac",
+            "Ag": "Ag",
+            "Al": "Al",
+            "Ar": "Ar",
+            "As": "As",
+            "Au": "Au",
+            "B": "B",
+            "Ba": "Ba_sv",
+            "Be": "Be_sv",
+            "Bi": "Bi",
+            "Br": "Br",
+            "C": "C",
+            "Ca": "Ca_sv",
+            "Cd": "Cd",
+            "Ce": "Ce",
+            "Cl": "Cl",
+            "Co": "Co",
+            "Cr": "Cr_pv",
+            "Cs": "Cs_sv",
+            "Cu": "Cu_pv",
+            "Dy": "Dy_3",
+            "Er": "Er_3",
+            "Eu": "Eu",
+            "F": "F",
+            "Fe": "Fe_pv",
+            "Ga": "Ga_d",
+            "Gd": "Gd",
+            "Ge": "Ge_d",
+            "H": "H",
+            "He": "He",
+            "Hf": "Hf_pv",
+            "Hg": "Hg",
+            "Ho": "Ho_3",
+            "I": "I",
+            "In": "In_d",
+            "Ir": "Ir",
+            "K": "K_sv",
+            "Kr": "Kr",
+            "La": "La",
+            "Li": "Li_sv",
+            "Lu": "Lu_3",
+            "Mg": "Mg_pv",
+            "Mn": "Mn_pv",
+            "Mo": "Mo_pv",
+            "N": "N",
+            "Na": "Na_pv",
+            "Nb": "Nb_pv",
+            "Nd": "Nd_3",
+            "Ne": "Ne",
+            "Ni": "Ni_pv",
+            "Np": "Np",
+            "O": "O",
+            "Os": "Os_pv",
+            "P": "P",
+            "Pa": "Pa",
+            "Pb": "Pb_d",
+            "Pd": "Pd",
+            "Pm": "Pm_3",
+            "Pr": "Pr_3",
+            "Pt": "Pt",
+            "Pu": "Pu",
+            "Rb": "Rb_sv",
+            "Re": "Re_pv",
+            "Rh": "Rh_pv",
+            "Ru": "Ru_pv",
+            "S": "S",
+            "Sb": "Sb",
+            "Sc": "Sc_sv",
+            "Se": "Se",
+            "Si": "Si",
+            "Sm": "Sm_3",
+            "Sn": "Sn_d",
+            "Sr": "Sr_sv",
+            "Ta": "Ta_pv",
+            "Tb": "Tb_3",
+            "Tc": "Tc_pv",
+            "Te": "Te",
+            "Th": "Th",
+            "Ti": "Ti_pv",
+            "Tl": "Tl_d",
+            "Tm": "Tm_3",
+            "U": "U",
+            "V": "V_pv",
+            "W": "W_pv",
+            "Xe": "Xe",
+            "Y": "Y_sv",
+            "Yb": "Yb_2",
+            "Zn": "Zn",
+            "Zr": "Zr_sv",
+        },
+    }
+
     def __init__(self, structure, **kwargs):
         """
         :param structure: Structure
@@ -77,47 +135,49 @@ class MyCustomSet(DictSet):
         super().__init__(structure, MyCustomSet.CONFIG, **kwargs)
         self.kwargs = kwargs
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 
 import pandas
 
-def parse_ACF(filename = "ACF.dat"):
-    
+
+def parse_ACF(filename="ACF.dat"):
+
     # open the file, grab the lines, and then close it
     file = open(filename)
     lines = file.readlines()
     file.close()
-    
+
     # establish the headers. Note that I ignore the '#' column as this is just site index.
     headers = ("x", "y", "z", "charge", "min_dist", "atomic_vol")
-    
+
     # create a list that we will load data into
     bader_data = []
     # The first 2 lines are header and the final 4 lines are the footer. This is always
-    # true so we don't need to iterate through those. The data we want is between the 
+    # true so we don't need to iterate through those. The data we want is between the
     # header and footer so that's what we loop through.
     for line in lines[2:-4]:
-        # by running strip, we convert the line from a string to a list of 
+        # by running strip, we convert the line from a string to a list of
         # The values are all still strings, so we convert them to int/floats before saving
         # I add [1:] because the first value is just '#' which is site index and we dont need
         line_data = [eval(value) for value in line.split()[1:]]
         # add the line data to our ouput
         bader_data.append(line_data)
-    
+
     # convert the list to a pandas dataframe
     dataframe = pandas.DataFrame(
-        data = bader_data,
-        columns = headers,
-        )
-    
+        data=bader_data,
+        columns=headers,
+    )
+
     # Extra data is included in the footer that we can grab too. For each line, the data
     # is a float that is at the end of the line, hence the split()[-1].
     extra_data = {
         "vacuum_charge": float(lines[-3].split()[-1]),
         "vacuum_volume": float(lines[-2].split()[-1]),
         "nelectrons": float(lines[-1].split()[-1]),
-        }
-    
+    }
+
     return dataframe, extra_data
 
     # This is how pymatgen parses the ACF.dat file
@@ -142,30 +202,36 @@ def parse_ACF(filename = "ACF.dat"):
     #         elif toks[0] == "NUMBER OF ELECTRONS":
     #             nelectrons = float(toks[1])
 
+
 # -----------------------------------------------------------------------------
 
 from pymatgen.io.vasp import Potcar
 
-def get_nelectron_counts(filename='POTCAR'):
+
+def get_nelectron_counts(filename="POTCAR"):
     # Grabbing the number of electrons used by the POTCAR
     #!!! In the future, I can have a reference csv that would be much faster than parsing
     #!!! the entire POTCAR file just for this one piece of information.
     potcars = Potcar.from_file(filename)
-    
+
     nelectron_data = {}
-    # the result is a list because there can be multiple element potcars in the file 
+    # the result is a list because there can be multiple element potcars in the file
     for potcar in potcars:
         nelectron_data.update({potcar.element: potcar.nelectrons})
-    
+
     return nelectron_data
+
 
 # -----------------------------------------------------------------------------
 
-print('Setting up...')
+print("Setting up...")
 
 # load structure
 from pymatgen.core.structure import Structure
-structure = Structure.from_file('Y2C.cif') ###################################################
+
+structure = Structure.from_file(
+    "Cu2O.cif"
+)  ###################################################
 structure = structure.get_primitive_structure()
 
 # write the vasp input files
@@ -173,13 +239,17 @@ MyCustomSet(structure).write_input(".")
 
 # run vasp
 import subprocess
-print('Running vasp...')
-subprocess.run('module load vasp; mpirun -np 20 /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std > vasp.out', shell=True)
 
-print('Running bader...')
+print("Running vasp...")
+subprocess.run(
+    "module load vasp; mpirun -np 30 /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std > vasp.out",
+    shell=True,
+)
+
+print("Running bader...")
 # Download the two executables from...
 # http://theory.cm.utexas.edu/henkelman/code/bader/
-subprocess.run('./chgsum.pl AECCAR0 AECCAR2 > addingcharges.out', shell=True)
+subprocess.run("./chgsum.pl AECCAR0 AECCAR2 > addingcharges.out", shell=True)
 # subprocess.run('./bader CHGCAR -ref CHGCAR_sum -b weight  > bader.out', shell=True)
 #!!! Play with -vac maybe? "-vac 4E-2" with Ca2N
 #!!! Also if I make a custom density file from CHGCAR, use -i chgcar
@@ -193,23 +263,25 @@ subprocess.run('./chgsum.pl AECCAR0 AECCAR2 > addingcharges.out', shell=True)
 
 # Load ELFCAR and add "empty" atom (I use Hydrogen)
 from pymatgen.io.vasp.outputs import Elfcar
-elfcar = Elfcar.from_file('ELFCAR')
+
+elfcar = Elfcar.from_file("ELFCAR")
 structure = elfcar.structure
-structure.append('H', [0.5,0.5,0.5])
-elfcar.write_file('ELFCAR_empty')
+# structure.append("H", [0.5, 0.5, 0.5])
+elfcar.write_file("ELFCAR_empty")
 
 # also write the crystal structure because it may differ from the input
-elfcar.structure.to(filename='primitive_structure_empty.cif')
+elfcar.structure.to(filename="primitive_structure_empty.cif")
 
 # Load CHGCAR (valence e- only) and add "empty" atom (I use Hydrogen)
 from pymatgen.io.vasp.outputs import Chgcar
-chgcar = Chgcar.from_file('CHGCAR')
+
+chgcar = Chgcar.from_file("CHGCAR")
 structure = chgcar.structure
-structure.append('H', [0.5,0.5,0.5])
-chgcar.write_file('CHGCAR_empty')
+# structure.append("H", [0.5, 0.5, 0.5])
+chgcar.write_file("CHGCAR_empty")
 
 # Run bader analysis with ELFCAR_empty as the reference file
-subprocess.run('./bader CHGCAR_empty -ref ELFCAR_empty > bader.out', shell=True)
+subprocess.run("./bader CHGCAR_empty -ref ELFCAR_empty > bader.out", shell=True)
 
 # -----------------------------------------------------------------------------
 
@@ -337,14 +409,14 @@ subprocess.run('./bader CHGCAR_empty -ref ELFCAR_empty > bader.out', shell=True)
 #     print("Median:", oxi_states.median())
 #     print("Max:", oxi_states.max())
 #     print("Max:", oxi_states.min())
-    
+
 #     # output for my reference
 #     # Format of dMedian (dMin to dMax)
-#     print(oxi_states.median() - bulk_ref[element_str], 
+#     print(oxi_states.median() - bulk_ref[element_str],
 #           oxi_states.max() - bulk_ref[element_str],
 #           oxi_states.min() - bulk_ref[element_str],
 #           )
-    
+
 #     print('\n')
 
 # print('Done!')

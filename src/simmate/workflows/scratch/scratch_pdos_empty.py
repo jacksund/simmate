@@ -10,7 +10,7 @@ class StaticEnergyCalc(DictSet):
         "INCAR": {
             "EDIFF": 1.0e-07,
             "EDIFFG": -1e-04,
-            "ENCUT": 600,
+            "ENCUT": 520,
             "ISIF": 3,  # !!! do I want this..?
             "ISMEAR": 0,  # Guassian smearing #!!! read docs!
             "LCHARG": True,  # write CHGCAR
@@ -25,16 +25,21 @@ class StaticEnergyCalc(DictSet):
             "SYMPREC": 1e-8,  # !!! CUSTODIAN FIX - dont use unless needed
             # 'ISYM': 0,
             
+            # 'NGX': 100,
+            # 'NGY': 100,
+            # 'NGZ': 100,
             'NGXF': 100,
             'NGYF': 100,
             'NGZF': 100,
+            
+            'NCORE': 8,
             
             #!!! TESTING
             # ELFCAR (optional)
             # 'LELF': True, # write ELFCAR
             # 'NPAR': 1, # Must be set if LELF is set to True
         },
-        "KPOINTS": {"reciprocal_density": 300},
+        "KPOINTS": {"reciprocal_density": 100},
         "POTCAR_FUNCTIONAL": "PBE_54",
         "POTCAR": {
             "Ac": "Ac",
@@ -144,7 +149,7 @@ class NonSCFCalc(DictSet):
         "INCAR": {
             "EDIFF": 1.0e-07,
             "EDIFFG": -1e-04,
-            "ENCUT": 600,
+            "ENCUT": 520,
             "ISIF": 3,  # !!! do I want this..?
             "ISMEAR": 0,  # Guassian smearing #!!! read docs!
             "LCHARG": True,  # write CHGCAR
@@ -164,6 +169,8 @@ class NonSCFCalc(DictSet):
             'NGYF': 100,
             'NGZF': 100,
             
+            'NCORE': 8,
+            
             #!!! TESTING
             # ELFCAR (optional)
             # 'LELF': True, # write ELFCAR
@@ -177,7 +184,7 @@ class NonSCFCalc(DictSet):
             'NEDOS': 2001, # number of grid states for evaluating DOS
             # NBANDS, EMIN/EMAX are some others parameters that I can consider
         },
-        "KPOINTS": {"reciprocal_density": 1000}, ##### <<<<<<<<< Changed from the first calc
+        "KPOINTS": {"reciprocal_density": 300}, ##### <<<<<<<<< Changed from the first calc
         "POTCAR_FUNCTIONAL": "PBE_54",
         "POTCAR": {
             "Ac": "Ac",
@@ -327,10 +334,10 @@ def parse_ACF(filename = "ACF.dat"):
 # if this is the starting point...
 from pymatgen.core.structure import Structure
 
-structure = Structure.from_file("GaAs.cif")
+structure = Structure.from_file("Y2C.cif")
 structure = structure.get_primitive_structure()
 structure = structure.copy(sanitize=True)
-calc = StaticEnergyCalc(structure, user_potcar_settings={"Ga": "Ga"})
+calc = StaticEnergyCalc(structure)
 # save the calc files
 calc.write_input(".")
 
@@ -342,7 +349,7 @@ print("Running vasp...")
 
 # run vasp
 subprocess.run(
-    "module load vasp; mpirun -np 20 /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std > vasp.out",
+    "module load vasp; mpirun -np 144 vasp_std > vasp.out",
     shell=True,
 )
 
@@ -362,29 +369,22 @@ dataframe, extra_data = parse_ACF(filename = "ACF.dat")
 # ...based off min-dist
 # NonSCFCalc.CONFIG["INCAR"].update({"RWIGS": str(dataframe.min_dist.values)[1:-1]})
 # ...based off total volume
-import math
-import numpy
-radii_from_vol = numpy.array([((3*volume)/(4*math.pi))**(1/3) for volume in dataframe.atomic_vol.values])
-NonSCFCalc.CONFIG["INCAR"].update({"RWIGS": str(radii_from_vol)[1:-1]})
+# import math
+# import numpy
+# radii_from_vol = numpy.array([((3*volume)/(4*math.pi))**(1/3) for volume in dataframe.atomic_vol.values])
+# NonSCFCalc.CONFIG["INCAR"].update({"RWIGS": str(radii_from_vol)[1:-1]})
+
+NonSCFCalc.CONFIG["INCAR"].update({"RWIGS": "1.584 1.699 1.552"})
 
 # -----------------------------------------------------------------------------
 
 structure = Structure.from_file("CONTCAR")
-calc = NonSCFCalc(structure, user_potcar_settings={"Ga": "Ga"})
+calc = NonSCFCalc(structure)
 
 # save the calc files
 calc.write_input(".")
 
 # -----------------------------------------------------------------------------
-
-# Now run this calculation
-
-print("Running vasp...")
-
-subprocess.run(
-    "module load vasp; mpirun -np 20 /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std > vasp.out",
-    shell=True,
-)
 
 #######
 # Now run this calculation 
@@ -396,6 +396,19 @@ subprocess.run(
 #!!! I also need to set LORBIT to 1 instead of 11
 #!!! I need to set the RWIGS tag too so that it knows what radius the sphere has
 #######
+
+
+# Now run this calculation
+
+print("Running vasp...")
+
+subprocess.run(
+    "module load vasp; mpirun -np 144 vasp_std > vasp.out",
+    shell=True,
+)
+# /nas/longleaf/apps-dogwood/vasp/5.4.4/bin/vasp_std
+
+# -----------------------------------------------------------------------------
 
 # from pymatgen.io.vasp.outputs import Vasprun
 
