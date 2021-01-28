@@ -2,20 +2,16 @@
 
 import os
 
-from prefect.utilities.tasks import defaults_from_attrs
-
 # TODO: write my own vasp.outputs classes and remove pymatgen dependency
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
-from simmate.utilities import get_directory
-from simmate.workflows.core.tasks.stagedshelltask import (
-    StagedShellTask,
-    StructureRequiredError,
+from simmate.workflows.core.tasks.supervisedstagedtask import (
+    SupervisedStagedShellTask as SSSTask,
 )
 
 
-class VaspTask(StagedShellTask):
+class VaspTask(SSSTask):
 
     # The command to call vasp in the current directory
     # TODO: add support for grabbing a user-set default from their configuration
@@ -98,18 +94,7 @@ class VaspTask(StagedShellTask):
         # now inherit the parent Prefect Task class
         super().__init__(**kwargs)
 
-    @defaults_from_attrs(
-        "dir", "structure", "incar", "kpoints", "functional", "potcar_mappings"
-    )
-    def setup(
-        self,
-        dir=None,
-        structure=None,
-        incar=None,
-        kpoints=None,
-        functional=None,
-        potcar_mappings=None,
-    ):
+    def setup(self, structure, dir):
 
         # TODO should I sanitize the structure first? primitive and LLL reduce?
 
@@ -117,26 +102,25 @@ class VaspTask(StagedShellTask):
         Poscar.write_file(structure, os.path.join(dir, "POSCAR"))
 
         # write the incar file
-        Incar(**incar).write_file(os.path.join(dir, "INCAR"))
+        Incar(**self.incar).write_file(os.path.join(dir, "INCAR"))
 
         # if KSPACING is not provided AND kpoints is, write the KPOINTS file
-        if kpoints and ("KSPACING" not in incar):
+        if self.kpoints and ("KSPACING" not in self.incar):
             Kpoints.write_file(
                 structure,
-                kpoints,
+                self.kpoints,
                 os.path.join(dir, "KPOINTS"),
             )
 
         # write the POTCAR file
         Potcar.write_from_type(
             structure.species,
-            functional,
+            self.functional,
             os.path.join(dir, "POTCAR"),
-            potcar_mappings,
+            self.potcar_mappings,
         )
 
-    @defaults_from_attrs("dir")
-    def postprocess(self, dir=None):
+    def postprocess(self, dir):
         """
         This is the most basic VASP workup where I simply load the final structure,
         final energy, and confirm convergence. I will likely make this a common
@@ -166,43 +150,3 @@ class VaspTask(StagedShellTask):
         # TODO: in the future, I may just want to return the VaspRun object
         # by default.
         return final_structure, final_energy
-
-    @defaults_from_attrs(
-        "command",
-        "dir",
-        "structure",
-        "incar",
-        "kpoints",
-        "functional",
-        "potcar_mappings",
-    )
-    def run(
-        self,
-        command=None,
-        dir=None,
-        structure=None,
-        incar=None,
-        kpoints=None,
-        functional=None,
-        potcar_mappings=None,
-    ):
-        """
-        Runs the entire job in the current working directory without any error
-        handling. If you want robust error handling, then you should instead
-        run this through the SupervisedJobTask class. This method should
-        very rarely be used!
-        """
-        if not structure and self.requires_structure:
-            raise StructureRequiredError("a structure is required as an input")
-        dir = get_directory(dir)
-        self.setup(
-            dir=dir,
-            structure=structure,
-            incar=incar,
-            kpoints=kpoints,
-            functional=functional,
-            potcar_mappings=potcar_mappings,
-        )
-        self.execute(command=command, dir=dir, wait_until_complete=True)
-        result = self.postprocess(dir=dir)
-        return result

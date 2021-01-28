@@ -7,7 +7,7 @@ class PreBaderTask(VaspTask):
 
     # The default settings to use for this static energy calculation.
     # The key thing for bader analysis is that we need a very fine FFT mesh
-    # TODO: in the future, I will support a NGF_density option inside of the
+    # TODO: in the future, I will support a NGxyzF_density option inside of the
     # Incar class so that this grid is set based on the given structure.
     incar = dict(
         EDIFF=1.0e-07,

@@ -25,14 +25,11 @@ import pytest
 
 from simmate.workflows.core.tasks.shelltask import ShellTask
 from simmate.workflows.core.tasks.errorhandler import ErrorHandler
-from simmate.workflows.core.tasks.stagedshelltask import (
-    StagedShellTask,
-    StructureRequiredError,
-    )
 from simmate.workflows.core.tasks.supervisedstagedtask import (
-    SupervisedStagedTask,
+    SupervisedStagedShellTask as SSSTask,
     NonZeroExitError,
     MaxCorrectionsError,
+    StructureRequiredError,
 )
 
 # ----------------------------------------------------------------------------
@@ -40,12 +37,9 @@ from simmate.workflows.core.tasks.supervisedstagedtask import (
 # make some simple StagedShellTasks for us to test with
 
 
-class DummyTask(StagedShellTask):
+class DummyTask(SSSTask):
     command = "echo dummy"
 
-
-class DummyAddFileTask(StagedShellTask):
-    command = "echo dummy > DummyFileTask.out"
 
 # ----------------------------------------------------------------------------
 
@@ -95,31 +89,22 @@ def test_shelltask():
     pytest.raises(
         CalledProcessError,
         task.run,
-        command='NonexistantCommand 404',)
+        command="NonexistantCommand 404",
+    )
 
 
-def test_stagedshelltask():
+def test_supervisedstagedshelltask():
 
-    # test individual methods
-    task = DummyTask()
-    task.setup()
-    task.execute()
-    task.postprocess()
+    # running a basic task
+    task = DummyTask(monitor=False)
     task.run()
-
-    # test overwriting a kwarg
-    task.run(command='echo dummyoverride')
 
     # requires structure failure
     task.requires_structure = True
     pytest.raises(StructureRequiredError, task.run)
 
-
-def test_supervisedstagedtask():
-
     # test success, handler, monitor, and special-monitor
-    task = SupervisedStagedTask(
-        stagedtask=DummyTask(),
+    task = DummyTask(
         errorhandlers=[
             AlwaysPassesHandler(),
             AlwaysPassesMonitor(),
@@ -130,16 +115,16 @@ def test_supervisedstagedtask():
     )
     assert task.run() == (None, [])
 
-    # test result-only return, compressed out, and tempdir
+    # test result-only return, write corrections file, compressed out, and tempdir
     with TemporaryDirectory() as tempdir:
-        task = SupervisedStagedTask(
-            stagedtask=DummyTask(),
+        task = DummyTask(
             errorhandlers=[
                 AlwaysPassesHandler(),
                 AlwaysPassesMonitor(),
                 AlwaysPassesSpecialMonitor(),
-                ],
+            ],
             return_corrections=False,
+            save_corrections_tofile=True,
             compress_output=True,
             polling_timestep=0,
             monitor_freq=2,
@@ -148,8 +133,8 @@ def test_supervisedstagedtask():
         assert os.path.exists(tempdir)
 
     # test nonzeo returncode
-    task = SupervisedStagedTask(
-        stagedtask=DummyTask(command='NonexistantCommand 404'),
+    task = DummyTask(
+        command="NonexistantCommand 404",
         errorhandlers=[AlwaysPassesHandler()],
         polling_timestep=0,
         monitor_freq=2,
@@ -157,8 +142,7 @@ def test_supervisedstagedtask():
     pytest.raises(NonZeroExitError, task.run)
 
     # testing handler-triggered failures
-    task = SupervisedStagedTask(
-        stagedtask=DummyTask(),
+    task = DummyTask(
         errorhandlers=[AlwaysFailsHandler()],
         return_corrections=False,
         polling_timestep=0,
@@ -167,8 +151,7 @@ def test_supervisedstagedtask():
     pytest.raises(MaxCorrectionsError, task.run)
 
     # monitor failure
-    task = SupervisedStagedTask(
-        stagedtask=DummyTask(),
+    task = DummyTask(
         errorhandlers=[AlwaysFailsMonitor()],
         return_corrections=False,
         polling_timestep=0,
@@ -177,8 +160,7 @@ def test_supervisedstagedtask():
     pytest.raises(MaxCorrectionsError, task.run)
 
     # special-monitor failure
-    task = SupervisedStagedTask(
-        stagedtask=DummyTask(),
+    task = DummyTask(
         errorhandlers=[AlwaysFailsSpecialMonitor()],
         return_corrections=False,
         polling_timestep=0,
@@ -186,7 +168,7 @@ def test_supervisedstagedtask():
     )
     pytest.raises(MaxCorrectionsError, task.run)
 
+
 # For manual testing
 # %time test_shelltask()
-# %time test_stagedshelltask()
-# %time test_supervisedstagedtask()
+# %time test_supervisedstagedshelltask()

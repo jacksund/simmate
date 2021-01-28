@@ -5,6 +5,7 @@ import time
 from shutil import make_archive
 from subprocess import Popen
 
+import pandas
 from prefect.core.task import Task
 from prefect.utilities.tasks import defaults_from_attrs
 
@@ -76,7 +77,7 @@ class SupervisedStagedShellTask(Task):
     def __init__(
         self,
         # core parts
-        command,
+        command=None,
         dir=None,
         errorhandlers=None,
         max_corrections=None,
@@ -88,8 +89,8 @@ class SupervisedStagedShellTask(Task):
         structure=None,
         # return, cleanup, and file saving settings
         compress_output=False,
-        return_corrections=False,
-        save_corrections_tofile=True,
+        return_corrections=True,
+        save_corrections_tofile=False,
         corrections_filename="simmate_corrections_log.txt",
         # To support other Prefect input options
         **kwargs,
@@ -109,9 +110,9 @@ class SupervisedStagedShellTask(Task):
             self.errorhandlers = errorhandlers
         if monitor:
             self.monitor = monitor
-        if max_corrections:
+        if max_corrections or max_corrections == 0:
             self.max_corrections = max_corrections
-        if polling_timestep:
+        if polling_timestep or polling_timestep == 0:
             self.polling_timestep = polling_timestep
         if monitor_freq:
             self.monitor_freq = monitor_freq
@@ -282,11 +283,16 @@ class SupervisedStagedShellTask(Task):
                 "the number of maximum corrections has been exceeded"
             )
 
-        # write the log of corrections to file if requested
+        # write the log of corrections to file if requested. This is written
+        # as a CSV file format.
         if self.save_corrections_tofile:
-            with open(self.corrections_filename, "w") as logfile:
-                for correction in corrections:
-                    logfile.write(f"{correction}\n")
+            # compile the corrections metadata into a dataframe
+            data = pandas.DataFrame(
+                corrections,
+                columns=["applied_errorhandler", "error_details", "correction_applied"],
+            )
+            # write the dataframe to a csv file
+            data.to_csv(self.corrections_filename)
 
         # if the user wants the corrections returned, return them
         if self.return_corrections:
