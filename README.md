@@ -1,7 +1,35 @@
-# Simmate (SME - Simulated Materials Ecosystem)
+<!-- This displays the Simmate Logo -->
+<p align="center" href=https://simmate.org>
+   <img src="https://github.com/jacksund/simmate/blob/main/logo/simmate.svg?raw=true" width="700" style="max-width: 700px;">
+</p>
 
-The dynamic badges are linked to pymatgen right now because I'm just testing out which ones I'd like to try.
+<!-- This displays the dynamic badges -->
+<p align="center">
+<!-- Conda-forge OS support -->
+<a href=https://anaconda.org/conda-forge/pymatgen>
+    <img src="https://img.shields.io/conda/pn/conda-forge/pymatgen">
+</a>
+<!-- PyPI downloads per month -->
+<a href=https://pypi.python.org/pypi/pymatgen/>
+    <img src="https://img.shields.io/pypi/dm/pymatgen">
+</a>
+<!-- Conda-forge download total -->
+<a href=https://anaconda.org/conda-forge/pymatgen>
+    <img src="https://img.shields.io/conda/dn/conda-forge/pymatgen">
+</a>
+<!-- Github Checks -->
+<a href=https://pypi.python.org/pypi/pymatgen/>
+    <img src="https://img.shields.io/github/checks-status/materialsproject/pymatgen/master">
+</a>
+<!-- Github Code Coverage -->
+<a href=https://pypi.python.org/pypi/pymatgen/>
+    <img src="https://img.shields.io/coveralls/github/materialsproject/pymatgen">
+</a>
+</p>
 
+<!-- 
+I use html format above to center the objects. Otherwise I could simple markdown like this:
+![Simmate Logo](https://github.com/jacksund/simmate/blob/main/logo/simmate.svg?raw=true)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI download total](https://img.shields.io/pypi/dm/pymatgen)](https://pypi.python.org/pypi/pymatgen/)
 [![Conda-forge download total](https://img.shields.io/conda/dn/conda-forge/pymatgen)](https://anaconda.org/conda-forge/pymatgen)
@@ -11,19 +39,19 @@ The dynamic badges are linked to pymatgen right now because I'm just testing out
 [![Total Line Count](https://img.shields.io/tokei/lines/github/pandas-dev/pandas)](https://pypi.python.org/pypi/pymatgen/)
 [![Github Checks](https://img.shields.io/github/checks-status/materialsproject/pymatgen/master)](https://pypi.python.org/pypi/pymatgen/)
 [![Github Code Coverage](https://img.shields.io/coveralls/github/materialsproject/pymatgen)](https://pypi.python.org/pypi/pymatgen/)
-
-This readme is not complete yet. Read here for more info on markdown, badges, and more:
+Read here for info on markdown, badges, and more:
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 [Shields Badges](https://shields.io/)
+-->
 
-## Welcome!
+## Welcome to the Simulated Materials Ecosystem (Simmate)!
 
 There are tons of programs available in computational materials science, and it can become overwhelming to pick which to use and how to mix-and-match them for your specific project. 
 
 That's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities.
 
 Simmate has everything you need for materials chemistry research all in one repo. Whether you're an experimental or computational scientist, this program is built to scale for your needs. Jumpstart your research from here and hit the ground running.
-
+ 
 ## Simmate is built for everyone
 
 _**For Readers:**_ Not ready to download and try things yourself? No worries! Just take a look at our website [simmate.org](simmate.org) that shows all of the calculations that we've done already. Explore what we have to offer, and then come back to try it yourself when you're ready!
