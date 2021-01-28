@@ -13,7 +13,7 @@
    version="1.1"
    id="svg905"
    inkscape:version="1.0.2 (e86c870879, 2021-01-15, custom)"
-   sodipodi:docname="Simmate.svg">
+   sodipodi:docname="simmate.svg">
   <defs
      id="defs899" />
   <sodipodi:namedview
@@ -27,7 +27,7 @@
      inkscape:cx="266.68246"
      inkscape:cy="150.71647"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g1562"
      inkscape:document-rotation="0"
      showgrid="false"
      inkscape:window-width="2560"
@@ -43,7 +43,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -54,17 +54,15 @@
     <g
        id="g1562"
        transform="translate(-2.9019763,-7.0865764)">
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:26.2685px;line-height:1.25;font-family:Corbel;-inkscape-font-specification:'Corbel, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#003144;fill-opacity:1;stroke:none;stroke-width:0.656713"
-         x="26.589918"
-         y="27.988333"
-         id="text148-0-2"><tspan
-           sodipodi:role="line"
-           id="tspan146-3-0"
-           x="26.589918"
-           y="27.988333"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:26.2685px;font-family:Corbel;-inkscape-font-specification:'Corbel, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#003144;fill-opacity:1;stroke-width:0.656713">S</tspan></text>
+      <g
+         aria-label="S"
+         id="text148-0-2"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:26.2685px;line-height:1.25;font-family:Corbel;-inkscape-font-specification:'Corbel, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#003144;fill-opacity:1;stroke:none;stroke-width:0.656713">
+        <path
+           d="m 37.081926,23.062989 q 0,-0.654147 -0.32066,-1.051766 -0.320661,-0.410445 -0.872196,-0.666974 -0.551536,-0.256528 -1.244163,-0.410445 -0.6798,-0.166743 -1.436558,-0.32066 -1.000461,-0.218049 -1.911136,-0.513057 -0.910676,-0.307834 -1.603302,-0.833717 -0.692627,-0.538709 -1.103072,-1.3596 -0.410445,-0.820891 -0.410445,-2.052227 0,-1.3596 0.474577,-2.36006 0.474577,-1.013287 1.282642,-1.667434 0.82089,-0.666974 1.911136,-0.987634 1.103071,-0.333487 2.475498,-0.333487 1.372426,0 2.757679,0.269355 1.385253,0.269355 2.385714,0.692626 v 2.693548 q -1.333948,-0.525883 -2.565284,-0.756759 -1.218509,-0.243702 -2.295928,-0.243702 -1.551996,0 -2.39854,0.564362 -0.833717,0.564363 -0.833717,1.693087 0,0.654148 0.269355,1.077419 0.282181,0.423272 0.756758,0.705453 0.474578,0.269355 1.090246,0.436098 0.615668,0.166744 1.308294,0.307834 1.090246,0.230876 2.07788,0.53871 1.00046,0.295007 1.770045,0.833717 0.769585,0.538709 1.218509,1.410905 0.448925,0.85937 0.448925,2.206144 0,1.385253 -0.513057,2.39854 -0.513056,1.013287 -1.462211,1.68026 -0.936328,0.654147 -2.283102,0.974808 -1.346774,0.32066 -2.950076,0.32066 -1.398079,0 -2.757679,-0.282181 -1.346774,-0.269355 -2.244623,-0.769585 v -2.655068 q 1.269815,0.551536 2.475498,0.808064 1.205683,0.243702 2.488325,0.243702 0.743932,0 1.462211,-0.115438 0.71828,-0.128264 1.282642,-0.423271 0.577189,-0.295008 0.923502,-0.795238 0.346313,-0.513057 0.346313,-1.256989 z"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:26.2685px;font-family:Corbel;-inkscape-font-specification:'Corbel, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#003144;fill-opacity:1;stroke-width:0.656713"
+           id="path839" />
+      </g>
       <path
          id="text148-5-5"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22.3532px;line-height:1.25;font-family:Corbel;-inkscape-font-specification:'Corbel, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#00aa44;fill-opacity:1;stroke:none;stroke-width:2.11276;stroke-miterlimit:4;stroke-dasharray:none"
