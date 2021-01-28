@@ -44,13 +44,15 @@ Read here for info on markdown, badges, and more:
 [Shields Badges](https://shields.io/)
 -->
 
-## Welcome to the Simulated Materials Ecosystem (Simmate)!
+## Welcome, everyone!
+
+Simmate has everything you need for materials research.
 
 There are tons of programs available in computational materials science, and it can become overwhelming to pick which to use and how to mix-and-match them for your specific project. 
 
 That's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities.
 
-Simmate has everything you need for materials chemistry research all in one repo. Whether you're an experimental or computational scientist, this program is built to scale for your needs. Jumpstart your research from here and hit the ground running.
+Whether you're an experimental or computational scientist, this program is built to scale for your needs. Jumpstart your research from here and hit the ground running.
  
 ## Simmate is built for everyone
 
