@@ -18,17 +18,22 @@ Example of running the code below:
 
 
 from pymatgen import MPRester
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-#!!! in production, I need to remove my API key
+# --------------------------------------------------------------------------------------
+
+
 def load_structure_from_mp(mp_id, api_key="2Tg7uUvaTAPHJQXl"):
+    # TODO in production, I need to remove my API key. Move this to a config file.
 
     # Connect with personal API key
     mpr = MPRester(api_key)
 
     # For reference, grab the database version
     db_version = mpr.get_database_version()
+    print(f"You are currently using MP database version {db_version}")
     # '2020_09_08'
-    #!!! This isn't used at the moment, but I should implement a check in the future
+    # TODO: this isn't used at the moment, but I should implement a check in the future
 
     # Filtering criteria for which structures to look at in the Materials Project
     # Catagories such as 'elements' that we can filter off of are listed here:
@@ -66,12 +71,9 @@ def load_structure_from_mp(mp_id, api_key="2Tg7uUvaTAPHJQXl"):
 # --------------------------------------------------------------------------------------
 
 
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-
-
 def sanitize_structure(data):
-    #!!! Data is the output dict of load_structure_from_mp. In the future, switch the
-    #!!! input to only be a pymatgen Structure object.
+    # TODO: Data is the output dict of load_structure_from_mp. In the future, switch the
+    # input to only be a pymatgen Structure object.
 
     # make a copy of data because we are going to be changing things in-place
     data = data.copy()
