@@ -14,11 +14,11 @@ Example of running the code below:
 
 """
 
-# --------------------------------------------------------------------------------------
-
-
 from pymatgen import MPRester
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
+from simmate.configuration import manage_django  # ensures setup
+from simmate.database.all import Structure as Structure_DB
 
 # --------------------------------------------------------------------------------------
 
@@ -123,72 +123,11 @@ def add_structure_from_mp(data):
     # update the data dictionary
     data.update({"structure": structure_json})
 
-    # connect to the django database
-    from fhahtda.website.manage import connect_db
-
-    connect_db()
-
-    # import the django model
-    from fhahtda.database.all import Structure
-
     # initialize it using the data
-    structure = Structure(**data)
+    structure = Structure_DB(**data)
 
     # save the data to the database
     structure.save()
-
-
-from prefect.tasks.database.sqlite import SQLiteQuery
-from fhahtda.website.core.settings import DATABASES
-
-db_filename = DATABASES["default"]["NAME"]
-
-
-def add_structure_from_mp_RAW(data, database=db_filename):
-
-    # I intend for this script to be the much faster version add_structure_from_mp.
-    # It certainly is faster when it comes to setting up a connection and tearing it
-    # down, which may be useful moving forward.
-
-    # make a copy of data because we are going to be changing things in-place
-    data = data.copy()
-
-    # convert the structure from pymatgen object to json string
-    structure_json = data["structure"].to_json()
-
-    # update the data dictionary
-    data.update({"structure": structure_json})
-
-    # format the query using the data. This is the raw SQL command.
-    query = f"""
-        INSERT INTO diffusion_structure 
-            (pretty_formula, 
-             nsites, 
-             density, 
-             structure, 
-             material_id, 
-             final_energy, 
-             final_energy_per_atom, 
-             formation_energy_per_atom, 
-             e_above_hull)
-        VALUES 
-            ('{data["pretty_formula"]}', 
-             {data["nsites"]}, 
-             {data["density"]}, 
-             '{data["structure"]}', 
-             '{data["material_id"]}', 
-             {data["final_energy"]}, 
-             {data["final_energy_per_atom"]}, 
-             {data["formation_energy_per_atom"]}, 
-             {data["e_above_hull"]})
-        """
-
-    # Run the query using Prefect's code.
-    #!!! In the future, just separate this into a separate step
-    out = SQLiteQuery(database, query).run()
-
-    # out has no use here, but may contain error information
-    return out
 
 
 # --------------------------------------------------------------------------------------
