@@ -95,8 +95,334 @@ failed_ids = [134, 339, 465, 466, 479, 481, 482, 990, 995, 1037, 1486, 1487, 163
 ```
 
 
+## TODO
+
+1. Filter based off atomic fraction, number of sites, density of structure, etc. Filter off of path_len_cutoff_vsDmin=0.2, which is the maximum length of pathways relative to shortest possible path. For example, 0.2 includes paths up 20% longer than the min for the structure.
+```python
+atm_frac = structure.composition.get_atomic_fraction('Li')
+```
+
+2. Analyze expected oxidation states of the structure. Save the radii as well for reference later on.
+```python
+# Add oxidation state guess. There are multiple ways to do this:
+structure.add_oxidation_state_by_guess()
+# Or...
+# note that this class runs on top of BVanalyzer
+pymatgen.analysis.local_env import ValenceIonicRadiusEvaluator
+oxidation_check = ValenceIonicRadiusEvaluator(structure) 
+structure = self.oxidation_check.structure
+```
+
+3. Get dimensionality of the pathway individual, cum_lengths, cum_barriers
+```python
+from pymatgen.analysis.dimensionality import get_dimensionality_larsen
+
+#!!! This code should be made into a GetPathDimension class. I should also 
+#!!! consider rewritting the FullPathMapper class.
+
+# This runs much faster if we run this on the unitcell structure. So we make the 
+# same paths in the unitcell and then match them to the paths we have.
+dpf = DistinctPathFinder(
+    structure = self.structure,
+    migrating_specie = self.ion_tested,
+    max_path_length = self.path_len_cutoff, # in Angstroms 
+    symprec = self.symprec, # Default is 0.1 which is very coarse
+    perc_mode = None # Turns off ">1d" setting
+    )
+# grab all pathway objects
+paths_unitcell = dpf.get_paths()
+
+# we also need the structure_graph for dimensional analysis        
+fpm = FullPathMapper(
+    self.structure, # use the unitcell for speed improvement
+    self.ion_tested, 
+    max_path_length=self.path_len_cutoff,
+    symprec = self.symprec,)
+# we have to do this ourselves (looks like FullPathMapper was written by a beginner)
+fpm.populate_edges_with_migration_paths()
+fpm.group_and_label_hops()
+fpm.get_unique_hops_dict()
+# grab data for all edges of the structure graph as we access it repeatedly below
+edges = fpm.s_graph.graph.edges(data=True)
+
+# take the pathways that remain and run dimensional analysis 
+valid_paths = []
+for path in self.paths:
+    
+    # see which path is equivalent to the unitcell paths. We also need it's index
+    # because the path index is used as the 'hop_label' in FullPathMapper
+    for path_index, path_unitcell in paths_unitcell:
+        if path == path_unitcell:
+            break
+    assert(path == path_unitcell) #!!! to make sure our loop above worked successfully
+    
+    # Deleting all but a specific MigrationPath 
+    # our target hop label is the path_index
+     
+    
+    # DIMENSIONALITY (INDEPENDENT PATH)
+    # make a deepcopy of the structuregraph because we will be deleting edges
+    s_graph_temp = copy.deepcopy(fpm.s_graph)
+    # Delete all but exact matches for the MigrationPath (which has a unique 'hop-label')
+    for edge in edges:
+        hop_label = edge[2]['hop_label']
+        if hop_label != target_hop_label:
+            s_graph_temp.break_edge(
+                from_index=edge[0],
+                to_index=edge[1],
+                to_jimage=edge[2]['to_jimage'],
+                allow_reverse=False)
+    dimensionality_ind = get_dimensionality_larsen(s_graph_test)
+    
+    # DIMENSIONALITY (CUMULATIVE BY LENGTH)
+    #!!! So includes all paths that are shorter and DOES NOT take ionic radii overlap into account!
+    #!!! I should consider changing this in the future.
+    # make a deepcopy of the structuregraph because we will be deleting edges
+    s_graph_temp = copy.deepcopy(fpm.s_graph)
+    # Delete all but exact matches for the MigrationPath (which has a unique 'hop-label')
+    for edge in edges:
+        hop_label = edge[2]['hop_label']
+        if hop_label != target_hop_label:
+            s_graph_temp.break_edge(
+                from_index=edge[0],
+                to_index=edge[1],
+                to_jimage=edge[2]['to_jimage'],
+                allow_reverse=False)
+    dimensionality_ind = get_dimensionality_larsen(s_graph_test)
+    
+    
+    
+    if dimensionality_ind == 0:
+        print('Pathway removed for not being periodic (>0d) on its own.')
+        pass
+    else:
+        valid_paths.append(path)
+    
+    # EXTRA CODE
+    # This line may be helpful when debugging. Try comparing before/after graphs.
+    # edge_labels = numpy.array([d['hop_label'] for u, v, d in fpm.s_graph.graph.edges(data=True)])
+    # These are other methods of breaking graph edges that I ended up not using
+    # fpm.s_graph.break_edge(from_index, to_index, to_jimage=None, allow_reverse=False)
+    # fpm.s_graph.graph.remove_edge(0,0)
+    
+    
+
+# now that we've identified the valid paths, update the class's paths variable
+self.paths = valid_paths
+
+pass
+```
+
+```python
+from pymatgen_diffusion.neb.full_path_mapper import FullPathMapper
+
+fpm = FullPathMapper(
+    structure, #!!! can I do prechecks without a supercell?
+    'I', 
+    max_path_length=5)
+
+# we have to do this ourselves (FullPathMapper was written by a beginner)
+fpm.populate_edges_with_migration_paths()
+fpm.group_and_label_hops()
+fpm.get_unique_hops_dict()
+
+
+import numpy as np
+edge_labels = np.array([d['hop_label'] for u, v, d in fpm.s_graph.graph.edges(data=True)])
+
+# Test out deleting all but a specific MigrationPath (which has a unique 'hop-label')
+import copy
+s_graph_test = copy.deepcopy(fpm.s_graph)
+target_hop_label = 0 #!!! SET THIS
+edges = fpm.s_graph.graph.edges(data=True) 
+for edge in edges:
+    hop_label = edge[2]['hop_label']
+    if hop_label != target_hop_label:
+        s_graph_test.break_edge(from_index=edge[0],
+                               to_index=edge[1],
+                               to_jimage=edge[2]['to_jimage'],
+                               allow_reverse=False)
+edge_labels_test = np.array([d['hop_label'] for u, v, d in s_graph_test.graph.edges(data=True)])
+
+from pymatgen.analysis.dimensionality import get_dimensionality_larsen
+dimensionality = get_dimensionality_larsen(s_graph_test)
+
+# These are other methods of breaking graph edges that I ended up not using
+# fpm.s_graph.break_edge(from_index, to_index, to_jimage=None, allow_reverse=False)
+# fpm.s_graph.graph.remove_edge(0,0)
+
+```
+
+4. Look at the ionic radii overlap along the pathway. Ewald Energy?
+```python
+#!!! This function should be moved elsewhere and further developed in the future
+def get_ionic_radii_overlap(
+    image_struct, 
+    ion_index,
+    oxidation_check=self.oxidation_check, #!!! is this line needed?
+    ion_tested=self.ion_tested, #!!! is this line needed?
+    ):
+
+    moving_site = image_struct[path.iindex]
+    moving_site_radius = self.oxidation_check.radii[self.ion_tested]
+    moving_site_neighbors = image_struct.get_neighbors(moving_site, r=8.0, include_image=True) #!!! Hard-coding issue for cutoff radius?
+    
+    max_overlap_cation, max_overlap_anion, max_overlap_nuetral = [-999] * 3 # start as -999 to ensure its reset
+    for neighbor_info in moving_site_neighbors:
+        neighbor, distance, trash, trash = neighbor_info
+        neighbor_radius = self.oxidation_check.radii[neighbor.species_string]
+        overlap = moving_site_radius + neighbor_radius - distance
+        # separate overlap analysis to oxidation types (+, -, or nuetral)
+        if ('+' in neighbor.species_string) and (overlap > max_overlap_cation):
+            max_overlap_cation = overlap
+        elif ('-' in neighbor.species_string) and (overlap > max_overlap_anion):
+            max_overlap_anion = overlap
+        elif ('-' not in neighbor.species_string) and ('+' not in neighbor.species_string) and (overlap > max_overlap_nuetral):
+            max_overlap_nuetral = overlap
+    
+    # I convert to numpy here so I can quickly subtract arrays below
+    return numpy.array(max_overlap_cation, max_overlap_anion, max_overlap_nuetral)
+
+valid_paths = []
+for path in self.paths:
+
+# we now run the idpp analysis on each pathway
+# The idpp relaxation is computationally expensive, so I only look at the 
+# start and midpoint images here.
+path_structures = path.get_structures(
+    nimages=1, # for speed, I only do one image here
+    vac_mode=True, # vacancy-based diffusion
+    idpp=True, # IDPP relaxation of the pathway
+    # **idpp_kwargs,#species = 'Li', # Default is None. Set this if I only want the ion to move
+    )
+            
+# only grab the first two images (start and midpoint images)
+start_data = get_ionic_radii_overlap(path_structures[0], path.iindex)
+midpoint_data = get_ionic_radii_overlap(path_structures[1], path.iindex)
+
+# Compute the change in overlap for [cation, anion, nuetral]
+delta_overlaps = midpoint_data - start_data
+
+# See if any ion type changes ionic radii overlap over the allowed threshold
+if max(delta_overlaps) > self.path_overlap_cutoff:
+    print("Pathway removed based on change in the diffusing ion's ionic radii overlap")
+    pass
+else:
+    valid_paths.append(path)
+
+# now that we've identified the valid paths, update the class's paths variable
+self.paths = valid_paths
+```
+
+```python
+# METHOD 1
+# Finding max change in anion and cation overlap
+overlap_data_cations, overlap_data_anions, overlap_data_nuetral = [], [], []
+for struct_index in range(len(idpp_structs)):
+    image_struct = idpp_structs[struct_index]
+    moving_site = image_struct[site1_shifted_index]
+    moving_site_neighbors = idpp_structs[struct_index].get_neighbors(moving_site, r=8.0, include_image=True)
+    moiving_site_radius = self.oxidation_check.radii[self.ion_tested]
+    max_overlap_cation, max_overlap_anion, max_overlap_nuetral = -999, -999, -999 # reset value for each image
+    for neighbor_info in moving_site_neighbors:
+        neighbor, distance, trash, trash = neighbor_info
+        neighbor_radius = self.oxidation_check.radii[neighbor.species_string]
+        overlap = moiving_site_radius + neighbor_radius - distance
+        # separate overlap analysis to oxidation types (+, -, or nuetral)
+        if ('+' in neighbor.species_string) and (overlap > max_overlap_cation):
+            max_overlap_cation = overlap
+        elif ('-' in neighbor.species_string) and (overlap > max_overlap_anion):
+            max_overlap_anion = overlap
+        elif ('-' not in neighbor.species_string) and ('+' not in neighbor.species_string) and (overlap > max_overlap_nuetral):
+            max_overlap_nuetral = overlap
+    overlap_data_cations.append(max_overlap_cation)
+    overlap_data_anions.append(max_overlap_anion)
+    overlap_data_nuetral.append(max_overlap_nuetral) 
+# make lists into relative values
+overlap_data_cations_rel = [(image - overlap_data_cations[0]) for image in overlap_data_cations]
+overlap_data_anions_rel = [(image - overlap_data_anions[0]) for image in overlap_data_anions]
+overlap_data_nuetral_rel = [(image - overlap_data_nuetral[0]) for image in overlap_data_nuetral]
+# append to self.unique_edges[edge]
+edge.append([overlap_data_cations_rel,overlap_data_anions_rel, overlap_data_nuetral_rel])
+#plotting
+# pyplot.figure(figsize=(5,3), dpi=80)
+# pyplot.plot(range(self.nimages+1),overlap_data_cations_rel, 'o-', label='Cation')
+# pyplot.plot(range(self.nimages+1),overlap_data_anions_rel, 'o-', label='Anion')
+# pyplot.plot(range(self.nimages+1),overlap_data_nuetral_rel, 'o-', label='Nuetral')
+# pyplot.legend(loc='upper right',title='Neighbor Type', fontsize=8)    
+# pyplot.xlabel('Diffusion Progress')
+# pyplot.xticks([0, self.nimages + 1], [r'$Start$', r'$End$'])
+# pyplot.ylabel('Max Overlap (A)') 
+# pyplot.tight_layout()
+# pyplot.savefig(filename_folder + "edgeoverlap_" + str(edge_index))
+# pyplot.show()
+# pyplot.close()
+```
+
+```python
+# METHOD 2
+from matminer.featurizers.site import EwaldSiteEnergy
+sitefingerprint_method = EwaldSiteEnergy(accuracy=3) # 12 is default
+# #!!! requires oxidation state decorated structure
+
+images = path.get_structures(
+    nimages=5, 
+    vac_mode=True,
+    idpp=True,
+    # **idpp_kwargs,
+    #species = 'Li', # Default is None. Set this if I only want one to move
+    )
+
+energy_ewald = []
+for image in images:
+    image_struct = idpp_structs[struct_index]
+    # moving_site = image_struct[site1_shifted_index]
+    image_fingerprint = numpy.array(sitefingerprint_method.featurize(image_struct, site1_shifted_index))
+    image_fingerprint = image_fingerprint[1:] * (1/(numpy.array(range(len(image_fingerprint))))**2)[1:] #!!! RDF Scale down
+    fingerprints.append(image_fingerprint)
+# I don't want to save the full fingerprints, so I save the distances instead
+# The distances are relative to the starting structure
+energies_ewald = []
+```
+
+5. IDPP relaxed supercell. min_sl_vector=6, images=6, 
+```python
+supercell_size = [(min_sl_vector//length)+1 for length in structure_lll_supercell.lattice.lengths]
+structure_lll_supercell.make_supercell(supercell_size)
+```
+
+6. visulizing pathways
+```python
+path_structures = path.get_structures(
+    nimages=5, 
+    vac_mode=True,
+    idpp=True,
+    # **idpp_kwargs,
+    #species = 'Li', # Default is None. Set this if I only want one to move
+    )
+path.write_path('test15.cif', nimages=10, idpp=False, species = None,)
+
+# write to cif file to visualize
+dpf.write_all_paths('test.cif', nimages=10, idpp=False) # for speed, species kwarg isnt accepted here
+```
+
+7. write IDPP calc files. Remember ISYM=0.
+```python
+# make the VASP input files for a given path
+from pymatgen.io.vasp.sets import MPStaticSet
+
+filename_folder_edge = filename_folder + "/EdgeIndex_" + str(edge_index)
+os.mkdir(filename_folder_edge) 
+for struct_index in range(len(idpp_structs)):
+    filename_folder_edge_image = filename_folder_edge + "/ImageIndex_" + str(struct_index)
+    MPStaticSet(idpp_structs[struct_index], user_incar_settings={"ISYM":0}).write_input(filename_folder_edge_image) 
+```
+
 
 ## Extra notes
+
+I need a way to constantly have a steady flow of workflows going through, where I can up/downscale this value over time. Below are some options, where I think the best is option 1.
+
 
 OPTION 1 -- we constantly loop to check number of running workflows and submit new one if needed. This requires a separate process to be constantly running. Or I can have this as a workflow that runs every few seconds.
 
@@ -132,10 +458,10 @@ Want to manually submit a specific structure? You can do this through the Prefec
 Option 2 -- We start a set number of workflows. We have the end of one workflow trigger the start of a new one. This doesn't require any separate running process but instead uses the Prefect Agents/Executors. I think this approach will give rise to messy code and issues where we want to increase/decrease the number of jobs.
 
 
-Option 2 -- We control the number of jobs through PrefectCloud concurrency settings. This requires a paid method and may require submitting all jobs to the queue at once though (or in stages like option 1).
+Option 3 -- We control the number of jobs through PrefectCloud concurrency settings. This requires a paid method and may require submitting all jobs to the queue at once though (or in stages like option 1).
 
 
-extra utils to add...
+### extra utils to add...
 
 
 Have a workflow that runs every month, day, etc. and deletes completed workflows to keep meta db size down
