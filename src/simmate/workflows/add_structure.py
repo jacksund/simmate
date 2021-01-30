@@ -3,19 +3,26 @@
 """
 
 ETL (Extract, Transform, Load)
-E = load structure from mp, file, dict, etc. (in this project, I only do mp)
-T = santize structure
-L = add structure to SQL database
+E = load structures from a Materials Project query
+T = santize structures
+L = add structures to SQL database
 
 Example of running the code below:
-    e = load_structure_from_mp('mp-8226')
-    t = sanitize_structure(e)
-    l = add_structure_from_mp(t)
+    e = load_structures_from_mp({"material_id": "mp-1234"})
+    t = sanitize_structure.map(e)
+    l = add_structure_from_mp.map(t)
+
+Note, the *.map() means I run this function for each output in "e". This makes
+use of running things in parallel for speed and also if one structure fails,
+the others can continue unaffected. Also note parallelization is only really
+useful if you are using a Postgres backend instead of SQLite.
 
 """
 
 from pymatgen import MPRester
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
+from prefect import Flow, Parameter, task
 
 from simmate.configuration import manage_django  # ensures setup
 from simmate.database.all import Structure as Structure_DB
@@ -23,8 +30,18 @@ from simmate.database.all import Structure as Structure_DB
 # --------------------------------------------------------------------------------------
 
 
-def load_structure_from_mp(mp_id, api_key="2Tg7uUvaTAPHJQXl"):
+@task
+def load_structures_from_mp(criteria, api_key="2Tg7uUvaTAPHJQXl"):
     # TODO in production, I need to remove my API key. Move this to a config file.
+
+    # Filtering criteria for which structures to look at in the Materials Project
+    # Catagories such as 'elements' that we can filter off of are listed here:
+    #       https://github.com/materialsproject/mapidoc
+    # Conditions such as $in or $exists that we filter based on are listed here:
+    #       https://docs.mongodb.com/manual/reference/operator/query/
+    # As the simplest example, I only want one structure and I grab it by it's
+    # mp-id in this code:
+    # criteria = {"task_id": mp_id}
 
     # Connect with personal API key
     mpr = MPRester(api_key)
@@ -34,14 +51,6 @@ def load_structure_from_mp(mp_id, api_key="2Tg7uUvaTAPHJQXl"):
     print(f"You are currently using MP database version {db_version}")
     # '2020_09_08'
     # TODO: this isn't used at the moment, but I should implement a check in the future
-
-    # Filtering criteria for which structures to look at in the Materials Project
-    # Catagories such as 'elements' that we can filter off of are listed here:
-    #       https://github.com/materialsproject/mapidoc
-    # Conditions such as $in or $exists that we filter based on are listed here:
-    #       https://docs.mongodb.com/manual/reference/operator/query/
-    # Here, I only want one structure and I grab it by it's mp-id.
-    criteria = {"task_id": mp_id}
 
     # For the filtered structures, which properties I want to grab.
     # All properties that we can grab are listed here:
@@ -63,14 +72,15 @@ def load_structure_from_mp(mp_id, api_key="2Tg7uUvaTAPHJQXl"):
     # now make the query!
     data = mpr.query(criteria, properties)
 
-    # the output dictionary is given back within a list. Just pull it out of the list
-    # and return the result
-    return data[0]
+    # the output dictionary is given back within a list, where each entry is
+    # a specific structure (so a single mp-id)
+    return data
 
 
 # --------------------------------------------------------------------------------------
 
 
+@task
 def sanitize_structure(data):
     # TODO: Data is the output dict of load_structure_from_mp. In the future, switch the
     # input to only be a pymatgen Structure object.
@@ -112,6 +122,7 @@ def sanitize_structure(data):
 # --------------------------------------------------------------------------------------
 
 
+@task
 def add_structure_from_mp(data):
 
     # make a copy of data because we are going to be changing things in-place
@@ -126,8 +137,28 @@ def add_structure_from_mp(data):
     # initialize it using the data
     structure = Structure_DB(**data)
 
+    # TODO: make sure an idenitical structure is not already in the database
+
     # save the data to the database
     structure.save()
+
+
+# --------------------------------------------------------------------------------------
+
+# now make the overall workflow
+with Flow("Add_Structures_from_MP") as workflow:
+
+    # The input should be a Materials Project query dictionary
+    criteria = Parameter("criteria")
+
+    # load the materials data
+    pulled_data = load_structures_from_mp(criteria)
+
+    # cleanup the data
+    cleaned_data = sanitize_structure.map(pulled_data)
+
+    # and add it to our database
+    add_structure_from_mp.map(cleaned_data)
 
 
 # --------------------------------------------------------------------------------------

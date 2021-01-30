@@ -151,7 +151,8 @@ setup(
     # install_requires=['numpy',
     #                   'pandas',
     #                   'django',
-    #                   'django-crispy-forms',
+    #                   'django-crispy-forms', # for formatting of online forms
+    #                   'django-pandas, # for converting QuerySets to PandasDF
     #                   'prefect',
     #                   'graphviz',# python-graphviz on conda. For viewing prefect flows
     #                   'pymatgen',
