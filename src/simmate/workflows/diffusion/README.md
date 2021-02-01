@@ -46,13 +46,21 @@ from simmate.configuration.manage_django import reset_db
 reset_db()
 ```
 
-2. We want to add all of the Fluoride structures from the Materials Project to our own database. This includes some extra data such as the hull energy and also running some "sanitation" on the structures. For safe-keeping, I also want to save all of this to a csv file. This is just in case I accidently reset my database. I also make a copy of the database file as db_checkpoint001.sqlite3
+2. For speed-up in the codes below, we want to use Dask. For that, we can setup a Dask cluster and tell Prefect to use it as our
+executor. This also allows us to watch a progress bar at http://localhost:8787/status. In other cases, I run workflow.run in parallel rather than task.run. For that, I simply use client.map() instead of setting the workflow executor.
 ```python
-# import all of the data to our sqlite database
-from simmate.workflows.add_structure import workflow
-workflow.visualize()
-status = workflow.run(criteria={"elements": {"$all": ["F"],}})
+# setup our Dask cluster
+from dask.distributed import Client, progress
+client = Client()
 
+# NOT SHOWN --> import our desired workflow
+
+# from prefect.engine.executors import DaskExecutor
+workflow.executor = DaskExecutor(address=client.scheduler.address)
+```
+
+3. For check pointing my database progress, I do two things at each step below. First, I make a copy of the sqlite file and name it db_checkpoint00N.sqlite3 where N corresponds to the step number. I also save the entire table added for each step to a csv file too. This is just in case I accidently reset my database or want to test with the next step. Here I show an example of making a csv file with the Structure_DB model:
+```python
 # now convert the entire table to a csv file
 from simmate.configuration import manage_django  # ensures django setup
 from simmate.database.all import Structure as Structure_DB
@@ -66,32 +74,36 @@ df.to_csv("initial_structuredb.csv")
 # df = pandas.read_csv("initial_structuredb.csv", index_col="id")
 ```
 
-3. Using this database, let's make a table for the diffusion pathways. Note that I hardcode some options here, such as limiting each structure to 5 pathways. See the find_paths.py workflow for details. I also make a copy of the database file as db_checkpoint002.sqlite3
+4. We want to add all of the Fluoride structures from the Materials Project to our own database. This includes some extra data such as the hull energy and also running some "sanitation" on the structures.
+```python
+# import all of the data to our sqlite database
+from simmate.workflows.add_structure import workflow
+workflow.executor = DaskExecutor(address=client.scheduler.address)
+status = workflow.run(criteria={"elements": {"$all": ["F"],}})
+```
+
+5. Using this database, let's make a table for the diffusion pathways. Note that I hardcode some options here, such as limiting each structure to 5 pathways. See the find_paths.py workflow for details.
 ```python
 from simmate.workflows.diffusion.find_paths import workflow
 from simmate.configuration import manage_django  # ensures django setup
 from simmate.database.all import Structure as Structure_DB, Pathway as Pathway_DB
-workflow.visualize()
+
 # grab all structure ids in our database
 structure_ids = Structure_DB.objects.values_list("id", flat=True).all()
-# now run the find_paths workflow for all of them. Keep track of which ones fail too.
-failed_ids = []
-for id in structure_ids:
-    status = workflow.run(structure_id=id)
-    # make sure all of these complete successfully
-    if status.is_failed():
-        failed_ids.append(id)
-        # raise Exception(f"Structure id {id} failed. Look into this!")
 
-# now convert the entire table to a csv file
-queryset = Pathway_DB.objects.all()
-from django_pandas.io import read_frame
-df = read_frame(queryset, index_col="id")
-df.to_csv("initial_pathwaydb.csv")
+# Run the find_paths workflow for each individual id
+futures = client.map(
+    workflow.run,
+    [{"structure_id": id} for id in structure_ids],
+    pure=False,
+)
+
+# wait for all of the calls to finish and grab the results
+results = client.gather(futures)
 
 # for reference these are the structure ids that failed
+# Note - it was easier to grab this list when not using dask
 failed_ids = [134, 339, 465, 466, 479, 481, 482, 990, 995, 1037, 1486, 1487, 1639, 1880, 1928, 1994, 1996, 2482, 2531, 2815, 3113, 3489, 3529, 4044, 4415, 4478, 4480, 4488, 4491, 4997, 5464, 5739, 7911, 7929, 8452, 9327, 9450]
-
 ```
 
 

@@ -12,9 +12,17 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from simmate import database  # needed to specify database location
+
+# The base directory is where simmate.website is located.
+# TODO: I may move this file to simmate.config, so this will change.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# The database directory is where simmate.database is located. I move the
+# default database file into the simmate.database module.
+# TODO: consider placing the database in the user's .simmate/ configuration
+# directory so they can easily share/delete it.
+DATABASE_DIR = os.path.dirname(os.path.abspath(database.__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -80,11 +88,12 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
+# BUG: django docs say to always use forward slashes, but it works just fine
+# without them... For now, I don't inlcude the .replace("\\", "/").
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),  # .replace("\\", "/")
     }
 }
 
@@ -134,6 +143,9 @@ DATETIME_INPUT_FORMATS = [
     "%m/%d/%y",  # '10/25/06'
 ]
 
+# If you set this to False, Django will make some optimizations so as not
+# to load the internationalization machinery.
+# !!! Consider removing in the future.
 USE_I18N = True
 
 # !!! I changed this setting to get my datetime-local widgets working, but I don't
@@ -146,30 +158,22 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
+# collect by running 'python manage.py collectstatic'
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(
-    BASE_DIR, "static"
-)  # collect by running 'python manage.py collectstatic'
-STATICFILES_DIRS = []  # if there are other directories you'd like to list
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 # options for login/logoff
-LOGIN_REDIRECT_URL = "/accounts/profile/"
+# LOGIN_REDIRECT_URL = "/accounts/profile/"  # this is the default
 LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
 
-# SECURITY WARNING: (jacksund) I added this setting myself! delete when in production
-# DJANGO_ALLOW_ASYNC_UNSAFE = True
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-
-
 # Settings for sending emails with my gmail account
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # this is the default
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # this is the default
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "jacksundberg123@gmail.com"  # os.environ.get('EMAIL_USER')
-EMAIL_HOST_PASSWORD = (
-    "lqurjxyttrjrlgcr"  # os.environ.get('EMAIL_PASSWORD') #!!! REMOVE IN PRODUCTION
-)
+# !!! REMOVE IN PRODUCTION. Use this instead: os.environ.get('EMAIL_PASSWORD')
+EMAIL_HOST_PASSWORD = "lqurjxyttrjrlgcr"

@@ -22,14 +22,14 @@ from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder
 
 from prefect import Flow, Parameter, task
 
-from simmate.configuration import manage_django  # ensures setup
-from simmate.database.all import Structure as Structure_DB, Pathway as Pathway_DB
-
 # --------------------------------------------------------------------------------------
 
 
 @task
 def load_structure_from_db(structure_id):
+
+    from simmate.configuration import manage_django  # ensures setup
+    from simmate.database.all import Structure as Structure_DB
 
     # grab the proper Structure entry and we want only the structure column
     # This query is ugly to read so here's the breakdown:
@@ -82,6 +82,9 @@ def find_paths(structure):
 
 @task
 def add_paths_to_db(structure_id, paths, path_limit=5):
+
+    from simmate.configuration import manage_django  # ensures setup
+    from simmate.database.all import Structure as Structure_DB, Pathway as Pathway_DB
 
     # make sure some pathways were actually provided. If not, exit the function.
     if not paths:

@@ -5,7 +5,11 @@
 import os
 import shutil
 import sys
+
 import django
+from django.conf import settings
+# BUG: import the settings raises an error in spyder. Should I moving this import
+# inside of the setup_django_full() function?
 
 # --------------------------------------------------------------------------------------
 
@@ -17,10 +21,12 @@ import django
 # a lot of potential headaches at roughly the same speed.
 
 
-def setup_django_full():  # Wall time: 250 ms first call and 780 ns after   
+def setup_django_full():  # Wall time: 250 ms first call and 175 ns after
 
     # see if django has already been configured. If so, just exit this function.
-    if "DJANGO_SETTINGS_MODULE" in os.environ:
+    # BUG: originally I used the code below, but it didn't work with Prefect+Dask:
+    #   if "DJANGO_SETTINGS_MODULE" in os.environ:
+    if settings.configured:
         return
 
     # The code below is the equiv of running 'python manage.py shell'
@@ -29,12 +35,17 @@ def setup_django_full():  # Wall time: 250 ms first call and 780 ns after
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "simmate.website.core.settings")
     django.setup()
 
+    # SECURITY WARNING: I added this setting myself! delete when in production
+    # BUG: I believe this is just for use within Spyder and Jupyter, which I think
+    # are examples async enviornments. In production (non-dev), I believe I should
+    # turn this off though.
+    # !!! REMOVE IN PRODUCTION
+    os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
 
 def connect_db():  # Wall time: 200 ms first call and 600 ns after
 
     # see if django has already been configured. If so, just exit this function.
-    # Note that this check is different than the one used in setup_django_full.
-    from django.conf import settings
     if settings.configured:
         return
 

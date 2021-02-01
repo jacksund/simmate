@@ -2,3 +2,95 @@ This module hosts everything for SQL-type database access. Right now it's just t
 
 It is likely to be a common task for users to convert data from SQL to CSV. To do this, we'd really take a django QuerySet --> convert it to a Pandas dataframe --> and then write the CSV file. There is a python package written for this (here)[https://github.com/chrisdev/django-pandas] but because it's really just one file that we'd use, it may be worth rewritting. It doesn't look like it handles relationship columns the way I'd like, as storing the related primary key is sufficient.
 
+
+If I ever need to look at the raw sql being executed for optimization...
+```python
+# Directions on how to see what the raw SQL command looks like:
+# https://docs.djangoproject.com/en/3.1/faq/models/#how-can-i-see-the-raw-sql-queries-django-is-running
+
+from django.db import connection
+queries = connection.queries
+
+# if you have a queryset (output from a django query) you can do this instead:
+query = users.query.__str__()
+```
+
+
+Running raw SQL commands directly against a file:
+```python
+# Using raw SQL for SQLite3 file
+# For testing with sqlite3: https://docs.python.org/3/library/sqlite3.html
+
+# connect to database
+import sqlite3
+conn = sqlite3.connect('db.sqlite3')
+cursor = conn.cursor()
+
+# write out your command in raw SQL
+query = 'SELECT * FROM exam_question LIMIT 2'
+
+# make the query against the database
+cursor.execute(query)
+output = cursor.fetchall()
+conn.commit() # if changes made
+
+# if you want column names, this is how you grab them
+names = [description[0] for description in cursor.description]
+
+# close connections
+cursor.close()
+conn.close()
+```
+
+
+Using Prefect to run raw SQL query against a file:
+```python
+# Using Prefect Tasks
+# For methods sqlite3 and many other db types, it's useful to start with Prefect Tasks
+# https://docs.prefect.io/api/latest/tasks/sqlite.html
+
+from prefect.tasks.database.sqlite import SQLiteQuery
+
+task = SQLiteQuery(
+    db='db.sqlite3',
+    query = 'SELECT * FROM exam_question LIMIT 2',
+    )
+
+output = task.run()
+```
+
+
+Example of making a user profile that properly uses hashing for storage:
+```python
+from django.contrib.auth.models import User
+
+# alternatively I can use User.objects.create_user which will also hanlde making the password
+user = User(username = 'jacksund',
+                email = 'jacksund' + '@live.unc.edu')
+# we can't give the password above because it needs to pass through the hash
+user.set_password('yeet123') 
+user.save()
+```
+
+
+Example of making an object with time-specific information and also adding another
+model to it's list of foreign keys:
+```python
+from exam.models import Exam
+import datetime
+import pytz
+
+# create the exam
+exam = Exam(name = 'Chem 102: 2020 Spring Final',
+            date = datetime.datetime(year = 2020,
+                                      month = 5,
+                                      day = 5,
+                                      hour = 13,
+                                      minute = 30,
+                                      tzinfo = pytz.utc), # this passes timezone info, but I need to understand this better...
+            time_limit = datetime.timedelta(hours=2),)
+exam.save()
+
+# add users and instructors to the exam via the .add() method
+exam.students.add(user)
+```

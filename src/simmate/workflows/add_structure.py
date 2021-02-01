@@ -24,9 +24,6 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from prefect import Flow, Parameter, task
 
-from simmate.configuration import manage_django  # ensures setup
-from simmate.database.all import Structure as Structure_DB
-
 # --------------------------------------------------------------------------------------
 
 
@@ -124,6 +121,9 @@ def sanitize_structure(data):
 
 @task
 def add_structure_from_mp(data):
+
+    from simmate.configuration import manage_django  # ensures setup
+    from simmate.database.all import Structure as Structure_DB
 
     # make a copy of data because we are going to be changing things in-place
     data = data.copy()
