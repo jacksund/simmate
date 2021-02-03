@@ -104,6 +104,8 @@ custodian = Custodian(
     jobs,
     validators=validators,
     max_errors=5,
+    # polling_time_step=10,
+    # monitor_freq=30,
 )
 
 custodian.run()
