@@ -1,0 +1,36 @@
+
+<!-- DataTables CDN downloads -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/r-2.2.3/datatables.min.css"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/r-2.2.3/datatables.min.js"></script>
+
+<!-- This code activates the DataTable scripts and formatting for your table -->
+<!-- The table is made to be responsive to window size and include download buttons -->
+<script>
+    $(document).ready( function () {
+        $('.datatable').DataTable( {
+                            responsive: true,
+                            dom: 'Bfrtip',
+                            buttons: [
+                                'copyHtml5',
+                                'excelHtml5',
+                                'csvHtml5',
+                                'pdfHtml5'
+                                    ] } );
+    } );
+</script>
+
+
+<!-- 
+
+NOTE!!! Make sure you include the following for your table to actually work:
+
+(1) The table should be inside of a div tag that has the following classes: 
+<div class="table table-striped table-bordered">
+
+(2) The table itself should be assigned the following class:
+<table class="datatable">
+
+-->
+

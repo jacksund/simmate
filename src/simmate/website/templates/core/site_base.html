@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+    
+        <!--Title of the page (located in the tab header) -->
+        <title>{% block tabtitle %}{% endblock %}</title>    
+        
+        <!-- Everthing commonly used in the header is stored in this template -->
+        {% include "puttyexams/header.html" %}
+        
+        <!-- Some pages may require extra lines in the header such as loading extra libraries -->
+        {% block extraheader %}{% endblock %}
+        
+    </head>
+    
+    <body>
+        
+        <!-- Some pages will have a welcome banner -->
+        {% block banner %}{% endblock %}
+        
+        <!-- The navigation bar is the same for every webpage, and it is stored in this template -->
+        {% include "puttyexams/navbar.html" %}
+        
+        <!-- This is the main portion of the webpage -->
+        {% block body %}{% endblock %}
+        
+        <!-- Many packages for JS libraries should be loaded last -->
+        {% include "puttyexams/footer.html" %}
+        
+        <!-- Sometimes I need to load extra javascript at the bottom of the page -->
+        {% block extrafooter %}
+        {% endblock %}
+        
+    </body>
+
+</html>

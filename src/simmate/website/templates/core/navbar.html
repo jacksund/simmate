@@ -1,0 +1,84 @@
+<!-- This is the collapsable header w. contact information. Not showing at start -->
+<div class="bg-dark collapse" id="navbarHeader" style="">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-8 col-md-7 py-4">
+          <h4 class="text-white">About</h4>
+          <p class="text-muted">
+              Created at the University of North Carolina (Chapel Hill) by Prof. Scott Warren and Jack Sundberg, <b>Putty Exams</b>'
+              ulitmate goal is to create a fair and cheater-free enviornment for students and instructors. Exams are made to be flexible and 
+              ultimately unique to each individual student, which is where we get our website name <b>Putty Exams</b> from! Even as exam questions
+              mold uniquely for each student, they still retain the same context.
+          </p>
+        </div>
+        <div class="col-sm-4 offset-md-1 py-4">
+          <h4 class="text-white">Contact</h4>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-white">scw@live.unc.edu</a></li>
+            <li><a href="#" class="text-white">jacksund@live.unc.edu</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- Add navigation bar that sticks at the top when scrolling -->
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top shadow-sm">
+    
+    <div class="container">
+    
+    <!-- Add brandname w. link -->
+    <a class="navbar-brand" href="{% url 'home' %}">
+        PuttyExams
+    </a>
+
+    <!-- Setup collapse button for when screen is small-->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Setup collapsable links -->
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+
+        <!-- start list of links -->
+        <ul class="navbar-nav">
+            
+            <!-- Links shown will depend if the user is signed in or not -->
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'profile' %}">
+                        Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">
+                        Logout
+                    </a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">
+                        Login
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">
+                        Register
+                    </a>
+                </li>
+            {% endif %}
+            
+            <!-- These links will always be shown, regardless of login stats -->
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" href="#navbarHeader" role="button">
+                    About
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+    
+    </div>
+
+</nav>

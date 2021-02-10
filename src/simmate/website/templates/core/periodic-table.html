@@ -1,0 +1,736 @@
+<style>
+    /* Setting box format for each element spot */
+    [class*="element-"] {
+        width: 5%;
+        padding: 0.2%;
+        margin: 0.2%;}
+    
+    [class*="-filled"] {
+        border: 1px solid black;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: bold;
+        color: black;}
+    
+    [class*="-empty"] {
+        background-color: transparent;}
+    
+    /* Setting format on hover */
+    [class*="-filled"]:hover {
+        color: white;
+        background-color: black;
+        }
+    
+    /* Coloring each element box and its text */
+    .nonmetal {background-color: lightyellow;}
+    .alkalimetal {background-color: lightpink;}
+    .alkaliearthmetal {background-color: lavender;}
+    .transitionmetal {background-color: lightblue;}
+    .metal {background-color: lightgreen;}
+    .metalloid {background-color: yellowgreen;}    
+    .halogen {background-color: lightyellow;}
+    .noblegas {background-color: lightsalmon;}
+    .lanthanide {background-color: lightskyblue;}
+    .actinide {background-color: lightseagreen;}
+    
+    /* Setting text format inside of each element */
+    .enumber {
+        margin: 0;
+        font-size: 65%;
+        text-align: left;}
+
+    .symbol {
+        margin-top: -8px;
+        font-size: 130%;}
+    
+    .name {
+        margin-top: -5px;
+        font-size: 50%;
+        font-style: italic;}
+        
+    /* Setting format on selected (onclick javascript needed here too)  */
+    .selected {
+        color: white;
+        background-color: black;
+        }
+    
+</style>
+
+<script>
+    function selectElement(element) {
+        element.classList.add("selected")
+    }
+</script>
+
+<div class="container p-4">
+
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled nonmetal" onclick="selectElement(this)">
+            <div class="enumber">1</div>
+            <div class="symbol d-none d-md-block">H</div>
+            <div class="name d-none d-lg-block">Hydrogen</div>
+        </div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled noblegas" onclick="selectElement(this)">
+            <div class="enumber">2</div>
+            <div class="symbol d-none d-md-block">He</div>
+            <div class="name d-none d-lg-block">Helium</div>
+        </div>
+    </div>
+    
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal" onclick="selectElement(this)">
+            <div class="enumber">3</div>
+            <div class="symbol d-none d-md-block">Li</div>
+            <div class="name d-none d-lg-block">Lithium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal" onclick="selectElement(this)">
+            <div class="enumber">4</div>
+            <div class="symbol d-none d-md-block">Be</div>
+            <div class="name d-none d-lg-block">Berylium</div>
+        </div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled metalloid" onclick="selectElement(this)">
+            <div class="enumber">5</div>
+            <div class="symbol d-none d-md-block">B</div>
+            <div class="name d-none d-lg-block">Boron</div>
+        </div>
+        <div class="element-filled nonmetal" onclick="selectElement(this)">
+            <div class="enumber">6</div>
+            <div class="symbol d-none d-md-block">C</div>
+            <div class="name d-none d-lg-block">Carbon</div>
+        </div>
+        <div class="element-filled nonmetal" onclick="selectElement(this)">
+            <div class="enumber">7</div>
+            <div class="symbol d-none d-md-block">N</div>
+            <div class="name d-none d-lg-block">Nitrogen</div>
+        </div>
+        <div class="element-filled nonmetal" onclick="selectElement(this)">
+            <div class="enumber">8</div>
+            <div class="symbol d-none d-md-block">O</div>
+            <div class="name d-none d-lg-block">Oxygen</div>
+        </div>
+        <div class="element-filled halogen" onclick="selectElement(this)">
+            <div class="enumber">9</div>
+            <div class="symbol d-none d-md-block">F</div>
+            <div class="name d-none d-lg-block">Fluorine</div>
+        </div>
+        <div class="element-filled noblegas" onclick="selectElement(this)">
+            <div class="enumber">10</div>
+            <div class="symbol d-none d-md-block">Ne</div>
+            <div class="name d-none d-lg-block">Neon</div>
+        </div>
+    </div>
+    
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal" onclick="selectElement(this)">
+            <div class="enumber">11</div>
+            <div class="symbol d-none d-md-block">Na</div>
+            <div class="name d-none d-lg-block">Sodium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal" onclick="selectElement(this)">
+            <div class="enumber">12</div>
+            <div class="symbol d-none d-md-block">Mg</div>
+            <div class="name d-none d-lg-block">Magnesium</div>
+        </div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">13</div>
+            <div class="symbol d-none d-md-block">Al</div>
+            <div class="name d-none d-lg-block">Aluminum</div>
+        </div>
+        <div class="element-filled metalloid" onclick="selectElement(this)">
+            <div class="enumber">14</div>
+            <div class="symbol d-none d-md-block">Si</div>
+            <div class="name d-none d-lg-block">Silicon</div>
+        </div>
+        <div class="element-filled nonmetal" onclick="selectElement(this)">
+            <div class="enumber">15</div>
+            <div class="symbol d-none d-md-block">P</div>
+            <div class="name d-none d-lg-block">Phosphorus</div>
+        </div>
+        <div class="element-filled nonmetal" onclick="selectElement(this)">
+            <div class="enumber">16</div>
+            <div class="symbol d-none d-md-block">S</div>
+            <div class="name d-none d-lg-block">Sulfur</div>
+        </div>
+        <div class="element-filled halogen" onclick="selectElement(this)">
+            <div class="enumber">17</div>
+            <div class="symbol d-none d-md-block">Cl</div>
+            <div class="name d-none d-lg-block">Chlorine</div>
+        </div>
+        <div class="element-filled noblegas" onclick="selectElement(this)">
+            <div class="enumber">18</div>
+            <div class="symbol d-none d-md-block">Ar</div>
+            <div class="name d-none d-lg-block">Argon</div>
+        </div>
+    </div>
+    
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal" onclick="selectElement(this)">
+            <div class="enumber">19</div>
+            <div class="symbol d-none d-md-block">K</div>
+            <div class="name d-none d-lg-block">Potassium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal" onclick="selectElement(this)">
+            <div class="enumber">20</div>
+            <div class="symbol d-none d-md-block">Ca</div>
+            <div class="name d-none d-lg-block">Calcium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">21</div>
+            <div class="symbol d-none d-md-block">Sc</div>
+            <div class="name d-none d-lg-block">Scandium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">22</div>
+            <div class="symbol d-none d-md-block">Ti</div>
+            <div class="name d-none d-lg-block">Titanium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">23</div>
+            <div class="symbol d-none d-md-block">V</div>
+            <div class="name d-none d-lg-block">Vanadium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">24</div>
+            <div class="symbol d-none d-md-block">Cr</div>
+            <div class="name d-none d-lg-block">Chromium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">25</div>
+            <div class="symbol d-none d-md-block">Mn</div>
+            <div class="name d-none d-lg-block">Manganese</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">26</div>
+            <div class="symbol d-none d-md-block">Fe</div>
+            <div class="name d-none d-lg-block">Iron</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">27</div>
+            <div class="symbol d-none d-md-block">Co</div>
+            <div class="name d-none d-lg-block">Cobalt</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">28</div>
+            <div class="symbol d-none d-md-block">Ni</div>
+            <div class="name d-none d-lg-block">Nickel</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">29</div>
+            <div class="symbol d-none d-md-block">Cu</div>
+            <div class="name d-none d-lg-block">Copper</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">30</div>
+            <div class="symbol d-none d-md-block">Zn</div>
+            <div class="name d-none d-lg-block">Zinc</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">31</div>
+            <div class="symbol d-none d-md-block">Ga</div>
+            <div class="name d-none d-lg-block">Gallium</div>
+        </div>
+        <div class="element-filled metalloid" onclick="selectElement(this)">
+            <div class="enumber">32</div>
+            <div class="symbol d-none d-md-block">Ge</div>
+            <div class="name d-none d-lg-block">Germanium</div>
+        </div>
+        <div class="element-filled metalloid" onclick="selectElement(this)">
+            <div class="enumber">33</div>
+            <div class="symbol d-none d-md-block">As</div>
+            <div class="name d-none d-lg-block">Arsenic</div>
+        </div>
+        <div class="element-filled nonmetal" onclick="selectElement(this)">
+            <div class="enumber">34</div>
+            <div class="symbol d-none d-md-block">Se</div>
+            <div class="name d-none d-lg-block">Selenium</div>
+        </div>
+        <div class="element-filled halogen" onclick="selectElement(this)">
+            <div class="enumber">35</div>
+            <div class="symbol d-none d-md-block">Br</div>
+            <div class="name d-none d-lg-block">Bromine</div>
+        </div>
+        <div class="element-filled noblegas" onclick="selectElement(this)">
+            <div class="enumber">36</div>
+            <div class="symbol d-none d-md-block">Kr</div>
+            <div class="name d-none d-lg-block">Krypton</div>
+        </div>
+    </div>
+    
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal" onclick="selectElement(this)">
+            <div class="enumber">37</div>
+            <div class="symbol d-none d-md-block">Rb</div>
+            <div class="name d-none d-lg-block">Rubidium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal" onclick="selectElement(this)">
+            <div class="enumber">38</div>
+            <div class="symbol d-none d-md-block">Sr</div>
+            <div class="name d-none d-lg-block">Strontium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">39</div>
+            <div class="symbol d-none d-md-block">Y</div>
+            <div class="name d-none d-lg-block">Yttrium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">40</div>
+            <div class="symbol d-none d-md-block">Zr</div>
+            <div class="name d-none d-lg-block">Zirconium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">41</div>
+            <div class="symbol d-none d-md-block">Nb</div>
+            <div class="name d-none d-lg-block">Niobium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">42</div>
+            <div class="symbol d-none d-md-block">Mo</div>
+            <div class="name d-none d-lg-block">Molybdenum</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">43</div>
+            <div class="symbol d-none d-md-block">Tc</div>
+            <div class="name d-none d-lg-block">Technetium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">44</div>
+            <div class="symbol d-none d-md-block">Ru</div>
+            <div class="name d-none d-lg-block">Ruthenium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">45</div>
+            <div class="symbol d-none d-md-block">Rh</div>
+            <div class="name d-none d-lg-block">Rhodium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">46</div>
+            <div class="symbol d-none d-md-block">Pd</div>
+            <div class="name d-none d-lg-block">Palladium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">47</div>
+            <div class="symbol d-none d-md-block">Ag</div>
+            <div class="name d-none d-lg-block">Silver</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">48</div>
+            <div class="symbol d-none d-md-block">Cd</div>
+            <div class="name d-none d-lg-block">Cadmium</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">49</div>
+            <div class="symbol d-none d-md-block">In</div>
+            <div class="name d-none d-lg-block">Indium</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">50</div>
+            <div class="symbol d-none d-md-block">Sn</div>
+            <div class="name d-none d-lg-block">Tin</div>
+        </div>
+        <div class="element-filled metalloid" onclick="selectElement(this)">
+            <div class="enumber">51</div>
+            <div class="symbol d-none d-md-block">Sb</div>
+            <div class="name d-none d-lg-block">Antimony</div>
+        </div>
+        <div class="element-filled metalloid" onclick="selectElement(this)">
+            <div class="enumber">52</div>
+            <div class="symbol d-none d-md-block">Te</div>
+            <div class="name d-none d-lg-block">Tellurium</div>
+        </div>
+        <div class="element-filled halogen" onclick="selectElement(this)">
+            <div class="enumber">53</div>
+            <div class="symbol d-none d-md-block">I</div>
+            <div class="name d-none d-lg-block">Iodine</div>
+        </div>
+        <div class="element-filled noblegas" onclick="selectElement(this)">
+            <div class="enumber">54</div>
+            <div class="symbol d-none d-md-block">Xe</div>
+            <div class="name d-none d-lg-block">Xenon</div>
+        </div>
+    </div>
+    
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal" onclick="selectElement(this)">
+            <div class="enumber">55</div>
+            <div class="symbol d-none d-md-block">Cs</div>
+            <div class="name d-none d-lg-block">Cesium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal" onclick="selectElement(this)">
+            <div class="enumber">56</div>
+            <div class="symbol d-none d-md-block">Ba</div>
+            <div class="name d-none d-lg-block">Barium</div>
+        </div>
+        <div class="element-filled lanthanide">
+            <div class="enumber d-none d-md-block">57-71</div>
+            <div class="symbol d-none d-md-block"></div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">72</div>
+            <div class="symbol d-none d-md-block">Hf</div>
+            <div class="name d-none d-lg-block">Hafnium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">73</div>
+            <div class="symbol d-none d-md-block">Ta</div>
+            <div class="name d-none d-lg-block">Tantalum</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">74</div>
+            <div class="symbol d-none d-md-block">W</div>
+            <div class="name d-none d-lg-block">Tungsten</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">75</div>
+            <div class="symbol d-none d-md-block">Re</div>
+            <div class="name d-none d-lg-block">Rhenium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">76</div>
+            <div class="symbol d-none d-md-block">Os</div>
+            <div class="name d-none d-lg-block">Osmium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">77</div>
+            <div class="symbol d-none d-md-block">Ir</div>
+            <div class="name d-none d-lg-block">Iridium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">78</div>
+            <div class="symbol d-none d-md-block">Pt</div>
+            <div class="name d-none d-lg-block">Platinum</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">79</div>
+            <div class="symbol d-none d-md-block">Au</div>
+            <div class="name d-none d-lg-block">Gold</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">80</div>
+            <div class="symbol d-none d-md-block">Hg</div>
+            <div class="name d-none d-lg-block">Mercury</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">81</div>
+            <div class="symbol d-none d-md-block">Tl</div>
+            <div class="name d-none d-lg-block">Thallium</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">82</div>
+            <div class="symbol d-none d-md-block">Pb</div>
+            <div class="name d-none d-lg-block">Lead</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">83</div>
+            <div class="symbol d-none d-md-block">Bi</div>
+            <div class="name d-none d-lg-block">Bismuth</div>
+        </div>
+        <div class="element-filled metalloid" onclick="selectElement(this)">
+            <div class="enumber">84</div>
+            <div class="symbol d-none d-md-block">Po</div>
+            <div class="name d-none d-lg-block">Polonium</div>
+        </div>
+        <div class="element-filled halogen" onclick="selectElement(this)">
+            <div class="enumber">85</div>
+            <div class="symbol d-none d-md-block">At</div>
+            <div class="name d-none d-lg-block">Astatine</div>
+        </div>
+        <div class="element-filled noblegas" onclick="selectElement(this)">
+            <div class="enumber">86</div>
+            <div class="symbol d-none d-md-block">Rn</div>
+            <div class="name d-none d-lg-block">Radon</div>
+        </div>
+    </div>
+
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-filled alkalimetal" onclick="selectElement(this)">
+            <div class="enumber">87</div>
+            <div class="symbol d-none d-md-block">Fr</div>
+            <div class="name d-none d-lg-block">Francium</div>
+        </div>
+        <div class="element-filled alkaliearthmetal" onclick="selectElement(this)">
+            <div class="enumber">88</div>
+            <div class="symbol d-none d-md-block">Ra</div>
+            <div class="name d-none d-lg-block">Radium</div>
+        </div>
+        <div class="element-filled actinide">
+            <div class="enumber d-none d-md-block">89-103</div>
+            <div class="symbol d-none d-md-block"></div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">104</div>
+            <div class="symbol d-none d-md-block">Rf</div>
+            <div class="name d-none d-lg-block" style="font-size: 7px">Rutherfordium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">105</div>
+            <div class="symbol d-none d-md-block">Db</div>
+            <div class="name d-none d-lg-block">Dubnium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">106</div>
+            <div class="symbol d-none d-md-block">Sg</div>
+            <div class="name d-none d-lg-block">Seaborgium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">107</div>
+            <div class="symbol d-none d-md-block">Bh</div>
+            <div class="name d-none d-lg-block">Bohrium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">108</div>
+            <div class="symbol d-none d-md-block">Hs</div>
+            <div class="name d-none d-lg-block">Hassium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">109</div>
+            <div class="symbol d-none d-md-block">Mt</div>
+            <div class="name d-none d-lg-block">Meitnerium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">110</div>
+            <div class="symbol d-none d-md-block">Ds</div>
+            <div class="name d-none d-lg-block" style="font-size: 7px">Darmstadtium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">111</div>
+            <div class="symbol d-none d-md-block">Rg</div>
+            <div class="name d-none d-lg-block">Roetgenium</div>
+        </div>
+        <div class="element-filled transitionmetal" onclick="selectElement(this)">
+            <div class="enumber">112</div>
+            <div class="symbol d-none d-md-block">Cn</div>
+            <div class="name d-none d-lg-block">Copernicium</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">113</div>
+            <div class="symbol d-none d-md-block">Nh</div>
+            <div class="name d-none d-lg-block">Nihonium</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">114</div>
+            <div class="symbol d-none d-md-block">Fl</div>
+            <div class="name d-none d-lg-block">Flerovium</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">115</div>
+            <div class="symbol d-none d-md-block">Mc</div>
+            <div class="name d-none d-lg-block">Moscovium</div>
+        </div>
+        <div class="element-filled metal" onclick="selectElement(this)">
+            <div class="enumber">116</div>
+            <div class="symbol d-none d-md-block">Lv</div>
+            <div class="name d-none d-lg-block">Livermorium</div>
+        </div>
+        <div class="element-filled halogen" onclick="selectElement(this)">
+            <div class="enumber">117</div>
+            <div class="symbol d-none d-md-block">Ts</div>
+            <div class="name d-none d-lg-block">Tennessine</div>
+        </div>
+        <div class="element-filled noblegas" onclick="selectElement(this)">
+            <div class="enumber">118</div>
+            <div class="symbol d-none d-md-block">Og</div>
+            <div class="name d-none d-lg-block">Oganesson</div>
+        </div>
+    </div>
+    
+    <div class="row" style="padding: 0.6%;"></div>
+    
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">57</div>
+            <div class="symbol d-none d-md-block">La</div>
+            <div class="name d-none d-lg-block">Lanthanium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">58</div>
+            <div class="symbol d-none d-md-block">Ce</div>
+            <div class="name d-none d-lg-block">Cerium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">59</div>
+            <div class="symbol d-none d-md-block">Pr</div>
+            <div class="name d-none d-lg-block" style="font-size: 7px">Praseodymium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">60</div>
+            <div class="symbol d-none d-md-block">Nd</div>
+            <div class="name d-none d-lg-block">Neodymium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">61</div>
+            <div class="symbol d-none d-md-block">Pm</div>
+            <div class="name d-none d-lg-block">Promethium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">62</div>
+            <div class="symbol d-none d-md-block">Sm</div>
+            <div class="name d-none d-lg-block">Samarium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">63</div>
+            <div class="symbol d-none d-md-block">Eu</div>
+            <div class="name d-none d-lg-block">Europium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">64</div>
+            <div class="symbol d-none d-md-block">Gd</div>
+            <div class="name d-none d-lg-block">Gadolinium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">65</div>
+            <div class="symbol d-none d-md-block">Tb</div>
+            <div class="name d-none d-lg-block">Terbium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">66</div>
+            <div class="symbol d-none d-md-block">Dy</div>
+            <div class="name d-none d-lg-block">Dysprosium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">67</div>
+            <div class="symbol d-none d-md-block">Ho</div>
+            <div class="name d-none d-lg-block">Holmium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">68</div>
+            <div class="symbol d-none d-md-block">Er</div>
+            <div class="name d-none d-lg-block">Erbium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">69</div>
+            <div class="symbol d-none d-md-block">Tm</div>
+            <div class="name d-none d-lg-block">Thulium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">70</div>
+            <div class="symbol d-none d-md-block">Yb</div>
+            <div class="name d-none d-lg-block">Ytterbium</div>
+        </div>
+        <div class="element-filled lanthanide" onclick="selectElement(this)">
+            <div class="enumber">71</div>
+            <div class="symbol d-none d-md-block">Lu</div>
+            <div class="name d-none d-lg-block">Lutetium</div>
+        </div>
+        <div class="element-empty"></div>
+    </div>
+
+    <div class="row" style="flex-wrap: nowrap;">
+        <div class="element-empty"></div>
+        <div class="element-empty"></div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">89</div>
+            <div class="symbol d-none d-md-block">Ac</div>
+            <div class="name d-none d-lg-block">Actinum</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">90</div>
+            <div class="symbol d-none d-md-block">Th</div>
+            <div class="name d-none d-lg-block">Thorium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">91</div>
+            <div class="symbol d-none d-md-block">Pa</div>
+            <div class="name d-none d-lg-block">Protectinium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">92</div>
+            <div class="symbol d-none d-md-block">U</div>
+            <div class="name d-none d-lg-block">Uranium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">93</div>
+            <div class="symbol d-none d-md-block">Np</div>
+            <div class="name d-none d-lg-block">Neptunium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">94</div>
+            <div class="symbol d-none d-md-block">Pu</div>
+            <div class="name d-none d-lg-block">Plutonium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">95</div>
+            <div class="symbol d-none d-md-block">Am</div>
+            <div class="name d-none d-lg-block">Americium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">96</div>
+            <div class="symbol d-none d-md-block">Cm</div>
+            <div class="name d-none d-lg-block">Curium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">97</div>
+            <div class="symbol d-none d-md-block">Bk</div>
+            <div class="name d-none d-lg-block">Berkelium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">98</div>
+            <div class="symbol d-none d-md-block">Cf</div>
+            <div class="name d-none d-lg-block">Californium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">99</div>
+            <div class="symbol d-none d-md-block">Es</div>
+            <div class="name d-none d-lg-block">Einsteinium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">100</div>
+            <div class="symbol d-none d-md-block">Fm</div>
+            <div class="name d-none d-lg-block">Fermium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">101</div>
+            <div class="symbol d-none d-md-block">Md</div>
+            <div class="name d-none d-lg-block">Mendekevium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">102</div>
+            <div class="symbol d-none d-md-block">No</div>
+            <div class="name d-none d-lg-block">Nobelium</div>
+        </div>
+        <div class="element-filled actinide" onclick="selectElement(this)">
+            <div class="enumber">103</div>
+            <div class="symbol d-none d-md-block">Lr</div>
+            <div class="name d-none d-lg-block">Lawrencium</div>
+        </div>
+        <div class="element-empty"></div>
+    </div>
+
+</div>

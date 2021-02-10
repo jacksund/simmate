@@ -1,0 +1,32 @@
+
+{% extends "puttyexams/site_base.html" %}
+
+{% block tabtitle %}
+PuttyExams | Profile
+{% endblock %}
+
+{% block banner %}
+{% include "puttyexams/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<section class="jumbotron text-center">
+    <div class="container">
+      <h1>Welcome {{ user.username }}!</h1>
+      <p class="lead text-muted">
+          Putty Exams is still at it's early stages, so your profile page is a little empty right now... 
+          But this also means that your feedback can have a big impact on what we add next. Send us email
+          if there is any feature that you'd like incorporated!
+      </p>
+      <p>
+        <a href="{% url 'exam:myexams' %}" class="btn btn-primary my-2">Go to Instructor Home</a>
+        <a href="{% url 'exam:ssexams' %}" class="btn btn-secondary my-2">Go to Student Home</a>
+      </p>
+    </div>
+</section>
+
+{% endblock %}
+
+

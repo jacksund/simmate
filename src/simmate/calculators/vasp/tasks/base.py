@@ -120,7 +120,7 @@ class VaspTask(SSSTask):
             self.potcar_mappings,
         )
 
-    def postprocess(self, dir):
+    def workup(self, dir):
         """
         This is the most basic VASP workup where I simply load the final structure,
         final energy, and confirm convergence. I will likely make this a common

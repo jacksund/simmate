@@ -1,0 +1,54 @@
+
+{% extends "puttyexams/site_base.html" %}
+
+{% block tabtitle %}
+PuttyExams | Login
+{% endblock %}
+
+{% block banner %}
+{% include "puttyexams/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+{% load crispy_forms_tags %}
+<div class="container mt-3">
+
+    <!-- Here is the input box -->
+    <div class="col-6 offset-3">
+        
+        {% if next %}
+            {% if user.is_authenticated %}
+            <p>Your account doesn't have access to this page. To proceed,
+            please login with an account that has access.</p>
+            {% else %}
+            <p>Please login to see this page.</p>
+            {% endif %}
+        {% endif %}
+    
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form | crispy }}
+            </div>
+            
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Login</button>
+                <input type="hidden" name="next" value="{{ next }}">
+            </div>
+            
+        </form>
+
+        <div class="border-top pt-3">
+            <p class="text-muted">
+            <small>
+                Not sure what your account is?<a class="ml-2" href="https://sakai.unc.edu/">Check your Sakai messages</a>
+            </small>
+            </p>
+            
+        </div>   
+
+    </div>
+    
+</div>
+{% endblock %}
