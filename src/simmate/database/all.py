@@ -166,20 +166,33 @@ class PathwayCalc(models.Model):
 # --------------------------------------------------------------------------------------
 
 
-class RelativeDistanceVsDmin(PathwayCalc):
+class EmpiricalMeasures(PathwayCalc):
+
+    # Total number of sites in the structure unitcell and supercell sizes
+    nsites_unitcell = models.IntegerField()
+    nsites_888 = models.IntegerField()
+    nsites_101010 = models.IntegerField()
+    nsites_121212 = models.IntegerField()
+
+    # atomic fraction of the diffusion ion
+    atomic_fraction = models.FloatField()
 
     # Distance of the pathway relative to the shortest pathway distance
     # in the structure using the formula: (D - Dmin)/Dmin
-    distance_rel_min = models.FloatField(blank=True, null=True)
+    distance_rel_min = models.FloatField()
 
-
-# --------------------------------------------------------------------------------------
-
-
-class DimensionalityLarsen(PathwayCalc):
+    # predicted oxidation state of the diffusing ion based on bond valence
+    oxidation_state = models.IntegerField()
 
     # Dimensionality of an individual pathway based on the Larsen Method
     dimensionality = models.IntegerField()
+    dimensionality_cumlengths = models.IntegerField()
 
+    # relative change in ewald_energy along the pathway: (Emax-Estart)/Estart
+    ewald_energy = models.FloatField()
+
+    # relative change in ionic radii overlaps: (Rmax-Rstart)/Rstart
+    ionic_radii_overlap_cations = models.FloatField()
+    ionic_radii_overlap_anions = models.FloatField()
 
 # --------------------------------------------------------------------------------------

@@ -77,6 +77,17 @@ def setup_django_cli():  # TODO -- move this to the command_line module
 # --------------------------------------------------------------------------------------
 
 
+def update_db(apps_to_migrate=["diffusion", "execution"]):
+
+    # setup django before we call any commands
+    setup_django_full()
+
+    # execute the following commands to build the database
+    from django.core.management import call_command
+    call_command("makemigrations", *apps_to_migrate)
+    call_command("migrate")
+
+
 def reset_db(apps_to_migrate=["diffusion", "execution"]):
     # Apps to init.
     # !!! In the future, I should do a more robust search, rather than hardcode here.
@@ -98,13 +109,8 @@ def reset_db(apps_to_migrate=["diffusion", "execution"]):
         if os.path.exists(migration_dir):
             shutil.rmtree(migration_dir)
 
-    # setup django before we call any commands
-    setup_django_full()
-
-    # execute the following commands to build the database
-    from django.core.management import call_command
-    call_command("makemigrations", *apps_to_migrate)
-    call_command("migrate")
+    # now update the database based on the registered models
+    update_db(apps_to_migrate)
 
 
 # --------------------------------------------------------------------------------------

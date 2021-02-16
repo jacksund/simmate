@@ -40,6 +40,16 @@ Priority ranking can adapt overtime as well. For example, we may want to replace
 
 ## Stages in my workflow
 
+
+NOTE: I am using... 
+    - Materials Project database version '2020_09_08'
+    - Pymatgen 2020.12.31
+    - Pymatgen-diffusion 2020.10.8 (be extra careful here!)
+    - Django 3.1.5
+    - Prefect 0.14.5
+    - Matminer forked + pip -e install because their conda is broken
+
+
 1. We want to start with a clean database so let's reset ours:
 ```python
 from simmate.configuration.manage_django import reset_db
@@ -50,16 +60,16 @@ reset_db()
 executor. This also allows us to watch a progress bar at http://localhost:8787/status. In other cases, I run workflow.run in parallel rather than task.run. For that, I simply use client.map() instead of setting the workflow executor.
 ```python
 # setup our Dask cluster
-from dask.distributed import Client, progress
+from dask.distributed import Client
 client = Client()
 
 # NOT SHOWN --> import our desired workflow
 
-# from prefect.engine.executors import DaskExecutor
+from prefect.executors import DaskExecutor
 workflow.executor = DaskExecutor(address=client.scheduler.address)
 ```
 
-3. For check pointing my database progress, I do two things at each step below. First, I make a copy of the sqlite file and name it db_checkpoint00N.sqlite3 where N corresponds to the step number. I also save the entire table added for each step to a csv file too. This is just in case I accidently reset my database or want to test with the next step. Here I show an example of making a csv file with the Structure_DB model:
+3. For checkpointing my database progress, I do two things at each step below. First, I make a copy of the sqlite file and name it db_checkpoint00N.sqlite3 where N corresponds to the step number. I also save the entire table added for each step to a csv file too. This is just in case I accidently reset my database or want to test with the next step. Here I show an example of making a csv file with the Structure_DB model:
 ```python
 # now convert the entire table to a csv file
 from simmate.configuration import manage_django  # ensures django setup
@@ -77,7 +87,7 @@ df.to_csv("initial_structuredb.csv")
 4. We want to add all of the Fluoride structures from the Materials Project to our own database. This includes some extra data such as the hull energy and also running some "sanitation" on the structures.
 ```python
 # import all of the data to our sqlite database
-from simmate.workflows.add_structure import workflow
+from simmate.workflows.diffusion.add_structure import workflow
 workflow.executor = DaskExecutor(address=client.scheduler.address)
 status = workflow.run(criteria={"elements": {"$all": ["F"],}})
 ```
@@ -106,166 +116,13 @@ results = client.gather(futures)
 failed_ids = [134, 339, 465, 466, 479, 481, 482, 990, 995, 1037, 1486, 1487, 1639, 1880, 1928, 1994, 1996, 2482, 2531, 2815, 3113, 3489, 3529, 4044, 4415, 4478, 4480, 4488, 4491, 4997, 5464, 5739, 7911, 7929, 8452, 9327, 9450]
 ```
 
+6. Make my table of empirical predictors.
+oxidation, oxidation_radii_dict, atomic_fraction_fanion, nsites, path_len_cutoff_vsDmin, dimensionality(_cumlengths, _cumbarriers), ionic_radii_overlap, ewald_energy,
+
 
 ## TODO
 
-1. Filter based off atomic fraction, number of sites, density of structure, etc. Filter off of path_len_cutoff_vsDmin=0.2, which is the maximum length of pathways relative to shortest possible path. For example, 0.2 includes paths up 20% longer than the min for the structure.
-```python
-atm_frac = structure.composition.get_atomic_fraction('Li')
-```
-
-2. Analyze expected oxidation states of the structure. Save the radii as well for reference later on.
-```python
-# Add oxidation state guess. There are multiple ways to do this:
-structure.add_oxidation_state_by_guess()
-# Or...
-# note that this class runs on top of BVanalyzer
-pymatgen.analysis.local_env import ValenceIonicRadiusEvaluator
-oxidation_check = ValenceIonicRadiusEvaluator(structure) 
-structure = self.oxidation_check.structure
-```
-
-3. Get dimensionality of the pathway individual, cum_lengths, cum_barriers
-```python
-from pymatgen.analysis.dimensionality import get_dimensionality_larsen
-
-#!!! This code should be made into a GetPathDimension class. I should also 
-#!!! consider rewritting the FullPathMapper class.
-
-# This runs much faster if we run this on the unitcell structure. So we make the 
-# same paths in the unitcell and then match them to the paths we have.
-dpf = DistinctPathFinder(
-    structure = self.structure,
-    migrating_specie = self.ion_tested,
-    max_path_length = self.path_len_cutoff, # in Angstroms 
-    symprec = self.symprec, # Default is 0.1 which is very coarse
-    perc_mode = None # Turns off ">1d" setting
-    )
-# grab all pathway objects
-paths_unitcell = dpf.get_paths()
-
-# we also need the structure_graph for dimensional analysis        
-fpm = FullPathMapper(
-    self.structure, # use the unitcell for speed improvement
-    self.ion_tested, 
-    max_path_length=self.path_len_cutoff,
-    symprec = self.symprec,)
-# we have to do this ourselves (looks like FullPathMapper was written by a beginner)
-fpm.populate_edges_with_migration_paths()
-fpm.group_and_label_hops()
-fpm.get_unique_hops_dict()
-# grab data for all edges of the structure graph as we access it repeatedly below
-edges = fpm.s_graph.graph.edges(data=True)
-
-# take the pathways that remain and run dimensional analysis 
-valid_paths = []
-for path in self.paths:
-    
-    # see which path is equivalent to the unitcell paths. We also need it's index
-    # because the path index is used as the 'hop_label' in FullPathMapper
-    for path_index, path_unitcell in paths_unitcell:
-        if path == path_unitcell:
-            break
-    assert(path == path_unitcell) #!!! to make sure our loop above worked successfully
-    
-    # Deleting all but a specific MigrationPath 
-    # our target hop label is the path_index
-     
-    
-    # DIMENSIONALITY (INDEPENDENT PATH)
-    # make a deepcopy of the structuregraph because we will be deleting edges
-    s_graph_temp = copy.deepcopy(fpm.s_graph)
-    # Delete all but exact matches for the MigrationPath (which has a unique 'hop-label')
-    for edge in edges:
-        hop_label = edge[2]['hop_label']
-        if hop_label != target_hop_label:
-            s_graph_temp.break_edge(
-                from_index=edge[0],
-                to_index=edge[1],
-                to_jimage=edge[2]['to_jimage'],
-                allow_reverse=False)
-    dimensionality_ind = get_dimensionality_larsen(s_graph_test)
-    
-    # DIMENSIONALITY (CUMULATIVE BY LENGTH)
-    #!!! So includes all paths that are shorter and DOES NOT take ionic radii overlap into account!
-    #!!! I should consider changing this in the future.
-    # make a deepcopy of the structuregraph because we will be deleting edges
-    s_graph_temp = copy.deepcopy(fpm.s_graph)
-    # Delete all but exact matches for the MigrationPath (which has a unique 'hop-label')
-    for edge in edges:
-        hop_label = edge[2]['hop_label']
-        if hop_label != target_hop_label:
-            s_graph_temp.break_edge(
-                from_index=edge[0],
-                to_index=edge[1],
-                to_jimage=edge[2]['to_jimage'],
-                allow_reverse=False)
-    dimensionality_ind = get_dimensionality_larsen(s_graph_test)
-    
-    
-    
-    if dimensionality_ind == 0:
-        print('Pathway removed for not being periodic (>0d) on its own.')
-        pass
-    else:
-        valid_paths.append(path)
-    
-    # EXTRA CODE
-    # This line may be helpful when debugging. Try comparing before/after graphs.
-    # edge_labels = numpy.array([d['hop_label'] for u, v, d in fpm.s_graph.graph.edges(data=True)])
-    # These are other methods of breaking graph edges that I ended up not using
-    # fpm.s_graph.break_edge(from_index, to_index, to_jimage=None, allow_reverse=False)
-    # fpm.s_graph.graph.remove_edge(0,0)
-    
-    
-
-# now that we've identified the valid paths, update the class's paths variable
-self.paths = valid_paths
-
-pass
-```
-
-```python
-from pymatgen_diffusion.neb.full_path_mapper import FullPathMapper
-
-fpm = FullPathMapper(
-    structure, #!!! can I do prechecks without a supercell?
-    'I', 
-    max_path_length=5)
-
-# we have to do this ourselves (FullPathMapper was written by a beginner)
-fpm.populate_edges_with_migration_paths()
-fpm.group_and_label_hops()
-fpm.get_unique_hops_dict()
-
-
-import numpy as np
-edge_labels = np.array([d['hop_label'] for u, v, d in fpm.s_graph.graph.edges(data=True)])
-
-# Test out deleting all but a specific MigrationPath (which has a unique 'hop-label')
-import copy
-s_graph_test = copy.deepcopy(fpm.s_graph)
-target_hop_label = 0 #!!! SET THIS
-edges = fpm.s_graph.graph.edges(data=True) 
-for edge in edges:
-    hop_label = edge[2]['hop_label']
-    if hop_label != target_hop_label:
-        s_graph_test.break_edge(from_index=edge[0],
-                               to_index=edge[1],
-                               to_jimage=edge[2]['to_jimage'],
-                               allow_reverse=False)
-edge_labels_test = np.array([d['hop_label'] for u, v, d in s_graph_test.graph.edges(data=True)])
-
-from pymatgen.analysis.dimensionality import get_dimensionality_larsen
-dimensionality = get_dimensionality_larsen(s_graph_test)
-
-# These are other methods of breaking graph edges that I ended up not using
-# fpm.s_graph.break_edge(from_index, to_index, to_jimage=None, allow_reverse=False)
-# fpm.s_graph.graph.remove_edge(0,0)
-
-```
-
-4. Look at the ionic radii overlap along the pathway. Ewald Energy?
+1. Look at the ionic radii overlap along the pathway. Ewald Energy?
 ```python
 #!!! This function should be moved elsewhere and further developed in the future
 def get_ionic_radii_overlap(
@@ -397,13 +254,13 @@ for image in images:
 energies_ewald = []
 ```
 
-5. IDPP relaxed supercell. min_sl_vector=6, images=6, 
+2. IDPP relaxed supercell. min_sl_vector=6, images=6, 
 ```python
 supercell_size = [(min_sl_vector//length)+1 for length in structure_lll_supercell.lattice.lengths]
 structure_lll_supercell.make_supercell(supercell_size)
 ```
 
-6. visulizing pathways
+3. visulizing pathways
 ```python
 path_structures = path.get_structures(
     nimages=5, 
@@ -418,7 +275,7 @@ path.write_path('test15.cif', nimages=10, idpp=False, species = None,)
 dpf.write_all_paths('test.cif', nimages=10, idpp=False) # for speed, species kwarg isnt accepted here
 ```
 
-7. write IDPP calc files. Remember ISYM=0.
+4. write IDPP calc files. Remember ISYM=0.
 ```python
 # make the VASP input files for a given path
 from pymatgen.io.vasp.sets import MPStaticSet
