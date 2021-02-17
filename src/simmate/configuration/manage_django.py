@@ -37,7 +37,7 @@ def setup_django_full():  # Wall time: 250 ms first call and 175 ns after
 
     # SECURITY WARNING: I added this setting myself! delete when in production
     # BUG: I believe this is just for use within Spyder and Jupyter, which I think
-    # are examples async enviornments. In production (non-dev), I believe I should
+    # are examples of async enviornments. In production (non-dev), I believe I should
     # turn this off though.
     # !!! REMOVE IN PRODUCTION
     os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
@@ -119,7 +119,7 @@ def reset_db(apps_to_migrate=["diffusion", "execution"]):
 def runserver():
 
     # for now I recommend using the shell command...
-    #   "django-admin runserver --setting=puttyexams.settings"
+    #   "django-admin runserver --setting=simmate.settings"
     # or... navigate to the directory and use
     #   "python manage.py runserver"
     raise NotImplementedError

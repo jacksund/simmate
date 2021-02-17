@@ -11,7 +11,7 @@ Example of running the code below:
     pathway_id = 1
     e = load_pathway_from_db(pathway_id)
     t = get_empirical_measures(e)
-    l = add_paths_to_db(pathway_id, t)
+    l = add_empiricalmeasures_to_db(pathway_id, t)
 
 """
 
@@ -125,7 +125,7 @@ def get_oxi_supercell_path(structure, path, min_sl_v):
     dpf = DistinctPathFinder(
         structure=supercell,
         migrating_specie="F-",
-        max_path_length=path.length + 1e-5,  #
+        max_path_length=path.length + 1e-5,  # add extra for rounding errors
         symprec=0.1,
         perc_mode=None,
     )
@@ -262,8 +262,95 @@ def get_ewald_energy(structure, path):
     return max(ewald_energies)
 
 
+def get_ionic_radii_overlap(structure, path):
+
+    # Let's run this within a supercell structure
+    supercell_path = get_oxi_supercell_path(
+        structure,
+        path,
+        min_sl_v=7,
+    )
+
+    # let's grab all of the pathway images
+    images = supercell_path.get_structures(
+        nimages=5,
+        # vac_mode=True,  # vacancy mode
+        idpp=True,
+        # **idpp_kwargs,
+        # species = 'Li', # Default is None. Set this if I only want one to move
+    )
+    # NOTE: the diffusion atom is always the first site in these structures (index=0)
+
+    # Finding max change in anion, cation, and nuetral atom overlap
+    overlap_data_cations, overlap_data_anions, overlap_data_nuetral = [], [], []
+
+    for image in images:
+
+        # grab the diffusing ion. This is always index 0. Also grab it's radius
+        moving_site = image[0]
+        moiving_site_radius = moving_site.specie.ionic_radius
+
+        # grab the diffusing ion's nearest neighbors within 8 angstroms and include
+        # neighboring unitcells
+        moving_site_neighbors = image.get_neighbors(
+            moving_site,
+            r=8.0,
+            include_image=True,
+        )
+
+        # This is effective our empty starting list. I set these to -999 to ensure
+        # they are changed.
+        max_overlap_cation, max_overlap_anion, max_overlap_nuetral = (
+            -999,
+            -999,
+            -999,
+        )
+        for neighbor, distance, _, _ in moving_site_neighbors:
+            neighbor_radius = neighbor.specie.ionic_radius
+            overlap = moiving_site_radius + neighbor_radius - distance
+            # separate overlap analysis to oxidation types (+, -, or nuetral)
+            if ("+" in neighbor.species_string) and (overlap > max_overlap_cation):
+                max_overlap_cation = overlap
+            elif ("-" in neighbor.species_string) and (overlap > max_overlap_anion):
+                max_overlap_anion = overlap
+            elif (
+                ("-" not in neighbor.species_string)
+                and ("+" not in neighbor.species_string)
+                and (overlap > max_overlap_nuetral)
+            ):
+                max_overlap_nuetral = overlap
+        overlap_data_cations.append(max_overlap_cation)
+        overlap_data_anions.append(max_overlap_anion)
+        overlap_data_nuetral.append(max_overlap_nuetral)
+    # make lists into relative values
+    # TODO: consider using /abs(overlap_data_cations[0]) instead
+    overlap_data_cations_rel = [
+        (image - overlap_data_cations[0]) for image in overlap_data_cations
+    ]
+    overlap_data_anions_rel = [
+        (image - overlap_data_anions[0]) for image in overlap_data_anions
+    ]
+    overlap_data_nuetral_rel = [
+        (image - overlap_data_nuetral[0]) for image in overlap_data_nuetral
+    ]
+
+    # grab the maximum deviation from 0. Note this can be negative!
+    ionic_radii_overlap_cations = max(overlap_data_cations_rel, key=abs)
+    ionic_radii_overlap_anions = max(overlap_data_anions_rel, key=abs)
+    ionic_radii_overlap_nuetral = max(overlap_data_nuetral_rel, key=abs)
+
+    return (
+        ionic_radii_overlap_cations,
+        ionic_radii_overlap_anions,
+        # ionic_radii_overlap_nuetral,
+    )
+
+
 @task
-def get_empirical_measures(structure, path, shortest_path_length):
+def get_empirical_measures(pathway_data):
+    
+    # TODO: format this better with prefect
+    structure, path, shortest_path_length = pathway_data
 
     # TODO: I can break this task down to run in parallel and also move code to lower
     # levels.
@@ -314,8 +401,9 @@ def get_empirical_measures(structure, path, shortest_path_length):
     ewald_energy = get_ewald_energy(structure, path)
 
     # # relative change in ionic radii overlaps: (Rmax-Rstart)/Rstart
-    # ionic_radii_overlap_cations = models.FloatField()
-    # ionic_radii_overlap_anions = models.FloatField()
+    ionic_radii_overlap_cations, ionic_radii_overlap_anions = get_ionic_radii_overlap(
+        structure, path
+    )
 
     # return all of the data we grabbed as a dictionary
     return dict(
@@ -329,26 +417,47 @@ def get_empirical_measures(structure, path, shortest_path_length):
         dimensionality=dimensionality,
         dimensionality_cumlengths=dimensionality_cumlengths,
         ewald_energy=ewald_energy,
+        ionic_radii_overlap_cations=ionic_radii_overlap_cations,
+        ionic_radii_overlap_anions=ionic_radii_overlap_anions,
     )
 
 
 # --------------------------------------------------------------------------------------
 
+# NOTE: if an entry already exists for this pathway, it is overwritten
 
-# # now make the overall workflow
-# with Flow("Find_DiffusionPathways") as workflow:
+@task
+def add_empiricalmeasures_to_db(pathway_id, em_dict):
 
-#     # load the structure object from our database
-#     structure_id = Parameter("structure_id")
+    from simmate.configuration import manage_django  # ensures setup
+    from simmate.database.all import EmpiricalMeasures as EM_DB, Pathway as Pathway_DB
 
-#     # load the structure object from our database
-#     structure = load_structure_from_db(structure_id)
+    # grab the proper Pathway entry
+    # OPTIMIZE: will this function still work if I only grab the id value?
+    pathway_db = Pathway_DB.objects.get(id=pathway_id)
 
-#     # identify all diffusion pathways for this structure
-#     pathways = find_paths(structure)
+    # now add the empirical data using the supplied dictionary
+    em_data = EM_DB(status="C", pathway=pathway_db, **em_dict)
+    em_data.save()
 
-#     # and the pathways to our database
-#     add_paths_to_db(structure_id, pathways)
 
+# --------------------------------------------------------------------------------------
+
+
+# now make the overall workflow
+with Flow("GenerateEmpiricalMeasuresforPathway") as workflow:
+
+    # load the structure object from our database
+    pathway_id = Parameter("pathway_id")
+
+    # load the pathway object from our database
+    # TODO: I load more than just the path object for now
+    pathway_data = load_pathway_from_db(pathway_id)
+
+    # calculate all of the empirical data
+    em_data = get_empirical_measures(pathway_data)
+
+    # save the data to our database
+    add_empiricalmeasures_to_db(pathway_id, em_data)
 
 # --------------------------------------------------------------------------------------

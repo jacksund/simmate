@@ -122,160 +122,13 @@ oxidation, oxidation_radii_dict, atomic_fraction_fanion, nsites, path_len_cutoff
 
 ## TODO
 
-1. Look at the ionic radii overlap along the pathway. Ewald Energy?
+1. visulizing pathways
 ```python
-#!!! This function should be moved elsewhere and further developed in the future
-def get_ionic_radii_overlap(
-    image_struct, 
-    ion_index,
-    oxidation_check=self.oxidation_check, #!!! is this line needed?
-    ion_tested=self.ion_tested, #!!! is this line needed?
-    ):
-
-    moving_site = image_struct[path.iindex]
-    moving_site_radius = self.oxidation_check.radii[self.ion_tested]
-    moving_site_neighbors = image_struct.get_neighbors(moving_site, r=8.0, include_image=True) #!!! Hard-coding issue for cutoff radius?
-    
-    max_overlap_cation, max_overlap_anion, max_overlap_nuetral = [-999] * 3 # start as -999 to ensure its reset
-    for neighbor_info in moving_site_neighbors:
-        neighbor, distance, trash, trash = neighbor_info
-        neighbor_radius = self.oxidation_check.radii[neighbor.species_string]
-        overlap = moving_site_radius + neighbor_radius - distance
-        # separate overlap analysis to oxidation types (+, -, or nuetral)
-        if ('+' in neighbor.species_string) and (overlap > max_overlap_cation):
-            max_overlap_cation = overlap
-        elif ('-' in neighbor.species_string) and (overlap > max_overlap_anion):
-            max_overlap_anion = overlap
-        elif ('-' not in neighbor.species_string) and ('+' not in neighbor.species_string) and (overlap > max_overlap_nuetral):
-            max_overlap_nuetral = overlap
-    
-    # I convert to numpy here so I can quickly subtract arrays below
-    return numpy.array(max_overlap_cation, max_overlap_anion, max_overlap_nuetral)
-
-valid_paths = []
-for path in self.paths:
-
-# we now run the idpp analysis on each pathway
-# The idpp relaxation is computationally expensive, so I only look at the 
-# start and midpoint images here.
-path_structures = path.get_structures(
-    nimages=1, # for speed, I only do one image here
-    vac_mode=True, # vacancy-based diffusion
-    idpp=True, # IDPP relaxation of the pathway
-    # **idpp_kwargs,#species = 'Li', # Default is None. Set this if I only want the ion to move
-    )
-            
-# only grab the first two images (start and midpoint images)
-start_data = get_ionic_radii_overlap(path_structures[0], path.iindex)
-midpoint_data = get_ionic_radii_overlap(path_structures[1], path.iindex)
-
-# Compute the change in overlap for [cation, anion, nuetral]
-delta_overlaps = midpoint_data - start_data
-
-# See if any ion type changes ionic radii overlap over the allowed threshold
-if max(delta_overlaps) > self.path_overlap_cutoff:
-    print("Pathway removed based on change in the diffusing ion's ionic radii overlap")
-    pass
-else:
-    valid_paths.append(path)
-
-# now that we've identified the valid paths, update the class's paths variable
-self.paths = valid_paths
-```
-
-```python
-# METHOD 1
-# Finding max change in anion and cation overlap
-overlap_data_cations, overlap_data_anions, overlap_data_nuetral = [], [], []
-for struct_index in range(len(idpp_structs)):
-    image_struct = idpp_structs[struct_index]
-    moving_site = image_struct[site1_shifted_index]
-    moving_site_neighbors = idpp_structs[struct_index].get_neighbors(moving_site, r=8.0, include_image=True)
-    moiving_site_radius = self.oxidation_check.radii[self.ion_tested]
-    max_overlap_cation, max_overlap_anion, max_overlap_nuetral = -999, -999, -999 # reset value for each image
-    for neighbor_info in moving_site_neighbors:
-        neighbor, distance, trash, trash = neighbor_info
-        neighbor_radius = self.oxidation_check.radii[neighbor.species_string]
-        overlap = moiving_site_radius + neighbor_radius - distance
-        # separate overlap analysis to oxidation types (+, -, or nuetral)
-        if ('+' in neighbor.species_string) and (overlap > max_overlap_cation):
-            max_overlap_cation = overlap
-        elif ('-' in neighbor.species_string) and (overlap > max_overlap_anion):
-            max_overlap_anion = overlap
-        elif ('-' not in neighbor.species_string) and ('+' not in neighbor.species_string) and (overlap > max_overlap_nuetral):
-            max_overlap_nuetral = overlap
-    overlap_data_cations.append(max_overlap_cation)
-    overlap_data_anions.append(max_overlap_anion)
-    overlap_data_nuetral.append(max_overlap_nuetral) 
-# make lists into relative values
-overlap_data_cations_rel = [(image - overlap_data_cations[0]) for image in overlap_data_cations]
-overlap_data_anions_rel = [(image - overlap_data_anions[0]) for image in overlap_data_anions]
-overlap_data_nuetral_rel = [(image - overlap_data_nuetral[0]) for image in overlap_data_nuetral]
-# append to self.unique_edges[edge]
-edge.append([overlap_data_cations_rel,overlap_data_anions_rel, overlap_data_nuetral_rel])
-#plotting
-# pyplot.figure(figsize=(5,3), dpi=80)
-# pyplot.plot(range(self.nimages+1),overlap_data_cations_rel, 'o-', label='Cation')
-# pyplot.plot(range(self.nimages+1),overlap_data_anions_rel, 'o-', label='Anion')
-# pyplot.plot(range(self.nimages+1),overlap_data_nuetral_rel, 'o-', label='Nuetral')
-# pyplot.legend(loc='upper right',title='Neighbor Type', fontsize=8)    
-# pyplot.xlabel('Diffusion Progress')
-# pyplot.xticks([0, self.nimages + 1], [r'$Start$', r'$End$'])
-# pyplot.ylabel('Max Overlap (A)') 
-# pyplot.tight_layout()
-# pyplot.savefig(filename_folder + "edgeoverlap_" + str(edge_index))
-# pyplot.show()
-# pyplot.close()
-```
-
-```python
-# METHOD 2
-from matminer.featurizers.site import EwaldSiteEnergy
-sitefingerprint_method = EwaldSiteEnergy(accuracy=3) # 12 is default
-# #!!! requires oxidation state decorated structure
-
-images = path.get_structures(
-    nimages=5, 
-    vac_mode=True,
-    idpp=True,
-    # **idpp_kwargs,
-    #species = 'Li', # Default is None. Set this if I only want one to move
-    )
-
-energy_ewald = []
-for image in images:
-    image_struct = idpp_structs[struct_index]
-    # moving_site = image_struct[site1_shifted_index]
-    image_fingerprint = numpy.array(sitefingerprint_method.featurize(image_struct, site1_shifted_index))
-    image_fingerprint = image_fingerprint[1:] * (1/(numpy.array(range(len(image_fingerprint))))**2)[1:] #!!! RDF Scale down
-    fingerprints.append(image_fingerprint)
-# I don't want to save the full fingerprints, so I save the distances instead
-# The distances are relative to the starting structure
-energies_ewald = []
-```
-
-2. IDPP relaxed supercell. min_sl_vector=6, images=6, 
-```python
-supercell_size = [(min_sl_vector//length)+1 for length in structure_lll_supercell.lattice.lengths]
-structure_lll_supercell.make_supercell(supercell_size)
-```
-
-3. visulizing pathways
-```python
-path_structures = path.get_structures(
-    nimages=5, 
-    vac_mode=True,
-    idpp=True,
-    # **idpp_kwargs,
-    #species = 'Li', # Default is None. Set this if I only want one to move
-    )
 path.write_path('test15.cif', nimages=10, idpp=False, species = None,)
-
-# write to cif file to visualize
 dpf.write_all_paths('test.cif', nimages=10, idpp=False) # for speed, species kwarg isnt accepted here
 ```
 
-4. write IDPP calc files. Remember ISYM=0.
+2. write IDPP calc files. Remember ISYM=0.
 ```python
 # make the VASP input files for a given path
 from pymatgen.io.vasp.sets import MPStaticSet
@@ -286,7 +139,6 @@ for struct_index in range(len(idpp_structs)):
     filename_folder_edge_image = filename_folder_edge + "/ImageIndex_" + str(struct_index)
     MPStaticSet(idpp_structs[struct_index], user_incar_settings={"ISYM":0}).write_input(filename_folder_edge_image) 
 ```
-
 
 ## Extra notes
 
