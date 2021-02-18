@@ -116,8 +116,26 @@ results = client.gather(futures)
 failed_ids = [134, 339, 465, 466, 479, 481, 482, 990, 995, 1037, 1486, 1487, 1639, 1880, 1928, 1994, 1996, 2482, 2531, 2815, 3113, 3489, 3529, 4044, 4415, 4478, 4480, 4488, 4491, 4997, 5464, 5739, 7911, 7929, 8452, 9327, 9450]
 ```
 
-6. Make my table of empirical predictors.
-oxidation, oxidation_radii_dict, atomic_fraction_fanion, nsites, path_len_cutoff_vsDmin, dimensionality(_cumlengths, _cumbarriers), ionic_radii_overlap, ewald_energy,
+6. Make my table of empirical predictors. Note: there are still a number of bugs in this code, so not all pathways are mapped. An example is for non-ionic pathways where F is not in the F- state. Thanks to the fractured architecture, that's alright! I can edit this script later.
+```python
+from dask.distributed import Client
+from simmate.workflows.diffusion.empirical_measures import workflow
+from simmate.configuration import manage_django  # ensures django setup
+from simmate.database.all import Pathway as Pathway_DB
+
+client = Client()
+pathway_ids = Pathway_DB.objects.values_list("id", flat=True).all()
+
+# Run the find_paths workflow for each individual id
+futures = client.map(
+    workflow.run,
+    [{"pathway_id": id} for id in pathway_ids],
+    pure=False,
+)
+
+# wait for all of the calls to finish and grab the results
+results = client.gather(futures)
+```
 
 
 ## TODO

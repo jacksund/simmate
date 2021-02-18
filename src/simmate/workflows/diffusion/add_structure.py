@@ -56,13 +56,10 @@ def load_structures_from_mp(criteria, api_key="2Tg7uUvaTAPHJQXl"):
     # see website.diffusion.models.Structure for the table schema
     properties = [
         "material_id",
-        "nsites",
-        "pretty_formula",
         "final_energy",
         "final_energy_per_atom",
         "formation_energy_per_atom",
         "e_above_hull",
-        "density",
         "structure",
     ]
 
@@ -105,10 +102,6 @@ def sanitize_structure(data):
     #   (iii) sorting elements by electronegativity
     structure = structure.copy(sanitize=True)
 
-    # number of sites may have decreased when we switched to the primitive structure
-    # so we need to update the value here
-    data.update({"nsites": structure.num_sites})
-
     # update the structure
     data.update({"structure": structure})
 
@@ -123,24 +116,13 @@ def sanitize_structure(data):
 def add_structure_from_mp(data):
 
     from simmate.configuration import manage_django  # ensures setup
-    from simmate.database.all import Structure as Structure_DB
+    from simmate.database.diffusion import MaterialsProjectStructure as MPS
 
-    # make a copy of data because we are going to be changing things in-place
-    data = data.copy()
-
-    # convert the structure from pymatgen object to json string
-    structure_json = data["structure"].to_json()
-
-    # update the data dictionary
-    data.update({"structure": structure_json})
-
-    # initialize it using the data
-    structure = Structure_DB(**data)
-
-    # TODO: make sure an idenitical structure is not already in the database
+    # convert the dictionary to django orm
+    structure_db = MPS.from_dict(data)
 
     # save the data to the database
-    structure.save()
+    structure_db.save()
 
 
 # --------------------------------------------------------------------------------------
