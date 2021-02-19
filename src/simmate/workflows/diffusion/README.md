@@ -73,8 +73,8 @@ workflow.executor = DaskExecutor(address=client.scheduler.address)
 ```python
 # now convert the entire table to a csv file
 from simmate.configuration import manage_django  # ensures django setup
-from simmate.database.all import Structure as Structure_DB
-queryset = Structure_DB.objects.all()
+from simmate.database.diffusion import MaterialsProjectStructure as MPS
+queryset = MPS.objects.all()
 from django_pandas.io import read_frame
 df = read_frame(queryset, index_col="id")
 df.to_csv("initial_structuredb.csv")
@@ -86,7 +86,6 @@ df.to_csv("initial_structuredb.csv")
 
 4. We want to add all of the Fluoride structures from the Materials Project to our own database. This includes some extra data such as the hull energy and also running some "sanitation" on the structures.
 ```python
-# import all of the data to our sqlite database
 from simmate.workflows.diffusion.add_structure import workflow
 workflow.executor = DaskExecutor(address=client.scheduler.address)
 status = workflow.run(criteria={"elements": {"$all": ["F"],}})
@@ -96,10 +95,10 @@ status = workflow.run(criteria={"elements": {"$all": ["F"],}})
 ```python
 from simmate.workflows.diffusion.find_paths import workflow
 from simmate.configuration import manage_django  # ensures django setup
-from simmate.database.all import Structure as Structure_DB, Pathway as Pathway_DB
+from simmate.database.diffusion import MaterialsProjectStructure as MPS
 
 # grab all structure ids in our database
-structure_ids = Structure_DB.objects.values_list("id", flat=True).all()
+structure_ids = MPS.objects.values_list("id", flat=True).all()
 
 # Run the find_paths workflow for each individual id
 futures = client.map(
@@ -110,10 +109,6 @@ futures = client.map(
 
 # wait for all of the calls to finish and grab the results
 results = client.gather(futures)
-
-# for reference these are the structure ids that failed
-# Note - it was easier to grab this list when not using dask
-failed_ids = [134, 339, 465, 466, 479, 481, 482, 990, 995, 1037, 1486, 1487, 1639, 1880, 1928, 1994, 1996, 2482, 2531, 2815, 3113, 3489, 3529, 4044, 4415, 4478, 4480, 4488, 4491, 4997, 5464, 5739, 7911, 7929, 8452, 9327, 9450]
 ```
 
 6. Make my table of empirical predictors. Note: there are still a number of bugs in this code, so not all pathways are mapped. An example is for non-ionic pathways where F is not in the F- state. Thanks to the fractured architecture, that's alright! I can edit this script later.

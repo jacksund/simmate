@@ -18,8 +18,8 @@ class MaterialsProjectStructure(Structure):
     """ Base Info """
 
     # Materials Project ID
-    # Max length of 12 is overkill: 'mp-123456789'
-    material_id = models.CharField(max_length=12, primary_key=True)
+    # For now, max length of 12 is overkill: 'mp-123456789'
+    id = models.CharField(max_length=12, primary_key=True)
 
     # Final calculated energy by Materials Project
     # Because Materials Project may be missing some of these values or we may add a
@@ -34,9 +34,7 @@ class MaterialsProjectStructure(Structure):
 
     # OPTIMIZE: is it better to just set the attribute than to have a fixed
     # property that's defined via a function?
-    @property
-    def source():
-        return "Materials Project"
+    source = "Materials Project"
 
     """ Model Methods """
 
@@ -59,10 +57,16 @@ class MaterialsProjectStructure(Structure):
         #       "structure",
         #   ]
 
+        # For full compatibility with django, we need to rename the material_id
+        # to just id. Also since I'm changing things in place, I need to make a
+        # copy of the dict as well.
+        data = data_dict.copy()
+        data["id"] = data.pop("material_id")
+
         # initialize this model object using the data. I pass to super() method to
         # handle the "structure". The reason I even have this method is because
         # there's a bunch of extra kwargs I'm passing in along with "structure".
-        structure_db = super().from_pymatgen(**data_dict)
+        structure_db = super().from_pymatgen(**data)
 
         return structure_db
 
@@ -128,7 +132,6 @@ class Pathway(models.Model):
     # Each Pathway will map to a row in the PathwayCalcs table. I keep this separate
     # for organization, though I could also move it here if I'd like
 
-    """ Properties """
     """ Model Methods """
     # TODO: If I want a queryset to return a pymatgen-diffusion object(s) directly,
     # then I need make a new Manager rather than adding methods here.
@@ -166,8 +169,9 @@ class Pathway(models.Model):
             nsites_777=nsites_777,
             nsites_101010=nsites_101010,
             nsites_121212=nsites_121212,
-            # OPTIMIZE: will this function still work if I only grab the id value?
-            structure=MaterialsProjectStructure.objects.get(id=structure_id),
+            # OPTIMIZE: will this function still work if I only grab the pk value?
+            # structure=MaterialsProjectStructure.objects.get(pk=structure_pk),
+            structure_id=structure_id,
         )
 
         return pathway_db
@@ -213,9 +217,6 @@ class Pathway(models.Model):
         # if the pathways match, then we can return the pathway object!
         return path
 
-    """ Restrictions """
-    # none
-
     """ For website compatibility """
 
     class Meta:
@@ -225,56 +226,9 @@ class Pathway(models.Model):
 # --------------------------------------------------------------------------------------
 
 
-class PathwayCalc(models.Model):
+class EmpiricalMeasures(Calculation):
 
     """ Base info """
-
-    # Indicate what state the calculation is in. This exists to ensure we don't
-    # submit multiple to Prefect and also let's us check how many currently exist in
-    # the queue.
-    # !!! If you choose to change these, consider Prefect's different state labels:
-    # !!! https://docs.prefect.io/api/latest/engine/state.html
-    class StatusTypeOptions(models.TextChoices):
-        SCHEDULED = "S"
-        COMPLETED = "C"
-        FAILED = "F"
-
-    status = models.CharField(
-        max_length=1,
-        choices=StatusTypeOptions.choices,
-        default=StatusTypeOptions.SCHEDULED,
-    )
-
-    """ Relationships """
-    # Each PathwayCalcs corresponds to one Pathway, which can have many Pathway(s)
-    # I set primary_key to true so that the primary keys match that of the pathway
-    pathway = models.OneToOneField(Pathway, primary_key=True, on_delete=models.CASCADE)
-
-    # Each Pathway will map to a row in the PathwayCalcs table. I keep this separate
-    # for organization, though I could also move it here if I'd like
-
-    """ Properties """
-    """ Model Methods """
-    # none implemented yet
-
-    """ Restrictions """
-    # none
-
-    """ For website compatibility """
-    """ Set as Abstract Model """
-    # I have other model inherit from this one, while this model doesn't need its own
-    # table. Therefore, I set this as an abstract model. Should that change in the
-    # future, look here:
-    # https://docs.djangoproject.com/en/3.1/topics/db/models/#model-inheritance
-    class Meta:
-        app_label = "diffusion"
-        abstract = True
-
-
-# --------------------------------------------------------------------------------------
-
-
-class EmpiricalMeasures(PathwayCalc):
 
     # NOTE: these are actually separate calculations, but I think it's easiest
     # to have them all in the same table. I allow blank+null for all of them
@@ -293,6 +247,11 @@ class EmpiricalMeasures(PathwayCalc):
     # relative change in ionic radii overlaps: (Rmax-Rstart)/Rstart
     ionic_radii_overlap_cations = models.FloatField(blank=True, null=True)
     ionic_radii_overlap_anions = models.FloatField(blank=True, null=True)
+
+    """ Relationships """
+    # Each PathwayCalcs corresponds to one Pathway, which can have many Pathway(s)
+    # I set primary_key to true so that the primary keys match that of the pathway
+    pathway = models.OneToOneField(Pathway, primary_key=True, on_delete=models.CASCADE)
 
 
 # --------------------------------------------------------------------------------------

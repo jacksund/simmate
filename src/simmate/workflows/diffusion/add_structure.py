@@ -10,7 +10,7 @@ L = add structures to SQL database
 Example of running the code below:
     e = load_structures_from_mp({"material_id": "mp-1234"})
     t = sanitize_structure.map(e)
-    l = add_structure_from_mp.map(t)
+    l = add_structure_from_materialsproject.map(t)
 
 Note, the *.map() means I run this function for each output in "e". This makes
 use of running things in parallel for speed and also if one structure fails,
@@ -113,7 +113,7 @@ def sanitize_structure(data):
 
 
 @task
-def add_structure_from_mp(data):
+def add_structure_from_materialsproject(data):
 
     from simmate.configuration import manage_django  # ensures setup
     from simmate.database.diffusion import MaterialsProjectStructure as MPS
@@ -128,7 +128,7 @@ def add_structure_from_mp(data):
 # --------------------------------------------------------------------------------------
 
 # now make the overall workflow
-with Flow("Add_Structures_from_MP") as workflow:
+with Flow("Add_Structures_From_MaterialsProject") as workflow:
 
     # The input should be a Materials Project query dictionary
     criteria = Parameter("criteria")
@@ -140,7 +140,7 @@ with Flow("Add_Structures_from_MP") as workflow:
     cleaned_data = sanitize_structure.map(pulled_data)
 
     # and add it to our database
-    add_structure_from_mp.map(cleaned_data)
+    add_structure_from_materialsproject.map(cleaned_data)
 
 
 # --------------------------------------------------------------------------------------
