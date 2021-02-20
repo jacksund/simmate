@@ -42,7 +42,7 @@ Priority ranking can adapt overtime as well. For example, we may want to replace
 
 
 NOTE: I am using... 
-    - Materials Project database version '2020_09_08'
+    - Materials Project database version '2021_02_08'
     - Pymatgen 2020.12.31
     - Pymatgen-diffusion 2020.10.8 (be extra careful here!)
     - Django 3.1.5
@@ -98,7 +98,7 @@ from simmate.configuration import manage_django  # ensures django setup
 from simmate.database.diffusion import MaterialsProjectStructure as MPS
 
 # grab all structure ids in our database
-structure_ids = MPS.objects.values_list("id", flat=True).all()
+structure_ids = MPS.objects..order_by("nsites").values_list("id", flat=True).all()
 
 # Run the find_paths workflow for each individual id
 futures = client.map(
@@ -108,7 +108,7 @@ futures = client.map(
 )
 
 # wait for all of the calls to finish and grab the results
-results = client.gather(futures)
+# results = client.gather(futures)
 ```
 
 6. Make my table of empirical predictors. Note: there are still a number of bugs in this code, so not all pathways are mapped. An example is for non-ionic pathways where F is not in the F- state. Thanks to the fractured architecture, that's alright! I can edit this script later.
@@ -116,10 +116,15 @@ results = client.gather(futures)
 from dask.distributed import Client
 from simmate.workflows.diffusion.empirical_measures import workflow
 from simmate.configuration import manage_django  # ensures django setup
-from simmate.database.all import Pathway as Pathway_DB
+from simmate.database.diffusion import Pathway as Pathway_DB
 
 client = Client()
-pathway_ids = Pathway_DB.objects.values_list("id", flat=True).all()
+pathway_ids = (
+    Pathway_DB.objects.filter(empiricalmeasures__isnull=True)
+    .order_by("structure__nsites", "nsites_777")
+    .values_list("id", flat=True)
+    .all()
+)
 
 # Run the find_paths workflow for each individual id
 futures = client.map(

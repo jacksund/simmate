@@ -195,13 +195,11 @@ class Pathway(models.Model):
         isite_new = PeriodicSite(
             species=self.element,
             coords=[float(x) for x in self.isite.split(" ")],
-            coords_are_cartesian=True,
             lattice=symm_structure.lattice,
         )
         esite_new = PeriodicSite(
             species=self.element,
             coords=[float(x) for x in self.esite.split(" ")],
-            coords_are_cartesian=True,
             lattice=symm_structure.lattice,
         )
 
