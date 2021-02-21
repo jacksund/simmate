@@ -51,17 +51,17 @@ If you are brand-new to Simmate, you should jump over to our main website [simma
 
 ## What is Simmate?
 
-The Simulated Materials Ecosystem (Simmate) is the ultimate toolbox and library for computational materials research.
+The Simulated Materials Ecosystem (Simmate) is the ultimate toolbox and helper for computational materials research.
 
-Even if you consider yourself 100% an experimentalist, Simmate's barrier to entry is built to be as low as possible -- in fact, you don't need to know how to code at all. Simmate is built to guide your studies and generate property predictions with a single mouse click. Computational research can be intimidating because there are so many programs to choose from, and it can become overwhelming to pick which to use and how to mix-and-match them for your specific project. And that's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities. We do the heavy lifting, and explain these other programs to you along the way.
+Even if you consider yourself an experimentalist, Simmate's barrier to entry is built to be as low as possible -- in fact, you don't need to know how to code at all. Simmate is built to guide your studies and generate property predictions with a single mouse click. Computational research can be intimidating because there are so many programs to choose from, and it's hard to mix-and-match them for your specific project. And that's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities. We do the heavy lifting, and explain these other programs to you along the way.
 
 At the other end of the spectrum, we provide an extremely powerful API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we opperate under a very different coding philosphy. **Here, usability and readability are our top priortities.** The first step toward that end is an "all-in-one" package rather than many separate programs. This includes a core material science framework, workflow management, database orm, and a website interface. Experts can jump to our "Coding Philosphy" section below for a more in-depth description.
 
 ## Installation
 
-**Don't panic** if your new to coding coding and Python. When you're ready to start learning, you can advance to our [30min Start-Up Tutorial]() where we teach you everything from the beginning.
+**Don't panic** if your new to coding coding and Python. When you're ready to start learning, you can advance to our [15min Start-Up Tutorial]() where we teach you everything from the beginning.
 
-If you're confortable with Python, you can install simmate quickly and easily with...
+If you're confortable with Python, you can install Simmate quickly and easily with...
 ```
 conda install -c conda-forge simmate
 ```
@@ -135,8 +135,6 @@ result = my_workflow.run()
 
 TODO: I think some of the stuff I wrote above should move to tutorials and docs. I could instead simplify the Sneak-Peak to these 4 core components.
 
-You can think of Simmate as "a toolbox and library for materials chemistry", where it includes...
-
 1. an online database. You can search any compound you want and then look at its calculated properties. It also brings together other databases and their data -- so a webpage for one material will link to our "competitors" as well. Essentially it serves as a Google for materials and their calculated properties.
 
 2. prebuilt workflows. Say a user has a new material of their own and wants to calculate how conductive it would be, but they don't know how to do those calculations. Our code takes their structure and will run everything for them.
@@ -145,7 +143,10 @@ You can think of Simmate as "a toolbox and library for materials chemistry", whe
 
 4. computing scalability. At the beginning of a project, the user may want to write and run their code on a single computer and single core (this is how 99% of programs work). But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations (much like video games do). At the extreme, some projects require thousands of computers across numerous locations, including university HPC clusters and cloud computing. You can easily set up any configuration of resources with only a few lines of code and minimal knowledge of firewalls + internet ports.
 
-## Integrations and Core Components
+## Coding Philosphy
+
+“If I have seen further it is by standing on the shoulders of Giants” -Isaac Newton (1675)
+Though there's [more behind this quote](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants) that I might want to used instead.
 
 Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
 
@@ -158,12 +159,6 @@ Post here in our github using [this link here](google.com)
 ## Extra resources
 
 contributing, tutorials, docs, etc.
-
-
-Fractured Hierarchical Architecture for High-Throughput Diffusion Analysis
-
-“If I have seen further it is by standing on the shoulders of Giants” -Isaac Newton (1675)
-Though there's [more behind this quote](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants) that I might want to used instead.
 
 
 Component | Package | Other Packages (not used)
