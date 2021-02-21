@@ -51,11 +51,11 @@ If you are brand-new to Simmate, you should jump over to our main website [simma
 
 ## What is Simmate?
 
-The Simulated Materials Ecosystem (Simmate) is the ultimate helper for computational materials research. 
+The Simulated Materials Ecosystem (Simmate) is the ultimate toolbox and library for computational materials research.
 
-Even if you consider yourself 100% an experimentalist, Simmate's barrier to entry is built to be as low as possible -- in fact, you don't need to know how to code at all. Simmate is built to guide your studies and generate property predictions with a single mouse click. Computational research can be intimidating because there are so many programs to choose from, and it can become overwhelming to pick which to use and how to mix-and-match them for your specific project. That's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities. We do the heavy lifting for you, and explain these other programs for you along the way.
+Even if you consider yourself 100% an experimentalist, Simmate's barrier to entry is built to be as low as possible -- in fact, you don't need to know how to code at all. Simmate is built to guide your studies and generate property predictions with a single mouse click. Computational research can be intimidating because there are so many programs to choose from, and it can become overwhelming to pick which to use and how to mix-and-match them for your specific project. And that's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities. We do the heavy lifting, and explain these other programs to you along the way.
 
-At the other end of the spectrum, we provide an extremely powerful API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we opperate under a very different coding philosphy. **Here, usability and readability are our top priortities.** The first step toward that end is an "all-in-one" package rather than many separate programs. Experts can jump to our "Coding Philosphy" section below for a more in-depth description.
+At the other end of the spectrum, we provide an extremely powerful API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we opperate under a very different coding philosphy. **Here, usability and readability are our top priortities.** The first step toward that end is an "all-in-one" package rather than many separate programs. This includes a core material science framework, workflow management, database orm, and a website interface. Experts can jump to our "Coding Philosphy" section below for a more in-depth description.
 
 ## Installation
 
@@ -82,10 +82,8 @@ Again, take a look at [our main website](simmate.org) if you'd like to see the e
 from simmate import Structure
 my_structure = Structure.from_file('NaCl.cif')
 
-# Load the workflow you'd like to use
+# Load the workflow you'd like to use and run it!
 from simmate.workflows import RelaxStructure
-
-# Now run the workflow!
 result = RelaxStructure.run(structure=my_structure)
 ```
 
@@ -98,18 +96,58 @@ result = workflow.run()
 
 # To run many workflows in parallel, use Prefect!
 from prefect import Client
+client = Client()
 client.create_flow_run(project_name="Example-Project", flow_name="Example-Workflow", parameters=...) 
 
 # You can using different combinations of these two parallelization strategies as well!
 ```
 
-_**For Experts:**_ Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
+4. **Clear, Up-Front Settings**. Many material science codes that map to DFT codes (like VASP, ABINIT, and others) often obscure what DFT setting they are using from the user. Even computational experts can have a difficult time figuring out which settings are being used and how dynamic ones are being set. In Simmate, a single DFT task and it's settings are made to be clear and obvious:
+```python
+# import the base Task for your desired calculator. Here we use VASP
+from simmate.calculators.vasp.tasks.base import VaspTask
 
-## Are there similar codes to ours?
+# Configure the VASP calculation to your liking
+# NOTE: we can make settings dynamic to each structure using tags like "_per_atom" like shown below
+class ExampleVaspCalculation(VaspTask):
 
-While we give you the most common matsci analyses, there are always places where other codes offer more advanced customization for expert users. That's generally the case with high-level packages like ours. Simmate will teach you the basics and then tell you where to go from there. For example, we love pointing users to the codes that inspired us, where some of the big ones are [PyMatGen](https://github.com/materialsproject/pymatgen), [ASE](https://gitlab.com/ase/ase), [MatMiner](https://github.com/hackingmaterials/matminer), [Custodian](https://github.com/materialsproject/custodian), and [Fireworks](https://github.com/materialsproject/fireworks). You can think of Simmate as a combination of all of these, where the original codes have a lot more functionality. We are working hard to catch up, but they've had a decade headstart in most cases and we need to give credit to all of those contributors and their hard work. Simmate wouldn't be possible without their findings. We do believe the changes we've made are for the better and like to show our benchmarks and simple api to prove it.
+    # The default settings to use for this static energy calculation.
+    incar = dict(
+        EDIFF_per_atom=1.0e-07,
+        ENCUT=520,
+        NSW=0,
+        KSPACING=0.5,
+    )
+
+    # We will use the PBE functional with all the default POTCARs
+    functional = "PBE"
+
+# if you'd like to run this task individually (without putting it in a workflow)
+result = task.run(structure=my_structure)
+
+# or you build it into a workflow and then run it
+with Flow("a-single-vasp-calc") as my_workflow:
+   structure = Parameter("structure")
+   result = ExampleVaspCalculation(structure)
+result = my_workflow.run()
+
+```
+
+TODO: I think some of the stuff I wrote above should move to tutorials and docs. I could instead simplify the Sneak-Peak to these 4 core components.
+
+You can think of Simmate as "a toolbox and library for materials chemistry", where it includes...
+
+1. an online database. You can search any compound you want and then look at its calculated properties. It also brings together other databases and their data -- so a webpage for one material will link to our "competitors" as well. Essentially it serves as a Google for materials and their calculated properties.
+
+2. prebuilt workflows. Say a user has a new material of their own and wants to calculate how conductive it would be, but they don't know how to do those calculations. Our code takes their structure and will run everything for them.
+
+3. common task utilities. A lot of times in research, you're coming up with a new method to analyze some structure, so a prebuilt workflow won't exist for you yet. Here, you need common functions ready to go (such as grabbing the volume of a crystal or running symmetry analysis). That way users can quickly build their own personal workflow without starting from scratch.
+
+4. computing scalability. At the beginning of a project, the user may want to write and run their code on a single computer and single core (this is how 99% of programs work). But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations (much like video games do). At the extreme, some projects require thousands of computers across numerous locations, including university HPC clusters and cloud computing. You can easily set up any configuration of resources with only a few lines of code and minimal knowledge of firewalls + internet ports.
 
 ## Integrations and Core Components
+
+Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
 
 Table of external codes that we support like vasp, pymatgen, django... (see table below)
 
@@ -160,11 +198,3 @@ SVG Editting | Inkscape | Adobe Illustrator
 Graphics Editting | GIMP | Adobe Photoshop
 Command Line Interface | Click | Argparse, Python-Fire
 Code Formatting | Black | PyLint
-
-# LOGO + GRAPHIC DESIGN NOTES
-Name: Simmate (Simulated Materials Ecosystem) 
-Overall design: MinimalistBecause it's a software package at its core, I like the minimalist logo designs (here are some examples) and that'd be in line with most python packages. I give some examples of this below.
-Color Scheme: up to youMy first thought was a green-based palette to go with "Ecosystem" in the name, but you can mess with whatever.
-About the software, website, & company:You can think of Simmate as "a toolbox and library for materials chemistry", where it includes...an online database. You can search any compound you want and then look at its calculated properties. It also brings together other databases and their data -- so a webpage for one material will link to our "competitors" as well. Essentially it serves as a Google for materials and their calculated properties.prebuilt workflows. Say a user has a new material of their own and wants to calculate how conductive it would be, but they don't know how to do those calculations. Our code takes their structure and will run everything for them.common task utilities. A lot of times in research, you're coming up with a new method to analyze some structure, so a prebuilt workflow won't exist for you yet. Here, you need common functions ready to go(such as grabbing the volume of a crystal or running symmetry analysis). That way users can quickly build their own personal workflow without starting from scratch.computing scalability. At the beginning of a project, the user may want to write and run their code on a single computer and single core (this is how 99% of programs work). But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations (much like video games do). At the extreme, some projects require thousands of computers across numerous resources, including university HPC clusters and cloud computing. You can easily set up any configuration of resources with only a few lines of code and minimal knowledge of firewalls + internet ports.
-Places to draw inspiration from:Don't take this section as me saying "try to incorporate these ideas", but instead as some resources if you want them. I don't want to railroad your thought process and work, so it may even be useful to read this section after you feel stuck and need some more tips. Use as much or as little of this section as you want (or even ignore it).materials chemistry. The most common geometric shapes in my field are the tetrahedral (tetrahedron), octahedral, and cube. Other more complex but less common shapes are here: https://en.wikipedia.org/wiki/Coordination_geometryconnectivity and modularity. Piecing a bunch of things together is a big part of Simmate. The workflows can be thought of a network of calculations; the database as connecting a bunch of materials and other databases; and the code connects super large open-source projects and programs. Therefore, I've been checking out google images for searches like "modular icon" and "network graph icon".competing codes' logos. I give a lot of info here, but really this is just so you can look at competing webpages and see what their logos are like (I'm not a fan of most of them, but think a few are clever). Simmate is really a rewrite of the Materials Project with some key differences and updates in coding philosophy. For example, MP writes many small packages that can be overwhelming, and their many codes are disorganized, slow, and of varying standards as a result too. For all of their logos in one place, check out this link. The key ones are Materials Project (for online database), Atomate (for prebuilt workflows), Fireworks (for computing scalability), and pymatgen (for common task utilities). Meanwhile Simmate is an all-in-one "batteries-included" package that has all of these features ready to go -- you don't have to learn and download a bunch of different programs; only one. Other people that do the same but are much less successful are JARVIS, AFLOW, COD, and ICSD.supporting codes' logos. I don't code everything from scratch, but instead build off of world-leading codes that thousands of people support and are free+open-source. The big two are Django and Prefect. As a side note, both of these sites have some great "modern minimalistic" logo + icon design that I like.
-
