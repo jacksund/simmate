@@ -68,15 +68,14 @@ conda install -c conda-forge simmate
 
 ## A Sneak-Peak of Features
 
-Again, take a look at [our main website](simmate.org) if you'd like to see the end-result of what Simmate has to offer. This secton showcases some features of downloading and using Simmate yourself. These features are ordered from high-level to the lowest -- so experts can get a peak at what's under the hood.
+Again, take a look at [our main website](simmate.org) if you'd like to see the end-result of what Simmate has to offer. This secton showcases some features of downloading and using Simmate yourself.
 
-1. **The User Interface.** Simmate builds off of [Prefect's](https://github.com/PrefectHQ/prefect) user-interface for orchestrating and managing workflows. Here you can submit pre-built (or custom) workflows for any crystal structure -- whether it is your own structure or one from a major database like ICSD, OCD, Materials Project, AFLOW, JARVIS, and others.
+1. **Prebuilt Workflows and Easy Orchestration.** All of the most common material properties have workflows ready to go. These range from simple XRD pattern predictions to intensive dielectric calculations. You can view the full library of workflows [here]() (if you'd like something added, [let us know]()!). Simmate also builds off of [Prefect](https://github.com/PrefectHQ/prefect) for orchestrating and managing workflows. So it's up to you whether you like to run jobs via an advanced user-interface (shown above) or even in your own custom scripts while testing. 
 
 <p align="center" style="margin-bottom:40px;">
 <img src="https://raw.githubusercontent.com/PrefectHQ/prefect/master/docs/.vuepress/public/orchestration/ui/dashboard-overview2.png"  height=440 style="max-height: 440px;">
 </p>
 
-2. **Immediate local exectution**. Other codes require complex setups such as a database server and worker processes, whereas these are completely optional in Simmate. If you'd like to test out running a workflow immediately and directly in your test enviornment, you can! For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
 ```python
 # Load the structure file you'd like to use
 from simmate import Structure
@@ -87,9 +86,26 @@ from simmate.workflows import RelaxStructure
 result = RelaxStructure.run(structure=my_structure)
 ```
 
-3. **Ease of Scaling**. Scaling your computational resources is often a difficult task, but it shouldn't be! Simmate makes scaling easy, whether you want to run workflows in parallel on a single computer or on hundreds of computers scattered accross multiple HPC clusters (using SLURM or PBS). This is an advanced topic, so please vist [our scaling tutorial]() for more info. For experts, here's how simple the code will be in the end:
+2. **A Full-Feature Database.** Using all the data on our official site or your personal data, you can take advantage of Simmate's extremely powerful database API that is built off of [Django ORM](https://github.com/django/django). You can search for structures by a series of flags and calculated properties, and then bring them to a data-viewer you are most comfortable with, such as Microsoft Excel. Simmate also brings together other databases and their data -- including those like ICSD, OCD, Materials Project, AFLOW, JARVIS, and others. Essentially, Simmate can serve serve as a Google for materials and their calculated properties. With so much data, being able to navigate it is critial. For the full tutorial on access our data through the API, see [here](). Here are some of the simplest queries:
+
 ```python
-# To run the tasks of a single workflow in parrall, use Dask!
+# Here are some examples of querying the Simmate database for specific structures
+from simmate.database import Structure
+
+# EXAMPLE 1: unitscells have less than 6 sites
+structures = Structure.objects.filter(nsites__lt=6)
+
+# Example 2: all MoS2 structures that are less than 10g/A^3 and have a bulk modulus greater than 0.5
+structures = Structure.objects.filter(
+   formula="MoS2",
+   density__lt=10,
+   elastic__bulk_modulus__gt=0.5)
+```
+
+3. **Ease of Scalability.** At the beginning of a project, the user may want to write and run their code on a single computer and single core (this is how 99% of programs work). But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations. At the extreme, some projects require thousands of computers across numerous locations, including university clusters (using SLURM or PBS) and cloud computing. You can easily set up any configuration of resources with only a few lines of code. This is an advanced topic, so please vist [our scaling tutorial]() for more info. For experts, here's how simple the code will be in the end:
+
+```python
+# To run the tasks of a single workflow in parallel, use Dask!
 from prefect.executors import DaskExecutor
 workflow.executor = DaskExecutor()
 result = workflow.run()
@@ -102,51 +118,24 @@ client.create_flow_run(project_name="Example-Project", flow_name="Example-Workfl
 # You can using different combinations of these two parallelization strategies as well!
 ```
 
-4. **Clear, Up-Front Settings**. Many material science codes that map to DFT codes (like VASP, ABINIT, and others) often obscure what DFT setting they are using from the user. Even computational experts can have a difficult time figuring out which settings are being used and how dynamic ones are being set. In Simmate, a single DFT task and it's settings are made to be clear and obvious:
+4. **Common Task Utilities and Toolbox.** A lot of times in research, you're coming up with a new method to analyze some structure, so a prebuilt workflow won't exist for you yet. Here, you need common functions ready to go (such as grabbing the volume of a crystal or running symmetry analysis). That way users can quickly build their own personal workflow without starting from scratch. Our core functions and classes are largely inspired from the [PyMatGen](https://github.com/materialsproject/pymatgen) and [ASE](https://gitlab.com/ase/ase) codes, where decided to write our own version for speed, readability, abd usability.
 ```python
-# import the base Task for your desired calculator. Here we use VASP
-from simmate.calculators.vasp.tasks.base import VaspTask
+# Load the structure file you'd like to use
+from simmate import Structure
+structure = Structure.from_file('NaCl.cif')
 
-# Configure the VASP calculation to your liking
-# NOTE: we can make settings dynamic to each structure using tags like "_per_atom" like shown below
-class ExampleVaspCalculation(VaspTask):
-
-    # The default settings to use for this static energy calculation.
-    incar = dict(
-        EDIFF_per_atom=1.0e-07,
-        ENCUT=520,
-        NSW=0,
-        KSPACING=0.5,
-    )
-
-    # We will use the PBE functional with all the default POTCARs
-    functional = "PBE"
-
-# if you'd like to run this task individually (without putting it in a workflow)
-result = task.run(structure=my_structure)
-
-# or you build it into a workflow and then run it
-with Flow("a-single-vasp-calc") as my_workflow:
-   structure = Parameter("structure")
-   result = ExampleVaspCalculation(structure)
-result = my_workflow.run()
-
+# Access a wide variety of properties and method. Here are some simple ones
+structure.density
+structure.composition.reduced_formula
+structure.lattice.volume
 ```
-
-TODO: I think some of the stuff I wrote above should move to tutorials and docs. I could instead simplify the Sneak-Peak to these 4 core components.
-
-1. an online database. You can search any compound you want and then look at its calculated properties. It also brings together other databases and their data -- so a webpage for one material will link to our "competitors" as well. Essentially it serves as a Google for materials and their calculated properties.
-
-2. prebuilt workflows. Say a user has a new material of their own and wants to calculate how conductive it would be, but they don't know how to do those calculations. Our code takes their structure and will run everything for them.
-
-3. common task utilities. A lot of times in research, you're coming up with a new method to analyze some structure, so a prebuilt workflow won't exist for you yet. Here, you need common functions ready to go (such as grabbing the volume of a crystal or running symmetry analysis). That way users can quickly build their own personal workflow without starting from scratch.
-
-4. computing scalability. At the beginning of a project, the user may want to write and run their code on a single computer and single core (this is how 99% of programs work). But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations (much like video games do). At the extreme, some projects require thousands of computers across numerous locations, including university HPC clusters and cloud computing. You can easily set up any configuration of resources with only a few lines of code and minimal knowledge of firewalls + internet ports.
 
 ## Coding Philosphy
 
 “If I have seen further it is by standing on the shoulders of Giants” -Isaac Newton (1675)
 Though there's [more behind this quote](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants) that I might want to used instead.
+
+**Immediate local exectution**. Other codes require complex setups such as a database server and worker processes, whereas these are completely optional in Simmate. If you'd like to test out running a workflow immediately and directly in your test enviornment, you can! For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
 
 Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
 
@@ -193,3 +182,34 @@ SVG Editting | Inkscape | Adobe Illustrator
 Graphics Editting | GIMP | Adobe Photoshop
 Command Line Interface | Click | Argparse, Python-Fire
 Code Formatting | Black | PyLint
+
+This belongs elsewhere maybe?
+4. **Clear, Up-Front Settings**. Many material science codes that map to DFT codes (like VASP, ABINIT, and others) often obscure what DFT setting they are using from the user. Even computational experts can have a difficult time figuring out which settings are being used and how dynamic ones are being set. In Simmate, a single DFT task and it's settings are made to be clear and obvious:
+```python
+# import the base Task for your desired calculator. Here we use VASP
+from simmate.calculators.vasp.tasks.base import VaspTask
+
+# Configure the VASP calculation to your liking
+# NOTE: we can make settings dynamic to each structure using tags like "_per_atom" like shown below
+class ExampleVaspCalculation(VaspTask):
+
+    # The default settings to use for this static energy calculation.
+    incar = dict(
+        EDIFF_per_atom=1.0e-07,
+        ENCUT=520,
+        NSW=0,
+        KSPACING=0.5,
+    )
+
+    # We will use the PBE functional with all the default POTCARs
+    functional = "PBE"
+
+# if you'd like to run this task individually (without putting it in a workflow)
+result = task.run(structure=my_structure)
+
+# or you build it into a workflow and then run it
+with Flow("a-single-vasp-calc") as my_workflow:
+   structure = Parameter("structure")
+   result = ExampleVaspCalculation(structure)
+result = my_workflow.run()
+```
