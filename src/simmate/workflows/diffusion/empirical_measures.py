@@ -308,7 +308,7 @@ def add_empiricalmeasures_to_db(
 
 
 # now make the overall workflow
-with Flow("CalcEmpiricalMeasuresforPathway") as workflow:
+with Flow("empiricalmeasures-for-pathway") as workflow:
 
     # load the structure object from our database
     pathway_id = Parameter("pathway_id")

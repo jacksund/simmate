@@ -100,7 +100,7 @@ def add_paths_to_db(structure_id, paths, path_limit=5):
 
 
 # now make the overall workflow
-with Flow("Find_DiffusionPathways") as workflow:
+with Flow("find-pathways") as workflow:
 
     # load the structure object from our database
     structure_id = Parameter("structure_id")

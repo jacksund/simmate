@@ -128,7 +128,7 @@ def add_structure_from_materialsproject(data):
 # --------------------------------------------------------------------------------------
 
 # now make the overall workflow
-with Flow("Add_Structures_From_MaterialsProject") as workflow:
+with Flow("add-structures-from-materialsproject") as workflow:
 
     # The input should be a Materials Project query dictionary
     criteria = Parameter("criteria")
