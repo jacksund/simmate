@@ -44,21 +44,39 @@ Read here for info on markdown, badges, and more:
 [Shields Badges](https://shields.io/)
 -->
 
-## Welcome, everyone!
+## Welcome!
 
-Simmate has everything you need for materials research.
+If you are brand-new to Simmate, you should jump over to our main website [simmate.org](simmate.org) and take a look at what we have to offer. This page is for when you're ready to start using Simmate in your own research and bring your lab to the next level. Explore what we have to offer, and then come back to try it yourself when you're ready!
 
-There are tons of programs available in computational materials science, and it can become overwhelming to pick which to use and how to mix-and-match them for your specific project. 
 
-That's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities.
+## What is Simmate?
 
-Whether you're an experimental or computational scientist, this program is built to scale for your needs. Jumpstart your research from here and hit the ground running.
- 
-## Simmate is built for everyone
+The Simulated Materials Ecosystem (Simmate) is the ultimate helper for computational materials research. 
 
-_**For Readers:**_ Not ready to download and try things yourself? No worries! Just take a look at our website [simmate.org](simmate.org) that shows all of the calculations that we've done already. Explore what we have to offer, and then come back to try it yourself when you're ready!
+Even if you consider yourself 100% an experimentalist, Simmate's barrier to entry is built to be as low as possible -- in fact, you don't need to know how to code at all. Simmate is built to guide your studies and generate property predictions with a single mouse click. Computational research can be intimidating because there are so many programs to choose from, and it can become overwhelming to pick which to use and how to mix-and-match them for your specific project. That's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities. We do the heavy lifting for you, and explain these other programs for you along the way.
 
-_**For Beginners:**_ We were all first-year graduate students before too, so our guides are written with that in mind. Take your research question and look for a workflow we've prebuilt that does it for you. For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
+At the other end of the spectrum, we provide an extremely powerful API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we opperate under a very different coding philosphy. **Here, usability and readability are our top priortities.** The first step toward that end is an "all-in-one" package rather than many separate programs. Experts can jump to our "Coding Philosphy" section below for a more in-depth description.
+
+## Installation
+
+**Don't panic** if your new to coding coding and Python. When you're ready to start learning, you can advance to our [30min Start-Up Tutorial]() where we teach you everything from the beginning.
+
+If you're confortable with Python, you can install simmate quickly and easily with...
+```
+conda install -c conda-forge simmate
+```
+
+## A Sneak-Peak of Features
+
+Again, take a look at [our main website](simmate.org) if you'd like to see the end-result of what Simmate has to offer. This secton showcases some features of downloading and using Simmate yourself. These features are ordered from high-level to the lowest -- so experts can get a peak at what's under the hood.
+
+1. **The User Interface.** Simmate builds off of [Prefect's](https://github.com/PrefectHQ/prefect) user-interface for orchestrating and managing workflows. Here you can submit pre-built (or custom) workflows for any crystal structure -- whether it is your own structure or one from a major database like ICSD, OCD, Materials Project, AFLOW, JARVIS, and others.
+
+<p align="center" style="margin-bottom:40px;">
+<img src="https://raw.githubusercontent.com/PrefectHQ/prefect/master/docs/.vuepress/public/orchestration/ui/dashboard-overview2.png"  height=440 style="max-height: 440px;">
+</p>
+
+2. **Immediate local exectution**. Other codes require complex setups such as a database server and worker processes, whereas these are completely optional in Simmate. If you'd like to test out running a workflow immediately and directly in your test enviornment, you can! For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
 ```python
 # Load the structure file you'd like to use
 from simmate import Structure
@@ -71,6 +89,20 @@ from simmate.workflows import RelaxStructure
 result = RelaxStructure.run(structure=my_structure)
 ```
 
+3. **Ease of Scaling**. Scaling your computational resources is often a difficult task, but it shouldn't be! Simmate makes scaling easy, whether you want to run workflows in parallel on a single computer or on hundreds of computers scattered accross multiple HPC clusters (using SLURM or PBS). This is an advanced topic, so please vist [our scaling tutorial]() for more info. For experts, here's how simple the code will be in the end:
+```python
+# To run the tasks of a single workflow in parrall, use Dask!
+from prefect.executors import DaskExecutor
+workflow.executor = DaskExecutor()
+result = workflow.run()
+
+# To run many workflows in parallel, use Prefect!
+from prefect import Client
+client.create_flow_run(project_name="Example-Project", flow_name="Example-Workflow", parameters=...) 
+
+# You can using different combinations of these two parallelization strategies as well!
+```
+
 _**For Experts:**_ Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
 
 ## Are there similar codes to ours?
@@ -80,14 +112,6 @@ While we give you the most common matsci analyses, there are always places where
 ## Integrations and Core Components
 
 Table of external codes that we support like vasp, pymatgen, django... (see table below)
-
-## Installation
-
-If you're new to coding and Python, you should go through our walkthrough tutorial located here: [30min Start-Up Tutorial](google.com)
-Otherwise, you can install simmate quickly and easily with...
-```
-conda install -c conda-forge simmate
-```
 
 ## Need help?
 
