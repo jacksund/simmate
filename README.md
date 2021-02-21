@@ -53,9 +53,9 @@ If you are brand-new to Simmate, you should jump over to our main website [simma
 
 The Simulated Materials Ecosystem (Simmate) is the ultimate toolbox and helper for computational materials research.
 
-Even if you consider yourself an experimentalist, Simmate's barrier to entry is built to be as low as possible -- in fact, you don't need to know how to code at all. Simmate is built to guide your studies and generate property predictions with a single mouse click. Computational research can be intimidating because there are so many programs to choose from, and it's hard to mix-and-match them for your specific project. And that's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities. We do the heavy lifting, and explain these other programs to you along the way.
+Even if you consider yourself an experimentalist, Simmate's barrier to entry is built to be as low as possible -- in fact, you don't need to know how to code at all. Simmate is designed to guide your studies and generate property predictions with a single mouse click. Computational research can be intimidating because there are so many programs to choose from, and it's hard to mix-and-match them for your specific project. And that's why we've made Simmate! We aim to be the glue between all these different programs, databases, and utilities. We do the heavy lifting, and explain these other programs to you along the way.
 
-At the other end of the spectrum, we provide an extremely powerful API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we opperate under a very different coding philosphy. **Here, usability and readability are our top priortities.** The first step toward that end is an "all-in-one" package rather than many separate programs. This includes a core material science framework, workflow management, database orm, and a website interface. Experts can jump to our "Coding Philosphy" section below for a more in-depth description.
+At the other end of the spectrum, we provide an extremely powerful API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we opperate under a very different coding philosphy. **Here, usability and readability are our top priortities.** The first step toward that end is an "all-in-one" package rather than many separate programs. This includes a core material science framework, workflow management, database orm, and a website interface. Experts can jump to our "Coding Philosphy" section of our [contributing docs]().
 
 ## Installation
 
@@ -99,7 +99,8 @@ structures = Structure.objects.filter(nsites__lt=6)
 structures = Structure.objects.filter(
    formula="MoS2",
    density__lt=10,
-   elastic__bulk_modulus__gt=0.5)
+   elastic__bulk_modulus__gt=0.5
+)
 ```
 
 3. **Ease of Scalability.** At the beginning of a project, the user may want to write and run their code on a single computer and single core (this is how 99% of programs work). But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations. At the extreme, some projects require thousands of computers across numerous locations, including university clusters (using SLURM or PBS) and cloud computing. You can easily set up any configuration of resources with only a few lines of code. This is an advanced topic, so please vist [our scaling tutorial]() for more info. For experts, here's how simple the code will be in the end:
@@ -130,17 +131,6 @@ structure.composition.reduced_formula
 structure.lattice.volume
 ```
 
-## Coding Philosphy
-
-“If I have seen further it is by standing on the shoulders of Giants” -Isaac Newton (1675)
-Though there's [more behind this quote](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants) that I might want to used instead.
-
-**Immediate local exectution**. Other codes require complex setups such as a database server and worker processes, whereas these are completely optional in Simmate. If you'd like to test out running a workflow immediately and directly in your test enviornment, you can! For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
-
-Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
-
-Table of external codes that we support like vasp, pymatgen, django... (see table below)
-
 ## Need help?
 
 Post here in our github using [this link here](google.com)
@@ -148,6 +138,29 @@ Post here in our github using [this link here](google.com)
 ## Extra resources
 
 contributing, tutorials, docs, etc.
+
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+
+
+Should I put this code in the contributing docs?
+## Coding Philosphy
+
+“If I have seen further it is by standing on the shoulders of Giants” -Isaac Newton (1675)
+Though there's [more behind this quote](https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants) that I might want to used instead.
+
+There are many different design choices made in Simmate compared to competing codes such as in the Materials Project, JARVIS, AFLOW, and others. When reading through our documentation and code, some of our core beliefs should stand out immediately:
+
+1. **Code is more often read than written.** For this reason, we believe code readability is extremely important. You'll find that we have an extremely large number of comments in our code -- there's actually more comments than code in many cases. This makes reading and understand functions much clearer. Users shouldn't treat their functions as a black-box, but instead as something they can read through to understand better - even if they aren't a python expert.
+2. **Opinionated code enhances usability.**
+
+**Immediate local exectution**. Other codes require complex setups such as a database server and worker processes, whereas these are completely optional in Simmate. If you'd like to test out running a workflow immediately and directly in your test enviornment, you can! For example, how do I relax my crystal structure using DFT? All you need is your crystal structure and the following code:
+
+Simmate includes all of the components you'll need including a core material science framework, workflow management, database orm, and a website interface. We adopt opinionated, high-level, and batteries-included coding philosophies, and we love building off of highly respected packages that do the same. The core "giants" that we build off of are [Django](https://github.com/django/django) and [Prefect](https://github.com/PrefectHQ/prefect), while lower level methods are sped up or parallelized by [Numpy](https://github.com/numpy/numpy), [Numba](https://github.com/numba/numba), and [Dask](https://github.com/dask/dask). The functionality of all these codes are built-in and you can use as much or as little of them as you'd like. We've also accounted for the complex scaling of your computer resources using modern Executor/Queue models -- whether you're working on a single computer for testing or want to submit thousands of VASP jobs to multiple HPC clusters (using a mix of SLURM or PBS queue systems), you can do that and do it quickly. Take a look at [our original publication](google.com) and [our benchmarks against other codes](google.com) to see more.
+
+Table of external codes that we support like vasp, pymatgen, django... (see table below)
+
 
 
 Component | Package | Other Packages (not used)
