@@ -46,7 +46,7 @@ Read here for info on markdown, badges, and more:
 
 ## Welcome!
 
-If you are brand-new to Simmate, you should jump over to our main website [simmate.org](simmate.org) and take a look at what we have to offer. This page is for when you're ready to bring your lab to the next level and start using Simmate in your own research. Simmate is open-source and free to use, so come back to try it yourself when you're ready! 
+If you are brand-new to Simmate, you should jump over to our main website [simmate.org](simmate.org) and take a look at what we have to offer. This page is for when you're ready to bring your lab to the next level and start using Simmate in your own research. Our software is open-source and free to use, so come back to try it yourself when you're ready! 
 
 
 ## What is Simmate?
