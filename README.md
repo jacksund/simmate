@@ -59,7 +59,7 @@ At the other end of the spectrum, we provide an extremely powerful API for exper
 
 ## Installation
 
-**Don't panic** if your new to coding coding and Python. When you're ready to start learning, you can advance to our [15min Start-Up Tutorial]() where we teach you everything from the beginning.
+**Don't panic** if your new to coding and Python. When you're ready to start learning, you can advance to our [15min Start-Up Tutorial]() where we teach you everything from the beginning.
 
 If you're confortable with Python, you can install Simmate with...
 ```
@@ -87,7 +87,7 @@ from simmate.workflows import RelaxStructure
 result = RelaxStructure.run(structure=my_structure)
 ```
 
-2. _**A Full-Feature Database.**_ Using all the data on our official site or your personal data, you can take advantage of Simmate's extremely powerful database API that is built off of [Django ORM](https://github.com/django/django). Simmate also brings together other databases and their data -- including those like ICSD, OCD, Materials Project, AFLOW, JARVIS, and others. With so much data, being able to navigate it is critial:
+2. _**A Full-Feature Database.**_ Using all the data on our official site or your personal data, you can take advantage of Simmate's extremely powerful database API that is built off of [Django ORM](https://github.com/django/django). Simmate also brings together third-party databases and their data -- including those like ICSD, OCD, Materials Project, AFLOW, JARVIS, and others. With so much data, being able to navigate it is critial:
 
 ```python
 # Here are some examples of querying the Simmate database for specific structures
