@@ -247,9 +247,25 @@ class EmpiricalMeasures(Calculation):
     ionic_radii_overlap_anions = models.FloatField(blank=True, null=True)
 
     """ Relationships """
-    # Each PathwayCalcs corresponds to one Pathway, which can have many Pathway(s)
+    # Each PathwayCalcs corresponds to one Pathway
     # I set primary_key to true so that the primary keys match that of the pathway
     pathway = models.OneToOneField(Pathway, primary_key=True, on_delete=models.CASCADE)
+
+
+# --------------------------------------------------------------------------------------
+
+
+# class VaspCalcA(Calculation):
+
+#     """ Base info """
+#     final_energy = models.FloatField(blank=True, null=True)
+#     final_energy_per_atom = models.FloatField(blank=True, null=True)
+#     dimensionality_cumlengths = models.IntegerField(blank=True, null=True)
+
+#     """ Relationships """
+#     # Each calc corresponds to one Pathway
+#     # I set primary_key to true so that the primary keys match that of the pathway
+#     pathway = models.OneToOneField(Pathway, primary_key=True, on_delete=models.CASCADE)
 
 
 # --------------------------------------------------------------------------------------

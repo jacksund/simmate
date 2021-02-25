@@ -5,6 +5,9 @@ Created on Thu Jan 28 14:38:41 2021
 @author: jacks
 """
 
+import os
+import shlex
+
 from pymatgen import Structure
 from pymatgen.io.vasp.sets import MPStaticSet
 
@@ -29,9 +32,12 @@ from custodian.vasp.handlers import (
 from custodian.vasp.jobs import VaspJob
 from custodian.vasp.validators import VasprunXMLValidator, VaspFilesValidator
 
-vasp_cmd = "vasp_std > vasp.out"
-gamma_vasp_cmd = "vasp_gamma > vasp.out"
-vasp_input_set_params = {}
+# Because shell=True is a secuirity problem, we need to convert the command
+# via shlex so that Popen can read it.
+vasp_cmd = "mpirun -n 30 vasp"  # " > vasp.out" is automatically added by custodian
+gamma_vasp_cmd = "mpirun -n 30 vasp_gamma"
+vasp_cmd = os.path.expandvars(vasp_cmd)  # if you have "$MY_ENV_VAR" in your command
+vasp_cmd = shlex.split(vasp_cmd)  # convert "mycmd --args" to ["mycmd", "--args"]
 
 # These are the settings I've changed relative to MPStaticSet, where the ones
 # still commented out are ones I'd consider changing if I'm doing a lower-quality
@@ -104,8 +110,8 @@ custodian = Custodian(
     jobs,
     validators=validators,
     max_errors=5,
-    # polling_time_step=10,
-    # monitor_freq=30,
+    polling_time_step=5,  # default 10
+    monitor_freq=3,  # default 30
 )
 
 custodian.run()

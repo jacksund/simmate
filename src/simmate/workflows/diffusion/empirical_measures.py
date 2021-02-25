@@ -19,6 +19,7 @@ import copy
 
 from prefect import Flow, Parameter, task
 from prefect.triggers import all_finished
+from prefect.storage import Local as LocalStorage
 
 from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 from pymatgen.analysis.local_env import ValenceIonicRadiusEvaluator
@@ -327,5 +328,8 @@ with Flow("empiricalmeasures-for-pathway") as workflow:
     add_empiricalmeasures_to_db(
         pathway_id, oxi_data, dimension_data, ewald_data, iro_data
     )
+
+# for Prefect Cloud compatibility, set the storage to a an import path
+workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
 
 # --------------------------------------------------------------------------------------
