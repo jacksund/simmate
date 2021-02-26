@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# import json
+
 from pymatgen.io.vasp.outputs import Vasprun
 
 from prefect import Flow, Parameter, task
@@ -96,7 +98,7 @@ def run_vasp(structure):
     )
 
     # grab the custodian log
-    # TODO custodian.json
+    # json_log = json.load("custodian.json")
 
     # workup the vasp calculation
     # load the xml file and only parse the bare minimum
@@ -122,14 +124,12 @@ def run_vasp(structure):
     empty_directory()
 
     # return the desired info
-    # BUG: pymatgen's FloatWithUnit gives prefect trouble in a mapping scheme
-    # for some reason.
-    return float(xmlReader.final_energy)
+    return xmlReader.final_energy
 
 
 # --------------------------------------------------------------------------------------
 
-@task
+@task(trigger=all_finished)
 def add_results_to_db(energies_mapped, pathway_id):
 
     # energies_mapped will be a list of three floats

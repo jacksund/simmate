@@ -224,5 +224,5 @@ def empty_directory():
     # An error will be thrown if there is a directory present (such as from an
     # NEB calc).
     for filename in os.listdir("."):
-        if not "submit.sh" and not "prefect_agent.py":
+        if filename not in ["submit.sh", "prefect_agent.py"]:
             os.remove(filename)
