@@ -2,7 +2,7 @@
 
 from pymatgen.io.vasp.outputs import Vasprun
 
-from prefect import Flow, Parameter, task, flatten
+from prefect import Flow, Parameter, task
 from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
 
@@ -127,11 +127,14 @@ def run_vasp(structure):
 
 # --------------------------------------------------------------------------------------
 
-@task(trigger=all_finished)
+@task  # (trigger=all_finished)
 def add_results_to_db(energies_mapped):
 
     # energies_mapped will be a list of three floats
-    e_start, e_midpoint, e_end = energies_mapped
+    # e_start, e_midpoint, e_end = energies_mapped
+    e_start = energies_mapped[0]
+    e_midpoint = energies_mapped[1]
+    e_end = energies_mapped[2]
 
     from simmate.configuration import django  # ensures setup
     from simmate.database.diffusion import VaspCalcA
@@ -180,8 +183,7 @@ with Flow("static-vasp-calc") as workflow:
     energies = run_vasp.map(images)
 
     # save the data to our database
-    # flatten is required for prefect compatibility (converts energies to a list)
-    add_results_to_db(flatten(energies))
+    add_results_to_db(energies)
 
 # for Prefect Cloud compatibility, set the storage to a an import path
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
