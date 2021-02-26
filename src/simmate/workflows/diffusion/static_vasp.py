@@ -122,7 +122,9 @@ def run_vasp(structure):
     empty_directory()
 
     # return the desired info
-    return xmlReader.final_energy
+    # BUG: pymatgen's FloatWithUnit gives prefect trouble in a mapping scheme
+    # for some reason.
+    return float(xmlReader.final_energy)
 
 
 # --------------------------------------------------------------------------------------
