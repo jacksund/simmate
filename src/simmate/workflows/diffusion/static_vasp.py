@@ -129,8 +129,8 @@ def run_vasp(structure):
 
 # --------------------------------------------------------------------------------------
 
-@task  # (trigger=all_finished)
-def add_results_to_db(energies_mapped):
+@task
+def add_results_to_db(energies_mapped, pathway_id):
 
     # energies_mapped will be a list of three floats
     # e_start, e_midpoint, e_end = energies_mapped
@@ -185,7 +185,7 @@ with Flow("static-vasp-calc") as workflow:
     energies = run_vasp.map(images)
 
     # save the data to our database
-    add_results_to_db(energies)
+    add_results_to_db(energies, pathway_id)
 
 # for Prefect Cloud compatibility, set the storage to a an import path
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
