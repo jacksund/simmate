@@ -18,6 +18,7 @@ Example of running the code below:
 from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder
 
 from prefect import Flow, Parameter, task
+from prefect.storage import Local as LocalStorage
 
 # --------------------------------------------------------------------------------------
 
@@ -25,7 +26,7 @@ from prefect import Flow, Parameter, task
 @task
 def load_structure_from_db(structure_id):
 
-    from simmate.configuration import manage_django  # ensures setup
+    from simmate.configuration import django  # ensures setup
     from simmate.database.diffusion import MaterialsProjectStructure as MPS
 
     # grab the proper Structure entry and we want only the structure_json column
@@ -71,7 +72,7 @@ def find_paths(structure):
 @task
 def add_paths_to_db(structure_id, paths, path_limit=5):
 
-    from simmate.configuration import manage_django  # ensures setup
+    from simmate.configuration import django  # ensures setup
     from simmate.database.diffusion import Pathway as Pathway_DB
 
     # make sure some pathways were actually provided. If not, exit the function.
@@ -114,5 +115,7 @@ with Flow("find-pathways") as workflow:
     # and the pathways to our database
     add_paths_to_db(structure_id, pathways)
 
+# for Prefect Cloud compatibility, set the storage to a an import path
+workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
 
 # --------------------------------------------------------------------------------------

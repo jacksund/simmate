@@ -36,7 +36,7 @@ from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
 @task
 def load_pathway_from_db(pathway_id):
 
-    from simmate.configuration import manage_django  # ensures setup
+    from simmate.configuration import django  # ensures setup
     from simmate.database.diffusion import Pathway as Pathway_DB
 
     # grab the pathway model object
@@ -270,7 +270,7 @@ def add_empiricalmeasures_to_db(
     pathway_id, oxi_data, dimension_data, ewald_data, iro_data
 ):
 
-    from simmate.configuration import manage_django  # ensures setup
+    from simmate.configuration import django  # ensures setup
     from simmate.database.diffusion import EmpiricalMeasures as EM_DB
 
     # now add the empirical data using the supplied dictionary

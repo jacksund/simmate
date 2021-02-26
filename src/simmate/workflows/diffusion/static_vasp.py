@@ -1,43 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 28 14:38:41 2021
-
-@author: jacks
-"""
-
-import os
-import shlex
 
 from pymatgen import Structure
-from pymatgen.io.vasp.sets import MPStaticSet
 
-from custodian import Custodian
-from custodian.vasp.handlers import (
-    VaspErrorHandler,
-    # AliasingErrorHandler,
-    MeshSymmetryErrorHandler,
-    UnconvergedErrorHandler,
-    # MaxForceErrorHandler,
-    PotimErrorHandler,
-    FrozenJobErrorHandler,
-    NonConvergingErrorHandler,
-    PositiveEnergyErrorHandler,
-    # WalltimeHandler,
-    StdErrHandler,
-    # DriftErrorHandler,
-    LargeSigmaHandler,
-    IncorrectSmearingHandler,
-    # ScanMetalHandler,
-)
-from custodian.vasp.jobs import VaspJob
-from custodian.vasp.validators import VasprunXMLValidator, VaspFilesValidator
+from simmate.workflows.diffusion.utilities import run_vasp_custodian
 
-# Because shell=True is a secuirity problem, we need to convert the command
-# via shlex so that Popen can read it.
-vasp_cmd = "mpirun -n 30 vasp"  # " > vasp.out" is automatically added by custodian
-gamma_vasp_cmd = "mpirun -n 30 vasp_gamma"
-vasp_cmd = os.path.expandvars(vasp_cmd)  # if you have "$MY_ENV_VAR" in your command
-vasp_cmd = shlex.split(vasp_cmd)  # convert "mycmd --args" to ["mycmd", "--args"]
+structure = Structure.from_file("NaCl.cif")
+structure = structure.get_primitive_structure()
+structure = structure.copy(sanitize=True)
 
 # These are the settings I've changed relative to MPStaticSet, where the ones
 # still commented out are ones I'd consider changing if I'm doing a lower-quality
@@ -56,65 +25,14 @@ custom_incar = dict(
     # KSPACING=0.5,
     NPAR=4,  # for parallel efficiency
     # IVDW=11,  # use DFT-D3 corrections
+    ISYM=1,  # Turn off symmetry for vacancy-based diffusion calcs
 )
 
-structure = Structure.from_file("NaCl.cif")
-structure = structure.get_primitive_structure()
-structure = structure.copy(sanitize=True)
-
-# to practice working with a supercell + vacancy
-structure.make_supercell(4)
-
-# All of this code is a simplified version of...
-#   atomate.vasp.fireworks.StaticFW
-# Note, this firework breaks down into in firetasks
-
-
-# The first firetask is to just write the static input. I assume MPStaticSet here.
-vasp_input_set = MPStaticSet(
+run_vasp_custodian(
     structure,
-    user_incar_settings=custom_incar,
-    # defaults are 64 for Relax, 100 for Static
+    errorhandler_settings="default",
+    vasp_cmd="mpirun -n 30 vasp",
+    gamma_vasp_cmd="mpirun -n 30 vasp_gamma",
+    custom_incar={},
     reciprocal_density=64,
-    # considered PBE_54, but +U or MagMom may change for that
-    user_potcar_functional="PBE",
 )
-vasp_input_set.write_input(".")
-
-
-# The next firetask is to run VASP using Custodian. This code is a simplified
-# version of atomate.vasp.firetasks.RunVaspCustodian
-
-# I choose the "default" handler group, but may want the "strict" later on
-errorhandlers = [
-    VaspErrorHandler(),
-    MeshSymmetryErrorHandler(),
-    UnconvergedErrorHandler(),
-    NonConvergingErrorHandler(),
-    PotimErrorHandler(),
-    PositiveEnergyErrorHandler(),
-    FrozenJobErrorHandler(),
-    StdErrHandler(),
-    LargeSigmaHandler(),
-    IncorrectSmearingHandler(),
-    # MaxForceErrorHandler() # This is just for relax, right?
-]
-
-validators = [VasprunXMLValidator(), VaspFilesValidator()]
-
-# construct jobs
-jobs = [VaspJob(vasp_cmd, backup=False)]
-
-custodian = Custodian(
-    errorhandlers,
-    jobs,
-    validators=validators,
-    max_errors=5,
-    polling_time_step=5,  # default 10
-    monitor_freq=3,  # default 30
-)
-
-custodian.run()
-
-# TODO
-# save to database

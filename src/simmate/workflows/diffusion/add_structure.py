@@ -23,6 +23,7 @@ from pymatgen import MPRester
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from prefect import Flow, Parameter, task
+from prefect.storage import Local as LocalStorage
 
 # --------------------------------------------------------------------------------------
 
@@ -115,7 +116,7 @@ def sanitize_structure(data):
 @task
 def add_structure_from_materialsproject(data):
 
-    from simmate.configuration import manage_django  # ensures setup
+    from simmate.configuration import django  # ensures setup
     from simmate.database.diffusion import MaterialsProjectStructure as MPS
 
     # convert the dictionary to django orm
@@ -142,5 +143,8 @@ with Flow("add-structures-from-materialsproject") as workflow:
     # and add it to our database
     add_structure_from_materialsproject.map(cleaned_data)
 
+
+# for Prefect Cloud compatibility, set the storage to a an import path
+workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
 
 # --------------------------------------------------------------------------------------

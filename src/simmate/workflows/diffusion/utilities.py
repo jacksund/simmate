@@ -1,10 +1,34 @@
 # -*- coding: utf-8 -*-
 
+import os
+import shlex
+
+from pymatgen.io.vasp.sets import MPStaticSet
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.analysis.local_env import ValenceIonicRadiusEvaluator
 
 from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder, MigrationPath
 
+from custodian import Custodian
+from custodian.vasp.handlers import (
+    VaspErrorHandler,
+    AliasingErrorHandler,
+    MeshSymmetryErrorHandler,
+    UnconvergedErrorHandler,
+    # MaxForceErrorHandler,
+    PotimErrorHandler,
+    FrozenJobErrorHandler,
+    NonConvergingErrorHandler,
+    PositiveEnergyErrorHandler,
+    # WalltimeHandler,
+    StdErrHandler,
+    DriftErrorHandler,
+    LargeSigmaHandler,
+    IncorrectSmearingHandler,
+    ScanMetalHandler,
+)
+from custodian.vasp.jobs import VaspJob
+from custodian.vasp.validators import VasprunXMLValidator, VaspFilesValidator
 
 # --------------------------------------------------------------------------------------
 
@@ -92,3 +116,101 @@ def get_oxi_supercell_path_OLD(structure, path, min_sl_v):
 
 
 # --------------------------------------------------------------------------------------
+
+def run_vasp_custodian(
+    structure,
+    errorhandler_settings="default",
+    vasp_cmd="mpirun -n 30 vasp",
+    gamma_vasp_cmd="mpirun -n 30 vasp_gamma",
+    custom_incar={},
+    reciprocal_density=64,
+):
+
+    # All of this code is a simplified version of...
+    #   atomate.vasp.fireworks.StaticFW
+    # Note, this firework breaks down into in firetasks
+
+    # Because shell=True is a secuirity problem, we need to convert the command
+    # via shlex so that Popen can read it.
+    # Also " > vasp.out" is automatically added by custodian
+    vasp_cmd = os.path.expandvars(vasp_cmd)  # if you have "$MY_ENV_VAR" in your command
+    vasp_cmd = shlex.split(vasp_cmd)  # convert "mycmd --args" to ["mycmd", "--args"]
+
+    # The first firetask is to just write the static input. I assume MPStaticSet here.
+    vasp_input_set = MPStaticSet(
+        structure,
+        user_incar_settings=custom_incar,
+        # defaults are 64 for Relax, 100 for Static
+        reciprocal_density=reciprocal_density,
+        # considered PBE_54, but +U or MagMom may change for that
+        user_potcar_functional="PBE",
+    )
+    vasp_input_set.write_input(".")
+
+    # The next firetask is to run VASP using Custodian. This code is a simplified
+    # version of atomate.vasp.firetasks.RunVaspCustodian
+
+    # These are the error handlers used by the Materials Project (via Atomate)
+    errorhandler_groups = {
+        "default": [
+            VaspErrorHandler(),
+            MeshSymmetryErrorHandler(),
+            UnconvergedErrorHandler(),
+            NonConvergingErrorHandler(),
+            PotimErrorHandler(),
+            PositiveEnergyErrorHandler(),
+            FrozenJobErrorHandler(),
+            StdErrHandler(),
+            LargeSigmaHandler(),
+            IncorrectSmearingHandler(),
+        ],
+        "strict": [
+            VaspErrorHandler(),
+            MeshSymmetryErrorHandler(),
+            UnconvergedErrorHandler(),
+            NonConvergingErrorHandler(),
+            PotimErrorHandler(),
+            PositiveEnergyErrorHandler(),
+            FrozenJobErrorHandler(),
+            StdErrHandler(),
+            AliasingErrorHandler(),
+            DriftErrorHandler(),
+            LargeSigmaHandler(),
+            IncorrectSmearingHandler(),
+        ],
+        "scan": [
+            VaspErrorHandler(),
+            MeshSymmetryErrorHandler(),
+            UnconvergedErrorHandler(),
+            NonConvergingErrorHandler(),
+            PotimErrorHandler(),
+            PositiveEnergyErrorHandler(),
+            FrozenJobErrorHandler(),
+            StdErrHandler(),
+            LargeSigmaHandler(),
+            IncorrectSmearingHandler(),
+            ScanMetalHandler(),
+        ],
+        "md": [VaspErrorHandler(), VaspFilesValidator()],
+        "no_handler": [],
+    }
+
+    # based on input flag, select which handlers we will be using
+    errorhandlers = errorhandler_groups[errorhandler_settings]
+
+    # For now, I always use these validators. These may be remove for NEB though.
+    validators = [VasprunXMLValidator(), VaspFilesValidator()]
+
+    # construct jobs
+    jobs = [VaspJob(vasp_cmd, backup=False)]
+
+    custodian = Custodian(
+        errorhandlers,
+        jobs,
+        validators=validators,
+        max_errors=5,
+        polling_time_step=5,  # default 10
+        monitor_freq=3,  # default 30
+    )
+
+    custodian.run()

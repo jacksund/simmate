@@ -21,7 +21,7 @@ from django.conf import settings
 # a lot of potential headaches at roughly the same speed.
 
 
-def setup_django_full():  # Wall time: 250 ms first call and 175 ns after
+def setup_full():  # Wall time: 250 ms first call and 175 ns after
 
     # see if django has already been configured. If so, just exit this function.
     # BUG: originally I used the code below, but it didn't work with Prefect+Dask:
@@ -43,7 +43,7 @@ def setup_django_full():  # Wall time: 250 ms first call and 175 ns after
     os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
-def connect_db():  # Wall time: 200 ms first call and 600 ns after
+def connect_database_only():  # Wall time: 200 ms first call and 600 ns after
 
     # see if django has already been configured. If so, just exit this function.
     if settings.configured:
@@ -77,10 +77,10 @@ def setup_django_cli():  # TODO -- move this to the command_line module
 # --------------------------------------------------------------------------------------
 
 
-def update_db(apps_to_migrate=["diffusion", "execution"]):
+def update_database(apps_to_migrate=["diffusion", "execution"]):
 
     # setup django before we call any commands
-    setup_django_full()
+    setup_full()
 
     # execute the following commands to build the database
     from django.core.management import call_command
@@ -88,7 +88,7 @@ def update_db(apps_to_migrate=["diffusion", "execution"]):
     call_command("migrate")
 
 
-def reset_db(apps_to_migrate=["diffusion", "execution"]):
+def reset_database(apps_to_migrate=["diffusion", "execution"]):
     # Apps to init.
     # !!! In the future, I should do a more robust search, rather than hardcode here.
     # !!! maybe just grab all folders in the base directory via os.listdir()?
@@ -110,7 +110,7 @@ def reset_db(apps_to_migrate=["diffusion", "execution"]):
             shutil.rmtree(migration_dir)
 
     # now update the database based on the registered models
-    update_db(apps_to_migrate)
+    update_database(apps_to_migrate)
 
 
 # --------------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ def runserver():
 # --------------------------------------------------------------------------------------
 
 
-if __name__ == "simmate.configuration.manage_django":
+if __name__ == "simmate.configuration.django":
     # This is a little hacking that I do to speed up when I setup django and
     # not redoing it again. When I import this module, it just automatically
     # runs this function. Otherwise I would have to make sure I'm connected
@@ -167,7 +167,7 @@ if __name__ == "simmate.configuration.manage_django":
     #   from simmate.configuration import manage_django # ensures setup
     # Not only that, but it's faster too! The first import takes 250 ms and then
     # after that it takes 370 ns. 996
-    setup_django_full()
+    setup_full()
 
 # TODO -- move this to the commandline module
 # if __name__ == "__main__":
