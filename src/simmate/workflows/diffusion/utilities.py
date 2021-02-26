@@ -120,8 +120,8 @@ def get_oxi_supercell_path_OLD(structure, path, min_sl_v):
 def run_vasp_custodian(
     structure,
     errorhandler_settings="default",
-    vasp_cmd="mpirun -n 20 vasp",
-    gamma_vasp_cmd="mpirun -n 20 vasp_gamma",
+    vasp_cmd="mpirun -n 28 vasp",
+    gamma_vasp_cmd="mpirun -n 28 vasp_gamma",
     custom_incar={},
     reciprocal_density=64,
 ):

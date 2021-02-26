@@ -91,8 +91,8 @@ def run_vasp(structure):
     run_vasp_custodian(
         structure,
         errorhandler_settings="md",  # minimal checks
-        vasp_cmd="mpirun -n 20 vasp",
-        gamma_vasp_cmd="mpirun -n 20 vasp_gamma",
+        # vasp_cmd="mpirun -n 20 vasp",
+        # gamma_vasp_cmd="mpirun -n 20 vasp_gamma",
         custom_incar=custom_incar,
         reciprocal_density=50,  # very low density kpt mesh
     )
@@ -167,7 +167,7 @@ def add_results_to_db(energies_mapped, pathway_id):
 
 
 # now make the overall workflow
-with Flow("static-vasp-calc") as workflow:
+with Flow("Vasp Calc A") as workflow:
 
     # load the structure object from our database
     pathway_id = Parameter("pathway_id")
