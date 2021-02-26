@@ -27,11 +27,13 @@ def build_projects():
     from simmate.workflows.diffusion.empirical_measures import (
         workflow as empirical_measures_workflow,
     )
+    from simmate.workflows.diffusion.static_vasp import workflow as vaspcalc_workflow
 
     workflows = [
         add_structure_workflow,
         find_paths_workflow,
         empirical_measures_workflow,
+        vaspcalc_workflow,
     ]
 
     for workflow in workflows:

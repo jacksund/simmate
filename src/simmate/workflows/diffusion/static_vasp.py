@@ -161,7 +161,7 @@ def add_results_to_db(energies_mapped):
 
 
 # now make the overall workflow
-with Flow("empiricalmeasures-for-pathway") as workflow:
+with Flow("static-vasp-calc") as workflow:
 
     # load the structure object from our database
     pathway_id = Parameter("pathway_id")
