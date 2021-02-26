@@ -191,7 +191,7 @@ def run_vasp_custodian(
             IncorrectSmearingHandler(),
             ScanMetalHandler(),
         ],
-        "md": [VaspErrorHandler(), VaspFilesValidator()],
+        "md": [VaspErrorHandler(), NonConvergingErrorHandler()],
         "no_handler": [],
     }
 
@@ -214,3 +214,15 @@ def run_vasp_custodian(
     )
 
     custodian.run()
+
+
+def empty_directory():
+
+    # BUG: because Custodian doesn't let you set the working directory, we
+    # need to clear our current directory of any past calculations
+    # Delete all files except submit.sh and prefect_agent.py.
+    # An error will be thrown if there is a directory present (such as from an
+    # NEB calc).
+    for filename in os.listdir("."):
+        if not "submit.sh" and not "prefect_agent.py":
+            os.remove(filename)
