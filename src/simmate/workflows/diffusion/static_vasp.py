@@ -3,6 +3,7 @@
 from pymatgen.io.vasp.outputs import Vasprun
 
 from prefect import Flow, Parameter, task
+from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
 
 from simmate.workflows.diffusion.utilities import (
@@ -88,8 +89,8 @@ def run_vasp(structure):
     run_vasp_custodian(
         structure,
         errorhandler_settings="md",  # minimal checks
-        vasp_cmd="mpirun -n 30 vasp",
-        gamma_vasp_cmd="mpirun -n 30 vasp_gamma",
+        vasp_cmd="mpirun -n 20 vasp",
+        gamma_vasp_cmd="mpirun -n 20 vasp_gamma",
         custom_incar=custom_incar,
         reciprocal_density=50,  # very low density kpt mesh
     )
@@ -126,7 +127,7 @@ def run_vasp(structure):
 
 # --------------------------------------------------------------------------------------
 
-@task
+@task(trigger=all_finished)
 def add_results_to_db(energies_mapped):
 
     # energies_mapped will be a list of three floats
