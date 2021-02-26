@@ -2,7 +2,7 @@
 
 from pymatgen.io.vasp.outputs import Vasprun
 
-from prefect import Flow, Parameter, task
+from prefect import Flow, Parameter, task, flatten
 from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
 
@@ -96,7 +96,7 @@ def run_vasp(structure):
     )
 
     # grab the custodian log
-    # TODO
+    # TODO custodian.json
 
     # workup the vasp calculation
     # load the xml file and only parse the bare minimum
@@ -180,7 +180,8 @@ with Flow("static-vasp-calc") as workflow:
     energies = run_vasp.map(images)
 
     # save the data to our database
-    add_results_to_db(energies)
+    # flatten is required for prefect compatibility (converts energies to a list)
+    add_results_to_db(flatten(energies))
 
 # for Prefect Cloud compatibility, set the storage to a an import path
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
