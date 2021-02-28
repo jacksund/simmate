@@ -115,7 +115,11 @@ result = workflow.run()
 # To run many workflows in parallel, use Prefect!
 from prefect import Client
 client = Client()
-client.create_flow_run(project_name="Example-Project", flow_name="Example-Workflow", parameters=...) 
+client.create_flow_run(
+   project_name="Example-Project",
+   flow_name="Example-Workflow",
+   parameters={"timelimit": 50},
+)
 
 # You can using different combinations of these two parallelization strategies as well!
 # Using Prefect and Dask, we can scale out accross various computer resources with a few lines of code.
