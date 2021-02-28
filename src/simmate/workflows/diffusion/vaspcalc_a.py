@@ -156,7 +156,7 @@ def add_results_to_db(energies_mapped, pathway_id):
     calc.energy_midpoint = e_midpoint if not isinstance(e_midpoint, Exception) else None
     calc.energy_end = e_end if not isinstance(e_end, Exception) else None
     try:
-        barrier = max([e_start - e_midpoint, e_end - e_midpoint])
+        barrier = max([e_midpoint - e_start, e_midpoint - e_end])
     except:
         barrier = None
     calc.energy_barrier = barrier
