@@ -127,10 +127,15 @@ client.create_flow_run(project_name="Example-Project", flow_name="Example-Workfl
 from simmate import Structure
 structure = Structure.from_file('NaCl.cif')
 
-# Access a wide variety of properties and method. Here are some simple ones.
+# Access a wide variety of properties. Here are some simple ones.
 structure.density
 structure.composition.reduced_formula
 structure.lattice.volume
+
+# Also access methods that run deformations or analysis on your structure.
+structure.get_supercell([2,2,2])
+structure.get_conventional_unitcell()
+structure.get_oxidation_states()
 ```
 
 ## Need help?
