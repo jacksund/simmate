@@ -5,7 +5,7 @@ import os
 # TODO: write my own vasp.outputs classes and remove pymatgen dependency
 from pymatgen.io.vasp.outputs import Vasprun
 
-from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
+from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
 from simmate.workflows.core.tasks.supervisedstagedtask import (
     SupervisedStagedShellTask as SSSTask,
 )

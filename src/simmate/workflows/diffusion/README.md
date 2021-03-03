@@ -137,6 +137,64 @@ futures = client.map(
 results = client.gather(futures)
 ```
 
+7. Rough vasp calc
+```python
+# from simmate.configuration import django  # ensures django setup
+# from simmate.database.diffusion import EmpiricalMeasures
+# queryset = EmpiricalMeasures.objects.order_by("created_at").all()[:400]
+# from django_pandas.io import read_frame
+# df = read_frame(queryset) # , index_col="pathway": df = df.reset_index()
+# df.to_csv("initial_structuredb.csv")
+
+
+from simmate.configuration.prefect import reset_projects
+reset_projects()
+
+from prefect import Client
+from simmate.configuration import django  # ensures django setup
+from simmate.database.diffusion import Pathway as Pathway_DB
+
+client = Client()
+
+pathway_ids = (
+    Pathway_DB.objects.filter(
+        vaspcalca__isnull=True,
+        empiricalmeasures__dimensionality__gte=1,
+        empiricalmeasures__oxidation_state=-1,
+        empiricalmeasures__ionic_radii_overlap_cations__gt=-1,
+        empiricalmeasures__ionic_radii_overlap_anions__gt=-1,
+        nsites_777__lte=150,
+        structure__nsites__lte=12,
+    )
+    # .exclude(pk__in=[220])  # BUG: "RSPHER: internal ERROR:" >> removed via overlap!
+    .order_by("nsites_777", "structure__nsites", "length")
+    # .distinct("structure__id")  # BUG: doesn't work for sqlite, only postgres
+    .values_list("id", flat=True)
+    .all()
+)
+
+for pathway_id in pathway_ids:
+    client.create_flow_run(
+        flow_id="3ec2c48d-3c57-4abf-92c2-da317ef6815b",
+        parameters={"pathway_id": pathway_id},
+    )
+
+
+# from simmate.configuration import django
+# from simmate.database.diffusion import VaspCalcA
+# queryset = VaspCalcA.objects.all()
+
+# for c in queryset:
+#     # try:
+#     #     barrier = max([c.energy_midpoint - c.energy_start, c.energy_midpoint - c.energy_end])
+#     # except:
+#     #     barrier = None
+#     # c.energy_barrier = barrier
+#     # c.save()
+    
+#     if c.status == "S":
+#         c.delete()
+```
 
 ## TODO
 

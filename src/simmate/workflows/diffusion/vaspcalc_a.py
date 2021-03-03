@@ -59,7 +59,7 @@ def get_images(path):
     return images
 
 
-@task
+@task  # (timeout=30*60)
 def run_vasp(structure):
 
     # These are the settings I've changed relative to MPStaticSet, where the ones
@@ -68,7 +68,7 @@ def run_vasp(structure):
     custom_incar = dict(
         EDIFF=1.0e-02,  # was EDIFF_PER_ATOM=5.0e-05
         ENCUT=400,  # was 520 --> reduced for fast rough calcs
-        # ICHARG=1,  # READ INTO THIS. There may be speedup from this setting
+        # ICHARG=1,  # Read into this. There may be speedup from this setting
         ISPIN=1,  # was 2 --> spin-polarized turned off for rough calcs
         LASPH=False,  # was True --> turned off for rough calcs.
         ALGO="Fast",  # Fast for geom_opt, Normal for static
