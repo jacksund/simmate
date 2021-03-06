@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import pickle
 import time
+
+# import pickle
+import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 
 from django.db import transaction
 
-from simmate.configuration import manage_django  # ensures setup
+from simmate.configuration import django  # ensures setup
 from simmate.workflows.core.execution.models import WorkItem
 
 # In the future, I might want this worker to be a local dask cluster that has
@@ -14,6 +16,17 @@ from simmate.workflows.core.execution.models import WorkItem
 # given workitems in serial. I could even allow for more threads so that this
 # worker can run multiple workitems at once and in parallel. I'm not sure if
 # asyncio would play into this though.
+
+# This string is just something fancy to display in the console when a worker
+# starts up.
+# This uses "Small Slant" from patorjk.com
+HEADER_ART = r"""
+   _____                  __        _      __         __
+  / __(_)_ _  __ _  ___ _/ /____   | | /| / /__  ____/ /_____ ____
+ _\ \/ /  ' \/  ' \/ _ `/ __/ -_)  | |/ |/ / _ \/ __/  '_/ -_) __/
+/___/_/_/_/_/_/_/_/\_,_/\__/\__/   |__/|__/\___/_/ /_/\_\\__/_/
+
+"""
 
 
 class DjangoWorker:
@@ -49,6 +62,9 @@ class DjangoWorker:
 
     def start(self):
 
+        # print the header in the console to let the user know the worker started
+        print(HEADER_ART)
+
         # establish starting point for the worker
         time_start = time.time()
         ntasks_finished = 0
@@ -82,6 +98,7 @@ class DjangoWorker:
                 # This is a special condition where we may want to close the
                 # worker if the queue stays empty
                 if self.close_on_empty_queue:
+                    # after we just waited, let's check the queue size again
                     if self.queue_size() == 0:
                         # if it's still empty, we should close the worker
                         raise EmptyQueueError(
@@ -103,9 +120,9 @@ class DjangoWorker:
                 workitem.save()
 
             # now let's unpickle the WorkItem components
-            fxn = pickle.loads(workitem.fxn)
-            args = pickle.loads(workitem.args)
-            kwargs = pickle.loads(workitem.kwargs)
+            fxn = cloudpickle.loads(workitem.fxn)
+            args = cloudpickle.loads(workitem.args)
+            kwargs = cloudpickle.loads(workitem.kwargs)
 
             # Try running the WorkItem
             try:
@@ -117,10 +134,10 @@ class DjangoWorker:
 
             # whatever the result, we need to try to pickle it now
             try:
-                result_pickled = pickle.dumps(result)
+                result_pickled = cloudpickle.dumps(result)
             # if this fails, we even want to pickle the error and return it
             except Exception as exception:
-                result_pickled = pickle.dumps(exception)
+                result_pickled = cloudpickle.dumps(exception)
 
             # requery the WorkItem to restart our lock
             workitem = WorkItem.objects.select_for_update().get(pk=workitem.pk)

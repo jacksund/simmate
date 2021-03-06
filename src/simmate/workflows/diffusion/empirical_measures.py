@@ -20,6 +20,7 @@ import copy
 from prefect import Flow, Parameter, task
 from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
+from prefect.executors import DaskExecutor
 
 from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 from pymatgen.analysis.local_env import ValenceIonicRadiusEvaluator
@@ -331,5 +332,8 @@ with Flow("Empirical Measures for Pathway") as workflow:
 
 # for Prefect Cloud compatibility, set the storage to a an import path
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
+
+# set the executor to a locally ran executor
+workflow.executor = DaskExecutor(address='tcp://127.0.0.1:8786')
 
 # --------------------------------------------------------------------------------------

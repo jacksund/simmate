@@ -1,6 +1,7 @@
 # --------------------------------------------------------------------------------------
 
-import pickle
+# import pickle
+import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 
 from django.db import models
 
@@ -40,10 +41,10 @@ class WorkItem(models.Model):
     fxn = models.BinaryField()
 
     # arguments to be passed into fxn
-    args = models.BinaryField(default=pickle.dumps([]))
+    args = models.BinaryField(default=cloudpickle.dumps([]))
 
     # keyword arguments to be passed into fxn
-    kwargs = models.BinaryField(default=pickle.dumps({}))
+    kwargs = models.BinaryField(default=cloudpickle.dumps({}))
 
     # the output of fxn(*args, **kwargs)
     result = models.BinaryField(blank=True, null=True)

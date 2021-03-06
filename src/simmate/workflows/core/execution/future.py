@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import pickle
 import time
+
+# import pickle
+import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 
 # from concurrent.futures import Future # No need to inherit at the moment
 
-from simmate.configuration import manage_django  # ensures setup
+from simmate.configuration import django  # ensures setup
 from simmate.workflows.core.execution.models import WorkItem
 
 # class based on...
@@ -51,7 +53,7 @@ class DjangoFuture:  # (Future)
         Return True if the call was successfully cancelled.
         """
         # I don't use a lock to check the status here
-        workitem = WorkItem.objects.get(pk=self.pk)
+        workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is CANCELED or not
         if workitem.status == "C":
@@ -64,7 +66,7 @@ class DjangoFuture:  # (Future)
         Return True if the call is currently being executed and cannot be cancelled.
         """
         # I don't use a lock to check the status here
-        workitem = WorkItem.objects.get(pk=self.pk)
+        workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is RUNNING or not
         if workitem.status == "R":
@@ -77,7 +79,7 @@ class DjangoFuture:  # (Future)
         Return True if the call was successfully cancelled or finished running.
         """
         # I don't use a lock to check the status here
-        workitem = WorkItem.objects.get(pk=self.pk)
+        workitem = WorkItem.objects.only("status").get(pk=self.pk)
 
         # check the status and indicate whether it is FINISHED or CANCELED
         if workitem.status == "F" or workitem.status == "C":
@@ -107,12 +109,12 @@ class DjangoFuture:  # (Future)
 
         while (time.time() - time_start) < timeout:
             # I don't use a lock to check the status here
-            workitem = WorkItem.objects.get(pk=self.pk)
+            workitem = WorkItem.objects.only("status", "result").get(pk=self.pk)
             status = workitem.status
 
             if status == "F":  # FINISHED
                 # grab the result, unpickle it, and return it
-                result = pickle.loads(workitem.result)
+                result = cloudpickle.loads(workitem.result)
                 # if the result is an Error or Exception, raise it
                 if isinstance(result, Exception):
                     raise result

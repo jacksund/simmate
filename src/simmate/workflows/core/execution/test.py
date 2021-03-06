@@ -1,24 +1,31 @@
 # -*- coding: utf-8 -*-
 
-from simmate.configuration.manage_django import reset_db
+from simmate.configuration.django import reset_database
 
-reset_db()
+reset_database()
 
 from simmate.workflows.core.execution.executor import DjangoExecutor
 
 executor = DjangoExecutor()
 
-future = executor.submit(sum, [1, 2, 3, 4])
+# EXAMPLE 1
+future = executor.submit(sum, [4, 3, 2, 1])
+assert future.result() == 10
+
+# EXAMPLE 2
+import time
+
+
+def test():
+    futures = [executor.submit(time.sleep, 5) for n in range(10)]
+    return executor.wait(futures)
+
 
 # ----------------------------------------------------------------------------
 
 from simmate.workflows.core.execution.worker import DjangoWorker
 
-worker = DjangoWorker(nitems_max=1)
+worker = DjangoWorker(waittime_on_empty_queue=1)  # nitems_max=1
 worker.start()
-
-# ----------------------------------------------------------------------------
-
-assert future.result() == 10
 
 # ----------------------------------------------------------------------------

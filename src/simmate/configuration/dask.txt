@@ -1,0 +1,93 @@
+
+
+# CONFIGURATION FOLLOWING: https://docs.dask.org/en/latest/configuration.html#dask.config.set
+
+
+# OPTION 1: in python
+import dask
+import dask.distributed  # populate config with distributed defaults
+
+# dask.config.config  # gives the entire config dictionary
+
+# grab a specific setting
+dask.config.get("distributed.worker.connections")
+
+# let's shut off "worker <-> worker" connections
+# NOTE: this is temporary and does't carry accross consoles
+dask.config.set(
+    {
+        "distributed.worker.connections": {
+            "outgoing": 50,
+            "incoming": 0,
+        }
+    }
+)
+
+
+# OPTION 2: via ENV variables
+
+# export DASK_DISTRIBUTED__WORKER__CONNECTIONS__OUTGOING=50
+# export DASK_DISTRIBUTED__WORKER__CONNECTIONS__INCOMING=0
+
+# or python ENV
+
+import os
+os.environ.setdefault("DASK_DISTRIBUTED__WORKER__CONNECTIONS__OUTGOING", "50")
+os.environ.setdefault("DASK_DISTRIBUTED__WORKER__CONNECTIONS__INCOMING", "0")
+
+
+# OPTION 3: via YAML file in ~/.config/dask/distributed.yaml
+distributed:
+    worker:
+        connections:
+            outgoing: 0
+            incoming: 0
+        lifetime:
+            duration: 30 seconds
+
+
+
+
+
+
+
+
+I would really like to use stuff like Dask.job_queue, but firewalls and ports are giving me way too much trouble
+```python
+from dask_jobqueue import SLURMCluster
+
+cluster = SLURMCluster(
+    # Dask Worker Settings
+    local_directory="~",
+    cores=1,
+    processes=1,
+    memory="1GB",
+    # Slurm Settings
+    job_cpu=1,  # --cpus-per-task, -c
+    # job_mem="1GB", # --mem # We want extra here for the vasp job!
+    job_extra=[
+        "--output=job.%j.out",
+        "-N 1",  # --nodes
+        # '-n 1' # --ntasks, this overwrite's dask's defautlt. confirm this with "echo $SLURM_NTASKS"
+    ],
+    walltime="3-00:00:00",  # --time, -t
+    queue="p1",  # --partition, -p
+    # project='jacksund', # account to link -- does nothing for us
+    # Extra details
+    env_extra=[
+        # 'conda activate jacks_env',
+        # "module load vasp",
+    ],
+    # if conda activate isnt working
+    # python="/opt/ohpc/pub/apps/anaconda/anaconda3/envs/jacks_env/bin/python",
+    # I don't see any affect for setting interfaces...
+    # interface="eth0", # grab using ifconfig on linux
+    # scheduler_options={'interface':'eno1'},
+)
+
+from dask.distributed import Client 
+client = Client(cluster)
+
+print(cluster.job_script()) 
+cluster.adapt(minimum=5,maximum=10)
+```
