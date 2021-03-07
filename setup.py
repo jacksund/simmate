@@ -155,20 +155,23 @@ setup(
     #                   'django-pandas, # for converting QuerySets to PandasDF
     #                   'prefect',
     #                   'graphviz',# python-graphviz on conda. For viewing prefect flows
+    #                   'plotly',
+    #                   'matplotlib',
+    #                   'selenium',
+    #                   'dask',
+    #                   'dask-jobqueue',  # for submitting on clusters
+    #                   'scikit-learn',
+    #                   'click',
+    #                   'pytest', # Optional
+    #                   'spyder',  # Optional
+    #                   # These are from the MP stack and I want to drop dependency
     #                   'pymatgen',
     #                   'pymatgen-diffusion',
     #                   'custodian',
     #                   'fireworks',
-    #                   'dnspython', # for mongocloud + fireworks
-    #                   'plotly',
-    #                   'matplotlib',
-    #                   'selenium',
     #                   'matminer',
-    #                   'dask',
-    #                   'scikit-learn',
-    #                   'spyder',
-    #                   'click',
-    #                   'pytest'],  # Optional
+    #                   'dnspython', # for mongocloud + fireworks
+    #                   ],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
