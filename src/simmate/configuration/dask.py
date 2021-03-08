@@ -23,6 +23,8 @@ def setup_warwulf_cluster():
     # is because I want to launch commands via mpirun.
 
     cluster = SLURMCluster(
+        # Dask Scheduler Settings
+        scheduler_options={"port": 8786},
         #
         #
         # Dask Worker Settings
@@ -72,7 +74,7 @@ def setup_warwulf_cluster():
     # print(cluster.job_script())
 
     # Start scaling the number of Dask workers based on how busy the Scheduler is
-    cluster.adapt(minimum=1, maximum=15)
+    cluster.adapt(minimum=10, maximum=15)
 
     # print out info
     print(HEADER_ART)
