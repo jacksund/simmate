@@ -6,10 +6,20 @@
 
 from dask_jobqueue import SLURMCluster
 
+HEADER_ART = r"""
+   ___           __     _______         __
+  / _ \___ ____ / /__  / ___/ /_ _____ / /____ ____
+ / // / _ `(_-</  '_/ / /__/ / // (_-</ __/ -_) __/
+/____/\_,_/___/_/\_\  \___/_/\_,_/___/\__/\__/_/
 
-def make_warwulf_cluster():
+"""
+
+
+def setup_warwulf_cluster():
 
     # Consider moving the configuration settings to ~/.config/dask/jobqueue.yaml
+    # NOTE: I request SLURM settings much higher than Dask worker settings. This
+    # is because I want to launch commands via mpirun.
 
     cluster = SLURMCluster(
         #
@@ -18,19 +28,19 @@ def make_warwulf_cluster():
         local_directory="~",  # moves dask-worker-space off the shared drive for speed
         cores=1,
         processes=1,
-        memory="1GB",
+        memory="4GB",
         #
         #
         # Slurm Settings
-        job_cpu=1,  # --cpus-per-task, -c
-        # job_mem="1GB", # --mem # We want extra here for the vasp job!
+        job_cpu=20,  # --cpus-per-task, -c
+        job_mem="50GB",  # --mem
         job_extra=[
             "--output=slurm-%j.out",
             "-N 1",  # --nodes
             # This overwrites Dask's default. Confirm this with "echo $SLURM_NTASKS"
             # '-n 1' # --ntasks
         ],
-        walltime="3-00:00:00",  # --time, -t
+        walltime="300-00:00:00",  # --time, -t
         queue="p1",  # --partition, -p
         #
         #
@@ -62,6 +72,12 @@ def make_warwulf_cluster():
 
     # Start scaling the number of Dask workers based on how busy the Scheduler is
     cluster.adapt(minimum=1, maximum=15)
+
+    # print out info
+    print(HEADER_ART)
+    print(f"Scheduler is located at {cluster.scheduler.address}")
+    print(f"Dashboard is located at {cluster.dashboard_link}")
+    print("\n\n\n")
 
     # connect to the cluster if you'd like to start submitting jobs
     # from dask.distributed import Client

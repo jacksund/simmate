@@ -8,6 +8,7 @@ import sys
 
 import django
 from django.conf import settings
+
 # BUG: import the settings raises an error in spyder. Should I moving this import
 # inside of the setup_django_full() function?
 
@@ -84,6 +85,7 @@ def update_database(apps_to_migrate=["diffusion", "execution"]):
 
     # execute the following commands to build the database
     from django.core.management import call_command
+
     call_command("makemigrations", *apps_to_migrate)
     call_command("migrate")
 
@@ -92,6 +94,8 @@ def reset_database(apps_to_migrate=["diffusion", "execution"]):
     # Apps to init.
     # !!! In the future, I should do a more robust search, rather than hardcode here.
     # !!! maybe just grab all folders in the base directory via os.listdir()?
+
+    # BUG: Why doesn't call_command("flush") do this? How is it different?
 
     # grab base directory and the location of the database file
     from simmate.website.core.settings import BASE_DIR, DATABASES
@@ -113,7 +117,47 @@ def reset_database(apps_to_migrate=["diffusion", "execution"]):
     update_database(apps_to_migrate)
 
 
+def dump_database_to_json(filename="db-dump.json"):
+
+    # setup django before we call any commands
+    setup_full()
+
+    # execute the following commands to build the database
+    from django.core.management import call_command
+
+    call_command("dumpdata", output=filename)
+
+
+def load_database_from_json(filename="db-dump.json"):
+
+    # setup django before we call any commands
+    setup_full()
+
+    # execute the following commands to build the database
+    from django.core.management import call_command
+
+    # BUG: contenttypes gives issues because a migrated database already has these
+    # set. Simply ignore this table and everything works. The contenttypes is
+    # simply a table that lists all of our different models.
+    call_command("loaddata", "test-dump.json", exclude=["contenttypes"])
+
+
 # --------------------------------------------------------------------------------------
+
+
+def call_command(command, *args, **kwargs):
+    """
+    This is just a convience wrapper around django's call_command function,
+    where I setup Simmate's django settings first.
+    """
+
+    # setup django before we call any commands
+    setup_full()
+
+    # execute the following commands to build the database
+    from django.core.management import call_command
+
+    call_command(command, *args, **kwargs)
 
 
 def runserver():

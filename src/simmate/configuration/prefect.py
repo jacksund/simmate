@@ -67,3 +67,20 @@ def reset_projects():
     # reseting just involves deleting all projects and then recreating them
     delete_projects()
     build_projects()
+
+
+def setup_warwulf_cluster_and_agent():
+
+    from simmate.configuration.dask import setup_warwulf_cluster
+
+    cluster = setup_warwulf_cluster()
+
+    from prefect.agent.local import LocalAgent
+
+    agent = LocalAgent(
+        name="WarWulf",
+        # max_polls=1,
+        labels=["DESKTOP-PVN50G5"]
+        # no_cloud_logs=True
+    )
+    agent.start()

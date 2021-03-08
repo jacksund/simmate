@@ -7,6 +7,7 @@ from pymatgen.io.vasp.outputs import Vasprun
 from prefect import Flow, Parameter, task
 from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
+from prefect.executors import DaskExecutor
 
 from simmate.workflows.diffusion.utilities import (
     run_vasp_custodian,
