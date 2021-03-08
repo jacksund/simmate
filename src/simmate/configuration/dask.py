@@ -7,10 +7,11 @@
 from dask_jobqueue import SLURMCluster
 
 HEADER_ART = r"""
-   ___           __     _______         __
-  / _ \___ ____ / /__  / ___/ /_ _____ / /____ ____
- / // / _ `(_-</  '_/ / /__/ / // (_-</ __/ -_) __/
-/____/\_,_/___/_/\_\  \___/_/\_,_/___/\__/\__/_/
+  ____            _       ____ _           _
+ |  _ \  __ _ ___| | __  / ___| |_   _ ___| |_ ___ _ __
+ | | | |/ _` / __| |/ / | |   | | | | / __| __/ _ \ '__|
+ | |_| | (_| \__ \   <  | |___| | |_| \__ \ ||  __/ |
+ |____/ \__,_|___/_|\_\  \____|_|\__,_|___/\__\___|_|
 
 """
 
@@ -77,7 +78,6 @@ def setup_warwulf_cluster():
     print(HEADER_ART)
     print(f"Scheduler is located at {cluster.scheduler.address}")
     print(f"Dashboard is located at {cluster.dashboard_link}")
-    print("\n\n\n")
 
     # connect to the cluster if you'd like to start submitting jobs
     # from dask.distributed import Client

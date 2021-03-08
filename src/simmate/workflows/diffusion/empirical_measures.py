@@ -334,6 +334,6 @@ with Flow("Empirical Measures for Pathway") as workflow:
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
 
 # set the executor to a locally ran executor
-workflow.executor = DaskExecutor(address="tcp://127.0.0.1:8786")
+workflow.executor = DaskExecutor(address="tcp://160.0.0.15:38875")
 
 # --------------------------------------------------------------------------------------
