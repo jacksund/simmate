@@ -24,7 +24,7 @@ def setup_warwulf_cluster():
 
     cluster = SLURMCluster(
         # Dask Scheduler Settings
-        scheduler_options={"port": 8786},
+        scheduler_options={"port": 8786},  # BUG: this should be the default already
         #
         #
         # Dask Worker Settings
@@ -36,7 +36,7 @@ def setup_warwulf_cluster():
         #
         # Slurm Settings
         job_cpu=8,  # --cpus-per-task, -c
-        job_mem="30GB",  # --mem
+        job_mem="20GB",  # --mem
         job_extra=[
             "--output=slurm-%j.out",
             "-N 1",  # --nodes
@@ -70,9 +70,6 @@ def setup_warwulf_cluster():
         # scheduler_options={'interface':'eno1'},
     )
 
-    # If you want to preview what the SLURM script looks like
-    # print(cluster.job_script())
-
     # Start scaling the number of Dask workers based on how busy the Scheduler is
     cluster.adapt(minimum=10, maximum=15)
 
@@ -80,6 +77,9 @@ def setup_warwulf_cluster():
     print(HEADER_ART)
     print(f"Scheduler is located at {cluster.scheduler.address}")
     print(f"Dashboard is located at {cluster.dashboard_link}")
+    # If you want to preview what the SLURM script looks like
+    print("Workers are submitted to SLURM with the following submit.sh...")
+    print(cluster.job_script())
 
     # connect to the cluster if you'd like to start submitting jobs
     # from dask.distributed import Client
