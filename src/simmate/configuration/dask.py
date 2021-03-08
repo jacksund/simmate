@@ -71,14 +71,14 @@ def setup_warwulf_cluster():
     )
 
     # Start scaling the number of Dask workers based on how busy the Scheduler is
-    cluster.adapt(minimum=10, maximum=15)
+    cluster.adapt(minimum=5, maximum=40)
 
     # print out info
     print(HEADER_ART)
     print(f"Scheduler is located at {cluster.scheduler.address}")
     print(f"Dashboard is located at {cluster.dashboard_link}")
     # If you want to preview what the SLURM script looks like
-    print("Workers are submitted to SLURM with the following submit.sh...")
+    print("Workers are submitted to SLURM with the following submit.sh...\n")
     print(cluster.job_script())
 
     # connect to the cluster if you'd like to start submitting jobs
