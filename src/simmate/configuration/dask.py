@@ -33,8 +33,8 @@ def setup_warwulf_cluster():
         #
         #
         # Slurm Settings
-        job_cpu=20,  # --cpus-per-task, -c
-        job_mem="50GB",  # --mem
+        job_cpu=8,  # --cpus-per-task, -c
+        job_mem="30GB",  # --mem
         job_extra=[
             "--output=slurm-%j.out",
             "-N 1",  # --nodes
