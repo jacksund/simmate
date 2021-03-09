@@ -91,12 +91,22 @@ WSGI_APPLICATION = "core.wsgi.application"
 # BUG: django docs say to always use forward slashes, but it works just fine
 # without them... For now, I don't inlcude the .replace("\\", "/").
 DATABASES = {
+    # "default": {
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
+    # }
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(DATABASE_DIR, "test123.sqlite3"),  # .replace("\\", "/")
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "simmate-test",  # default on DigitalOcean is defaultdb
+        "USER": "doadmin",
+        "PASSWORD": "sagoltez4bigl6f1",
+        "HOST": "db-postgresql-nyc3-15733-do-user-8843535-0.b.db.ondigitalocean.com",
+        "PORT": "25060",
     }
 }
 
+# $ dropdb development_db_name
+# $ createdb developmnent_db_name
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

@@ -117,7 +117,7 @@ def reset_database(apps_to_migrate=["diffusion", "execution"]):
     update_database(apps_to_migrate)
 
 
-def dump_database_to_json(filename="db-dump.json"):
+def dump_database_to_json(filename="db-dump.json", exclude=[]):
 
     # setup django before we call any commands
     setup_full()
@@ -125,7 +125,7 @@ def dump_database_to_json(filename="db-dump.json"):
     # execute the following commands to build the database
     from django.core.management import call_command
 
-    call_command("dumpdata", output=filename)
+    call_command("dumpdata", output=filename, exclude=exclude)
 
 
 def load_database_from_json(filename="db-dump.json"):

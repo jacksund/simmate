@@ -32,6 +32,9 @@ def setup_warwulf_cluster():
         cores=1,
         processes=1,
         memory="4GB",
+        extra=["--preload simmate.configuration.dask.init_django_worker"],
+        # BUG: dask-jobqueue doesn't support our preferred kwargs format...
+        #   {"preload": "simmate.configuration.dask.init_django_worker"}
         #
         #
         # Slurm Settings
@@ -70,8 +73,9 @@ def setup_warwulf_cluster():
         # scheduler_options={'interface':'eno1'},
     )
 
-    # Start scaling the number of Dask workers based on how busy the Scheduler is
-    cluster.adapt(minimum=5, maximum=40)
+    # Start scaling the number of Dask workers based on how busy the Scheduler is.
+    # TODO: should I just return the cluster and leave the user to adapt it?
+    cluster.adapt(minimum=5, maximum=20)
 
     # print out info
     print(HEADER_ART)

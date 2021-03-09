@@ -148,30 +148,32 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    # install_requires=['numpy',
-    #                   'pandas',
-    #                   'django',
-    #                   'django-crispy-forms', # for formatting of online forms
-    #                   'django-pandas, # for converting QuerySets to PandasDF
-    #                   'prefect',
-    #                   'graphviz',# python-graphviz on conda. For viewing prefect flows
-    #                   'plotly',
-    #                   'matplotlib',
-    #                   'selenium',
-    #                   'dask',
-    #                   'dask-jobqueue',  # for submitting on clusters
-    #                   'scikit-learn',
-    #                   'click',
-    #                   'pytest', # Optional
-    #                   'spyder',  # Optional
-    #                   # These are from the MP stack and I want to drop dependency
-    #                   'pymatgen',
-    #                   'pymatgen-diffusion',
-    #                   'custodian',
-    #                   'fireworks',
-    #                   'matminer',
-    #                   'dnspython', # for mongocloud + fireworks
-    #                   ],
+    # install_requires=[
+    #     'numpy',
+    #     'pandas',
+    #     'django',
+    #     'django-crispy-forms',  # for formatting of online forms
+    #     'django-pandas',  # for converting QuerySets to PandasDF
+    #     'psycopg2',  # for Postgres connections
+    #     'prefect',
+    #     'graphviz',  # python-graphviz on conda. For viewing prefect flows
+    #     'plotly',
+    #     'matplotlib',
+    #     'selenium',  # for web scraping (slow but robust)
+    #     'dask',
+    #     'dask-jobqueue',  # for submitting on clusters
+    #     'scikit-learn',
+    #     'click',
+    #     'pytest',  # Optional
+    #     'spyder',  # Optional
+    #     # These are from the MP stack and I want to drop dependency
+    #     'pymatgen',
+    #     'pymatgen-diffusion',
+    #     'custodian',
+    #     'fireworks',
+    #     'matminer',
+    #     'dnspython',  # for mongocloud + fireworks
+    # ],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"

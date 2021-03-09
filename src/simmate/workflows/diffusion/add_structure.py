@@ -19,11 +19,16 @@ useful if you are using a Postgres backend instead of SQLite.
 
 """
 
+from datetime import timedelta
+
 from pymatgen import MPRester
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from prefect import Flow, Parameter, task
 from prefect.storage import Local as LocalStorage
+
+from simmate.configuration import django  # ensures setup
+from simmate.database.diffusion import MaterialsProjectStructure as MPS
 
 # --------------------------------------------------------------------------------------
 
@@ -113,11 +118,8 @@ def sanitize_structure(data):
 # --------------------------------------------------------------------------------------
 
 
-@task
+@task(max_retries=3, retry_delay=timedelta(seconds=5))
 def add_structure_from_materialsproject(data):
-
-    from simmate.configuration import django  # ensures setup
-    from simmate.database.diffusion import MaterialsProjectStructure as MPS
 
     # convert the dictionary to django orm
     structure_db = MPS.from_dict(data)
@@ -146,5 +148,8 @@ with Flow("Add Structures from Materials Project") as workflow:
 
 # for Prefect Cloud compatibility, set the storage to a an import path
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
+
+from prefect.executors import DaskExecutor
+workflow.executor = DaskExecutor(address='tcp://127.0.0.1:56144')
 
 # --------------------------------------------------------------------------------------

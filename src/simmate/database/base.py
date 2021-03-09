@@ -97,7 +97,7 @@ class Structure(models.Model):
     # The composition of the structure formatted in various ways
     # OPTIMIZE: which of these are redundant and unnecessary?
     # TODO: add comment for each showing an example.
-    formula_full = models.CharField(max_length=25)
+    formula_full = models.CharField(max_length=50)
     formula_reduced = models.CharField(max_length=25)
     formula_anonymous = models.CharField(max_length=25)
 
