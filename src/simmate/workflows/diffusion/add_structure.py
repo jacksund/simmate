@@ -150,6 +150,6 @@ with Flow("Add Structures from Materials Project") as workflow:
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
 
 from prefect.executors import DaskExecutor
-workflow.executor = DaskExecutor(address='tcp://127.0.0.1:56144')
+workflow.executor = DaskExecutor(address="tcp://152.2.172.72:8786")
 
 # --------------------------------------------------------------------------------------

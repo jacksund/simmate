@@ -99,11 +99,12 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "simmate-test",  # default on DigitalOcean is defaultdb
         "USER": "doadmin",
-        "PASSWORD": "sagoltez4bigl6f1",
-        "HOST": "db-postgresql-nyc3-15733-do-user-8843535-0.b.db.ondigitalocean.com",
+        "PASSWORD": "dibi5n3varep5ad8",
+        "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
         "PORT": "25060",
     }
 }
+
 
 # $ dropdb development_db_name
 # $ createdb developmnent_db_name

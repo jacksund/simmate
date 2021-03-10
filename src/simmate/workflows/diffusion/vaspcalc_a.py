@@ -9,6 +9,8 @@ from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
 from prefect.executors import DaskExecutor
 
+from simmate.configuration import django  # ensures setup
+from simmate.database.diffusion import VaspCalcA, Pathway as Pathway_DB
 from simmate.workflows.diffusion.utilities import (
     run_vasp_custodian,
     get_oxi_supercell_path,
@@ -21,9 +23,6 @@ from simmate.workflows.diffusion.utilities import (
 @task
 def load_pathway_from_db(pathway_id):
 
-    from simmate.configuration import django  # ensures setup
-    from simmate.database.diffusion import Pathway as Pathway_DB
-
     # grab the pathway model object
     pathway_db = Pathway_DB.objects.get(id=pathway_id)
 
@@ -35,9 +34,6 @@ def load_pathway_from_db(pathway_id):
 
 @task
 def register_run(pathway_id):
-
-    from simmate.configuration import django  # ensures setup
-    from simmate.database.diffusion import VaspCalcA
 
     # create the file and indicate that it has been submitted
     calc = VaspCalcA(status="S", pathway_id=pathway_id)
@@ -130,6 +126,7 @@ def run_vasp(structure):
 
 # --------------------------------------------------------------------------------------
 
+
 @task(trigger=all_finished)
 def add_results_to_db(energies_mapped, pathway_id):
 
@@ -138,9 +135,6 @@ def add_results_to_db(energies_mapped, pathway_id):
     e_start = energies_mapped[0]
     e_midpoint = energies_mapped[1]
     e_end = energies_mapped[2]
-
-    from simmate.configuration import django  # ensures setup
-    from simmate.database.diffusion import VaspCalcA
 
     # grab the pathway_id entry. This should exists already in the Submitted state
     # An error will be thrown if it's not in the submitted state -- meaning we
@@ -158,7 +152,7 @@ def add_results_to_db(energies_mapped, pathway_id):
     calc.energy_end = e_end if not isinstance(e_end, Exception) else None
     try:
         barrier = max([e_midpoint - e_start, e_midpoint - e_end])
-    except:
+    except:  # TypeError
         barrier = None
     calc.energy_barrier = barrier
     calc.save()

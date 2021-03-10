@@ -20,14 +20,17 @@ from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder
 from prefect import Flow, Parameter, task
 from prefect.storage import Local as LocalStorage
 
+from simmate.configuration import django  # ensures setup
+from simmate.database.diffusion import (
+    MaterialsProjectStructure as MPS,
+    Pathway as Pathway_DB,
+)
+
 # --------------------------------------------------------------------------------------
 
 
 @task
 def load_structure_from_db(structure_id):
-
-    from simmate.configuration import django  # ensures setup
-    from simmate.database.diffusion import MaterialsProjectStructure as MPS
 
     # grab the proper Structure entry and we want only the structure_json column
     structure_db = MPS.objects.only("structure_json").get(id=structure_id)
@@ -71,9 +74,6 @@ def find_paths(structure):
 
 @task
 def add_paths_to_db(structure_id, paths, path_limit=5):
-
-    from simmate.configuration import django  # ensures setup
-    from simmate.database.diffusion import Pathway as Pathway_DB
 
     # make sure some pathways were actually provided. If not, exit the function.
     if not paths:

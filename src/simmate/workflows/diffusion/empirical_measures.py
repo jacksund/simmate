@@ -29,6 +29,8 @@ from pymatgen_diffusion.neb.full_path_mapper import FullPathMapper
 
 from matminer.featurizers.site import EwaldSiteEnergy
 
+from simmate.configuration import django  # ensures setup
+from simmate.database.diffusion import EmpiricalMeasures as EM_DB, Pathway as Pathway_DB
 from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
 
 # --------------------------------------------------------------------------------------
@@ -36,9 +38,6 @@ from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
 
 @task
 def load_pathway_from_db(pathway_id):
-
-    from simmate.configuration import django  # ensures setup
-    from simmate.database.diffusion import Pathway as Pathway_DB
 
     # grab the pathway model object
     pathway_db = Pathway_DB.objects.get(id=pathway_id)
@@ -270,9 +269,6 @@ def get_ionic_radii_overlap(path):
 def add_empiricalmeasures_to_db(
     pathway_id, oxi_data, dimension_data, ewald_data, iro_data
 ):
-
-    from simmate.configuration import django  # ensures setup
-    from simmate.database.diffusion import EmpiricalMeasures as EM_DB
 
     # now add the empirical data using the supplied dictionary
     # NOTE: the "if not __ else None" code is to make sure there wasn't an error
