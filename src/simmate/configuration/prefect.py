@@ -97,9 +97,9 @@ def setup_warwulf_cluster_and_agent():
     python prefect_agent.py
     """
 
-    from simmate.configuration.dask import setup_warwulf_cluster
+    from simmate.configuration.dask.warwulf import setup_cluster
 
-    cluster = setup_warwulf_cluster()
+    cluster = setup_cluster()
 
     from prefect.agent.local import LocalAgent
 

@@ -91,6 +91,8 @@ def update_database(apps_to_migrate=["diffusion", "execution"]):
 
 
 def reset_database(apps_to_migrate=["diffusion", "execution"]):
+    # BUG: this is only for SQLite3
+
     # Apps to init.
     # !!! In the future, I should do a more robust search, rather than hardcode here.
     # !!! maybe just grab all folders in the base directory via os.listdir()?
@@ -129,6 +131,11 @@ def dump_database_to_json(filename="db-dump.json", exclude=[]):
 
 
 def load_database_from_json(filename="db-dump.json"):
+
+    # OPTIMIZE: this function is very slow. Consider speed-up options such as
+    # making this function a transaction or manually writing a bulk_create. It
+    # actually looks like django ORM takes up most of the time tough, and the actual
+    # database queries are not the bottleneck...
 
     # setup django before we call any commands
     setup_full()

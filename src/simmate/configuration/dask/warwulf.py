@@ -16,7 +16,7 @@ HEADER_ART = r"""
 """
 
 
-def setup_warwulf_cluster():
+def setup_cluster():
 
     # Consider moving the configuration settings to ~/.config/dask/jobqueue.yaml
     # NOTE: I request SLURM settings much higher than Dask worker settings. This
