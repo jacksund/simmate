@@ -3,7 +3,6 @@
 # --------------------------------------------------------------------------------------
 
 import os
-import shutil
 import sys
 
 import django
@@ -24,6 +23,12 @@ from django.conf import settings
 
 def setup_full():  # Wall time: 250 ms first call and 175 ns after
 
+    # OPTIMIZE: this function will take longer than 250ms when other imports
+    # get involved. For example, simmate.database.diffusion has some pymatgen
+    # imports that that >0.8s and make this function take over 1s. I should have
+    # setup_select() function that only configures "select" apps to help with
+    # setup speed.
+
     # see if django has already been configured. If so, just exit this function.
     # BUG: originally I used the code below, but it didn't work with Prefect+Dask:
     #   if "DJANGO_SETTINGS_MODULE" in os.environ:
@@ -33,7 +38,9 @@ def setup_full():  # Wall time: 250 ms first call and 175 ns after
     # The code below is the equiv of running 'python manage.py shell'
     # This sets up all of django for its full use. You can being importing
     # models after this is setup.
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "simmate.website.core.settings")
+    os.environ.setdefault(
+        "DJANGO_SETTINGS_MODULE", "simmate.configuration.django.settings"
+    )
     django.setup()
 
     # SECURITY WARNING: I added this setting myself! delete when in production
@@ -78,95 +85,6 @@ def setup_django_cli():  # TODO -- move this to the command_line module
 # --------------------------------------------------------------------------------------
 
 
-def update_database(apps_to_migrate=["diffusion", "execution"]):
-
-    # setup django before we call any commands
-    setup_full()
-
-    # execute the following commands to build the database
-    from django.core.management import call_command
-
-    call_command("makemigrations", *apps_to_migrate)
-    call_command("migrate")
-
-
-def reset_database(apps_to_migrate=["diffusion", "execution"]):
-    # BUG: this is only for SQLite3
-
-    # Apps to init.
-    # !!! In the future, I should do a more robust search, rather than hardcode here.
-    # !!! maybe just grab all folders in the base directory via os.listdir()?
-
-    # BUG: Why doesn't call_command("flush") do this? How is it different?
-
-    # grab base directory and the location of the database file
-    from simmate.website.core.settings import BASE_DIR, DATABASES
-
-    db_filename = DATABASES["default"]["NAME"]
-
-    # delete the sqlite3 database file if it exists
-    if os.path.exists(db_filename):
-        os.remove(db_filename)
-
-    # go through each listed directory in the base directory
-    # and delete all folders named 'migrations'
-    for app in apps_to_migrate:
-        migration_dir = os.path.join(BASE_DIR, app, "migrations")
-        if os.path.exists(migration_dir):
-            shutil.rmtree(migration_dir)
-
-    # now update the database based on the registered models
-    update_database(apps_to_migrate)
-
-
-def dump_database_to_json(filename="db-dump.json", exclude=[]):
-
-    # setup django before we call any commands
-    setup_full()
-
-    # execute the following commands to build the database
-    from django.core.management import call_command
-
-    call_command("dumpdata", output=filename, exclude=exclude)
-
-
-def load_database_from_json(filename="db-dump.json"):
-
-    # OPTIMIZE: this function is very slow. Consider speed-up options such as
-    # making this function a transaction or manually writing a bulk_create. It
-    # actually looks like django ORM takes up most of the time tough, and the actual
-    # database queries are not the bottleneck...
-
-    # setup django before we call any commands
-    setup_full()
-
-    # execute the following commands to build the database
-    from django.core.management import call_command
-
-    # BUG: contenttypes gives issues because a migrated database already has these
-    # set. Simply ignore this table and everything works. The contenttypes is
-    # simply a table that lists all of our different models.
-    call_command("loaddata", filename, exclude=["contenttypes"])
-
-
-# --------------------------------------------------------------------------------------
-
-
-def call_command(command, *args, **kwargs):
-    """
-    This is just a convience wrapper around django's call_command function,
-    where I setup Simmate's django settings first.
-    """
-
-    # setup django before we call any commands
-    setup_full()
-
-    # execute the following commands to build the database
-    from django.core.management import call_command
-
-    call_command(command, *args, **kwargs)
-
-
 def runserver():
 
     # for now I recommend using the shell command...
@@ -203,22 +121,6 @@ def runserver():
 
 
 # --------------------------------------------------------------------------------------
-
-
-if __name__ == "simmate.configuration.django":
-    # This is a little hacking that I do to speed up when I setup django and
-    # not redoing it again. When I import this module, it just automatically
-    # runs this function. Otherwise I would have to make sure I'm connected
-    # to the django database and have django settings properly configured. In
-    # every single module I import models. That would mean I need two lines:
-    #   from simmate.configuration.manage_django import setup_django_full
-    #   setup_django_full() # ensures setup
-    # Then I would import Models after these two lines. With this hack, I instead
-    # only need to have one line before I import any other models:
-    #   from simmate.configuration import manage_django # ensures setup
-    # Not only that, but it's faster too! The first import takes 250 ms and then
-    # after that it takes 370 ns. 996
-    setup_full()
 
 # TODO -- move this to the commandline module
 # if __name__ == "__main__":

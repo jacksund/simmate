@@ -4,7 +4,7 @@
 from prefect import Client
 
 
-def build_projects():
+def build():
 
     # grab the Prefect client
     client = Client()
@@ -46,7 +46,7 @@ def build_projects():
     return project_id, workflow_id
 
 
-def delete_projects():
+def delete():
 
     # grab the Prefect client
     client = Client()
@@ -60,53 +60,10 @@ def delete_projects():
     return is_successful
 
 
-def reset_projects():
+def reset():
 
     # OPTIMIZE: both of these functions connect to a client. I believe it would
     # be fast to just connect once.
     # reseting just involves deleting all projects and then recreating them
-    delete_projects()
-    build_projects()
-
-
-def setup_warwulf_cluster_and_agent():
-    """
-    from simmate.configuration.prefect import setup_warwulf_cluster_and_agent
-    setup_warwulf_cluster_and_agent()
-
-    ------SUBMIT.SH------
-    #!/bin/bash
-
-    #SBATCH --job-name=prefect_agent
-    #SBATCH --output=slurm.out
-    #SBATCH --nodes=1
-    #SBATCH --ntasks=1
-    #SBATCH --cpus-per-task 1
-    #SBATCH --partition=p1
-    #SBATCH --time=400-00:00
-
-    # Load modules
-    module load intel
-    module load impi
-    module load vasp
-
-    # set python env
-    #conda activate jacks_env
-
-    # run Prefect
-    python prefect_agent.py
-    """
-
-    from simmate.configuration.dask.warwulf import setup_cluster
-
-    cluster = setup_cluster()
-
-    from prefect.agent.local import LocalAgent
-
-    agent = LocalAgent(
-        name="WarWulf",
-        # max_polls=1,
-        labels=["DESKTOP-PVN50G5"]
-        # no_cloud_logs=True
-    )
-    agent.start()
+    delete()
+    build()
