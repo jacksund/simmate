@@ -15,6 +15,8 @@ Example of running the code below:
 
 """
 
+from datetime import timedelta
+
 from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder
 
 from prefect import Flow, Parameter, task
@@ -72,7 +74,7 @@ def find_paths(structure):
 # --------------------------------------------------------------------------------------
 
 
-@task
+@task(max_retries=3, retry_delay=timedelta(seconds=5))
 def add_paths_to_db(structure_id, paths, path_limit=5):
 
     # make sure some pathways were actually provided. If not, exit the function.

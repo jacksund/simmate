@@ -16,6 +16,7 @@ Example of running the code below:
 """
 
 import copy
+from datetime import timedelta
 
 from prefect import Flow, Parameter, task
 from prefect.triggers import all_finished
@@ -264,8 +265,7 @@ def get_ionic_radii_overlap(path):
 
 # NOTE: if an entry already exists for this pathway, it is overwritten
 
-
-@task(trigger=all_finished)
+@task(trigger=all_finished, max_retries=3, retry_delay=timedelta(seconds=5))
 def add_empiricalmeasures_to_db(
     pathway_id, oxi_data, dimension_data, ewald_data, iro_data
 ):

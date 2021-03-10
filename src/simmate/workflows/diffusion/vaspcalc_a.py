@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# import json
+from datetime import timedelta
 
 from pymatgen.io.vasp.outputs import Vasprun
 
@@ -127,7 +127,7 @@ def run_vasp(structure):
 # --------------------------------------------------------------------------------------
 
 
-@task(trigger=all_finished)
+@task(trigger=all_finished, max_retries=3, retry_delay=timedelta(seconds=5))
 def add_results_to_db(energies_mapped, pathway_id):
 
     # energies_mapped will be a list of three floats
