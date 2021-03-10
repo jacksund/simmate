@@ -9,7 +9,7 @@ from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
 from prefect.executors import DaskExecutor
 
-from simmate.configuration import django  # ensures setup
+from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import VaspCalcA, Pathway as Pathway_DB
 from simmate.workflows.diffusion.utilities import (
     run_vasp_custodian,

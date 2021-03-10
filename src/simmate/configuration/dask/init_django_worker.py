@@ -6,7 +6,7 @@ a worker is started -- rather than have each task connect separately.
 """
 
 # First setup django settings for simmate
-from simmate.configuration import django  # ensures setup
+from simmate.configuration.django import setup_full  # ensures setup
 
 # The settings (including the database) are all set up now, but django doesn't
 # actually connect to the database until a query is made. So here, we do a

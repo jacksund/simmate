@@ -20,7 +20,7 @@ from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder
 from prefect import Flow, Parameter, task
 from prefect.storage import Local as LocalStorage
 
-from simmate.configuration import django  # ensures setup
+from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import (
     MaterialsProjectStructure as MPS,
     Pathway as Pathway_DB,

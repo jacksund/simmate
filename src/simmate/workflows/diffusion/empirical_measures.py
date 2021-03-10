@@ -29,7 +29,7 @@ from pymatgen_diffusion.neb.full_path_mapper import FullPathMapper
 
 from matminer.featurizers.site import EwaldSiteEnergy
 
-from simmate.configuration import django  # ensures setup
+from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import EmpiricalMeasures as EM_DB, Pathway as Pathway_DB
 from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
 
