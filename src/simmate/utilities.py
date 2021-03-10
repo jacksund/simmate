@@ -15,8 +15,8 @@ def get_directory(dir):
     # This includes... None, a string, or a TemporaryDirectory instance.
     # I consistently want to handle these inputs and thus make this utility.
     # Based on the input, I do the following:
-    #   None --> I return the pull path to python's current working directory
-    #   TemporaryDirectory --> I return the full path to this directory
+    #   None --> I return the full path to python's current working directory
+    #   TemporaryDirectory --> I return the full path to the given temp directory
     #   str --> I make the directory if it doesnt exist and then return the path
 
     # Avoid overusing this! It should often only exist at the highest level

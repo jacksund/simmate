@@ -16,7 +16,7 @@ HEADER_ART = r"""
 """
 
 
-def setup_cluster():
+def setup_cluster(workers_min=5, workers_max=20):
 
     # Consider moving the configuration settings to ~/.config/dask/jobqueue.yaml
     # NOTE: I request SLURM settings much higher than Dask worker settings. This
@@ -75,12 +75,13 @@ def setup_cluster():
 
     # Start scaling the number of Dask workers based on how busy the Scheduler is.
     # TODO: should I just return the cluster and leave the user to adapt it?
-    cluster.adapt(minimum=5, maximum=20)
+    cluster.adapt(minimum=workers_min, maximum=workers_max)
 
     # print out info
     print(HEADER_ART)
     print(f"Scheduler is located at {cluster.scheduler.address}")
     print(f"Dashboard is located at {cluster.dashboard_link}")
+    print(f"The number of Workers will scale between {workers_min} and {workers_max}")
     # If you want to preview what the SLURM script looks like
     print("Workers are submitted to SLURM with the following submit.sh...\n")
     print(cluster.job_script())
