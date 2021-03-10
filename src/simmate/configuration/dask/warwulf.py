@@ -16,7 +16,7 @@ HEADER_ART = r"""
 """
 
 
-def setup_cluster(workers_min=5, workers_max=20):
+def setup_cluster(workers_min=5, workers_max=75):
 
     # Consider moving the configuration settings to ~/.config/dask/jobqueue.yaml
     # NOTE: I request SLURM settings much higher than Dask worker settings. This
