@@ -139,7 +139,7 @@ def load_database_from_json(filename="db-dump.json"):
     # BUG: contenttypes gives issues because a migrated database already has these
     # set. Simply ignore this table and everything works. The contenttypes is
     # simply a table that lists all of our different models.
-    call_command("loaddata", "test-dump.json", exclude=["contenttypes"])
+    call_command("loaddata", filename, exclude=["contenttypes"])
 
 
 # --------------------------------------------------------------------------------------
