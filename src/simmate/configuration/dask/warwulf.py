@@ -16,7 +16,7 @@ HEADER_ART = r"""
 """
 
 
-def setup_cluster(workers_min=5, workers_max=75):
+def setup_cluster(workers_min=5, workers_max=25):
 
     # Consider moving the configuration settings to ~/.config/dask/jobqueue.yaml
     # NOTE: I request SLURM settings much higher than Dask worker settings. This
@@ -38,8 +38,8 @@ def setup_cluster(workers_min=5, workers_max=75):
         #
         #
         # Slurm Settings
-        job_cpu=8,  # --cpus-per-task, -c
-        job_mem="20GB",  # --mem
+        job_cpu=16,  # --cpus-per-task, -c
+        job_mem="50GB",  # --mem
         job_extra=[
             "--output=slurm-%j.out",
             "-N 1",  # --nodes

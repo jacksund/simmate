@@ -35,7 +35,7 @@ class Incar(dict):
         #   MAGMOM = x1 y1 z1    x2 y2 z2    x3 y3 z3 ...
         #       [...instead of...]
         #   MAGMOM = value1 value2 value3 ...
-        # TODO -- is this the best implementation spot? What about where I parse
+        # TODO: is this the best implementation spot? What about where I parse
         # all other values to their target format and shapes?
 
         # Check if MAGMOM is set along with LSORBIT or LNONCOLLINEAR being True
@@ -129,7 +129,7 @@ class Incar(dict):
             # multiple parameters on a single line are separated by a semicolon
             for sub_line in line.split(";"):
                 # the PARAMETER and VALUE are separated by equal sign
-                parameter, value = line.split("=")
+                parameter, value = sub_line.split("=")
                 # we can use the parameter/value to update our dictionary. The
                 # last thing we do is remove leading/trailing whitespace with strip()
                 parameters[parameter.strip()] = value.strip()
