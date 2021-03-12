@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-
 
+
 def setup_warwulf():
     """
-    from simmate.configuration.prefect import setup_warwulf_cluster_and_agent
-    setup_warwulf_cluster_and_agent()
+
+    ------PREFECT_AGENT.PY------
+    from simmate.configuration.prefect.agents_and_clusters import setup_warwulf
+    setup_warwulf()
+
+    ------IN TERMINAL------
+    nohup redshift &
+    based on advice from...
+    https://unix.stackexchange.com/questions/4004/how-can-i-run-a-command-which-will-survive-terminal-close
 
     ------SUBMIT.SH------
     #!/bin/bash

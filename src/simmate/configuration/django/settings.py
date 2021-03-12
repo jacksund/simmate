@@ -102,6 +102,7 @@ DATABASES = {
         "PASSWORD": "dibi5n3varep5ad8",
         "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
         "PORT": "25061",
+        'OPTIONS': {'sslmode': 'require'},
     }
 }
 
