@@ -9,9 +9,12 @@ def setup_warwulf():
     setup_warwulf()
 
     ------IN TERMINAL------
-    nohup redshift &
+    nohup python prefect_agent.py &
     based on advice from...
     https://unix.stackexchange.com/questions/4004/how-can-i-run-a-command-which-will-survive-terminal-close
+    to cancel...
+    ps -aef | grep python # to find id
+    kill <id>
 
     ------SUBMIT.SH------
     #!/bin/bash

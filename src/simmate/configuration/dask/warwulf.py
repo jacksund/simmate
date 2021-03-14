@@ -15,6 +15,21 @@ HEADER_ART = r"""
 
 """
 
+# BUG: for scaling Dask to many workers, I initially ran into issues of "too many
+# files open". This is addressed in Dask's FAQ:
+#   https://distributed.dask.org/en/latest/faq.html#too-many-open-file-descriptors
+# To summarize the fix...
+#   (1) check the current soft limit (soft = no sudo permissions) for  files
+#       ulimit -Sn
+#   (2) to increase the softlimit, edit the limits.conf file and add one line
+#       sudo nano /etc/security/limits.conf
+#           # add this line below
+#           * soft nofile 10240
+#   (3) close and reopen the terminal
+#   (4) confirm we changed the limit
+#       ulimit -Sn
+#
+
 
 def setup_cluster(workers_min=5, workers_max=25):
 
