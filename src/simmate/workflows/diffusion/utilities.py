@@ -213,7 +213,15 @@ def run_vasp_custodian(
         monitor_freq=3,  # default 30
     )
 
-    custodian.run()
+    # BUG: Cloudpickle fails to handle Custodian outputs properly. So I decided
+    # to catch the errors here and return a simple error that cloudpickle can handle.
+    # In the future, I need to drop Custodian dependency.
+    try:
+        custodian.run()
+    except Exception as exception:
+        # I raise only the Custodian error message. The issue is with exception.validator
+        # on the ValidationError.
+        raise Exception(str(exception))
 
 
 def empty_directory():

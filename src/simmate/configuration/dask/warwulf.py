@@ -29,7 +29,22 @@ HEADER_ART = r"""
 #   (4) confirm we changed the limit
 #       ulimit -Sn
 #
-
+# This may also be a leak of sockets being left open by Dask:
+#   (1) get the PID of the running process with
+#       ps -aef | grep python
+#   (2) look at the fd's (file opened) by the given process
+#       cd /proc/<PID>/fd; ls -l
+#   (3) count the number of files opened by the given process
+#       ls /proc/<PID>/fd/ | wc -l
+#   (4) view overall stats with
+#       cat /proc/<PID>/net/sockstat
+#   (5) another option to list open files is
+#       lsof -p <PID> | wc -l
+#
+# Whenever I see a heartbeat fail, I also see a massive jump in the number of
+# files opened by the process. I believe zombie prefect runs are creating
+# a socket leak.
+#
 
 # nworkers_min=5, nworkers_max=25 BUG: adaptive deploy removed for now
 def setup_cluster(nworkers=25):
