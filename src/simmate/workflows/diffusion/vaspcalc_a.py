@@ -7,7 +7,6 @@ from pymatgen.io.vasp.outputs import Vasprun
 from prefect import Flow, Parameter, task
 from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
-from prefect.executors import DaskExecutor
 
 from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import VaspCalcA, Pathway as Pathway_DB
@@ -182,11 +181,8 @@ with Flow("Vasp Calc A") as workflow:
     # save the data to our database
     add_results_to_db(energies, pathway_id)
 
-# for Prefect Cloud compatibility, set the storage to a an import path
+# for Prefect Cloud compatibility, set the storage to an import path
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
-
-# set the executor to a locally ran executor
-workflow.executor = DaskExecutor(address="tcp://152.2.172.72:8786")
 
 # NOTE TO USER -- because Custodian doesn't really have working-directory control
 # I need to run everything in the same directory. Therefore, do NOT run this workflow's

@@ -146,10 +146,7 @@ with Flow("Add Structures from Materials Project") as workflow:
     add_structure_from_materialsproject.map(cleaned_data)
 
 
-# for Prefect Cloud compatibility, set the storage to a an import path
+# for Prefect Cloud compatibility, set the storage to an import path
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)
-
-from prefect.executors import DaskExecutor
-workflow.executor = DaskExecutor(address="tcp://152.2.172.72:8786")
 
 # --------------------------------------------------------------------------------------

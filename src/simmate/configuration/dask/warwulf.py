@@ -62,7 +62,7 @@ def setup_cluster(nworkers=25):
         local_directory="~",  # moves dask-worker-space off the shared drive for speed
         cores=1,
         processes=1,
-        memory="4GB",
+        memory="50GB",
         extra=["--preload simmate.configuration.dask.init_django_worker"],
         # BUG: dask-jobqueue doesn't support our preferred kwargs format...
         #   {"preload": "simmate.configuration.dask.init_django_worker"}

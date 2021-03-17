@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 
 def setup_warwulf():
     """
@@ -39,9 +41,20 @@ def setup_warwulf():
     python prefect_agent.py
     """
 
+    # Setup up the Dask cluster using the pre-defined settings
     from simmate.configuration.dask.warwulf import setup_cluster
 
     cluster = setup_cluster()
+
+    # All workflows should be pointed to the Dask cluster as the default Executor.
+    # We can grab the Dask scheduler's address using the cluster object from above.
+    # For the master node, this address is "tcp://152.2.172.72:8786"
+    os.environ.setdefault(
+        "PREFECT__ENGINE__EXECUTOR__DEFAULT_CLASS", "prefect.executors.DaskExecutor"
+    )
+    os.environ.setdefault(
+        "PREFECT__ENGINE__EXECUTOR__DASK__ADDRESS", cluster.scheduler.address
+    )
 
     from prefect.agent.local import LocalAgent
 
