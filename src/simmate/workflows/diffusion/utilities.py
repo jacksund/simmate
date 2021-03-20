@@ -41,6 +41,22 @@ def get_oxi_supercell_path(path, min_sl_v=None, oxi=False):
     else:
         structure = path.symm_structure
 
+    # Update the specie string
+    if oxi:
+        # We need to grab the site species and make sure it is the proper oxidation
+        # state if we had oxi=True above. Be carefule with this because
+        # pymatgen-diffusion iindex/eindex really refers to the symm_struct
+        # index, not the structure[index]. Therefore, we look at the symm_struct's
+        # equivalent sites, grab the first site (bc they are all the same) and
+        # see what specie it is.
+        specie = structure.equivalent_sites[path.iindex][0].specie
+    else:
+        # if no oxidation analysis was done, its the same as before
+        specie = path.isite.specie
+
+    print((str(specie) == "F" or str(specie) == "F-"))
+    print(specie)
+
     structure_supercell = structure.copy()
     if min_sl_v:
         structure_supercell = structure.copy()
@@ -50,13 +66,13 @@ def get_oxi_supercell_path(path, min_sl_v=None, oxi=False):
         structure_supercell.make_supercell(supercell_size)
 
     isite_new = PeriodicSite(
-        species=structure[path.iindex].specie,  # make sure to grab new oxi state
+        species=specie,
         coords=path.isite.coords,
         coords_are_cartesian=True,
         lattice=structure_supercell.lattice,
     )
     esite_new = PeriodicSite(
-        species=structure[path.eindex].specie,  # make sure to grab new oxi state
+        species=specie,
         coords=path.esite.coords,
         coords_are_cartesian=True,
         lattice=structure_supercell.lattice,
@@ -121,7 +137,7 @@ def run_vasp_custodian(
     structure,
     errorhandler_settings="default",
     vasp_cmd="mpirun -n 16 vasp",
-    gamma_vasp_cmd="mpirun -n 16 vasp_gamma",
+    # gamma_vasp_cmd="mpirun -n 16 vasp_gamma",
     custom_incar={},
     reciprocal_density=64,
 ):
@@ -202,7 +218,8 @@ def run_vasp_custodian(
     validators = [VasprunXMLValidator(), VaspFilesValidator()]
 
     # construct jobs
-    jobs = [VaspJob(vasp_cmd, backup=False)]
+    # BUG: vasp_gamma appears to have a bug so I turn it off
+    jobs = [VaspJob(vasp_cmd, backup=False, auto_gamma=False)]
 
     custodian = Custodian(
         errorhandlers,
@@ -219,8 +236,8 @@ def run_vasp_custodian(
     try:
         custodian.run()
     except Exception as exception:
-        # I raise only the Custodian error message. The issue is with exception.validator
-        # on the ValidationError.
+        # I raise only the Custodian error message. The issue is with
+        # exception.validator on the ValidationError.
         raise Exception(str(exception))
 
 

@@ -114,6 +114,10 @@ def setup_cluster(nworkers=25):
     print(HEADER_ART)
     print(f"Scheduler is located at {cluster.scheduler.address}")
     print(f"Dashboard is located at {cluster.dashboard_link}")
+    print(
+        "To view the dashboard via ssh, use the command... \n\t"
+        "ssh -N -L 8787:warwulf.net:8787 WarrenLab@warwulf.net"
+    )
     # !!! Removed adpative deploy for the time being
     # print(f"The number of Workers will scale between {workers_min} and {workers_max}")
     print(f"The number of Workers will be fixed at {nworkers}")

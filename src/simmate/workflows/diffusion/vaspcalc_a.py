@@ -75,7 +75,7 @@ def run_vasp(structure):
         LCHARG=False,  # don't write out the CHG or CHGCAR
         LVTOT=False,  # don't write the LOCPOT
         # KSPACING=0.5,
-        NPAR=4,  # for parallel efficiency
+        NPAR=1,  # for parallel efficiency
         # IVDW=11,  # use DFT-D3 corrections
         ISYM=1,  # Turn off symmetry for vacancy-based diffusion calcs
     )
