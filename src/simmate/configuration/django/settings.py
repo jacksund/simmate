@@ -103,12 +103,9 @@ DATABASES = {
         "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
         "PORT": "25061",
         'OPTIONS': {'sslmode': 'require'},  # !!! is this needed?
-        # "CONN_MAX_AGE": 0,  # set this to a higher value for production website server
+        # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
     }
 }
-
-# $ dropdb development_db_name
-# $ createdb developmnent_db_name
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

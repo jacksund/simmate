@@ -129,7 +129,7 @@ def get_path_dimension(path):
     edges = fpm.s_graph.graph.edges(data=True)
     for edge in edges:
         hop_length = edge[2]["hop"].length
-        if hop_length > path.length:
+        if hop_length > path.length:  # BUG: there might be a rounding error here.
             s_graph_cleaned.break_edge(
                 from_index=edge[0],
                 to_index=edge[1],

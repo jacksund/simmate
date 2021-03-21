@@ -55,18 +55,17 @@ conda install -n jacks_env -c conda-forge pymatgen==2020.12.31 pymatgen-diffusio
 ```
 
 
-1. We want to start with a clean database so let's reset ours:
+1. We want to start with a clean database so let's reset ours (if we are using SQLite3):
 ```python
-from simmate.configuration.manage_django import reset_db
-reset_db()
+from simmate.configuration.django.database import reset_database
+reset_database()
 ```
 
-2. For speed-up in the codes below, we want to use Dask. For that, we can setup a Dask cluster and tell Prefect to use it as our
-executor. This also allows us to watch a progress bar at http://localhost:8787/status. In other cases, I run workflow.run in parallel rather than task.run. For that, I simply use client.map() instead of setting the workflow executor.
+2. For speed-up in the codes below, we want to use Dask. For that, we can setup a Dask cluster and tell Prefect to use it as our executor. This also allows us to watch a progress bar at http://localhost:8787/status. In other cases, I run workflow.run in parallel rather than task.run. For that, I simply use client.map() instead of setting the workflow executor.
 ```python
 # setup our Dask cluster
 from dask.distributed import Client
-client = Client()
+client = Client(preload="simmate.configuration.dask.init_django_worker")
 
 # NOT SHOWN --> import our desired workflow
 
@@ -74,19 +73,17 @@ from prefect.executors import DaskExecutor
 workflow.executor = DaskExecutor(address=client.scheduler.address)
 ```
 
-3. For checkpointing my database progress, I do two things at each step below. First, I make a copy of the sqlite file and name it db_checkpoint00N.sqlite3 where N corresponds to the step number. I also save the entire table added for each step to a csv file too. This is just in case I accidently reset my database or want to test with the next step. Here I show an example of making a csv file with the Structure_DB model:
+3. For checkpointing my database progress, there are a number of options that I can do. I could simply
+copy and past my sqlite3 file. I could write my data to csv. Or I can dump it to json. Django is most robust
+with dumping to json, so I do that periodically with the following:
 ```python
-# now convert the entire table to a csv file
-from simmate.configuration import manage_django  # ensures django setup
-from simmate.database.diffusion import MaterialsProjectStructure as MPS
-queryset = MPS.objects.all()
-from django_pandas.io import read_frame
-df = read_frame(queryset, index_col="id")
-df.to_csv("initial_structuredb.csv")
+from simmate.configuration.django import setup_full  # ensures setup
+from simmate.configuration.django.database import dump_database_to_json
+dump_database_to_json()  # I can add to the kwarg exclude to be specific
 
-# if you want to reload the csv
-# import pandas
-# df = pandas.read_csv("initial_structuredb.csv", index_col="id")
+# If I wanted to load data into an empty & migrated database, I can use...
+from simmate.configuration.django.database import load_database_from_json
+load_database_from_json()
 ```
 
 4. We want to add all of the Fluoride structures from the Materials Project to our own database. This includes some extra data such as the hull energy and also running some "sanitation" on the structures.
@@ -99,11 +96,11 @@ status = workflow.run(criteria={"elements": {"$all": ["F"],}})
 5. Using this database, let's make a table for the diffusion pathways. Note that I hardcode some options here, such as limiting each structure to 5 pathways. See the find_paths.py workflow for details.
 ```python
 from simmate.workflows.diffusion.find_paths import workflow
-from simmate.configuration import manage_django  # ensures django setup
+from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import MaterialsProjectStructure as MPS
 
 # grab all structure ids in our database
-structure_ids = MPS.objects..order_by("nsites").values_list("id", flat=True).all()
+structure_ids = MPS.objects.order_by("nsites").values_list("id", flat=True).all()
 
 # Run the find_paths workflow for each individual id
 futures = client.map(
@@ -120,16 +117,20 @@ futures = client.map(
 ```python
 from dask.distributed import Client
 from simmate.workflows.diffusion.empirical_measures import workflow
-from simmate.configuration import manage_django  # ensures django setup
+from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import Pathway as Pathway_DB
 
-client = Client()
+# grab the pathway ids that I am going to submit
 pathway_ids = (
     Pathway_DB.objects.filter(empiricalmeasures__isnull=True)
     .order_by("structure__nsites", "nsites_777")
     .values_list("id", flat=True)
-    .all()
+    .all()[:10000]  # if I want to limit the number I submit at a time
 )
+
+# setup my Dask cluster and connect to it. Make sure I have each work connect to
+# the database before starting
+client = Client(preload="simmate.configuration.dask.init_django_worker")
 
 # Run the find_paths workflow for each individual id
 futures = client.map(
@@ -144,61 +145,38 @@ results = client.gather(futures)
 
 7. Rough vasp calc
 ```python
-# from simmate.configuration import django  # ensures django setup
-# from simmate.database.diffusion import EmpiricalMeasures
-# queryset = EmpiricalMeasures.objects.order_by("created_at").all()[:400]
-# from django_pandas.io import read_frame
-# df = read_frame(queryset) # , index_col="pathway": df = df.reset_index()
-# df.to_csv("initial_structuredb.csv")
-
-
-from simmate.configuration.prefect import reset_projects
-reset_projects()
-
 from prefect import Client
-from simmate.configuration import django  # ensures django setup
+from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import Pathway as Pathway_DB
 
-client = Client()
-
+# grab the pathway ids that I am going to submit
 pathway_ids = (
     Pathway_DB.objects.filter(
         vaspcalca__isnull=True,
         empiricalmeasures__dimensionality__gte=1,
-        empiricalmeasures__oxidation_state=-1,
-        empiricalmeasures__ionic_radii_overlap_cations__gt=-1,
-        empiricalmeasures__ionic_radii_overlap_anions__gt=-1,
-        nsites_777__lte=150,
-        structure__nsites__lte=12,
+        # empiricalmeasures__oxidation_state=-1,
+        # empiricalmeasures__ionic_radii_overlap_cations__gt=-1,
+        # empiricalmeasures__ionic_radii_overlap_anions__gt=-1,
+        # nsites_777__lte=150,
+        # structure__nsites__lte=20,
     )
-    # .exclude(pk__in=[220])  # BUG: "RSPHER: internal ERROR:" >> removed via overlap!
     .order_by("nsites_777", "structure__nsites", "length")
-    # .distinct("structure__id")  # BUG: doesn't work for sqlite, only postgres
+    # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
+    # "structure__id" as the first flag in order_by for this to work.
+    # .distinct("structure__id")
     .values_list("id", flat=True)
-    .all()
+    .all()  # [:500]
 )
 
+# connect to Prefect Cloud
+client = Client()
+
+# submit a run for each pathway
 for pathway_id in pathway_ids:
     client.create_flow_run(
-        flow_id="3ec2c48d-3c57-4abf-92c2-da317ef6815b",
+        flow_id="5422b96d-fbbe-4f61-820f-dec934a2dd6b",
         parameters={"pathway_id": pathway_id},
     )
-
-
-# from simmate.configuration import django
-# from simmate.database.diffusion import VaspCalcA
-# queryset = VaspCalcA.objects.all()
-
-# for c in queryset:
-#     # try:
-#     #     barrier = max([c.energy_midpoint - c.energy_start, c.energy_midpoint - c.energy_end])
-#     # except:
-#     #     barrier = None
-#     # c.energy_barrier = barrier
-#     # c.save()
-    
-#     if c.status == "S":
-#         c.delete()
 ```
 
 ## TODO
@@ -209,17 +187,6 @@ path.write_path('test15.cif', nimages=10, idpp=False, species = None,)
 dpf.write_all_paths('test.cif', nimages=10, idpp=False) # for speed, species kwarg isnt accepted here
 ```
 
-2. write IDPP calc files. Remember ISYM=0.
-```python
-# make the VASP input files for a given path
-from pymatgen.io.vasp.sets import MPStaticSet
-
-filename_folder_edge = filename_folder + "/EdgeIndex_" + str(edge_index)
-os.mkdir(filename_folder_edge) 
-for struct_index in range(len(idpp_structs)):
-    filename_folder_edge_image = filename_folder_edge + "/ImageIndex_" + str(struct_index)
-    MPStaticSet(idpp_structs[struct_index], user_incar_settings={"ISYM":0}).write_input(filename_folder_edge_image) 
-```
 
 ## Extra notes
 

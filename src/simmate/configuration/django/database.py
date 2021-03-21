@@ -5,7 +5,7 @@ import shutil
 
 from django.core.management import call_command
 
-from simmate.website.core.settings import BASE_DIR, DATABASES
+from simmate.configuration.django.settings import BASE_DIR, DATABASES
 
 
 def update_database(apps_to_migrate=["diffusion", "execution"]):
@@ -42,13 +42,13 @@ def reset_database(apps_to_migrate=["diffusion", "execution"]):
     update_database(apps_to_migrate)
 
 
-def dump_database_to_json(filename="db-dump.json", exclude=[]):
+def dump_database_to_json(filename="db_dump.json", exclude=[]):
 
     # execute the following commands to write the database to a json file
     call_command("dumpdata", output=filename, exclude=exclude)
 
 
-def load_database_from_json(filename="db-dump.json"):
+def load_database_from_json(filename="db_dump.json"):
 
     # OPTIMIZE: this function is very slow. Consider speed-up options such as
     # making this function a transaction or manually writing a bulk_create. It
