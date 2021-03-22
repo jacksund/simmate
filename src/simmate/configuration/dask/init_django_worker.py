@@ -8,6 +8,16 @@ a worker is started -- rather than have each task connect separately.
 # First setup django settings for simmate
 from simmate.configuration.django import setup_full  # ensures setup
 
+# BUG: do I want to make a connection first? It looks like if the connection
+# closes at any point, then all following tasks will fail -- that is, once
+# the connection closes, no following tasks reopen it. Maybe if I don't establish
+# the connection upfront, I can just let every task make their own.
+# The error I get is...
+#   Unexpected error: InterfaceError('connection already closed') dask
+# This has only happened when I submit >5,000 flow runs, so there may be too
+# many connections opened at that point. I'm not sure if that's actually the
+# case though.
+
 # The settings (including the database) are all set up now, but django doesn't
 # actually connect to the database until a query is made. So here, we do a
 # very simple query that should work for any django database. We don't actaully
@@ -17,7 +27,6 @@ from django.contrib.contenttypes.models import ContentType
 
 # and make a quick query
 ContentType.objects.count()
-
 
 # --------------------------------------------------------------------------------------
 
