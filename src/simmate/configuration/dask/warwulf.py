@@ -69,7 +69,7 @@ def setup_cluster(nworkers=25):
         #
         #
         # Slurm Settings
-        job_cpu=16,  # --cpus-per-task, -c
+        job_cpu=20,  # --cpus-per-task, -c
         job_mem="50GB",  # --mem
         job_extra=[
             "--output=slurm-%j.out",

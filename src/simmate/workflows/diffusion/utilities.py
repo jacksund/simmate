@@ -54,9 +54,7 @@ def get_oxi_supercell_path(path, min_sl_v=None, oxi=False):
         # if no oxidation analysis was done, its the same as before
         specie = path.isite.specie
 
-    print((str(specie) == "F" or str(specie) == "F-"))
-    print(specie)
-
+    # convert the structure to a supercell if min_sl_v was provided
     structure_supercell = structure.copy()
     if min_sl_v:
         structure_supercell = structure.copy()
@@ -88,48 +86,6 @@ def get_oxi_supercell_path(path, min_sl_v=None, oxi=False):
     path_new.eindex = path.eindex
 
     return path_new
-
-
-def get_oxi_supercell_path_OLD(structure, path, min_sl_v):
-
-    # if desired, add oxidation states to structure
-    structure = ValenceIonicRadiusEvaluator(structure).structure
-
-    # make the supercell
-    supercell = structure.copy()
-    supercell_size = [(min_sl_v // length) + 1 for length in supercell.lattice.lengths]
-    supercell.make_supercell(supercell_size)
-
-    # run the pathway analysis using the supercell structure
-    dpf = DistinctPathFinder(
-        structure=supercell,
-        migrating_specie="F-",
-        max_path_length=path.length + 1e-5,  # add extra for rounding errors
-        symprec=0.1,
-        perc_mode=None,
-    )
-
-    # go through paths until we find a match
-    # assume we didn't find a match until proven otherwise
-    found_match = False
-    for path_check in dpf.get_paths():
-        if (
-            abs(path.length - path_check.length) <= 1e-5  # capture rounding error
-            and path.iindex == path_check.iindex
-            and path.eindex == path_check.eindex
-        ):
-            # we found a match so break. No need to check any other pathways.
-            found_match = True
-            break
-
-    # Just in case we didn't find a match, we need to raise an error
-    if not found_match:
-        raise Exception("Failed to find the equivalent pathway in the supercell")
-
-    # we now have path_check as the equivalent pathway. This is what the user
-    # wants so we can return it
-    return path_check
-
 
 # --------------------------------------------------------------------------------------
 
@@ -226,8 +182,8 @@ def run_vasp_custodian(
         jobs,
         validators=validators,
         max_errors=5,
-        polling_time_step=5,  # default 10
-        monitor_freq=3,  # default 30
+        polling_time_step=10,  # default 10
+        monitor_freq=30,  # default 30
     )
 
     # BUG: Cloudpickle fails to handle Custodian outputs properly. So I decided

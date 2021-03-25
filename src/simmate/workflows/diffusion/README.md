@@ -115,7 +115,7 @@ futures = client.map(
 
 6. Make my table of empirical predictors. Note: there are still a number of bugs in this code, so not all pathways are mapped. An example is for non-ionic pathways where F is not in the F- state. Thanks to the fractured architecture, that's alright! I can edit this script later.
 ```python
-from dask.distributed import Client
+from dask.distributed import Client, wait
 from simmate.workflows.diffusion.empirical_measures import workflow
 from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import Pathway as Pathway_DB
@@ -125,7 +125,7 @@ pathway_ids = (
     Pathway_DB.objects.filter(empiricalmeasures__isnull=True)
     .order_by("structure__nsites", "nsites_777")
     .values_list("id", flat=True)
-    .all()[:10000]  # if I want to limit the number I submit at a time
+    .all()  # [:1500]  # if I want to limit the number I submit at a time
 )
 
 # setup my Dask cluster and connect to it. Make sure I have each work connect to
@@ -133,14 +133,17 @@ pathway_ids = (
 client = Client(preload="simmate.configuration.dask.init_django_worker")
 
 # Run the find_paths workflow for each individual id
-futures = client.map(
-    workflow.run,
-    [{"pathway_id": id} for id in pathway_ids],
-    pure=False,
-)
-
-# wait for all of the calls to finish and grab the results
-results = client.gather(futures)
+# To make sure Dask is stable and doesn't have too many futures, I only submit
+# 250 at a time. Once those finish, I submit another 250.
+chunk_size = 250
+chunks = [pathway_ids[i:i + chunk_size] for i in range(0, len(pathway_ids), chunk_size)] 
+for chunk in chunks:
+    futures = client.map(
+        workflow.run,
+        [{"pathway_id": id} for id in chunk],  # for id in pathway_ids chunk
+        pure=False,
+    )
+    results = wait(futures)
 ```
 
 7. Rough vasp calc
