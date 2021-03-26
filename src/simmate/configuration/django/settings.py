@@ -13,9 +13,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 from simmate import website  # needed to specify location of apps
-from simmate import database  # needed to specify database location
+from simmate import database  # needed to specify location of database
+# from simmate.configuration.django import settings_user  # to allow extra apps supplied by user
 
-# The base directory is where simmate.website is located
+# The base directory is where simmate.website is located. Note this is Django's
+# base directory, NOT simmates
 BASE_DIR = os.path.dirname(os.path.abspath(website.__file__))
 
 # The database directory is where simmate.database is located. I move the
