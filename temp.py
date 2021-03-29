@@ -93,3 +93,17 @@ for pathway_id in pathway_ids:
 # set the executor to a locally ran executor
 # from prefect.executors import DaskExecutor
 # workflow.executor = DaskExecutor(address="tcp://152.2.172.72:8786")
+
+
+
+
+
+
+from simmate.configuration.django import setup_full  # ensures setup
+from simmate.database.diffusion import Pathway
+path_db = Pathway.objects.first()
+path = path_db.to_pymatgen()
+structures = path.get_structures(nimages=3)
+
+from simmate.workflows.diffusion.utilities import run_vasp_custodian
+run_vasp_custodian(structures, job_type="neb", errorhandler_settings="no_handler")

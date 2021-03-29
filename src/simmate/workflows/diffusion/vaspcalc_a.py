@@ -65,7 +65,7 @@ def run_vasp(structure):
         #
         # Turn off / reduce settings for low-quality
         EDIFF=1.0e-02,  # was EDIFF_PER_ATOM=5.0e-05
-        # ENCUT=400,  # was 520 --> reduced for fast rough calcs
+        ENCUT=400,  # was 520 --> reduced for fast rough calcs
         # ICHARG=1,  # Read into this. There may be speedup from this setting
         ISPIN=1,  # was 2 --> spin-polarized turned off for rough calcs
         LASPH=False,  # was True --> turned off for rough calcs.

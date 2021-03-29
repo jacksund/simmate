@@ -96,7 +96,7 @@ def run_vasp_custodian(
     job_type="normal",  # other option is "neb"
     half_kpts_for_neb=False,  # consider changing this for rough NEB calcs
     errorhandler_settings="default",
-    vasp_cmd="mpirun -n 18 vasp",
+    vasp_cmd="mpirun -n 16 vasp",
     # gamma_vasp_cmd="mpirun -n 16 vasp_gamma",
     custom_incar={},
     # reciprocal_density=64,  # MIT uses "length", which I won't mess with
@@ -198,8 +198,11 @@ def run_vasp_custodian(
     # based on input flag, select which handlers we will be using
     errorhandlers = errorhandler_groups[errorhandler_settings]
 
-    # For now, I always use these validators. These may be remove for NEB though.
-    validators = [VasprunXMLValidator(), VaspFilesValidator()]
+    # For now, I always use these validators. These may be removed for NEB though.
+    if job_type == "normal":
+        validators = [VasprunXMLValidator(), VaspFilesValidator()]
+    elif job_type == "neb":
+        validators = []
 
     # now put all of the jobs and error handlers together
     custodian = Custodian(
