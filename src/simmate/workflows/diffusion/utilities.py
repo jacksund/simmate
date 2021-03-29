@@ -3,11 +3,11 @@
 import os
 import shlex
 
-from pymatgen.io.vasp.sets import MPStaticSet
+from pymatgen.io.vasp.sets import MITRelaxSet, MITNEBSet  # MPStaticSet
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.analysis.local_env import ValenceIonicRadiusEvaluator
 
-from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder, MigrationPath
+from pymatgen_diffusion.neb.pathfinder import MigrationPath  # DistinctPathFinder
 
 from custodian import Custodian
 from custodian.vasp.handlers import (
@@ -27,7 +27,7 @@ from custodian.vasp.handlers import (
     IncorrectSmearingHandler,
     ScanMetalHandler,
 )
-from custodian.vasp.jobs import VaspJob
+from custodian.vasp.jobs import VaspJob, VaspNEBJob
 from custodian.vasp.validators import VasprunXMLValidator, VaspFilesValidator
 
 # --------------------------------------------------------------------------------------
@@ -87,20 +87,26 @@ def get_oxi_supercell_path(path, min_sl_v=None, oxi=False):
 
     return path_new
 
+
 # --------------------------------------------------------------------------------------
 
+
 def run_vasp_custodian(
-    structure,
+    structure,  # for "neb" this is STRUCTURES! (so a list of structures)
+    job_type="normal",  # other option is "neb"
+    half_kpts_for_neb=False,  # consider changing this for rough NEB calcs
     errorhandler_settings="default",
-    vasp_cmd="mpirun -n 16 vasp",
+    vasp_cmd="mpirun -n 18 vasp",
     # gamma_vasp_cmd="mpirun -n 16 vasp_gamma",
     custom_incar={},
-    reciprocal_density=64,
+    # reciprocal_density=64,  # MIT uses "length", which I won't mess with
 ):
-
-    # All of this code is a simplified version of...
-    #   atomate.vasp.fireworks.StaticFW
-    # Note, this firework breaks down into in firetasks
+    """
+    All of this code is a simplified version of...
+        atomate.vasp.fireworks.StaticFW
+    Note, this firework breaks down into in firetasks, where the main one is...
+        atomate.vasp.firetasks.RunVaspCustodian
+    """
 
     # Because shell=True is a secuirity problem, we need to convert the command
     # via shlex so that Popen can read it.
@@ -108,15 +114,37 @@ def run_vasp_custodian(
     vasp_cmd = os.path.expandvars(vasp_cmd)  # if you have "$MY_ENV_VAR" in your command
     vasp_cmd = shlex.split(vasp_cmd)  # convert "mycmd --args" to ["mycmd", "--args"]
 
+    # construct jobs, which is just a single VASP calculation for now. Depending on the
+    # job type (normal or neb), I need to all decide which pymatgen input set to use.
+    # BUG: vasp_gamma appears to have a bug so I turn it off in all cases
+    if job_type == "normal":
+        # whether this is a static or relax calc, we use MITRelaxSet as the base
+        vasp_input_set = MITRelaxSet(
+            structure,
+            user_incar_settings=custom_incar,
+            # considered PBE_54, but +U or MagMom may change for that
+            user_potcar_functional="PBE",
+        )
+        jobs = [VaspJob(vasp_cmd, backup=False, auto_gamma=False)]
+    elif job_type == "neb":
+        # For NEB calcs, we use the MITRelaxSet as the base.
+        vasp_input_set = MITNEBSet(
+            structure,
+            user_incar_settings=custom_incar,
+            # considered PBE_54, but +U or MagMom may change for that
+            user_potcar_functional="PBE",
+        )
+        jobs = [
+            VaspNEBJob(
+                vasp_cmd,
+                half_kpts=half_kpts_for_neb,
+                backup=False,
+                auto_gamma=False,
+                auto_npar=False,
+            )
+        ]
+
     # The first firetask is to just write the static input. I assume MPStaticSet here.
-    vasp_input_set = MPStaticSet(
-        structure,
-        user_incar_settings=custom_incar,
-        # defaults are 64 for Relax, 100 for Static
-        reciprocal_density=reciprocal_density,
-        # considered PBE_54, but +U or MagMom may change for that
-        user_potcar_functional="PBE",
-    )
     vasp_input_set.write_input(".")
 
     # The next firetask is to run VASP using Custodian. This code is a simplified
@@ -173,10 +201,7 @@ def run_vasp_custodian(
     # For now, I always use these validators. These may be remove for NEB though.
     validators = [VasprunXMLValidator(), VaspFilesValidator()]
 
-    # construct jobs
-    # BUG: vasp_gamma appears to have a bug so I turn it off
-    jobs = [VaspJob(vasp_cmd, backup=False, auto_gamma=False)]
-
+    # now put all of the jobs and error handlers together
     custodian = Custodian(
         errorhandlers,
         jobs,

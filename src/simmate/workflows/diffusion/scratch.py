@@ -17,121 +17,77 @@ from simmate.workflows.diffusion.utilities import (
 )
 
 """
-# A standard CI-NEB calculation
-# Comment the item to use the default settings.
-# Note that "fireworks" is a list corresponding to the order of execution.
-# Author: Hanmei Tang (UCSD)
-fireworks:
-# Relaxation for parent structure
-- fw: atomate.vasp.fireworks.core.NEBRelaxationFW
-  user_incar_settings:
-    EDIFF: 1e-5
-    EDIFFG: -0.02
-    LDAU: False
-    NPAR: 4
-    NSW: 200
-  user_kpoints_settings:
-    grid_density: 100
-  additional_cust_args:
-    auto_npar: False
-    gzip_output: False
 
-# Two endpoints relaxations
-- fw: atomate.vasp.fireworks.core.NEBRelaxationFW
-  user_incar_settings:
-    EDIFF: 1e-5
-    EDIFFG: -0.02
-    NPAR: 4
-    NSW: 500
-  user_kpoints_settings:
-    grid_density: 100
-  additional_cust_args:
-    auto_npar: False
-    gzip_output: False
+Atomate's Default NEB workflow is...
+    Relaxation for parent structure
+    Two endpoints relaxations [MVLCINEBEndPointSet]
+    First round NEB (coarse)
+    Second round NEB (fine) [MVLCINEBSet]
 
-# First round NEB (coarse)
-- fw: atomate.vasp.fireworks.core.NEBFW
-  user_incar_settings:
-    EDIFFG: -0.05
-    IOPT: 7
-    NPAR: 4
-  user_kpoints_settings:
-    grid_density: 100
-  additional_cust_args:
-    auto_npar: False
-    gzip_output: False
+MITRelaxSet --> vs that of MPRelaxSet
+    ISYM=0
+    ICHARG=1
+    NELM=200 (MP has 100)
+    NELMIN=6
+    kpt_length=25 (MP has reciprocal_density=64)
 
-# Second round NEB (fine)
-- fw: atomate.vasp.fireworks.core.NEBFW
-  user_incar_settings:
-    EDIFFG: -0.03
-    EDIFFG: -0.03
-    IOPT: 1
-  user_kpoints_settings:
-    grid_density: 100
-  additional_cust_args:
-    auto_npar: False
-    gzip_output: False
+MITStaticSet --> theoretical based on MPRelaxSet vs MPStaticSet
+    IBRION=-1
+    NSW=0
+    ISMEAR=-5
+    ALGO=Normal
+    reciprocal_density=100
 
-# These will update spec_default in neb.py
-common_params:
-  _category: ""
-  wf_name: lio2_neb_workflow
-  is_optimized: False  # for calcluation from ep and parent
-  # additional_ep_params:
-  idpp_species: ["Li"]  # List of string
-  site_indices: [0, 1]
-  interpolation_type: "IDPP"
-  # Distance tolerance (in Angstrom) used to match the atomic indices between
-  # start and end structures. If it is set 0, then no sorting will be performed.
-  sort_tol: 0
-  # Distance in Angstrom, used in calculating number of images.
-  d_img: 0.7
-  neb_walltime: "10:00:00"  # set NEB walltime to 10 hours
+MITNEBSet --> subclasses MITRelaxSet
+    IMAGES= len(struc) -2
+    IBRION=1
+    ISYM=0
+    LCHARG=False
+    LDAU=False
+    EDIFF --> needs to be set
+
+MVLCINEBEndPointSet --> subclasses MITRelaxSet
+    ISIF=2
+    EDIFF=5e-5
+    EDIFFG=-0.02
+    ISMEAR=0
+    ISYM=0
+    LCHARG=False
+    LDAU=False
+    NELMIN=4
+
+MVLCINEBSet --> subclasses MITNEBSet
+    EDIFF=5e-5
+    EDIFFG=-0.02
+    IBRION=3
+    ICHAIN=0
+    IOPT=1
+    ISIF=2
+    ISMEAR=0
+    ISPIN=2
+    LCHARG=False
+    LCLIMB=True
+    LDAU=False
+    LORBIT=0
+    NSW=200
+    POTIM=0
+    SPRING=-5
+
+Atomate Settings
+    grid_density=100
+    EDIFFG= -0.05 (course); -0.03 (fine)
+    NSW= 200 (parent structure); 500 (endpoints)
+    IOPT= 7 (course); 1 (fine)
+    walltime=10:00:00
+    no_handlers (custodian)
+
 """
-
-
-
-# Relaxing the endpoint structures
-# from pymatgen_diffusion.neb.io import MVLCINEBEndPointSet
-# vasp_input_set = MVLCINEBEndPointSet(
-#     structure,
-#     user_incar_settings=user_incar_settings,
-#     user_kpoints_settings=user_kpoints_settings,
-# )
-# cust_args = {
-#     "job_type": "normal",
-#     "gzip_output": False,
-#     "handler_group": "no_handler",
-# }
-# cust_args.update(additional_cust_args)
-# run_vasp = RunVaspCustodian(
-#     vasp_cmd=">>vasp_cmd<<", gamma_vasp_cmd=">>gamma_vasp_cmd<<", **cust_args
-# )
 
 # getting all NEB images
 # nimages = path.length // 0.7  # so 1 image per 0.7 Angstroms
 # from pymatgen_diffusion.neb.pathfinder import IDPPSolver
 # obj = IDPPSolver.from_endpoints([ep0, ep1], nimages=nimages)
 # images = obj.run(species=idpp_species)
-
-# Writing all images for CI-NEBSet
-# from pymatgen_diffusion.neb.io import MVLCINEBSet
-# vis = MVLCINEBSet(images, user_incar_settings=user_incar_settings,
-#                   user_kpoints_settings=user_kpoints_settings)
-# vis.write_input(".")
-
-# Running NEB via Custodian
-# cust_args = {
-#     "job_type": "neb",
-#     "gzip_output": False,
-#     "handler_group": "no_handler",
-# }
-# cust_args.update(additional_cust_args)
-# run_neb_task = RunVaspCustodian(
-#     vasp_cmd=">>vasp_cmd<<", gamma_vasp_cmd=">>gamma_vasp_cmd<<", **cust_args
-# )
-
 
 # --------------------------------------------------------------------------------------
 
