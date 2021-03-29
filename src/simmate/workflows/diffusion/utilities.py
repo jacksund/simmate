@@ -2,6 +2,7 @@
 
 import os
 import shlex
+import copy
 
 from pymatgen.io.vasp.sets import MITRelaxSet, MITNEBSet  # MPStaticSet
 from pymatgen.core.sites import PeriodicSite
@@ -231,7 +232,7 @@ def run_vasp_custodian(
 def run_vasp_custodian_neb(
     structures,  # list of all images, including the endpoints
     half_kpts_for_neb=False,  # consider changing this for rough NEB calcs
-    errorhandler_settings="default",
+    errorhandler_settings="no_handler",
     vasp_cmd="mpirun -n 15 vasp",
     # gamma_vasp_cmd="mpirun -n 16 vasp_gamma",
     custom_incar_endpoints={},
@@ -287,14 +288,16 @@ def run_vasp_custodian_neb(
         "md": [VaspErrorHandler(), NonConvergingErrorHandler()],
         "no_handler": [],
     }
-
-    # based on input flag, select which handlers we will be using
-    errorhandlers = errorhandler_groups[errorhandler_settings]
+    
+    # Giving each calc their own unique copies
+    errorhandlers1 = errorhandler_groups[errorhandler_settings]
+    errorhandlers2 = copy.deepcopy(errorhandlers1)
+    errorhandlers3 = copy.deepcopy(errorhandlers1)
 
     # make sure command is in correct format
     vasp_cmd = os.path.expandvars(vasp_cmd)
     vasp_cmd = shlex.split(vasp_cmd)
-
+    
     # We need two jobs -- one for each endpoint. And then a third job for NEB.
     vasp_input_set = MITRelaxSet(
         structures[0],
@@ -303,7 +306,7 @@ def run_vasp_custodian_neb(
         user_potcar_functional="PBE",
     )
     jobs = [VaspJob(vasp_cmd, backup=False, auto_gamma=False)]
-    run_custodian_robust(vasp_input_set, errorhandlers, jobs, [], dir="00")
+    run_custodian_robust(vasp_input_set, errorhandlers1, jobs, [], dir="00")
     #
     vasp_input_set = MITRelaxSet(
         structures[-1],
@@ -313,7 +316,7 @@ def run_vasp_custodian_neb(
     )
     jobs = [VaspJob(vasp_cmd, backup=False, auto_gamma=False)]
     run_custodian_robust(
-        vasp_input_set, errorhandlers, jobs, [], dir=str(len(structures)-1).zfill(2)
+        vasp_input_set, errorhandlers2, jobs, [], dir=str(len(structures)-1).zfill(2)
     )
     ##
 
@@ -327,13 +330,14 @@ def run_vasp_custodian_neb(
     jobs = [
         VaspNEBJob(
             vasp_cmd,
+            output_file="vasp.out",  # to fix bug with error handlers
             half_kpts=half_kpts_for_neb,
             backup=False,
             auto_gamma=False,
             auto_npar=False,
         )
     ]
-    run_custodian_robust(vasp_input_set, errorhandlers, jobs, [])
+    run_custodian_robust(vasp_input_set, errorhandlers3, jobs, [])
 
 
 def run_custodian_robust(vasp_input_set, errorhandlers, jobs, validators, dir=None):

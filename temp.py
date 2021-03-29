@@ -95,19 +95,25 @@ for pathway_id in pathway_ids:
 # workflow.executor = DaskExecutor(address="tcp://152.2.172.72:8786")
 
 
+
+
 from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import Pathway
+from simmate.workflows.diffusion.utilities import (
+    run_vasp_custodian_neb,
+    get_oxi_supercell_path,
+)
 
 path_db = Pathway.objects.first()
 path = path_db.to_pymatgen()
 structures = path.get_structures(nimages=3)
-
-from simmate.workflows.diffusion.utilities import run_vasp_custodian_neb
+path_supercell = get_oxi_supercell_path(path, min_sl_v=7)
+images = path_supercell.get_structures(nimages=1, idpp=True)
 
 run_vasp_custodian_neb(
-    structures,
-    errorhandler_settings="no_handler",
-    vasp_cmd="mpirun -n 15 vasp",
-    custom_incar_endpoints={"NPAR": 1, "NSW": 0},
-    custom_incar_neb={"NPAR": 1},
+    images,
+    vasp_cmd="mpirun -n 16 vasp",
+    # errorhandler_settings="no_handler",
+    custom_incar_endpoints={"NPAR": 1, "NSW": 0, "EDIFF": 1e-3},
+    custom_incar_neb={"NPAR": 1, "EDIFF": 1e-3, "EDIFFG": -0.1, "ISIF": 2},
 )
