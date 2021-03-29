@@ -114,6 +114,25 @@ run_vasp_custodian_neb(
     images,
     vasp_cmd="mpirun -n 16 vasp",
     # errorhandler_settings="no_handler",
-    custom_incar_endpoints={"NPAR": 1, "NSW": 0, "EDIFF": 1e-3},
-    custom_incar_neb={"NPAR": 1, "EDIFF": 1e-3, "EDIFFG": -0.1, "ISIF": 2},
+    custom_incar_endpoints={"NPAR": 1, "EDIFF": 5e-5, "ISIF": 2},  # "NSW": 0,
+    custom_incar_neb={"NPAR": 1, "EDIFF": 5e-5, "EDIFFG": -0.1, "ISIF": 2},
 )
+
+
+
+"""
+PZUNMTR parameter number    5 had an illegal value 
+{    0,    0}:  On entry to 
+PZUNMTR parameter number    5 had an illegal value 
+ GSD%LWWORK        1228        5116         456          76
+ ERROR in subspace rotation PSSYEVX: not enough eigenvalues found         618
+
+
+===================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   RANK 3 PID 3326541 RUNNING AT WarWulf
+=   KILLED BY SIGNAL: 6 (Aborted)
+===================================================================================
+
+
+"""
