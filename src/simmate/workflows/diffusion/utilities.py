@@ -225,6 +225,148 @@ def run_vasp_custodian(
         raise Exception(str(exception))
 
 
+# --------------------------------------------------------------------------------------
+
+
+def run_vasp_custodian_neb(
+    structures,  # list of all images, including the endpoints
+    half_kpts_for_neb=False,  # consider changing this for rough NEB calcs
+    errorhandler_settings="default",
+    vasp_cmd="mpirun -n 15 vasp",
+    # gamma_vasp_cmd="mpirun -n 16 vasp_gamma",
+    custom_incar_endpoints={},
+    custom_incar_neb={},
+    # reciprocal_density=64,  # MIT uses "length", which I won't mess with
+):
+    """
+    this is a terrible function becuase Custodian doesn't have dir management...
+    I'm only using this in the short term so I can wrap up my project with custodian.
+    """
+
+    # These are the error handlers used by the Materials Project (via Atomate)
+    errorhandler_groups = {
+        "default": [
+            VaspErrorHandler(),
+            MeshSymmetryErrorHandler(),
+            UnconvergedErrorHandler(),
+            NonConvergingErrorHandler(),
+            PotimErrorHandler(),
+            PositiveEnergyErrorHandler(),
+            FrozenJobErrorHandler(),
+            StdErrHandler(),
+            LargeSigmaHandler(),
+            IncorrectSmearingHandler(),
+        ],
+        "strict": [
+            VaspErrorHandler(),
+            MeshSymmetryErrorHandler(),
+            UnconvergedErrorHandler(),
+            NonConvergingErrorHandler(),
+            PotimErrorHandler(),
+            PositiveEnergyErrorHandler(),
+            FrozenJobErrorHandler(),
+            StdErrHandler(),
+            AliasingErrorHandler(),
+            DriftErrorHandler(),
+            LargeSigmaHandler(),
+            IncorrectSmearingHandler(),
+        ],
+        "scan": [
+            VaspErrorHandler(),
+            MeshSymmetryErrorHandler(),
+            UnconvergedErrorHandler(),
+            NonConvergingErrorHandler(),
+            PotimErrorHandler(),
+            PositiveEnergyErrorHandler(),
+            FrozenJobErrorHandler(),
+            StdErrHandler(),
+            LargeSigmaHandler(),
+            IncorrectSmearingHandler(),
+            ScanMetalHandler(),
+        ],
+        "md": [VaspErrorHandler(), NonConvergingErrorHandler()],
+        "no_handler": [],
+    }
+
+    # based on input flag, select which handlers we will be using
+    errorhandlers = errorhandler_groups[errorhandler_settings]
+
+    # make sure command is in correct format
+    vasp_cmd = os.path.expandvars(vasp_cmd)
+    vasp_cmd = shlex.split(vasp_cmd)
+
+    # We need two jobs -- one for each endpoint. And then a third job for NEB.
+    vasp_input_set = MITRelaxSet(
+        structures[0],
+        user_incar_settings=custom_incar_endpoints,
+        # considered PBE_54, but +U or MagMom may change for that
+        user_potcar_functional="PBE",
+    )
+    jobs = [VaspJob(vasp_cmd, backup=False, auto_gamma=False)]
+    run_custodian_robust(vasp_input_set, errorhandlers, jobs, [], dir="00")
+    #
+    vasp_input_set = MITRelaxSet(
+        structures[-1],
+        user_incar_settings=custom_incar_endpoints,
+        # considered PBE_54, but +U or MagMom may change for that
+        user_potcar_functional="PBE",
+    )
+    jobs = [VaspJob(vasp_cmd, backup=False, auto_gamma=False)]
+    run_custodian_robust(
+        vasp_input_set, errorhandlers, jobs, [], dir=str(len(structures-1)).zfill(2)
+    )
+    ##
+
+    # For NEB calcs, we use the MITRelaxSet as the base.
+    vasp_input_set = MITNEBSet(
+        structures,
+        user_incar_settings=custom_incar_neb,
+        # considered PBE_54, but +U or MagMom may change for that
+        user_potcar_functional="PBE",
+    )
+    jobs = [
+        VaspNEBJob(
+            vasp_cmd,
+            half_kpts=half_kpts_for_neb,
+            backup=False,
+            auto_gamma=False,
+            auto_npar=False,
+        )
+    ]
+    run_custodian_robust(vasp_input_set, errorhandlers, jobs, [])
+
+
+def run_custodian_robust(vasp_input_set, errorhandlers, jobs, validators, dir=None):
+    """
+    This function only exists for NEB right now -- where I'm jumping directories
+    """
+
+    # now put all of the jobs and error handlers together
+    custodian = Custodian(
+        errorhandlers,
+        jobs,
+        validators=[],
+        max_errors=5,
+        polling_time_step=10,  # default 10
+        monitor_freq=30,  # default 30
+    )
+
+    try:
+        if dir:
+            os.mkdir(dir)
+            os.chdir(dir)
+        vasp_input_set.write_input(".")
+        custodian.run()
+    except Exception as exception:
+        raise Exception(str(exception))
+    finally:
+        if dir:
+            os.chdir("..")
+
+
+# --------------------------------------------------------------------------------------
+
+
 def empty_directory():
 
     # BUG: because Custodian doesn't let you set the working directory, we
