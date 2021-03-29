@@ -102,12 +102,12 @@ path_db = Pathway.objects.first()
 path = path_db.to_pymatgen()
 structures = path.get_structures(nimages=3)
 
-from simmate.workflows.diffusion.utilities import run_vasp_custodian
+from simmate.workflows.diffusion.utilities import run_vasp_custodian_neb
 
-run_vasp_custodian(
+run_vasp_custodian_neb(
     structures,
-    job_type="neb",
     errorhandler_settings="no_handler",
     vasp_cmd="mpirun -n 15 vasp",
-    custom_incar={"NPAR": 1},
+    custom_incar_endpoints={"NPAR": 1, "NSW": 0},
+    custom_incar_neb={"NPAR": 1},
 )

@@ -313,7 +313,7 @@ def run_vasp_custodian_neb(
     )
     jobs = [VaspJob(vasp_cmd, backup=False, auto_gamma=False)]
     run_custodian_robust(
-        vasp_input_set, errorhandlers, jobs, [], dir=str(len(structures-1)).zfill(2)
+        vasp_input_set, errorhandlers, jobs, [], dir=str(len(structures)-1).zfill(2)
     )
     ##
 
