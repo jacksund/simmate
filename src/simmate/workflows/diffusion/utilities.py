@@ -45,7 +45,7 @@ def get_oxi_supercell_path(path, min_sl_v=None, oxi=False):
     # Update the specie string
     if oxi:
         # We need to grab the site species and make sure it is the proper oxidation
-        # state if we had oxi=True above. Be carefule with this because
+        # state if we had oxi=True above. Be careful with this because
         # pymatgen-diffusion iindex/eindex really refers to the symm_struct
         # index, not the structure[index]. Therefore, we look at the symm_struct's
         # equivalent sites, grab the first site (bc they are all the same) and
@@ -124,7 +124,7 @@ def run_vasp_custodian(
             structure,
             user_incar_settings=custom_incar,
             # considered PBE_54, but +U or MagMom may change for that
-            user_potcar_functional="PBE",
+            # user_potcar_functional="PBE",
         )
         jobs = [VaspJob(vasp_cmd, backup=False, auto_gamma=False)]
     elif job_type == "neb":

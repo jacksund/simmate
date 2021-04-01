@@ -269,5 +269,5 @@ class VaspCalcA(Calculation):
     # I set primary_key to true so that the primary keys match that of the pathway
     pathway = models.OneToOneField(Pathway, primary_key=True, on_delete=models.CASCADE)
 
-
 # --------------------------------------------------------------------------------------
+

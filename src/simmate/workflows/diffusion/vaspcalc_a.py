@@ -63,16 +63,20 @@ def run_vasp(structure):
     # calculation.
     custom_incar = dict(
         #
+        # For static calc
+        NSW=0,
+        IBRION=-1,
+        #
         # Turn off / reduce settings for low-quality
-        EDIFF=1.0e-02,  # was EDIFF_PER_ATOM=5.0e-05
-        ENCUT=400,  # was 520 --> reduced for fast rough calcs
+        EDIFF=1.0e-03,  # was EDIFF_PER_ATOM=5.0e-05
+        # ENCUT=400,  # was 520 --> reduced for fast rough calcs
         # ICHARG=1,  # Read into this. There may be speedup from this setting
         ISPIN=1,  # was 2 --> spin-polarized turned off for rough calcs
-        LASPH=False,  # was True --> turned off for rough calcs.
-        ALGO="Fast",  # Fast for geom_opt, Normal for static
+        # LASPH=False,  # was True --> turned off for rough calcs
+        # ALGO="Fast",  # Fast for geom_opt, Normal for static
+        LDAU=False,  # Turns off +U setting for low-quality calcs (following MITNEBSet)
         #
         # Turn off verbosity & extra file-writing
-        LDAU=False,  # Turns off +U setting for low-quality calcs (following MITNEBSet)
         LDAUPRINT=0,  # was 1 --> Turned off verbosity of +U routines
         LORBIT=None,  # was 11 --> Turned off writing of PROCAR and DOSCAR
         LAECHG=False,  # don't write out the  AECCARs

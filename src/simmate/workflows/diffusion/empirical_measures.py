@@ -57,10 +57,15 @@ def get_oxidation_state(path):
     # run oxidation analysis on structure
     structure = ValenceIonicRadiusEvaluator(path.symm_structure).structure
 
-    # grab the oxidation state of the diffusion ion
-    specie = structure[path.iindex].specie.oxi_state
-
-    return specie
+    # grab the oxidation state of the diffusing ion
+    specie = structure.equivalent_sites[path.iindex][0].specie
+    
+    # return the integer value of the oxidation state
+    # if the compound doesn't have the oxi_state property, then oxi_state = 0
+    if hasattr(specie, "oxi_state"):    
+        return specie.oxi_state
+    else:
+        return 0
 
 
 # --------------------------------------------------------------------------------------
@@ -128,8 +133,11 @@ def get_path_dimension(path):
     s_graph_cleaned = copy.deepcopy(fpm.s_graph)
     edges = fpm.s_graph.graph.edges(data=True)
     for edge in edges:
-        hop_length = edge[2]["hop"].length
-        if hop_length > path.length:  # BUG: there might be a rounding error here.
+        # BUG: there might be a rounding error here. So I subtract 1e-5 to the length.
+        # This ensures "hop_length > path.length" holds for cases where round increased
+        # the hop_length unintentially
+        hop_length = edge[2]["hop"].length - 1e-6
+        if hop_length > path.length:
             s_graph_cleaned.break_edge(
                 from_index=edge[0],
                 to_index=edge[1],

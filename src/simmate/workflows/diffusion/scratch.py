@@ -34,7 +34,6 @@ MITRelaxSet --> vs that of MPRelaxSet
 MITStaticSet --> theoretical based on MPRelaxSet vs MPStaticSet
     IBRION=-1
     NSW=0
-    ISMEAR=-5
     ALGO=Normal
     reciprocal_density=100
 
