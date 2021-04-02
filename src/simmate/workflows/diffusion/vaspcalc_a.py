@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import numpy
 from datetime import timedelta
 
 from pymatgen.io.vasp.outputs import Vasprun
@@ -51,7 +52,14 @@ def get_images(path):
     # grab the start, midpoint, and endpoint structures (idpp relaxed)
     # For testing, you can use path.write_path() to visualize these structures
     images = path_supercell.get_structures(nimages=1, idpp=True)
-
+    
+    # BUG: if the idpp relaxation fails, it doesn't raise an error but instead
+    # outputs an image filled with sites that have coord (nan, nan, nan). These
+    # make empty poscars that just hang in VASP. I check the midpoint image for this
+    # and see if any coord is listed as "nan"
+    if numpy.isnan(images[1].frac_coords.sum()):
+        raise Exception("nan located in midpoint image -- IDPP failed")
+    
     return images
 
 
@@ -71,7 +79,7 @@ def run_vasp(structure):
         EDIFF=1.0e-03,  # was EDIFF_PER_ATOM=5.0e-05
         # ENCUT=400,  # was 520 --> reduced for fast rough calcs
         # ICHARG=1,  # Read into this. There may be speedup from this setting
-        ISPIN=1,  # was 2 --> spin-polarized turned off for rough calcs
+        # ISPIN=1,  # was 2 --> spin-polarized turned off for rough calcs
         # LASPH=False,  # was True --> turned off for rough calcs
         # ALGO="Fast",  # Fast for geom_opt, Normal for static
         LDAU=False,  # Turns off +U setting for low-quality calcs (following MITNEBSet)
@@ -80,7 +88,7 @@ def run_vasp(structure):
         LDAUPRINT=0,  # was 1 --> Turned off verbosity of +U routines
         LORBIT=None,  # was 11 --> Turned off writing of PROCAR and DOSCAR
         LAECHG=False,  # don't write out the  AECCARs
-        LCHARG=False,  # don't write out the CHG or CHGCAR
+        # LCHARG=False,  # don't write out the CHG or CHGCAR
         LVTOT=False,  # don't write the LOCPOT
         #
         # Extra settings

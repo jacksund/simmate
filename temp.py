@@ -63,6 +63,7 @@ pathway_ids = (
     # "structure__id" as the first flag in order_by for this to work.
     # .distinct("structure__id")
     .values_list("id", flat=True)
+    # .count()
     .all()[:1000]
 )
 
@@ -81,15 +82,21 @@ for pathway_id in pathway_ids:
 
 # from simmate.configuration.django import setup_full  # ensures setup
 # from simmate.database.diffusion import EmpiricalMeasures
-# queryset = EmpiricalMeasures.objects.all()
+# queryset = EmpiricalMeasures.objects.all()[:1000]
 # from django_pandas.io import read_frame
-# df = read_frame(queryset) # , index_col="pathway": df = df.rese
+# df = read_frame(queryset) # , index_col="pathway"
 
 # from simmate.configuration.django import setup_full  # ensures setup
 # from simmate.database.diffusion import VaspCalcA
 # queryset = VaspCalcA.objects.all()
 # from django_pandas.io import read_frame
-# df = read_frame(queryset) # , index_col="pathway": df = df.rese
+# df = read_frame(queryset)
+
+
+# from simmate.database.diffusion import Pathway as Pathway_DB
+# path_db = Pathway_DB.objects.get(id=55)
+# path = path_db.to_pymatgen()
+# path.write_path("test.cif", nimages=3)
 
 # # from dask.distributed import Client
 # # client = Client(preload="simmate.configuration.dask.init_django_worker")
