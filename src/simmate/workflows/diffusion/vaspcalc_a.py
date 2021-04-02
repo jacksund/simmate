@@ -100,7 +100,7 @@ def run_vasp(structure):
         # vasp_cmd="mpirun -n 20 vasp",
         # gamma_vasp_cmd="mpirun -n 20 vasp_gamma",
         custom_incar=custom_incar,
-        reciprocal_density=50,  # very low density kpt mesh
+        # reciprocal_density=50,  # very low density kpt mesh
     )
 
     # grab the custodian log
