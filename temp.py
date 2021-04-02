@@ -72,7 +72,7 @@ client = Client()
 # submit a run for each pathway
 for pathway_id in pathway_ids:
     client.create_flow_run(
-        flow_id="5422b96d-fbbe-4f61-820f-dec934a2dd6b",
+        flow_id="db86199f-e9cb-4f45-9f4a-e7b25aec0dde",
         parameters={"pathway_id": pathway_id},
     )
 

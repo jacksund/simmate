@@ -61,7 +61,7 @@ def setup_warwulf():
     agent = LocalAgent(
         name="WarWulf",
         # max_polls=1,
-        labels=["DESKTOP-PVN50G5"]
+        labels=["DESKTOP-PVN50G5", "digital-storm"]
         # no_cloud_logs=True
     )
     agent.start()
