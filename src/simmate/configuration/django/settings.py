@@ -38,20 +38,43 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
-
-# !!! I can add "simmate.website." if I'm not using django within a package
+# List all applications that Django will initialize with. Write the full python
+# path to the app or it's config file. Note that relative python paths work too
+# if you are developing a new app. Advanced users can remove unnecessary apps
+# if you'd like to speed up django's start-up time.
 INSTALLED_APPS = [
+    #
+    # These are all apps that are built by Simmate
     "simmate.website.accounts.apps.AccountsConfig",
     "simmate.website.diffusion.apps.DiffusionConfig",
     "simmate.website.execution.apps.ExecutionConfig",
-    "crispy_forms",
+    #
+    # These are built-in django apps that we use for extra features
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Other apps installed with Django to consider
+    #   "django.contrib.humanize",
+    #   "django.contrib.postgres",
+    #   "django.contrib.redirects",
+    #   "django.contrib.sitemaps",
+    #
+    # These are apps created by third-parties that give us extra features
+    "crispy_forms",  # django-crispy-forms
+    # Other third-party apps/tools to consider. Note that some of these don't
+    # need to be installed apps while some also request different setups.
+    #   django-extensions
+    #   django-ratelimit
+    #   dj-stripe
+    #   django-allauth
+    #   django-debug-toolbar
+    #   django-channels (+ React.js)
+    #   django-REST-framework
+    #   django-graphene
+    #   django-redis
 ]
 
 MIDDLEWARE = [
