@@ -1,1 +1,0 @@
-This module is empty at the moment, but I plan for it to be a fork/merge of pymatgen.core and ase in the future. For now, I just use this packages as dependencies directly. I call this 'matsci' instead of 'core' to help beginner users but I may change this back in the future.

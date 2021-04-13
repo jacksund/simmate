@@ -1,14 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-- write 1st rough static flow
-- write 1st rough NEB flow --> and model for relaxed path
-- test NEB run
-- launch 1st rough static flows (wait 2 days before launching NEBs)
-- inspect database for known flouride conductors and prototype plots
-- outline writing & figures
-"""
-
 # --------------------------------------------------------------------------------------
 
 # from dask.distributed import Client, wait
@@ -64,7 +55,7 @@ pathway_ids = (
     # .distinct("structure__id")
     .values_list("id", flat=True)
     # .count()
-    .all()[:1000]
+    .all()[:300]
 )
 
 # connect to Prefect Cloud
@@ -86,6 +77,7 @@ for pathway_id in pathway_ids:
 # from django_pandas.io import read_frame
 # df = read_frame(queryset) # , index_col="pathway"
 
+# import datetime
 # from simmate.configuration.django import setup_full  # ensures setup
 # from simmate.database.diffusion import VaspCalcA
 # queryset = VaspCalcA.objects.all()

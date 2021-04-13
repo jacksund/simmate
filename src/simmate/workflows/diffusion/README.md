@@ -50,7 +50,7 @@ NOTE: I am using...
     - Matminer forked + pip -e install because their conda-forge install is broken
 Install with...
 ```
-conda create -n jacks_env python=3.8.6
+conda create -n jacks_env python=3.8
 conda install -n jacks_env -c conda-forge pymatgen==2020.12.31 pymatgen-diffusion==2020.10.8 custodian==2021.1.8 dask==2021.1.1 dask-jobqueue==0.7.2 django==3.1.5 django-crispy-forms==1.11.0 django-pandas==0.6.1 psycopg2 prefect==0.14.5
 ```
 
