@@ -84,6 +84,20 @@ for pathway_id in pathway_ids:
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)
 
+# .filter(pathway_id__in=pids)
+# pids= [3036,
+# 9461,
+# 3040,
+# 10373,
+# 3033,
+# 8701,
+# 9143,
+# 9924,
+# 1220,
+# 1443,
+# 1496,
+# 1034,]
+
 
 # from simmate.database.diffusion import Pathway as Pathway_DB
 # path_db = Pathway_DB.objects.get(id=55)
@@ -137,6 +151,13 @@ PZUNMTR parameter number    5 had an illegal value
 =   RANK 3 PID 3326541 RUNNING AT WarWulf
 =   KILLED BY SIGNAL: 6 (Aborted)
 ===================================================================================
-
-
 """
+
+from simmate.materials_science.element_data import ALL_DATA
+
+props = []
+
+for key, data in ALL_DATA.items():
+    for prop in data.keys():
+        if prop not in props:
+            props.append(prop)
