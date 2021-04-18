@@ -79,12 +79,17 @@ SUPPORTED_PROPERTIES = [
 ]
 
 """
-These are the attributes that pymatgen has but we are missing at the moment.
+These are the attributes that pymatgen has but we are missing at the moment. There are
+others, but I think these are the ones worth adding:
     ionization_energies
     mendeleev_no
-    ground_state_term_symbol
     valence
     ground_level
+    row_number
+    group_number
+    block (s,p,d,f)
+    term_symbols
+    ground_state_term_symbol
 """
 
 # --------------------------------------------------------------------------------------
@@ -5140,4 +5145,6 @@ ALL_DATA = {
         "atomic_number": 118,
         "name": "Oganesson",
     },
+    # This is a dummy element.
+    "X": {"atomic_number": 0, "name": "Unknown"},
 }

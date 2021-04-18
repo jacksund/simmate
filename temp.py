@@ -152,12 +152,3 @@ PZUNMTR parameter number    5 had an illegal value
 =   KILLED BY SIGNAL: 6 (Aborted)
 ===================================================================================
 """
-
-from simmate.materials_science.element_data import ALL_DATA
-
-props = []
-
-for key, data in ALL_DATA.items():
-    for prop in data.keys():
-        if prop not in props:
-            props.append(prop)
