@@ -89,7 +89,8 @@ from simmate import Structure_Database
 # EXAMPLE 1: all structures that have less than 6 sites in their unitcell
 structures = Structure_Database.objects.filter(nsites__lt=6)
 
-# EXAMPLE 2: all MoS2 structures that are less than 10g/A^3 and have a bulk modulus greater than 0.5
+# EXAMPLE 2: all MoS2 structures that are less than 10g/A^3 and have a bulk
+# modulus greater than 0.5
 structures = Structure_Database.objects.filter(
    formula="MoS2",
    density__lt=10,
@@ -115,7 +116,8 @@ client.create_flow_run(
 )
 
 # You can use different combinations of these two parallelization strategies as well!
-# Using Prefect and Dask, we can scale out accross various computer resources with a few lines of code.
+# Using Prefect and Dask, we can scale out accross various computer resources 
+# with a few lines of code.
 ```
 
 4. _**Common Task Utilities and Toolbox.**_ A lot of times in research, a new method is needed to analyze a structure, so a prebuilt workflow won't exist for you yet. Here, you'll need common functions ready to go (such as grabbing the volume of a crystal or running symmetry analysis). Our core functions and classes are largely inspired from the [PyMatGen](https://github.com/materialsproject/pymatgen) and [ASE](https://gitlab.com/ase/ase) codes, where we decided to write our own version for speed, readability, and usability:
