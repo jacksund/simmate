@@ -151,6 +151,7 @@ def run_vasp(structures):
         # IBRION=-1,
         # For Relax
         ISIF=2,
+        EDIFFG=-0.1,
         #
         # Turn off / reduce settings for low-quality
         EDIFF=1.0e-05,  # was EDIFF_PER_ATOM=5.0e-05
@@ -184,7 +185,8 @@ def run_vasp(structures):
         errorhandler_settings="md",  # minimal checks
         # vasp_cmd="mpirun -n 20 vasp",
         # gamma_vasp_cmd="mpirun -n 20 vasp_gamma",
-        custom_incar=custom_incar,
+        custom_incar_neb=custom_incar,
+        custom_incar_endpoints=custom_incar,  # I just use the same. let set handle NSW and NEB settings
         # reciprocal_density=50,  # very low density kpt mesh
     )
 
