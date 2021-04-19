@@ -176,7 +176,7 @@ def run_vasp(structures):
     )
 
     # make sure we have a clean directory before starting
-    empty_directory()
+    # empty_directory()
 
     # Run VASP using the structure, custom settings, and custodian
     run_vasp_custodian_neb(
