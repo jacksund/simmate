@@ -379,5 +379,5 @@ def empty_directory():
     # An error will be thrown if there is a directory present (such as from an
     # NEB calc).
     for filename in os.listdir("."):
-        if filename not in ["submit.sh", "slurm.out"]:
+        if filename not in ["submit.sh", "slurm.out", "python.out"]:
             os.remove(filename)

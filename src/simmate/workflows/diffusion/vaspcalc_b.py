@@ -219,7 +219,7 @@ def run_vasp(structures):
 
     # empty the directory once we are done (note we will not reach this point
     # if the calculation fails above)
-    empty_directory()
+    # empty_directory()
     
     print(energies)
     print(structures)
