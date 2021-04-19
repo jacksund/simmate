@@ -152,3 +152,27 @@ PZUNMTR parameter number    5 had an illegal value
 =   KILLED BY SIGNAL: 6 (Aborted)
 ===================================================================================
 """
+
+
+# from prefect import Flow, task, context
+
+# @task
+# def access_context():
+    
+#     # you can initialize context with custom variables
+#     # Note, this can be done outside of a task too
+#     with context(a=1, b=2) as c:
+#         print(c.a) # 1
+    
+#     # you can also access metadata of the overall flow-run
+#     print(context.flow_run_id)
+#     # or task-run metadata
+#     print(context.task_run_id)
+
+
+# # The task shown above will only work within a Flow!
+
+# access_context.run()  # does not have context filled and will fail
+ 
+# with Flow("Grab that context!") as flow:
+#     access_context()  # has a context filled and works successfully
