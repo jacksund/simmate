@@ -149,6 +149,8 @@ def run_vasp(structures):
         # For static calc
         # NSW=0,
         # IBRION=-1,
+        # For Relax
+        ISIF=2,
         #
         # Turn off / reduce settings for low-quality
         EDIFF=1.0e-05,  # was EDIFF_PER_ATOM=5.0e-05
