@@ -150,7 +150,7 @@ def run_vasp(structures):
         # NSW=0,
         # IBRION=-1,
         # For Relax
-        ISIF=2,
+        ISIF=3,
         EDIFFG=-0.1,
         #
         # Turn off / reduce settings for low-quality
