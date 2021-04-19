@@ -19,11 +19,12 @@ class Element(Enum):
     means there are fixed number of options to choose from. Further, once one is
     chosen, it never changes. This means we really only need one object instance
     for each element -- and any time we call Element("Al"), it will share that instance
-    and data. This is effectively a "singleton" and helps us save on memory in a big way.
+    and data. This is effectively a "singleton" and helps us save on memory and 
+    object initialization in a big way.
 
     The second thing we do is "lazy-loading" of an Element's attributes. This helps
     with how fast we can create Element objects. In 99% of cases, we really don't need
-    all of the data about an element -- just the symbol. Therefore, data isn't loaded
+    all of the data for an element -- just the symbol. Therefore, data isn't loaded
     and attached to Element objects until they need to be. Once you call that attribute,
     we then link it to the object and it's there for good. This helps with performance
     too because once an attribute is accessed, it will likely be accessed again.
@@ -173,8 +174,7 @@ class Element(Enum):
         wasn't pre-set. As a solution to that, we set the attributes as they
         are accessed -- via the setattr() function. This means the first call takes
         longer and then it's fast after that. If I never access this attribute again,
-        this is also wasted overhead. I should do more testing as to whether this
-        line is actually beneficial or not.
+        this is also wasted overhead.
         """
 
         # See if the requested attribute is actually one we support
@@ -334,6 +334,7 @@ class Element(Enum):
     @property
     def is_metal(self):
         """ True if element is a metal. """
+        # if any of these are true, it's a metal
         return (
             self.is_alkali
             or self.is_alkaline
