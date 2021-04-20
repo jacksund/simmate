@@ -122,7 +122,7 @@ def load_pathway_from_db(pathway_id):
 def get_images(path):
 
     # convert the path to a supercell
-    path_supercell = get_oxi_supercell_path(path, min_sl_v=7)
+    path_supercell = get_oxi_supercell_path(path, min_sl_v=10)
 
     # grab the start, midpoint, and endpoint structures (idpp relaxed)
     # For testing, you can use path.write_path() to visualize these structures
@@ -152,6 +152,7 @@ def run_vasp(structures):
         # For Relax
         ISIF=3,
         EDIFFG=-0.1,
+        IBRION=2,  # 2 for bad initial guess
         #
         # Turn off / reduce settings for low-quality
         EDIFF=1.0e-05,  # was EDIFF_PER_ATOM=5.0e-05
@@ -160,7 +161,7 @@ def run_vasp(structures):
         # ISPIN=1,  # was 2 --> spin-polarized turned off for rough calcs
         # LASPH=False,  # was True --> turned off for rough calcs
         # ALGO="Fast",  # Fast for geom_opt, Normal for static
-        # LDAU=False,  # Turns off +U setting for low-quality calcs (following MITNEBSet)
+        LDAU=False,  # Turns off +U setting for low-quality calcs (following MITNEBSet)
         #
         # Turn off verbosity & extra file-writing
         LDAUPRINT=0,  # was 1 --> Turned off verbosity of +U routines
@@ -196,7 +197,7 @@ def run_vasp(structures):
     structures_relaxed = []
     energies = []
     
-    for directory in ["00", "01", "02"]:
+    for directory in ["00", "", "02"]:  # midpoint isn't in 01, but in parent dir (".")
 
         # workup the vasp calculation
         # load the xml file and only parse the bare minimum
