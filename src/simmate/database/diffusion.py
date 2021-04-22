@@ -271,3 +271,24 @@ class VaspCalcA(Calculation):
 
 # --------------------------------------------------------------------------------------
 
+
+class VaspCalcB(Calculation):
+
+    """ Base info """
+    
+    structure_start_json = models.TextField(blank=True, null=True)
+    structure_midpoint_json = models.TextField(blank=True, null=True)
+    structure_end_json = models.TextField(blank=True, null=True)
+    
+    energy_start = models.FloatField(blank=True, null=True)
+    energy_midpoint = models.FloatField(blank=True, null=True)
+    energy_end = models.FloatField(blank=True, null=True)
+
+    energy_barrier = models.FloatField(blank=True, null=True)
+
+    """ Relationships """
+    # Each calc corresponds to one Pathway
+    # I set primary_key to true so that the primary keys match that of the pathway
+    pathway = models.OneToOneField(Pathway, primary_key=True, on_delete=models.CASCADE)
+
+# --------------------------------------------------------------------------------------

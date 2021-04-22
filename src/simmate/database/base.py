@@ -89,7 +89,9 @@ class Structure(models.Model):
 
     # Density of the crystal
     density = models.FloatField()
-
+    
+    # TODO: add molar volume
+    
     # symmetry info
     # TODO: should this be a relationship to a separate table?
     spacegroup = models.IntegerField()

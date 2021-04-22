@@ -85,7 +85,7 @@ from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
 
 from simmate.configuration.django import setup_full  # ensures setup
-from simmate.database.diffusion import Pathway as Pathway_DB  # VaspCalcB,
+from simmate.database.diffusion import VaspCalcB, Pathway as Pathway_DB
 from simmate.workflows.diffusion.utilities import (
     run_vasp_custodian_neb,
     get_oxi_supercell_path,
@@ -178,7 +178,7 @@ def run_vasp(structures):
     )
 
     # make sure we have a clean directory before starting
-    # empty_directory()
+    empty_directory()
 
     # Run VASP using the structure, custom settings, and custodian
     run_vasp_custodian_neb(
@@ -193,82 +193,87 @@ def run_vasp(structures):
 
     # grab the custodian log
     # json_log = json.load("custodian.json")
-    
+
     structures_relaxed = []
     energies = []
-    
+
     for directory in ["00", "", "02"]:  # midpoint isn't in 01, but in parent dir (".")
 
-        # workup the vasp calculation
-        # load the xml file and only parse the bare minimum
-        xmlReader = Vasprun(
-            filename=os.path.join(directory, "vasprun.xml"),
-            parse_dos=False,
-            parse_eigen=False,
-            parse_projected_eigen=False,
-            parse_potcar_file=False,
-            exception_on_bad_xml=True,
-        )
+        try:
+            # workup the vasp calculation
+            # load the xml file and only parse the bare minimum
+            xmlReader = Vasprun(
+                filename=os.path.join(directory, "vasprun.xml"),
+                parse_dos=False,
+                parse_eigen=False,
+                parse_projected_eigen=False,
+                parse_potcar_file=False,
+                exception_on_bad_xml=True,
+            )
 
-        # confirm that the calculation converged
-        assert xmlReader.converged
-        
-        # grab the final structure and energy
-        final_structure = xmlReader.structures[-1]
-        energy = xmlReader.final_energy
-        # add to results list
-        structures_relaxed.append(final_structure)
-        energies.append(energy)
+            # confirm that the calculation converged
+            assert xmlReader.converged
+
+            # grab the final structure and energy
+            final_structure = xmlReader.structures[-1]
+            energy = xmlReader.final_energy
+            # add to results list
+            structures_relaxed.append(final_structure)
+            energies.append(energy)
+        except:
+            structures_relaxed.append(None)
+            energies.append(None)
 
     # empty the directory once we are done (note we will not reach this point
     # if the calculation fails above)
-    # empty_directory()
-    
-    print(energies)
-    print(structures)
-    
+    empty_directory()
+
     # return the desired info
     return {"structures": structures_relaxed, "energies": energies}
+
 
 # --------------------------------------------------------------------------------------
 
 
-# @task(trigger=all_finished, max_retries=3, retry_delay=timedelta(seconds=5))
-# def add_results_to_db(energies_mapped, pathway_id):
+@task(trigger=all_finished, max_retries=3, retry_delay=timedelta(seconds=5))
+def add_results_to_db(output_data, pathway_id):    
 
-#     # energies_mapped will be a list of three floats
-#     # e_start, e_midpoint, e_end = energies_mapped
-#     e_start = energies_mapped[0]
-#     e_midpoint = energies_mapped[1]
-#     e_end = energies_mapped[2]
+    # unpack data
+    e_start, e_midpoint, e_end = output_data["energies"]
+    s_start, s_midpoint, s_end = output_data["structures"]
 
-#     # grab the pathway_id entry. This should exists already in the Submitted state
-#     # An error will be thrown if it's not in the submitted state -- meaning we
-#     # are trying to overwrite results, which we shouldn't do.
-#     calc = VaspCalcA.objects.get(pathway_id=pathway_id, status="S")
+    # grab the pathway_id entry. This should exists already in the Submitted state
+    # An error will be thrown if it's not in the submitted state -- meaning we
+    # are trying to overwrite results, which we shouldn't do.
+    calc = VaspCalcB.objects.get(pathway_id=pathway_id, status="S")
 
-#     # now add the empirical data using the supplied dictionary
-#     # NOTE: the "if not __ else None" code is to make sure there wasn't an error
-#     # raise in one of the upstream tasks. For example there was an error, oxi_data
-#     # would be an excpetion class -- in that case, we choose to store None instead
-#     # of the exception itself.
-#     calc.status = "C"
-#     calc.energy_start = e_start if not isinstance(e_start, Exception) else None
-#     calc.energy_midpoint = e_midpoint if not isinstance(e_midpoint, Exception) else None
-#     calc.energy_end = e_end if not isinstance(e_end, Exception) else None
-#     try:
-#         barrier = max([e_midpoint - e_start, e_midpoint - e_end])
-#     except:  # TypeError
-#         barrier = None
-#     calc.energy_barrier = barrier
-#     calc.save()
+    # now add the empirical data using the supplied dictionary
+    # NOTE: the "if not __ else None" code is to make sure there wasn't an error
+    # raise in one of the upstream tasks. For example there was an error, oxi_data
+    # would be an excpetion class -- in that case, we choose to store None instead
+    # of the exception itself.
+    calc.status = "C"
+    calc.energy_start = e_start if not isinstance(e_start, Exception) else None
+    calc.energy_midpoint = e_midpoint if not isinstance(e_midpoint, Exception) else None
+    calc.energy_end = e_end if not isinstance(e_end, Exception) else None
+    try:
+        barrier = max([e_midpoint - e_start, e_midpoint - e_end])
+    except:  # TypeError
+        barrier = None
+    calc.energy_barrier = barrier
+
+    calc.structure_start_json = s_start.to_json() if s_start else None
+    calc.structure_midpoint_json = s_midpoint.to_json() if s_midpoint else None
+    calc.structure_end_json = s_end.to_json() if s_end else None
+
+    calc.save()
 
 
 # --------------------------------------------------------------------------------------
 
 
 # now make the overall workflow
-with Flow("Vasp Calc A") as workflow:
+with Flow("Vasp Calc B") as workflow:
 
     # load the structure object from our database
     pathway_id = Parameter("pathway_id")

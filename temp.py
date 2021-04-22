@@ -2,38 +2,6 @@
 
 # --------------------------------------------------------------------------------------
 
-# from dask.distributed import Client, wait
-# from simmate.workflows.diffusion.empirical_measures import workflow
-# from simmate.configuration.django import setup_full  # ensures setup
-# from simmate.database.diffusion import Pathway as Pathway_DB
-
-# # grab the pathway ids that I am going to submit
-# pathway_ids = (
-#     Pathway_DB.objects.filter(empiricalmeasures__isnull=True)
-#     .order_by("structure__nsites", "nsites_777")
-#     .values_list("id", flat=True)
-#     .all()  # [:1500]  # if I want to limit the number I submit at a time
-# )
-
-# # setup my Dask cluster and connect to it. Make sure I have each work connect to
-# # the database before starting
-# client = Client(preload="simmate.configuration.dask.init_django_worker")
-
-# # Run the find_paths workflow for each individual id
-# # To make sure Dask is stable and doesn't have too many futures, I only submit
-# # 250 at a time. Once those finish, I submit another 250.
-# chunk_size = 250
-# chunks = [pathway_ids[i:i + chunk_size] for i in range(0, len(pathway_ids), chunk_size)] 
-# for chunk in chunks:
-#     futures = client.map(
-#         workflow.run,
-#         [{"pathway_id": id} for id in chunk],  # for id in pathway_ids chunk
-#         pure=False,
-#     )
-#     results = wait(futures)
-
-# --------------------------------------------------------------------------------------
-
 from prefect import Client
 from simmate.configuration.django import setup_full  # ensures setup
 from simmate.database.diffusion import Pathway as Pathway_DB
@@ -48,8 +16,7 @@ pathway_ids = (
         # empiricalmeasures__ionic_radii_overlap_anions__gt=-1,
         # nsites_777__lte=150,
         # structure__nsites__lte=20,
-    )
-    .order_by("nsites_777", "structure__nsites", "length")
+    ).order_by("nsites_777", "structure__nsites", "length")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
     # .distinct("structure__id")
@@ -64,7 +31,7 @@ client = Client()
 # submit a run for each pathway
 for pathway_id in pathway_ids:
     client.create_flow_run(
-        flow_id="b10a9c46-763f-42e7-8ff5-eff91fb8fb6c",
+        flow_id="dae896f1-2078-4389-8383-0a3dab61ef2b",
         parameters={"pathway_id": pathway_id},
     )
 
@@ -73,16 +40,111 @@ for pathway_id in pathway_ids:
 
 # from simmate.configuration.django import setup_full  # ensures setup
 # from simmate.database.diffusion import EmpiricalMeasures
-# queryset = EmpiricalMeasures.objects.all()[:1000]
+# queryset = EmpiricalMeasures.objects.all()  # [:5000]
 # from django_pandas.io import read_frame
-# df = read_frame(queryset) # , index_col="pathway"
+# df = read_frame(queryset)  # , index_col="pathway"
+# # ##
+# df2 = df[df["ionic_radii_overlap_anions"] > -900] # .sample(750)
+# df2.plot(
+#     x="ionic_radii_overlap_anions",
+#     y="ionic_radii_overlap_cations",
+#     c="ewald_energy",
+#     kind="scatter",
+#     colormap="RdYlGn_r",
+# )
+# df2.plot(
+#     x="ionic_radii_overlap_anions",
+#     y="ewald_energy",
+#     # c="ionic_radii_overlap_cations",
+#     kind="scatter",
+#     colormap="RdYlGn_r",
+# )
+# df2.plot(
+#     x="ionic_radii_overlap_cations",
+#     y="ewald_energy",
+#     c="ionic_radii_overlap_anions",
+#     kind="scatter",
+#     colormap="RdYlGn_r",
+# )
+# test = df2.plot.hexbin(
+#     x="ionic_radii_overlap_anions",
+#     y="ionic_radii_overlap_cations",
+#     C="ewald_energy",
+#     gridsize=20,
+#     colormap="RdYlGn_r",
+# )
 
-# import datetime
 # from simmate.configuration.django import setup_full  # ensures setup
 # from simmate.database.diffusion import VaspCalcA
 # queryset = VaspCalcA.objects.all()
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)
+# df.hist("energy_barrier", bins=100, figsize=(10,2))
+
+
+# --------------------------------------------------------------------------------------
+
+
+from simmate.configuration.django import setup_full  # ensures setup
+from simmate.database.diffusion import Pathway as Pathway_DB
+
+queryset = (
+    Pathway_DB.objects.filter(
+        vaspcalca__energy_barrier__isnull=False,
+        vaspcalca__energy_barrier__gte=0,
+        empiricalmeasures__ionic_radii_overlap_anions__gt=-900,
+    )
+    .select_related("vaspcalca", "empiricalmeasures")
+    .all()
+)
+from django_pandas.io import read_frame
+
+df = read_frame(
+    queryset,
+    fieldnames=[
+        "length",
+        "empiricalmeasures__ewald_energy",
+        "empiricalmeasures__ionic_radii_overlap_anions",
+        "empiricalmeasures__ionic_radii_overlap_cations",
+        "vaspcalca__energy_barrier",
+    ],
+)
+df.plot(
+    x="empiricalmeasures__ewald_energy",
+    y="vaspcalca__energy_barrier",
+    kind="scatter",
+    s=4,
+    # xlim=(0,1.2),
+    # ylim=(0,17),
+)
+df.plot(
+    x="empiricalmeasures__ionic_radii_overlap_anions",
+    y="empiricalmeasures__ionic_radii_overlap_cations",
+    c="vaspcalca__energy_barrier",
+    kind="scatter",
+    colormap="RdYlGn_r",
+)
+df.plot(
+    x="empiricalmeasures__ionic_radii_overlap_anions",
+    y="vaspcalca__energy_barrier",
+    c="empiricalmeasures__ionic_radii_overlap_cations",
+    kind="scatter",
+    colormap="RdYlGn_r",
+)
+df.plot(
+    x="empiricalmeasures__ionic_radii_overlap_cations",
+    y="vaspcalca__energy_barrier",
+    c="empiricalmeasures__ionic_radii_overlap_anions",
+    kind="scatter",
+    colormap="RdYlGn_r",
+)
+df.plot.hexbin(
+    x="empiricalmeasures__ionic_radii_overlap_anions",
+    y="empiricalmeasures__ionic_radii_overlap_cations",
+    C="vaspcalca__energy_barrier",
+    gridsize=20,
+    colormap="RdYlGn_r",
+)
 
 # .filter(pathway_id__in=pids)
 # pids= [3036,
@@ -100,63 +162,14 @@ for pathway_id in pathway_ids:
 
 
 # from simmate.database.diffusion import Pathway as Pathway_DB
-# path_db = Pathway_DB.objects.get(id=55)
-# path = path_db.to_pymatgen()
-# path.write_path("test.cif", nimages=3)
-
-# # from dask.distributed import Client
-# # client = Client(preload="simmate.configuration.dask.init_django_worker")
+# path_db = Pathway_DB.objects.get(id=55).to_pymatgen().write_path("test.cif", nimages=3)
 
 
 # set the executor to a locally ran executor
 # from prefect.executors import DaskExecutor
 # workflow.executor = DaskExecutor(address="tcp://152.2.172.72:8786")
 
-
-
-
-from simmate.configuration.django import setup_full  # ensures setup
-from simmate.database.diffusion import Pathway
-from simmate.workflows.diffusion.vaspcalc_b import workflow
-result = workflow.run(pathway_id=4)
-
-
-"""
-PZUNMTR parameter number    5 had an illegal value 
-{    0,    0}:  On entry to 
-PZUNMTR parameter number    5 had an illegal value 
- GSD%LWWORK        1228        5116         456          76
- ERROR in subspace rotation PSSYEVX: not enough eigenvalues found         618
-
-
-===================================================================================
-=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
-=   RANK 3 PID 3326541 RUNNING AT WarWulf
-=   KILLED BY SIGNAL: 6 (Aborted)
-===================================================================================
-"""
-
-
-# from prefect import Flow, task, context
-
-# @task
-# def access_context():
-    
-#     # you can initialize context with custom variables
-#     # Note, this can be done outside of a task too
-#     with context(a=1, b=2) as c:
-#         print(c.a) # 1
-    
-#     # you can also access metadata of the overall flow-run
-#     print(context.flow_run_id)
-#     # or task-run metadata
-#     print(context.task_run_id)
-
-
-# # The task shown above will only work within a Flow!
-
-# access_context.run()  # does not have context filled and will fail
- 
-# with Flow("Grab that context!") as flow:
-#     access_context()  # has a context filled and works successfully
-
+# from simmate.configuration.django import setup_full  # ensures setup
+# from simmate.database.diffusion import Pathway
+# from simmate.workflows.diffusion.vaspcalc_b import workflow
+# result = workflow.run(pathway_id=4)

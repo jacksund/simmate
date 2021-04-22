@@ -28,16 +28,17 @@ def build():
         workflow as empirical_measures_workflow,
     )
     from simmate.workflows.diffusion.vaspcalc_a import workflow as a_workflow
+    from simmate.workflows.diffusion.vaspcalc_b import workflow as b_workflow
 
     workflows = [
         add_structure_workflow,
         find_paths_workflow,
         empirical_measures_workflow,
         a_workflow,
+        b_workflow,
     ]
 
     for workflow in workflows:
-        pass
         # alternatively I could use client.register(workflow)
         workflow_id = workflow.register(project_name="Simmate-Diffusion")
 

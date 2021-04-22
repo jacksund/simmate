@@ -149,23 +149,32 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     # install_requires=[
+    #     # Core dependencies
     #     'numpy',
     #     'pandas',
     #     'django',
+    #     'prefect',
+    #     'dask',
+    #     'click',
+    #
+    #     # Extra dependencies
     #     'django-crispy-forms',  # for formatting of online forms
     #     'django-pandas',  # for converting QuerySets to PandasDF
     #     'psycopg2',  # for Postgres connections
-    #     'prefect',
+    #     'selenium',  # for web scraping (slow but robust)
+    #     'dask-jobqueue',  # for submitting on clusters
+    #     'scikit-learn',
+    #
+    #     # For development
+    #     'pytest',  # Optional
+    #     'spyder',  # Optional
+    #
+    #     # For visualization
     #     'graphviz',  # python-graphviz on conda. For viewing prefect flows
     #     'plotly',
     #     'matplotlib',
-    #     'selenium',  # for web scraping (slow but robust)
-    #     'dask',
-    #     'dask-jobqueue',  # for submitting on clusters
-    #     'scikit-learn',
-    #     'click',
-    #     'pytest',  # Optional
-    #     'spyder',  # Optional
+    #     'seaborn',
+    #
     #     # These are from the MP stack and I want to drop dependency
     #     'pymatgen',
     #     'pymatgen-diffusion',

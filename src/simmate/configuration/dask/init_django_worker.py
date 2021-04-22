@@ -3,6 +3,10 @@
 """
 To prevent database-connection leaks, we want to setup django upfront when
 a worker is started -- rather than have each task connect separately.
+
+You can set this up with...
+    from dask.distributed import Client
+    client = Client(preload="simmate.configuration.dask.init_django_worker")
 """
 
 # First setup django settings for simmate

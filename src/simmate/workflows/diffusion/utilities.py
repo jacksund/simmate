@@ -233,7 +233,7 @@ def run_vasp_custodian_neb(
     structures,  # list of all images, including the endpoints
     half_kpts_for_neb=False,  # consider changing this for rough NEB calcs
     errorhandler_settings="no_handler",
-    vasp_cmd="mpirun -n 84 vasp_std",
+    vasp_cmd="mpirun -n 36 vasp_std",
     # gamma_vasp_cmd="mpirun -n 16 vasp_gamma",
     custom_incar_endpoints={},
     custom_incar_neb={},
