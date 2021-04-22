@@ -107,12 +107,12 @@ def load_pathway_from_db(pathway_id):
     return path
 
 
-# @task
-# def register_run(pathway_id):
+@task
+def register_run(pathway_id):
 
-#     # create the file and indicate that it has been submitted
-#     calc = VaspCalcB(status="S", pathway_id=pathway_id)
-#     calc.save()
+    # create the file and indicate that it has been submitted
+    calc = VaspCalcB(status="S", pathway_id=pathway_id)
+    calc.save()
 
 
 # --------------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ def run_vasp(structures):
     )
 
     # make sure we have a clean directory before starting
-    empty_directory()
+    # empty_directory()
 
     # Run VASP using the structure, custom settings, and custodian
     run_vasp_custodian_neb(
@@ -226,7 +226,7 @@ def run_vasp(structures):
 
     # empty the directory once we are done (note we will not reach this point
     # if the calculation fails above)
-    empty_directory()
+    # empty_directory()
 
     # return the desired info
     return {"structures": structures_relaxed, "energies": energies}
@@ -279,7 +279,7 @@ with Flow("Vasp Calc B") as workflow:
     pathway_id = Parameter("pathway_id")
 
     # register that the flow is being ran in our result database
-    # register_run(pathway_id)
+    register_run(pathway_id)
 
     # load the pathway
     path = load_pathway_from_db(pathway_id)
@@ -291,7 +291,7 @@ with Flow("Vasp Calc B") as workflow:
     output_data = run_vasp(images)
 
     # save the data to our database
-    # add_results_to_db(energies, pathway_id)
+    add_results_to_db(output_data, pathway_id)
 
 # for Prefect Cloud compatibility, set the storage to an import path
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)

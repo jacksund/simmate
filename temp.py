@@ -160,10 +160,24 @@ df.plot.hexbin(
 # 1496,
 # 1034,]
 
+from simmate.shortcuts import setup
+from simmate.database.diffusion import Pathway as Pathway_DB
+queryset = (
+    Pathway_DB.objects.filter(
+        structure__formula_anonymous="AB2",
+        # structure__chemical_system="Ca-F",
+        structure__spacegroup=225,
+        vaspcalca__energy_barrier__lte=2,
+    )
+    .all()
+    # .to_pymatgen()
+    # .write_path("test.cif", nimages=3)
+)
+from django_pandas.io import read_frame
+df = read_frame(queryset, fieldnames=["id", "structure__formula_full", "structure__id", "vaspcalca__energy_barrier"])
 
 # from simmate.database.diffusion import Pathway as Pathway_DB
 # path_db = Pathway_DB.objects.get(id=55).to_pymatgen().write_path("test.cif", nimages=3)
-
 
 # set the executor to a locally ran executor
 # from prefect.executors import DaskExecutor
