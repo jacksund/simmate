@@ -101,6 +101,7 @@ ax_histx.hist(
     edgecolor="white",
     linewidth=0.5,
 )
+ax_histx.axvline(0, color="black", linewidth=0.8, linestyle="--")
 
 # Y-AXIS HISTOGRAM
 ax_histy = fig.add_subplot(
@@ -117,6 +118,7 @@ ax_histy.hist(
     edgecolor="white",
     linewidth=0.5,
 )
+ax_histy.axhline(0, color="black", linewidth=0.8, linestyle="--")
 
 # setting subplot(xticklabels=[],) above doesn't work as intended so I do this here
 ax_histx.tick_params(axis="x", labelbottom=False)
