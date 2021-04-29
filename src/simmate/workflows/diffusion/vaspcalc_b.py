@@ -139,7 +139,7 @@ def get_images(path):
 
 
 @task  # (timeout=30*60)
-def run_vasp(structures):
+def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
 
     # These are the settings I've changed relative to MPStaticSet, where the ones
     # still commented out are ones I'd consider changing if I'm doing a lower-quality
@@ -184,7 +184,7 @@ def run_vasp(structures):
     run_vasp_custodian_neb(
         structures,
         errorhandler_settings="md",  # minimal checks
-        # vasp_cmd="mpirun -n 20 vasp",
+        vasp_cmd=vasp_cmd,
         # gamma_vasp_cmd="mpirun -n 20 vasp_gamma",
         custom_incar_neb=custom_incar,
         custom_incar_endpoints=custom_incar,  # I just use the same. let set handle NSW and NEB settings
@@ -274,7 +274,9 @@ def add_results_to_db(output_data, pathway_id):
 
 # now make the overall workflow
 with Flow("Vasp Calc B") as workflow:
-
+    
+    vasp_cmd = Parameter("vasp_cmd", default="mpirun -n 16 vasp_std")
+    
     # load the structure object from our database
     pathway_id = Parameter("pathway_id")
 
@@ -288,7 +290,7 @@ with Flow("Vasp Calc B") as workflow:
     images = get_images(path)
 
     # for each image, run vasp and get the result energy
-    output_data = run_vasp(images)
+    output_data = run_vasp(images, vasp_cmd)
 
     # save the data to our database
     add_results_to_db(output_data, pathway_id)

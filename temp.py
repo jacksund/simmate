@@ -44,82 +44,19 @@ for pathway_id in pathway_ids:
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)  # , index_col="pathway"
 
-# from simmate.configuration.django import setup_full  # ensures setup
+# from simmate.shortcuts import setup
 # from simmate.database.diffusion import VaspCalcA
 # queryset = VaspCalcA.objects.all()
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)
-# df.hist("energy_barrier", bins=100, figsize=(10,2))
+
+# from simmate.shortcuts import setup
+# from simmate.database.diffusion import VaspCalcA
+# pids = [14695, 15038]
+# queryset = VaspCalcA.objects.filter(pathway_id__in=pids).all()
 
 
 # --------------------------------------------------------------------------------------
-
-
-from simmate.configuration.django import setup_full  # ensures setup
-from simmate.database.diffusion import Pathway as Pathway_DB
-
-queryset = (
-    Pathway_DB.objects.filter(
-        vaspcalca__energy_barrier__isnull=False,
-        vaspcalca__energy_barrier__gte=0,
-        empiricalmeasures__ionic_radii_overlap_anions__gt=-900,
-    )
-    .select_related("vaspcalca", "empiricalmeasures")
-    .all()
-)
-from django_pandas.io import read_frame
-
-df = read_frame(
-    queryset,
-    fieldnames=[
-        "length",
-        "empiricalmeasures__ewald_energy",
-        "empiricalmeasures__ionic_radii_overlap_anions",
-        "empiricalmeasures__ionic_radii_overlap_cations",
-        "vaspcalca__energy_barrier",
-    ],
-)
-df.plot(
-    x="empiricalmeasures__ewald_energy",
-    y="vaspcalca__energy_barrier",
-    kind="scatter",
-    s=4,
-    # xlim=(0,1.2),
-    # ylim=(0,17),
-)
-df.plot(
-    x="empiricalmeasures__ionic_radii_overlap_anions",
-    y="empiricalmeasures__ionic_radii_overlap_cations",
-    c="vaspcalca__energy_barrier",
-    kind="scatter",
-    colormap="RdYlGn_r",
-)
-df.plot(
-    x="empiricalmeasures__ionic_radii_overlap_anions",
-    y="vaspcalca__energy_barrier",
-    c="empiricalmeasures__ionic_radii_overlap_cations",
-    kind="scatter",
-    colormap="RdYlGn_r",
-)
-df.plot(
-    x="empiricalmeasures__ionic_radii_overlap_cations",
-    y="vaspcalca__energy_barrier",
-    c="empiricalmeasures__ionic_radii_overlap_anions",
-    kind="scatter",
-    colormap="RdYlGn_r",
-)
-df.plot.hexbin(
-    x="empiricalmeasures__ionic_radii_overlap_anions",
-    y="empiricalmeasures__ionic_radii_overlap_cations",
-    C="vaspcalca__energy_barrier",
-    gridsize=20,
-    colormap="RdYlGn_r",
-    vmax=7.5,
-)
-
-
-
-
 
 # .filter(pathway_id__in=pids)
 # pids= [3036,
@@ -137,19 +74,25 @@ df.plot.hexbin(
 
 from simmate.shortcuts import setup
 from simmate.database.diffusion import Pathway as Pathway_DB
-
+# AB2 225
+# AB3 194
 queryset = (
     Pathway_DB.objects.filter(
-        structure__formula_anonymous="AB2",
+        # structure__formula_anonymous="AB3",
         # structure__chemical_system="Ca-F",
-        structure__spacegroup=225,
+        # structure__spacegroup=194,
         vaspcalca__energy_barrier__lte=2,
-    ).all()
-    # .to_pymatgen()
-    # .write_path("test.cif", nimages=3)
+        vaspcalcb__energy_barrier__isnull=True,
+    )
+    .order_by("-nsites_101010", "vaspcalca__energy_barrier")
+    # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
+    # "structure__id" as the first flag in order_by for this to work.
+    .select_related("vaspcalca", "empiricalmeasures")
+    # .distinct("structure__id")
+    .all()[:100]
 )
+# .to_pymatgen().write_path("test.cif", nimages=3)
 from django_pandas.io import read_frame
-
 df = read_frame(
     queryset,
     fieldnames=[
@@ -157,8 +100,23 @@ df = read_frame(
         "structure__formula_full",
         "structure__id",
         "vaspcalca__energy_barrier",
+        "nsites_101010",
+        # "vaspcalcb__energy_barrier",
     ],
 )
+
+
+# from simmate.shortcuts import setup
+# from simmate.database.diffusion import Pathway as Pathway_DB
+# from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
+# # 51, 1686, 29326
+# get_oxi_supercell_path(
+#     Pathway_DB.objects.get(id=3020).to_pymatgen(), 9).write_path(
+#     "test.cif",
+#     nimages=3,
+#     # idpp=True,
+# )
+
 
 # from simmate.database.diffusion import Pathway as Pathway_DB
 # path_db = Pathway_DB.objects.get(id=55).to_pymatgen().write_path("test.cif", nimages=3)
@@ -171,4 +129,3 @@ df = read_frame(
 # from simmate.database.diffusion import Pathway
 # from simmate.workflows.diffusion.vaspcalc_b import workflow
 # result = workflow.run(pathway_id=4)
-

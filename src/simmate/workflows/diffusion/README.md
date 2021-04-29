@@ -48,6 +48,7 @@ NOTE: I am using...
     - Django 3.1.5
     - Prefect 0.14.5
     - Matminer forked + pip -e install because their conda-forge install is broken
+    - Custodian 2021.1.8. (for NEB only) forked b/c "s = vi["POSCAR"]" is broken due to differing file structure, so generic VaspErrorHandler is buggy.
 Install with...
 ```
 conda create -n jacks_env python=3.8
