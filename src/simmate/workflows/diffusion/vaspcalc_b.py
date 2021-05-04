@@ -235,7 +235,7 @@ def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
 # --------------------------------------------------------------------------------------
 
 
-@task(trigger=all_finished, max_retries=3, retry_delay=timedelta(seconds=5))
+@task(max_retries=3, retry_delay=timedelta(seconds=5))  # trigger=all_finished,
 def add_results_to_db(output_data, pathway_id):    
 
     # unpack data

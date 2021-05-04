@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------------------
 
 from prefect import Client
-from simmate.configuration.django import setup_full  # ensures setup
+from simmate.shortcuts import setup # ensures setup
 from simmate.database.diffusion import Pathway as Pathway_DB
 
 # grab the pathway ids that I am going to submit
@@ -45,8 +45,8 @@ for pathway_id in pathway_ids:
 # df = read_frame(queryset)  # , index_col="pathway"
 
 # from simmate.shortcuts import setup
-# from simmate.database.diffusion import VaspCalcA
-# queryset = VaspCalcA.objects.all()
+# from simmate.database.diffusion import VaspCalcB
+# queryset = VaspCalcB.objects.all()
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)
 
@@ -76,15 +76,17 @@ from simmate.shortcuts import setup
 from simmate.database.diffusion import Pathway as Pathway_DB
 # AB2 225
 # AB3 194
+# ABC4 123
 queryset = (
     Pathway_DB.objects.filter(
-        # structure__formula_anonymous="AB3",
+        structure__formula_anonymous="AB3",
         # structure__chemical_system="Ca-F",
-        # structure__spacegroup=194,
+        structure__spacegroup=194,
         vaspcalca__energy_barrier__lte=2,
-        vaspcalcb__energy_barrier__isnull=True,
+        # vaspcalcb__energy_barrier__isnull=True,
+        vaspcalcb__isnull=True,
     )
-    .order_by("-nsites_101010", "vaspcalca__energy_barrier")
+    # .order_by("nsites_101010", "vaspcalca__energy_barrier")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
     .select_related("vaspcalca", "empiricalmeasures")
@@ -125,7 +127,24 @@ df = read_frame(
 # from prefect.executors import DaskExecutor
 # workflow.executor = DaskExecutor(address="tcp://152.2.172.72:8786")
 
-# from simmate.configuration.django import setup_full  # ensures setup
+# from simmate.shortcuts import setup  # ensures setup
 # from simmate.database.diffusion import Pathway
 # from simmate.workflows.diffusion.vaspcalc_b import workflow
-# result = workflow.run(pathway_id=4)
+# result = workflow.run(pathway_id=4, vasp_cmd="mpirun -n 16 vasp_std")
+
+# module load openmpi_3.0.0/gcc_6.3.0
+# mpirun -n 44 /21dayscratch/scr/j/a/jacksund/vasp_build/vasp/5.4.4/bin/vasp
+
+# from simmate.shortcuts import setup
+# from simmate.database.diffusion import VaspCalcB
+# queryset = VaspCalcB.objects.get(pathway=831)
+# pathway_ids = [1044]
+# queryset = VaspCalcB.objects.get(pathway__in=pathway_ids)
+
+
+# import datetime
+# from simmate.shortcuts import setup
+# from simmate.database.diffusion import VaspCalcA
+# queryset = VaspCalcA.objects.filter(status="S", updated_at__gte=datetime.date(2021,4,26)).all()
+# from django_pandas.io import read_frame
+# df = read_frame(queryset)
