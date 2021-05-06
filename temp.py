@@ -137,7 +137,7 @@ df = read_frame(
 
 # from simmate.shortcuts import setup
 # from simmate.database.diffusion import VaspCalcB
-# queryset = VaspCalcB.objects.get(pathway=831)
+# queryset = VaspCalcB.objects.get(pathway=3426)
 # pathway_ids = [1044]
 # queryset = VaspCalcB.objects.get(pathway__in=pathway_ids)
 
@@ -148,3 +148,4 @@ df = read_frame(
 # queryset = VaspCalcA.objects.filter(status="S", updated_at__gte=datetime.date(2021,4,26)).all()
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)
+    
