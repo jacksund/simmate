@@ -2,6 +2,11 @@
 This module is analogous to `matminer.data_retrieval` and `pymatgen.ext` modules, where we are pulling data from third-party databases.
 
 
+Note, that the structures we pull into our database may not be exact matches to
+what's shown in their database. This is beacuse we run symmetry analysis on the
+structure and convert to a LLL reduced cell.
+
+
 _**WARNING:**_ If you are trying to use Simmate to pull various data from Materials Project, OQMD, AFLOW, and others *into your own project/script/analysis*, you should jump over to the `simmate.database` module! This module is for pulling data from various databases *into the Simmate database*. Therefore, you should only be using this module if you are on Simmate development team or an expert user.
 
 

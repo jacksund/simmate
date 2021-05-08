@@ -4,8 +4,8 @@
 
 This file is for pulling Materials Project data into the Simmate database. 
 PyMatGen offers an easy way to do this in python -- the MPRester class. All you
-need is an API key from materialsproject.org/open and pymatgen installed. For
-now, we only pull the mp-id, structure, final energy, and energy above hull.
+need is an API key from https://materialsproject.org/open and pymatgen installed.
+For now, we only pull the mp-id, structure, final energy, and energy above hull.
 
 Note, that the structures we pull into our database may not be exact matches to
 what's shown in their database. This is beacuse we run symmetry analysis on the
