@@ -22,14 +22,14 @@ from aflow.control import Query as AflowQuery
 
 from simmate.configuration.django import setup_full  # sets up database
 
-# from simmate.database.third_parties.materials_project import MaterialsProjectStructure
+# from simmate.database.third_parties.aflow import AflowStructure
 from simmate.datamine.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
 
 
 @transaction.atomic
-def load_all_aflow_structures():
+def load_all_structures():
 
     # The way we build a query looks similar to the Django API, where we start
     # with a Query object (similar to Table.objects manager) and build filters

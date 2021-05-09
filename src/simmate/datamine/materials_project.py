@@ -50,7 +50,7 @@ test_list = ["mp-" + str(n) for n in range(1, 1000)]
 
 
 @transaction.atomic
-def load_all_materials_project_structures(
+def load_all_structures(
     criteria={"task_id": {"$exists": True, "$in": test_list}},  # !!! $in is for testing
     api_key="2Tg7uUvaTAPHJQXl",  # TODO remove in production - maybe to a config file
 ):

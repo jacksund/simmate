@@ -22,7 +22,7 @@ pathway_ids = (
     # .distinct("structure__id")
     .values_list("id", flat=True)
     # .count()
-    .all()[:300]
+    .all()[:500]
 )
 
 # connect to Prefect Cloud
@@ -79,19 +79,21 @@ from simmate.database.diffusion import Pathway as Pathway_DB
 # ABC4 123
 queryset = (
     Pathway_DB.objects.filter(
-        structure__formula_anonymous="AB3",
+        # structure__formula_anonymous="ABC2",
         # structure__chemical_system="Ca-F",
-        structure__spacegroup=194,
+        # structure__spacegroup=194,
+        empiricalmeasures__dimensionality=3,
         vaspcalca__energy_barrier__lte=2,
+        vaspcalca__energy_barrier__gte=0,
         # vaspcalcb__energy_barrier__isnull=True,
         vaspcalcb__isnull=True,
     )
-    # .order_by("nsites_101010", "vaspcalca__energy_barrier")
+    .order_by("vaspcalca__energy_barrier")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
     .select_related("vaspcalca", "empiricalmeasures")
     # .distinct("structure__id")
-    .all()[:100]
+    .all()
 )
 # .to_pymatgen().write_path("test.cif", nimages=3)
 from django_pandas.io import read_frame
@@ -137,9 +139,9 @@ df = read_frame(
 
 # from simmate.shortcuts import setup
 # from simmate.database.diffusion import VaspCalcB
-# queryset = VaspCalcB.objects.get(pathway=3426)
-# pathway_ids = [1044]
-# queryset = VaspCalcB.objects.get(pathway__in=pathway_ids)
+# queryset = VaspCalcB.objects.get(pathway=15436)
+# pathway_ids = [2080,2082, 2085, 2644, 2645, 2646, 2756, 2762, 3051, 3052]
+# queryset = VaspCalcB.objects.filter(pathway__in=pathway_ids).all()
 
 
 # import datetime
