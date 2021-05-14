@@ -77,21 +77,35 @@ from simmate.database.diffusion import Pathway as Pathway_DB
 # AB2 225
 # AB3 194
 # ABC4 123
+#
+# interesting 2D
+# ABC 166
+# ABCD 129
+# AB2C2D2E2 139
+# AB2C2 164
+# AB2C4 139
+# A2B3C7 139
+#
+# interesting 3D
+# ABC3 221
+#
+# mp-27175
 queryset = (
     Pathway_DB.objects.filter(
-        # structure__formula_anonymous="ABC2",
+        # structure__formula_anonymous="A2B3C7",
         # structure__chemical_system="Ca-F",
-        # structure__spacegroup=194,
-        empiricalmeasures__dimensionality=3,
+        # structure__spacegroup=139,
+        structure__e_above_hull=0,
+        empiricalmeasures__dimensionality=1,
         vaspcalca__energy_barrier__lte=2,
         vaspcalca__energy_barrier__gte=0,
         # vaspcalcb__energy_barrier__isnull=True,
-        vaspcalcb__isnull=True,
+        # vaspcalcb__isnull=True,
     )
     .order_by("vaspcalca__energy_barrier")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
-    .select_related("vaspcalca", "empiricalmeasures")
+    .select_related("vaspcalca", "empiricalmeasures", "structure")
     # .distinct("structure__id")
     .all()
 )
@@ -103,8 +117,11 @@ df = read_frame(
         "id",
         "structure__formula_full",
         "structure__id",
+        "structure__e_above_hull",
+        "structure__spacegroup",
+        "structure__formula_anonymous",
         "vaspcalca__energy_barrier",
-        "nsites_101010",
+        # "nsites_101010",
         # "vaspcalcb__energy_barrier",
     ],
 )
@@ -114,10 +131,11 @@ df = read_frame(
 # from simmate.database.diffusion import Pathway as Pathway_DB
 # from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
 # # 51, 1686, 29326
+# pathway_id = 378
 # get_oxi_supercell_path(
-#     Pathway_DB.objects.get(id=3020).to_pymatgen(), 9).write_path(
-#     "test.cif",
-#     nimages=3,
+#     Pathway_DB.objects.get(id=pathway_id).to_pymatgen(), 7).write_path(
+#     f"{pathway_id}.cif",
+#     nimages=5,
 #     # idpp=True,
 # )
 
