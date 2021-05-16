@@ -95,7 +95,7 @@ class Incar(dict):
         # we now have our final string and can return it!
         return final_str
 
-    def write_file(self, filename="INCAR"):
+    def to_file(self, filename="INCAR"):
         """
         Write Incar to a file.
         Args:

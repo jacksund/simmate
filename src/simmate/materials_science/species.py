@@ -4,7 +4,20 @@ from simmate.materials_science.elements import Element
 
 class Species:
     """
-    Species is just an Element with extra data attached to it and *DOES NOT* include
+    
+    Species is an central class to using Simmate as there are many types that we
+    need to account for. We use https://en.wikipedia.org/wiki/Chemical_species as
+    a template for the type of species:
+        atomic/elemental species --> This is just an Element with extra data
+        ionic species --> an elemental species with an oxidation state
+        molecular species -->  a moleucle object with extra data
+        radical species --> species with unpaired electron
+        compositional species --> similar to elemental species but with partial occupancy
+            or with multiple elements & stoichiometric ratios
+        
+    
+    
+    Note all species can have extra data attached to it, but this *DOES NOT* include
     coordinates. This is generic data such as an ideal oxidation state or spin data.
     
     This class can be confusing when compared to Sites, which are Elements with 
@@ -40,3 +53,6 @@ class Species:
         
         # for each additional keyword and value provided, link it to an attribute
         pass
+
+
+
