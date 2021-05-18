@@ -89,16 +89,15 @@ from simmate.database.diffusion import Pathway as Pathway_DB
 # interesting 3D
 # ABC3 221
 #
-# mp-27175
 queryset = (
     Pathway_DB.objects.filter(
-        # structure__formula_anonymous="A2B3C7",
+        structure__formula_anonymous="ABCD",
         # structure__chemical_system="Ca-F",
-        # structure__spacegroup=139,
-        structure__e_above_hull=0,
-        empiricalmeasures__dimensionality=1,
-        vaspcalca__energy_barrier__lte=2,
-        vaspcalca__energy_barrier__gte=0,
+        structure__spacegroup=129,
+        # structure__e_above_hull=0,
+        # empiricalmeasures__dimensionality=1,
+        # vaspcalca__energy_barrier__lte=2,
+        # vaspcalca__energy_barrier__gte=0,
         # vaspcalcb__energy_barrier__isnull=True,
         # vaspcalcb__isnull=True,
     )
@@ -122,7 +121,8 @@ df = read_frame(
         "structure__formula_anonymous",
         "vaspcalca__energy_barrier",
         # "nsites_101010",
-        # "vaspcalcb__energy_barrier",
+        "vaspcalcb__energy_barrier",
+        "vaspcalcb__status",
     ],
 )
 
@@ -131,7 +131,7 @@ df = read_frame(
 # from simmate.database.diffusion import Pathway as Pathway_DB
 # from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
 # # 51, 1686, 29326
-# pathway_id = 378
+# pathway_id = 1643
 # get_oxi_supercell_path(
 #     Pathway_DB.objects.get(id=pathway_id).to_pymatgen(), 7).write_path(
 #     f"{pathway_id}.cif",

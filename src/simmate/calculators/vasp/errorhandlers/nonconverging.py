@@ -18,15 +18,6 @@ class NonConverging(ErrorHandler):
     is_monitor = True
 
     def __init__(self, min_ionic_steps=10):
-        """
-        Initializes the handler with the output file to check.
-        Args:
-            output_filename (str): This is the OSZICAR file. Change
-                this only if it is different from the default (unlikely).
-            nionic_steps (int): The threshold number of ionic steps that
-                needs to hit the maximum number of electronic steps for the
-                run to be considered non-converging.
-        """
         self.min_ionic_steps = min_ionic_steps
 
     def check(self, dir):
