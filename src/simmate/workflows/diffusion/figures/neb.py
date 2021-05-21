@@ -12,7 +12,7 @@ queryset = (
         vaspcalcb__energy_barrier__isnull=False,
         # empiricalmeasures__ionic_radii_overlap_anions__gt=-900,
     )
-    .select_related("vaspcalca", "vaspcalcb")
+    .select_related("vaspcalca", "vaspcalcb", "empiricalmeasures", "structure")
     .all()
 )
 from django_pandas.io import read_frame
@@ -20,10 +20,45 @@ from django_pandas.io import read_frame
 df = read_frame(
     queryset,
     fieldnames=[
+        "id",
+        "length",
+        "nsites_777",
+        "nsites_101010",
+        "structure__id",
+        "structure__formula_full",
+        "structure__spacegroup",
+        "structure__formula_anonymous",
+        "structure__e_above_hull",
+        "empiricalmeasures__ewald_energy",
         "vaspcalca__energy_barrier",
         "vaspcalcb__energy_barrier",
     ],
 )
+
+# --------------------------------------------------------------------------------------
+
+# The code below is for interactive plotting using Plotly
+# import plotly.express as px
+
+# fig = px.scatter(
+#     data_frame=df,
+#     x="vaspcalca__energy_barrier",
+#     y="vaspcalcb__energy_barrier",
+#     color="empiricalmeasures__ewald_energy",
+#     # text="structure__id",
+#     hover_data=[
+#         "id",
+#         "length",
+#         "structure__id",
+#         "structure__formula_full",
+#         "structure__spacegroup",
+#         "structure__formula_anonymous",
+#         "structure__e_above_hull",
+#         "empiricalmeasures__ewald_energy",
+#         "vaspcalca__energy_barrier",
+#     ],
+# )
+# fig.show(renderer="browser", config={'scrollZoom': True})
 
 # --------------------------------------------------------------------------------------
 
@@ -41,18 +76,19 @@ ax = fig.add_subplot(
     ylim=(-0.05, 2),
 )
 
-# add a y=x line through the ploy
-line = ax.plot(
-    [-1, 1, 3],  # X
-    [-1, 1, 3],  # Y
-    c="Black", # COLOR
-)
-
 # add the data as a scatter
 hb = ax.scatter(
     x=df["vaspcalca__energy_barrier"],  # X
     y=df["vaspcalcb__energy_barrier"],  # Y
     c="Green", # COLOR
+    alpha=.6,  # Transparency
+)
+
+# add a y=x line through the ploy
+line = ax.plot(
+    [-1, 1, 3],  # X
+    [-1, 1, 3],  # Y
+    c="Black", # COLOR
 )
 
 plt.show()

@@ -12,7 +12,7 @@ queryset = (
         vaspcalca__energy_barrier__gte=0,
         empiricalmeasures__ionic_radii_overlap_anions__gt=-900,
     )
-    .select_related("vaspcalca", "empiricalmeasures")
+    .select_related("vaspcalca", "empiricalmeasures", "structure")
     .all()
 )
 from django_pandas.io import read_frame
@@ -20,14 +20,44 @@ from django_pandas.io import read_frame
 df = read_frame(
     queryset,
     fieldnames=[
+        "id",
         "length",
+        "structure__id",
+        "structure__formula_full",
+        "structure__spacegroup",
+        "structure__formula_anonymous",
+        "structure__e_above_hull",
         "empiricalmeasures__ewald_energy",
-        "empiricalmeasures__ionic_radii_overlap_anions",
-        "empiricalmeasures__ionic_radii_overlap_cations",
         "vaspcalca__energy_barrier",
     ],
 )
 
+
+# --------------------------------------------------------------------------------------
+
+
+# The code below is for interactive plotting using Plotly
+import plotly.express as px
+
+fig = px.scatter(
+    data_frame=df,
+    x="length",
+    y="empiricalmeasures__ewald_energy",
+    color="vaspcalca__energy_barrier",
+    range_color=[0, 1.1],
+    hover_data=[
+        "id",
+        "length",
+        "structure__id",
+        "structure__formula_full",
+        "structure__spacegroup",
+        "structure__formula_anonymous",
+        "structure__e_above_hull",
+        "empiricalmeasures__ewald_energy",
+        "vaspcalca__energy_barrier",
+    ],
+)
+fig.show(renderer="browser", config={'scrollZoom': True})
 
 # --------------------------------------------------------------------------------------
 
