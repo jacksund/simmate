@@ -37,27 +37,27 @@ df = read_frame(
 
 
 # The code below is for interactive plotting using Plotly
-import plotly.express as px
+# import plotly.express as px
 
-fig = px.scatter(
-    data_frame=df,
-    x="length",
-    y="empiricalmeasures__ewald_energy",
-    color="vaspcalca__energy_barrier",
-    range_color=[0, 1.1],
-    hover_data=[
-        "id",
-        "length",
-        "structure__id",
-        "structure__formula_full",
-        "structure__spacegroup",
-        "structure__formula_anonymous",
-        "structure__e_above_hull",
-        "empiricalmeasures__ewald_energy",
-        "vaspcalca__energy_barrier",
-    ],
-)
-fig.show(renderer="browser", config={'scrollZoom': True})
+# fig = px.scatter(
+#     data_frame=df,
+#     x="length",
+#     y="empiricalmeasures__ewald_energy",
+#     color="vaspcalca__energy_barrier",
+#     range_color=[0, 1.1],
+#     hover_data=[
+#         "id",
+#         "length",
+#         "structure__id",
+#         "structure__formula_full",
+#         "structure__spacegroup",
+#         "structure__formula_anonymous",
+#         "structure__e_above_hull",
+#         "empiricalmeasures__ewald_energy",
+#         "vaspcalca__energy_barrier",
+#     ],
+# )
+# fig.show(renderer="browser", config={'scrollZoom': True})
 
 # --------------------------------------------------------------------------------------
 
@@ -137,6 +137,7 @@ ax_histy = fig.add_subplot(
     gs[1, 1],  # bottom right subplot
     sharey=ax,
     xlabel="Pathways (#)",
+    # xlim=(0,100),
     # facecolor="lightgrey",  # background color
 )
 ax_histy.hist(
@@ -146,7 +147,9 @@ ax_histy.hist(
     color="black",
     edgecolor="white",
     linewidth=0.5,
+    log=True,
 )
+
 
 # setting subplot(xticklabels=[],) above doesn't work as intended so I do this here
 ax_histx.tick_params(axis="x", labelbottom=False)

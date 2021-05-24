@@ -96,12 +96,12 @@ queryset = (
         # structure__formula_anonymous="ABC3",
         # structure__chemical_system="Ca-F",
         # structure__spacegroup=221,
-        # structure__e_above_hull=0,
-        # empiricalmeasures__dimensionality=2,
-        # vaspcalca__energy_barrier__lte=2,
-        # vaspcalca__energy_barrier__gte=0,
-        vaspcalcb__energy_barrier__isnull=False,
-        # vaspcalcb__isnull=False,
+        structure__e_above_hull=0,
+        empiricalmeasures__dimensionality=2,
+        vaspcalca__energy_barrier__lte=2,
+        vaspcalca__energy_barrier__gte=0,
+        # vaspcalcb__energy_barrier__isnull=False,
+        vaspcalcb__isnull=True,
     ).order_by("vaspcalca__energy_barrier")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
@@ -133,7 +133,7 @@ from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
 # 51, 1686, 29326
 # GOOD NEB: 77
 # BAD NEB: 1046
-pathway_id = 51
+pathway_id = 9504
 path = Pathway_DB.objects.get(id=pathway_id)
 get_oxi_supercell_path(path.to_pymatgen(), 10).write_path(
     f"{pathway_id}.cif",
