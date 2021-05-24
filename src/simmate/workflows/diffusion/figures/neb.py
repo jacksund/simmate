@@ -219,3 +219,9 @@ line = ax.plot(
 )
 
 plt.show()
+
+
+# --------------------------------------------------------------------------------------
+
+test = y_test_expected - y_test_predicted
+test.plot.hist("vaspcalcb__energy_barrier", bins=20)
