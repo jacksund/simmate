@@ -30,7 +30,7 @@ code and make it easier to read:
             OneToOne - place field in the one that has extra features
 
     Properties
-        In a few cases, you may want to add convience attribute to a model. However,
+        In a few cases, you may want to add a convience attribute to a model. However,
         in the majority of cases, you'll want to convert the model to some other
         class first which has all of the properties you need. We separate classes
         in this way for performance and clarity. This also allows our core and
@@ -89,9 +89,13 @@ class Structure(models.Model):
 
     # Density of the crystal
     density = models.FloatField()
-    
-    # TODO: add molar volume
-    
+
+    # Molar volume of the crystal.
+    # Note we prefer this over a "volume" field because volume is highly dependent
+    # on the symmetry and the arbitray unitcell. If you are truly after small volumes
+    # of the unitcell, it is likely you really just want to search by spacegroup.
+    molar_volume = models.FloatField()
+
     # symmetry info
     # TODO: should this be a relationship to a separate table?
     spacegroup = models.IntegerField()
