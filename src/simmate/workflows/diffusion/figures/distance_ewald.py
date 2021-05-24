@@ -12,7 +12,7 @@ queryset = (
         vaspcalca__energy_barrier__gte=0,
         empiricalmeasures__ionic_radii_overlap_anions__gt=-900,
     )
-    .select_related("vaspcalca", "empiricalmeasures")
+    .select_related("vaspcalca", "empiricalmeasures", "structure")
     .all()
 )
 from django_pandas.io import read_frame
@@ -20,14 +20,44 @@ from django_pandas.io import read_frame
 df = read_frame(
     queryset,
     fieldnames=[
+        "id",
         "length",
+        "structure__id",
+        "structure__formula_full",
+        "structure__spacegroup",
+        "structure__formula_anonymous",
+        "structure__e_above_hull",
         "empiricalmeasures__ewald_energy",
-        "empiricalmeasures__ionic_radii_overlap_anions",
-        "empiricalmeasures__ionic_radii_overlap_cations",
         "vaspcalca__energy_barrier",
     ],
 )
 
+
+# --------------------------------------------------------------------------------------
+
+
+# The code below is for interactive plotting using Plotly
+# import plotly.express as px
+
+# fig = px.scatter(
+#     data_frame=df,
+#     x="length",
+#     y="empiricalmeasures__ewald_energy",
+#     color="vaspcalca__energy_barrier",
+#     range_color=[0, 1.1],
+#     hover_data=[
+#         "id",
+#         "length",
+#         "structure__id",
+#         "structure__formula_full",
+#         "structure__spacegroup",
+#         "structure__formula_anonymous",
+#         "structure__e_above_hull",
+#         "empiricalmeasures__ewald_energy",
+#         "vaspcalca__energy_barrier",
+#     ],
+# )
+# fig.show(renderer="browser", config={'scrollZoom': True})
 
 # --------------------------------------------------------------------------------------
 
@@ -107,6 +137,7 @@ ax_histy = fig.add_subplot(
     gs[1, 1],  # bottom right subplot
     sharey=ax,
     xlabel="Pathways (#)",
+    # xlim=(0,100),
     # facecolor="lightgrey",  # background color
 )
 ax_histy.hist(
@@ -116,7 +147,9 @@ ax_histy.hist(
     color="black",
     edgecolor="white",
     linewidth=0.5,
+    log=True,
 )
+
 
 # setting subplot(xticklabels=[],) above doesn't work as intended so I do this here
 ax_histx.tick_params(axis="x", labelbottom=False)

@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------------------
 
 from prefect import Client
-from simmate.shortcuts import setup # ensures setup
+from simmate.shortcuts import setup  # ensures setup
 from simmate.database.diffusion import Pathway as Pathway_DB
 
 # grab the pathway ids that I am going to submit
@@ -22,7 +22,7 @@ pathway_ids = (
     # .distinct("structure__id")
     .values_list("id", flat=True)
     # .count()
-    .all()[:300]
+    .all()[:500]
 )
 
 # connect to Prefect Cloud
@@ -74,50 +74,88 @@ for pathway_id in pathway_ids:
 
 from simmate.shortcuts import setup
 from simmate.database.diffusion import Pathway as Pathway_DB
+from django_pandas.io import read_frame
+
 # AB2 225
 # AB3 194
 # ABC4 123
+#
+# interesting 2D
+# ABC 166 --dogwood
+# ABCD 129 --longleaf
+# AB2C2D2E2 139 --longleaf
+# AB2C2 164 --dogwood
+# AB2C4 139
+# A2B3C7 139
+#
+# interesting 3D
+# ABC3 221
+#
 queryset = (
     Pathway_DB.objects.filter(
-        structure__formula_anonymous="AB3",
+        # structure__formula_anonymous="ABC3",
         # structure__chemical_system="Ca-F",
-        structure__spacegroup=194,
+        # structure__spacegroup=221,
+        structure__e_above_hull=0,
+        empiricalmeasures__dimensionality=2,
         vaspcalca__energy_barrier__lte=2,
-        # vaspcalcb__energy_barrier__isnull=True,
+        vaspcalca__energy_barrier__gte=0,
+        # vaspcalcb__energy_barrier__isnull=False,
         vaspcalcb__isnull=True,
-    )
-    # .order_by("nsites_101010", "vaspcalca__energy_barrier")
+    ).order_by("vaspcalca__energy_barrier")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
-    .select_related("vaspcalca", "empiricalmeasures")
+    .select_related("vaspcalca", "empiricalmeasures", "structure")
     # .distinct("structure__id")
-    .all()[:100]
+    .all()
 )
-# .to_pymatgen().write_path("test.cif", nimages=3)
-from django_pandas.io import read_frame
 df = read_frame(
     queryset,
     fieldnames=[
         "id",
         "structure__formula_full",
         "structure__id",
+        "structure__e_above_hull",
+        "structure__spacegroup",
+        "structure__formula_anonymous",
         "vaspcalca__energy_barrier",
         "nsites_101010",
-        # "vaspcalcb__energy_barrier",
+        "vaspcalcb__energy_barrier",
+        "vaspcalcb__status",
     ],
 )
 
 
-# from simmate.shortcuts import setup
-# from simmate.database.diffusion import Pathway as Pathway_DB
-# from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
-# # 51, 1686, 29326
-# get_oxi_supercell_path(
-#     Pathway_DB.objects.get(id=3020).to_pymatgen(), 9).write_path(
-#     "test.cif",
-#     nimages=3,
-#     # idpp=True,
-# )
+from simmate.shortcuts import setup
+from simmate.database.diffusion import Pathway as Pathway_DB
+from simmate.workflows.diffusion.utilities import get_oxi_supercell_path
+
+# 51, 1686, 29326
+# GOOD NEB: 77
+# BAD NEB: 1046
+pathway_id = 9504
+path = Pathway_DB.objects.get(id=pathway_id)
+get_oxi_supercell_path(path.to_pymatgen(), 10).write_path(
+    f"{pathway_id}.cif",
+    nimages=5,
+    # idpp=True,
+)
+
+# import json
+# from pymatgen.core.structure import Structure
+# structure_dict = json.loads(path.vaspcalcb.structure_start_json)
+# structure_start = Structure.from_dict(structure_dict)
+# structure_start.to("cif", "z0.cif")
+# structure_dict = json.loads(path.vaspcalcb.structure_midpoint_json)
+# structure_midpoint = Structure.from_dict(structure_dict)
+# structure_midpoint.to("cif", "z1.cif")
+# structure_dict = json.loads(path.vaspcalcb.structure_end_json)
+# structure_end = Structure.from_dict(structure_dict)
+# structure_end.to("cif", "z2.cif")
+
+# linear path from start to end
+# images = structure_start.interpolate(structure_end, interpolate_lattices=True)
+# test = [image.to(filename=f"{n}.cif") for n, image in enumerate(images)]
 
 
 # from simmate.database.diffusion import Pathway as Pathway_DB
@@ -137,9 +175,9 @@ df = read_frame(
 
 # from simmate.shortcuts import setup
 # from simmate.database.diffusion import VaspCalcB
-# queryset = VaspCalcB.objects.get(pathway=831)
-# pathway_ids = [1044]
-# queryset = VaspCalcB.objects.get(pathway__in=pathway_ids)
+# queryset = VaspCalcB.objects.get(pathway=674)
+# pathway_ids = [2080,2082, 2085, 2644, 2645, 2646, 2756, 2762, 3051, 3052]
+# queryset = VaspCalcB.objects.filter(pathway__in=pathway_ids).all()
 
 
 # import datetime
