@@ -27,7 +27,7 @@ convient modules too. So you're actually loading extra things!
 from simmate.configuration.django import setup_full as setup
 
 # These are objects that each represent a table in the Simmate database
-from simmate.database.diffusion import Structure as Structure_DB
+# from simmate.database.diffusion import Structure as Structure_DB
 
 # These are the most commonly-used workflows for structures
 # from simmate.workflows.energy import static

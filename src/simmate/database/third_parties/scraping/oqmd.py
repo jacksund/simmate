@@ -21,8 +21,8 @@ import qmpy_rester
 
 from simmate.configuration.django import setup_full  # sets up database
 
-# from simmate.database.third_parties.aflow import OqmdStructure
-from simmate.datamine.utilities import get_sanitized_structure
+from simmate.database.third_parties.oqmd import OqmdStructure
+from simmate.database.third_parties.scraping.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
 
@@ -44,9 +44,9 @@ def load_all_structures():
     is_last_page = False
     while not is_last_page:
 
-        # results per page is set based on OQMD recommendations and is constant
+        # results per page is set based on OQMD recommendations and is constant (2000)
         # !!! for testing, try a smaller number like 100
-        results_per_page = 2000
+        results_per_page = 100
 
         with qmpy_rester.QMPYRester() as query:
 
@@ -59,7 +59,7 @@ def load_all_structures():
                 # Note delta_e is the formation energy and then stability is the
                 # energy above hull.
                 fields="entry_id,unit_cell,sites,delta_e,stability,band_gap",
-                element_set="Yb",  # !!! for testing
+                # element_set="Y,O,F",  # !!! for testing
             )
             # grab the data for the next slice of structures
             query_slice = result["data"]
@@ -71,8 +71,12 @@ def load_all_structures():
             for entry in query_slice:
                 data.append(entry)
 
+            # on the very first page, let's also check the total number of pages
+            if current_page == 0:
+                total_pages = result["meta"]["data_available"] // results_per_page
+
             # move on to the next page
-            print(f"Successfully downloaded page {current_page}")
+            print(f"Successfully downloaded page {current_page} of {total_pages}")
             current_page += 1
 
     # Now iterate through all the data -- which is a list of dictionaries.
@@ -100,17 +104,17 @@ def load_all_structures():
         # Compile all of our data into a dictionary
         entry_dict = {
             "structure": structure_sanitized,
-            "oqmd-id": entry["entry_id"],
-            "energy_above_hull": entry["stability"],
-            "formation_energy": entry["delta_e"],
+            "id": "oqmd-" + str(entry["entry_id"]),
+            "e_above_hull": entry["stability"],
+            "final_energy": entry["delta_e"],
             "band_gap": entry["band_gap"],
         }
 
         # now convert the entry to a database object
-        # structure_db = OqmdStructure.from_dict(entry_dict)
+        structure_db = OqmdStructure.from_dict(entry_dict)
 
         # and save it to our database!
-        # structure_db.save()
+        structure_db.save()
 
 
 # --------------------------------------------------------------------------------------

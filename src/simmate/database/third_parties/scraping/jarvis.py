@@ -24,8 +24,8 @@ from pymatgen.core.structure import Structure
 
 from simmate.configuration.django import setup_full  # sets up database
 
-# from simmate.database.third_parties.aflow import JarvisStructure
-from simmate.datamine.utilities import get_sanitized_structure
+from simmate.database.third_parties.jarvis import JarvisStructure
+from simmate.database.third_parties.scraping.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
 
@@ -58,20 +58,23 @@ def load_all_structures(filename="jarvis.json"):
         # Run symmetry analysis and sanitization on the pymatgen structure
         structure_sanitized = get_sanitized_structure(structure)
 
-        # Compile all of our data into a dictionary
+        # Compile all of our data into a dictionary. If a value doesn't exist
+        # for a given entry, JARVIS just uses "na" instead. We need to replace
+        # these with None.
         entry_dict = {
             "structure": structure_sanitized,
-            "jid": entry["jid"],
-            "ehull": entry["ehull"],
-            "formation_energy_peratom": entry["formation_energy_peratom"],
-            "xml_data_link": entry["xml_data_link"],
+            "id": "JVASP-" + entry["jid"],
+            "e_above_hull": entry["ehull"] if entry["ehull"] != "na" else None,
+            "formation_energy_per_atom": entry["formation_energy_peratom"]
+            if entry["formation_energy_peratom"] != "na"
+            else None,
         }
 
         # now convert the entry to a database object
-        # structure_db = JarivsStructure.from_dict(entry_dict)
+        structure_db = JarvisStructure.from_dict(entry_dict)
 
         # and save it to our database!
-        # structure_db.save()
+        structure_db.save()
 
 
 # --------------------------------------------------------------------------------------

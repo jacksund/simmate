@@ -40,8 +40,8 @@ from pymatgen import MPRester
 
 from simmate.configuration.django import setup_full  # sets up database
 
-# from simmate.database.third_parties.materials_project import MaterialsProjectStructure
-from simmate.datamine.utilities import get_sanitized_structure
+from simmate.database.third_parties.materials_project import MaterialsProjectStructure
+from simmate.database.third_parties.scraping.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
 
@@ -86,6 +86,7 @@ def load_all_structures(
         "formation_energy_per_atom",
         "e_above_hull",
         "structure",
+        "band_gap",
     ]
 
     # now make the query and grab everything from the Materials Project!
@@ -117,10 +118,10 @@ def load_all_structures(
         entry_cleaned.update({"structure": structure_sanitized})
 
         # now convert the entry to a database object
-        # structure_db = MaterialsProjectStructure.from_dict(data)
+        structure_db = MaterialsProjectStructure.from_dict(entry)
 
         # and save it to our database!
-        # structure_db.save()
+        structure_db.save()
 
 
 # --------------------------------------------------------------------------------------

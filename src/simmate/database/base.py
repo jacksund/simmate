@@ -49,6 +49,7 @@ code and make it easier to read:
 
 import json
 
+from scipy.constants import Avogadro
 from pymatgen.core.structure import Structure as Structure_PMG
 
 from django.db import models
@@ -70,11 +71,12 @@ class Structure(models.Model):
     # TODO: to save on space, I can also come up with a non-json format here
     structure_json = models.TextField()
 
+    # !!! Should I have timestamps for the third-party databases?
     # timestamping for when this was added to the database
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
     # !!! I don't think this column should exist because you shouldn't edit these
-    # but I include it
-    updated_at = models.DateTimeField(auto_now=True)
+    # but I include it anyways
+    # updated_at = models.DateTimeField(auto_now=True)
 
     """ Query-helper Info """
 
@@ -126,6 +128,8 @@ class Structure(models.Model):
     # Each structure can have many Calculation(s)
 
     """ Properties """
+    # none
+
     """ Model Methods """
     # TODO: If I want a queryset to return a pymatgen Structure object(s) directly,
     # then I need make a new Manager rather than adding methods here. When doing
@@ -143,6 +147,9 @@ class Structure(models.Model):
             nelement=len(structure.composition),
             chemical_system=structure.composition.chemical_system,
             density=structure.density,
+            # 1e-27 is to convert from cubic angstroms to Liter. so this is in L/mol
+            # OPTIMIZE: move this to a class method
+            molar_volume=(structure.volume / structure.num_sites) * Avogadro * 1e-27,
             spacegroup=structure.get_space_group_info(0.1)[1],  # OPTIMIZE
             formula_full=structure.composition.formula,
             formula_reduced=structure.composition.reduced_formula,
@@ -170,7 +177,7 @@ class Structure(models.Model):
     """ For website compatibility """
 
     class Meta:
-        app_label = "diffusion"  # TODO: move to a separate app
+        app_label = "third_parties"  # TODO: move to a separate app
         abstract = True
 
 
