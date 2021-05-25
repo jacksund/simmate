@@ -5,7 +5,7 @@ from django.db import models
 from simmate.database.base import Structure
 
 
-class OqmdStructure(Structure):
+class OcdStructure(Structure):
 
     """ Base Info """
 
@@ -13,25 +13,25 @@ class OqmdStructure(Structure):
     # For now, max length of 14 is overkill: 'oqmd-123456789'
     id = models.CharField(max_length=14, primary_key=True)
 
-    # Extra data by OQMD's calculations
-    final_energy = models.FloatField(blank=True, null=True)
-    e_above_hull = models.FloatField(blank=True, null=True)
-    band_gap = models.FloatField(blank=True, null=True)
-    # !!! There are plenty more properties I can add too. Check a single entry
-    # when scraping data for more (in simmate.database.third_parties.scrapping.aflow)
+    # Extra data by OCD
+    # See my notes in the scraping file. There's more metadata to add but I leave
+    # this out for now.
 
     """ Properties """
 
     # OPTIMIZE: is it better to just set the attribute than to have a fixed
     # property that's defined via a function?
-    source = "OQMD"
+    source = "OCD"
 
     @property
     def external_link(self):
-        # Links to the OQMD dashboard for this structure. An example is...
-        #   http://oqmd.org/materials/entry/10435
-        id_number = self.id.split("-")[-1]  # this removes the "oqmd-" from the id
-        return f"http://oqmd.org/materials/entry/{id_number}"
+        # Links to the AFLOW dashboard for this structure. An example is...
+        #   http://aflow.org/material/?id=aflow:ffea9279661c929f
+        # !!! I could also consider an alternative link which points to an interactive
+        # REST endpoint. The API is also sporatic for these, An example one is...
+        #   aflowlib.duke.edu/AFLOWDATA/ICSD_WEB/FCC/Dy1Mn2_ICSD_602151
+        id_formatted = self.id.replace("-",":")
+        return f"http://aflow.org/material/?id={id_formatted}"
 
     """ Model Methods """
 

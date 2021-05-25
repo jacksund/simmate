@@ -46,30 +46,3 @@ class MaterialsProjectStructure(Structure):
     # @classmethod
     # def from_query(criteria, api_key="2Tg7uUvaTAPHJQXl"):
     #     some_workflow.run()
-
-    @classmethod
-    def from_dict(cls, data_dict):
-        # the dictionary format follows what is returned by the MPRester query,
-        # which has requested the following properties:
-        #   properties = [
-        #       "material_id",
-        #       "final_energy",
-        #       "final_energy_per_atom",
-        #       "formation_energy_per_atom",
-        #       "e_above_hull",
-        #       "structure",
-        #       "band_gap",
-        #   ]
-
-        # For full compatibility with django, we need to rename the material_id
-        # to just id. Also since I'm changing things in place, I need to make a
-        # copy of the dict as well.
-        data = data_dict.copy()
-        data["id"] = data.pop("material_id")
-
-        # initialize this model object using the data. I pass to super() method to
-        # handle the "structure". The reason I even have this method is because
-        # there's a bunch of extra kwargs I'm passing in along with "structure".
-        structure_db = super().from_pymatgen(**data)
-
-        return structure_db

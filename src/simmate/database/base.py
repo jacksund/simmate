@@ -142,7 +142,12 @@ class Structure(models.Model):
         # is only if you inherit from this class and add extra fields, which
         # should rarely be done.
         structure_db = cls(
-            structure_json=structure.to_json(),
+            # structure_json=structure.to_json(),
+            # OPTIMIZE: The structure_json is not the most compact format. Others
+            # like POSCAR are more compact and can save space. This is at the cost of
+            # being robust to things like fractional occupancies. Perhaps a new compact
+            # format needs to be made specifically for Simmate.
+            structure_json=structure.to(fmt="POSCAR"),
             nsites=structure.num_sites,
             nelement=len(structure.composition),
             chemical_system=structure.composition.chemical_system,

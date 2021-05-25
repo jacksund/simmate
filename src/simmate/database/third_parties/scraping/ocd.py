@@ -32,8 +32,8 @@ from pymatgen.core.structure import Structure
 
 from simmate.configuration.django import setup_full  # sets up database
 
-# from simmate.database.third_parties.aflow import OcdStructure
-from simmate.datamine.utilities import get_sanitized_structure
+from simmate.database.third_parties.ocd import OcdStructure
+from simmate.database.third_parties.scraping.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
 
@@ -69,38 +69,45 @@ def load_all_structures(base_directory="ocd/cif/"):
                     # construct the full path to the file we are after
                     cif_filepath = os.path.join(folder_path, cif_filename)
                     
+                    # The OCD has a lot of structures that aren't formatted properly
+                    # and various errors are thrown throughout the loading process.
+                    # for now, I just skip the ones that give issues.
+                    # !!! I should take a closer look at failed cifs in the future.
                     try:
                         # load the structure from the cif file
                         structure = Structure.from_file(cif_filepath)
                         
-                        # Run symmetry analysis and sanitization on the pymatgen structure
+                        # Run symmetry analysis and sanitization on the structure
                         structure_sanitized = get_sanitized_structure(structure)
-                        
+
+                        # TODO: For now I just record the structure and ocd-id, but I 
+                        # should pull metadata in the future. To do this, I can use 
+                        # pymatgen.io.cif.CifFile to parse the data.
+                        # Here's how you would grab the data...
+                        #   from pymatgen.io.cif import CifFile
+                        #   file = CifFile.from_file(filename_cif)
+                        #   # grab the first data entry. There also should only be one
+                        #   # but it is possible
+                        #   # for a cif file to have more than one structure.
+                        #   entry = file.data[0]
+                        #   entry_data = entry.data
+    
+                        # Compile all of our data into a dictionary
+                        entry_dict = {
+                            # the split removes ".cif" from each file name and 
+                            # the remaining number is the id
+                            "id": cif_filename.split(".")[0],
+                            "structure": structure_sanitized,
+                        }
+    
+                        # now convert the entry to a database object
+                        structure_db = OcdStructure.from_dict(entry_dict)
+    
+                        # and save it to our database!
+                        structure_db.save()
+
                     except:  # there are a bunch of different Exceptions...
-                        print(cif_filepath + " FAILED")
+                        # print(cif_filepath + " FAILED")
                         continue  # skip to the next structure
-
-
-                    # TODO: For now I just record the structure and ocd-id, but I should pull metadata
-                    # in the future. To do this, I can use pymatgen.io.cif.CifFile to parse the data.
-                    # Here's how you would grab the data...
-                    #   from pymatgen.io.cif import CifFile
-                    #   file = CifFile.from_file(filename_cif)
-                    #   # grab the first data entry. There also should only be one -- but it is possible
-                    #   # for a cif file to have more than one structure.
-                    #   entry = file.data[0]
-                    #   entry_data = entry.data
-
-                    # # Compile all of our data into a dictionary
-                    # entry_dict = {
-                    #     "structure": structure_sanitized,
-                    # }
-
-                    # now convert the entry to a database object
-                    # structure_db = OcdStructure.from_dict(entry_dict)
-
-                    # and save it to our database!
-                    # structure_db.save()
-
 
 # --------------------------------------------------------------------------------------

@@ -59,7 +59,7 @@ def load_all_structures():
                 # Note delta_e is the formation energy and then stability is the
                 # energy above hull.
                 fields="entry_id,unit_cell,sites,delta_e,stability,band_gap",
-                # element_set="Y,O,F",  # !!! for testing
+                element_set="Al,C",  # !!! for testing
             )
             # grab the data for the next slice of structures
             query_slice = result["data"]
