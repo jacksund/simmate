@@ -15,14 +15,16 @@ reset_database()
 # --------------------------------------------------------------------------------------
 
 from simmate.shortcuts import setup
-from simmate.database.third_parties.scraping.ocd import load_all_structures
+from simmate.database.third_parties.scraping.jarvis import load_all_structures
 test = load_all_structures()
 
 # --------------------------------------------------------------------------------------
 
 from simmate.shortcuts import setup
-from simmate.database.third_parties.all import OcdStructure
-OcdStructure.objects.count()
+from simmate.database.third_parties.all import JarvisStructure
+JarvisStructure.objects.count()
 
 # --------------------------------------------------------------------------------------
 
+# from django.db.models import Sum
+# MaterialsProjectStructure.objects.aggregate(Sum('nsites'))

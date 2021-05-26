@@ -40,9 +40,9 @@ def load_all_structures():
             # to be separately stored databases. I just use all of them by default.
             catalog=[
                 "icsd",  # 60,000 structures
-                # "lib1",  # 4,000 structures
-                # "lib2",  # 360,000 structures (binary phases)
-                # "lib3",  # 2,530,000 structures (ternary phases)
+                "lib1",  # 4,000 structures
+                "lib2",  # 360,000 structures (binary phases)
+                "lib3",  # 2,530,000 structures (ternary phases)
             ],
             # The batch size the number of results to return per HTTP request.
             batch_size=500,
@@ -61,7 +61,7 @@ def load_all_structures():
             AflowKeywords.auid,
             # This is the URL that leads to the rest of the data. Note it is a
             # interactive REST endpoint, while the dashboard link is different.
-            # AflowKeywords.aurl, 
+            # AflowKeywords.aurl,
             # The date that the entry was added
             # AflowKeywords.aflowlib_date,
             # Band gap
