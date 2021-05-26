@@ -21,8 +21,8 @@ test = load_all_structures()
 # --------------------------------------------------------------------------------------
 
 from simmate.shortcuts import setup
-from simmate.database.third_parties.all import MaterialsProjectStructure
-MaterialsProjectStructure.objects.count()
+from simmate.database.third_parties.all import OcdStructure
+OcdStructure.objects.count()
 
 # --------------------------------------------------------------------------------------
 

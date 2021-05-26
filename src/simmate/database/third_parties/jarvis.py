@@ -31,16 +31,3 @@ class JarvisStructure(Structure):
         # All JARVIS structures have their data mapped to a URL in the same way
         # ex: https://www.ctcms.nist.gov/~knc6/static/JARVIS-DFT/JVASP-1234.xml
         return f"https://www.ctcms.nist.gov/~knc6/static/JARVIS-DFT/{self.id}.xml"
-
-    
-    """ Model Methods """
-
-    @classmethod
-    def from_dict(cls, data_dict):
-
-        # initialize this model object using the data. I pass to super() method to
-        # handle the "structure". The reason I even have this method is because
-        # there's a bunch of extra kwargs I'm passing in along with "structure".
-        structure_db = super().from_pymatgen(**data_dict)
-
-        return structure_db

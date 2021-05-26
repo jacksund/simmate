@@ -97,7 +97,7 @@ class Structure(models.Model):
     # on the symmetry and the arbitray unitcell. If you are truly after small volumes
     # of the unitcell, it is likely you really just want to search by spacegroup.
     molar_volume = models.FloatField()
-
+    
     # symmetry info
     # TODO: should this be a relationship to a separate table?
     spacegroup = models.IntegerField()
@@ -139,8 +139,7 @@ class Structure(models.Model):
     def from_pymatgen(cls, structure, **kwargs):
         # Given a pymatgen structure object, this will return a database structure
         # object, but will NOT save it to the database yet. The kwargs input
-        # is only if you inherit from this class and add extra fields, which
-        # should rarely be done.
+        # is only if you inherit from this class and add extra fields.
         structure_db = cls(
             # structure_json=structure.to_json(),
             # OPTIMIZE: The structure_json is not the most compact format. Others

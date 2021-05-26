@@ -32,15 +32,3 @@ class OcdStructure(Structure):
         #   aflowlib.duke.edu/AFLOWDATA/ICSD_WEB/FCC/Dy1Mn2_ICSD_602151
         id_formatted = self.id.replace("-",":")
         return f"http://aflow.org/material/?id={id_formatted}"
-
-    """ Model Methods """
-
-    @classmethod
-    def from_dict(cls, data_dict):
-
-        # initialize this model object using the data. I pass to super() method to
-        # handle the "structure". The reason I even have this method is because
-        # there's a bunch of extra kwargs I'm passing in along with "structure".
-        structure_db = super().from_pymatgen(**data_dict)
-
-        return structure_db

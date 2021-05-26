@@ -38,11 +38,3 @@ class MaterialsProjectStructure(Structure):
         # the same way. For example...
         #   https://materialsproject.org/materials/mp-12345/
         return f"https://materialsproject.org/materials/{self.id}/"
-
-    """ Model Methods """
-
-    # TODO: This should be an ETL workflow (maybe no L?). I can link to the
-    # workflow in the future when it's ready
-    # @classmethod
-    # def from_query(criteria, api_key="2Tg7uUvaTAPHJQXl"):
-    #     some_workflow.run()

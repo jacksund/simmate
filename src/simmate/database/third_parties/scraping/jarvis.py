@@ -71,7 +71,7 @@ def load_all_structures(filename="jarvis.json"):
         }
 
         # now convert the entry to a database object
-        structure_db = JarvisStructure.from_dict(entry_dict)
+        structure_db = JarvisStructure.from_pymatgen(**entry_dict)
 
         # and save it to our database!
         structure_db.save()

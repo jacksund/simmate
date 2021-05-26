@@ -32,15 +32,3 @@ class OqmdStructure(Structure):
         #   http://oqmd.org/materials/entry/10435
         id_number = self.id.split("-")[-1]  # this removes the "oqmd-" from the id
         return f"http://oqmd.org/materials/entry/{id_number}"
-
-    """ Model Methods """
-
-    @classmethod
-    def from_dict(cls, data_dict):
-
-        # initialize this model object using the data. I pass to super() method to
-        # handle the "structure". The reason I even have this method is because
-        # there's a bunch of extra kwargs I'm passing in along with "structure".
-        structure_db = super().from_pymatgen(**data_dict)
-
-        return structure_db

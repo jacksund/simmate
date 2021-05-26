@@ -98,7 +98,7 @@ def load_all_structures():
         }
 
         # now convert the entry to a database object
-        structure_db = AflowStructure.from_dict(entry_dict)
+        structure_db = AflowStructure.from_pymatgen(**entry_dict)
 
         # and save it to our database!
         structure_db.save()

@@ -5,9 +5,9 @@
 # https://docs.djangoproject.com/en/3.1/topics/db/models/#organizing-models-in-a-package
 
 from simmate.database.third_parties.all import (
-    # MaterialsProjectStructure,
-    # JarvisStructure,
-    # AflowStructure,
-    # OqmdStructure,
+    MaterialsProjectStructure,
+    JarvisStructure,
+    AflowStructure,
+    OqmdStructure,
     OcdStructure,
 )
