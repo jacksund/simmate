@@ -93,9 +93,9 @@ from django_pandas.io import read_frame
 #
 queryset = (
     Pathway_DB.objects.filter(
-        # structure__formula_anonymous="ABC3",
+        # structure__formula_anonymous="ABCD",
         # structure__chemical_system="Ca-F",
-        # structure__spacegroup=221,
+        # structure__spacegroup=129,
         structure__e_above_hull=0,
         empiricalmeasures__dimensionality=2,
         vaspcalca__energy_barrier__lte=2,
@@ -175,8 +175,8 @@ get_oxi_supercell_path(path.to_pymatgen(), 10).write_path(
 
 # from simmate.shortcuts import setup
 # from simmate.database.diffusion import VaspCalcB
-# queryset = VaspCalcB.objects.get(pathway=674)
-# pathway_ids = [2080,2082, 2085, 2644, 2645, 2646, 2756, 2762, 3051, 3052]
+# queryset = VaspCalcB.objects.get(pathway=1686)
+# pathway_ids = [1643,2791,1910,2688,2075,2338,3199,2511,3231,3186,2643]
 # queryset = VaspCalcB.objects.filter(pathway__in=pathway_ids).all()
 
 
