@@ -123,9 +123,14 @@ def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
     # grab the custodian log
     # json_log = json.load("custodian.json")
 
+    # These are collective lists that will each have 3 entries
+    # (one for each image: start, midpoint, end)
     structures_relaxed = []
+    energies_steps = []
+    forces = []
+    stresses = []
     energies = []
-
+    converged = []
     for directory in ["00", "", "02"]:  # midpoint isn't in 01, but in parent dir (".")
 
         try:
@@ -141,31 +146,61 @@ def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
             )
 
             # check if the calculation converged
-            is_converged = xmlReader.converged
+            assert xmlReader.converged_electronic  # This MUST be true
+            # This likely won't be true bc we limited the calculation to only 10 ionic steps (NSW=10)
+            # Because this is expected, we record it just it case it actually did converge
+            is_converged = xmlReader.converged_ionic
+
+            # grab the forces, stress, and energies for each ionic step and record
+            # these in a collected list.
+            f = []
+            s = []
+            e = []
+            for ionic_step in xmlReader.ionic_steps:
+                f.append(ionic_step["forces"])
+                s.append(ionic_step["stress"])
+                e.append(ionic_step["e_wo_entrp"])
 
             # grab the final structure and energy
             final_structure = xmlReader.structures[-1]
             energy = xmlReader.final_energy
+
             # add to results list
+            energies_steps.append(e)
+            forces.append(f)
+            stresses.append(s)
             structures_relaxed.append(final_structure)
             energies.append(energy)
+            converged.append(is_converged)
+
         except:
+            energies_steps.append(None)
+            forces.append(None)
+            stresses.append(None)
             structures_relaxed.append(None)
             energies.append(None)
+            converged.append(None)
 
     # empty the directory once we are done (note we will not reach this point
     # if the calculation fails above)
     # empty_directory()
 
     # return the desired info
-    return {"structures": structures_relaxed, "energies": energies}
+    return {
+        "structures": structures_relaxed,
+        "energies": energies,
+        "energies_steps": energies_steps,
+        "forces": forces,
+        "stresses": stresses,
+        "converged": converged,
+    }
 
 
 # --------------------------------------------------------------------------------------
 
 
 @task(max_retries=3, retry_delay=timedelta(seconds=5))  # trigger=all_finished,
-def add_results_to_db(output_data, pathway_id):    
+def add_results_to_db(output_data, pathway_id):
 
     # unpack data
     e_start, e_midpoint, e_end = output_data["energies"]
@@ -203,14 +238,14 @@ def add_results_to_db(output_data, pathway_id):
 
 # now make the overall workflow
 with Flow("Vasp Calc C") as workflow:
-    
+
     vasp_cmd = Parameter("vasp_cmd", default="mpirun -n 28 vasp_std")
-    
+
     # load the structure object from our database
     pathway_id = Parameter("pathway_id")
 
     # register that the flow is being ran in our result database
-    # register_run(pathway_id)
+    register_run(pathway_id)
 
     # load the pathway
     path = load_pathway_from_db(pathway_id)
@@ -222,7 +257,7 @@ with Flow("Vasp Calc C") as workflow:
     output_data = run_vasp(images, vasp_cmd)
 
     # save the data to our database
-    # add_results_to_db(output_data, pathway_id)
+    add_results_to_db(output_data, pathway_id)
 
 # for Prefect Cloud compatibility, set the storage to an import path
 workflow.storage = LocalStorage(path=f"{__name__}:workflow", stored_as_script=True)

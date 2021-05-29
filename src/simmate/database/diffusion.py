@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import json
+
 from django.db import models
 
 from pymatgen.core.sites import PeriodicSite
@@ -305,12 +307,69 @@ class VaspCalcC(Calculation):
     energy_start = models.FloatField(blank=True, null=True)
     energy_midpoint = models.FloatField(blank=True, null=True)
     energy_end = models.FloatField(blank=True, null=True)
-
+    
+    converged_start = models.BooleanField(blank=True, null=True)
+    converged_midpoint = models.BooleanField(blank=True, null=True)
+    converged_end = models.BooleanField(blank=True, null=True)
+    
+    forces_start_json = models.TextField(blank=True, null=True)
+    forces_midpoint_json = models.TextField(blank=True, null=True)
+    forces_end_json = models.TextField(blank=True, null=True)
+    
+    stress_start_json = models.TextField(blank=True, null=True)
+    stress_midpoint_json = models.TextField(blank=True, null=True)
+    stress_end_json = models.TextField(blank=True, null=True)
+    
+    energysteps_start_json = models.TextField(blank=True, null=True)
+    energysteps_midpoint_json = models.TextField(blank=True, null=True)
+    energysteps_end_json = models.TextField(blank=True, null=True)
+    
     energy_barrier = models.FloatField(blank=True, null=True)
 
     """ Relationships """
     # Each calc corresponds to one Pathway
     # I set primary_key to true so that the primary keys match that of the pathway
     pathway = models.OneToOneField(Pathway, primary_key=True, on_delete=models.CASCADE)
-
+    
+    """ Properties """
+    # These only exist because I'm storing lists as json above. So I was lazy to
+    # take a shortcut above -- and I need to add this extra functionality here as
+    # a result.
+    
+    @property
+    def forces_start(self):
+        return json.loads(self.forces_start_json)
+    
+    @property
+    def forces_midpoint(self):
+        return json.loads(self.forces_midpoint_json)
+    
+    @property
+    def forces_end(self):
+        return json.loads(self.forces_end_json)
+    
+    @property
+    def stress_start(self):
+        return json.loads(self.stress_start_json)
+    
+    @property
+    def stress_midpoint(self):
+        return json.loads(self.stress_midpoint_json)
+    
+    @property
+    def stress_end(self):
+        return json.loads(self.stress_end_json)
+    
+    @property
+    def energysteps_start(self):
+        return json.loads(self.energysteps_start_json)
+    
+    @property
+    def energysteps_midpoint(self):
+        return json.loads(self.energysteps_midpoint_json)
+    
+    @property
+    def energysteps_end(self):
+        return json.loads(self.energysteps_end_json)
+    
 # --------------------------------------------------------------------------------------

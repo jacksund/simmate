@@ -119,6 +119,7 @@ df = read_frame(
         "structure__spacegroup",
         "structure__formula_anonymous",
         "vaspcalca__energy_barrier",
+        "nsites_777",
         "nsites_101010",
         "vaspcalcb__energy_barrier",
         "vaspcalcb__status",
