@@ -3,6 +3,7 @@
 # --------------------------------------------------------------------------------------
 
 import os
+import json
 import numpy
 from datetime import timedelta
 
@@ -174,12 +175,12 @@ def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
             converged.append(is_converged)
 
         except:
-            energies_steps.append(None)
-            forces.append(None)
-            stresses.append(None)
+            energies_steps.append([])
+            forces.append([[]])
+            stresses.append([])
             structures_relaxed.append(None)
             energies.append(None)
-            converged.append(None)
+            converged.append(False)
 
     # empty the directory once we are done (note we will not reach this point
     # if the calculation fails above)
@@ -203,7 +204,12 @@ def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
 def add_results_to_db(output_data, pathway_id):
 
     # unpack data
+    s_start, s_midpoint, s_end = output_data["structures"]
     e_start, e_midpoint, e_end = output_data["energies"]
+    es_start, es_midpoint, es_end = output_data["energies_steps"]
+    f_start, f_midpoint, f_end = output_data["forces"]
+    st_start, st_midpoint, st_end = output_data["stresses"]
+    c_start, c_midpoint, c_end = output_data["converged"]
     s_start, s_midpoint, s_end = output_data["structures"]
 
     # grab the pathway_id entry. This should exists already in the Submitted state
@@ -229,6 +235,22 @@ def add_results_to_db(output_data, pathway_id):
     calc.structure_start_json = s_start.to_json() if s_start else None
     calc.structure_midpoint_json = s_midpoint.to_json() if s_midpoint else None
     calc.structure_end_json = s_end.to_json() if s_end else None
+
+    calc.converged_start = c_start
+    calc.converged_midpoint = c_midpoint
+    calc.converged_end = c_end
+    
+    calc.forces_start_json = json.dumps(f_start)
+    calc.forces_midpoint_json = json.dumps(f_midpoint)
+    calc.forces_end_json = json.dumps(f_end)
+    
+    calc.stress_start_json = json.dumps(st_start)
+    calc.stress_midpoint_json = json.dumps(st_midpoint)
+    calc.stress_end_json = json.dumps(st_end)
+    
+    calc.energysteps_start_json = json.dumps(es_start)
+    calc.energysteps_midpoint_json = json.dumps(es_midpoint)
+    calc.energysteps_end_json = json.dumps(es_end)
 
     calc.save()
 
