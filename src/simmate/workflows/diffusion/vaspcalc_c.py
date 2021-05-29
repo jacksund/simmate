@@ -50,7 +50,7 @@ def register_run(pathway_id):
 def get_images(path):
 
     # convert the path to a supercell
-    path_supercell = get_oxi_supercell_path(path, min_sl_v=10)
+    path_supercell = get_oxi_supercell_path(path, min_sl_v=7)
 
     # grab the start, midpoint, and endpoint structures (idpp relaxed)
     # For testing, you can use path.write_path() to visualize these structures
