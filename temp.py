@@ -45,8 +45,8 @@ for pathway_id in pathway_ids:
 # df = read_frame(queryset)  # , index_col="pathway"
 
 # from simmate.shortcuts import setup
-# from simmate.database.diffusion import VaspCalcB
-# queryset = VaspCalcB.objects.all()
+# from simmate.database.diffusion import VaspCalcC
+# queryset = VaspCalcC.objects.all()
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)
 
@@ -96,12 +96,13 @@ queryset = (
         # structure__formula_anonymous="ABCD",
         # structure__chemical_system="Ca-F",
         # structure__spacegroup=129,
-        # structure__e_above_hull=0,
-        # empiricalmeasures__dimensionality=2,
+        structure__e_above_hull=0,
+        empiricalmeasures__dimensionality=2,
         # vaspcalca__energy_barrier__lte=2,
         # vaspcalca__energy_barrier__gte=0,
-        vaspcalcb__energy_barrier__isnull=False,
-        # vaspcalcb__isnull=True,
+        # vaspcalcb__energy_barrier__isnull=False,
+        vaspcalcb__isnull=True,
+        # vaspcalcc__isnull=False,
     ).order_by("vaspcalca__energy_barrier")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
@@ -118,11 +119,11 @@ df = read_frame(
         "structure__e_above_hull",
         "structure__spacegroup",
         "structure__formula_anonymous",
-        "vaspcalca__energy_barrier",
         "nsites_777",
         "nsites_101010",
+        "vaspcalca__energy_barrier",
         "vaspcalcb__energy_barrier",
-        "vaspcalcb__status",
+        "vaspcalcc__energy_barrier",
     ],
 )
 
@@ -175,8 +176,8 @@ get_oxi_supercell_path(path.to_pymatgen(), 10).write_path(
 # mpirun -n 44 /21dayscratch/scr/j/a/jacksund/vasp_build/vasp/5.4.4/bin/vasp
 
 # from simmate.shortcuts import setup
-# from simmate.database.diffusion import VaspCalcB
-# queryset = VaspCalcB.objects.get(pathway=1686)
+# from simmate.database.diffusion import VaspCalcC
+# queryset = VaspCalcC.objects.get(pathway=26)
 # pathway_ids = [1643,2791,1910,2688,2075,2338,3199,2511,3231,3186,2643]
 # queryset = VaspCalcB.objects.filter(pathway__in=pathway_ids).all()
 

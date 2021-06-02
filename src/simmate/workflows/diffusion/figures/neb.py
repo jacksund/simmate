@@ -201,7 +201,7 @@ hb = ax.scatter(
     x=df["vaspcalca__energy_barrier"],  # X
     y=df["vaspcalcb__energy_barrier"],  # Y
     c="Green",  # COLOR
-    # alpha=0.6,  # Transparency
+    alpha=0.6,  # Transparency
 )
 
 # hb = ax.scatter(
