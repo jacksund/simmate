@@ -264,8 +264,8 @@ fig = plt.figure(figsize=(5, 5))  # golden ratio = 1.618
 
 # Add axes for the main plot
 ax = fig.add_subplot(
-    xlabel=r"IDPP-relaxed Barrier (eV)",
-    ylabel=r"Midpoint-only NEB Barrier (eV) [NSW=10]",
+    xlabel=r"IDPP-relaxed Barrier (eV) [NSW=10]",
+    ylabel=r"Midpoint-only NEB Barrier (eV)",
     # xlim=(-0.5, 2.5),
     # ylim=(-0.5, 2.5),
 )
