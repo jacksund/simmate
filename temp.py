@@ -44,11 +44,17 @@ for pathway_id in pathway_ids:
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)  # , index_col="pathway"
 
-# from simmate.shortcuts import setup
-# from simmate.database.diffusion import VaspCalcC
-# queryset = VaspCalcC.objects.all()
-# from django_pandas.io import read_frame
-# df = read_frame(queryset)
+from simmate.shortcuts import setup
+from simmate.database.diffusion import VaspCalcB
+
+queryset = VaspCalcB.objects.filter(
+    energy_barrier__isnull=True,
+    pathway__structure__e_above_hull=0,
+    pathway__empiricalmeasures__dimensionality__gte=2,
+    pathway__vaspcalca__energy_barrier__lte=0.75,
+).all()
+from django_pandas.io import read_frame
+df = read_frame(queryset)
 
 # from simmate.shortcuts import setup
 # from simmate.database.diffusion import VaspCalcA
@@ -97,8 +103,8 @@ queryset = (
         # structure__chemical_system="Ca-F",
         # structure__spacegroup=129,
         structure__e_above_hull=0,
-        empiricalmeasures__dimensionality=2,
-        # vaspcalca__energy_barrier__lte=2,
+        empiricalmeasures__dimensionality__gte=2,
+        vaspcalca__energy_barrier__lte=0.75,
         # vaspcalca__energy_barrier__gte=0,
         # vaspcalcb__energy_barrier__isnull=False,
         vaspcalcb__isnull=True,
@@ -188,3 +194,38 @@ get_oxi_supercell_path(path.to_pymatgen(), 10).write_path(
 # queryset = VaspCalcA.objects.filter(status="S", updated_at__gte=datetime.date(2021,4,26)).all()
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)
+
+
+with open("OUTCAR") as file:
+    filelines = file.readlines()
+
+time_lines = [line for line in filelines if "time" in line.lower()]
+
+# the "Total CPU Time used" is the 3rd to last line (if the calc completed successfully)
+# There is also the "Total Elapsed Time" which includes all overhead. We select this one.
+total_time_line = time_lines[-1]
+total_time = float(total_time_line.split()[-1])
+
+# the time of each ionic step has "LOOP+" in it
+ionic_step_time_lines = [line for line in time_lines if "LOOP+" in line]
+# there is a real time and a cpu time (real is slightly extra). We take the cpu time
+ionic_step_times = [float(line.split()[-4][:-1]) for line in ionic_step_time_lines]
+
+
+from optimade.providers.jarvis import JarvisStructure
+
+structures = JarvisStructure.objects.filter(
+    chemical_system="Y-C",
+    nsites__lte=12,
+    energy_above_hull=0,
+    dimensionality_larsen=2,
+).all()
+
+structures.to_pymatgen()
+structures.to_ase()
+structures.to_pandas()
+
+
+from jarvis.db.figshare import data
+
+data_dft3d = data(dataset="dft_3d")
