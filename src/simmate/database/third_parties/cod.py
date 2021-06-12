@@ -5,15 +5,15 @@ from django.db import models
 from simmate.database.base import Structure
 
 
-class OcdStructure(Structure):
+class CodStructure(Structure):
 
     """ Base Info """
 
-    # OQMD ID
-    # For now, max length of 14 is overkill: 'oqmd-123456789'
+    # COD ID
+    # For now, max length of 14 is overkill: 'ocd-123456789'
     id = models.CharField(max_length=14, primary_key=True)
 
-    # Extra data by OCD
+    # Extra data by COD
     # See my notes in the scraping file. There's more metadata to add but I leave
     # this out for now.
 
@@ -21,7 +21,7 @@ class OcdStructure(Structure):
 
     # OPTIMIZE: is it better to just set the attribute than to have a fixed
     # property that's defined via a function?
-    source = "OCD"
+    source = "COD"
 
     @property
     def external_link(self):

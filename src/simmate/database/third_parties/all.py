@@ -17,4 +17,4 @@ from simmate.database.third_parties.materials_project import MaterialsProjectStr
 from simmate.database.third_parties.jarvis import JarvisStructure
 from simmate.database.third_parties.aflow import AflowStructure
 from simmate.database.third_parties.oqmd import OqmdStructure
-from simmate.database.third_parties.ocd import OcdStructure
+from simmate.database.third_parties.cod import CodStructure

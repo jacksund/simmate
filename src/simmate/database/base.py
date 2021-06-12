@@ -47,8 +47,6 @@ code and make it easier to read:
 
 """
 
-import json
-
 from scipy.constants import Avogadro
 from pymatgen.core.structure import Structure as Structure_PMG
 
@@ -97,7 +95,7 @@ class Structure(models.Model):
     # on the symmetry and the arbitray unitcell. If you are truly after small volumes
     # of the unitcell, it is likely you really just want to search by spacegroup.
     molar_volume = models.FloatField()
-    
+
     # symmetry info
     # TODO: should this be a relationship to a separate table?
     spacegroup = models.IntegerField()
@@ -137,6 +135,15 @@ class Structure(models.Model):
 
     @classmethod
     def from_pymatgen(cls, structure, **kwargs):
+
+        # OPTIMIZE: I currently store files as poscar strings for ordered structures
+        # and as CIFs for disordered structures. Both of this include excess information
+        # that slightly inflates file size, so I will be making a new string format in
+        # the future. This will largely be based off the POSCAR format, but will
+        # account for disordered structures and all limit repeated data (such as the
+        # header line, "direct", listing each element/composition, etc.).
+        storage_format = "POSCAR" if structure.is_ordered else "CIF"
+
         # Given a pymatgen structure object, this will return a database structure
         # object, but will NOT save it to the database yet. The kwargs input
         # is only if you inherit from this class and add extra fields.
@@ -146,7 +153,7 @@ class Structure(models.Model):
             # like POSCAR are more compact and can save space. This is at the cost of
             # being robust to things like fractional occupancies. Perhaps a new compact
             # format needs to be made specifically for Simmate.
-            structure_json=structure.to(fmt="POSCAR"),
+            structure_json=structure.to(fmt=storage_format),
             nsites=structure.num_sites,
             nelement=len(structure.composition),
             chemical_system=structure.composition.chemical_system,
@@ -168,13 +175,21 @@ class Structure(models.Model):
         # NOTE: if you know this is what you're going to do from a query, then
         # it is more efficient to only grab the structure_json column because
         # that's all you need! You'd do that like this:
-        # structure_db = Structure.objects.only("structure_json").get(pk=1)
-        # grab the proper Structure entry and we want only the structure column
+        #   structure_db = Structure.objects.only("structure_json").get(id="example-id")
+        # This grabs the proper Structure entry and only the structure column.
 
-        # convert the json string to python dictionary
-        structure_dict = json.loads(self.structure_json)
-        # convert the dictionary to pymatgen Structure object
-        structure = Structure_PMG.from_dict(structure_dict)
+        # convert the stored string to python dictionary.
+        # OPTIMIZE: see my comment on storing strings in the from_pymatgen method above.
+        # For now, I need to figure out if I used "CIF" or "POSCAR" and read the structure
+        # accordingly. In the future, I can just assume my new format.
+        # If the string starts with "#", then I know that I stored it as a "CIF".
+        storage_format = "CIF" if (self.structure_json[0] == "#") else "POSCAR"
+        
+        # convert the string to pymatgen Structure object
+        structure = Structure_PMG.from_str(
+            self.structure_json,
+            fmt=storage_format,
+        )
 
         return structure
 

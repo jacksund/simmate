@@ -9,5 +9,5 @@ from simmate.database.third_parties.all import (
     JarvisStructure,
     AflowStructure,
     OqmdStructure,
-    OcdStructure,
+    CodStructure,
 )
