@@ -21,10 +21,10 @@ test = load_all_structures()
 # --------------------------------------------------------------------------------------
 
 from simmate.shortcuts import setup
-from simmate.database.third_parties.all import JarvisStructure
-JarvisStructure.objects.count()
+from simmate.database.third_parties.all import CodStructure
+CodStructure.objects.count()
 
 # --------------------------------------------------------------------------------------
 
-# from django.db.models import Sum
-# MaterialsProjectStructure.objects.aggregate(Sum('nsites'))
+from django.db.models import Sum
+CodStructure.objects.aggregate(Sum('nsites'))
