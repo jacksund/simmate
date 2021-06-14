@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     # These are all apps that are built by Simmate
     "simmate.website.accounts.apps.AccountsConfig",
     "simmate.website.third_parties.apps.ThirdPartyConfig",
-    "simmate.website.execution.apps.ExecutionConfig",
+    # "simmate.website.execution.apps.ExecutionConfig",  # using Prefect instead
     #
     # These are built-in django apps that we use for extra features
     "django.contrib.admin",
@@ -88,7 +88,7 @@ MIDDLEWARE = [
 ]
 
 # "core" here is based on the name of my main django folder
-ROOT_URLCONF = "core.urls"
+ROOT_URLCONF = "simmate.website.core.urls"
 
 TEMPLATES = [
     {
@@ -108,7 +108,7 @@ TEMPLATES = [
 ]
 
 # "core" here is based on the name of my main django folder
-WSGI_APPLICATION = "core.wsgi.application"
+WSGI_APPLICATION = "simmate.website.core.wsgi.application"
 
 
 # Database

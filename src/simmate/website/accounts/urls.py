@@ -6,7 +6,7 @@
 
 from django.urls import include, path
 
-from . import views
+from simmate.website.accounts import views
 
 urlpatterns = [
     # This points to a built-in app for django that has the some login/password options

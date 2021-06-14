@@ -8,14 +8,14 @@ from django.core.management import call_command
 from simmate.configuration.django.settings import BASE_DIR, DATABASES
 
 
-def update_database(apps_to_migrate=["third_parties", "execution"]):
+def update_database(apps_to_migrate=["third_parties"]):
 
     # execute the following commands to update the database
     call_command("makemigrations", *apps_to_migrate)
     call_command("migrate")
 
 
-def reset_database(apps_to_migrate=["third_parties", "execution"]):
+def reset_database(apps_to_migrate=["third_parties"]):
     # BUG: this is only for SQLite3
 
     # Apps to init.
