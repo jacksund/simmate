@@ -373,3 +373,41 @@ class VaspCalcC(Calculation):
         return json.loads(self.energysteps_end_json)
     
 # --------------------------------------------------------------------------------------
+
+
+class VaspCalcD(Calculation):
+
+    """ Base info """
+    
+    structure_start_json = models.TextField(blank=True, null=True)
+    structure_midpoint_json = models.TextField(blank=True, null=True)
+    structure_end_json = models.TextField(blank=True, null=True)
+    
+    forces_start_json = models.TextField(blank=True, null=True)
+    forces_midpoint_json = models.TextField(blank=True, null=True)
+    forces_end_json = models.TextField(blank=True, null=True)
+    
+    stress_start_json = models.TextField(blank=True, null=True)
+    stress_midpoint_json = models.TextField(blank=True, null=True)
+    stress_end_json = models.TextField(blank=True, null=True)
+    
+    energysteps_start_json = models.TextField(blank=True, null=True)
+    energysteps_midpoint_json = models.TextField(blank=True, null=True)
+    energysteps_end_json = models.TextField(blank=True, null=True)
+
+    timesteps_start_json = models.TextField(blank=True, null=True)
+    timesteps_midpoint_json = models.TextField(blank=True, null=True)
+    timesteps_end_json = models.TextField(blank=True, null=True)
+    
+    error_time_start = models.FloatField(blank=True, null=True)
+    error_time_midpoint = models.FloatField(blank=True, null=True)
+    error_time_end = models.FloatField(blank=True, null=True)
+
+    converged_start = models.BooleanField(blank=True, null=True)
+    converged_midpoint = models.BooleanField(blank=True, null=True)
+    converged_end = models.BooleanField(blank=True, null=True)
+
+    """ Relationships """
+    # Each calc corresponds to one Pathway
+    # I set primary_key to true so that the primary keys match that of the pathway
+    pathway = models.OneToOneField(Pathway, primary_key=True, on_delete=models.CASCADE)

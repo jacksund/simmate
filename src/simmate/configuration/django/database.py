@@ -8,7 +8,7 @@ from django.core.management import call_command
 from simmate.configuration.django.settings import BASE_DIR, DATABASES
 
 
-def update_database(apps_to_migrate=["diffusion", "execution"]):
+def update_database(apps_to_migrate=["diffusion"]):
 
     # execute the following commands to update the database
     call_command("makemigrations", *apps_to_migrate)
