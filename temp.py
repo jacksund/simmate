@@ -45,14 +45,9 @@ for pathway_id in pathway_ids:
 # df = read_frame(queryset)  # , index_col="pathway"
 
 from simmate.shortcuts import setup
-from simmate.database.diffusion import VaspCalcB
+from simmate.database.diffusion import VaspCalcC
 
-queryset = VaspCalcB.objects.filter(
-    energy_barrier__isnull=True,
-    pathway__structure__e_above_hull=0,
-    pathway__empiricalmeasures__dimensionality__gte=2,
-    pathway__vaspcalca__energy_barrier__lte=0.75,
-).all()
+queryset = VaspCalcC.objects.all()
 from django_pandas.io import read_frame
 df = read_frame(queryset)
 
@@ -194,22 +189,3 @@ get_oxi_supercell_path(path.to_pymatgen(), 10).write_path(
 # queryset = VaspCalcA.objects.filter(status="S", updated_at__gte=datetime.date(2021,4,26)).all()
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)
-
-
-from optimade.providers.jarvis import JarvisStructure
-
-structures = JarvisStructure.objects.filter(
-    chemical_system="Y-C",
-    nsites__lte=12,
-    energy_above_hull=0,
-    dimensionality_larsen=2,
-).all()
-
-structures.to_pymatgen()
-structures.to_ase()
-structures.to_pandas()
-
-
-from jarvis.db.figshare import data
-
-data_dft3d = data(dataset="dft_3d")

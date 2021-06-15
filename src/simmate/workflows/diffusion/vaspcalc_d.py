@@ -14,7 +14,7 @@ from prefect.triggers import all_finished
 from prefect.storage import Local as LocalStorage
 
 from simmate.configuration.django import setup_full  # ensures setup
-from simmate.database.diffusion import VaspCalcC, Pathway as Pathway_DB
+from simmate.database.diffusion import VaspCalcD, Pathway as Pathway_DB
 from simmate.workflows.diffusion.utilities import (
     run_vasp_custodian_neb,
     get_oxi_supercell_path,
@@ -40,7 +40,7 @@ def load_pathway_from_db(pathway_id):
 def register_run(pathway_id):
 
     # create the file and indicate that it has been submitted
-    calc = VaspCalcC(status="S", pathway_id=pathway_id)
+    calc = VaspCalcD(status="S", pathway_id=pathway_id)
     calc.save()
 
 
@@ -243,7 +243,7 @@ def add_results_to_db(output_data, pathway_id):
     # grab the pathway_id entry. This should exists already in the Submitted state
     # An error will be thrown if it's not in the submitted state -- meaning we
     # are trying to overwrite results, which we shouldn't do.
-    calc = VaspCalcC.objects.get(pathway_id=pathway_id, status="S")
+    calc = VaspCalcD.objects.get(pathway_id=pathway_id, status="S")
 
     # now add the empirical data using the supplied dictionary
     # NOTE: the "if not __ else None" code is to make sure there wasn't an error
