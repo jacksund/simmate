@@ -79,7 +79,7 @@ def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
         # NSW=0,
         # IBRION=-1,
         # For Relax
-        NSW=3,  # don't do more than N ionic steps
+        NSW=99,  # don't do more than N ionic steps
         ISIF=3,
         EDIFFG=5e-4,
         IBRION=2,  # 2 for bad initial guess

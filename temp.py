@@ -44,12 +44,11 @@ for pathway_id in pathway_ids:
 # from django_pandas.io import read_frame
 # df = read_frame(queryset)  # , index_col="pathway"
 
-from simmate.shortcuts import setup
-from simmate.database.diffusion import VaspCalcC
-
-queryset = VaspCalcC.objects.all()
-from django_pandas.io import read_frame
-df = read_frame(queryset)
+# from simmate.shortcuts import setup
+# from simmate.database.diffusion import VaspCalcD
+# queryset = VaspCalcD.objects.all()
+# from django_pandas.io import read_frame
+# df = read_frame(queryset)
 
 # from simmate.shortcuts import setup
 # from simmate.database.diffusion import VaspCalcA
@@ -177,8 +176,8 @@ get_oxi_supercell_path(path.to_pymatgen(), 10).write_path(
 # mpirun -n 44 /21dayscratch/scr/j/a/jacksund/vasp_build/vasp/5.4.4/bin/vasp
 
 # from simmate.shortcuts import setup
-# from simmate.database.diffusion import VaspCalcC
-# queryset = VaspCalcC.objects.get(pathway=26)
+# from simmate.database.diffusion import VaspCalcD
+# queryset = VaspCalcD.objects.get(pathway=1322)
 # pathway_ids = [1643,2791,1910,2688,2075,2338,3199,2511,3231,3186,2643]
 # queryset = VaspCalcB.objects.filter(pathway__in=pathway_ids).all()
 
