@@ -79,7 +79,7 @@ def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
         # NSW=0,
         # IBRION=-1,
         # For Relax
-        NSW=10,  # don't do more than 10 ionic steps
+        NSW=3,  # don't do more than N ionic steps
         ISIF=3,
         EDIFFG=5e-4,
         IBRION=2,  # 2 for bad initial guess
@@ -173,8 +173,11 @@ def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
             start_time = os.path.getmtime(os.path.join(dir_poscar, "POSCAR"))
             all_errors = [filename for filename in os.listdir(dir_poscar) if "error." in filename]
             all_errors.sort()
-            final_error_time = os.path.getmtime(os.path.join(dir_poscar, all_errors[-1]))
-            total_error_time = final_error_time - start_time
+            if all_errors:
+                final_error_time = os.path.getmtime(os.path.join(dir_poscar, all_errors[-1]))
+                total_error_time = final_error_time - start_time
+            else:
+                total_error_time = 0
             
             # For the vasp calculation that was successful, we also want the 
             # time spent on each ionic step. This info is in the OUTCAR
@@ -206,7 +209,7 @@ def run_vasp(structures, vasp_cmd="mpirun -n 16 vasp_std"):
             structures_relaxed.append(None)
             converged.append(False)
             times.append([])
-            error_times.append([])
+            error_times.append(None)
 
     # empty the directory once we are done (note we will not reach this point
     # if the calculation fails above)
