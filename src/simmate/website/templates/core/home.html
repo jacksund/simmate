@@ -2,7 +2,7 @@
 {% extends "core/site_base.html" %}
 
 {% block tabtitle %}
-PuttyExams
+Simmate
 {% endblock %}
 
 {% block banner %}
@@ -14,21 +14,18 @@ PuttyExams
 
 <div class="container-fluid px-4 min-vh-100">
     <div class="row gx-4">
-        <div class="col-2">
+        <div class="col-2 p-3">
             {% include "core/sidebar.html"%}
         </div>
         
-        <div class="col-8">
+        <div class="col-8 p-3">
             {% include "core/periodic-table.html"%}
         </div>
        
-        <div class="col-2">
+        <div class="col-2 p-3">
             <div class="p-3 border bg-light">Custom column padding</div>
         </div>
     </div>
 </div>
-
-
-
 
 {% endblock %}

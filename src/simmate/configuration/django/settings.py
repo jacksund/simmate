@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     #   django-debug-toolbar
     #   django-channels (+ React.js)
     #   django-REST-framework
-    #   django-graphene
+    #   django-graphene (+ GraphQL)
     #   django-redis
 ]
 
