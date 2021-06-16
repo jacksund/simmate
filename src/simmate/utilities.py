@@ -5,6 +5,7 @@ This file hosts common functions that are used throughout Simmate
 """
 
 import os
+import itertools
 from tempfile import TemporaryDirectory
 
 
@@ -37,3 +38,33 @@ def get_directory(dir):
             os.mkdir(dir)
     # and return the full path to the directory
     return dir
+
+
+def get_chemical_subsystems(chemical_system):
+    
+    # TODO: this will may be better located elsewhere. Maybe even as a method for
+    # the Composition class.
+    
+    # Given a chemical system, this returns all chemical systems that are also
+    # contained within it. For example, "Y-C" would return ["Y", "C", "C-Y"].
+    # Note that the returned list has elements of a given system in alphabetical
+    # order (i.e. it gives "C-Y" and not "Y-C")
+    
+    # Convert the system to a list of elements
+    system_cleaned = chemical_system.split("-")
+    
+    # Now generate all unique combinations of these elements. Because we also
+    # want combinations of different sizes (nelements = 1, 2, ... N), then we
+    # put this in a for-loop.
+    subsystems = []
+    for i in range(len(system_cleaned)):
+        # i is the size of combination we want. We now ask for each unique combo
+        # of elements at this given size.
+        for combo in itertools.combinations(system_cleaned, i+1):
+            # Combo will be a tuple of elements that we then convert back to a 
+            # chemical system. We also sort this alphabetically.
+            #   ex: ("Y", "C", "F") ---> "C-F-Y"
+            subsystem = "-".join(sorted(combo))
+            subsystems.append(subsystem)
+    
+    return subsystems
