@@ -81,10 +81,10 @@ class Structure(models.Model):
     # total number of sites in the unitcell
     nsites = models.IntegerField()
 
-    # number of unique elements
+    # total number of unique elements
     nelement = models.IntegerField()
 
-    # the base chemical system
+    # the base chemical system (ex: "Y-C-F")
     chemical_system = models.CharField(max_length=25)
 
     # Density of the crystal
@@ -110,10 +110,11 @@ class Structure(models.Model):
     # TODO: would it make sense to include these extra fields for Lattice/Sites?
     # Lattice: matrix and then... a, b, c, alpha, beta, gamma, volume
     # Sites: abc, xyz, properties, species/element, occupancy
+    # Personally, I'm against it because users shouldn't be querying by these.
 
     # For subclasses of this model, it may be useful to add...
     # cell_type (primitive, reduced, supercell, etc.)
-    # is_ordered (True/False)
+    # is_ordered (True/False) --> for many databases this is always True
     # charge (float value if charge was added) --> I think this belongs in Calculation
 
     """ Relationships """
