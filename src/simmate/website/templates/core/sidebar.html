@@ -1,48 +1,55 @@
-<div class="col-2 bg-light border rounded-3 p-2 list-group text-truncate">
+<div class="col-auto col-lg-2 p-2 list-group text-truncate">
 
-    <a class="list-group-item list-group-item-action text-truncate active" href="{% url 'home' %}">
+    <a id="home" class="list-group-item list-group-item-action text-truncate text-primary" href="{% url 'home' %}">
         <i class="bi bi-house fs-4"></i>
-        <span class="d-none d-md-inline">Home</span>
+        <span class="d-none d-lg-inline">Home</span>
     </a>
     
-    <a class="list-group-item list-group-item-action text-truncate text-primary" href="{% url 'profile' %}">
+    <a id="profile" class="list-group-item list-group-item-action text-truncate text-primary" href="{% url 'profile' %}">
         <i class="bi bi-person-circle fs-4"></i>
-        <span class="d-none d-md-inline">Profile</span>
+        <span class="d-none d-lg-inline">Profile</span>
     </a>
     
-    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="toolbox" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
         <i class="bi bi-calculator fs-4"></i>
-        <span class="d-none d-md-inline">Toolbox</span>
+        <span class="d-none d-lg-inline">Toolbox</span>
     </a>
     
-    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="home" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
         <i class="bi bi-diagram-3 fs-4"></i>
-        <span class="d-none d-md-inline">Workflows</span>
+        <span class="d-none d-lg-inline">Workflows</span>
     </a>
     
-    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="learn" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
         <i class="bi bi-lightbulb fs-4"></i>
-        <span class="d-none d-md-inline">Learn</span>
+        <span class="d-none d-lg-inline">Learn</span>
     </a>
     
-    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="downloads" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
         <i class="bi bi-box-arrow-down fs-4"></i>
-        <span class="d-none d-md-inline">Downloads</span>
+        <span class="d-none d-lg-inline">Downloads</span>
     </a>
     
-    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="contribute" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
         <i class="bi bi-box-arrow-in-up fs-4"></i>
-        <span class="d-none d-md-inline">Contribute</span>
+        <span class="d-none d-lg-inline">Contribute</span>
     </a>
     
-    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="settings" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
         <i class="bi bi-gear fs-4"></i>
-        <span class="d-none d-md-inline">Settings</span>
+        <span class="d-none d-lg-inline">Settings</span>
     </a>
     
-    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="more" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
         <i class="bi bi-three-dots fs-4"></i>
-        <span class="d-none d-md-inline">More</span>
+        <span class="d-none d-lg-inline">More</span>
     </a>
 
 </div>
+
+<!-- This javascript helps highlight the correct tab and adds the "active" class to it -->
+<script>
+    var tab = document.getElementById("{{ active_tab_id }}");
+    tab.classList.add("active")
+    tab.classList.remove("text-primary")
+</script>
