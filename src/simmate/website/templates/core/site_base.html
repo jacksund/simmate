@@ -17,14 +17,18 @@
     
     <body>
         
-        <!-- Some pages will have a welcome banner -->
-        {% block banner %}{% endblock %}
-        
         <!-- The navigation bar is the same for every webpage, and it is stored in this template -->
         {% include "core/navbar.html" %}
 
-        <!-- This is the main portion of the webpage -->
-        {% block body %}{% endblock %}
+        <!-- This is the main portion of the webpage, which I put in a single padded row. The sidebar is always present, and the remainder of the page varies. -->
+        <div class="container-fluid">
+            <div class="row m-xxl-5 m-2">
+                {% include "core/sidebar.html"%}
+                <div class="col-10 overflow-auto h-100">
+                    {% block body %}{% endblock %}
+                </div>
+            </div>
+        </div>
         
         <!-- Many packages for JS libraries should be loaded last -->
         {% include "core/footer.html" %}

@@ -1,74 +1,48 @@
-<div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark">
-  <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-    <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
-    <span class="fs-4">Simmate</span>
-  </a>
-  <hr>
-  <ul class="nav nav-pills flex-column mb-auto">
-    
-    <li class="nav-item">
-      <a href="#" class="nav-link active" aria-current="page">
-        <i class="bi bi-house"></i>
-        Home
-      </a>
-    </li>
-    
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-person-circle"></i>
-        Profile
-      </a>
-    </li>
-    
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-calculator"></i> <!-- <i class="bi bi-hammer"></i> -->
-        Toolbox
-      </a>
-    </li>
-    
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-diagram-3"></i>
-        Workflows
-      </a>
-    </li>
-    
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-lightbulb"></i>
-        Learn
-      </a>
-    </li>
-    
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-box-arrow-down"></i>
-        Downloads
-      </a>
-    </li>
-    
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-cpu"></i>
-        Contribute
-      </a>
-    </li>
+<div class="col-2 bg-light border rounded-3 p-2 list-group text-truncate">
 
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-tools"></i>
-        Settings
-      </a>
-    </li>
-
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-three-dots"></i>
-        More
-      </a>
-    </li>
+    <a class="list-group-item list-group-item-action text-truncate active" href="{% url 'home' %}">
+        <i class="bi bi-house fs-4"></i>
+        <span class="d-none d-md-inline">Home</span>
+    </a>
     
-  </ul>
-  <hr>
+    <a class="list-group-item list-group-item-action text-truncate text-primary" href="{% url 'profile' %}">
+        <i class="bi bi-person-circle fs-4"></i>
+        <span class="d-none d-md-inline">Profile</span>
+    </a>
+    
+    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+        <i class="bi bi-calculator fs-4"></i>
+        <span class="d-none d-md-inline">Toolbox</span>
+    </a>
+    
+    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+        <i class="bi bi-diagram-3 fs-4"></i>
+        <span class="d-none d-md-inline">Workflows</span>
+    </a>
+    
+    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+        <i class="bi bi-lightbulb fs-4"></i>
+        <span class="d-none d-md-inline">Learn</span>
+    </a>
+    
+    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+        <i class="bi bi-box-arrow-down fs-4"></i>
+        <span class="d-none d-md-inline">Downloads</span>
+    </a>
+    
+    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+        <i class="bi bi-box-arrow-in-up fs-4"></i>
+        <span class="d-none d-md-inline">Contribute</span>
+    </a>
+    
+    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+        <i class="bi bi-gear fs-4"></i>
+        <span class="d-none d-md-inline">Settings</span>
+    </a>
+    
+    <a class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+        <i class="bi bi-three-dots fs-4"></i>
+        <span class="d-none d-md-inline">More</span>
+    </a>
+
 </div>
