@@ -29,7 +29,7 @@ class Aliasing(ErrorHandler):
 
     def check(self, dir):
         """
-        Check for error in the specified directory. Note, we assume that we are
+        Check for errors in the specified directory. Note, we assume that we are
         checking the vasp.out file. If that file is not present, we say that there
         is no error because another handler will address this.
         """
@@ -125,16 +125,19 @@ class Aliasing(ErrorHandler):
             
             # Check the current ICHARG setting, where default is 0
             # !!! BUG: isn't the default 2 if we are starting from scratch?
-            current_symprec = incar.get("ICHARG", 0)
+            current_icharg = incar.get("ICHARG", 0)
 
             # If the ICHARG is less than 10, then we want to delete the CHGCAR
             # and WAVECAR to ensure the next run is a clean start.
-            if current_symprec < 10:
+            if current_icharg < 10:
                 os.remove(os.path.join(dir, "CHGCAR"))
                 os.remove(os.path.join(dir, "WAVECAR"))
 
             # return the description of what we did
             corrections.append("deleted CHGCAR and WAVECAR")
+
+        # rewrite the new INCAR file
+        incar.to_file(incar_filename)
 
         # return the list of corrections we made
         return corrections

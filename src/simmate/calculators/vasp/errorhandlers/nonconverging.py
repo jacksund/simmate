@@ -58,7 +58,7 @@ class NonConverging(ErrorHandler):
             for ionic_step in oszicar.ionic_steps[-1 * self.min_ionic_steps : -1]:
 
                 # As soon as we find one ionic step that converged before the
-                # nelm limit, we can say the error is not present and exit
+                # NELM limit, we can say the error is not present and exit
                 if len(ionic_step["electronic_steps"]) != current_nelm:
                     return False
 
@@ -85,7 +85,7 @@ class NonConverging(ErrorHandler):
         # check what the current ALGO is. If it's not set, that means it's using
         # the default which is "Normal".
         current_algo = incar.get("ALGO", "Normal")
-        # also check mixing parameters and what
+        # also check mixing parameters
         current_amix = incar.get("AMIX", 0.4)
         current_bmix = incar.get("BMIX", 1.0)
         current_amin = incar.get("AMIN", 0.1)
