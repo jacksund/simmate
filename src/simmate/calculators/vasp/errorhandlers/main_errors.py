@@ -14,7 +14,7 @@ from simmate.calculators.vasp.outputs.oszicar import Oszicar
 # !!! I really don't like how all of these errors are amassed into one class because
 # it makes the logic difficult to follow and it raises questions about how to handle
 # multiple errors showing up at once. I still convert this class from custodian,
-# but in an admittedly lazy way (there are enough explanations for each correction).
+# but in an admittedly lazy way (there aren't enough explanations for each correction).
 # I'm going to revisit this and breakdown this class into smaller ones.
 
 
