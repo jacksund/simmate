@@ -5,8 +5,11 @@ from simmate.database.diffusion import Pathway as Pathway_DB
 
 
 queryset = (
-    Pathway_DB.objects.filter(vaspcalca__isnull=False)
-    .select_related("vaspcalca", "empiricalmeasures", "structure")
+    Pathway_DB.objects.filter(
+        # vaspcalca__isnull=False,
+        vaspcalcb__energy_barrier__isnull=False,
+    )
+    .select_related("vaspcalca", "vaspcalcb", "empiricalmeasures", "structure")
     .all()
 )
 # .to_pymatgen().write_path("test.cif", nimages=3)
@@ -42,6 +45,8 @@ df = read_frame(
         "vaspcalca__energy_end",
         "vaspcalca__energy_barrier",
         # "nsites_101010",
-        # "vaspcalcb__energy_barrier",
+        "vaspcalcb__energy_barrier",
     ],
 )
+
+df.to_csv("neb_results.csv", index=False)

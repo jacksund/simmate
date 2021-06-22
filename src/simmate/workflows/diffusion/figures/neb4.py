@@ -118,28 +118,6 @@ df["vaspcalcd__energysteps_end_convergence"] = [
     for e_list in df.vaspcalcd__energysteps_end
 ]
 
-
-# --------------------------------------------------------------------------------------
-
-# EXPERIMENTAL COLUMNS
-
-# df["nsites_supercell_complex"] = df["nsites_101010"] / (df["nsites_777"] ** 2)
-
-# df["forces_norm_start"] = df.vaspcalcd__forces_start.apply(numpy.linalg.norm)
-# df["forces_norm_midpoint"] = df.vaspcalcd__forces_midpoint.apply(numpy.linalg.norm)
-# df["forces_norm_end"] = df.vaspcalcd__forces_end.apply(numpy.linalg.norm)
-
-# df["forces_norm_diff_initial"] = [
-#     max([m - s, m - e])
-#     for s, m, e in zip(
-#         df.forces_norm_start,
-#         df.forces_norm_midpoint,
-#         df.forces_norm_end,
-#     )
-# ]
-
-# df["forces_norm_complex"] = df["forces_norm_diff_initial"] * df["forces_norm_start"]
-
 # --------------------------------------------------------------------------------------
 
 df["total_time"] = df.vaspcalcd__timesteps.apply(sum)
