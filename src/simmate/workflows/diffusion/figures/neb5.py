@@ -145,6 +145,16 @@ df["vaspcalcd__forces_norm_start"] = df.vaspcalcd__forces_start.apply(numpy_util
 df["vaspcalcd__forces_norm_midpoint"] = df.vaspcalcd__forces_midpoint.apply(numpy_util)
 df["vaspcalcd__forces_norm_end"] = df.vaspcalcd__forces_end.apply(numpy_util)
 
+# This is useful a couple places below
+df["error_static"] = [
+    pathway_barriers[0]
+    if pathway_barriers else numpy.NAN
+    for pathway_barriers in df.vaspcalcd__energysteps_barrier_errors   
+]
+
+# N_SITES Experimental
+df["nsites_777_^-3"] = df.nsites_777.apply(lambda x: x**-3)
+
 # --------------------------------------------------------------------------------------
 
 # This section grabs data from vaspcalcd that represents EDIFFG=0.1, NSW=10
@@ -202,6 +212,29 @@ df[f"error_{convergence}"] = errors
 
 # --------------------------------------------------------------------------------------
 
+# OUTLIER DETECTION
+
+# For the static calcs
+all_errors_static = df[f"error_static"].dropna().to_numpy()
+median_error_static = numpy.median(all_errors_static)
+std_error_static = numpy.std(all_errors_static)
+df[f"is_outlier_static"] = [
+    bool(abs(error - median_error_static) > (2 * std_error_static))
+    for error in df["error_static"]
+]
+
+# For the relax dataset
+all_errors = df[f"error_{convergence}"].dropna().to_numpy()
+median_error = numpy.median(all_errors)
+std_error = numpy.std(all_errors)
+
+df[f"is_outlier_{convergence}"] = [
+    bool(abs(error - median_error) > (2 * std_error))
+    for error in df[f"error_{convergence}"]
+]
+
+# --------------------------------------------------------------------------------------
+
 # EMPIRICAL CORRECTION FOR STATIC
 
 from sklearn import linear_model
@@ -216,8 +249,9 @@ reg = linear_model.LinearRegression()
 # Fields to use in fitting
 fields_to_fit = [
     # "length",
-    "nsites_777",
+    # "nsites_777",
     # "structure__e_above_hull",
+    # "nsites_777_^-3",
     # "empiricalmeasures__ewald_energy",
     "vaspcalca__energy_barrier",
 ]
@@ -253,8 +287,9 @@ reg = linear_model.LinearRegression()
 # Fields to use in fitting
 fields_to_fit = [
     # "length",
-    "nsites_777",
+    # "nsites_777",
     # f"force_{convergence}",
+    # "nsites_777_^-3",
     # "structure__e_above_hull",
     # "empiricalmeasures__ewald_energy",
     f"barrier_{convergence}",
@@ -296,7 +331,7 @@ gs = fig.add_gridspec(
     top=0.9,
     #
     # spacing between subplots (axes)
-    wspace=0.05,
+    wspace=0.0,
     hspace=0.05,
 )
 
@@ -408,7 +443,7 @@ gs = fig.add_gridspec(
     #
     # spacing between subplots (axes)
     wspace=0.05,
-    hspace=0.05,
+    hspace=0.0,
 )
 
 range_for_bins = (-1.0, 1.0)
@@ -480,3 +515,55 @@ hb = ax4.hist(
 plt.show()
 
 # --------------------------------------------------------------------------------------
+
+
+# TESTING
+
+from sklearn import linear_model
+from sklearn.model_selection import train_test_split
+
+df = df[df["is_outlier_static"] == False]
+# df = df[df[f"is_outlier_{convergence}"] == False]
+
+coefs = []
+r2s = []
+
+for trial in range(100):
+
+    reg = linear_model.LinearRegression()
+    # reg = linear_model.Lasso(alpha=0.1)
+    
+    # split our dataframe into training and test sets
+    df_training, df_test = train_test_split(df, test_size=0.2)
+    
+    # Fields to use in fitting
+    fields_to_fit = [
+        "vaspcalca__energy_barrier",
+        # f"barrier_{convergence}",
+        "nsites_777_^-3",
+        "length",
+        # "nsites_777",
+        # f"force_{convergence}",
+        # "structure__e_above_hull",
+        # "empiricalmeasures__ewald_energy",
+        
+    ]
+    
+    data = df_training[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
+    
+    X_train = data[fields_to_fit]
+    y_train = data["vaspcalcb__energy_barrier"]
+    reg.fit(X_train, y_train)
+    coefs.append(reg.coef_)  # List of coefficients for each field
+    r2s.append(reg.score(X_train, y_train))  # R^2
+
+%varexp --hist r2s
+
+for n in range(len(fields_to_fit)):
+    aa = [i[n] for i in coefs]
+    %varexp --hist aa
+
+# Flat 0.7
+# Length -0.05
+# Forces -0.05
+# nsites^-3 -600

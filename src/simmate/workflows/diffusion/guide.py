@@ -52,15 +52,11 @@ source_data = mpr.query(criteria, properties)
 
 # STAGE 2 -- Structure Santization
 
-# We now "sanitize" the structure by 
-# For each structure, we run symmetry analysis and "sanitization"
-
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-
 # Make sure we have the primitive unitcell first
 # We choose to use SpagegroupAnalyzer (which uses spglib) rather than pymatgen's
 # built-in Structure.get_primitive_structure function:
 # Default tol is 0.01, but we use a looser 0.1 Angstroms
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 structure = SpacegroupAnalyzer(structure, 0.1).find_primitive()
 
 # Convert the structure to a "sanitized" version.
@@ -76,12 +72,11 @@ structure = structure.copy(sanitize=True)
 
 # The pymatgen_diffusion package makes this super easy for us, but note that future
 # versions of this package may differ greatly in how you import and use their code.
-from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder
-
 # To configure our path finder, we limit all pathways to 5 Angstroms. We also use
 # a symmetry tolerance of 0.1 to match our settings used above. The "perc_mode"
 # is turned off here because we want to determine pathway dimmensionality later
 # on, rather than within pathway identification.
+from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder
 dpf = DistinctPathFinder(
     structure=structure,
     migrating_specie="F",

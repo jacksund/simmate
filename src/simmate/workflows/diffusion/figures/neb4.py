@@ -259,7 +259,7 @@ plt.show()
 
 # --------------------------------------------------------------------------------------
 
-convergence_list = [0.5, 0.25, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005]
+convergence_list = [0.1, 0.05, 0.01, 0.005, 0.001, 0.0005]
 
 for convergence in convergence_list:
     energies = []
@@ -366,7 +366,7 @@ gs = fig.add_gridspec(
     #
     # spacing between subplots (axes)
     wspace=0.05,
-    hspace=0.05,
+    hspace=0.0,
 )
 
 for index, convergence in enumerate(convergence_list):
@@ -421,7 +421,7 @@ gs = fig.add_gridspec(
     #
     # spacing between subplots (axes)
     wspace=0.05,
-    hspace=0.05,
+    hspace=0.0,
 )
 
 ax1 = fig.add_subplot(
@@ -431,11 +431,23 @@ ax1 = fig.add_subplot(
     # ylim=(-0.05, 1)
 )
 
+# Add NSW=0 first
+zero_step_errors = [pathway_barriers[0] for pathway_barriers in df.vaspcalcd__energysteps_barrier_errors]
+hb = ax1.boxplot(
+    zero_step_errors,
+    labels=["static"],
+    positions=[0],
+    showfliers=False,
+    patch_artist=True,
+)
+hb["boxes"][0].set_facecolor("lightblue")
+
+# Add all steps
 for index, convergence in enumerate(convergence_list):
     hb = ax1.boxplot(
         df[f"errors_{convergence}"],
         labels=[convergence],
-        positions=[index],
+        positions=[index+1],
         showfliers=False,
         patch_artist=True,
     )
@@ -448,13 +460,24 @@ ax2 = fig.add_subplot(
     sharex=ax1,
 )
 
+# Add NSW=0 first
+zero_step_times = [timesteps[0]/(60**2) for timesteps in df.vaspcalcd__timesteps]
+hb = ax2.boxplot(
+    zero_step_times,
+    labels=["static"],
+    positions=[0],
+    showfliers=False,
+    patch_artist=True,
+)
+hb["boxes"][0].set_facecolor("lightgreen")
+
 for index, convergence in enumerate(convergence_list):
 
     # add the data as a boxplot
     hb = ax2.boxplot(
         df[f"times_{convergence}"],
         labels=[convergence],
-        positions=[index],
+        positions=[index+1],
         showfliers=False,
         patch_artist=True,
     )
@@ -485,7 +508,7 @@ gs = fig.add_gridspec(
     #
     # spacing between subplots (axes)
     wspace=0.05,
-    hspace=0.05,
+    hspace=0.0,
 )
 
 ax1 = fig.add_subplot(
