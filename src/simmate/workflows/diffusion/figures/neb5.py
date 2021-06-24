@@ -519,49 +519,49 @@ plt.show()
 
 # TESTING
 
-from sklearn import linear_model
-from sklearn.model_selection import train_test_split
+# from sklearn import linear_model
+# from sklearn.model_selection import train_test_split
 
-df = df[df["is_outlier_static"] == False]
-# df = df[df[f"is_outlier_{convergence}"] == False]
+# df = df[df["is_outlier_static"] == False]
+# # df = df[df[f"is_outlier_{convergence}"] == False]
 
-coefs = []
-r2s = []
+# coefs = []
+# r2s = []
 
-for trial in range(100):
+# for trial in range(100):
 
-    reg = linear_model.LinearRegression()
-    # reg = linear_model.Lasso(alpha=0.1)
+#     reg = linear_model.LinearRegression()
+#     # reg = linear_model.Lasso(alpha=0.1)
     
-    # split our dataframe into training and test sets
-    df_training, df_test = train_test_split(df, test_size=0.2)
+#     # split our dataframe into training and test sets
+#     df_training, df_test = train_test_split(df, test_size=0.2)
     
-    # Fields to use in fitting
-    fields_to_fit = [
-        "vaspcalca__energy_barrier",
-        # f"barrier_{convergence}",
-        "nsites_777_^-3",
-        "length",
-        # "nsites_777",
-        # f"force_{convergence}",
-        # "structure__e_above_hull",
-        # "empiricalmeasures__ewald_energy",
+#     # Fields to use in fitting
+#     fields_to_fit = [
+#         "vaspcalca__energy_barrier",
+#         # f"barrier_{convergence}",
+#         "nsites_777_^-3",
+#         "length",
+#         # "nsites_777",
+#         # f"force_{convergence}",
+#         # "structure__e_above_hull",
+#         # "empiricalmeasures__ewald_energy",
         
-    ]
+#     ]
     
-    data = df_training[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
+#     data = df_training[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
     
-    X_train = data[fields_to_fit]
-    y_train = data["vaspcalcb__energy_barrier"]
-    reg.fit(X_train, y_train)
-    coefs.append(reg.coef_)  # List of coefficients for each field
-    r2s.append(reg.score(X_train, y_train))  # R^2
+#     X_train = data[fields_to_fit]
+#     y_train = data["vaspcalcb__energy_barrier"]
+#     reg.fit(X_train, y_train)
+#     coefs.append(reg.coef_)  # List of coefficients for each field
+#     r2s.append(reg.score(X_train, y_train))  # R^2
 
-%varexp --hist r2s
+# %varexp --hist r2s
 
-for n in range(len(fields_to_fit)):
-    aa = [i[n] for i in coefs]
-    %varexp --hist aa
+# for n in range(len(fields_to_fit)):
+#     aa = [i[n] for i in coefs]
+#     %varexp --hist aa
 
 # Flat 0.7
 # Length -0.05

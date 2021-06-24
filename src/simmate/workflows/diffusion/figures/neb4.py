@@ -259,6 +259,13 @@ plt.show()
 
 # --------------------------------------------------------------------------------------
 
+#### RECORD STATS
+errors_relax_median = []
+times_relax_median = []
+errors_relax_std = []
+times_relax_std = []
+####
+
 convergence_list = [0.1, 0.05, 0.01, 0.005, 0.001, 0.0005]
 
 for convergence in convergence_list:
@@ -432,26 +439,47 @@ ax1 = fig.add_subplot(
 )
 
 # Add NSW=0 first
-zero_step_errors = [pathway_barriers[0] for pathway_barriers in df.vaspcalcd__energysteps_barrier_errors]
+zero_step_errors = [
+    pathway_barriers[0] for pathway_barriers in df.vaspcalcd__energysteps_barrier_errors
+]
 hb = ax1.boxplot(
     zero_step_errors,
     labels=["static"],
     positions=[0],
     showfliers=False,
     patch_artist=True,
+    meanline=True,
+    showmeans=True,
+    meanprops=dict(color='black'),
 )
 hb["boxes"][0].set_facecolor("lightblue")
+errors_relax_median.append(
+    numpy.median(zero_step_errors)
+)
+errors_relax_std.append(
+    numpy.std(zero_step_errors)
+)
+
 
 # Add all steps
 for index, convergence in enumerate(convergence_list):
     hb = ax1.boxplot(
         df[f"errors_{convergence}"],
         labels=[convergence],
-        positions=[index+1],
+        positions=[index + 1],
         showfliers=False,
         patch_artist=True,
+        meanline=True,
+        showmeans=True,
+        meanprops=dict(color='black'),
     )
     hb["boxes"][0].set_facecolor("lightblue")
+    errors_relax_median.append(
+        numpy.median(df[f"errors_{convergence}"].dropna().to_numpy())
+    )
+    errors_relax_std.append(
+        numpy.std(df[f"errors_{convergence}"].dropna().to_numpy())
+    )
 
 ax2 = fig.add_subplot(
     gs[1, 0],
@@ -461,15 +489,24 @@ ax2 = fig.add_subplot(
 )
 
 # Add NSW=0 first
-zero_step_times = [timesteps[0]/(60**2) for timesteps in df.vaspcalcd__timesteps]
+zero_step_times = [timesteps[0] / (60 ** 2) for timesteps in df.vaspcalcd__timesteps]
 hb = ax2.boxplot(
     zero_step_times,
     labels=["static"],
     positions=[0],
     showfliers=False,
     patch_artist=True,
+    meanline=True,
+    showmeans=True,
+    meanprops=dict(color='black'),
 )
 hb["boxes"][0].set_facecolor("lightgreen")
+times_relax_median.append(
+    numpy.median(zero_step_times)
+)
+times_relax_std.append(
+    numpy.std(zero_step_times)
+)
 
 for index, convergence in enumerate(convergence_list):
 
@@ -477,12 +514,21 @@ for index, convergence in enumerate(convergence_list):
     hb = ax2.boxplot(
         df[f"times_{convergence}"],
         labels=[convergence],
-        positions=[index+1],
+        positions=[index + 1],
         showfliers=False,
         patch_artist=True,
+        meanline=True,
+        showmeans=True,
+        meanprops=dict(color='black'),
     )
 
     hb["boxes"][0].set_facecolor("lightgreen")
+    times_relax_median.append(
+        numpy.median(df[f"times_{convergence}"].dropna().to_numpy())
+    )
+    times_relax_std.append(
+        numpy.std(df[f"times_{convergence}"].dropna().to_numpy())
+    )
 
 ax1.tick_params(axis="x", labelbottom=False)
 
@@ -531,6 +577,9 @@ for nsw in range(10):
         positions=[nsw],
         showfliers=False,
         patch_artist=True,
+        meanline=True,
+        showmeans=True,
+        meanprops=dict(color='black'),
     )
     hb["boxes"][0].set_facecolor("lightblue")
 
@@ -562,7 +611,35 @@ for i in range(10):
         positions=[i],
         showfliers=False,
         patch_artist=True,
+        meanline=True,
+        showmeans=True,
+        meanprops=dict(color='black'),
     )
     hb["boxes"][0].set_facecolor("lightgreen")
 
 ax1.tick_params(axis="x", labelbottom=False)
+
+# --------------------------------------------------------------------------------------
+
+import matplotlib.pyplot as plt
+
+# start with a square Figure
+fig = plt.figure(figsize=(6, 6))  # golden ratio = 1.618
+
+# Add axes for the main plot
+ax = fig.add_subplot(
+    xlabel="CPU Time (hrs)",
+    ylabel="Error (eV)",
+    # xlim=(0, 6),
+    # ylim=(0, 0.5),
+)
+
+# add the data
+hb = ax.errorbar(
+    x=times_relax_median,
+    y=errors_relax_median,
+    # xerr=times_relax_std,
+    yerr=errors_relax_std,
+    fmt='--o',
+    capsize=6,
+)
