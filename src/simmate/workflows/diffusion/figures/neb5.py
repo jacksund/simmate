@@ -235,7 +235,7 @@ df[f"is_outlier_{convergence}"] = [
 
 # UNCOMMENT IF YOU WANT TO REMOVE!
 # df = df[df["is_outlier_static"] == False]
-df = df[df[f"is_outlier_{convergence}"] == False]
+# df = df[df[f"is_outlier_{convergence}"] == False]
 
 # --------------------------------------------------------------------------------------
 
@@ -249,18 +249,19 @@ reg = linear_model.LinearRegression()
 
 # split our dataframe into training and test sets
 # df_training, df_test = train_test_split(df, test_size=0.2)
+df_training = df[df["is_outlier_static"] == False]
 
 # Fields to use in fitting
 fields_to_fit = [
     # "length",
     # "nsites_777",
     # "structure__e_above_hull",
-    # "nsites_777_^-3",
+    "nsites_777_^-3",
     # "empiricalmeasures__ewald_energy",
     "vaspcalca__energy_barrier",
 ]
 
-data = df[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
+data = df_training[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
 
 X_train = data[fields_to_fit]
 y_train = data["vaspcalcb__energy_barrier"]
@@ -287,19 +288,20 @@ reg = linear_model.LinearRegression()
 
 # split our dataframe into training and test sets
 # df_training, df_test = train_test_split(df, test_size=0.2)
+df_training = df[df[f"is_outlier_{convergence}"] == False]
 
 # Fields to use in fitting
 fields_to_fit = [
     # "length",
     # "nsites_777",
-    # f"force_{convergence}",
-    # "nsites_777_^-3",
+    f"force_{convergence}",
+    "nsites_777_^-3",
     # "structure__e_above_hull",
     # "empiricalmeasures__ewald_energy",
     f"barrier_{convergence}",
 ]
 
-data = df[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
+data = df_training[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
 
 X_train = data[fields_to_fit]
 y_train = data["vaspcalcb__energy_barrier"]
@@ -516,12 +518,16 @@ hb = ax4.hist(
     linewidth=0.5,
 )
 
+# add vertical lines
+for ax in [ax1, ax2, ax3, ax4]:
+    ax.axvline(0, color="black", linewidth=0.8, linestyle="--")
+
 plt.show()
 
 # --------------------------------------------------------------------------------------
 
 
-# TESTING
+# # TESTING
 
 # from sklearn import linear_model
 # from sklearn.model_selection import train_test_split
@@ -547,7 +553,7 @@ plt.show()
 #         # "vaspcalca__energy_barrier",
 #         f"barrier_{convergence}",
 #         "nsites_777_^-3",
-#         "length",
+#         # "length",
 #         # "nsites_777",
 #         f"force_{convergence}",
 #         # "structure__e_above_hull",

@@ -96,13 +96,14 @@ queryset = (
         # structure__formula_anonymous="ABCD",
         # structure__chemical_system="Ca-F",
         # structure__spacegroup=129,
-        structure__e_above_hull__lte=0.01,
-        empiricalmeasures__dimensionality=1,
-        vaspcalca__energy_barrier__lte=2,
+        # nsites_777__lte=100,
+        # structure__e_above_hull=0,
+        # empiricalmeasures__dimensionality__gte=1,
+        # vaspcalca__energy_barrier__gte=2,
         # vaspcalca__energy_barrier__gte=0,
-        # vaspcalcb__energy_barrier__isnull=False,
-        vaspcalcb__isnull=True,
-        # vaspcalcc__isnull=False,
+        vaspcalcb__energy_barrier__isnull=False,
+        # vaspcalcb__isnull=False,
+        vaspcalcd__isnull=True,
     ).order_by("vaspcalca__energy_barrier")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
