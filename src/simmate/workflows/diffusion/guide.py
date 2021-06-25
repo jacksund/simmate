@@ -315,6 +315,7 @@ vasp_input_set.write_input("/path/to/my/folder")
 # we don't use any validators when doing a midpoint NEB because of the differing
 # file structure.
 from custodian.vasp.handlers import VaspErrorHandler, NonConvergingErrorHandler
+from custodian.vasp.validators import VasprunXMLValidator, VaspFilesValidator
 errorhandlers = [VaspErrorHandler(), NonConvergingErrorHandler()]
 validators = [VasprunXMLValidator(), VaspFilesValidator()]
 
@@ -347,7 +348,8 @@ custodian.run()
 # supercell size. The easiest option is to provide a supercell to the DistinctPathFinder
 # class -- if you can do this, you should! However, in this study, we have a known
 # pathway in the unitcell and we want to convert it to the same pathway in a supercell
-# structure. To do this, we 
+# structure. To do this, we manually generate a MigrationPath. Note, future versions
+# of pymatgen_diffusion may negate the need for this utility.
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen_diffusion.neb.pathfinder import MigrationPath
