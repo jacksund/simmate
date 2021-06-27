@@ -346,6 +346,8 @@ ax1 = fig.add_subplot(
     gs[0, 0],
     xlabel="Barrier (eV) [static]",
     ylabel=r"Midpoint-only NEB Barrier (eV)",
+    xlim=(-1.5,5),
+    ylim=(-1.5,5.5),
 )
 hb = ax1.scatter(
     x=df["vaspcalca__energy_barrier"],  # X
