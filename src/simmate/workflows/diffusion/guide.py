@@ -398,11 +398,6 @@ def get_oxi_supercell_path(path, min_sl_v=None, oxi=False):
     )
 
     path_new = MigrationPath(isite_new, esite_new, structure_supercell)
-    # BUG: the init script for MigrationPath can't identify the site indexes properly
-    # but they should be the same as before because it is a symmetrized structure. Note
-    # that even if I'm wrong in some case -- this will have no effect because iindex
-    # and eindex are only used in one portion of the hash as well as for printing
-    # the __str__ of the object.
     path_new.iindex = path.iindex
     path_new.eindex = path.eindex
 

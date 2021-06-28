@@ -97,13 +97,13 @@ queryset = (
         # structure__chemical_system="Ca-F",
         # structure__spacegroup=129,
         # nsites_777__lte=100,
-        structure__e_above_hull=0,
-        empiricalmeasures__dimensionality__gte=1,
-        vaspcalca__energy_barrier__gte=2,
-        vaspcalca__energy_barrier__lte=5,
-        # vaspcalcb__energy_barrier__isnull=False,
-        vaspcalcb__isnull=True,
-        # vaspcalcd__isnull=True,
+        # structure__e_above_hull=0,
+        # empiricalmeasures__dimensionality__gte=1,
+        # vaspcalca__energy_barrier__gte=2,
+        # vaspcalca__energy_barrier__lte=5,
+        vaspcalcb__energy_barrier__isnull=False,
+        # vaspcalcb__isnull=True,
+        vaspcalcd__isnull=True,
     ).order_by("vaspcalca__energy_barrier")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
@@ -177,8 +177,8 @@ get_oxi_supercell_path(path.to_pymatgen(), 10).write_path(
 # mpirun -n 44 /21dayscratch/scr/j/a/jacksund/vasp_build/vasp/5.4.4/bin/vasp
 
 # from simmate.shortcuts import setup
-# from simmate.database.diffusion import VaspCalcD
-# queryset = VaspCalcD.objects.get(pathway=1322)
+# from simmate.database.diffusion import VaspCalcB
+# queryset = VaspCalcB.objects.get(pathway=1234)
 # pathway_ids = [1643,2791,1910,2688,2075,2338,3199,2511,3231,3186,2643]
 # queryset = VaspCalcB.objects.filter(pathway__in=pathway_ids).all()
 

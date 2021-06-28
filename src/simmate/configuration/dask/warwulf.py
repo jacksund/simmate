@@ -47,7 +47,7 @@ HEADER_ART = r"""
 #
 
 # nworkers_min=5, nworkers_max=25 BUG: adaptive deploy removed for now
-def setup_cluster(nworkers=25):
+def setup_cluster(nworkers=8):
 
     # Consider moving the configuration settings to ~/.config/dask/jobqueue.yaml
     # NOTE: I request SLURM settings much higher than Dask worker settings. This
