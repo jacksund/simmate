@@ -264,6 +264,7 @@ errors_relax_median = []
 times_relax_median = []
 errors_relax_std = []
 times_relax_std = []
+times_relax_mean = []
 ####
 
 convergence_list = [0.1, 0.05, 0.01, 0.005, 0.001, 0.0005]
@@ -507,6 +508,9 @@ times_relax_median.append(
 times_relax_std.append(
     numpy.std(zero_step_times)
 )
+times_relax_mean.append(
+    numpy.mean(zero_step_times)
+)
 
 for index, convergence in enumerate(convergence_list):
 
@@ -528,6 +532,9 @@ for index, convergence in enumerate(convergence_list):
     )
     times_relax_std.append(
         numpy.std(df[f"times_{convergence}"].dropna().to_numpy())
+    )
+    times_relax_mean.append(
+        numpy.mean(df[f"times_{convergence}"].dropna().to_numpy())
     )
 
 ax1.tick_params(axis="x", labelbottom=False)

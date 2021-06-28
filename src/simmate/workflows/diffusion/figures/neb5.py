@@ -159,15 +159,20 @@ df["nsites_777_^-3"] = df.nsites_777.apply(lambda x: x**-3)
 
 # This section grabs data from vaspcalcd that represents EDIFFG=0.1, NSW=10
 convergence = 0.1
-max_nsw = 10
+max_nsw = 8
+
+# for testing
+steps_required_to_converge = []
+times = []
 
 for image in ["start", "midpoint", "end"]:
     energies = []
     forces = []
-    for energysteps, convsteps, forcesteps in zip(
+    for energysteps, convsteps, forcesteps, timesteps in zip(
         df[f"vaspcalcd__energysteps_{image}"],
         df[f"vaspcalcd__energysteps_{image}_convergence"],
         df[f"vaspcalcd__forces_norm_{image}"],
+        df["vaspcalcd__timesteps"],
     ):
         if not all([energysteps, convsteps]):
             energies.append(None)
@@ -175,17 +180,20 @@ for image in ["start", "midpoint", "end"]:
             continue
         for i, c in enumerate(convsteps):
             if c <= convergence or i >= max_nsw:  # <<< This is where I set limits
+                steps_required_to_converge.append(i)
                 break
         if c >= convergence:
             print(c, convergence)  # !!! THIS WILL REPORT ANY UNCONVERGED CALCS
         energies.append(energysteps[i + 1])
         forces.append(forcesteps[i + 1])
+        times.append(sum(forcesteps[:i + 1]))
     df[f"energy_{image}_{convergence}"] = energies
     df[f"force_{image}_{convergence}"] = forces
 
 barriers = []
 errors = []
 forces = []
+
 for s, m, e, fs, fm, fe, actual in zip(
     df[f"energy_start_{convergence}"],
     df[f"energy_midpoint_{convergence}"],
@@ -353,7 +361,7 @@ hb = ax1.scatter(
     x=df["vaspcalca__energy_barrier"],  # X
     y=df["vaspcalcb__energy_barrier"],  # Y
     c="Green",  # COLOR
-    alpha=0.6,  # Transparency
+    alpha=0.4,  # Transparency
 )
 line = ax1.plot(
     [-1, 1, 3],  # X
@@ -373,7 +381,7 @@ hb = ax2.scatter(
     x=y_test1_predicted,  # X
     y=y_test1_expected,  # Y
     c="Blue",  # COLOR
-    alpha=0.6,  # Transparency
+    alpha=0.4,  # Transparency
 )
 line = ax2.plot(
     [-1, 1, 3],  # X
@@ -394,7 +402,7 @@ hb = ax3.scatter(
     x=df[f"barrier_{convergence}"],  # X
     y=df["vaspcalcb__energy_barrier"],  # Y
     c="Red",  # COLOR
-    alpha=0.6,  # Transparency
+    alpha=0.4,  # Transparency
 )
 line = ax3.plot(
     [-1, 1, 3],  # X
@@ -415,7 +423,7 @@ hb = ax4.scatter(
     x=y_test2_predicted,  # X
     y=y_test2_expected,  # Y
     c="Black",  # COLOR
-    alpha=0.6,  # Transparency
+    alpha=0.4,  # Transparency
 )
 line = ax4.plot(
     [-1, 1, 3],  # X
@@ -583,3 +591,12 @@ plt.show()
 # Length -0.05
 # Forces -0.05
 # nsites^-3 -600
+
+# ----------------------------------------------------------------------------
+
+# TEST CODE, IGNORE
+# import pandas
+# test = pandas.DataFrame(
+#     {"neb": y_test1_expected.values, "static": y_test1_predicted},
+# )
+# test2 = test[(test["neb"] < 0.8) & (test["static"] > 1.0)]

@@ -10,10 +10,15 @@ from simmate.database.diffusion import Pathway as Pathway_DB
 pathway_ids = (
     Pathway_DB.objects.filter(
         vaspcalca__isnull=True,
-        empiricalmeasures__dimensionality__gte=1,
+        empiricalmeasures__dimensionality_cumlengths__gte=1,
         # empiricalmeasures__oxidation_state=-1,
-        # empiricalmeasures__ionic_radii_overlap_cations__gt=-1,
-        # empiricalmeasures__ionic_radii_overlap_anions__gt=-1,
+        empiricalmeasures__ionic_radii_overlap_cations__gt=-0.5,
+        empiricalmeasures__ionic_radii_overlap_cations__lt=0.5,
+        empiricalmeasures__ionic_radii_overlap_anions__gt=-0.5,
+        empiricalmeasures__ionic_radii_overlap_anions__lt=0.5,
+        length__lt=3.25,
+        empiricalmeasures__ewald_energy__lt=0.5,
+        structure__e_above_hull=0,
         # nsites_777__lte=150,
         # structure__nsites__lte=20,
     ).order_by("nsites_777", "structure__nsites", "length")
@@ -22,7 +27,7 @@ pathway_ids = (
     # .distinct("structure__id")
     .values_list("id", flat=True)
     # .count()
-    .all()[:500]
+    .all()[:250]
 )
 
 # connect to Prefect Cloud
@@ -99,11 +104,12 @@ queryset = (
         # nsites_777__lte=100,
         # structure__e_above_hull=0,
         # empiricalmeasures__dimensionality__gte=1,
-        # vaspcalca__energy_barrier__gte=2,
+        vaspcalca__energy_barrier__gte=1.0,
         # vaspcalca__energy_barrier__lte=5,
-        vaspcalcb__energy_barrier__isnull=False,
+        # vaspcalcb__energy_barrier__isnull=False,
+        vaspcalcb__energy_barrier__gte=0.8,
         # vaspcalcb__isnull=True,
-        vaspcalcd__isnull=True,
+        # vaspcalcd__isnull=True,
     ).order_by("vaspcalca__energy_barrier")
     # BUG: distinct() doesn't work for sqlite, only postgres. also you must have
     # "structure__id" as the first flag in order_by for this to work.
