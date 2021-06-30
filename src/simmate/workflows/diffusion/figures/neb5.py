@@ -257,7 +257,7 @@ reg = linear_model.LinearRegression()
 
 # split our dataframe into training and test sets
 # df_training, df_test = train_test_split(df, test_size=0.2)
-df_training = df[df["is_outlier_static"] == False]
+# df_training = df[df["is_outlier_static"] == False]
 
 # Fields to use in fitting
 fields_to_fit = [
@@ -269,7 +269,7 @@ fields_to_fit = [
     "vaspcalca__energy_barrier",
 ]
 
-data = df_training[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
+data = df[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
 
 X_train = data[fields_to_fit]
 y_train = data["vaspcalcb__energy_barrier"]
@@ -283,6 +283,8 @@ X_test = data[fields_to_fit]
 y_test1_expected = data["vaspcalcb__energy_barrier"]
 y_test1_predicted = reg.predict(X_test)
 y_test1_errors = y_test1_predicted - y_test1_expected
+y_test1_std = numpy.std(y_test1_errors)
+y_test1_median = numpy.median(y_test1_errors)
 
 # --------------------------------------------------------------------------------------
 
@@ -296,7 +298,7 @@ reg = linear_model.LinearRegression()
 
 # split our dataframe into training and test sets
 # df_training, df_test = train_test_split(df, test_size=0.2)
-df_training = df[df[f"is_outlier_{convergence}"] == False]
+# df_training = df[df[f"is_outlier_{convergence}"] == False]
 
 # Fields to use in fitting
 fields_to_fit = [
@@ -309,7 +311,7 @@ fields_to_fit = [
     f"barrier_{convergence}",
 ]
 
-data = df_training[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
+data = df[fields_to_fit + ["vaspcalcb__energy_barrier"]].dropna()
 
 X_train = data[fields_to_fit]
 y_train = data["vaspcalcb__energy_barrier"]
@@ -323,6 +325,8 @@ X_test = data[fields_to_fit]
 y_test2_expected = data["vaspcalcb__energy_barrier"]
 y_test2_predicted = reg.predict(X_test)
 y_test2_errors = y_test2_predicted - y_test2_expected
+y_test2_std = numpy.std(y_test2_errors)
+y_test2_median = numpy.median(y_test2_errors)
 
 # --------------------------------------------------------------------------------------
 
