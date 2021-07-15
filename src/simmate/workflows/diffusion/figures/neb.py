@@ -10,7 +10,7 @@ queryset = (
     Pathway_DB.objects.filter(
         vaspcalca__energy_barrier__isnull=False,
         vaspcalcb__energy_barrier__isnull=False,
-        empiricalmeasures__ewald_energy__isnull=False,
+        # empiricalmeasures__ewald_energy__isnull=False,
     )
     .select_related("vaspcalca", "vaspcalcb", "empiricalmeasures", "structure")
     .all()
@@ -114,11 +114,11 @@ fields_to_fit = [
         # "structure__final_energy",
         # "structure__final_energy_per_atom",
         # "structure__formation_energy_per_atom",
-        "structure__e_above_hull",
+        # "structure__e_above_hull",
         # "empiricalmeasures__oxidation_state",
         # "empiricalmeasures__dimensionality",
         # "empiricalmeasures__dimensionality_cumlengths",
-        "empiricalmeasures__ewald_energy",
+        # "empiricalmeasures__ewald_energy",
         # "empiricalmeasures__ionic_radii_overlap_cations",
         # "empiricalmeasures__ionic_radii_overlap_anions",
         # "vaspcalca__energy_start",

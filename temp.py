@@ -98,15 +98,16 @@ from django_pandas.io import read_frame
 #
 queryset = (
     Pathway_DB.objects.filter(
-        # structure__formula_anonymous="ABCD",
+        structure__nelement=4,
+        # structure__formula_anonymous="AB2",
         # structure__chemical_system="Ca-F",
-        # structure__spacegroup=129,
+        # structure__spacegroup=225,
         # nsites_777__lte=100,
-        structure__e_above_hull=0,
-        empiricalmeasures__dimensionality__gte=1,
-        vaspcalca__energy_barrier__gte=2.0,
-        vaspcalca__energy_barrier__lte=5,
-        vaspcalcb__energy_barrier__isnull=True,
+        # structure__e_above_hull=0,
+        # empiricalmeasures__dimensionality__gte=1,
+        # vaspcalca__energy_barrier__gte=2.0,
+        # vaspcalca__energy_barrier__lte=5,
+        vaspcalcb__energy_barrier__isnull=False,
         # vaspcalcb__energy_barrier__gte=0.8,
         # vaspcalcb__isnull=True,
         # vaspcalcd__isnull=True,
@@ -117,6 +118,7 @@ queryset = (
     # .distinct("structure__id")
     .all()
 )
+
 df = read_frame(
     queryset,
     fieldnames=[
@@ -131,6 +133,8 @@ df = read_frame(
         "vaspcalca__energy_barrier",
         "vaspcalcb__energy_barrier",
         "vaspcalcc__energy_barrier",
+        "empiricalmeasures__dimensionality",
+        "empiricalmeasures__dimensionality_cumlengths",
     ],
 )
 
