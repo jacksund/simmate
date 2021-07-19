@@ -9,14 +9,6 @@
 <a href=https://anaconda.org/conda-forge/pymatgen>
     <img src="https://img.shields.io/conda/pn/conda-forge/pymatgen">
 </a>
-<!-- PyPI downloads per month -->
-<a href=https://pypi.python.org/pypi/pymatgen/>
-    <img src="https://img.shields.io/pypi/dm/pymatgen">
-</a>
-<!-- Conda-forge download total -->
-<a href=https://anaconda.org/conda-forge/pymatgen>
-    <img src="https://img.shields.io/conda/dn/conda-forge/pymatgen">
-</a>
 <!-- Github Checks -->
 <a href=https://pypi.python.org/pypi/pymatgen/>
     <img src="https://img.shields.io/github/checks-status/materialsproject/pymatgen/master">
@@ -37,7 +29,7 @@ Read here for info on markdown, badges, and more:
 
 ## Welcome!
 
-If you are brand-new to Simmate, jump over to our main website [simmate.org](simmate.org) and take a look at what we have to offer. This page is for when you're ready to use Simmate in your own research and access some advanced functionality. Our software is open-source and free-to-use, so come back to try it when you're ready! 
+If you are brand-new to Simmate, jump over to our main website [simmate.org](simmate.org) and take a look at what we have to offer. This page is for when you're ready to use Simmate in your own research and access some advanced functionality. Our software is open-source and free to use, so come back to try it when you're ready! 
 
 
 ## What is Simmate?
