@@ -1,22 +1,18 @@
-This module is empty at the moment, but I plan for it to be extremely similar to pymatgen.io's module. It will have classes for parsing input and output files from other programs. More than that, it will have common tasks that you'd run with the program. I haven't decided on the name of the module yet but here are my thoughts so far:
+Calculators are external codes/programs that perform some analysis for us. 
 
-io -- input/ouput. is consistent with other codes but I also
-have this as a submodule for each program. I don't this io will fully capture what this module includes.
+For example, VASP is a program that can run a variety of density functional theory (DFT) calculations. But because it isn't written in Python, we need some "helper" code here to help us call VASP commands, make input files, and pull data from the outputs. All calculators have the same folder structure:
+```
+├── my_calculator
+│   ├── errorhandlers
+│   ├── inputs
+│   ├── outputs
+│   └── tasks
+```
 
-brokers -- captures the idea that these are intermediates and that simmate is using something else to run calculations. See definitions of "a person or firm who arranges transactions between a buyer and a seller".
+The `inputs` and `outputs` folders are for automatically generating files as well as loading their data into python.
 
-thirdparty -- same idea implied with brokers but much more explicit and clear to the user right away
+The `errorhandlers` folder helps correct common errors in calculations that cause the program to fail.
 
-software -- might not be clear that it's other peoples code
+The `tasks` folder is how the program is actually setup, executed, and worked-up. It ties together all the input, output, and error-handler functions into one.
 
-thirdpartysoftware -- clear and gets the message accross but is too long. And tps is unclear at a glance.
-
-calculators -- takes from ASE naming convention but uses it more broadly (beyond just DFT and geometry calculators). It would also help distinguish from what I want the "datamine" module to be -- because that would also suggest a broker.
-
-
-External code includes those that...
-run DFT or similar calculations
-workup DFT calculations and run subsequent analysis
-provide visualizaton, vesta files...? (or have this in visualization.thirdparty module)
-What about cif and xyz files? (or have this in io module? Maybe visualization mod?)
-Or pymatgen, jarvis, ase structures? (add this to io module as well)
+**NOTE:** *Beginners should instead start by looking at the `simmate.workflows` module. This module should only be used directly if you're writing a brand new workflow or analysis. Otherwise, you can start with each calculator's `tasks` to build your own workflow.*
