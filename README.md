@@ -132,7 +132,7 @@ structure.get_oxidation_states()
 
 ## Need help?
 
-Post your question [here in our discussion section](). 
+Post your question [here in our discussion section](https://github.com/jacksund/simmate/discussions/categories/q-a). 
 
 Even if it's something like "_How do I download all structures with x, y, and z properties?_", let us help out and point you in the right direction!
 
@@ -140,5 +140,5 @@ Even if it's something like "_How do I download all structures with x, y, and z 
 
 - [Getting-started guides and tutorials]()
 - [Joining our community & helping contribute]()
-- [Requesting a new feature]()
+- [Requesting a new feature](https://github.com/jacksund/simmate/discussions/categories/ideas)
 - [Exploring alternatives to Simmate]()
