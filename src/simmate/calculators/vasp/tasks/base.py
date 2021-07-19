@@ -99,14 +99,14 @@ class VaspTask(SSSTask):
         # TODO should I sanitize the structure first? primitive and LLL reduce?
 
         # write the poscar file
-        Poscar.write_file(structure, os.path.join(dir, "POSCAR"))
+        Poscar.to_file(structure, os.path.join(dir, "POSCAR"))
 
         # write the incar file
-        Incar(**self.incar).write_file(os.path.join(dir, "INCAR"))
+        Incar(**self.incar).to_file(os.path.join(dir, "INCAR"))
 
         # if KSPACING is not provided AND kpoints is, write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
-            Kpoints.write_file(
+            Kpoints.to_file(
                 structure,
                 self.kpoints,
                 os.path.join(dir, "KPOINTS"),

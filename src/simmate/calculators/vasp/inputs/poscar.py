@@ -200,7 +200,7 @@ class Poscar:
         return structure
 
     @staticmethod
-    def write_file(
+    def to_file(
         structure,
         filename="POSCAR",
         comment=None,
