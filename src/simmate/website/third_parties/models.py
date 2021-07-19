@@ -4,9 +4,10 @@
 # they are located at. I do this based on the directions given by:
 # https://docs.djangoproject.com/en/3.1/topics/db/models/#organizing-models-in-a-package
 
-from simmate.database.diffusion import (
+from simmate.database.third_parties.all import (
     MaterialsProjectStructure,
-    Pathway,
-    EmpiricalMeasures,
-    VaspCalcA,
+    JarvisStructure,
+    AflowStructure,
+    OqmdStructure,
+    CodStructure,
 )

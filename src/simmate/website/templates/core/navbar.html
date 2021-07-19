@@ -1,21 +1,21 @@
 <!-- This is the collapsable header w. contact information. Not showing at start -->
-<div class="bg-dark collapse" id="navbarHeader" style="">
+<div class="bg-light collapse" id="navbarHeader" style="">
     <div class="container">
       <div class="row">
         <div class="col-sm-8 col-md-7 py-4">
-          <h4 class="text-white">About</h4>
+          <h4 class="text-primary">Welcome to Simmate!</h4>
           <p class="text-muted">
-              Created at the University of North Carolina (Chapel Hill) by Prof. Scott Warren and Jack Sundberg, <b>Putty Exams</b>'
-              ulitmate goal is to create a fair and cheater-free enviornment for students and instructors. Exams are made to be flexible and 
-              ultimately unique to each individual student, which is where we get our website name <b>Putty Exams</b> from! Even as exam questions
-              mold uniquely for each student, they still retain the same context.
+              </br>
+              The Simulated Materials Ecosystem (<b>Simmate</b>) is a toolbox and helper for materials science research. It lets you explore various crystal databases, predict new materials, and quickly calculate properties (electronic, elastic, thermodynamic, and more). 
+              </br> </br>
+              All our software is free and open-source, so making an account is 100% optional. If you'd like to download Simmate's framework and use it yourself, take a look at <a href="https://github.com/jacksund/simmate" target="_blank">our github page</a>.
           </p>
         </div>
         <div class="col-sm-4 offset-md-1 py-4">
-          <h4 class="text-white">Contact</h4>
+          <h4 class="text-primary">Contact</h4>
           <ul class="list-unstyled">
-            <li><a href="#" class="text-white">scw@live.unc.edu</a></li>
-            <li><a href="#" class="text-white">jacksund@live.unc.edu</a></li>
+            <li><a href="#">jacksund@live.unc.edu</a></li>
+            <li><a href="#">scw@live.unc.edu</a></li>
           </ul>
         </div>
       </div>
@@ -23,13 +23,13 @@
 </div>
 
 <!-- Add navigation bar that sticks at the top when scrolling -->
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top shadow-sm">
+<nav class="navbar navbar-expand-sm sticky-top shadow navbar-light bg-light">
     
     <div class="container">
     
     <!-- Add brandname w. link -->
     <a class="navbar-brand" href="{% url 'home' %}">
-        PuttyExams
+        <i class="bi bi-bootstrap"></i> Simmate
     </a>
 
     <!-- Setup collapse button for when screen is small-->
@@ -41,9 +41,9 @@
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
 
         <!-- start list of links -->
-        <ul class="navbar-nav">
+        <ul class="navbar-nav ms-auto">
             
-            <!-- Links shown will depend if the user is signed in or not -->
+            <!-- Links shown will depend on whether the user is signed in or not -->
             {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'profile' %}">

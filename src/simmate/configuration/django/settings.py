@@ -46,8 +46,8 @@ INSTALLED_APPS = [
     #
     # These are all apps that are built by Simmate
     "simmate.website.accounts.apps.AccountsConfig",
-    "simmate.website.diffusion.apps.DiffusionConfig",
-    "simmate.website.execution.apps.ExecutionConfig",
+    "simmate.website.third_parties.apps.ThirdPartyConfig",
+    # "simmate.website.execution.apps.ExecutionConfig",  # using Prefect instead
     #
     # These are built-in django apps that we use for extra features
     "django.contrib.admin",
@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     #   django-debug-toolbar
     #   django-channels (+ React.js)
     #   django-REST-framework
-    #   django-graphene
+    #   django-graphene (+ GraphQL)
     #   django-redis
 ]
 
@@ -88,7 +88,7 @@ MIDDLEWARE = [
 ]
 
 # "core" here is based on the name of my main django folder
-ROOT_URLCONF = "core.urls"
+ROOT_URLCONF = "simmate.website.core.urls"
 
 TEMPLATES = [
     {
@@ -108,7 +108,7 @@ TEMPLATES = [
 ]
 
 # "core" here is based on the name of my main django folder
-WSGI_APPLICATION = "core.wsgi.application"
+WSGI_APPLICATION = "simmate.website.core.wsgi.application"
 
 
 # Database
@@ -116,20 +116,20 @@ WSGI_APPLICATION = "core.wsgi.application"
 # BUG: django docs say to always use forward slashes, but it works just fine
 # without them... For now, I don't inlcude the .replace("\\", "/").
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
-    # }
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "simmate-test-pool",  # default on DigitalOcean is defaultdb
-        "USER": "doadmin",
-        "PASSWORD": "dibi5n3varep5ad8",
-        "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-        "PORT": "25061",
-        'OPTIONS': {'sslmode': 'require'},  # !!! is this needed?
-        # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
     }
+    # "default": {
+    #     "ENGINE": "django.db.backends.postgresql_psycopg2",
+    #     "NAME": "simmate-test-pool",  # default on DigitalOcean is defaultdb
+    #     "USER": "doadmin",
+    #     "PASSWORD": "dibi5n3varep5ad8",
+    #     "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
+    #     "PORT": "25061",
+    #     'OPTIONS': {'sslmode': 'require'},  # !!! is this needed?
+    #     # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
+    # }
 }
 
 # Password validation

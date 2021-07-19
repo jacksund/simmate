@@ -5,10 +5,10 @@
     <head>
     
         <!--Title of the page (located in the tab header) -->
-        <title>{% block tabtitle %}{% endblock %}</title>    
+        <title>{% block tabtitle %}{% endblock %}</title>
         
         <!-- Everthing commonly used in the header is stored in this template -->
-        {% include "puttyexams/header.html" %}
+        {% include "core/header.html" %}
         
         <!-- Some pages may require extra lines in the header such as loading extra libraries -->
         {% block extraheader %}{% endblock %}
@@ -17,17 +17,21 @@
     
     <body>
         
-        <!-- Some pages will have a welcome banner -->
-        {% block banner %}{% endblock %}
-        
         <!-- The navigation bar is the same for every webpage, and it is stored in this template -->
-        {% include "puttyexams/navbar.html" %}
-        
-        <!-- This is the main portion of the webpage -->
-        {% block body %}{% endblock %}
+        {% include "core/navbar.html" %}
+
+        <!-- This is the main portion of the webpage, which I put in a single padded row. The sidebar is always present, and the remainder of the page varies. -->
+        <div class="container-fluid">
+            <div class="row m-xxl-5 m-2">
+                {% include "core/sidebar.html" %}
+                <div class="col-10 overflow-auto h-100">
+                    {% block body %}{% endblock %}
+                </div>
+            </div>
+        </div>
         
         <!-- Many packages for JS libraries should be loaded last -->
-        {% include "puttyexams/footer.html" %}
+        {% include "core/footer.html" %}
         
         <!-- Sometimes I need to load extra javascript at the bottom of the page -->
         {% block extrafooter %}

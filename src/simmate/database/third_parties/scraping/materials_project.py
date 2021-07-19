@@ -40,18 +40,19 @@ from pymatgen import MPRester
 
 from simmate.configuration.django import setup_full  # sets up database
 
-# from simmate.database.third_parties.materials_project import MaterialsProjectStructure
-from simmate.datamine.utilities import get_sanitized_structure
+from simmate.database.third_parties.materials_project import MaterialsProjectStructure
+from simmate.database.third_parties.scraping.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
-
-# !!! This is just for testing
-test_list = ["mp-" + str(n) for n in range(1, 1000)]
 
 
 @transaction.atomic
 def load_all_structures(
-    criteria={"task_id": {"$exists": True, "$in": test_list}},  # !!! $in is for testing
+    criteria={"task_id": {"$exists": True}},
+    # !!! for testing
+    # criteria={
+    #     "task_id": {"$exists": True, "$in": ["mp-" + str(n) for n in range(1, 1000)]}
+    # },
     api_key="2Tg7uUvaTAPHJQXl",  # TODO remove in production - maybe to a config file
 ):
 
@@ -86,6 +87,7 @@ def load_all_structures(
         "formation_energy_per_atom",
         "e_above_hull",
         "structure",
+        "band_gap",
     ]
 
     # now make the query and grab everything from the Materials Project!
@@ -116,11 +118,17 @@ def load_all_structures(
         # update the structure for the entry copy
         entry_cleaned.update({"structure": structure_sanitized})
 
+        # For full compatibility with django, we need to rename the material_id
+        # to just id. Also since I'm changing things in place, I need to make a
+        # copy of the dict as well.
+        entry_cleaned = entry.copy()
+        entry_cleaned["id"] = entry_cleaned.pop("material_id")
+
         # now convert the entry to a database object
-        # structure_db = MaterialsProjectStructure.from_dict(data)
+        structure_db = MaterialsProjectStructure.from_pymatgen(**entry_cleaned)
 
         # and save it to our database!
-        # structure_db.save()
+        structure_db.save()
 
 
 # --------------------------------------------------------------------------------------

@@ -4,6 +4,6 @@ from django.shortcuts import render
 
 
 def home(request):
-    context = {}
-    template = "website/home.html"  # !!! Doesn't exist at the moment
+    context = {"active_tab_id": "home"}
+    template = "core/home.html"
     return render(request, template, context)

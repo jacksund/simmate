@@ -30,7 +30,7 @@ code and make it easier to read:
             OneToOne - place field in the one that has extra features
 
     Properties
-        In a few cases, you may want to add convience attribute to a model. However,
+        In a few cases, you may want to add a convience attribute to a model. However,
         in the majority of cases, you'll want to convert the model to some other
         class first which has all of the properties you need. We separate classes
         in this way for performance and clarity. This also allows our core and
@@ -47,8 +47,7 @@ code and make it easier to read:
 
 """
 
-import json
-
+from scipy.constants import Avogadro
 from pymatgen.core.structure import Structure as Structure_PMG
 
 from django.db import models
@@ -70,28 +69,33 @@ class Structure(models.Model):
     # TODO: to save on space, I can also come up with a non-json format here
     structure_json = models.TextField()
 
+    # !!! Should I have timestamps for the third-party databases?
     # timestamping for when this was added to the database
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
     # !!! I don't think this column should exist because you shouldn't edit these
-    # but I include it
-    updated_at = models.DateTimeField(auto_now=True)
+    # but I include it anyways
+    # updated_at = models.DateTimeField(auto_now=True)
 
     """ Query-helper Info """
 
     # total number of sites in the unitcell
     nsites = models.IntegerField()
 
-    # number of unique elements
+    # total number of unique elements
     nelement = models.IntegerField()
 
-    # the base chemical system
+    # the base chemical system (ex: "Y-C-F")
     chemical_system = models.CharField(max_length=25)
 
     # Density of the crystal
     density = models.FloatField()
-    
-    # TODO: add molar volume
-    
+
+    # Molar volume of the crystal.
+    # Note we prefer this over a "volume" field because volume is highly dependent
+    # on the symmetry and the arbitray unitcell. If you are truly after small volumes
+    # of the unitcell, it is likely you really just want to search by spacegroup.
+    molar_volume = models.FloatField()
+
     # symmetry info
     # TODO: should this be a relationship to a separate table?
     spacegroup = models.IntegerField()
@@ -106,10 +110,11 @@ class Structure(models.Model):
     # TODO: would it make sense to include these extra fields for Lattice/Sites?
     # Lattice: matrix and then... a, b, c, alpha, beta, gamma, volume
     # Sites: abc, xyz, properties, species/element, occupancy
+    # Personally, I'm against it because users shouldn't be querying by these.
 
     # For subclasses of this model, it may be useful to add...
     # cell_type (primitive, reduced, supercell, etc.)
-    # is_ordered (True/False)
+    # is_ordered (True/False) --> for many databases this is always True
     # charge (float value if charge was added) --> I think this belongs in Calculation
 
     """ Relationships """
@@ -122,6 +127,8 @@ class Structure(models.Model):
     # Each structure can have many Calculation(s)
 
     """ Properties """
+    # none
+
     """ Model Methods """
     # TODO: If I want a queryset to return a pymatgen Structure object(s) directly,
     # then I need make a new Manager rather than adding methods here. When doing
@@ -129,16 +136,32 @@ class Structure(models.Model):
 
     @classmethod
     def from_pymatgen(cls, structure, **kwargs):
+
+        # OPTIMIZE: I currently store files as poscar strings for ordered structures
+        # and as CIFs for disordered structures. Both of this include excess information
+        # that slightly inflates file size, so I will be making a new string format in
+        # the future. This will largely be based off the POSCAR format, but will
+        # account for disordered structures and all limit repeated data (such as the
+        # header line, "direct", listing each element/composition, etc.).
+        storage_format = "POSCAR" if structure.is_ordered else "CIF"
+
         # Given a pymatgen structure object, this will return a database structure
         # object, but will NOT save it to the database yet. The kwargs input
-        # is only if you inherit from this class and add extra fields, which
-        # should rarely be done.
+        # is only if you inherit from this class and add extra fields.
         structure_db = cls(
-            structure_json=structure.to_json(),
+            # structure_json=structure.to_json(),
+            # OPTIMIZE: The structure_json is not the most compact format. Others
+            # like POSCAR are more compact and can save space. This is at the cost of
+            # being robust to things like fractional occupancies. Perhaps a new compact
+            # format needs to be made specifically for Simmate.
+            structure_json=structure.to(fmt=storage_format),
             nsites=structure.num_sites,
             nelement=len(structure.composition),
             chemical_system=structure.composition.chemical_system,
             density=structure.density,
+            # 1e-27 is to convert from cubic angstroms to Liter. so this is in L/mol
+            # OPTIMIZE: move this to a class method
+            molar_volume=(structure.volume / structure.num_sites) * Avogadro * 1e-27,
             spacegroup=structure.get_space_group_info(0.1)[1],  # OPTIMIZE
             formula_full=structure.composition.formula,
             formula_reduced=structure.composition.reduced_formula,
@@ -153,20 +176,28 @@ class Structure(models.Model):
         # NOTE: if you know this is what you're going to do from a query, then
         # it is more efficient to only grab the structure_json column because
         # that's all you need! You'd do that like this:
-        # structure_db = Structure.objects.only("structure_json").get(pk=1)
-        # grab the proper Structure entry and we want only the structure column
+        #   structure_db = Structure.objects.only("structure_json").get(id="example-id")
+        # This grabs the proper Structure entry and only the structure column.
 
-        # convert the json string to python dictionary
-        structure_dict = json.loads(self.structure_json)
-        # convert the dictionary to pymatgen Structure object
-        structure = Structure_PMG.from_dict(structure_dict)
+        # convert the stored string to python dictionary.
+        # OPTIMIZE: see my comment on storing strings in the from_pymatgen method above.
+        # For now, I need to figure out if I used "CIF" or "POSCAR" and read the structure
+        # accordingly. In the future, I can just assume my new format.
+        # If the string starts with "#", then I know that I stored it as a "CIF".
+        storage_format = "CIF" if (self.structure_json[0] == "#") else "POSCAR"
+        
+        # convert the string to pymatgen Structure object
+        structure = Structure_PMG.from_str(
+            self.structure_json,
+            fmt=storage_format,
+        )
 
         return structure
 
     """ For website compatibility """
 
     class Meta:
-        app_label = "diffusion"  # TODO: move to a separate app
+        app_label = "third_parties"  # TODO: move to a separate app
         abstract = True
 
 

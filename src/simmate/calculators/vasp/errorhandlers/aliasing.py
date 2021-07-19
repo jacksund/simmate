@@ -1,106 +1,143 @@
 # -*- coding: utf-8 -*-
 
-class AliasingErrorHandler(ErrorHandler):
+import os
+
+from simmate.workflows.core.tasks.errorhandler import ErrorHandler
+from simmate.calculators.vasp.inputs.incar import Incar
+
+
+class Aliasing(ErrorHandler):
     """
-    Master VaspErrorHandler class that handles a number of common errors
-    that occur during VASP runs.
+    Aliasing errors occur when there are issues with the NGX, NGY, and NGZ grid
+    in VASP. Typically the fix is to just remove user defined settings for these
+    values, delete the CHGCAR and WAVECAR, and then restart the calculation. In
+    some cases, VASP even provides recommended values for this grid and we just
+    use those.
     """
 
+    # run this while the VASP calculation is still going
     is_monitor = True
 
-    error_msgs = {
-        "aliasing": ["WARNING: small aliasing (wrap around) errors must be expected"],
-        "aliasing_incar": ["Your FFT grids (NGX,NGY,NGZ) are not sufficient " "for an accurate"],
+    # These are the error messages that we are looking for
+    error_messages = {
+        "aliasing": "WARNING: small aliasing (wrap around) errors must be expected",
+        "insufficient_fft_grid": "Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate",
     }
 
-    def __init__(self, output_filename="vasp.out"):
-        """
-        Initializes the handler with the output file to check.
-        Args:
-            output_filename (str): This is the file where the stdout for vasp
-                is being redirected. The error messages that are checked are
-                present in the stdout. Defaults to "vasp.out", which is the
-                default redirect used by :class:`custodian.vasp.jobs.VaspJob`.
-        """
-        self.output_filename = output_filename
-        self.errors = set()
+    # All instances of this ErrorHandler will work exactly the same, so there
+    # are no keywords available -- and also there's no need for a __init__()
 
-    def check(self):
+    def check(self, dir):
         """
-        Check for error.
+        Check for errors in the specified directory. Note, we assume that we are
+        checking the vasp.out file. If that file is not present, we say that there
+        is no error because another handler will address this.
         """
-        incar = Incar.from_file("INCAR")
-        self.errors = set()
-        with open(self.output_filename, "r") as f:
-            for line in f:
-                l = line.strip()
-                for err, msgs in AliasingErrorHandler.error_msgs.items():
-                    for msg in msgs:
-                        if l.find(msg) != -1:
-                            # this checks if we want to run a charged
-                            # computation (e.g., defects) if yes we don't
-                            # want to kill it because there is a change in e-
-                            # density (brmix error)
-                            if err == "brmix" and "NELECT" in incar:
-                                continue
-                            self.errors.add(err)
-        return len(self.errors) > 0
 
-    def correct(self):
+        # We want to return a list of errors that were found, so we keep a
+        # master list.
+        errors_found = []
+
+        # establish the full path to the output file
+        filename = os.path.join(dir, "vasp.out")
+
+        # check to see that the file is there first
+        if os.path.exists(filename):
+
+            # read the file content and then close it
+            with open(filename) as file:
+                file_text = file.read()
+
+            # Check if each error is present
+            for error, message in self.error_messages.items():
+                # if the error is NOT present, find() returns a -1
+                if file_text.find(message) != -1:
+                    errors_found.append(error)
+
+        # If the file doesn't exist, we are not seeing any error yetm which is
+        # also an empty list. Otherwise return the list of errors we found
+        return errors_found
+
+    def correct(self, error, dir):
         """
-        Perform corrections.
+        Perform corrections based on the INCAR.
         """
-        backup(VASP_BACKUP_FILES | {self.output_filename})
-        actions = []
-        vi = VaspInput.from_directory(".")
 
-        if "aliasing" in self.errors:
-            with open("OUTCAR") as f:
-                grid_adjusted = False
-                changes_dict = {}
-                r = re.compile(r".+aliasing errors.*(NG.)\s*to\s*(\d+)")
-                for line in f:
-                    m = r.match(line)
-                    if m:
-                        changes_dict[m.group(1)] = int(m.group(2))
-                        grid_adjusted = True
-                    # Ensure that all NGX, NGY, NGZ have been checked
-                    if grid_adjusted and "NGZ" in line:
-                        actions.append({"dict": "INCAR", "action": {"_set": changes_dict}})
-                        if vi["INCAR"].get("ICHARG", 0) < 10:
-                            actions.extend(
-                                [
-                                    {
-                                        "file": "CHGCAR",
-                                        "action": {"_file_delete": {"mode": "actual"}},
-                                    },
-                                    {
-                                        "file": "WAVECAR",
-                                        "action": {"_file_delete": {"mode": "actual"}},
-                                    },
-                                ]
-                            )
-                        break
+        # Note "error" here is a list of the errors found. For example, error
+        # could be ["alaising_error", "insufficient_fft_grid"]. If there
+        # weren't any errors found then this is just and empty list.
 
-        if "aliasing_incar" in self.errors:
-            # vasp seems to give different warnings depending on whether the
-            # aliasing error was caused by user supplied inputs
-            d = {k: 1 for k in ["NGX", "NGY", "NGZ"] if k in vi["INCAR"].keys()}
-            actions.append({"dict": "INCAR", "action": {"_unset": d}})
+        # Multiple corrections could be applied here so we record all of them.
+        corrections = []
 
-            if vi["INCAR"].get("ICHARG", 0) < 10:
-                actions.extend(
-                    [
-                        {
-                            "file": "CHGCAR",
-                            "action": {"_file_delete": {"mode": "actual"}},
-                        },
-                        {
-                            "file": "WAVECAR",
-                            "action": {"_file_delete": {"mode": "actual"}},
-                        },
-                    ]
-                )
+        # load the INCAR file to view the current settings
+        incar_filename = os.path.join(dir, "INCAR")
+        incar = Incar.from_file(incar_filename)
 
-        VaspModder(vi=vi).apply_actions(actions)
-        return {"errors": list(self.errors), "actions": actions}
+        if "aliasing" in error:
+
+            # VASP will actually tell us what to switch NGX, NGY, and NGZ to inside
+            # the OUTCAR. So we look there for our fix.
+            # Here is what the aliasing error typically looks like in the OUTCAR:
+            #   WARNING: aliasing errors must be expected set NGX to  34 to avoid them
+            #   NGY is ok and might be reduce to 102
+            #   NGZ is ok and might be reduce to 120
+            #   aliasing errors are usually negligible using standard VASP settings
+            #   and one can safely disregard these warnings
+
+            # so we open the OUTCAR and find these lines and the suggested fix.
+
+            # read the file content and then close it
+            outcar_filename = os.path.join(dir, "OUTCAR")
+            with open(outcar_filename) as file:
+                outcar_lines = file.readlines()
+
+            # go through each line looking for the suggestions
+            for line in outcar_lines:
+                if "to avoid them" in line:
+
+                    # break the line up into a list, where NG* is at index 7 and
+                    # the fix is at index 9.
+                    # BUG: I expect an error will show up here if I was wrong about
+                    # the indexes of what we want always being 7 and 9.
+                    line_info = line.split()
+                    incar_key = line_info[7]
+                    new_value = int(line_info[9])
+
+                    # update the incar with this value
+                    incar.update({incar_key: new_value})
+
+                    # record the correction
+                    corrections.append(f"switched {incar_key} to {new_value}")
+
+        if "insufficient_fft_grid" in error:
+
+            # This is typically caused by a user introducing too coarse of a grid.
+            # Here we remove all NGX/NGY/NGZ settings from the INCAR
+            incar.pop("NGX")
+            incar.pop("NGY")
+            incar.pop("NGZ")
+            # record the change
+            corrections.append("removed all NGX/NGY/NGZ settings")
+
+        # if any corrections were made above, we may want to reset some files
+        if corrections:
+            
+            # Check the current ICHARG setting, where default is 0
+            # !!! BUG: isn't the default 2 if we are starting from scratch?
+            current_icharg = incar.get("ICHARG", 0)
+
+            # If the ICHARG is less than 10, then we want to delete the CHGCAR
+            # and WAVECAR to ensure the next run is a clean start.
+            if current_icharg < 10:
+                os.remove(os.path.join(dir, "CHGCAR"))
+                os.remove(os.path.join(dir, "WAVECAR"))
+
+            # return the description of what we did
+            corrections.append("deleted CHGCAR and WAVECAR")
+
+        # rewrite the new INCAR file
+        incar.to_file(incar_filename)
+
+        # return the list of corrections we made
+        return corrections

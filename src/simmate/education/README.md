@@ -1,1 +1,0 @@
-This module is empty at the moment, but I plan for it to be a module for teaching materials chemistry, dft, python, etc. Therefore the code, notebook, and apps located here will be more of a library.

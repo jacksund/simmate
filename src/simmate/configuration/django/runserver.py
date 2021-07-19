@@ -3,9 +3,7 @@
 def runserver():
 
     # for now I recommend using the shell command...
-    #   "django-admin runserver --setting=simmate.settings"
-    # or... navigate to the directory and use
-    #   "python manage.py runserver"
+    #   "django-admin runserver --setting=simmate.configuration.django.settings"
     raise NotImplementedError
 
     # BUG: I'm not sure why this code below doesn't work...
