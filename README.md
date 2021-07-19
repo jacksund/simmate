@@ -37,7 +37,7 @@ Read here for info on markdown, badges, and more:
 
 ## Welcome!
 
-If you are brand-new to Simmate, jump over to our main website [simmate.org](simmate.org) and take a look at what we have to offer. This page is for when you're ready to start using Simmate in your own research and bring your lab to the next level. Our software is open-source and free to use, so come back to try it when you're ready! 
+If you are brand-new to Simmate, jump over to our main website [simmate.org](simmate.org) and take a look at what we have to offer. This page is for when you're ready to use Simmate in your own research and access some advanced functionality. Our software is open-source and free-to-use, so come back to try it when you're ready! 
 
 
 ## What is Simmate?
@@ -59,9 +59,10 @@ If you're confortable with Python, you can install Simmate with...
 conda install -c conda-forge simmate
 ```
 
+
 ## A Sneak-Peak of Features (for experts)
 
-Again, take a look at [our main website](simmate.org) if you'd like to see the end-result of what Simmate has to offer. This secton showcases some features of downloading and using Simmate yourself.
+Again, take a look at [our main website](simmate.org) if you'd like to see the end-result of what Simmate has to offer. This section showcases some features of downloading and using Simmate yourself.
 
 1. _**Prebuilt Workflows and Easy Orchestration.**_ All of the most common material properties have workflows ready to go. These range from simple XRD pattern predictions to intensive elastic calculations. Simmate also builds off of [Prefect](https://github.com/PrefectHQ/prefect) for orchestrating and managing workflows. So it's up to you whether to run jobs via an advanced user-interface (shown below) or in custom scripts:
 
