@@ -51,7 +51,7 @@ class PreBaderTask(VaspTask):
 
     # The default settings to use for this static energy calculation.
     # The key thing for bader analysis is that we need a very fine FFT mesh
-    # TODO: in the future, I will support a NGxyzF_density option inside of the
+    # TODO: in the future, I will support a NGxyzF__density option inside of the
     # Incar class so that this grid is set based on the given structure.
     incar = dict(
         EDIFF=1.0e-07,
@@ -73,10 +73,14 @@ class PreBaderTask(VaspTask):
     # We will use the PBE functional with all default mappings
     functional = "PBE"
 
-
+# load the structure
 structure = Structure_PMG.from_file("nacl.cif")
 
-task = PreBaderTask()
+# Initialize the task
+task = PreBaderTask(command="mpirun -n 4 vasp > vasp.out")
 
-result = task.run(structure=structure)
+# Now run the task with your desired structure and directory
+result = task.run(structure=structure, dir=".")
+
+# --------------------------------------------------------------------------------------
 
