@@ -25,7 +25,7 @@ class Incar(dict):
         # datatypes and formatting? Also will this behave properly if the value
         # is already in the correct format?
         for parameter, value in self.items():
-            formatted_value = self.str_to_datatype(parameter, value)
+            formatted_value = self._str_to_datatype(parameter, value)
             self.update({parameter: formatted_value})
 
         # SPECIAL CASE
@@ -138,7 +138,7 @@ class Incar(dict):
         return Incar(**parameters)
 
     @staticmethod
-    def str_to_datatype(parameter, value):
+    def _str_to_datatype(parameter, value):
         """
         When given a vasp parameter and it's value as a string, this helper
         function will use the key (parameter) to determine how to convert the

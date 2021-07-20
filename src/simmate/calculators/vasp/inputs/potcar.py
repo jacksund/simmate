@@ -14,7 +14,7 @@ from simmate.calculators.vasp.inputs.potcar_mappings import (
 
 class Potcar:
     @staticmethod
-    def write_from_type(
+    def to_file_from_type(
         elements,
         functional,
         filename="POTCAR",

@@ -389,7 +389,7 @@ class MainVaspErrors(ErrorHandler):
             incar["KGAMMA"] = True
             corrections.append("switched KGAMMA to True")
             # TODO: 2nd attempt is to turn ISYM=0
-
+            
         if "amin" in self.errors:
             incar["AMIN"] = 0.01
             corrections.append("switched AMIN to 0.01")
@@ -539,6 +539,8 @@ class MainVaspErrors(ErrorHandler):
 
         # Now that we made all of our changes to the INCAR, we can rewrite it
         incar.to_file(incar_filename)
+
+        #!!! BUG: rewrite simmate_error_counts!
 
         # return the list of corrections we made
         return corrections

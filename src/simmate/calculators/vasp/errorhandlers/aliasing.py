@@ -19,8 +19,8 @@ class Aliasing(ErrorHandler):
     is_monitor = True
 
     # These are the error messages that we are looking for
-    error_messages = {
-        "aliasing": "WARNING: small aliasing (wrap around) errors must be expected",
+    possible_error_messages = {
+        "aliasing_error": "WARNING: small aliasing (wrap around) errors must be expected",
         "insufficient_fft_grid": "Your FFT grids (NGX,NGY,NGZ) are not sufficient for an accurate",
     }
 
@@ -49,7 +49,7 @@ class Aliasing(ErrorHandler):
                 file_text = file.read()
 
             # Check if each error is present
-            for error, message in self.error_messages.items():
+            for error, message in self.possible_error_messages.items():
                 # if the error is NOT present, find() returns a -1
                 if file_text.find(message) != -1:
                     errors_found.append(error)
