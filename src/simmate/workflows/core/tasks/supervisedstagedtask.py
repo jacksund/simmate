@@ -76,6 +76,8 @@ class SupervisedStagedShellTask(Task):
 
     def __init__(
         self,
+        # this is a common input but not required for all SSSTasks
+        structure=None,
         # core parts
         command=None,
         dir=None,
@@ -85,8 +87,6 @@ class SupervisedStagedShellTask(Task):
         monitor=None,
         polling_timestep=None,
         monitor_freq=None,
-        # this is a common input but not required for all SSSTasks
-        structure=None,
         # return, cleanup, and file saving settings
         compress_output=False,
         return_corrections=True,

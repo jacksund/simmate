@@ -54,16 +54,11 @@ class VaspTask(SSSTask):
 
     def __init__(
         self,
-        # optional setup parameters
-        command=None,
-        dir=None,
-        # these are the inputs for
-        structure=None,
         incar=None,
         kpoints=None,
         functional=None,
         potcar_mappings=None,
-        # To support other Prefect input options
+        # To support other options from the Simmate SSSTask and Prefect Task
         **kwargs,
     ):
 
@@ -71,12 +66,8 @@ class VaspTask(SSSTask):
         # Note to python devs: this odd formatting is because we set our defaults
         # to None in __init__ while our actual default values are define above
         # as class attributes. This may seem funky at first glance, but it
-        # makes inheriting from this class extremely pretty :)
+        # makes inheriting from this class extremely pretty!
         # This code is effectively the same as @defaults_from_attrs(...)
-        if command:
-            self.command = command
-        if structure:
-            self.structure = structure
         if incar:
             self.incar = incar
         if kpoints:
@@ -86,12 +77,7 @@ class VaspTask(SSSTask):
         if potcar_mappings:
             self.potcar_mappings = potcar_mappings
 
-        # These parameters will never have a default, so go ahead and set them
-        # establish the working directory for this Task
-        self.dir = dir
-        self.structure = structure
-
-        # now inherit the parent Prefect Task class
+        # now inherit from parent SSSTask class
         super().__init__(**kwargs)
 
     def setup(self, structure, dir):

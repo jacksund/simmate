@@ -84,3 +84,17 @@ result = task.run(structure=structure, dir=".")
 
 # --------------------------------------------------------------------------------------
 
+from pymatgen.core.structure import Structure
+structure = Structure.from_file("nacl.cif")
+
+# from pymatgen.io.vasp.sets import MPNonSCFSet
+# mpset = MPNonSCFSet(structure, standardize=True)
+# mpset.write_input("mpset")
+
+# from simmate.calculators.vasp.tasks.bandstructure import BandStructureTask
+# task = BandStructureTask(structure=structure, dir="smeset")
+# result = task.run()
+
+# from simmate.calculators.vasp.tasks.nudged_elastic_band import NudgedElasticBandTask
+# task = NudgedElasticBandTask(structure=[structure for i in range(5)], dir="NEBset")
+# result = task.run()
