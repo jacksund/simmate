@@ -12,11 +12,19 @@ class ChemicalSystemForm(forms.Form):
     # the chemical system. This way users can quickly query with a composition
     # such as "Y-C-F". We also ask if they want the subsystem too. For example,
     # Y-C-F would also include Y, C, F, Y-C, Y-F, etc. in the search results.
-
+    
+    # Searching by Chemical System
     include_subsystems = forms.BooleanField(label="Include Subsytems", required=False)
-
     chemical_system = forms.CharField(label="Chemical System", max_length=20)
-
+    
+    # Searching by Database Providers
+    aflow = forms.BooleanField(required=False)
+    jarvis = forms.BooleanField(required=False)
+    materials_project = forms.BooleanField(required=False)
+    simmate = forms.BooleanField(required=False)
+    ocd = forms.BooleanField(required=False)
+    oqmd = forms.BooleanField(required=False)
+    
     def clean_chemical_system(self):
 
         # Our database expects the chemical system to be given in alphabetical

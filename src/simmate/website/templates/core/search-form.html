@@ -1,6 +1,6 @@
 
 <div class="container p-4 bg-light border">
-<form action="{% url 'home' %}" method="post">
+<form action="{% url 'home' %}#search-results" method="post">
     {% csrf_token %}
     
     <!-- 
@@ -10,6 +10,7 @@
      look like (without Bootstrap), this line is all you need:
      {{ chemical_system_form }}
      -->
+     
     {{ chemical_system_form.non_field_errors }}
     <div class="fieldWrapper">
         {{ chemical_system_form.chemical_system.errors }}
@@ -20,15 +21,53 @@
         {{ chemical_system_form.include_subsystems.errors }}
         <label for="id_include_subsystems" class="form-check-label">include subsystems</label>
         <input type="checkbox" name="include_subsystems" id="id_include_subsystems" class="form-check-input">
+        <div id="include_subsystems_help" class="form-text">
+            <i>subsystems of Li-Co-O would be Li, Co, O, Li-Co, Li-O, and Co-O.</i>    
+        </div>
+    </div>
+    
+    <br>
+    
+    <b>Databases to Search:</b>
+    <br>
+    <div class="fieldWrapper form-check">
+        {{ chemical_system_form.include_subsystems.errors }}
+        <input type="checkbox" name="aflow" id="id_aflow" class="form-check-input" checked>
+        <label for="id_aflow" class="form-check-label">AFLOW</label>
+    </div>
+    <div class="fieldWrapper form-check">
+        {{ chemical_system_form.include_subsystems.errors }}
+        <input type="checkbox" name="jarvis" id="id_jarvis" class="form-check-input" checked>
+        <label for="id_jarvis" class="form-check-label">JARVIS</label>
+    </div>
+    <div class="fieldWrapper form-check">
+        {{ chemical_system_form.include_subsystems.errors }}
+        <input type="checkbox" name="materials_project" id="id_materials_project" class="form-check-input" checked>
+        <label for="id_materials_project" class="form-check-label">Materials Project</label>
+    </div>
+    <div class="fieldWrapper form-check">
+        {{ chemical_system_form.include_subsystems.errors }}
+        <input type="checkbox" name="simmate" id="id_simmate" class="form-check-input" disabled>
+        <label for="id_simmate" class="form-check-label">Simmate</label>
         
     </div>
-    <div id="include_subsystems_help" class="form-text">
-        <i>Perform a quick search for all crystal structures of a given chemical system. 
-        If you'd like to include subsystems in your results, check the box!
-        For example, subsystems of Li-Co-O would be Li, Co, O, Li-Co, Li-O, and Co-O.
-        <br>
-        Advanced filtering criteria for searches is coming soon!!</i>
+    <div class="fieldWrapper form-check">
+        {{ chemical_system_form.include_subsystems.errors }}
+        <input type="checkbox" name="ocd" id="id_ocd" class="form-check-input" checked>
+        <label for="id_ocd" class="form-check-label">OCD</label>
     </div>
+    <div class="fieldWrapper form-check">
+        {{ chemical_system_form.include_subsystems.errors }}
+        <input type="checkbox" name="oqmd" id="id_oqmd" class="form-check-input" checked>
+        <label for="id_oqmd" class="form-check-label">OQMD</label>
+    </div>
+    
+    
+    <br>
+    <b>Advanced filtering criteria is coming soon!</b>
+    <br><br>
+    
     <button class="btn btn-outline-success" type="submit">Search</button>
+
 </form>
 </div>

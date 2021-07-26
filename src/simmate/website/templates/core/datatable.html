@@ -1,28 +1,49 @@
 
-<!-- DataTables CDN downloads -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/r-2.2.3/datatables.min.css"/>
+<!-- 
+
+DataTables CDN downloads 
+
+To update this file, visit https://datatables.net/download/
+Currently we select...
+    Step 1: Bootstrap 5
+    Step 2: jQuery 3, Datatables
+    Step 3: FixedHeader, Responsive, Buttons (HTML5 export, JSZip, pdfmake)
+    Step 4: CDN
+
+-->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.css"/>
+ 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/r-2.2.3/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.js"></script>
+
+
 
 <!-- This code activates the DataTable scripts and formatting for your table -->
 <!-- The table is made to be responsive to window size and include download buttons -->
 <script>
-    $(document).ready( function () {
-        $('.datatable').DataTable( {
-                            responsive: true,
-                            dom: 'Bfrtip',
-                            buttons: [
-                                'copyHtml5',
-                                'excelHtml5',
-                                'csvHtml5',
-                                'pdfHtml5'
-                                    ] } );
+    $(document).ready(function() {
+        $('.table').DataTable({
+            // Adapt table width with the screensize
+            responsive: true,
+            // This is for objects around table (then B is for buttons)
+            // For help see: https://datatables.net/examples/basic_init/dom.html
+            dom: '<fB<t>lp>',
+            buttons: ['copy', 'csv', 'excel', 'pdf'],
+            // Keep header in view while scrolling
+            fixedHeader: {header: true},
+            // Order by the 3rd column, then 2nd, then 4th
+            order: [[ 2, "asc" ], [ 1, "asc" ], [ 3, "asc" ]],
+            // Allow different pagination
+            lengthMenu: [ 12, 25, 50, 75, 200 ],
+    });
     } );
 </script>
 
 
 <!-- 
+
+ 'Blfrtp'
 
 NOTE!!! Make sure you include the following for your table to actually work:
 
@@ -31,6 +52,8 @@ NOTE!!! Make sure you include the following for your table to actually work:
 
 (2) The table itself should be assigned the following class:
 <table class="datatable">
+
+(3) The cdn downloads need to be place AFTER the footer (where jQuery is loaded).
 
 -->
 

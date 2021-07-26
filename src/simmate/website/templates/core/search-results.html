@@ -1,0 +1,46 @@
+<!-- NOTE: for this section to work, be sure to read datatable.html -->
+
+<div class="container p-4 bg-light border" id="search-results">
+
+<!-- List of structures for data table -->
+<div class="container p-4">
+{% if structures == None %}
+    <p>Make a search for structures and the results will be shown here!</p>
+{% elif structures %}
+    {% load chemical_formula_filter %}
+    <p>
+        This table includes <b>{{ structures | length }}</b> of <b>{{ nstructures_possible }}</b> structures that match your search criteria.
+        <br><i><small>In cases where >200 structures are found, please either refine your search criteria or use the Simmate's Python client to access all structures (see our Github page for more info).</small></i>
+    </p>
+    <table id="SearchResultsTable" class="table table-striped" style="width:100%">
+        <thead>
+            <tr>
+                <th>Source Database</th>
+                <th>Material-ID</th>
+                <th>Reduced Formula</th>
+                <th>Energy Above Hull (eV)</th>
+                <th>Number of Sites</th>
+                <th>Molar Volume (L/mol)</th>
+                <th>Spacegroup</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for structure in structures %}
+                <tr>
+                    <td>{{ structure.source }}</td>
+                    <td><a href="{{ structure.external_link }}" target="_blank">{{ structure.id }}</a></td>
+                    <td>{{ structure.formula_reduced | chemical_formula }}</td>
+                    <td>{{ structure.e_above_hull|floatformat:4 }}</td>
+                    <td>{{ structure.nsites }}</td>
+                    <td>{{ structure.molar_volume|floatformat:5 }}</td>
+                    <td>{{ structure.spacegroup }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No structures are available.</p>
+{% endif %}
+</div>
+
+</div>
