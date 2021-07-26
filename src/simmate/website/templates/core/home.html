@@ -1,5 +1,5 @@
 
-{% extends "core/site_base.html" %}
+{% extends "core/site-base.html" %}
 
 {% block tabtitle %}
 Simmate
@@ -11,5 +11,6 @@ Simmate
 
 
 {% block body %}
+{% include "core/search-form.html" %}
 {% include "core/periodic-table.html" %}
 {% endblock %}

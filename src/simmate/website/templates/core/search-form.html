@@ -1,0 +1,34 @@
+
+<div class="container p-4 bg-light border">
+<form action="{% url 'home' %}" method="post">
+    {% csrf_token %}
+    
+    <!-- 
+     To customize the order of fields as well as how they render, we manually
+     write out this form. If I were to change anything for the form, I would
+     need to look at the formatting here again. To gauge what the form should
+     look like (without Bootstrap), this line is all you need:
+     {{ chemical_system_form }}
+     -->
+    {{ chemical_system_form.non_field_errors }}
+    <div class="fieldWrapper">
+        {{ chemical_system_form.chemical_system.errors }}
+        <label for="id_chemical_system" class="form-label"><b>Search by Chemical System:</b></label>
+        <input type="text" name="chemical_system" maxlength="20" required="" id="id_chemical_system" class="form-control" placeholder="Li-Co-O">
+    </div>
+    <div class="fieldWrapper form-check">
+        {{ chemical_system_form.include_subsystems.errors }}
+        <label for="id_include_subsystems" class="form-check-label">include subsystems</label>
+        <input type="checkbox" name="include_subsystems" id="id_include_subsystems" class="form-check-input">
+        
+    </div>
+    <div id="include_subsystems_help" class="form-text">
+        <i>Perform a quick search for all crystal structures of a given chemical system. 
+        If you'd like to include subsystems in your results, check the box!
+        For example, subsystems of Li-Co-O would be Li, Co, O, Li-Co, Li-O, and Co-O.
+        <br>
+        Advanced filtering criteria for searches is coming soon!!</i>
+    </div>
+    <button class="btn btn-outline-success" type="submit">Search</button>
+</form>
+</div>

@@ -2,6 +2,11 @@
 
 # --------------------------------------------------------------------------------------
 
+# TO RUN DJANGO SERVER...
+# django-admin runserver --settings=simmate.configuration.django.settings
+
+# --------------------------------------------------------------------------------------
+
 # set the executor to a locally ran executor
 # from prefect.executors import DaskExecutor
 # workflow.executor = DaskExecutor(address="tcp://152.2.172.72:8786")
