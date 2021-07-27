@@ -21,8 +21,8 @@
 # --------------------------------------------------------------------------------------
 
 # from simmate.shortcuts import setup
-# from simmate.database.third_parties.scraping.cod import load_all_structures
-# test = load_all_structures()
+# from simmate.database.third_parties.scraping.materials_project import load_all_structures
+# load_all_structures()
 
 # --------------------------------------------------------------------------------------
 
@@ -31,7 +31,6 @@ from simmate.database.third_parties.all import MaterialsProjectStructure
 from simmate.utilities import get_chemical_subsystems
 
 MaterialsProjectStructure.objects.count()
-
 
 systems = get_chemical_subsystems("Y-C-F")
 

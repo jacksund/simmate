@@ -32,8 +32,13 @@
     <br>
     <div class="fieldWrapper form-check">
         {{ chemical_system_form.include_subsystems.errors }}
-        <input type="checkbox" name="aflow" id="id_aflow" class="form-check-input" checked>
+        <input type="checkbox" name="aflow" id="id_aflow" class="form-check-input" disabled>
         <label for="id_aflow" class="form-check-label">AFLOW</label>
+    </div>
+    <div class="fieldWrapper form-check">
+        {{ chemical_system_form.include_subsystems.errors }}
+        <input type="checkbox" name="cod" id="id_cod" class="form-check-input" disabled>
+        <label for="id_cod" class="form-check-label">COD</label>
     </div>
     <div class="fieldWrapper form-check">
         {{ chemical_system_form.include_subsystems.errors }}
@@ -53,12 +58,7 @@
     </div>
     <div class="fieldWrapper form-check">
         {{ chemical_system_form.include_subsystems.errors }}
-        <input type="checkbox" name="ocd" id="id_ocd" class="form-check-input" checked>
-        <label for="id_ocd" class="form-check-label">OCD</label>
-    </div>
-    <div class="fieldWrapper form-check">
-        {{ chemical_system_form.include_subsystems.errors }}
-        <input type="checkbox" name="oqmd" id="id_oqmd" class="form-check-input" checked>
+        <input type="checkbox" name="oqmd" id="id_oqmd" class="form-check-input" disabled>
         <label for="id_oqmd" class="form-check-label">OQMD</label>
     </div>
     

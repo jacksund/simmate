@@ -6,7 +6,7 @@ DataTables CDN downloads
 To update this file, visit https://datatables.net/download/
 Currently we select...
     Step 1: Bootstrap 5
-    Step 2: jQuery 3, Datatables
+    Step 2: Datatables
     Step 3: FixedHeader, Responsive, Buttons (HTML5 export, JSZip, pdfmake)
     Step 4: CDN
 
@@ -19,11 +19,13 @@ Currently we select...
 
 
 
+
 <!-- This code activates the DataTable scripts and formatting for your table -->
 <!-- The table is made to be responsive to window size and include download buttons -->
+<!-- If I want this to apply to apply all tables, I could select by class with .table instead -->
 <script>
     $(document).ready(function() {
-        $('.table').DataTable({
+        $('#SearchResultsTable').DataTable({
             // Adapt table width with the screensize
             responsive: true,
             // This is for objects around table (then B is for buttons)
@@ -32,12 +34,15 @@ Currently we select...
             buttons: ['copy', 'csv', 'excel', 'pdf'],
             // Keep header in view while scrolling
             fixedHeader: {header: true},
-            // Order by the 3rd column, then 2nd, then 4th
-            order: [[ 2, "asc" ], [ 1, "asc" ], [ 3, "asc" ]],
+            // Order by the 4th column, then 3rd, then 5th
+            order: [[ 3, "asc" ], [ 2, "asc" ], [ 4, "asc" ]],
             // Allow different pagination
-            lengthMenu: [ 12, 25, 50, 75, 200 ],
+            lengthMenu: [ [12, 25, 50, -1], [12, 25, 50, "All"] ],
+            // Specify how each column should be aligned.
+            // This doesn't seem to work with Bootstrap though.
+            // columnDefs: [{targets: 3, className: 'text-right'}],
+            });
     });
-    } );
 </script>
 
 

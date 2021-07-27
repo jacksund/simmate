@@ -105,7 +105,8 @@ def load_all_structures():
         entry_dict = {
             "structure": structure_sanitized,
             "id": "oqmd-" + str(entry["entry_id"]),
-            "e_above_hull": entry["stability"],
+            # the *1000 converts to meV
+            "energy_above_hull": entry["stability"]*1000,
             "final_energy": entry["delta_e"],
             "band_gap": entry["band_gap"],
         }

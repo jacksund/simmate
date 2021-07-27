@@ -8,20 +8,47 @@
     <p>Make a search for structures and the results will be shown here!</p>
 {% elif structures %}
     {% load chemical_formula_filter %}
-    <p>
-        This table includes <b>{{ structures | length }}</b> of <b>{{ nstructures_possible }}</b> structures that match your search criteria.
-        <br><i><small>In cases where >200 structures are found, please either refine your search criteria or use the Simmate's Python client to access all structures (see our Github page for more info).</small></i>
-    </p>
+    
+    <div class="alert alert-success d-flex align-items-center p-2" role="alert">
+        <i class="bi bi-check-circle-fill fs-4"></i>
+        <div class="p-3">
+            This table includes <b>{{ structures | length }}</b> out of 
+            <b>{{ nstructures_possible }}</b> structures that match your search criteria.
+            <br>
+            <i><small>
+            Search results are limited to the 50 most stable structures for 
+            each database.
+            In cases where >50 structures are found, please either 
+            refine your search criteria or use the Simmate's python client to access
+            all structures (see our <a href="#">Github page</a> for more info).
+            </small></i>
+        </div>
+    </div>
+    
+    <div class="alert alert-warning d-flex align-items-center p-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        <div class="p-3">
+            <b>Don't compare energies across different databases!</b>
+            
+            <br>
+            <i><small>
+            Each database provider uses different settings for their
+            calculations AND they have a different pool of structures. To learn more
+            about hull energies, <a href="#">read here</a>.</small></i>
+        </div>
+    </div>
+    
     <table id="SearchResultsTable" class="table table-striped" style="width:100%">
         <thead>
             <tr>
                 <th>Source Database</th>
                 <th>Material-ID</th>
                 <th>Reduced Formula</th>
-                <th>Energy Above Hull (eV)</th>
+                <th>Energy Above Hull (meV)</th>
                 <th>Number of Sites</th>
-                <th>Molar Volume (L/mol)</th>
                 <th>Spacegroup</th>
+                <th>Density (g/mL)</th>
+                <th>Molar Volume (mL/mol)</th>
             </tr>
         </thead>
         <tbody>
@@ -30,10 +57,12 @@
                     <td>{{ structure.source }}</td>
                     <td><a href="{{ structure.external_link }}" target="_blank">{{ structure.id }}</a></td>
                     <td>{{ structure.formula_reduced | chemical_formula }}</td>
-                    <td>{{ structure.e_above_hull|floatformat:4 }}</td>
+                    <!-- why won't class="text-right" work here?-->
+                    <td>{{ structure.energy_above_hull | floatformat }}</td>
                     <td>{{ structure.nsites }}</td>
-                    <td>{{ structure.molar_volume|floatformat:5 }}</td>
                     <td>{{ structure.spacegroup }}</td>
+                    <td>{{ structure.density | floatformat:3 }}</td>
+                    <td>{{ structure.molar_volume | floatformat:3 }}</td>
                 </tr>
             {% endfor %}
         </tbody>

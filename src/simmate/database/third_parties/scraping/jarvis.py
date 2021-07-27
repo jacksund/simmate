@@ -4,23 +4,25 @@
 
 This file is for pulling JARVIS data into the Simmate database. 
 
-It's unclear how JARVIS prefers uses to access their data, as they have a python
-package and REST API, but poor documentation on how to pull from their database.
-What looks like the most straight-forward is their downloads section:
+JARVIS has a python package "jarvis-tools" that let's us pull some of their
+database dumps. For instructions on how to do this, they provided this link:
+    https://colab.research.google.com/github/knc6/jarvis-tools-notebooks/blob/master/jarvis-tools-notebooks/Get_JARVIS_DFT_final_structures_in_ASE_or_Pymatgen_format.ipynb
+    
+Alternatively, we could manually download their database json files from here:
     https://jarvis-materials-design.github.io/dbdocs/thedownloads/
     >> looking at the "3D-materials curated data"
-This is really just a large JSON file that I can download manually, and then
-add to the database using this script. The JSON of the metadata includes the structure
-information, which we need to format/feed into a pymatgen object.
+
+Currently we use the jarvis-tools package below. This is slow to download, but
+at least saves us from manually finding the files.
 
 """
-
-import json
 
 from django.db import transaction
 
 from tqdm import tqdm
 from pymatgen.core.structure import Structure
+
+from jarvis.db.figshare import data as jarvis_helper
 
 from simmate.configuration.django import setup_full  # sets up database
 
@@ -37,9 +39,9 @@ def load_all_structures(filename="jarvis.json"):
     # directory before loading this. Simply pick the most update file from here:
     # https://figshare.com/articles/dataset/jdft_3d-7-7-2018_json/6815699
 
-    # load the entire json file into python and close the file right away
-    with open(filename) as file:
-        data = json.load(file)
+    # Load all of the 3D data from JARVIS. This gives us a list of dictionaries
+    # TODO: In the future, we can include other datasets like their 2D dataset.
+    data = jarvis_helper("dft_3d")
 
     # Now iterate through all the data -- which is a list of dictionaries.
     # We convert the data into a pymatgen object and sanitize it before saving
@@ -63,8 +65,9 @@ def load_all_structures(filename="jarvis.json"):
         # these with None.
         entry_dict = {
             "structure": structure_sanitized,
-            "id": "JVASP-" + entry["jid"],
-            "e_above_hull": entry["ehull"] if entry["ehull"] != "na" else None,
+            "id": entry["jid"].lower(),
+            # the *1000 converts to meV
+            "energy_above_hull": entry["ehull"]*1000 if entry["ehull"] != "na" else None,
             "formation_energy_per_atom": entry["formation_energy_peratom"]
             if entry["formation_energy_peratom"] != "na"
             else None,

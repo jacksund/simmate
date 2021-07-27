@@ -87,10 +87,10 @@ class Structure(models.Model):
     # the base chemical system (ex: "Y-C-F")
     chemical_system = models.CharField(max_length=25)
 
-    # Density of the crystal
+    # Density of the crystal (g/L)
     density = models.FloatField()
 
-    # Molar volume of the crystal.
+    # Molar volume of the crystal (mL/mol)
     # Note we prefer this over a "volume" field because volume is highly dependent
     # on the symmetry and the arbitray unitcell. If you are truly after small volumes
     # of the unitcell, it is likely you really just want to search by spacegroup.
@@ -159,9 +159,13 @@ class Structure(models.Model):
             nelement=len(structure.composition),
             chemical_system=structure.composition.chemical_system,
             density=structure.density,
-            # 1e-27 is to convert from cubic angstroms to Liter. so this is in L/mol
+            # 1e-27 is to convert from cubic angstroms to Liter and then 1e3 to
+            # mL. Therefore this value is in mL/mol
             # OPTIMIZE: move this to a class method
-            molar_volume=(structure.volume / structure.num_sites) * Avogadro * 1e-27,
+            molar_volume=(structure.volume / structure.num_sites)
+            * Avogadro
+            * 1e-27
+            * 1e3,
             spacegroup=structure.get_space_group_info(0.1)[1],  # OPTIMIZE
             formula_full=structure.composition.formula,
             formula_reduced=structure.composition.reduced_formula,
@@ -185,7 +189,7 @@ class Structure(models.Model):
         # accordingly. In the future, I can just assume my new format.
         # If the string starts with "#", then I know that I stored it as a "CIF".
         storage_format = "CIF" if (self.structure_json[0] == "#") else "POSCAR"
-        
+
         # convert the string to pymatgen Structure object
         structure = Structure_PMG.from_str(
             self.structure_json,

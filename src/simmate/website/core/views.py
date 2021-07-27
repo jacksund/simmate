@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.db.models import F
 
 from simmate.website.third_parties.forms import ChemicalSystemForm
 
 from simmate.database.third_parties.all import (
     MaterialsProjectStructure,
+    CodStructure,
     JarvisStructure,
     AflowStructure,
     OqmdStructure,
-    CodStructure,
 )
 
 
@@ -26,34 +26,56 @@ def home(request):
         form = ChemicalSystemForm(request.POST)
         # see if all of the data is valid
         if form.is_valid():
+
             # grab the cleaned data from the form
+            cleaned_data = form.cleaned_data
+
+            # check which databases the user wants to search and collect the
+            # proper models into a list that we query with below
+            databases_to_search = []
+            for database, database_model in (
+                ("aflow", AflowStructure),
+                ("cod", CodStructure),
+                ("jarvis", JarvisStructure),
+                ("materials_project", MaterialsProjectStructure),
+                ("oqmd", OqmdStructure),
+            ):
+                # if the user requested this database, the value will be true
+                if cleaned_data[database]:
+                    databases_to_search.append(database_model)
+
             # Note, this value is converted to a list of systems once cleaned.
-            chemical_systems = form.cleaned_data["chemical_system"]
-            # Now we can make the query! We limit the results to only 200 structures
-            # to make things easier on our server. We also only want to load the
-            # fields that we need -- so that everything runs faster.
-            # TODO: Should I sort by stability or something else?
-            # TODO: This is only the materials project for now.
-            structures = (
-                MaterialsProjectStructure.objects.filter(
-                    chemical_system__in=chemical_systems,
+            chemical_systems = cleaned_data["chemical_system"]
+
+            # now go through each database, search for the requested system
+            # and then pool them all together. We limit each database to 50
+            # results. Note the += below means we compile into a single list
+            structures = []
+            nstructures_possible = 0
+            for database_model in databases_to_search:
+                # Now we can make the query! We also dont want to load the
+                # structure json -- so that everything runs faster.
+                search_results = database_model.objects.filter(
+                    chemical_system__in=chemical_systems
                 ).defer("structure_json")
-                # if no e_above_hull value, place these last
-                .order_by(F("e_above_hull").asc(nulls_last=True))
-                # .values(
-                #     "id",
-                #     "formula_reduced",
-                #     "nsites",
-                #     "molar_volume",
-                #     "spacegroup",
-                # )
-                .all()[:200]
-            )
-            # We also tell the user how many results are possible if there are
-            # more than 200
-            nstructures_possible = MaterialsProjectStructure.objects.filter(
-                chemical_system__in=chemical_systems,
-            ).count()
+
+                # if the database provides the hull energy, we want to sort
+                # the structures by that (putting highest priority on stable ones)
+                if hasattr(database_model, "energy_above_hull"):
+                    # if there isn't a hull energy value, place these last
+                    search_results = search_results.order_by(
+                        F("energy_above_hull").asc(nulls_last=True)
+                    )
+
+                # now add the search results to the output
+                # for performance, we limit each database to 50 structures
+                structures += search_results.all()[:50]
+
+                # We also tell the user how many results are possible if there
+                # wasn't any limit on the structures returned
+                nstructures_possible += database_model.objects.filter(
+                    chemical_system__in=chemical_systems,
+                ).count()
 
     # if the page is grabbed via a 'GET' method, send an empty form
     else:

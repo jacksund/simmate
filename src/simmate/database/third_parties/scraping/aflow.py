@@ -52,8 +52,7 @@ def load_all_structures():
         #     # want all of them, we normally comment this line out. For testing, we
         #     # can pull a smaller subset of the structures.
         #     # I use the element Dy because it gives about 1,300 structures
-        #     AflowKeywords.species
-        #     == "Dy",
+        #     AflowKeywords.species == "Dy",
         # )
         .select(
             # Indicate what data we want to grab from each result. Note that we don't

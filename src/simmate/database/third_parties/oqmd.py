@@ -15,7 +15,7 @@ class OqmdStructure(Structure):
 
     # Extra data by OQMD's calculations
     final_energy = models.FloatField(blank=True, null=True)
-    e_above_hull = models.FloatField(blank=True, null=True)
+    energy_above_hull = models.FloatField(blank=True, null=True)
     band_gap = models.FloatField(blank=True, null=True)
     # !!! There are plenty more properties I can add too. Check a single entry
     # when scraping data for more (in simmate.database.third_parties.scrapping.aflow)
