@@ -9,7 +9,7 @@ import pandas
 from prefect.core.task import Task
 from prefect.utilities.tasks import defaults_from_attrs
 
-from simmate.utilities import get_directory
+from simmate.utilities import get_directory, empty_directory
 
 # This is a combination of prefect ShellTask, custodian Job, and Custodian main.
 
@@ -62,16 +62,18 @@ class SupervisedStagedShellTask(Task):
     # wait until the job has completed.
     monitor = True
 
-    # how often (in seconds) we should check the status of a shelltask if we
-    # are also monitoring the job while it runs
+    # If we are monitoring the job for errors while it runs, this is how often
+    # (in seconds) we should check the status of our job. Note this check is
+    # just whether the job is done or not. This is NOT how often we check for
+    # errors. See monitor_freq for that.
     polling_timestep = 10
 
-    # the frequency we should run checks with our monitors. This is based on the
-    # polling_timestep loops. For example, if we have a polling_timestep of 10
-    # seconds and a monitor_freq of 2, then we would run the monitor checks
-    # every other loop -- or every 2*10 = 20 seconds. The default values of
-    # polling_timestep=10 and monitor_freq=30 indicate that we run monitoring
-    # functions every 5 minutes (10*30=300s=5min).
+    # The frequency we should run check for errors with our monitors. This is 
+    # based on the polling_timestep loops. For example, if we have a 
+    # polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
+    # the monitor checks every other loop -- or every 2*10 = 20 seconds. The 
+    # default values of polling_timestep=10 and monitor_freq=30 indicate that 
+    # we run monitoring functions every 5 minutes (10*30=300s=5min).
     monitor_freq = 30
 
     def __init__(
@@ -80,7 +82,7 @@ class SupervisedStagedShellTask(Task):
         structure=None,
         # core parts
         command=None,
-        dir=None,
+        directory=None,
         errorhandlers=None,
         max_corrections=None,
         # settings for the stagedtask supervision/monitoring
@@ -91,8 +93,11 @@ class SupervisedStagedShellTask(Task):
         compress_output=False,
         return_corrections=True,
         save_corrections_tofile=False,
+        empty_directory_on_finish=False,
+        files_to_keep=[], # this is only used when empty_directory_on_finish=True
         corrections_filename="simmate_corrections_log.txt",
-        # To support other Prefect input options
+        # To support other Prefect input options. To see all the options, visit...
+        # https://docs.prefect.io/api/latest/core/task.html
         **kwargs,
     ):
 
@@ -101,7 +106,7 @@ class SupervisedStagedShellTask(Task):
         # to None in __init__ while our actual default values are defined above
         # as class attributes. This may seem funky at first glance, but it
         # makes inheriting from this class extremely pretty :)
-        # This code is effectively the same as @defaults_from_attrs(...)
+        # This code is effectively the same as @defaults_from_attrs(...).
         if command:
             self.command = command
         if structure:
@@ -119,31 +124,32 @@ class SupervisedStagedShellTask(Task):
 
         # These parameters will never have a default which is set to the attribute,
         # so go ahead and set them from what was given in the init
-        self.dir = dir
+        self.directory = directory
         self.structure = structure
         self.compress_output = compress_output
         self.return_corrections = return_corrections
         self.save_corrections_tofile = save_corrections_tofile
         self.corrections_filename = corrections_filename
+        self.empty_directory_on_finish=False,
 
         # now inherit the parent Prefect Task class
         super().__init__(**kwargs)
 
-    def setup(self, structure, dir):
+    def setup(self, structure, directory):
         """
         This abstract method is ran before the start of a job. Allows for some
         pre-processing. This includes creating a directory, writing input files
         or any other function ran before calling the executable.
         """
-        # Be sure to include dir and structure (or **kwargs) as input arguments for
+        # Be sure to include directory and structure (or **kwargs) as input arguments for
         # higher-level compatibility with the run method.
         # You should never need to call this method directly!
         pass
 
-    def execute(self, dir):
+    def execute(self, directory):
 
         # Establish the working directory for this run.
-        dir = get_directory(dir)
+        directory = get_directory(directory)
 
         # some errorhandlers run while the shelltask is running. These are known as
         # Monitors and are labled via the is_monitor attribute. It's good for us
@@ -166,7 +172,7 @@ class SupervisedStagedShellTask(Task):
             # launch the shelltask without waiting for it to complete. Also,
             # make sure to use common shell commands and to set the working
             # directory.
-            future = Popen(self.command, cwd=dir, shell=True)
+            future = Popen(self.command, cwd=directory, shell=True)
 
             # Assume the shelltask has no errors until proven otherwise
             has_error = False
@@ -199,7 +205,7 @@ class SupervisedStagedShellTask(Task):
                         for errorhandler in self.monitors:
                             # check if there's an error with this errorhandler
                             # and grab the error if so
-                            error = errorhandler.check(dir)
+                            error = errorhandler.check(directory)
                             if error:
                                 # determine if it is_terminating
                                 if errorhandler.is_terminating:
@@ -215,7 +221,7 @@ class SupervisedStagedShellTask(Task):
                                 # end the shelltask right away.
                                 else:
                                     # apply the fix now
-                                    correction = errorhandler.correct(error, dir)
+                                    correction = errorhandler.correct(error, directory)
                                     # record what's been changed
                                     corrections.append(
                                         (errorhandler.name, error, correction)
@@ -253,14 +259,14 @@ class SupervisedStagedShellTask(Task):
 
                 # check if there's an error with this errorhandler and grab the
                 # error if there is one
-                error = errorhandler.check(dir)
+                error = errorhandler.check(directory)
                 if error:
                     # record the error in case it wasn't done so above
                     has_error = True
                     # And apply the proper correction if there is one.
                     # Some errorhandlers will even raise an error here signaling
                     # that the stagedtask is unrecoverable and a lost cause.
-                    correction = errorhandler.correct(error, dir)
+                    correction = errorhandler.correct(error, directory)
                     # record what's been changed
                     corrections.append((errorhandler.name, error, correction))
                     # break from the errorhandler for-loop as we only apply the
@@ -298,19 +304,19 @@ class SupervisedStagedShellTask(Task):
         if self.return_corrections:
             return corrections
 
-    def workup(self, dir):
+    def workup(self, directory):
         """
         This method is called at the end of a job, *after* error detection.
         This allows post-processing, such as cleanup, analysis of results,
         etc. This should return the result of the entire job, such as a
         the final structure or final energy calculated.
         """
-        # Be sure to include dir (or **kwargs) as input argument for
+        # Be sure to include directory (or **kwargs) as input argument for
         # higher-level compatibility with the run method and SupervisedStagedTask
         # You should never need to call this method directly!
         pass
 
-    def postprocess(self, dir):
+    def postprocess(self, directory):
         # compress the output directory for storage if requested
         if self.compress_output:
             make_archive(
@@ -320,20 +326,28 @@ class SupervisedStagedShellTask(Task):
                 # !!! overwritten if I run another stagedtask right after it.
                 # !!! Consider using a unique filename for each save and returning
                 # !!! it, or just using a generic simmate_checkpoint name.
-                base_name=os.path.join(os.path.abspath(dir), os.path.basename(dir)),
+                base_name=os.path.join(os.path.abspath(directory), os.path.basename(directory)),
                 # format to use switch to gztar after testing
                 format="zip",
-                # full path to up tp dir that will be archived
-                root_dir=os.path.dirname(dir),
-                # directory within root_dir to archive
-                base_dir=os.path.basename(dir),
+                # full path to up tp directory that will be archived
+                root_directory=os.path.dirname(directory),
+                # directory within root_directory to archive
+                base_directory=os.path.basename(directory),
             )
+        
+        # In many cases, the user may want to delete everything inside the
+        # directory to save on filespace. Note that this will NOT delete the
+        # folder itself. This is because we want to leave the folder in case in
+        # case it's something like "SpyderWorkingDirectory" or the user
+        # wants to keep some folders/file (which they set in self.files_to_keep)
+        if self.empty_directory_on_finish:
+             empty_directory(directory, self.files_to_keep)
 
-    @defaults_from_attrs("structure", "dir")
+    @defaults_from_attrs("structure", "directory")
     def run(
         self,
         structure=None,
-        dir=None,
+        directory=None,
     ):
         """
         Runs the entire job in the current working directory without any error
@@ -346,19 +360,19 @@ class SupervisedStagedShellTask(Task):
             raise StructureRequiredError("a structure is required as an input")
 
         # establish the working directory
-        dir = get_directory(dir)
+        directory = get_directory(directory)
 
         # run the setup stage of the task
-        self.setup(structure, dir)
+        self.setup(structure, directory)
 
         # run the shelltask and error supervision stages
-        corrections = self.execute(dir)
+        corrections = self.execute(directory)
 
         # run the workup stage of the task
-        result = self.workup(dir)
+        result = self.workup(directory)
 
         # run the postprocess in case any zipping/archiving was requested
-        self.postprocess(dir)
+        self.postprocess(directory)
 
         # Based on the input settings, return either the (result, log) or
         # just the result on its own.

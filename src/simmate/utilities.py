@@ -7,9 +7,10 @@ This file hosts common functions that are used throughout Simmate
 import os
 import itertools
 from tempfile import TemporaryDirectory
+import shutil
 
 
-def get_directory(dir):
+def get_directory(directory=None):
 
     # There are many cases where the user can choose their working directory
     # for a given calculation, where they can pass a number of options in.
@@ -25,34 +26,49 @@ def get_directory(dir):
     # nowhere else.
 
     # if no directory was provided, use the current working directory
-    if not dir:
-        dir = os.getcwd()
+    if not directory:
+        directory = os.getcwd()
     # if the user provided a tempdir, we want it's name
-    elif isinstance(dir, TemporaryDirectory):
-        dir = dir.name
+    elif isinstance(directory, TemporaryDirectory):
+        directory = directory.name
     # otherwise make sure the directory the user provided exists and if it does
     # not, then make it!
     else:
-        # !!! Or should I assert the directory exists and raise an error if not?
-        if not os.path.exists(dir):
-            os.mkdir(dir)
+        # We use mkdirs instead of mkdir because we want to make these directory
+        # recursively. That is, we can do "path/to/newfolder1/newfolder2" where
+        # multiple folders can be made with one call.
+        # Also if the folder already exists, we don't want to raise an error.
+        os.makedirs(directory, exist_ok=True)
     # and return the full path to the directory
-    return dir
+    return directory
+
+
+def empty_directory(directory, files_to_keep=[]):
+
+    # grab all of the files and folders inside the listed directory
+    for filename in os.listdir(directory):
+        if filename not in files_to_keep:
+            # check if we have a folder or a file.
+            # Folders we delete with shutil and files with the os module
+            if os.path.isdir(filename):
+                shutil.rmtree(filename)  # ignore_errors=False
+            else:
+                os.remove(filename)
 
 
 def get_chemical_subsystems(chemical_system):
-    
+
     # TODO: this will may be better located elsewhere. Maybe even as a method for
     # the Composition class.
-    
+
     # Given a chemical system, this returns all chemical systems that are also
     # contained within it. For example, "Y-C" would return ["Y", "C", "C-Y"].
     # Note that the returned list has elements of a given system in alphabetical
     # order (i.e. it gives "C-Y" and not "Y-C")
-    
+
     # Convert the system to a list of elements
     system_cleaned = chemical_system.split("-")
-    
+
     # Now generate all unique combinations of these elements. Because we also
     # want combinations of different sizes (nelements = 1, 2, ... N), then we
     # put this in a for-loop.
@@ -60,11 +76,11 @@ def get_chemical_subsystems(chemical_system):
     for i in range(len(system_cleaned)):
         # i is the size of combination we want. We now ask for each unique combo
         # of elements at this given size.
-        for combo in itertools.combinations(system_cleaned, i+1):
-            # Combo will be a tuple of elements that we then convert back to a 
+        for combo in itertools.combinations(system_cleaned, i + 1):
+            # Combo will be a tuple of elements that we then convert back to a
             # chemical system. We also sort this alphabetically.
             #   ex: ("Y", "C", "F") ---> "C-F-Y"
             subsystem = "-".join(sorted(combo))
             subsystems.append(subsystem)
-    
+
     return subsystems
