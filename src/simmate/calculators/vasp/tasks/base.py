@@ -100,7 +100,7 @@ class VaspTask(SSSTask):
 
         # write the POTCAR file
         Potcar.to_file_from_type(
-            structure.species,
+            structure.composition.elements,
             self.functional,
             os.path.join(dir, "POTCAR"),
             self.potcar_mappings,

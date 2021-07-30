@@ -171,3 +171,7 @@ with Flow("NEB Analysis") as workflow:
 # LIST OF SOME ERRORS ENCOUNTERED...
 
 # Fatal error! IBRION=0, but no entry for POTIM on file INCAR. MUST be specified!
+
+# WARNING: type information on POSCAR and POTCAR are incompatible
+# POTCAR overwrites the type information in POSCAR
+
