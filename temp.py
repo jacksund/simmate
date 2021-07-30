@@ -7,6 +7,7 @@
 # pymatgen-diffusion is outdated on anaconda
 # pip install pymatgen-analysis-diffusion
 
+# git clone https://github.com/jacksund/simmate.git
 # pip install -e simmate
 
 # --------------------------------------------------------------------------------------

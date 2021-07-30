@@ -133,12 +133,13 @@ with Flow("NEB Analysis") as workflow:
     min_sl_vector = Parameter("min_sl_vector", default=8)
     # nimages = Parameter("nimages", default=5)
     # directory = Parameter("directory", default=".")
-    # vasp_cmd = Parameter("vasp_cmd", default="mpirun -n 16 vasp_std")
+    vasp_cmd = Parameter("vasp_command", default="vasp > vasp.out")
 
     # Relax the starting bulk structure
     structure_relaxed = relax_structure(
         structure=structure,
         directory="bulk_relaxation",
+        command = vasp_cmd,
     )
 
     # Identify all symmetrically unique pathways
@@ -164,7 +165,7 @@ with Flow("NEB Analysis") as workflow:
 # from pymatgen.core.structure import Structure
 # from simmate.workflows.diffusion.nudged_elastic_band import workflow
 # structure = Structure.from_file("baalgef.cif")
-# test = workflow.run(structure=structure, migrating_specie="F")
+# test = workflow.run(structure=structure, migrating_specie="F", vasp_command="echo test")
 
 # --------------------------
 
@@ -175,3 +176,19 @@ with Flow("NEB Analysis") as workflow:
 # WARNING: type information on POSCAR and POTCAR are incompatible
 # POTCAR overwrites the type information in POSCAR
 
+
+#  ----------------------------------------------------------------------------- 
+# |                                                                             |
+# |  ADVICE TO THIS USER RUNNING 'VASP/VAMP'   (HEAR YOUR MASTER'S VOICE ...):  |
+# |                                                                             |
+# |      You have a (more or less) 'small supercell' and for smaller cells      |
+# |      it is recommended  to use the reciprocal-space projection scheme!      |
+# |      The real space optimization is not  efficient for small cells and it   |
+# |      is also less accurate ...                                              |
+# |      Therefore set LREAL=.FALSE. in the  INCAR file                         |
+# |                                                                             |
+#  ----------------------------------------------------------------------------- 
+
+# /bin/sh: line 1: 2696800 Segmentation fault      (core dumped) vasp > vasp.out
+
+# /bin/sh: vasp: command not found

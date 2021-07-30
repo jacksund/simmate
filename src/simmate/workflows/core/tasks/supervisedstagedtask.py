@@ -146,7 +146,7 @@ class SupervisedStagedShellTask(Task):
         # You should never need to call this method directly!
         pass
 
-    def execute(self, directory):
+    def execute(self, directory, command):
 
         # Establish the working directory for this run.
         directory = get_directory(directory)
@@ -172,7 +172,7 @@ class SupervisedStagedShellTask(Task):
             # launch the shelltask without waiting for it to complete. Also,
             # make sure to use common shell commands and to set the working
             # directory.
-            future = Popen(self.command, cwd=directory, shell=True)
+            future = Popen(command, cwd=directory, shell=True)
 
             # Assume the shelltask has no errors until proven otherwise
             has_error = False
@@ -343,11 +343,12 @@ class SupervisedStagedShellTask(Task):
         if self.empty_directory_on_finish:
              empty_directory(directory, self.files_to_keep)
 
-    @defaults_from_attrs("structure", "directory")
+    @defaults_from_attrs("structure", "directory", "command")
     def run(
         self,
         structure=None,
         directory=None,
+        command=None,
     ):
         """
         Runs the entire job in the current working directory without any error
@@ -355,6 +356,12 @@ class SupervisedStagedShellTask(Task):
         run this through the SupervisedJobTask class. This method should
         very rarely be used!
         """
+        
+        # because the command is something that is frequently changed at the 
+        # workflow level, then we want to make it so the user can set it for
+        # each unique task.run() call. Otherwise we grab the default from the
+        # class attribute
+        
         # make sure a structure was given if it's required
         if not structure and self.requires_structure:
             raise StructureRequiredError("a structure is required as an input")
@@ -366,7 +373,7 @@ class SupervisedStagedShellTask(Task):
         self.setup(structure, directory)
 
         # run the shelltask and error supervision stages
-        corrections = self.execute(directory)
+        corrections = self.execute(directory, command)
 
         # run the workup stage of the task
         result = self.workup(directory)
