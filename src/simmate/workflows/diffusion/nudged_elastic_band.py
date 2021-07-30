@@ -2,7 +2,7 @@
 
 from prefect import task, Flow, Parameter
 
-from pymatgen_diffusion.neb.pathfinder import DistinctPathFinder, IDPPSolver
+from pymatgen.analysis.diffusion.neb.pathfinder import DistinctPathFinder, IDPPSolver
 from pymatgen.core.structure import Structure
 
 from simmate.calculators.vasp.tasks.base import VaspTask
@@ -27,43 +27,34 @@ Nudged elastic band is composed of the following stages...
 
 """
 
-# The first task is just to optimize the bulk structure with VASP
-relax_bulk_structure = VaspTask(
+# The a series of tasks is just to optimize the structure with VASP. I can use
+# this single class to do it because I turn symmetry off from the start.
+# I currently base these off of MITRelaxSet
+# https://github.com/materialsproject/pymatgen/blob/master/pymatgen/io/vasp/MITRelaxSet.yaml
+relax_structure = VaspTask(
     incar=dict(
-        EDIFF=1.0e-07,
-        EDIFFG=-1e-04,
+        ALGO="FAST",
+        EDIFF=1.0e-05,
         ENCUT=520,
-        ISMEAR=0,
-        LCHARG=True,
-        LAECHG=True,
+        IBRION=2,
+        ICHARG=1,
+        ISIF=3,
+        ISMEAR=-5,
+        ISPIN=2,
+        ISYM=0,
+        # LDAU --> These parameters are excluded for now.
+        LORBIT=11,
+        LREAL="auto",
         LWAVE=False,
+        NELM=200,
+        NELMIN=6,
         NSW=99,
         PREC="Accurate",
         SIGMA=0.05,
-        KSPACING=0.5,
+        KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
     ),
     functional="PBE",
 )
-
-
-@task
-def make_cubic_supercell(structure, min_sl_vector=8):
-
-    # This task only exists because I'm stuck on pymatgen-diffusion v2020.10.8
-    # In this version, I need to pass a supercell into DistinctPathFinder. In
-    # future versions, I instead convert to a supercell AFTER I have the paths
-    # from DistinctPathFinder.
-
-    # convert the structure to the LLL reduced form
-    structure_new = structure.copy(sanitize=True)
-
-    # convert to a supercell
-    supercell_size = [
-        (min_sl_vector // length) + 1 for length in structure_new.lattice.lengths
-    ]
-    structure_new.make_supercell(supercell_size)
-
-    return structure_new
 
 
 @task
@@ -94,28 +85,27 @@ def find_all_unique_pathways(structure, migrating_specie):
     return paths[0]
 
 
-# The first task is just to optimize the bulk structure with VASP
-relax_endpoint_structure = VaspTask(
-    incar=dict(
-        EDIFF=1.0e-07,
-        EDIFFG=-1e-04,
-        ENCUT=520,
-        ISMEAR=0,
-        LCHARG=True,
-        LAECHG=True,
-        LWAVE=False,
-        NSW=99,
-        PREC="Accurate",
-        SIGMA=0.05,
-        KSPACING=0.5,
-        ISYM=0,
-    ),
-    functional="PBE",
-)
-
 # Take the two optimized endpoints and make images from them.
 # Note that directory here is the base directory where we'll find the 00 and
 # nimages+1 folder that the endpoints are in
+
+
+@task(nout=2)  # nout means we are returning two items!
+def get_endpoints(
+    pathway,
+    min_length=7,
+    min_atoms=40,
+    max_atoms=150,
+):
+
+    structure_start, structure_end, _ = pathway.get_sc_structures(
+        vac_mode=True,  # we assume vacancy-based diffusion for now
+        min_length=min_length,
+        min_atoms=min_atoms,
+        max_atoms=max_atoms,
+    )
+
+    return structure_start, structure_end
 
 
 @task
@@ -143,20 +133,23 @@ with Flow("NEB Analysis") as workflow:
     min_sl_vector = Parameter("min_sl_vector", default=8)
     # nimages = Parameter("nimages", default=5)
     # directory = Parameter("directory", default=".")
-     # vasp_cmd = Parameter("vasp_cmd", default="mpirun -n 16 vasp_std")
+    # vasp_cmd = Parameter("vasp_cmd", default="mpirun -n 16 vasp_std")
 
     # Relax the starting bulk structure
-    structure_relaxed = relax_bulk_structure(
+    structure_relaxed = relax_structure(
         structure=structure,
         directory="bulk_relaxation",
     )
 
-    # convert to cubic supercell
-    supercell = make_cubic_supercell(structure=structure_relaxed, min_sl_vector=min_sl_vector)
-
     # Identify all symmetrically unique pathways
     # TODO: currently I limit results to the first pathway
-    pathway = find_all_unique_pathways(supercell, migrating_specie)
+    pathway = find_all_unique_pathways(structure_relaxed, migrating_specie)
+
+    # convert to cubic supercell
+    start, end = get_endpoints(
+        pathway=pathway,
+        min_length=min_sl_vector,
+    )
 
     # *** and then the remaindering steps are done for each individual pathway ***
 
@@ -170,5 +163,11 @@ with Flow("NEB Analysis") as workflow:
 
 # from pymatgen.core.structure import Structure
 # from simmate.workflows.diffusion.nudged_elastic_band import workflow
-# structure = Structure.from_file("ybof.cif")
+# structure = Structure.from_file("baalgef.cif")
 # test = workflow.run(structure=structure, migrating_specie="F")
+
+# --------------------------
+
+# LIST OF SOME ERRORS ENCOUNTERED...
+
+# Fatal error! IBRION=0, but no entry for POTIM on file INCAR. MUST be specified!

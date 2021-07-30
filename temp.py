@@ -5,7 +5,7 @@
 # conda create -n simmate -c conda-forge python=3.8 numpy pandas django prefect dask click django-crispy-forms django-pandas psycopg2 dask-jobqueue scikit-learn pytest matplotlib plotly pymatgen spyder
 
 # pymatgen-diffusion is outdated on anaconda
-# pip install 
+# pip install pymatgen-analysis-diffusion
 
 # pip install -e simmate
 
