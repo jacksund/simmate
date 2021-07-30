@@ -4,6 +4,7 @@ import os
 import time
 from shutil import make_archive
 from subprocess import Popen
+from typing import Any, Tuple
 
 import pandas
 from prefect.core.task import Task
@@ -90,12 +91,11 @@ class SupervisedStagedShellTask(Task):
         polling_timestep=None,
         monitor_freq=None,
         # return, cleanup, and file saving settings
-        compress_output=False,
-        return_corrections=True,
-        save_corrections_tofile=False,
+        save_corrections_to_file=True,
+        corrections_filename="simmate_corrections_log.txt",
         empty_directory_on_finish=False,
         files_to_keep=[], # this is only used when empty_directory_on_finish=True
-        corrections_filename="simmate_corrections_log.txt",
+        compress_output=False,
         # To support other Prefect input options. To see all the options, visit...
         # https://docs.prefect.io/api/latest/core/task.html
         **kwargs,
@@ -127,8 +127,7 @@ class SupervisedStagedShellTask(Task):
         self.directory = directory
         self.structure = structure
         self.compress_output = compress_output
-        self.return_corrections = return_corrections
-        self.save_corrections_tofile = save_corrections_tofile
+        self.save_corrections_to_file = save_corrections_to_file
         self.corrections_filename = corrections_filename
         self.empty_directory_on_finish=empty_directory_on_finish
         self.files_to_keep=files_to_keep
@@ -292,7 +291,7 @@ class SupervisedStagedShellTask(Task):
 
         # write the log of corrections to file if requested. This is written
         # as a CSV file format.
-        if self.save_corrections_tofile:
+        if self.save_corrections_to_file:
             # compile the corrections metadata into a dataframe
             data = pandas.DataFrame(
                 corrections,
@@ -301,9 +300,8 @@ class SupervisedStagedShellTask(Task):
             # write the dataframe to a csv file
             data.to_csv(self.corrections_filename)
 
-        # if the user wants the corrections returned, return them
-        if self.return_corrections:
-            return corrections
+        # now return the corrections for them to stored/used elsewhere
+        return corrections
 
     def workup(self, directory):
         """
@@ -350,13 +348,18 @@ class SupervisedStagedShellTask(Task):
         structure=None,
         directory=None,
         command=None,
-    ):
+    ) -> Tuple[Any, list]:
         """
         Runs the entire job in the current working directory without any error
         handling. If you want robust error handling, then you should instead
         run this through the SupervisedJobTask class. This method should
         very rarely be used!
         """
+        
+        # Note that we have "-> Tuple[Any, list]" at the end of our run method.
+        # This tells Prefect that we are returning two things...
+        #   (1) all of the corrections made during execution
+        #   (2) the result of our workup method
         
         # because the command is something that is frequently changed at the 
         # workflow level, then we want to make it so the user can set it for
@@ -373,21 +376,19 @@ class SupervisedStagedShellTask(Task):
         # run the setup stage of the task
         self.setup(structure, directory)
 
-        # run the shelltask and error supervision stages
+        # run the shelltask and error supervision stages. This method returns
+        # a list of any corrections applied during the run.
         corrections = self.execute(directory, command)
 
-        # run the workup stage of the task
+        # run the workup stage of the task. This is where the data/info is pull
+        # out from the calculation and is thus our "result".
         result = self.workup(directory)
 
-        # run the postprocess in case any zipping/archiving was requested
+        # run the postprocess in case any zipping/archiving/cleanup was requested
         self.postprocess(directory)
 
-        # Based on the input settings, return either the (result, log) or
-        # just the result on its own.
-        if self.return_corrections:
-            return (result, corrections)
-        else:
-            return result
+        # Return both our result and our corrections as a tuple
+        return result, corrections
 
 
 # Custom errors that indicate exactly what causes the SupervisedStagedTask

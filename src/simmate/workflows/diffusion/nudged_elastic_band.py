@@ -136,7 +136,7 @@ with Flow("NEB Analysis") as workflow:
     vasp_cmd = Parameter("vasp_command", default="vasp > vasp.out")
 
     # Relax the starting bulk structure
-    structure_relaxed = relax_structure(
+    structure_relaxed, corrections = relax_structure(
         structure=structure,
         directory="bulk_relaxation",
         command = vasp_cmd,

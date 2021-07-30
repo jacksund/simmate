@@ -80,33 +80,33 @@ class VaspTask(SSSTask):
         # now inherit from parent SSSTask class
         super().__init__(**kwargs)
 
-    def setup(self, structure, dir):
+    def setup(self, structure, directory):
 
         # TODO should I sanitize the structure first? primitive and LLL reduce?
 
         # write the poscar file
-        Poscar.to_file(structure, os.path.join(dir, "POSCAR"))
+        Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
 
         # write the incar file
-        Incar(**self.incar).to_file(os.path.join(dir, "INCAR"))
+        Incar(**self.incar).to_file(os.path.join(directory, "INCAR"))
 
         # if KSPACING is not provided AND kpoints is, write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
             Kpoints.to_file(
                 structure,
                 self.kpoints,
-                os.path.join(dir, "KPOINTS"),
+                os.path.join(directory, "KPOINTS"),
             )
 
         # write the POTCAR file
         Potcar.to_file_from_type(
             structure.composition.elements,
             self.functional,
-            os.path.join(dir, "POTCAR"),
+            os.path.join(directory, "POTCAR"),
             self.potcar_mappings,
         )
 
-    def workup(self, dir):
+    def workup(self, directory):
         """
         This is the most basic VASP workup where I simply load the final structure,
         final energy, and confirm convergence. I will likely make this a common
@@ -115,7 +115,7 @@ class VaspTask(SSSTask):
 
         # load the xml file and only parse the bare minimum
         xmlReader = Vasprun(
-            filename=os.path.join(dir, "vasprun.xml"),
+            filename=os.path.join(directory, "vasprun.xml"),
             parse_dos=False,
             parse_eigen=False,
             parse_projected_eigen=False,
@@ -135,4 +135,4 @@ class VaspTask(SSSTask):
         # return the desired info
         # TODO: in the future, I may just want to return the VaspRun object
         # by default.
-        return final_structure, final_energy
+        return final_structure
