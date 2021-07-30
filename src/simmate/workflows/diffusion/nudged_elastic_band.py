@@ -131,7 +131,7 @@ with Flow("NEB Analysis") as workflow:
     structure = Parameter("structure")
     migrating_specie = Parameter("migrating_specie")
     min_sl_vector = Parameter("min_sl_vector", default=8)
-    # nimages = Parameter("nimages", default=5)
+    nimages = Parameter("nimages", default=5)
     # directory = Parameter("directory", default=".")
     vasp_cmd = Parameter("vasp_command", default="vasp > vasp.out")
 
@@ -139,24 +139,38 @@ with Flow("NEB Analysis") as workflow:
     structure_relaxed, corrections = relax_structure(
         structure=structure,
         directory="bulk_relaxation",
-        command = vasp_cmd,
+        command=vasp_cmd,
     )
 
     # Identify all symmetrically unique pathways
-    # TODO: currently I limit results to the first pathway
     pathway = find_all_unique_pathways(structure_relaxed, migrating_specie)
+    # *** and then the remaindering steps are done for each individual pathway ***
+    # TODO: currently I limit analysis to the first pathway
 
-    # convert to cubic supercell
-    start, end = get_endpoints(
+    # grab our start/end structures of a target supercell size
+    start_structure, end_structure = get_endpoints(
         pathway=pathway,
         min_length=min_sl_vector,
     )
 
-    # *** and then the remaindering steps are done for each individual pathway ***
-
     # Relax the start/end supercell images
+    start_structure_relaxed, corrections = relax_structure(
+        structure=start_structure,
+        directory="start_image_relaxation",
+        command=vasp_cmd,
+    )
+    end_structure_relaxed, corrections = relax_structure(
+        structure=end_structure,
+        directory="end_image_relaxation",
+        command=vasp_cmd,
+    )
 
     # Interpolate the start/end supercell images and empirically relax these using IDPP.
+    images = get_idpp_images(
+        start_structure_relaxed,
+        end_structure_relaxed,
+        nimages=nimages,
+    )
 
     # Relax all images using NEB
 
@@ -165,7 +179,7 @@ with Flow("NEB Analysis") as workflow:
 # from pymatgen.core.structure import Structure
 # from simmate.workflows.diffusion.nudged_elastic_band import workflow
 # structure = Structure.from_file("baalgef.cif")
-# test = workflow.run(structure=structure, migrating_specie="F", vasp_command="echo test")
+# test = workflow.run(structure=structure, vasp_command="echo test")
 
 # --------------------------
 
@@ -177,7 +191,7 @@ with Flow("NEB Analysis") as workflow:
 # POTCAR overwrites the type information in POSCAR
 
 
-#  ----------------------------------------------------------------------------- 
+#  -----------------------------------------------------------------------------
 # |                                                                             |
 # |  ADVICE TO THIS USER RUNNING 'VASP/VAMP'   (HEAR YOUR MASTER'S VOICE ...):  |
 # |                                                                             |
@@ -187,7 +201,7 @@ with Flow("NEB Analysis") as workflow:
 # |      is also less accurate ...                                              |
 # |      Therefore set LREAL=.FALSE. in the  INCAR file                         |
 # |                                                                             |
-#  ----------------------------------------------------------------------------- 
+#  -----------------------------------------------------------------------------
 
 # /bin/sh: line 1: 2696800 Segmentation fault      (core dumped) vasp > vasp.out
 

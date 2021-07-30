@@ -298,7 +298,7 @@ class SupervisedStagedShellTask(Task):
                 columns=["applied_errorhandler", "error_details", "correction_applied"],
             )
             # write the dataframe to a csv file
-            data.to_csv(self.corrections_filename)
+            data.to_csv(self.corrections_filename, index=False)
 
         # now return the corrections for them to stored/used elsewhere
         return corrections
