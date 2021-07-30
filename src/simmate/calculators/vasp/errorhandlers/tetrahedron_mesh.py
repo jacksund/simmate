@@ -33,10 +33,10 @@ class TetrahedronMesh(ErrorHandler):
         "DENTET",
     ]
 
-    def correct(self, error, dir):
+    def correct(self, error, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # check what the current KSPACING is. If it's not set, that means we're using

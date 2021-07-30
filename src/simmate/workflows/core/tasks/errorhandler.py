@@ -38,7 +38,7 @@ class ErrorHandler(ABC):
     # possible_error_messages --> a list of messages to find in the file
     
     
-    def check(self, dir):
+    def check(self, directory):
         """
         This method is called during the job (for monitors) or at the end of
         the job to check for errors. It searches for errors and returns the
@@ -62,7 +62,7 @@ class ErrorHandler(ABC):
         """
 
         # establish the full path to the output file
-        filename = os.path.join(dir, self.filename_to_check)
+        filename = os.path.join(directory, self.filename_to_check)
 
         # check to see that the file is there first
         if os.path.exists(filename):
@@ -84,7 +84,7 @@ class ErrorHandler(ABC):
         return False
 
     @abstractmethod
-    def correct(self, error, dir):
+    def correct(self, error, directory):
         """
         This method is called at the end of a job when an error is detected.
         It should perform any corrective measures relating to the detected

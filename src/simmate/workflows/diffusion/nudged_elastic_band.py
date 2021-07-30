@@ -6,6 +6,7 @@ from pymatgen.analysis.diffusion.neb.pathfinder import DistinctPathFinder, IDPPS
 from pymatgen.core.structure import Structure
 
 from simmate.calculators.vasp.tasks.base import VaspTask
+from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
 
 """
 Nudged elastic band is composed of the following stages...
@@ -54,6 +55,7 @@ relax_structure = VaspTask(
         KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
     ),
     functional="PBE",
+    errorhandlers=[TetrahedronMesh()]
 )
 
 
@@ -206,3 +208,7 @@ with Flow("NEB Analysis") as workflow:
 # /bin/sh: line 1: 2696800 Segmentation fault      (core dumped) vasp > vasp.out
 
 # /bin/sh: vasp: command not found
+
+# VERY BAD NEWS! internal error in subroutine IBZKPT:
+# Tetrahedron method fails for NKPT<4. NKPT =       2
+
