@@ -130,7 +130,8 @@ class SupervisedStagedShellTask(Task):
         self.return_corrections = return_corrections
         self.save_corrections_tofile = save_corrections_tofile
         self.corrections_filename = corrections_filename
-        self.empty_directory_on_finish=False,
+        self.empty_directory_on_finish=empty_directory_on_finish
+        self.files_to_keep=files_to_keep
 
         # now inherit the parent Prefect Task class
         super().__init__(**kwargs)
