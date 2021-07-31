@@ -142,7 +142,7 @@ class Incar(dict):
         """
         When given a vasp parameter and it's value as a string, this helper
         function will use the key (parameter) to determine how to convert the
-        val string to the proper python datatype (int,float, bool, list...).
+        val string to the proper python datatype (int, float, bool, list...).
         I have the most common keys mapped out, but if a parameter is given that
         isn't mapped, I simply leave it as a string.
         """
@@ -195,6 +195,7 @@ class Incar(dict):
             "AGGAC",
             "PARAM1",
             "PARAM2",
+            "KSPACING",
         )
         int_keys = (
             "NSW",
