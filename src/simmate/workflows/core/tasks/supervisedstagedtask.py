@@ -69,11 +69,11 @@ class SupervisedStagedShellTask(Task):
     # errors. See monitor_freq for that.
     polling_timestep = 10
 
-    # The frequency we should run check for errors with our monitors. This is 
-    # based on the polling_timestep loops. For example, if we have a 
+    # The frequency we should run check for errors with our monitors. This is
+    # based on the polling_timestep loops. For example, if we have a
     # polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
-    # the monitor checks every other loop -- or every 2*10 = 20 seconds. The 
-    # default values of polling_timestep=10 and monitor_freq=30 indicate that 
+    # the monitor checks every other loop -- or every 2*10 = 20 seconds. The
+    # default values of polling_timestep=10 and monitor_freq=30 indicate that
     # we run monitoring functions every 5 minutes (10*30=300s=5min).
     monitor_freq = 30
 
@@ -94,7 +94,7 @@ class SupervisedStagedShellTask(Task):
         save_corrections_to_file=True,
         corrections_filename="simmate_corrections_log.txt",
         empty_directory_on_finish=False,
-        files_to_keep=[], # this is only used when empty_directory_on_finish=True
+        files_to_keep=[],  # this is only used when empty_directory_on_finish=True
         compress_output=False,
         # To support other Prefect input options. To see all the options, visit...
         # https://docs.prefect.io/api/latest/core/task.html
@@ -129,8 +129,8 @@ class SupervisedStagedShellTask(Task):
         self.compress_output = compress_output
         self.save_corrections_to_file = save_corrections_to_file
         self.corrections_filename = corrections_filename
-        self.empty_directory_on_finish=empty_directory_on_finish
-        self.files_to_keep=files_to_keep
+        self.empty_directory_on_finish = empty_directory_on_finish
+        self.files_to_keep = files_to_keep
 
         # now inherit the parent Prefect Task class
         super().__init__(**kwargs)
@@ -298,7 +298,10 @@ class SupervisedStagedShellTask(Task):
                 columns=["applied_errorhandler", "error_details", "correction_applied"],
             )
             # write the dataframe to a csv file
-            data.to_csv(self.corrections_filename, index=False)
+            data.to_csv(
+                os.path.join(directory, self.corrections_filename),
+                index=False,
+            )
 
         # now return the corrections for them to stored/used elsewhere
         return corrections
@@ -325,7 +328,9 @@ class SupervisedStagedShellTask(Task):
                 # !!! overwritten if I run another stagedtask right after it.
                 # !!! Consider using a unique filename for each save and returning
                 # !!! it, or just using a generic simmate_checkpoint name.
-                base_name=os.path.join(os.path.abspath(directory), os.path.basename(directory)),
+                base_name=os.path.join(
+                    os.path.abspath(directory), os.path.basename(directory)
+                ),
                 # format to use switch to gztar after testing
                 format="zip",
                 # full path to up tp directory that will be archived
@@ -333,14 +338,14 @@ class SupervisedStagedShellTask(Task):
                 # directory within root_directory to archive
                 base_directory=os.path.basename(directory),
             )
-        
+
         # In many cases, the user may want to delete everything inside the
         # directory to save on filespace. Note that this will NOT delete the
         # folder itself. This is because we want to leave the folder in case in
         # case it's something like "SpyderWorkingDirectory" or the user
         # wants to keep some folders/file (which they set in self.files_to_keep)
         if self.empty_directory_on_finish:
-             empty_directory(directory, self.files_to_keep)
+            empty_directory(directory, self.files_to_keep)
 
     @defaults_from_attrs("structure", "directory", "command")
     def run(
@@ -355,17 +360,17 @@ class SupervisedStagedShellTask(Task):
         run this through the SupervisedJobTask class. This method should
         very rarely be used!
         """
-        
+
         # Note that we have "-> Tuple[Any, list]" at the end of our run method.
         # This tells Prefect that we are returning two things...
         #   (1) all of the corrections made during execution
         #   (2) the result of our workup method
-        
-        # because the command is something that is frequently changed at the 
+
+        # because the command is something that is frequently changed at the
         # workflow level, then we want to make it so the user can set it for
         # each unique task.run() call. Otherwise we grab the default from the
         # class attribute
-        
+
         # make sure a structure was given if it's required
         if not structure and self.requires_structure:
             raise StructureRequiredError("a structure is required as an input")
