@@ -28,14 +28,36 @@ class NudgedElasticBandTask(VaspTask):
     # To tell VASP that we are doing an NEB calculation, we need to set the
     # IMAGES
     incar = dict(
-        EDIFF=1.0e-07,
+        # These settings are from MITRelaxSet
+        # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/MPRelaxSet.yaml
+        ALGO="FAST",
+        EDIFF=1.0e-05,
         ENCUT=520,
-        ISMEAR=0,
-        LCHARG=False,
+        # IBRION=2, --> overwritten by MITNEBSet below
+        ICHARG=1,
+        ISIF=3,
+        ISMEAR=-5,
+        ISPIN=2,
+        ISYM=0,
+        # LDAU --> These parameters are excluded for now.
+        LORBIT=11,
+        LREAL="auto",
         LWAVE=False,
-        NSW=0,
+        NELM=200,
+        NELMIN=6,
+        NSW=99,
         PREC="Accurate",
         SIGMA=0.05,
+        KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
+        
+        # These settings are from MITNEBSet
+        # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/sets.py#L2376-L2491
+        # IMAGES=len(structures) - 2, --> set inside task 
+        IBRION=1,
+        # ISYM=0, --> duplicate of setting above
+        LCHARG=False,
+        # LDAU=False, --> already the default value
+        
         # TODO: Allow IMAGES to be set like shown below.
         # For this, we use "__auto" to let Simmate set this automatically by
         # using the input structures given.

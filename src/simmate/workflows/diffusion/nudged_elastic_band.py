@@ -7,6 +7,7 @@ from pymatgen.core.structure import Structure
 
 from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
+from simmate.calculators.vasp.tasks.nudged_elastic_band import NudgedElasticBandTask
 
 """
 Nudged elastic band is composed of the following stages...
@@ -46,10 +47,10 @@ relax_structure = VaspTask(
         # LDAU --> These parameters are excluded for now.
         LORBIT=11,
         LREAL="auto",
-        LWAVE=True,  # changed to True so I can do restarts
+        LWAVE=False,
         NELM=200,
         NELMIN=6,
-        NSW=99,
+        NSW=0,  # !!! Changed to static energy for testing
         PREC="Accurate",
         SIGMA=0.05,
         KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
@@ -58,6 +59,8 @@ relax_structure = VaspTask(
     errorhandlers=[TetrahedronMesh()]
 )
 
+# FOR NEB RELAXATION
+run_neb = NudgedElasticBandTask()
 
 @task
 def find_all_unique_pathways(structure, migrating_specie):
