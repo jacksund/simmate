@@ -11,9 +11,13 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import sys
+
+import dj_database_url  # needed for DigitalOcean database connection
 
 from simmate import website  # needed to specify location of apps
 from simmate import database  # needed to specify location of database
+
 # from simmate.configuration.django import settings_user  # to allow extra apps supplied by user
 
 # The base directory is where simmate.website is located. Note this is Django's
@@ -30,13 +34,21 @@ DATABASE_DIR = os.path.dirname(os.path.abspath(database.__file__))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "ts@sqlo4ky*4*^*+iezl%^-^i^yfbqir#ref5_or4@x8i49(o$"
+# For DigitalOcean, we grab this secret key from an enviornment variable.
+# If this variable isn't set, then we instead generate a random one.
+from django.core.management.utils import get_random_secret_key
+
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# For DigitalOcean, we try grabbing this from an enviornment variable. If that
+# variable isn't set, then we assume we are debugging.
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = []
-
+# To make this compatible with DigitalOcean, we try to grab the allowed hosts
+# from an enviornment variable, which we then split into a list. If this
+# enviornment variable isn't set yet, then we just defaul to the localhost.
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 # List all applications that Django will initialize with. Write the full python
 # path to the app or it's config file. Note that relative python paths work too
@@ -110,27 +122,52 @@ TEMPLATES = [
 # "core" here is based on the name of my main django folder
 WSGI_APPLICATION = "simmate.website.core.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-# BUG: django docs say to always use forward slashes, but it works just fine
-# without them... For now, I don't inlcude the .replace("\\", "/").
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
+# -----------------------
+# Database Connection
+# Note that the database we connect to depends on whether we are testing things
+# locally or running things in production! So we use DEVELOPMENT_MODE setting
+# to decide how to connect.
+#
+# This is a DigitalOcean keyword that we use to help with alternative configurations.
+# For example, we could use this to decide which database to connect to below. It
+# defaults to True unless it's set otherwise in the enviornment.
+# The == "True" at the end converts this to a boolean for us.
+DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "True") == "True"
+#
+# If we are in development mode, then we only connect to our local SQLite database.
+# Alternatively, we would connect to a personal PostgreSQL database -- which I have
+# an example of this commented out below.
+if DEVELOPMENT_MODE is True:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
+            # "default": {
+            #     "ENGINE": "django.db.backends.postgresql_psycopg2",
+            #     "NAME": "simmate-test-pool",  # default on DigitalOcean is defaultdb
+            #     "USER": "doadmin",
+            #     "PASSWORD": "dibi5n3varep5ad8",
+            #     "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
+            #     "PORT": "25061",
+            #     'OPTIONS': {'sslmode': 'require'},  # !!! is this needed?
+            #     # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
+            # }
+        }
     }
-    # "default": {
-    #     "ENGINE": "django.db.backends.postgresql_psycopg2",
-    #     "NAME": "simmate-test-pool",  # default on DigitalOcean is defaultdb
-    #     "USER": "doadmin",
-    #     "PASSWORD": "dibi5n3varep5ad8",
-    #     "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-    #     "PORT": "25061",
-    #     'OPTIONS': {'sslmode': 'require'},  # !!! is this needed?
-    #     # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
-    # }
-}
+# When DigitalOcean runs the "collectstatic" command, we don't want to connect
+# any database. So we use the "sys" library to look at the command and ensure
+# it doesn't involve "collectstatic". Otherwise we use the URL that is set with
+# our enviornment variable.
+elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
+    # ensure that we have the database URL properly configured in DigitalOcean
+    if os.getenv("DATABASE_URL", None) is None:
+        raise Exception("DATABASE_URL environment variable not defined")
+    # Now connect our DigitalOcean to this database!
+    DATABASES = {
+        "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
+    }
+# -----------------------
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

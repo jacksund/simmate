@@ -2,6 +2,7 @@
 
 from django.shortcuts import render
 from django.db.models import F
+from django.contrib.auth.decorators import login_required
 
 from simmate.website.third_parties.forms import ChemicalSystemForm
 
@@ -13,7 +14,7 @@ from simmate.database.third_parties.all import (
     OqmdStructure,
 )
 
-
+@login_required
 def home(request):
 
     # The home page is also an html "form" because users submit queries from

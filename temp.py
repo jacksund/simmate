@@ -2,7 +2,7 @@
 
 # TO CREATE CONDA ENV...
 
-# conda create -n simmate -c conda-forge python=3.8 numpy pandas django prefect dask click django-crispy-forms django-pandas psycopg2 dask-jobqueue scikit-learn pytest matplotlib plotly pymatgen spyder graphviz
+# conda create -n simmate -c conda-forge python=3.8 numpy pandas django prefect dask click django-crispy-forms django-pandas psycopg2 dask-jobqueue scikit-learn pytest matplotlib plotly pymatgen spyder graphviz dj-database-url
 
 # pymatgen-diffusion is outdated on anaconda
 # pip install pymatgen-analysis-diffusion
@@ -14,6 +14,12 @@
 
 # TO RUN DJANGO SERVER...
 # django-admin runserver --settings=simmate.configuration.django.settings
+
+
+# To help setup Django on DigitalOcean
+# https://docs.digitalocean.com/products/app-platform/languages-frameworks/django/
+# https://www.digitalocean.com/community/tutorials/how-to-deploy-django-to-app-platform
+# https://github.com/digitalocean/sample-django
 
 # --------------------------------------------------------------------------------------
 

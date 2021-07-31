@@ -21,7 +21,7 @@ def connect_database_only():  # Wall time: 200 ms first call and 600 ns after
         return
 
     # import the settings I want from the actual django settings file
-    from simmate.website.core.settings import BASE_DIR, DATABASES, DEBUG
+    from simmate.configuration.django.settings import BASE_DIR, DATABASES, DEBUG
 
     # For speed, I only want this app installed
     # I also need to write out the full import path from django here.

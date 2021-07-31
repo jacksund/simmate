@@ -164,6 +164,7 @@ setup(
     #     'selenium',  # for web scraping (slow but robust)
     #     'dask-jobqueue',  # for submitting on clusters
     #     'scikit-learn',
+    #     'dj-database-url',
     #
     #     # For development
     #     'pytest',  # Optional
