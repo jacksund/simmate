@@ -46,7 +46,7 @@ relax_structure = VaspTask(
         # LDAU --> These parameters are excluded for now.
         LORBIT=11,
         LREAL="auto",
-        LWAVE=False,
+        LWAVE=True,  # changed to True so I can do restarts
         NELM=200,
         NELMIN=6,
         NSW=99,
@@ -95,9 +95,9 @@ def find_all_unique_pathways(structure, migrating_specie):
 @task(nout=2)  # nout means we are returning two items!
 def get_endpoints(
     pathway,
-    min_length=7,
-    min_atoms=40,
-    max_atoms=150,
+    min_length=4,
+    min_atoms=20,
+    max_atoms=80,
 ):
 
     structure_start, structure_end, _ = pathway.get_sc_structures(
@@ -180,8 +180,14 @@ with Flow("NEB Analysis") as workflow:
 
 # from pymatgen.core.structure import Structure
 # from simmate.workflows.diffusion.nudged_elastic_band import workflow
-# structure = Structure.from_file("baalgef.cif")
+# structure = Structure.from_file("ybof.cif")
 # test = workflow.run(structure=structure, vasp_command="echo test")
+
+# from pymatgen.analysis.diffusion.neb.pathfinder import DistinctPathFinder
+# pathfinder = DistinctPathFinder(structure,migrating_specie="F")
+# pathway = pathfinder.get_paths()[0]
+# structure_start, structure_end, test = pathway.get_sc_structures(vac_mode=False)
+# structure_start.composition
 
 # --------------------------
 
