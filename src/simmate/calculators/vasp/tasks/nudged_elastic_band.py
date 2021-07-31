@@ -30,9 +30,9 @@ class NudgedElasticBandTask(VaspTask):
     incar = dict(
         # These settings are from MITRelaxSet
         # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/MPRelaxSet.yaml
-        ALGO="FAST",
+        ALGO="Fast",
         EDIFF=1.0e-05,
-        ENCUT=520,
+        ENCUT=400,
         # IBRION=2, --> overwritten by MITNEBSet below
         ICHARG=1,
         ISIF=3,
@@ -67,7 +67,7 @@ class NudgedElasticBandTask(VaspTask):
     # We will use the PBE functional with all default mappings
     functional = "PBE"
 
-    def _pre_checks(self, structure, dir):
+    def _pre_checks(self, structure, directory):
         # This function is used inside of this class's setup method (shown below),
         # where we make sure the user has everything set up properly.
 
@@ -104,10 +104,10 @@ class NudgedElasticBandTask(VaspTask):
         # "mpirun -n 16 vasp" will not work for IMAGES=3 because 16 is not
         # divisible by 3.
 
-    def setup(self, structure, dir):
+    def setup(self, structure, directory):
 
         # run some prechecks to make sure the user has everything set up properly.
-        self._pre_checks(structure, dir)
+        self._pre_checks(structure, directory)
 
         # Here, each image (start to end structures) is put inside of its own
         # folder. We make those folders here, where they are named 00, 01, 02...N
@@ -115,7 +115,7 @@ class NudgedElasticBandTask(VaspTask):
         for i, image in enumerate(structure):
             # first make establish the foldername
             # The zfill function converts numbers from "1" to "01" for us
-            foldername = os.path.join(dir, str(i).zfill(2))
+            foldername = os.path.join(directory, str(i).zfill(2))
             # see if the folder exists, and if not, make it
             if not os.path.exists(foldername):
                 os.mkdir(foldername)
@@ -132,7 +132,7 @@ class NudgedElasticBandTask(VaspTask):
         # to Incar() below.
         
         # write the incar file
-        Incar(**self.incar).to_file(os.path.join(dir, "INCAR"))
+        Incar(**self.incar).to_file(os.path.join(directory, "INCAR"))
 
         # if KSPACING is not provided AND kpoints is, write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
@@ -140,7 +140,7 @@ class NudgedElasticBandTask(VaspTask):
                 # We use the first image as all should give the same result
                 structure[0],
                 self.kpoints,
-                os.path.join(dir, "KPOINTS"),
+                os.path.join(directory, "KPOINTS"),
             )
 
         # write the POTCAR file
@@ -148,6 +148,6 @@ class NudgedElasticBandTask(VaspTask):
             # We use the first image as all should give the same result
             structure[0].species,
             self.functional,
-            os.path.join(dir, "POTCAR"),
+            os.path.join(directory, "POTCAR"),
             self.potcar_mappings,
         )

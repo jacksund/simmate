@@ -35,9 +35,9 @@ Nudged elastic band is composed of the following stages...
 # https://github.com/materialsproject/pymatgen/blob/master/pymatgen/io/vasp/MITRelaxSet.yaml
 relax_structure = VaspTask(
     incar=dict(
-        ALGO="FAST",
+        ALGO="Fast",
         EDIFF=1.0e-05,
-        ENCUT=520,
+        ENCUT=400,
         IBRION=2,
         ICHARG=1,
         ISIF=3,
@@ -178,6 +178,7 @@ with Flow("NEB Analysis") as workflow:
     )
 
     # Relax all images using NEB
+    run_neb(structure=images,)
 
 # --------------------------
 
