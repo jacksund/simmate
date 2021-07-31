@@ -178,7 +178,10 @@ with Flow("NEB Analysis") as workflow:
     )
 
     # Relax all images using NEB
-    run_neb(structure=images,)
+    run_neb(
+        structure=images,
+        command=vasp_cmd,
+    )
 
 # --------------------------
 
@@ -221,4 +224,6 @@ with Flow("NEB Analysis") as workflow:
 
 # VERY BAD NEWS! internal error in subroutine IBZKPT:
 # Tetrahedron method fails for NKPT<4. NKPT =       2
+
+#  M_divide: can not subdivide           44 nodes by           5
 

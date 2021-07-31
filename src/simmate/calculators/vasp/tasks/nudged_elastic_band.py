@@ -102,7 +102,7 @@ class NudgedElasticBandTask(VaspTask):
         # TODO: add a precheck that ensures the number of cores VASP is ran on
         # is also divisible by the number of images. For example...
         # "mpirun -n 16 vasp" will not work for IMAGES=3 because 16 is not
-        # divisible by 3.
+        # divisible by 3. But this also may be better suited for an ErrorHandler
 
     def setup(self, structure, directory):
 
