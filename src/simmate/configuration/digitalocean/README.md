@@ -85,7 +85,7 @@ DEVELOPMENT_MODE=True
 ```
 6. Change our "Run Command" to...
 ```
-gunicorn --worker-tmp-dir /dev/shm django_app.wsgi
+gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi
 ```
 7. Use the button at the bottom of this page to connect to our PostgreSQL database set-up above
 8. We can still with the defaults for the rest of the pages! Create your server when you're ready!
