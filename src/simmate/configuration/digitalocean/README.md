@@ -75,7 +75,7 @@ These are the tutorials that I'm following along with:
 2. Select Github (and give github access if this is your first time)
 3. For your "Source", we want to select our project. For me, this is "jacksund/simmate". Leave everything else at its default. 
 4. When you go to the next page, you should see that Python was detected. We will now update some of these settings
-5. Edit "Enviornment Variables" to include the following. Note that we are connecting to our database pool and that your secret key should be [randomly generated](https://passwordsgenerator.net/)!:
+5. Edit "Enviornment Variables" to include the following. Note that we are connecting to our database pool and that your secret key should be [randomly generated](https://passwordsgenerator.net/) and encrypted!:
 ```
 DJANGO_ALLOWED_HOSTS=${APP_DOMAIN}
 DATABASE_URL=${simmate-database-pool.DATABASE_URL}

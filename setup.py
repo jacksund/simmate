@@ -156,7 +156,7 @@ setup(
         'django',
         'prefect',
         'dask',
-        'click',
+        # 'click',
     
         # Extra dependencies
         'django-crispy-forms',  # for formatting of online forms
@@ -166,6 +166,7 @@ setup(
         'dask-jobqueue',  # for submitting on clusters
         'scikit-learn',
         'dj-database-url',  # for DigitalOcean URL conversion
+        'gunicorn',  # for website server (Django+DigitalOcean)
     
         # For development
         'pytest',
