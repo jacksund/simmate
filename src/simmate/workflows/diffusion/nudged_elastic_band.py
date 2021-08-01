@@ -135,7 +135,9 @@ with Flow("NEB Analysis") as workflow:
     # These are the input parameters for the overall workflow
     structure = Parameter("structure")
     migrating_specie = Parameter("migrating_specie")
-    min_sl_vector = Parameter("min_sl_vector", default=8)
+    min_length=Parameter("min_length", default=4)
+    min_atoms=Parameter("min_atoms", default=20)
+    max_atoms=Parameter("max_atoms", default=80)
     nimages = Parameter("nimages", default=5)
     # directory = Parameter("directory", default=".")
     vasp_cmd = Parameter("vasp_command", default="vasp > vasp.out")
@@ -155,7 +157,9 @@ with Flow("NEB Analysis") as workflow:
     # grab our start/end structures of a target supercell size
     start_structure, end_structure = get_endpoints(
         pathway=pathway,
-        min_length=min_sl_vector,
+        min_length=min_length,
+        min_atoms=min_atoms,
+        max_atoms=max_atoms,
     )
 
     # Relax the start/end supercell images

@@ -4,6 +4,7 @@ import os
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
 from simmate.calculators.vasp.tasks.base import VaspTask
+from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
 
 # NOTE TO USER:
 # This NEB task is very different from all other VASP tasks!
@@ -66,6 +67,9 @@ class NudgedElasticBandTask(VaspTask):
 
     # We will use the PBE functional with all default mappings
     functional = "PBE"
+    
+    # We also set up some error handlers that are commonly used with 
+    errorhandlers=[TetrahedronMesh()]
 
     def _pre_checks(self, structure, directory):
         # This function is used inside of this class's setup method (shown below),
