@@ -13,6 +13,7 @@ For more info on changing this file, look here:
 from setuptools import setup, find_packages
 import pathlib
 
+# Grab the full path to this file
 here = pathlib.Path(__file__).parent.resolve()
 
 # Get the long description from the README file
@@ -148,42 +149,42 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    # install_requires=[
-    #     # Core dependencies
-    #     'numpy',
-    #     'pandas',
-    #     'django',
-    #     'prefect',
-    #     'dask',
-    #     'click',
-    #
-    #     # Extra dependencies
-    #     'django-crispy-forms',  # for formatting of online forms
-    #     'django-pandas',  # for converting QuerySets to PandasDF
-    #     'psycopg2',  # for Postgres connections
-    #     'selenium',  # for web scraping (slow but robust)
-    #     'dask-jobqueue',  # for submitting on clusters
-    #     'scikit-learn',
-    #     'dj-database-url',
-    #
-    #     # For development
-    #     'pytest',  # Optional
-    #     'spyder',  # Optional
-    #
-    #     # For visualization
-    #     'graphviz',  # python-graphviz on conda. For viewing prefect flows
-    #     'plotly',
-    #     'matplotlib',
-    #     'seaborn',
-    #
-    #     # These are from the MP stack and I want to drop dependency
-    #     'pymatgen',
-    #     'pymatgen-diffusion',
-    #     'custodian',
-    #     'fireworks',
-    #     'matminer',
-    #     'dnspython',  # for mongocloud + fireworks
-    # ],
+    install_requires=[
+        # Core dependencies
+        'numpy',
+        'pandas',
+        'django',
+        'prefect',
+        'dask',
+        'click',
+    
+        # Extra dependencies
+        'django-crispy-forms',  # for formatting of online forms
+        'django-pandas',  # for converting QuerySets to PandasDF
+        'psycopg2',  # for Postgres connections
+        # 'selenium',  # for web scraping (slow but robust)
+        'dask-jobqueue',  # for submitting on clusters
+        'scikit-learn',
+        'dj-database-url',  # for DigitalOcean URL conversion
+    
+        # For development
+        'pytest',
+        # 'spyder',
+    
+        # For visualization
+        'graphviz',  # python-graphviz on conda. For viewing prefect flows
+        'plotly',
+        'matplotlib',
+        'seaborn',
+    
+        # These are from the MP stack and I want to drop dependency
+        'pymatgen',
+        'pymatgen-analysis-diffusion',
+        # 'custodian',
+        # 'fireworks',
+        # 'matminer',
+        # 'dnspython',  # for mongocloud + fireworks
+    ],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"

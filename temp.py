@@ -15,12 +15,6 @@
 # TO RUN DJANGO SERVER...
 # django-admin runserver --settings=simmate.configuration.django.settings
 
-
-# To help setup Django on DigitalOcean
-# https://docs.digitalocean.com/products/app-platform/languages-frameworks/django/
-# https://www.digitalocean.com/community/tutorials/how-to-deploy-django-to-app-platform
-# https://github.com/digitalocean/sample-django
-
 # --------------------------------------------------------------------------------------
 
 # set the executor to a locally ran executor
