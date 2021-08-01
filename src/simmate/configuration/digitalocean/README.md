@@ -78,10 +78,10 @@ These are the tutorials that I'm following along with:
 5. Edit "Enviornment Variables" to include the following. Note that we are connecting to our database pool and that your secret key should be [randomly generated](https://passwordsgenerator.net/) and encrypted!:
 ```
 DJANGO_ALLOWED_HOSTS=${APP_DOMAIN}
-DATABASE_URL=${simmate-database-pool.DATABASE_URL}
-DEBUG=True
+DATABASE_URL=${db-postgresql-nyc3-09114.DATABASE_URL}
+DEBUG=False
 DJANGO_SECRET_KEY=randomly-generated-passord-12345
-DEVELOPMENT_MODE=True
+DEVELOPMENT_MODE=False
 ```
 6. Change our "Run Command" to...
 ```

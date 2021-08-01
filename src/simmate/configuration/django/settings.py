@@ -42,8 +42,9 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # For DigitalOcean, we try grabbing this from an enviornment variable. If that
-# variable isn't set, then we assume we are debugging.
-DEBUG = os.getenv("DEBUG", "False") == "True"
+# variable isn't set, then we assume we are debugging. The == at the end converts
+# the string to a boolean for us.
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
 # To make this compatible with DigitalOcean, we try to grab the allowed hosts
 # from an enviornment variable, which we then split into a list. If this
@@ -139,19 +140,9 @@ DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "True") == "True"
 # an example of this commented out below.
 if DEVELOPMENT_MODE is True:
     DATABASES = {
-        # "default": {
-        #     "ENGINE": "django.db.backends.sqlite3",
-        #     "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
-        # }
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": "simmate-database-pool",  # default on DigitalOcean is defaultdb
-            "USER": "doadmin",
-            "PASSWORD": "dibi5n3varep5ad8",
-            "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-            "PORT": "25061",
-            'OPTIONS': {'sslmode': 'require'},  # !!! is this needed?
-            # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
         }
     }
 # When DigitalOcean runs the "collectstatic" command, we don't want to connect
@@ -166,8 +157,21 @@ elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
     DATABASES = {
         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
     }
-# -----------------------
+    # NOTE: this line above is the same as doing...
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.postgresql_psycopg2",
+    #         "NAME": "simmate-database-pool",  # default on DigitalOcean is defaultdb
+    #         "USER": "doadmin",
+    #         "PASSWORD": "dibi5n3varep5ad8",
+    #         "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
+    #         "PORT": "25061",
+    #         "OPTIONS": {"sslmode": "require"},  # !!! is this needed?
+    #         # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
+    #     }
+    # }
 
+# -----------------------
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
