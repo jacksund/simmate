@@ -20,10 +20,10 @@ class Eddrmm(ErrorHandler):
     # These are the error messages that we are looking for in the file
     possible_error_messages = ["WARNING in EDDRMM: call to ZHEGV failed"]
 
-    def correct(self, error, dir):
+    def correct(self, error, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # RMM algorithm is not stable for this calculation
@@ -42,8 +42,8 @@ class Eddrmm(ErrorHandler):
         # and WAVECAR to ensure the next run is a clean start.
         current_icharg = incar.get("ICHARG", 0)
         if current_icharg < 10:
-            os.remove(os.path.join(dir, "CHGCAR"))
-            os.remove(os.path.join(dir, "WAVECAR"))
+            os.remove(os.path.join(directory, "CHGCAR"))
+            os.remove(os.path.join(directory, "WAVECAR"))
             correction += "and deleted CHGCAR + WAVECAR"
 
         # rewrite the INCAR with new settings

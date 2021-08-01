@@ -2,9 +2,12 @@
 
 import os
 
+from pymatgen.analysis.transition_state import NEBAnalysis
+
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
 from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
+from simmate.calculators.vasp.errorhandlers.eddrmm import Eddrmm
 
 # NOTE TO USER:
 # This NEB task is very different from all other VASP tasks!
@@ -46,19 +49,17 @@ class NudgedElasticBandTask(VaspTask):
         LWAVE=False,
         NELM=200,
         NELMIN=6,
-        NSW=99,
+        NSW=0,  # !!! Changed to static energy for testing
         PREC="Accurate",
         SIGMA=0.05,
         KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
-        
         # These settings are from MITNEBSet
         # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/sets.py#L2376-L2491
-        # IMAGES=len(structures) - 2, --> set inside task 
+        # IMAGES=len(structures) - 2, --> set inside task
         IBRION=1,
         # ISYM=0, --> duplicate of setting above
         LCHARG=False,
         # LDAU=False, --> already the default value
-        
         # TODO: Allow IMAGES to be set like shown below.
         # For this, we use "__auto" to let Simmate set this automatically by
         # using the input structures given.
@@ -67,9 +68,9 @@ class NudgedElasticBandTask(VaspTask):
 
     # We will use the PBE functional with all default mappings
     functional = "PBE"
-    
-    # We also set up some error handlers that are commonly used with 
-    errorhandlers=[TetrahedronMesh()]
+
+    # We also set up some error handlers that are commonly used with
+    errorhandlers = [TetrahedronMesh(), Eddrmm()]
 
     def _pre_checks(self, structure, directory):
         # This function is used inside of this class's setup method (shown below),
@@ -102,7 +103,7 @@ class NudgedElasticBandTask(VaspTask):
                     " from your INCAR and Simmate will provide it automatically"
                     " for you."
                 )
-        
+
         # TODO: add a precheck that ensures the number of cores VASP is ran on
         # is also divisible by the number of images. For example...
         # "mpirun -n 16 vasp" will not work for IMAGES=3 because 16 is not
@@ -134,7 +135,7 @@ class NudgedElasticBandTask(VaspTask):
         # task is used accross multiple pathways with different image numbers.
         # It may be better to make a separate incar dictionary that we then pass
         # to Incar() below.
-        
+
         # write the incar file
         Incar(**self.incar).to_file(os.path.join(directory, "INCAR"))
 
@@ -155,3 +156,18 @@ class NudgedElasticBandTask(VaspTask):
             os.path.join(directory, "POTCAR"),
             self.potcar_mappings,
         )
+
+    def workup(self, directory):
+        
+        # BUG: For now I assume there are start/end image directories are located
+        # in the working directory. This bad assumption is made as I'm just quickly
+        # trying to get results for some labmates. In the future, I need to search
+        # a number of places for these directories.
+        neb_results = NEBAnalysis.from_dir(
+            directory,
+            relaxation_dirs=["start_image_relaxation", "end_image_relaxation"],
+        )
+
+        # plot the results
+        plot = neb_results.get_plot()
+        plot.savefig("NEB_plot.jpeg")

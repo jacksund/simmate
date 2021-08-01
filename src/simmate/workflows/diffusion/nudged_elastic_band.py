@@ -7,6 +7,7 @@ from pymatgen.core.structure import Structure
 
 from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
+from simmate.calculators.vasp.errorhandlers.eddrmm import Eddrmm
 from simmate.calculators.vasp.tasks.nudged_elastic_band import NudgedElasticBandTask
 
 """
@@ -56,7 +57,7 @@ relax_structure = VaspTask(
         KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
     ),
     functional="PBE",
-    errorhandlers=[TetrahedronMesh()]
+    errorhandlers=[TetrahedronMesh(), Eddrmm()]
 )
 
 # FOR NEB RELAXATION
@@ -231,3 +232,4 @@ with Flow("NEB Analysis") as workflow:
 
 #  M_divide: can not subdivide           44 nodes by           5
 
+# WARNING in EDDRMM: call to ZHEGV failed, returncode =   6  3      3
