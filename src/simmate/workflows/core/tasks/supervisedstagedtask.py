@@ -2,6 +2,7 @@
 
 import os
 import time
+import signal
 from shutil import make_archive
 from subprocess import Popen
 from typing import Any, Tuple
@@ -211,7 +212,19 @@ class SupervisedStagedShellTask(Task):
                                 if errorhandler.is_terminating:
                                     # kill the process but don't apply the fix
                                     # quite yet. See below for more on this.
-                                    future.terminate()
+                                    # The normal line is just...
+                                    #   future.terminate()
+                                    # However this struggles to kill all "child"
+                                    # processes if we are using something like
+                                    # mpirun to run things in parallel. Instead,
+                                    # we use the os module to grab the parent id
+                                    # and send that the termination singal, which
+                                    # is also passed on to all child processes.
+                                    os.killpg(os.getpgid(future.pid), signal.SIGTERM)
+                                    # just in case the job needs to clean-up or
+                                    # doesn't terminate immediately, we want to
+                                    # wait for it to finish.
+                                    future.wait()
                                 # Otherwise apply the fix and let the shelltask end
                                 # naturally. An example of this is for codes
                                 # where you add a STOP file to get it to
