@@ -173,7 +173,16 @@ class SupervisedStagedShellTask(Task):
             # launch the shelltask without waiting for it to complete. Also,
             # make sure to use common shell commands and to set the working
             # directory.
-            future = Popen(command, cwd=directory, shell=True)
+            # The preexec_fn keyword allows us to properly terminate jobs that
+            # are launched with parallel processes (such as mpirun). This assigns
+            # a parent id to it that we use when killing a job (if an error 
+            # handler calls for us to do so)
+            future = Popen(
+                command,
+                cwd=directory,
+                shell=True,
+                preexec_fn=os.setsid,
+            )
 
             # Assume the shelltask has no errors until proven otherwise
             has_error = False
@@ -221,10 +230,6 @@ class SupervisedStagedShellTask(Task):
                                     # and send that the termination singal, which
                                     # is also passed on to all child processes.
                                     os.killpg(os.getpgid(future.pid), signal.SIGTERM)
-                                    # just in case the job needs to clean-up or
-                                    # doesn't terminate immediately, we want to
-                                    # wait for it to finish.
-                                    future.wait()
                                 # Otherwise apply the fix and let the shelltask end
                                 # naturally. An example of this is for codes
                                 # where you add a STOP file to get it to
