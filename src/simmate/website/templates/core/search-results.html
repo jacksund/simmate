@@ -34,7 +34,8 @@
             <i><small>
             Each database provider uses different settings for their
             calculations AND they have a different pool of structures. To learn more
-            about hull energies, <a href="#">read here</a>.</small></i>
+            about hull energies, <a href="#">read here</a>.
+            </small></i>
         </div>
     </div>
     
@@ -68,7 +69,23 @@
         </tbody>
     </table>
 {% else %}
-    <p>No structures are available.</p>
+    <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        <div class="p-3">
+            <b>No structures found matching your search criteria!</b>
+            <br><br>
+            <i><small>
+            Make sure you don't have a typo in your search. If you are searching
+             for "Li-Co-O", common typos include searching "LiCoO" (missing hyphens),
+            "Li-Co-O-" (extra hyphen), or "li-co-o" (lowercase). We are working 
+            to account for these common mistakes, but you'll have to fix these until then!
+            <br><br>
+            It is also possible that there just aren't any results for your search.
+            In cases such as this, please reach out to our team and we can start
+            exploring the system(s) you're interested in!
+            </small></i>
+        </div>
+    </div>
 {% endif %}
 </div>
 

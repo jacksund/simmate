@@ -17,30 +17,32 @@ def register(request):
                 username=usercreation_form.cleaned_data["username"],
                 password=usercreation_form.cleaned_data["password1"],
             )
-            print(new_user)
             login(request, new_user)
-            # redirect to LOGIN_REDIRECT_URL #!!! I just do profile right now.
+            # after first creating a profile, I send them to their profile page
             return redirect("profile")
     else:
         usercreation_form = UserCreationForm()
 
-    context = {"usercreation_form": usercreation_form}
+    context = {
+        "usercreation_form": usercreation_form,
+        "active_tab_id": "profile",
+    }
     template = "registration/register.html"
     return render(request, template, context)
 
 
 @login_required
 def profile(request):
-    # grab the exams that the user is listed under
-    exams = request.user.exams_as_student.all()
+    # !!! For future reference, you can grab user-associated data via...
+    # data = request.user.relateddata.all()
 
-    context = {"exams": exams}
+    context = {"active_tab_id": "profile"}
     template = "registration/profile.html"
     return render(request, template, context)
 
 
 def loginstatus(request):
-    context = {}  # we just want the premade template
+    context = {"active_tab_id": "profile"}  # we just want the premade template
     template = "registration/loginstatus.html"
     return render(request, template, context)
 

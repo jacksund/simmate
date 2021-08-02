@@ -10,37 +10,37 @@
         <span class="d-none d-lg-inline">Profile</span>
     </a>
     
-    <a id="toolbox" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="toolbox" class="list-group-item text-truncate text-secondary" href="#">
         <i class="bi bi-calculator fs-4"></i>
         <span class="d-none d-lg-inline">Toolkit</span>
     </a>
     
-    <a id="home" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="home" class="list-group-item text-truncate text-secondary" href="#">
         <i class="bi bi-diagram-3 fs-4"></i>
         <span class="d-none d-lg-inline">Workflows</span>
     </a>
     
-    <a id="learn" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="learn" class="list-group-item text-truncate text-secondary" href="#">
         <i class="bi bi-lightbulb fs-4"></i>
         <span class="d-none d-lg-inline">Learn</span>
     </a>
     
-    <a id="downloads" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="downloads" class="list-group-item text-truncate text-secondary" href="#">
         <i class="bi bi-box-arrow-down fs-4"></i>
         <span class="d-none d-lg-inline">Downloads</span>
     </a>
     
-    <a id="contribute" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="contribute" class="list-group-item text-truncate text-secondary" href="#">
         <i class="bi bi-box-arrow-in-up fs-4"></i>
         <span class="d-none d-lg-inline">Contribute</span>
     </a>
     
-    <a id="settings" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="settings" class="list-group-item text-truncate text-secondary" href="#">
         <i class="bi bi-gear fs-4"></i>
         <span class="d-none d-lg-inline">Settings</span>
     </a>
     
-    <a id="more" class="list-group-item list-group-item-action text-truncate text-primary" href="#">
+    <a id="more" class="list-group-item text-truncate text-secondary" href="#">
         <i class="bi bi-three-dots fs-4"></i>
         <span class="d-none d-lg-inline">More</span>
     </a>
@@ -48,8 +48,10 @@
 </div>
 
 <!-- This javascript helps highlight the correct tab and adds the "active" class to it -->
+{% if active_tab_id %}
 <script>
     var tab = document.getElementById("{{ active_tab_id }}");
     tab.classList.add("active")
     tab.classList.remove("text-primary")
 </script>
+{% endif %}

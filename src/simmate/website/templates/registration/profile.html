@@ -2,7 +2,7 @@
 {% extends "core/site-base.html" %}
 
 {% block tabtitle %}
-PuttyExams | Profile
+Simmate | Profile
 {% endblock %}
 
 {% block banner %}
@@ -13,16 +13,13 @@ PuttyExams | Profile
 {% block body %}
 
 <section class="jumbotron text-center">
-    <div class="container">
+    <div class="container py-5">
       <h1>Welcome {{ user.username }}!</h1>
       <p class="lead text-muted">
-          Putty Exams is still at it's early stages, so your profile page is a little empty right now... 
-          But this also means that your feedback can have a big impact on what we add next. Send us email
-          if there is any feature that you'd like incorporated!
-      </p>
-      <p>
-        <a href="{% url 'exam:myexams' %}" class="btn btn-primary my-2">Go to Instructor Home</a>
-        <a href="{% url 'exam:ssexams' %}" class="btn btn-secondary my-2">Go to Student Home</a>
+          The <b>Profile</b> page is still under development and is therefore empty at the moment.
+          In the future, this will be a place where you can view your "favorite" 
+          materials as well as track calculations that you've requested. For now,
+          switch to the <b>Home</b> page to explore materials.
       </p>
     </div>
 </section>

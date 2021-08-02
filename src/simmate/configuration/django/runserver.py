@@ -16,7 +16,7 @@ def runserver():
     #
     # grab the working directory
     # wait=False, timeout=300
-    # from puttyexams.settings import BASE_DIR
+    # from simmate.settings import BASE_DIR
     # from subprocess import Popen
     # # and now submit the command via a separate shell
     # future = Popen(
