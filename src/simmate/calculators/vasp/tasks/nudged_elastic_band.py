@@ -151,7 +151,7 @@ class NudgedElasticBandTask(VaspTask):
         # write the POTCAR file
         Potcar.to_file_from_type(
             # We use the first image as all should give the same result
-            structure[0].species,
+            structure[0].composition.elements,
             self.functional,
             os.path.join(directory, "POTCAR"),
             self.potcar_mappings,
