@@ -2,7 +2,7 @@
 
 # TO CREATE CONDA ENV...
 
-# conda create -n simmate -c conda-forge python=3.8 numpy pandas django prefect dask click django-crispy-forms django-pandas psycopg2 dask-jobqueue scikit-learn pytest matplotlib plotly pymatgen spyder graphviz dj-database-url
+# conda create -n simmate -c conda-forge python=3.8 numpy pandas django prefect dask click django-crispy-forms django-pandas psycopg2 dask-jobqueue scikit-learn pytest matplotlib plotly pymatgen spyder graphviz dj-database-url djangorestframework
 
 # pymatgen-diffusion is outdated on anaconda
 # pip install pymatgen-analysis-diffusion
@@ -31,7 +31,7 @@
 # --------------------------------------------------------------------------------------
 
 # from simmate.shortcuts import setup
-# from simmate.database.third_parties.scraping.materials_project import load_all_structures
+# from simmate.database.third_parties.scraping.cod import load_all_structures
 # load_all_structures()
 
 # --------------------------------------------------------------------------------------

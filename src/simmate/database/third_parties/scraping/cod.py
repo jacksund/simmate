@@ -26,8 +26,6 @@ to account for these problematic cif files though.
 
 import os
 
-# from django.db import transaction
-
 from tqdm import tqdm
 from pymatgen.io.cif import CifParser
 
@@ -39,14 +37,12 @@ from simmate.database.third_parties.scraping.utilities import get_sanitized_stru
 # --------------------------------------------------------------------------------------
 
 
-# @transaction.atomic
 def load_all_structures(base_directory="cod/cif/"):
 
     # For debuging and development, I keep track of all cif files that fail, and I
     # also keep track of all possible data in the cif files.
     all_keywords = []
     failed_cifs = []
-    testing = []  # !!!
 
     # We need to look at all the folders that have numbered-names (1,2,3..,9). and
     # grab the folder inside that are also numbers. This continues until we find cif
@@ -164,7 +160,6 @@ def load_all_structures(base_directory="cod/cif/"):
     return {
         "failed_cifs": failed_cifs,
         "all_keywords": all_keywords,
-        "testing": testing,
     }
 
 

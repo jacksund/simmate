@@ -77,6 +77,8 @@ INSTALLED_APPS = [
     #
     # These are apps created by third-parties that give us extra features
     "crispy_forms",  # django-crispy-forms
+    "rest_framework",  # djangorestframework
+    'django_filters',  # django-filter
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
     #   django-extensions
@@ -262,3 +264,19 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "jacksundberg123@gmail.com"  # os.environ.get('EMAIL_USER')
 # !!! REMOVE IN PRODUCTION. Use this instead: os.environ.get('EMAIL_PASSWORD')
 EMAIL_HOST_PASSWORD = "lqurjxyttrjrlgcr"
+
+# These settings help configure djangorestframework and our REST API
+REST_FRAMEWORK = {
+    # The default permission needed to access data is simply that the individual
+    # in signed into an account. In the future, consider using
+    # DjangoModelPermissionsOrAnonReadOnly as default because this will inherit
+    # user permissions we assign at the model level in django.
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    # Because we have a massive number of results for different endpoints,
+    # we want to set results to be paginated by 25 results per page. This
+    # way we don't have to set a page limit for every individual endpoint
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 25,
+    # 
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+}

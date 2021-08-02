@@ -30,8 +30,16 @@ urlpatterns = [
     #
     #
     path(
-        route="third_parties/",
+        route="third-parties/",
         view=include("simmate.website.third_parties.urls"),
         name="third_parties",
+    ),
+    #
+    #
+    # This maps to our REST api endpoints
+    path(
+        route="rest-api/",
+        view=include("simmate.website.rest_api.urls"),
+        name="rest_api",
     ),
 ]
