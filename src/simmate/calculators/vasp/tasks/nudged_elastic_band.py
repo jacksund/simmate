@@ -36,7 +36,7 @@ class NudgedElasticBandTask(VaspTask):
         # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/MPRelaxSet.yaml
         ALGO="Fast",
         EDIFF=1.0e-05,
-        ENCUT=400,
+        ENCUT=520,
         # IBRION=2, --> overwritten by MITNEBSet below
         ICHARG=1,
         ISIF=3,
@@ -49,7 +49,7 @@ class NudgedElasticBandTask(VaspTask):
         LWAVE=False,
         NELM=200,
         NELMIN=6,
-        NSW=0,  # !!! Changed to static energy for testing
+        NSW=99,  # !!! Changed to static energy for testing
         PREC="Accurate",
         SIGMA=0.05,
         KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
