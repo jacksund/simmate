@@ -3,7 +3,6 @@
 from prefect import task, Flow, Parameter
 
 from pymatgen.analysis.diffusion.neb.pathfinder import DistinctPathFinder, IDPPSolver
-from pymatgen.core.structure import Structure
 
 from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
