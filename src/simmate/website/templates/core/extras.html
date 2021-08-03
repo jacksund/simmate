@@ -1,0 +1,45 @@
+
+{% extends "core/site-base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+
+<!--
+NOTE: in the future, use Bootstraps grid system when I add more cards here
+https://getbootstrap.com/docs/5.0/components/card/#grid-cards
+-->
+
+<div class="container p-4 bg-light border">
+    <div class="card" style="width: 25rem;">
+      <div class="card-body">
+        <h5 class="card-title">REST API</h5>
+        <p class="card-text">
+            This lets you search our database using just a website URL and then 
+            returns your data as JSON.
+        <div class="alert alert-warning d-flex align-items-center p-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+            <div class="px-3">
+                <i><small>
+                Note that REST API is only meant for experts
+                who prefer not to use Simmate's
+                <a href="https://github.com/jacksund/simmate/tree/main/src/simmate/database">python client</a>.
+                </small></i>
+            </div>
+        </div>
+
+          <a role="button" class="btn btn-primary btn-sm" href="https://github.com/jacksund/simmate/tree/main/src/simmate/website/rest_api">Learn More...</a>
+          <a role="button" class="btn btn-primary btn-sm" href="{% url 'api-root' %}">Try it out!</a>
+      </div>
+    </div>
+</div>
+{% endblock %}
+

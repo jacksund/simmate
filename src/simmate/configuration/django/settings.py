@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     "crispy_forms",  # django-crispy-forms
     "rest_framework",  # djangorestframework
     "django_filters",  # django-filter
+    'django_extensions',  # for development tools
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
     #   django-extensions

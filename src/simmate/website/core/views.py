@@ -94,3 +94,10 @@ def home(request):
     }
     template = "core/home.html"
     return render(request, template, context)
+
+def extras(request):
+
+    # now let's put the data and template together to send the user
+    context = {"active_tab_id": "extras"}
+    template = "core/extras.html"
+    return render(request, template, context)

@@ -19,14 +19,16 @@ we instead let djangorestframework do the heavy lifting for us -- it creates
 all views for us via a "Serializer" and "ViewSet". So this is a two-step process
 for each model. Here is an example:
 
-class MaterialsProjectSerializer(HyperlinkedModelSerializer):
+from some.package.models import MyExampleModel    
+
+class MyExampleSerializer(HyperlinkedModelSerializer):
     class Meta:
-        model = MaterialsProjectStructure
+        model = MyExampleStructure
         fields = "__all__"    
 
-class MaterialsProjectViewSet(ReadOnlyModelViewSet):
-    queryset = MaterialsProjectStructure.objects.all()
-    serializer_class = MaterialsProjectSerializer
+class MyExampleViewSet(ReadOnlyModelViewSet):
+    queryset = MyExampleModel.objects.all()
+    serializer_class = MyExampleSerializer
     filterset_fields = "__all__"
 
 """

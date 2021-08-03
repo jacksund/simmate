@@ -26,7 +26,9 @@ urlpatterns = [
     path(
         route="",
         view=include(router.urls),
-        name="rest_endpoints",
+        # name="api-root", # This is set by default
+        # To view all other urls that this maps, you can use django_extensions
+        # to list all of them. The command is... python manage.py show_urls
     ),
     #
     # Additionally, we include login URLs. This doesn't do anything other than
