@@ -36,7 +36,7 @@ Nudged elastic band is composed of the following stages...
 # https://github.com/materialsproject/pymatgen/blob/master/pymatgen/io/vasp/MITRelaxSet.yaml
 relax_structure = VaspTask(
     incar=dict(
-        ALGO="Fast",
+        ALGO="Normal",  # TEMPORARY SWITCH FROM Fast
         EDIFF=1.0e-05,
         ENCUT=520,
         IBRION=2,

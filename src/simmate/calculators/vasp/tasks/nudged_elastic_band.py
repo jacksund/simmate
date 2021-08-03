@@ -34,7 +34,7 @@ class NudgedElasticBandTask(VaspTask):
     incar = dict(
         # These settings are from MITRelaxSet
         # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/MPRelaxSet.yaml
-        ALGO="Fast",
+        ALGO="Normal",  # TEMPORARY SWITCH FROM Fast
         EDIFF=1.0e-05,
         ENCUT=520,
         # IBRION=2, --> overwritten by MITNEBSet below
@@ -70,7 +70,7 @@ class NudgedElasticBandTask(VaspTask):
     functional = "PBE"
 
     # We also set up some error handlers that are commonly used with
-    errorhandlers = [TetrahedronMesh(), Eddrmm()]
+    errorhandlers = [TetrahedronMesh()]
 
     def _pre_checks(self, structure, directory):
         # This function is used inside of this class's setup method (shown below),
