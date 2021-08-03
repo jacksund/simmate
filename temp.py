@@ -30,9 +30,9 @@
 
 # --------------------------------------------------------------------------------------
 
-# from simmate.shortcuts import setup
-# from simmate.database.third_parties.scraping.cod import load_all_structures
-# load_all_structures()
+from simmate.shortcuts import setup
+from simmate.database.third_parties.scraping.cod import load_all_structures
+load_all_structures()
 
 # --------------------------------------------------------------------------------------
 

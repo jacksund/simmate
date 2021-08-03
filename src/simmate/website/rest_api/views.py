@@ -1,19 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from django.contrib.auth.models import User, Group
-
-from rest_framework import viewsets
-from rest_framework import permissions
-
-from simmate.website.rest_api.serializers import (
-    UserSerializer,
-    GroupSerializer,
-    MaterialsProjectSerializer,
-    JarvisSerializer,
-    AflowSerializer,
-    OqmdSerializer,
-    CodSerializer,
-)
+from rest_framework.serializers import HyperlinkedModelSerializer
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from simmate.database.third_parties.all import (
     MaterialsProjectStructure,
@@ -23,39 +11,99 @@ from simmate.database.third_parties.all import (
     CodStructure,
 )
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.order_by("-date_joined").all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser]
 
+"""
 
-class GroupViewSet(viewsets.ModelViewSet):
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAdminUser]
+Instead of making an individual view for each model and each of its properties,
+we instead let djangorestframework do the heavy lifting for us -- it creates
+all views for us via a "Serializer" and "ViewSet". So this is a two-step process
+for each model. Here is an example:
 
+class MaterialsProjectSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = MaterialsProjectStructure
+        fields = "__all__"    
 
-class MaterialsProjectViewSet(viewsets.ModelViewSet):
+class MaterialsProjectViewSet(ReadOnlyModelViewSet):
     queryset = MaterialsProjectStructure.objects.all()
     serializer_class = MaterialsProjectSerializer
     filterset_fields = "__all__"
 
-class JarvisViewSet(viewsets.ModelViewSet):
+"""
+
+# --------------------------------------------------------------------------------------
+
+
+class MaterialsProjectSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = MaterialsProjectStructure
+        fields = "__all__"
+
+
+class MaterialsProjectViewSet(ReadOnlyModelViewSet):
+    queryset = MaterialsProjectStructure.objects.all()
+    serializer_class = MaterialsProjectSerializer
+    filterset_fields = "__all__"
+
+
+# --------------------------------------------------------------------------------------
+
+
+class JarvisSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = JarvisStructure
+        fields = "__all__"
+
+
+class JarvisViewSet(ReadOnlyModelViewSet):
     queryset = JarvisStructure.objects.all()
     serializer_class = JarvisSerializer
     filterset_fields = "__all__"
-    
-class AflowViewSet(viewsets.ModelViewSet):
+
+
+# --------------------------------------------------------------------------------------
+
+
+class AflowSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = AflowStructure
+        fields = "__all__"
+
+
+class AflowViewSet(ReadOnlyModelViewSet):
     queryset = AflowStructure.objects.all()
     serializer_class = AflowSerializer
     filterset_fields = "__all__"
-    
-class OqmdViewSet(viewsets.ModelViewSet):
+
+
+# --------------------------------------------------------------------------------------
+
+
+class OqmdSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = OqmdStructure
+        fields = "__all__"
+
+
+class OqmdViewSet(ReadOnlyModelViewSet):
     queryset = OqmdStructure.objects.all()
     serializer_class = OqmdSerializer
     filterset_fields = "__all__"
 
-class CodViewSet(viewsets.ModelViewSet):
+
+# --------------------------------------------------------------------------------------
+
+
+class CodSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = CodStructure
+        fields = "__all__"
+
+
+class CodViewSet(ReadOnlyModelViewSet):
     queryset = CodStructure.objects.all()
     serializer_class = CodSerializer
     filterset_fields = "__all__"
+
+
+# --------------------------------------------------------------------------------------
