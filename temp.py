@@ -26,12 +26,6 @@
 
 # --------------------------------------------------------------------------------------
 
-from simmate.shortcuts import setup
-from simmate.configuration.django.database import load_database_from_json
-load_database_from_json()
-
-# --------------------------------------------------------------------------------------
-
 
 # from simmate.shortcuts import setup
 # from simmate.configuration.django.database import dump_database_to_json
@@ -39,9 +33,9 @@ load_database_from_json()
 
 # --------------------------------------------------------------------------------------
 
-# from simmate.shortcuts import setup
-# from simmate.database.third_parties.scraping.materials_project import load_all_structures
-# load_all_structures()
+from simmate.shortcuts import setup
+from simmate.database.third_parties.scraping.materials_project import load_all_structures
+load_all_structures()
 
 # --------------------------------------------------------------------------------------
 

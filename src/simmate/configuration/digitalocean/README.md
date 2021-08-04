@@ -75,14 +75,16 @@ These are the tutorials that I'm following along with:
 2. Select Github (and give github access if this is your first time)
 3. For your "Source", we want to select our project. For me, this is "jacksund/simmate". Leave everything else at its default. 
 4. When you go to the next page, you should see that Python was detected. We will now update some of these settings
-5. Edit "Enviornment Variables" to include the following. Note that you can get your DATABASE_URL on your database page by looking at the "Connection details" (right side on the Overview page) and switching from "Connection parameters" to "Connection string". Also note that we are connecting to our database pool and that your secret key should be [randomly generated](https://passwordsgenerator.net/) and encrypted!:
+5. Edit "Enviornment Variables" to include the following. Also note that we are connecting to our database pool and that your secret key should be [randomly generated](https://passwordsgenerator.net/) and encrypted!:
 ```
 DJANGO_ALLOWED_HOSTS=${APP_DOMAIN}
-DATABASE_URL=postgresql://doadmin:show-password@db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com:25060/simmate-database?sslmode=require
+DATABASE_URL=${db-postgresql-nyc3-09114.DATABASE_URL}
 DEBUG=False
 DJANGO_SECRET_KEY=randomly-generated-passord-12345
 DEVELOPMENT_MODE=False
 ```
+**consider switching to setting all database variables directly:
+https://docs.digitalocean.com/products/app-platform/how-to/use-environment-variables/
 
 6. Change our "Run Command" to...
 ```

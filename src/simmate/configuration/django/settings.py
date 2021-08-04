@@ -149,15 +149,16 @@ if DEVELOPMENT_MODE is True:
         # }
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": "simmate-database",  # default on DigitalOcean is defaultdb
+            "NAME": "simmate-database-01-pool",  # default on DigitalOcean is defaultdb
             "USER": "doadmin",
             "PASSWORD": "dibi5n3varep5ad8",
             "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-            "PORT": "25060",
+            "PORT": "25061",
             "OPTIONS": {"sslmode": "require"},  # !!! is this needed?
             # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
         }
     }
+
 # When DigitalOcean runs the "collectstatic" command, we don't want to connect
 # any database. So we use the "sys" library to look at the command and ensure
 # it doesn't involve "collectstatic". Otherwise we use the URL that is set with
@@ -249,6 +250,12 @@ USE_TZ = True
 # collect by running 'python manage.py collectstatic'
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# BUG: djangorestframework's static files struggle to load and I'm not sure why.
+# I add these two lines to fix the bug and need to revisit this later.
+# Based on recommendation by... 
+# https://stackoverflow.com/questions/35557129/css-not-loading-wrong-mime-type-django
+import mimetypes
+mimetypes.add_type("text/css", ".css", True)
 
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"
