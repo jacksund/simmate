@@ -47,12 +47,10 @@ load_database_from_json()
 
 from simmate.shortcuts import setup
 from simmate.database.third_parties.all import MaterialsProjectStructure
-from simmate.utilities import get_chemical_subsystems
-
 MaterialsProjectStructure.objects.count()
 
+from simmate.utilities import get_chemical_subsystems
 systems = get_chemical_subsystems("Y-C-F")
-
 MaterialsProjectStructure.objects.filter(chemical_system__in=systems).count()
 MaterialsProjectStructure.objects.filter(chemical_system__contains="Y").filter(
     chemical_system__contains="C"

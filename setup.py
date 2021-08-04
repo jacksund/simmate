@@ -168,7 +168,8 @@ setup(
         'dj-database-url',  # for DigitalOcean URL conversion
         'gunicorn',  # for website server (Django+DigitalOcean)
         'djangorestframework',  # for our REST API
-        'django-filter',  # sets up automatic filters for our REST API 
+        'django-filter',  # sets up automatic filters for our REST API
+        'django-extensions',  # simple tools to help with django development
     
         # For development
         'pytest',
