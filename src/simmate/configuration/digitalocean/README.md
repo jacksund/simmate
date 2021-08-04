@@ -75,17 +75,38 @@ These are the tutorials that I'm following along with:
 2. Select Github (and give github access if this is your first time)
 3. For your "Source", we want to select our project. For me, this is "jacksund/simmate". Leave everything else at its default. 
 4. When you go to the next page, you should see that Python was detected. We will now update some of these settings
-5. Edit "Enviornment Variables" to include the following. Note that we are connecting to our database pool and that your secret key should be [randomly generated](https://passwordsgenerator.net/) and encrypted!:
+5. Edit "Enviornment Variables" to include the following. Note that you can get your DATABASE_URL on your database page by looking at the "Connection details" (right side on the Overview page) and switching from "Connection parameters" to "Connection string". Also note that we are connecting to our database pool and that your secret key should be [randomly generated](https://passwordsgenerator.net/) and encrypted!:
 ```
 DJANGO_ALLOWED_HOSTS=${APP_DOMAIN}
-DATABASE_URL=${db-postgresql-nyc3-09114.DATABASE_URL}
+DATABASE_URL=postgresql://doadmin:show-password@db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com:25060/simmate-database?sslmode=require
 DEBUG=False
 DJANGO_SECRET_KEY=randomly-generated-passord-12345
 DEVELOPMENT_MODE=False
 ```
+
 6. Change our "Run Command" to...
 ```
 gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi
 ```
 7. Use the button at the bottom of this page to connect to our PostgreSQL database set-up above
 8. We can still with the defaults for the rest of the pages! Create your server when you're ready!
+
+
+## Stage 3: Setting up our website domain name (simmate.org)
+
+We use google domains as I found it had the easiest setup and cheapest prices.
+For connecting this to DigitalOcean, I follow these guides:
+- https://docs.digitalocean.com/products/app-platform/how-to/manage-domains/
+- https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars
+- https://docs.digitalocean.com/products/networking/dns/how-to/manage-records/
+
+1. Purchase your website (domain) name on https://domains.google.com/registrar/
+2. Select the domain you just purchased and now go to it "DNS" tab. For example, ours brings us to https://domains.google.com/registrar/simmate.org/DNS
+3. Switch to the "Custom name servers" tab and add the following three servers:
+- ns1.digitalocean.com
+- ns2.digitalocean.com
+- ns3.digitalocean.com
+4. Save these and be sure to select "Switch to these settings" at the top to enable them
+5. Jump back to your DigitalOcean dashboard and go to the [Networking tab](https://cloud.digitalocean.com/networking/domains)
+6. The first page here is the Domain view where you should now add your new domain name
+
