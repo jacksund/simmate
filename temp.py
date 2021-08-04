@@ -2,10 +2,13 @@
 
 # TO CREATE CONDA ENV...
 
-# conda create -n simmate -c conda-forge python=3.8 numpy pandas django prefect dask click django-crispy-forms django-pandas psycopg2 dask-jobqueue scikit-learn pytest matplotlib plotly pymatgen spyder graphviz dj-database-url djangorestframework
+# conda create -n simmate -c conda-forge python=3.8 numpy pandas django prefect dask click django-crispy-forms django-pandas psycopg2 dask-jobqueue scikit-learn pytest matplotlib plotly pymatgen spyder graphviz dj-database-url djangorestframework django-filter django-extensions
 
 # pymatgen-diffusion is outdated on anaconda
 # pip install pymatgen-analysis-diffusion
+
+# other packages for pulling data
+# pip install jarvis-tools
 
 # git clone https://github.com/jacksund/simmate.git
 # pip install -e simmate
@@ -23,16 +26,22 @@
 
 # --------------------------------------------------------------------------------------
 
-# from simmate.shortcuts import setup
-# from simmate.configuration.django.database import reset_database
-
-# reset_database()
+from simmate.shortcuts import setup
+from simmate.configuration.django.database import load_database_from_json
+load_database_from_json()
 
 # --------------------------------------------------------------------------------------
 
-from simmate.shortcuts import setup
-from simmate.database.third_parties.scraping.cod import load_all_structures
-load_all_structures()
+
+# from simmate.shortcuts import setup
+# from simmate.configuration.django.database import dump_database_to_json
+# dump_database_to_json()
+
+# --------------------------------------------------------------------------------------
+
+# from simmate.shortcuts import setup
+# from simmate.database.third_parties.scraping.materials_project import load_all_structures
+# load_all_structures()
 
 # --------------------------------------------------------------------------------------
 
@@ -112,3 +121,14 @@ structure = Structure.from_file("nacl.cif")
 # from simmate.calculators.vasp.tasks.nudged_elastic_band import NudgedElasticBandTask
 # task = NudgedElasticBandTask(structure=[structure for i in range(5)], dir="NEBset")
 # result = task.run()
+
+
+# import json
+# data = json.load(open("db_dump.json"))
+# for entry in data:
+#     if entry["pk"] == "cod-1000023":
+#         break
+# from pymatgen.core.structure import Structure
+# structure = Structure.from_str(entry["fields"]["structure_json"], "cif")
+
+

@@ -67,7 +67,7 @@ class Structure(models.Model):
     # !!! we can still test with SQLite3
     # TODO: in the (far) future, I will drop pymatgen dependency
     # TODO: to save on space, I can also come up with a non-json format here
-    structure_json = models.TextField()
+    structure_str = models.TextField()
 
     # !!! Should I have timestamps for the third-party databases?
     # timestamping for when this was added to the database
@@ -88,24 +88,24 @@ class Structure(models.Model):
     chemical_system = models.CharField(max_length=25)
 
     # Density of the crystal (g/L)
-    density = models.FloatField()
+    density = models.DecimalField(max_digits=7, decimal_places=3)
 
     # Molar volume of the crystal (mL/mol)
     # Note we prefer this over a "volume" field because volume is highly dependent
     # on the symmetry and the arbitray unitcell. If you are truly after small volumes
     # of the unitcell, it is likely you really just want to search by spacegroup.
-    molar_volume = models.FloatField()
+    molar_volume = models.DecimalField(max_digits=7, decimal_places=3)
 
     # symmetry info
     # TODO: should this be a relationship to a separate table?
     spacegroup = models.IntegerField()
 
     # The composition of the structure formatted in various ways
-    # OPTIMIZE: which of these are redundant and unnecessary?
-    # TODO: add comment for each showing an example.
-    formula_full = models.CharField(max_length=50)
-    formula_reduced = models.CharField(max_length=25)
-    formula_anonymous = models.CharField(max_length=25)
+    # BUG: The max length here is massive because some formulas in pymatgen
+    # return floats (ex: Ca2.1234567N)
+    formula_full = models.CharField(max_length=100)
+    formula_reduced = models.CharField(max_length=100)
+    formula_anonymous = models.CharField(max_length=100)
 
     # TODO: would it make sense to include these extra fields for Lattice/Sites?
     # Lattice: matrix and then... a, b, c, alpha, beta, gamma, volume
@@ -149,12 +149,11 @@ class Structure(models.Model):
         # object, but will NOT save it to the database yet. The kwargs input
         # is only if you inherit from this class and add extra fields.
         structure_db = cls(
-            # structure_json=structure.to_json(),
             # OPTIMIZE: The structure_json is not the most compact format. Others
             # like POSCAR are more compact and can save space. This is at the cost of
             # being robust to things like fractional occupancies. Perhaps a new compact
             # format needs to be made specifically for Simmate.
-            structure_json=structure.to(fmt=storage_format),
+            structure_str=structure.to(fmt=storage_format),
             nsites=structure.num_sites,
             nelement=len(structure.composition),
             chemical_system=structure.composition.chemical_system,
@@ -256,7 +255,7 @@ class Calculation(models.Model):
     # future, look here:
     # https://docs.djangoproject.com/en/3.1/topics/db/models/#model-inheritance
     class Meta:
-        app_label = "diffusion"  # TODO: move to a separate app
+        app_label = "third_parties"  # TODO: move to a separate app
         abstract = True
 
 

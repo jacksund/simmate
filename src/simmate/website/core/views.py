@@ -58,7 +58,7 @@ def home(request):
                 # structure json -- so that everything runs faster.
                 search_results = database_model.objects.filter(
                     chemical_system__in=chemical_systems
-                ).defer("structure_json")
+                ).defer("structure_str")
 
                 # if the database provides the hull energy, we want to sort
                 # the structures by that (putting highest priority on stable ones)

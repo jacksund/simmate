@@ -36,7 +36,7 @@ structure and convert to a LLL reduced cell.
 from django.db import transaction
 
 from tqdm import tqdm
-from pymatgen import MPRester
+from pymatgen.ext.matproj import MPRester
 
 from simmate.configuration.django import setup_full  # sets up database
 
