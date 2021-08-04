@@ -16,41 +16,72 @@ relax_structure = VaspTask(
     incar=dict(
         ALGO="Normal",  # TEMPORARY SWITCH FROM Fast
         EDIFF=1.0e-05,
+        EDIFFG=-0.02, # From MVL's set
         ENCUT=520,
         IBRION=2,
         ICHARG=1,
         ISIF=3,
-        ISMEAR=-5,
+        ISMEAR=2,  ## changed for metal
         ISPIN=2,
         ISYM=0,
         # LDAU --> These parameters are excluded for now.
         LORBIT=11,
-        LREAL="auto",
+        LREAL="False",
         LWAVE=False,
         NELM=200,
         NELMIN=6,
         NSW=99,  # !!! Changed to static energy for testing
         PREC="Accurate",
-        SIGMA=0.05,
-        KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
+        SIGMA=0.2,
+        KSPACING=0.4,  # --> This is VASP default and not the same as pymatgen
     ),
     functional="PBE",
-    errorhandlers=[TetrahedronMesh(), Eddrmm()]
+    errorhandlers=[TetrahedronMesh(), Eddrmm()],
 )
 
 # FOR NEB RELAXATION
-run_neb = NudgedElasticBandTask()
+run_neb = NudgedElasticBandTask(
+    incar=dict(
+        # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/MPRelaxSet.yaml
+        ALGO="Normal",  # TEMPORARY SWITCH FROM Fast
+        EDIFF=1.0e-05,
+        EDIFFG=-0.02, # From MVL's set
+        ENCUT=520,
+        # IBRION=2, --> overwritten by MITNEBSet below
+        ICHARG=1,
+        ISIF=2,  # fixed lattice
+        ISMEAR=-5,
+        ISPIN=2,
+        ISYM=0,
+        # LDAU --> These parameters are excluded for now.
+        LORBIT=11,
+        LREAL="False",
+        LWAVE=False,
+        NELM=200,
+        NELMIN=6,
+        NSW=99,  # !!! Changed to static energy for testing
+        PREC="Accurate",
+        SIGMA=0.2,
+        KSPACING=0.4,  # --> This is VASP default and not the same as pymatgen
+        # These settings are from MITNEBSet
+        # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/sets.py#L2376-L2491
+        # IMAGES=len(structures) - 2, --> set inside task
+        IBRION=1,
+        # ISYM=0, --> duplicate of setting above
+        LCHARG=False,
+    )
+)
 
 
 @task(nout=3)
 def load_images_from_files(directory="source_structures", nimages=21):
-    
+
     structures = []
     for nposcar in range(nimages):
         filename = os.path.join(directory, f"POSCAR_{str(nposcar).zfill(2)}")
         structure = Structure.from_file(filename)
         structures.append(structure)
-    
+
     # returns start_image, [midpoint_images], end_image
     return structures[0], structures[1:-1], structures[-1]
 
@@ -62,7 +93,6 @@ with Flow("NEB Analysis") as workflow:
     # images = Parameter("images")
     # directory = Parameter("directory", default=".")
     vasp_cmd = Parameter("vasp_command", default="vasp > vasp.out")
-
 
     # grab our start/end structures of a target supercell size
     start_structure, images, end_structure = load_images_from_files()
@@ -87,5 +117,4 @@ with Flow("NEB Analysis") as workflow:
 
 # --------------------------
 
-workflow.run(vasp_command="mpirun -n 38 vasp_std > vasp.out")
-
+workflow.run(vasp_command="mpirun -n 76 vasp_std > vasp.out")
