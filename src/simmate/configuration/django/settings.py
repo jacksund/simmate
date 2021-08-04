@@ -254,8 +254,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # I add these two lines to fix the bug and need to revisit this later.
 # Based on recommendation by... 
 # https://stackoverflow.com/questions/35557129/css-not-loading-wrong-mime-type-django
-import mimetypes
-mimetypes.add_type("text/css", ".css", True)
+# import mimetypes
+# mimetypes.add_type("text/css", ".css", True)
 
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"
