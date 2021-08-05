@@ -9,10 +9,6 @@ class OqmdStructure(Structure):
 
     """ Base Info """
 
-    # OQMD ID
-    # For now, max length of 14 is overkill: 'oqmd-123456789'
-    id = models.CharField(max_length=14, primary_key=True)
-
     # Extra data by OQMD's calculations
     final_energy = models.FloatField(blank=True, null=True)
     energy_above_hull = models.FloatField(blank=True, null=True)

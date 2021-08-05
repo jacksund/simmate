@@ -9,10 +9,6 @@ class AflowStructure(Structure):
 
     """ Base Info """
 
-    # Jarvis ID
-    # For now, max length of 30 is overkill: 'aflow-abcdefghijklmnopqrstuvwx'
-    id = models.CharField(max_length=30, primary_key=True)
-
     # Extra data by JARVIS's calculations
     final_energy = models.FloatField(blank=True, null=True)
     final_energy_per_atom = models.FloatField(blank=True, null=True)

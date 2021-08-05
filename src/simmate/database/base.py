@@ -59,14 +59,15 @@ from django.db import models
 class Structure(models.Model):
 
     """ Base Info """
+    
+    # The id used to symbolize the structure.
+    # For example, Materials Project structures are represented by ids such as
+    # "mp-12345" while AFLOW structures by "aflow-12345"
+    id = models.CharField(max_length=25, primary_key=True)
 
-    # The structure which is written as a json string from pymatgen's to_json method.
-    # To convert back to Structure object, you need to apply json.loads to the string
-    # and then Structure.from_dict
-    # !!! Postgres does support a dictionary type, but we don't use that here so that
-    # !!! we can still test with SQLite3
-    # TODO: in the (far) future, I will drop pymatgen dependency
-    # TODO: to save on space, I can also come up with a non-json format here
+    # The structure which is written to a string and in a compressed format 
+    # using the .from_pymatgen() method. To get back to our pymatgen structure
+    # object, use the .to_pymatgen() method!
     structure_str = models.TextField()
 
     # !!! Should I have timestamps for the third-party databases?
@@ -103,9 +104,9 @@ class Structure(models.Model):
     # The composition of the structure formatted in various ways
     # BUG: The max length here is massive because some formulas in pymatgen
     # return floats (ex: Ca2.1234567N)
-    formula_full = models.CharField(max_length=100)
-    formula_reduced = models.CharField(max_length=100)
-    formula_anonymous = models.CharField(max_length=100)
+    formula_full = models.CharField(max_length=25)
+    formula_reduced = models.CharField(max_length=25)
+    formula_anonymous = models.CharField(max_length=25)
 
     # TODO: would it make sense to include these extra fields for Lattice/Sites?
     # Lattice: matrix and then... a, b, c, alpha, beta, gamma, volume

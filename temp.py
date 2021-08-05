@@ -27,15 +27,11 @@
 # --------------------------------------------------------------------------------------
 
 
-# from simmate.shortcuts import setup
-# from simmate.configuration.django.database import dump_database_to_json
-# dump_database_to_json()
-
 # --------------------------------------------------------------------------------------
 
-from simmate.shortcuts import setup
-from simmate.database.third_parties.scraping.materials_project import load_all_structures
-load_all_structures()
+# from simmate.shortcuts import setup
+# from simmate.database.third_parties.scraping.materials_project import load_all_structures
+# load_all_structures()
 
 # --------------------------------------------------------------------------------------
 
@@ -123,4 +119,14 @@ structure = Structure.from_file("nacl.cif")
 # from pymatgen.core.structure import Structure
 # structure = Structure.from_str(entry["fields"]["structure_json"], "cif")
 
+# import json
+
+# data = json.load(open("db_dump.json"))
+
+# ls = []
+# for entry in data:
+#     l = len(entry["fields"]["chemical_system"])
+#     if l > 50:
+#         # break
+#         ls.append(entry["fields"]["chemical_system"])
 

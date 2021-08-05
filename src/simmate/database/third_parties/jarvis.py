@@ -9,10 +9,6 @@ class JarvisStructure(Structure):
 
     """ Base Info """
 
-    # Jarvis ID
-    # For now, max length of 12 is overkill: 'mp-123456789'
-    id = models.CharField(max_length=12, primary_key=True)
-
     # Extra data by JARVIS's calculations
     formation_energy_per_atom = models.FloatField(blank=True, null=True)
     energy_above_hull = models.FloatField(blank=True, null=True)

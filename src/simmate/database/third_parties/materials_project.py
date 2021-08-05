@@ -9,10 +9,6 @@ class MaterialsProjectStructure(Structure):
 
     """ Base Info """
 
-    # Materials Project ID
-    # For now, max length of 12 is overkill: 'mp-123456789'
-    id = models.CharField(max_length=12, primary_key=True)
-
     # Final calculated energy by Materials Project
     # Because Materials Project may be missing some of these values or we may add a
     # structure without a calc done, we set this column as optional.

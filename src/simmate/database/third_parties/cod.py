@@ -6,13 +6,20 @@ from simmate.database.base import Structure
 
 
 class CodStructure(Structure):
+    
+    # These fields overwrite the default Structure fields
+    # BUG: We can't use CharField for the COD database because there are a number
+    # of structures that have 20+ elements in them and are disordered. The disordered
+    # aspect throws issues in pymatgen where formulas can be returned as long
+    # floats (ex: Ca2.1234567N). Until this is fixed and cleaned up, I'll
+    # need to use TextField instead of CharField for these fields.
+    chemical_system = models.TextField()
+    formula_full = models.TextField()
+    formula_reduced = models.TextField()
+    formula_anonymous = models.TextField()
 
     """ Base Info """
 
-    # COD ID
-    # For now, max length of 14 is overkill: 'ocd-123456789'
-    id = models.CharField(max_length=14, primary_key=True)
-    
     # whether the structure contains disordered sites (i.e. mixed occupancies)
     is_ordered = models.BooleanField()
     
