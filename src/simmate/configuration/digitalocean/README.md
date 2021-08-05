@@ -94,7 +94,15 @@ gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi
 8. We can still with the defaults for the rest of the pages! Create your server when you're ready!
 
 
-## Stage 3: Setting up our website domain name (simmate.org)
+### creating our static file server (CDN)
+Everything for our website should work except for the serving of static files. This is because DigitalOcean wants us to serve these separately. This isn't a big deal because the extra server is free for us!
+1. On our current app, go to "Settings" and then select "+Add Component" button on the top right. We want to add a "Static Site"
+2. Select the same github repo as before and make sure python is detected
+3. On this page, change "HTTP Request Routes" to **/static** and  the "Output Directory" to **/src/simmate/website/static**
+4. That's it! Start the server when you're ready!
+
+
+## setting up our website domain name (simmate.org)
 
 We use google domains as I found it had the easiest setup and cheapest prices.
 For connecting this to DigitalOcean, I follow these guides:
@@ -111,4 +119,6 @@ For connecting this to DigitalOcean, I follow these guides:
 4. Save these and be sure to select "Switch to these settings" at the top to enable them
 5. Jump back to your DigitalOcean dashboard and go to the [Networking tab](https://cloud.digitalocean.com/networking/domains)
 6. The first page here is the Domain view where you should now add your new domain name
+7. Now switch back to our DigitalOcean App (from above) and go to settings
+8. Under "Domains", we want to edit and add 
 
