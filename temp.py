@@ -26,6 +26,9 @@
 
 # --------------------------------------------------------------------------------------
 
+from simmate.shortcuts import setup
+from simmate.configuration.django.database import load_database_from_json
+load_database_from_json()
 
 # --------------------------------------------------------------------------------------
 

@@ -102,11 +102,11 @@ class Structure(models.Model):
     spacegroup = models.IntegerField()
 
     # The composition of the structure formatted in various ways
-    # BUG: The max length here is massive because some formulas in pymatgen
-    # return floats (ex: Ca2.1234567N)
-    formula_full = models.CharField(max_length=25)
-    formula_reduced = models.CharField(max_length=25)
-    formula_anonymous = models.CharField(max_length=25)
+    # BUG: The max length here is overkill because there are many structures
+    # with 8+ elements and disordered formula (e.g. "Ca2.103 N0.98")
+    formula_full = models.CharField(max_length=50)  # more
+    formula_reduced = models.CharField(max_length=50)
+    formula_anonymous = models.CharField(max_length=50)
 
     # TODO: would it make sense to include these extra fields for Lattice/Sites?
     # Lattice: matrix and then... a, b, c, alpha, beta, gamma, volume
