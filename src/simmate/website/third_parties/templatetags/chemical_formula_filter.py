@@ -20,8 +20,8 @@ def formula_to_html(formula_str):
     new_formula_str = ""
     
     for character in formula_str:
-        # if it's a number, we wrap it in <sub> tags
-        if character.isnumeric():
+        # if it's a number or a decimal, we wrap it in <sub> tags
+        if character.isnumeric() or character == ".":
             character = f"<sub>{character}</sub>"
         # now add it to our result
         new_formula_str += character
