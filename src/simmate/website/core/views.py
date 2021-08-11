@@ -14,6 +14,7 @@ from simmate.database.third_parties.all import (
     OqmdStructure,
 )
 
+
 @login_required
 def home(request):
 
@@ -94,6 +95,7 @@ def home(request):
     }
     template = "core/home.html"
     return render(request, template, context)
+
 
 def extras(request):
 

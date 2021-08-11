@@ -33,13 +33,13 @@ class Structure(models.Model):
     chemical_system = models.CharField(max_length=25)
 
     # Density of the crystal (g/cm^3)
-    density = models.DecimalField(max_digits=7, decimal_places=3)
+    density = models.FloatField()
 
     # Molar volume of the crystal (cm^3/mol)
     # Note we prefer this over a "volume" field because volume is highly dependent
     # on the symmetry and the arbitray unitcell. If you are truly after small volumes
     # of the unitcell, it is likely you really just want to search by spacegroup.
-    molar_volume = models.DecimalField(max_digits=7, decimal_places=3)
+    molar_volume = models.FloatField()
 
     # The composition of the structure formatted in various ways
     # BUG: The max length here is overkill because there are many structures

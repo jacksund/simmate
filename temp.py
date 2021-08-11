@@ -26,8 +26,8 @@
 
 # --------------------------------------------------------------------------------------
 
-# from simmate.configuration.django.database import reset_database
-# reset_database()
+from simmate.configuration.django.database import reset_database
+reset_database()
 
 # --------------------------------------------------------------------------------------
 
