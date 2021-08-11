@@ -381,8 +381,8 @@ class SupervisedStagedShellTask(Task):
 
         # Note that we have "-> Tuple[Any, list]" at the end of our run method.
         # This tells Prefect that we are returning two things...
-        #   (1) all of the corrections made during execution
-        #   (2) the result of our workup method
+        #   (1) the result of our workup method (which could be anything)
+        #   (2) all of the corrections made during execution (as a list)
 
         # because the command is something that is frequently changed at the
         # workflow level, then we want to make it so the user can set it for

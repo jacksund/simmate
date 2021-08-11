@@ -26,15 +26,14 @@
 
 # --------------------------------------------------------------------------------------
 
-from simmate.shortcuts import setup
-from simmate.configuration.django.database import load_database_from_json
-load_database_from_json()
+# from simmate.configuration.django.database import reset_database
+# reset_database()
 
 # --------------------------------------------------------------------------------------
 
-# from simmate.shortcuts import setup
-# from simmate.database.third_parties.scraping.materials_project import load_all_structures
-# load_all_structures()
+from simmate.shortcuts import setup
+from simmate.database.third_parties.scraping.materials_project import load_all_structures
+load_all_structures()
 
 # --------------------------------------------------------------------------------------
 
@@ -54,6 +53,14 @@ MaterialsProjectStructure.objects.filter(chemical_system__contains="Y").filter(
 from django.db.models import Sum
 
 MaterialsProjectStructure.objects.aggregate(Sum("nsites"))
+
+# --------------------------------------------------------------------------------------
+
+from simmate.shortcuts import setup
+from simmate.database.third_parties.all import MaterialsProjectStructure
+queryset = MaterialsProjectStructure.objects.all()[:100]
+from django_pandas.io import read_frame
+df = read_frame(queryset)
 
 # --------------------------------------------------------------------------------------
 

@@ -5,6 +5,7 @@ import shutil
 
 from django.core.management import call_command
 
+from simmate.configuration.django import setup_full  # sets database connection
 from simmate.configuration.django.settings import BASE_DIR, DATABASES
 
 

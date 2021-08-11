@@ -143,20 +143,20 @@ DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "True") == "True"
 # an example of this commented out below.
 if DEVELOPMENT_MODE is True:
     DATABASES = {
-        # "default": {
-        #     "ENGINE": "django.db.backends.sqlite3",
-        #     "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
-        # }
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": "simmate-database-02-pool",  # default on DigitalOcean is defaultdb
-            "USER": "doadmin",
-            "PASSWORD": "dibi5n3varep5ad8",
-            "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-            "PORT": "25061",
-            "OPTIONS": {"sslmode": "require"},  # !!! is this needed?
-            # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
         }
+        # "default": {
+        #     "ENGINE": "django.db.backends.postgresql_psycopg2",
+        #     "NAME": "simmate-database-02-pool",  # default on DigitalOcean is defaultdb
+        #     "USER": "doadmin",
+        #     "PASSWORD": "dibi5n3varep5ad8",
+        #     "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
+        #     "PORT": "25061",
+        #     "OPTIONS": {"sslmode": "require"},  # !!! is this needed?
+        #     # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
+        # }
     }
 
 # When DigitalOcean runs the "collectstatic" command, we don't want to connect

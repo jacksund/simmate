@@ -2,7 +2,7 @@
 
 from django.db import models
 
-from simmate.database.base import Structure
+from simmate.database.structure import Structure
 
 
 class MaterialsProjectStructure(Structure):
