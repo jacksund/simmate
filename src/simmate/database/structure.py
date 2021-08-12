@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from scipy.constants import Avogadro
-from pymatgen.core.structure import Structure as Structure_PMG
-# from pymatgen.analysis.prototypes import AflowPrototypeMatcher
 
 from django.db import models
+
+from pymatgen.core.structure import Structure as Structure_PMG
+
+# from pymatgen.analysis.prototypes import AflowPrototypeMatcher
+
+from simmate.database.symmetry import Spacegroup
 
 
 class Structure(models.Model):
@@ -67,7 +71,7 @@ class Structure(models.Model):
 
     # symmetry info
     # TODO: this will be a relationship in the future
-    spacegroup = models.IntegerField()
+    spacegroup = models.ForeignKey(Spacegroup, on_delete=models.PROTECT)
 
     # The AFLOW prototype that this structure maps to.
     # TODO: this will be a relationship in the future
@@ -116,7 +120,7 @@ class Structure(models.Model):
             * Avogadro
             * 1e-27
             * 1e3,
-            spacegroup=structure.get_space_group_info(0.1)[1],  # OPTIMIZE
+            spacegroup_id=structure.get_space_group_info(0.1)[1],  # OPTIMIZE
             formula_full=structure.composition.formula,
             formula_reduced=structure.composition.reduced_formula,
             formula_anonymous=structure.composition.anonymized_formula,
