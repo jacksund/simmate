@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import math
+
 
 class Incar(dict):
     """
@@ -7,6 +9,15 @@ class Incar(dict):
     a python dictionary, but has a few extra checks and methods attached to it.
     You can pass it a dictionary or initialize it just like you would dict(kwargs).
     You can consider the dict(kwargs) as equivalent to Incar(parameters).
+
+    If you want a given setting to be dependent on the structure or dynamically
+    determined, then we implement these modifiers. This would enable us to
+    do things like ENCUT__per_atom or NGZF__density. We can even have more complex
+    modifiers like LDAUU__smart (which is a custom class).
+    
+    TODO: In the future, I want to allow modifiers like __relative_to_previous
+    and __use_previous to string settings accross tasks.
+
     """
 
     def __init__(self, **kwargs):
@@ -25,8 +36,20 @@ class Incar(dict):
         # datatypes and formatting? Also will this behave properly if the value
         # is already in the correct format?
         for parameter, value in self.items():
-            formatted_value = self._str_to_datatype(parameter, value)
-            self.update({parameter: formatted_value})
+            
+            # parameters may have tags like "__density" added onto them. We don't
+            # convert to the datatype yet, but instead wait until a structure
+            # is provided (when the to_file or str methods are called below).
+            # These are defined in python and should already be in the correct
+            # data format.
+            if "__" in parameter:
+                self.update({parameter: value})
+            
+            # Otherwise, we need to convert values to the proper python datatype
+            # because we might be reading from a file where everything is a string
+            else:
+                formatted_value = self._str_to_datatype(parameter, value)
+                self.update({parameter: formatted_value})
 
         # SPECIAL CASE
         # If you have LSORBIT=True or LNONCOLLINEAR=True, the MAGMOM class needs
@@ -35,9 +58,6 @@ class Incar(dict):
         #   MAGMOM = x1 y1 z1    x2 y2 z2    x3 y3 z3 ...
         #       [...instead of...]
         #   MAGMOM = value1 value2 value3 ...
-        # TODO: is this the best implementation spot? What about where I parse
-        # all other values to their target format and shapes?
-
         # Check if MAGMOM is set along with LSORBIT or LNONCOLLINEAR being True
         if ("MAGMOM" in kwargs) and (
             kwargs.get("LSORBIT") or kwargs.get("LNONCOLLINEAR")
@@ -53,7 +73,7 @@ class Incar(dict):
             # now update the dictionary with this value
             self.update({"MAGMOM": new_format})
 
-    def __str__(self):
+    def __str__(self, structure=None):
 
         # Let's start with an empty string and build from there
         final_str = ""
@@ -61,6 +81,42 @@ class Incar(dict):
         # Iterate through each parameter and its set value. Each one will be
         # put on a separate line.
         for parameter, value in self.items():
+            
+            # parameters may have tags like "__density" added onto them. We check
+            # for those and apply them if nececary.
+            if "__" in parameter:
+                
+                # make sure we have a structure supplied because all modifiers
+                # require one.
+                if not structure:
+                    raise Exception(
+                        """
+                        It looks like you used a keyword modifier but didn't
+                        supply a structure! If you want something like ENCUT__per_atom,
+                        then you need to make sure you provide a structure so that
+                        the modifier (__per_atom here) can be evaluated.
+                        """
+                        )
+                
+                # separate the input into the base parameter and modifier
+                parameter, modifier_tag = parameter.split("__")
+                # check that this class has this modifier supported. It should
+                # be a method named "keyword_modifier_mymodifer"
+                modifier_fxn_name = "keyword_modifier_" + modifier_tag
+                if hasattr(self, modifier_fxn_name):
+                    modifier_fxn = getattr(self, modifier_fxn_name)
+                else:
+                    raise AttributeError(
+                        """
+                        It looks like you used a keyword modifier that hasn't
+                        been defined yet! If you want something like ENCUT__smart_encut,
+                        then you need to make sure there is a keyword_modifier_smart_encut
+                        method available.
+                        """
+                        )
+                # now that we have the modifier function, let's use it to update
+                # our value for this keyword.
+                value = modifier_fxn(structure, value)
 
             # let's start by adding the parameter key to our output
             # It will be followed by an equal sign to separate it's value
@@ -69,12 +125,11 @@ class Incar(dict):
             # If we have a value that is a list (or list of lists)
             if isinstance(value, list):
 
-                # check if we have a list of lists, which is uncommon
+                # check if we have a list of lists
                 # Take MAGMOM with LSORBIT=True as an example, where we convert...
                 #   [[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]
                 # to...
                 # "x1 y1 z1 x2 y2 z2 x3 y3 z3"
-                # !!! Should I do "x1 y1 z1\tx2 y2 z2\tx3 y3 z3"
                 if isinstance(value[0], list):
                     final_str += " ".join(str(n) for xyz in value for n in xyz)
 
@@ -95,7 +150,7 @@ class Incar(dict):
         # we now have our final string and can return it!
         return final_str
 
-    def to_file(self, filename="INCAR"):
+    def to_file(self, structure=None, filename="INCAR"):
         """
         Write Incar to a file.
         Args:
@@ -103,7 +158,7 @@ class Incar(dict):
         """
         # we just take the string format and put it in a file
         with open(filename, "w") as file:
-            file.write(self.__str__())
+            file.write(self.__str__(structure=structure))
 
     @staticmethod
     def from_file(filename="INCAR"):
@@ -332,10 +387,60 @@ class Incar(dict):
             if parameter in self and value != self[parameter]:
                 # If not, we shouldn't allow combining these Incars as it can
                 # lead to undesired results.
-                raise ValueError("Incars have conflicting values!")
+                raise ValueError(
+                    "Incars have conflicting values! One conflict is with {parameter}"
+                    )
             # otherwise just set the value
             else:
                 new_parameters[parameter] = value
 
         # now return the new Incar
         return Incar(**new_parameters)
+
+    # ------------------------------
+    # All methods below are modifiers that users can apply. I may move these to
+    # a separate class (e.g. KeywordModifier).
+    
+    @staticmethod
+    def keyword_modifier_density(structure, density):
+        """
+        The __density modifier means the user wants a specific density. They 
+        provide this density in per-angstrom^3 units and we return the 
+        structure-specific count that gives this density. 
+        For example, density=10 and a structure lattice that volume of 5,
+        then this returns value=10*5=50.
+        """
+        # VASP expect integers for a lot of these values, so we round up
+        return math.ceil(structure.lattice.volume * density)
+    
+    @staticmethod
+    def keyword_modifier_density_a(structure, density):
+        """
+        The __density_a modifier means the user wants a specific density along
+        the A lattice vector. They provide this density in per-angstrom units
+        and we return the structure-specific count that gives this density. 
+        For example, density=10 and a structure lattice that A vector of 5,
+        then this returns value=10*5=50.
+        """
+        # VASP expect integers for a lot of these values, so we round up
+        return math.ceil(structure.lattice.a * density)
+    
+    @staticmethod
+    def keyword_modifier_density_b(structure, density):
+        return math.ceil(structure.lattice.b * density)
+    
+    @staticmethod
+    def keyword_modifier_density_c(structure, density):
+        return math.ceil(structure.lattice.c * density)
+    
+    @staticmethod
+    def keyword_modifier_per_atom(structure, per_atom_value):
+        """
+        The __density modifier means the user wants a specific density. They 
+        provide this density in per-angstrom^3 units and we return the 
+        structure-specific count that gives this density. 
+        For example, density=10 and a structure lattice that volume of 5,
+        then this returns value=10*5=50.
+        """
+        # VASP expect integers for a lot of these values, so we round up
+        return math.ceil(per_atom_value / structure.num_sites)

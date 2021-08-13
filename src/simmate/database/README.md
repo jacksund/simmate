@@ -179,15 +179,6 @@ EnergyCalculation
     run_type(GGA,GGAU,HF)
     is_hubbard
 
-Spacegroup
-    number
-    crystal_system
-    hall
-    number
-    pointgroup
-    source
-    symbol
-
 BandStructure + DOS
     band_gap
     is_direct
