@@ -156,5 +156,7 @@ class Structure(models.Model):
     """ For website compatibility """
 
     class Meta:
-        app_label = "third_parties"  # TODO: move to a separate app
         abstract = True
+        # Any time you inherit from this class, you'll need to indicate which
+        # django app it is associated with. For example...
+        #   app_label = "third_parties"

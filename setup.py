@@ -170,6 +170,7 @@ setup(
         'djangorestframework',  # for our REST API
         'django-filter',  # sets up automatic filters for our REST API
         'django-extensions',  # simple tools to help with django development
+        'pyyaml',  # for yaml configuration files
     
         # For development
         'pytest',

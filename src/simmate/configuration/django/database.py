@@ -6,7 +6,7 @@ import shutil
 from django.core.management import call_command
 
 from simmate.configuration.django import setup_full  # sets database connection
-from simmate.configuration.django.settings import BASE_DIR, DATABASES
+from simmate.configuration.django.settings import DJANGO_DIRECTORY, DATABASES
 from simmate.database.symmetry import Spacegroup
 
 def update_database(apps_to_migrate=["third_parties"]):
@@ -35,7 +35,7 @@ def reset_database(apps_to_migrate=["third_parties"]):
     # go through each listed directory in the base directory
     # and delete all folders named 'migrations'
     for app in apps_to_migrate:
-        migration_dir = os.path.join(BASE_DIR, app, "migrations")
+        migration_dir = os.path.join(DJANGO_DIRECTORY, app, "migrations")
         if os.path.exists(migration_dir):
             shutil.rmtree(migration_dir)
 

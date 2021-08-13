@@ -7,7 +7,7 @@ from simmate.database.structure import Structure
 
 class AflowStructure(Structure):
 
-    """ Base Info """
+    """Base Info"""
 
     # Extra data by JARVIS's calculations
     final_energy = models.FloatField(blank=True, null=True)
@@ -16,17 +16,21 @@ class AflowStructure(Structure):
     band_gap = models.FloatField(blank=True, null=True)
     # !!! There are plenty more properties I can add too. Check a single entry
     # when scraping data for more (in simmate.database.third_parties.scrapping.aflow)
-    
+
     # The hull energy of the structure is not supported by this databse, but
     # we have enough information here to generate this value ourselves. We
     # therefore have this field empty to start and we then calculate it in Simmate.
     energy_above_hull = models.FloatField(blank=True, null=True)
-    
+
     """ Properties """
 
     # OPTIMIZE: is it better to just set the attribute than to have a fixed
     # property that's defined via a function?
     source = "AFLOW"
+
+    # Make sure Django knows which app this is associated with
+    class Meta:
+        app_label = "third_parties"
 
     @property
     def external_link(self):
@@ -35,7 +39,7 @@ class AflowStructure(Structure):
         # !!! I could also consider an alternative link which points to an interactive
         # REST endpoint. The API is also sporatic for these, An example one is...
         #   aflowlib.duke.edu/AFLOWDATA/ICSD_WEB/FCC/Dy1Mn2_ICSD_602151
-        id_formatted = self.id.replace("-",":")
+        id_formatted = self.id.replace("-", ":")
         return f"http://aflow.org/material/?id={id_formatted}"
 
     """ Model Methods """

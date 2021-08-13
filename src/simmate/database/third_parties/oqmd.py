@@ -22,6 +22,10 @@ class OqmdStructure(Structure):
     # property that's defined via a function?
     source = "OQMD"
 
+    # Make sure Django knows which app this is associated with
+    class Meta:
+        app_label = "third_parties"
+
     @property
     def external_link(self):
         # Links to the OQMD dashboard for this structure. An example is...

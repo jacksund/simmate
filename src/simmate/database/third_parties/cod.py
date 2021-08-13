@@ -40,6 +40,10 @@ class CodStructure(Structure):
     # property that's defined via a function?
     source = "COD"
 
+    # Make sure Django knows which app this is associated with
+    class Meta:
+        app_label = "third_parties"
+
     @property
     def external_link(self):
         # Links to the AFLOW dashboard for this structure. An example is...

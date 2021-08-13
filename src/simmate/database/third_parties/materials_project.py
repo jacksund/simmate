@@ -28,6 +28,10 @@ class MaterialsProjectStructure(Structure):
     # property that's defined via a function?
     source = "Materials Project"
 
+    # Make sure Django knows which app this is associated with
+    class Meta:
+        app_label = "third_parties"
+
     @property
     def external_link(self):
         # All Materials Project structures have their data mapped to a URL in 

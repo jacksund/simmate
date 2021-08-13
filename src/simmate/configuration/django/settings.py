@@ -12,35 +12,46 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import sys
+from pathlib import Path
+
+import yaml
+
+from django.core.management.utils import get_random_secret_key
 
 import dj_database_url  # needed for DigitalOcean database connection
 
-from simmate import website  # needed to specify location of apps
-from simmate import database  # needed to specify location of database
+from simmate import website  # needed to specify location of built-in apps
 
-# from simmate.configuration.django import settings_user  # to allow extra apps supplied by user
+# --------------------------------------------------------------------------------------
 
-# The base directory is where simmate.website is located. Note this is Django's
-# base directory, NOT simmates
-BASE_DIR = os.path.dirname(os.path.abspath(website.__file__))
+# SET MAIN DIRECTORIES
 
-# The database directory is where simmate.database is located. I move the
-# default database file into the simmate.database module.
-# TODO: consider placing the database in the user's .simmate/ configuration
-# directory so they can easily share/delete it.
-DATABASE_DIR = os.path.dirname(os.path.abspath(database.__file__))
+# We check for extra django apps in the user's home directory and in a "hidden"
+# folder named ".simmate/extra_applications".
+# For windows, this would be something like...
+#   C:\Users\exampleuser\.simmate\extra_applications
+SIMMATE_DIRECTORY = os.path.join(Path.home(), ".simmate")
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+# This directory is where simmate.website is located and helps us indicate
+# where things like our templates or static files are located. We find this
+# by looking at the import path to see where python installed it.
+DJANGO_DIRECTORY = os.path.dirname(os.path.abspath(website.__file__))
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# --------------------------------------------------------------------------------------
+
+# ENVIORNMENT VARIABLES
+
+# There are a number of settings that we let the user configure via enviornment
+# variables, which helps control things when we want to launch a website server.
+# We check for these variables in the enviornment, and if they are not set,
+# they fall back to a default.
+
+# Keep the secret key used in production secret!
 # For DigitalOcean, we grab this secret key from an enviornment variable.
 # If this variable isn't set, then we instead generate a random one.
-from django.core.management.utils import get_random_secret_key
-
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# Don't run with debug turned on in production!
 # For DigitalOcean, we try grabbing this from an enviornment variable. If that
 # variable isn't set, then we assume we are debugging. The == at the end converts
 # the string to a boolean for us.
@@ -50,6 +61,73 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 # from an enviornment variable, which we then split into a list. If this
 # enviornment variable isn't set yet, then we just defaul to the localhost.
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+
+# This decides wether we use a local sqlite database. The order of priority for
+# databases goes...
+#   (1) Check for a "database.yaml" file in the user's home directory
+#   (2) Check for the USE_LOCAL_DATABASE enviornment variable (defaults to True)
+#   (3) If USE_LOCAL_DATABASE=False, then check for DATABASE_URL enviornment variable
+USE_LOCAL_DATABASE = os.getenv("USE_LOCAL_DATABASE", "True") == "True"
+# this is not a typical Django setting
+
+# --------------------------------------------------------------------------------------
+
+# DATBASE CONNECTION
+
+# We first check if the user has a "database.yaml" file and we use the databases
+# specified there as our first priority.
+DATABASE_YAML = os.path.join(SIMMATE_DIRECTORY, "database.yaml")
+if os.path.exists(DATABASE_YAML):
+    with open(DATABASE_YAML) as file:
+        DATABASES = yaml.full_load(file)
+
+# If this file doesn't exist, we next check our enviornment variable to see if 
+# we should use our local sql database. This is the default behavior!
+elif USE_LOCAL_DATABASE is True:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(SIMMATE_DIRECTORY, "database.sqlite3"),
+        }
+    }
+
+# Otherwise, we are likely using DigitalOcean and running a server.
+# When DigitalOcean runs the "collectstatic" command, we don't want to connect
+# any database. So we use the "sys" library to look at the command and ensure
+# it doesn't involve "collectstatic". Otherwise we use the URL that is set with
+# our enviornment variable.
+elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
+    # ensure that we have the database URL properly configured in DigitalOcean
+    if os.getenv("DATABASE_URL", None) is None:
+        raise Exception("DATABASE_URL environment variable not defined")
+    # Now connect our DigitalOcean to this database!
+    DATABASES = {
+        "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
+    }
+
+# Here is an example of connecting to a Postgres server normally...
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "NAME": "simmate-database-pool",  # default on DigitalOcean is defaultdb
+#         "USER": "doadmin",
+#         "PASSWORD": "dibi5n3varep5ad8",
+#         "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
+#         "PORT": 25061,
+#         "OPTIONS": {"sslmode": "require"},  # !!! is this needed?
+#         # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
+#     }
+# }
+
+# --------------------------------------------------------------------------------------
+
+# INSTALLED APPS
+
+# OPTIMIZE: for now, I just load everything, but I will want to allow users to
+# to disable some apps from loading. This will allow faster import/setup times
+# when running small scripts. One idea is to have an applications_override.yaml
+# where the user specifies only what they want. Alternatively, I can use
+# a general DATABASE_ONLY keyword or something similar to limit what's loaded.
 
 # List all applications that Django will initialize with. Write the full python
 # path to the app or it's config file. Note that relative python paths work too
@@ -79,19 +157,34 @@ INSTALLED_APPS = [
     "crispy_forms",  # django-crispy-forms
     "rest_framework",  # djangorestframework
     "django_filters",  # django-filter
-    'django_extensions',  # for development tools
+    "django_extensions",  # for development tools
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
-    #   django-extensions
     #   django-ratelimit
     #   dj-stripe
     #   django-allauth
     #   django-debug-toolbar
-    #   django-channels (+ React.js)
+    #   django-unicorn
     #   django-REST-framework
     #   django-graphene (+ GraphQL)
     #   django-redis
 ]
+
+# We also check if the user has a "applications.yaml" file. In this file, the
+# user can provide extra apps to install for Django. We simply append these
+# to our list above
+APPLICATIONS_YAML = os.path.join(SIMMATE_DIRECTORY, "applications.yaml")
+if os.path.exists(APPLICATIONS_YAML):
+    with open(APPLICATIONS_YAML) as file:
+        # load the list of extra apps. Since this is really just one line for
+        # each, it is loaded as a single string separated by a space.
+        extra_apps = yaml.full_load(file).split()
+        # now add each app to our list above so Django loads it.
+        for app in extra_apps:
+            INSTALLED_APPS.append(app)
+
+# --------------------------------------------------------------------------------------
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -110,7 +203,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         # I set DIRS below so I can have a single templates folder
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [os.path.join(DJANGO_DIRECTORY, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -125,67 +218,6 @@ TEMPLATES = [
 
 # "core" here is based on the name of my main django folder
 WSGI_APPLICATION = "simmate.website.core.wsgi.application"
-
-# -----------------------
-# Database Connection
-# Note that the database we connect to depends on whether we are testing things
-# locally or running things in production! So we use DEVELOPMENT_MODE setting
-# to decide how to connect.
-#
-# This is a DigitalOcean keyword that we use to help with alternative configurations.
-# For example, we could use this to decide which database to connect to below. It
-# defaults to True unless it's set otherwise in the enviornment.
-# The == "True" at the end converts this to a boolean for us.
-DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "True") == "True"
-#
-# If we are in development mode, then we only connect to our local SQLite database.
-# Alternatively, we would connect to a personal PostgreSQL database -- which I have
-# an example of this commented out below.
-if DEVELOPMENT_MODE is True:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(DATABASE_DIR, "db.sqlite3"),
-        }
-        # "default": {
-        #     "ENGINE": "django.db.backends.postgresql_psycopg2",
-        #     "NAME": "simmate-database-02-pool",  # default on DigitalOcean is defaultdb
-        #     "USER": "doadmin",
-        #     "PASSWORD": "dibi5n3varep5ad8",
-        #     "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-        #     "PORT": "25061",
-        #     "OPTIONS": {"sslmode": "require"},  # !!! is this needed?
-        #     # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
-        # }
-    }
-
-# When DigitalOcean runs the "collectstatic" command, we don't want to connect
-# any database. So we use the "sys" library to look at the command and ensure
-# it doesn't involve "collectstatic". Otherwise we use the URL that is set with
-# our enviornment variable.
-elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
-    # ensure that we have the database URL properly configured in DigitalOcean
-    if os.getenv("DATABASE_URL", None) is None:
-        raise Exception("DATABASE_URL environment variable not defined")
-    # Now connect our DigitalOcean to this database!
-    DATABASES = {
-        "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
-    }
-    # NOTE: this line above is the same as doing...
-    # DATABASES = {
-    #     "default": {
-    #         "ENGINE": "django.db.backends.postgresql_psycopg2",
-    #         "NAME": "simmate-database-pool",  # default on DigitalOcean is defaultdb
-    #         "USER": "doadmin",
-    #         "PASSWORD": "dibi5n3varep5ad8",
-    #         "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-    #         "PORT": "25061",
-    #         "OPTIONS": {"sslmode": "require"},  # !!! is this needed?
-    #         # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
-    #     }
-    # }
-
-# -----------------------
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -249,10 +281,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 # collect by running 'python manage.py collectstatic'
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(DJANGO_DIRECTORY, "static")
 # BUG: djangorestframework's static files struggle to load and I'm not sure why.
 # I add these two lines to fix the bug and need to revisit this later.
-# Based on recommendation by... 
+# Based on recommendation by...
 # https://stackoverflow.com/questions/35557129/css-not-loading-wrong-mime-type-django
 # import mimetypes
 # mimetypes.add_type("text/css", ".css", True)

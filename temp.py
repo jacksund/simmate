@@ -139,4 +139,3 @@ structure = Structure.from_file("nacl.cif")
 #     if l > 50:
 #         # break
 #         ls.append(entry["fields"]["chemical_system"])
-

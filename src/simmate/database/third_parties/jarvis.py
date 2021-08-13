@@ -21,7 +21,11 @@ class JarvisStructure(Structure):
     # OPTIMIZE: is it better to just set the attribute than to have a fixed
     # property that's defined via a function?
     source = "JARVIS"
-    
+
+    # Make sure Django knows which app this is associated with
+    class Meta:
+        app_label = "third_parties"
+
     @property
     def external_link(self):
         # All JARVIS structures have their data mapped to a URL in the same way
