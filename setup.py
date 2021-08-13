@@ -180,7 +180,7 @@ setup(
         'graphviz',  # python-graphviz on conda. For viewing prefect flows
         'plotly',
         'matplotlib',
-        'seaborn',
+        # 'seaborn',
     
         # These are from the MP stack and I want to drop dependency
         'pymatgen',

@@ -2,7 +2,7 @@
 
 # TO CREATE CONDA ENV...
 
-# conda create -n simmate -c conda-forge python=3.8 numpy pandas django prefect dask click django-crispy-forms django-pandas psycopg2 dask-jobqueue scikit-learn pytest matplotlib plotly pymatgen spyder graphviz dj-database-url djangorestframework django-filter django-extensions
+# conda create -n simmate -c conda-forge python=3.8 numpy pandas django prefect dask click django-crispy-forms django-pandas psycopg2 dask-jobqueue scikit-learn pytest matplotlib plotly pymatgen spyder graphviz dj-database-url djangorestframework django-filter django-extensions pyyaml gunicorn
 
 # pymatgen-diffusion is outdated on anaconda
 # pip install pymatgen-analysis-diffusion

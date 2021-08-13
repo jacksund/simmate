@@ -13,7 +13,9 @@ class Incar(dict):
     If you want a given setting to be dependent on the structure or dynamically
     determined, then we implement these modifiers. This would enable us to
     do things like ENCUT__per_atom or NGZF__density. We can even have more complex
-    modifiers like LDAUU__smart (which is a custom class).
+    modifiers like LDAU__multiple_tags__smart_ldau which signals that our 
+    "smart_ldau" modifier might introduce new settings to the INCAR, such as
+    LDAUJ, LDAUU, LDAUL, LDAUTYPE, and LDAUPRINT.
     
     TODO: In the future, I want to allow modifiers like __relative_to_previous
     and __use_previous to string settings accross tasks.
@@ -444,3 +446,151 @@ class Incar(dict):
         """
         # VASP expect integers for a lot of these values, so we round up
         return math.ceil(per_atom_value / structure.num_sites)
+    
+    @staticmethod
+    def keyword_modifier_smart_magmom(structure, override_values):
+        """
+        The __smart_magmom modifier goes through a series of checks to decide
+        what to set the MAGMOM as for VASP. In order of priority they are...
+            (1) the magmom property attached to each site in the structure object
+            (2) the spin property attached to the site's specie
+            (3) a value provided explicitly (e.g. {"Co": 0.5})
+            (4) a value of 0.6
+        """
+        
+        # we go through each site in the structure and decide what to set the
+        # MAGMOM for each. This allows even different sites of the same
+        # element to have their own MAGMOM
+        magnetic_moments = []
+        for site in structure:
+            # if the structure object has magmom-decorated sites, we use that
+            # as our first priority
+            if hasattr(site, "magmom"):
+                magnetic_moments.append(site.magmom)
+            # next we check if the site's specie has a spin
+            elif hasattr(site.specie, "spin"):
+                magnetic_moments.append(site.specie.spin)
+            # we then look at the override dictionary if there was one provided.
+            # If note, we use 0.6 as a default.
+            else:
+                magnetic_moment = override_values.get(site.specie.symbol, 0.6)
+                magnetic_moments.append(magnetic_moment)
+        
+        return magnetic_moments
+
+    @staticmethod
+    def keyword_modifier_smart_ldau(structure, ldau_config):
+        """
+        This modifier handles a series of keyword arguments that are associated
+        with LDAU, including LDAUJ, LDAUL, LDAUTYPE, LDAUU, LDAUPRINT, and LMAXMIX.
+        Therefore, a complex dictionary is passed to this. The format looks like this...
+            LDAU__multiple_tags__smart_ldau = dict(
+                LDAU__auto=True,
+                LDAUTYPE=2,
+                LDAUPRINT=1,
+                LDAUJ={...},
+                LDAUL={...},
+                LDAUU={...},
+                LMAXMIX__auto=True,
+                )
+        The LDAUJ, LDAUL, and LDAUU values can be a dictionary of elements to 
+        value, or (most commonly) a nested dictionary. For example...
+            LDAUJ = {"F":{"Co":0}}
+        This would mean if the structure is a fluoride, set the LDAUJ for Co to 0.
+        If there are multiple options here (e.g. for fluorides and oxides), then
+        priority is placed on the most electronegative element. This would mean
+        some thing like yttrium oxide fluoride would be treated as a fluoride over
+        an oxide.
+        """
+        
+        # first we need to go through the LDAUJ, LDAUL, and LDAUU keywords and
+        # see what their values are. If all of these end up be 0 for all elements
+        # then we actually don't need LDAU at all! Therefore, we'll go through
+        # all of these keywords and build a dictionary of settings to return
+        # at the end of this function
+        ldau_settings = {}
+        
+        # To help decide how we set these values, let's check what the most 
+        # electronegative element is, which will be last in the sorted composition
+        most_electroneg = sorted(structure.composition.elements)[-1].symbol
+        
+        for ldau_keyword in ["LDAUJ", "LDAUL", "LDAUU"]:
+            
+            # grab the sub-dictionary that maps elements to this keyword.
+            # If it's not there, just use an empty dictionary.
+            keyword_config = ldau_config.get(ldau_keyword, {})
+            
+            # check if the most electronegative element is in the override_values
+            # and if so, see if it has a subdictionary in it. We use this 
+            # dictionary as our base one to pull values from.
+            if most_electroneg in keyword_config and isinstance(keyword_config[most_electroneg], dict):
+                keyword_config = keyword_config[most_electroneg]
+    
+            # now iterate through all the sites and grab the assigned value. If nothing
+            # is set then the default is 0.
+            values = [keyword_config[most_electroneg].get(element.symbol, 0) for element in structure.composition]
+            
+            # now that we have this keyword all set, we add it to our results
+            ldau_settings.update({ldau_keyword:values})
+
+        # modify LMAXMIX if LSDA+U and you have d or f electrons
+        # note that if the user explicitly sets LMAXMIX in settings it will
+        # override this logic.
+        if "LMAXMIX__auto" in ldau_config:
+            # contains f-electrons
+            # if any(el.Z > 56 for el in structure.composition):
+            #     incar["LMAXMIX"] = 6
+            # # contains d-electrons
+            # elif any(el.Z > 20 for el in structure.composition):
+            #     incar["LMAXMIX"] = 4
+            pass
+
+        # Now let's go through these settings and see if we are even using LDAU.
+        # For example if we ran a calculation on NaCl, we'd probably see that
+        # all LDAUJ/LDAUL/LDAUU values are just 0. In that case, we can just 
+        # throw away (i.e. turn off) all LDAU settings.
+        if "LDAU__auto" in ldau_config:
+            pass
+        
+        return ldau_settings
+
+
+
+# To introduce other modifiers that pymatgen uses...
+# https://github.com/materialsproject/pymatgen/blob/b789d74639aa851d7e5ee427a765d9fd5a8d1079/pymatgen/io/vasp/sets.py#L500
+
+# if self.constrain_total_magmom:
+#     nupdown = sum([mag if abs(mag) > 0.6 else 0 for mag in incar["MAGMOM"]])
+#     incar["NUPDOWN"] = nupdown
+
+# if self.use_structure_charge:
+#     incar["NELECT"] = self.nelect
+
+# Ensure adequate number of KPOINTS are present for the tetrahedron
+# method (ISMEAR=-5). If KSPACING is in the INCAR file the number
+# of kpoints is not known before calling VASP, but a warning is raised
+# when the KSPACING value is > 0.5 (2 reciprocal Angstrom).
+# An error handler in Custodian is available to
+# correct overly large KSPACING values (small number of kpoints)
+# if necessary.
+# if "KSPACING" not in self.user_incar_settings.keys():
+# if self.kpoints is not None:
+#     if np.product(self.kpoints.kpts) < 4 and incar.get("ISMEAR", 0) == -5:
+#         incar["ISMEAR"] = 0
+
+# if self.user_incar_settings.get("KSPACING", 0) > 0.5 and incar.get("ISMEAR", 0) == -5:
+#     warnings.warn(
+#         "Large KSPACING value detected with ISMEAR = -5. Ensure that VASP "
+#         "generates an adequate number of KPOINTS, lower KSPACING, or "
+#         "set ISMEAR = 0",
+#         BadInputSetWarning,
+#     )
+
+# if all(k.is_metal for k in structure.composition.keys()):
+#     if incar.get("NSW", 0) > 0 and incar.get("ISMEAR", 1) < 1:
+#         warnings.warn(
+#             "Relaxation of likely metal with ISMEAR < 1 "
+#             "detected. Please see VASP recommendations on "
+#             "ISMEAR for metals.",
+#             BadInputSetWarning,
+#         )
