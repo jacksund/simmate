@@ -145,8 +145,3 @@ class Lattice:
         The angle between the lattice vectors a and b (in degrees).
         """
         return self.angles[2]
-
-# from simmate.materials_science.lattice import Lattice
-# lattice = Lattice(matrix=[[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-# %time lattice.lengths
-# %timeit lattice.lengths

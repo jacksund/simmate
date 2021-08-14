@@ -156,7 +156,8 @@ setup(
         'django',
         'prefect',
         'dask',
-        # 'click',
+        'click',
+        'numba',
     
         # Extra dependencies
         'django-crispy-forms',  # for formatting of online forms
