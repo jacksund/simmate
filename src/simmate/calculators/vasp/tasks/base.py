@@ -13,22 +13,21 @@ from simmate.workflows.core.tasks.supervisedstagedtask import (
 
 class VaspTask(SSSTask):
 
-    # The command to call vasp in the current directory
-    # TODO: add support for grabbing a user-set default from their configuration
-    command = "vasp > vasp.out"
-
     # Vasp calculations always need an input structure
     requires_structure = True
 
-    # TODO: add options for poscar formation
-    # add_selective_dynamics=False
-    # add_velocities=False
-    # significant_figures=6
+    # The command to call vasp in the current directory
+    # TODO: add support for grabbing a user-set default from their configuration
+    command = "vasp > vasp.out"
 
     # set the default vasp settings from a dictionary. This is the one thing
     # you *must* set when subclassing VaspTask. An example is:
     #   incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
     incar = None
+    # TODO: add options for poscar formation
+    # add_selective_dynamics=False
+    # add_velocities=False
+    # significant_figures=6
 
     # set the KptGrid or KptPath object
     # TODO - KptGrid is just a float for now
@@ -88,9 +87,10 @@ class VaspTask(SSSTask):
         Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
 
         # write the incar file
-        Incar(**self.incar).to_file(os.path.join(directory, "INCAR"))
+        Incar(**self.incar).to_file(structure, os.path.join(directory, "INCAR"))
 
-        # if KSPACING is not provided AND kpoints is, write the KPOINTS file
+        # if KSPACING is not provide in the incar AND kpoints is attached to this
+        # class instance, then we write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
             Kpoints.to_file(
                 structure,

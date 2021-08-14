@@ -108,9 +108,9 @@ result = task.run(structure=structure, dir=".")
 from pymatgen.core.structure import Structure
 structure = Structure.from_file("YFeO3.cif")
 
-from simmate.calculators.vasp.inputs.all import Incar
-
-print(incar.__str__(structure=structure))
+from simmate.workflows.relaxation.mit import MITRelaxationTask
+task = MITRelaxationTask()
+task.setup(structure, ".")
 
 from pymatgen.io.vasp.sets import MITRelaxSet
 mp = MITRelaxSet(structure)

@@ -603,6 +603,30 @@ class Incar(dict):
         
         return ldau_settings
 
+    @staticmethod
+    def keyword_modifier_smart_ismear(structure, ismear_config):
+        """
+        The smearing value used here depends on if we have a semiconductor,
+        insulator, or metal. This modifier makes a "best-guess" on what the
+        material is and uses the proper smearing type. Note that if this 
+        guess is wrong, it is useful to have the IncorrectSmearing error
+        handler to fix this as VASP runs.
+        
+        Read more about the VASP recommended ISMEAR settings here:
+            https://www.vasp.at/wiki/index.php/ISMEAR
+        """
+        
+        # for now we just go through the structure and if all elements are 
+        # metals, then we say it's a metal. Otherwise, we treat the structure
+        # as a semiconductor or insulator.
+        if all(element.is_metal for element in structure.composition):
+            ismear_settings = ismear_config.get("metal", {})
+        
+        else:
+            ismear_settings = ismear_config.get("non-metal", {})      
+            
+        return ismear_settings
+
 
 
 # To introduce other modifiers that pymatgen uses...
@@ -622,20 +646,3 @@ class Incar(dict):
 # if self.kpoints is not None:
 #     if np.product(self.kpoints.kpts) < 4 and incar.get("ISMEAR", 0) == -5:
 #         incar["ISMEAR"] = 0
-
-# if self.user_incar_settings.get("KSPACING", 0) > 0.5 and incar.get("ISMEAR", 0) == -5:
-#     warnings.warn(
-#         "Large KSPACING value detected with ISMEAR = -5. Ensure that VASP "
-#         "generates an adequate number of KPOINTS, lower KSPACING, or "
-#         "set ISMEAR = 0",
-#         BadInputSetWarning,
-#     )
-
-# if all(k.is_metal for k in structure.composition.keys()):
-#     if incar.get("NSW", 0) > 0 and incar.get("ISMEAR", 1) < 1:
-#         warnings.warn(
-#             "Relaxation of likely metal with ISMEAR < 1 "
-#             "detected. Please see VASP recommendations on "
-#             "ISMEAR for metals.",
-#             BadInputSetWarning,
-#         )

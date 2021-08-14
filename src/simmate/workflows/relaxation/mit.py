@@ -22,7 +22,6 @@ class MITRelaxationTask(VaspTask):
         IBRION=2,
         ICHARG=1,
         ISIF=3,
-        ISMEAR=-5,
         ISPIN=2,
         ISYM=0,
         LORBIT=11,
@@ -32,11 +31,23 @@ class MITRelaxationTask(VaspTask):
         NELMIN=6,
         NSW=99,
         PREC="Accurate",
-        SIGMA=0.05,
-        KSPACING=0.4,  # !!! This is where we are different from pymatgen right now
+        KSPACING=0.5,  # !!! This is where we are different from pymatgen right now
+        
+        # The type of smearing we use depends on if we have a metal, semiconductor,
+        # or insulator. So we need to decide this using a keyword modifier.
+        multiple_keywords__smart_ismear={
+            "metal": dict(
+                ISMEAR=2,
+                SIGMA=0.2,
+                ),
+            "non-metal": dict(
+                ISMEAR=-5,
+                SIMGA=0.05,
+                )
+            },
         
         # The magnetic moments are dependent on what the composition and oxidation
-        # states are. These are relevent because we have ISPIN=2
+        # states are. Note our default of 0.6 is different from the VASP default too.
         MAGMOM__smart_magmom={
             "default": 0.6,
             "Ce": 5,
@@ -73,15 +84,15 @@ class MITRelaxationTask(VaspTask):
         
         # We run LDA+U for certain compositions. This is a complex configuration
         # so be sure to read the "__smart_ldau" modifier for more information.
+        # But as an example for how the mappings work...
+        # {"F": {"Ag": 2}} means if the structure is a fluoride, then we set
+        # the MAGMOM for Ag to 2. Any element that isn't listed defaults to 0.
         multiple_keywords__smart_ldau=dict(
             LDAU__auto=True,
             LDAUTYPE=2,
             LDAUPRINT=1,
             LMAXMIX__auto=True,
             LDAUJ={},
-            # The way you read these below... {F: {Ag: 2}} means if the structure
-            # is a fluoride, then we set the MAGMOM for Ag to 2. Any element that
-            # isn't listed defaults to 0.
             LDAUL={
                 "F":{
                     "Ag":2,
