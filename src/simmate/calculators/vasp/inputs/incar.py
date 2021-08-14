@@ -13,9 +13,9 @@ class Incar(dict):
     If you want a given setting to be dependent on the structure or dynamically
     determined, then we implement these modifiers. This would enable us to
     do things like ENCUT__per_atom or NGZF__density. We can even have more complex
-    modifiers like LDAU__multiple_tags__smart_ldau which signals that our 
-    "smart_ldau" modifier might introduce new settings to the INCAR, such as
-    LDAUJ, LDAUU, LDAUL, LDAUTYPE, and LDAUPRINT.
+    modifiers like multiple_keywords__smart_ldau which signals that our 
+    "smart_ldau" modifier introduces more than one new setting to the INCAR, such
+    as LDAUJ, LDAUU, LDAUL, LDAUTYPE, and LDAUPRINT.
     
     TODO: In the future, I want to allow modifiers like __relative_to_previous
     and __use_previous to string settings accross tasks.
@@ -80,13 +80,19 @@ class Incar(dict):
         # Let's start with an empty string and build from there
         final_str = ""
 
-        # Iterate through each parameter and its set value. Each one will be
-        # put on a separate line.
+        # First we need to iterate through all parameters and check if we have
+        # ones that are structure-specific. For example, we would need to
+        # evaluate "ENCUT__per_atom". We go through all these and collect the
+        # paramters into a final settings list.
+        final_settings = {}
         for parameter, value in self.items():
             
-            # parameters may have tags like "__density" added onto them. We check
-            # for those and apply them if nececary.
-            if "__" in parameter:
+            # if there is no modifier attached to the parameter, we just keep it as-is
+            if "__" not in parameter:
+                final_settings[parameter] = value
+            
+            # Otherwise we have a modifier like "__density" and need to evaluate it
+            else:
                 
                 # make sure we have a structure supplied because all modifiers
                 # require one.
@@ -96,14 +102,17 @@ class Incar(dict):
                         It looks like you used a keyword modifier but didn't
                         supply a structure! If you want something like ENCUT__per_atom,
                         then you need to make sure you provide a structure so that
-                        the modifier (__per_atom here) can be evaluated.
+                        the modifier can be evaluated.
                         """
                         )
                 
-                # separate the input into the base parameter and modifier
+                # separate the input into the base parameter and modifier.
+                # This also overwrites what our paramter value is.
                 parameter, modifier_tag = parameter.split("__")
+                
                 # check that this class has this modifier supported. It should
-                # be a method named "keyword_modifier_mymodifer"
+                # be a method named "keyword_modifier_mymodifer".
+                # If everything looks good, we grab the modifier function
                 modifier_fxn_name = "keyword_modifier_" + modifier_tag
                 if hasattr(self, modifier_fxn_name):
                     modifier_fxn = getattr(self, modifier_fxn_name)
@@ -116,9 +125,26 @@ class Incar(dict):
                         method available.
                         """
                         )
+                
                 # now that we have the modifier function, let's use it to update
                 # our value for this keyword.
                 value = modifier_fxn(structure, value)
+                
+                # if the "parameter" is actually "multiple_keywords", then we
+                # have our actually parameters as a dictionary. We need to
+                # pull these out of the "value" we have.
+                if parameter == "multiple_keywords":
+                    for subparameter, subvalue in value.items():
+                        final_settings[subparameter] = subvalue
+                
+                # otherwise we were just given back an update value
+                else:
+                    final_settings[parameter] = value
+
+        # Now that we have all of our parameters evaluated for the structure, we
+        # iterate through each parameter and its set value. Each one will be
+        # put on a separate line.
+        for parameter, value in final_settings.items():
 
             # let's start by adding the parameter key to our output
             # It will be followed by an equal sign to separate it's value
@@ -367,10 +393,10 @@ class Incar(dict):
             # compare the two and store
             if value1 == value2:
                 # it doesn't matter which value I grab so I just use value1
-                same_parameters.update({parameter: value1})
+                same_parameters[parameter] = value1
             # if they are different...
             else:
-                different_parameters.update({parameter: (value1, value2)})
+                different_parameters[parameter] = (value1, value2)
 
         return {"Same": same_parameters, "Different": different_parameters}
 
@@ -458,6 +484,9 @@ class Incar(dict):
             (4) a value of 0.6
         """
         
+        # grab the default MAGMOM supplied, or use VASP's default of 1 otherwise
+        default_value = override_values.get("default", 1)
+        
         # we go through each site in the structure and decide what to set the
         # MAGMOM for each. This allows even different sites of the same
         # element to have their own MAGMOM
@@ -473,8 +502,13 @@ class Incar(dict):
             # we then look at the override dictionary if there was one provided.
             # If note, we use 0.6 as a default.
             else:
-                magnetic_moment = override_values.get(site.specie.symbol, 0.6)
+                magnetic_moment = override_values.get(site.specie.symbol, default_value)
                 magnetic_moments.append(magnetic_moment)
+        
+        # This feature is in pymatgen, but I haven't added it here yet.
+        # if self.constrain_total_magmom:
+        #     nupdown = sum([mag if abs(mag) > 0.6 else 0 for mag in incar["MAGMOM"]])
+        #     incar["NUPDOWN"] = nupdown
         
         return magnetic_moments
 
@@ -484,7 +518,7 @@ class Incar(dict):
         This modifier handles a series of keyword arguments that are associated
         with LDAU, including LDAUJ, LDAUL, LDAUTYPE, LDAUU, LDAUPRINT, and LMAXMIX.
         Therefore, a complex dictionary is passed to this. The format looks like this...
-            LDAU__multiple_tags__smart_ldau = dict(
+            LDAU__multiple_keywords__smart_ldau = dict(
                 LDAU__auto=True,
                 LDAUTYPE=2,
                 LDAUPRINT=1,
@@ -513,7 +547,14 @@ class Incar(dict):
         # To help decide how we set these values, let's check what the most 
         # electronegative element is, which will be last in the sorted composition
         most_electroneg = sorted(structure.composition.elements)[-1].symbol
-        
+
+        # As we go through these settings, we want see if we are even using LDAU.
+        # For example if we ran a calculation on NaCl, we'd probably see that
+        # all LDAUJ/LDAUL/LDAUU values are just 0. In that case, we can just 
+        # throw away (i.e. turn off) all LDAU settings. Therefore, we have a term
+        # "using_ldau" that is false until proven otherwise.
+        using_ldau=False
+
         for ldau_keyword in ["LDAUJ", "LDAUL", "LDAUU"]:
             
             # grab the sub-dictionary that maps elements to this keyword.
@@ -528,29 +569,37 @@ class Incar(dict):
     
             # now iterate through all the sites and grab the assigned value. If nothing
             # is set then the default is 0.
-            values = [keyword_config[most_electroneg].get(element.symbol, 0) for element in structure.composition]
+            values = [keyword_config.get(element.symbol, 0) for element in structure.composition]
             
             # now that we have this keyword all set, we add it to our results
-            ldau_settings.update({ldau_keyword:values})
+            ldau_settings[ldau_keyword] = values
+            
+            # check to see if we are using ldau here (i.e. any value is not 0)
+            if any(values):
+                using_ldau = True
+        
+        # now check if we actaully need LDAU here. If not, we can throw out all
+        # settings and just return an empty dictionary
+        if using_ldau and "LDAU__auto" in ldau_config:
+            ldau_settings["LDAU"] = True
+        else:
+            return {}
 
-        # modify LMAXMIX if LSDA+U and you have d or f electrons
-        # note that if the user explicitly sets LMAXMIX in settings it will
-        # override this logic.
+        # we want to modify LMAXMIX if LSDA+U and there are any d or f electrons
         if "LMAXMIX__auto" in ldau_config:
-            # contains f-electrons
-            # if any(el.Z > 56 for el in structure.composition):
-            #     incar["LMAXMIX"] = 6
-            # # contains d-electrons
-            # elif any(el.Z > 20 for el in structure.composition):
-            #     incar["LMAXMIX"] = 4
-            pass
-
-        # Now let's go through these settings and see if we are even using LDAU.
-        # For example if we ran a calculation on NaCl, we'd probably see that
-        # all LDAUJ/LDAUL/LDAUU values are just 0. In that case, we can just 
-        # throw away (i.e. turn off) all LDAU settings.
-        if "LDAU__auto" in ldau_config:
-            pass
+            # first iterate through all elements and check for f-electrons
+            if any(element.Z > 56 for element in structure.composition):
+                ldau_settings["LMAXMIX"] = 6
+            # now check for elements that contain d-electrons
+            elif any(element.Z > 20 for element in structure.composition):
+                ldau_settings["LMAXMIX"] = 4
+        
+        # The remaining LDAU keywords are LDAUPRINT and LDAUTYPE, which we just
+        # leave at what is set in the input
+        if "LDAUPRINT" in ldau_config:
+            ldau_settings["LDAUPRINT"] = ldau_config["LDAUPRINT"]
+        if "LDAUTYPE" in ldau_config:
+            ldau_settings["LDAUTYPE"] = ldau_config["LDAUTYPE"]
         
         return ldau_settings
 
@@ -558,10 +607,6 @@ class Incar(dict):
 
 # To introduce other modifiers that pymatgen uses...
 # https://github.com/materialsproject/pymatgen/blob/b789d74639aa851d7e5ee427a765d9fd5a8d1079/pymatgen/io/vasp/sets.py#L500
-
-# if self.constrain_total_magmom:
-#     nupdown = sum([mag if abs(mag) > 0.6 else 0 for mag in incar["MAGMOM"]])
-#     incar["NUPDOWN"] = nupdown
 
 # if self.use_structure_charge:
 #     incar["NELECT"] = self.nelect
