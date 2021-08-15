@@ -75,7 +75,7 @@ class Incar(dict):
             # now update the dictionary with this value
             self.update({"MAGMOM": new_format})
 
-    def __str__(self, structure=None):
+    def to_evaluated_str(self, structure=None):
 
         # Let's start with an empty string and build from there
         final_str = ""
@@ -186,7 +186,7 @@ class Incar(dict):
         """
         # we just take the string format and put it in a file
         with open(filename, "w") as file:
-            file.write(self.__str__(structure=structure))
+            file.write(self.to_evaluated_str(structure=structure))
 
     @staticmethod
     def from_file(filename="INCAR"):

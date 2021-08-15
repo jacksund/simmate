@@ -33,7 +33,8 @@ class Potcar:
         # calculations). Here, they can do something like...
         #   element_mappings={"C": "C_h", ...} # with all of their other choices
         # or...
-        #   element_mappings = PBE_ELEMENT_MAPPINGS.copy().update({"C": "C_h"})
+        #   element_mappings = PBE_ELEMENT_MAPPINGS.copy()
+        #   element_mappings.update({"C": "C_h"})
         # NOTE: remember whereever you use update(), be careful and make sure
         # you update a copy of the imported dictionary and avoid logical bugs.
         # I don't do that here, but I know I'm not mutating the dictionary.

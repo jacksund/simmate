@@ -9,14 +9,14 @@ from simmate.configuration.django import setup_full  # sets database connection
 from simmate.configuration.django.settings import DJANGO_DIRECTORY, DATABASES
 from simmate.database.symmetry import Spacegroup
 
-def update_database(apps_to_migrate=["third_parties"]):
+def update_database(apps_to_migrate=["local_calculations", "third_parties"]):
 
     # execute the following commands to update the database
     call_command("makemigrations", *apps_to_migrate)
     call_command("migrate")
 
 
-def reset_database(apps_to_migrate=["third_parties"]):
+def reset_database(apps_to_migrate=["local_calculations", "third_parties"]):
     # BUG: this is only for SQLite3
 
     # Apps to init.

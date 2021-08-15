@@ -138,6 +138,7 @@ INSTALLED_APPS = [
     # These are all apps that are built by Simmate
     "simmate.website.accounts.apps.AccountsConfig",
     "simmate.website.third_parties.apps.ThirdPartyConfig",
+    "simmate.website.local_calculations.apps.LocalCalculationsConfig",
     # "simmate.website.execution.apps.ExecutionConfig",  # using Prefect instead
     #
     # These are built-in django apps that we use for extra features

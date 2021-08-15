@@ -139,7 +139,8 @@ PBE_ELEMENT_MAPPINGS = {
 # criteria is less tight. A lot of the elements are the same as above, so we
 # just copy those element mappings and update the elements that are actaully
 # lower quality here.
-PBE_ELEMENT_MAPPINGS_LOW_QUALITY = PBE_ELEMENT_MAPPINGS.copy().update({
+PBE_ELEMENT_MAPPINGS_LOW_QUALITY = PBE_ELEMENT_MAPPINGS.copy()
+PBE_ELEMENT_MAPPINGS_LOW_QUALITY.update({
     'Be': 'Be',
     'Cr': 'Cr',
     'Cu': 'Cu',

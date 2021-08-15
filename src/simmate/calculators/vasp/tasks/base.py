@@ -135,4 +135,4 @@ class VaspTask(SSSTask):
         # return the desired info
         # TODO: in the future, I may just want to return the VaspRun object
         # by default.
-        return final_structure
+        return final_structure, final_energy

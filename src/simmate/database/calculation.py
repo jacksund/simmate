@@ -24,6 +24,7 @@ class Calculation(models.Model):
     # The id is still needed because it let's me make the link to the cloud page
     prefect_flow_run_name = models.CharField(max_length=50, blank=True, null=True)
     prefect_flow_run_id = models.CharField(max_length=50, blank=True, null=True)
+    prefect_flow_run_version = models.CharField(max_length=50, blank=True, null=True)
 
     # Indicate what state the calculation is in. This exists to ensure we don't
     # submit multiple to Prefect and also let's us check how many currently exist in
@@ -48,6 +49,7 @@ class Calculation(models.Model):
     # Simmate workflows often have ErrorHandlers that fix any issues while the
     # calaculation ran. This often involves changing settings, so we store
     # any of those changes here.
+    corrections = models.TextField(blank=True, null=True)
 
     """ Relationships """
     # While there are no base relations for this abstract class, the majority of
@@ -81,5 +83,4 @@ class Calculation(models.Model):
     # future, look here:
     # https://docs.djangoproject.com/en/3.1/topics/db/models/#model-inheritance
     class Meta:
-        app_label = "third_parties"  # TODO: move to a separate app
         abstract = True
