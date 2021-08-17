@@ -199,7 +199,7 @@ relax_structure = MITRelaxationTask()
 def save_input(structure):
     
     # save the intial structure to the database
-    structure_initial = MITRelaxationInitialStructure.from_pymatgen(structure)
+    structure_initial = MITRelaxationFinalStructure.from_pymatgen(structure)
     structure_initial.save()
     
     # now initialize the Calculation with the attached initial_structure
