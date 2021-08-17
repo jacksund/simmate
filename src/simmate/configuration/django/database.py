@@ -47,13 +47,13 @@ def reset_database(apps_to_migrate=["local_calculations", "third_parties"]):
     Spacegroup.load_database_from_pymatgen()
 
 
-def dump_database_to_json(filename="db_dump.json", exclude=[]):
+def dump_database_to_json(filename="database_dump.json", exclude=[]):
 
     # execute the following commands to write the database to a json file
     call_command("dumpdata", output=filename, exclude=exclude)
 
 
-def load_database_from_json(filename="db_dump.json"):
+def load_database_from_json(filename="database_dump.json"):
 
     # OPTIMIZE: this function is very slow. Consider speed-up options such as
     # making this function a transaction or manually writing a bulk_create. It

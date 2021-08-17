@@ -223,14 +223,13 @@ setup(
     # `pip` to create the appropriate form of executable for the target
     # platform.
     #
-    # For example, the following would provide a command called `sample` which
+    # For example, the following would provide a command called `simmate` which
     # executes the function `main` from this package when invoked:
-    # entry_points={  # Optional
-    #     'console_scripts': [
-    #         'sample=sample:main',
-    #         'sme = simmate.cli.sme:main',
-    #     ],
-    # },
+    entry_points={
+        'console_scripts': [
+            'simmate = simmate.command_line.base_command:simmate',
+        ],
+    },
 
     # List additional URLs that are relevant to your project as a dict.
     #
