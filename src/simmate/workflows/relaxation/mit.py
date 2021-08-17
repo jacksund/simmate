@@ -199,7 +199,7 @@ relax_structure = MITRelaxationTask()
 def save_input(structure):
     
     # save the intial structure to the database
-    structure_initial = MITRelaxationFinalStructure.from_pymatgen(structure)
+    structure_initial = MITRelaxationInitialStructure.from_pymatgen(structure)
     structure_initial.save()
     
     # now initialize the Calculation with the attached initial_structure
@@ -223,13 +223,13 @@ def save_results(result_and_corrections, calculation_id):
     (structure, energy), corrections = result_and_corrections
     
     # save the intial structure to the database
-    initial_structure = MITRelaxationFinalStructure.from_pymatgen(structure)
-    initial_structure.save()
+    structure_final = MITRelaxationFinalStructure.from_pymatgen(structure)
+    structure_final.save()
     
     # now grab our calculation from before and update it with our results
     calculation = MITRelaxation.objects.get(id=calculation_id)
     calculation.corrections = corrections
-    calculation.structure_final = structure
+    calculation.structure_final = structure_final
     calculation.final_energy = energy
     calculation.save()
     
