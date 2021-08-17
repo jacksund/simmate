@@ -7,6 +7,11 @@ from simmate.database.structure import Structure
 
 class CodStructure(Structure):
     
+    # The id used to symbolize the structure.
+    # For example, Materials Project structures are represented by ids such as
+    # "mp-12345" while AFLOW structures by "aflow-12345"
+    id = models.CharField(max_length=25, primary_key=True)
+    
     # These fields overwrite the default Structure fields
     # BUG: We can't use CharField for the COD database because there are a number
     # of structures that have 20+ elements in them and are disordered. The disordered

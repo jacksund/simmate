@@ -15,11 +15,6 @@ class Structure(models.Model):
 
     """Base Info"""
 
-    # The id used to symbolize the structure.
-    # For example, Materials Project structures are represented by ids such as
-    # "mp-12345" while AFLOW structures by "aflow-12345"
-    id = models.CharField(max_length=25, primary_key=True)
-
     # The structure which is written to a string and in a compressed format
     # using the .from_pymatgen() method. To get back to our pymatgen structure
     # object, use the .to_pymatgen() method!

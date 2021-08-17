@@ -127,3 +127,11 @@ print(mp.incar)
 # from simmate.calculators.vasp.tasks.nudged_elastic_band import NudgedElasticBandTask
 # task = NudgedElasticBandTask(structure=[structure for i in range(5)], dir="NEBset")
 # result = task.run()
+
+
+from pymatgen.core.structure import Structure
+structure = Structure.from_file("YFeO3.cif")
+
+from simmate.workflows.relaxation.mit import workflow
+workflow.run(structure=structure, directory=".", vasp_command="vasp_std > vasp.out")
+
