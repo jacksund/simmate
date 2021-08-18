@@ -67,3 +67,24 @@ def dumpdata(filename):
     click.echo(
         f"Success! You should now see the file {filename} with all of your data."
     )
+
+@database.command()
+@click.option(
+    "--filename",
+    default="database_dump.json",
+    help="the file to load the all the JSON data from",
+)
+def loaddata(filename):
+    """Takes a JSON database and loads it into the Simmate database."""
+
+    # Begin writing the database to the json file.
+    click.echo("Loading all data from JSON...")
+
+    from simmate.configuration.django.database import load_database_from_json
+
+    load_database_from_json(filename=filename)
+
+    # Let the user know everything succeeded
+    click.echo(
+        f"Success! You now have all the data from {filename} available in your database."
+    )
