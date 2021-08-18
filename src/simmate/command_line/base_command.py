@@ -11,7 +11,7 @@ def simmate():
     """
     This is the base command that all others stem from.
 
-    If you are brand-new to the command line, take a look at our tutorial:
+    If you are a beginner for the command line, take a look at our tutorial:
         << TODO: insert link >>
 
     """
@@ -25,11 +25,3 @@ def simmate():
 # them to our base "simmate" command here.
 simmate.add_command(database)
 simmate.add_command(workflows)
-
-# @database.command()
-# @click.option("--count", default=1, help="Number of greetings.")
-# @click.option("--name", prompt="Your name", help="The person to greet.")
-# def hellodata(count, name):
-#     """Simple program that greets NAME for a total of COUNT times."""
-#     for x in range(count):
-#         click.echo(f"Hello {name}!")
