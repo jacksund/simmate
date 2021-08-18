@@ -56,11 +56,12 @@ relax_structure = VaspTask(
         KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
     ),
     functional="PBE",
-    errorhandlers=[TetrahedronMesh(), Eddrmm()]
+    errorhandlers=[TetrahedronMesh(), Eddrmm()],
 )
 
 # FOR NEB RELAXATION
 run_neb = NudgedElasticBandTask()
+
 
 @task
 def find_all_unique_pathways(structure, migrating_specie):
@@ -135,9 +136,9 @@ with Flow("NEB Analysis") as workflow:
     # These are the input parameters for the overall workflow
     structure = Parameter("structure")
     migrating_specie = Parameter("migrating_specie")
-    min_length=Parameter("min_length", default=4)
-    min_atoms=Parameter("min_atoms", default=20)
-    max_atoms=Parameter("max_atoms", default=80)
+    min_length = Parameter("min_length", default=4)
+    min_atoms = Parameter("min_atoms", default=20)
+    max_atoms = Parameter("max_atoms", default=80)
     nimages = Parameter("nimages", default=5)
     # directory = Parameter("directory", default=".")
     vasp_cmd = Parameter("vasp_command", default="vasp > vasp.out")

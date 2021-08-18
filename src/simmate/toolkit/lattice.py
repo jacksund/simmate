@@ -7,6 +7,7 @@ from functools import cached_property
 import numpy
 from numba import njit as numba_speedup
 
+
 class Lattice:
     """
     This class is for 3D crystal lattices, which are represented by a 3x3 matrix.
@@ -48,12 +49,12 @@ class Lattice:
     @staticmethod
     @numba_speedup(cache=True)
     def _lengths_fast(matrix):
-        
+
         # NOTE: users should not call this method! Use lattice.lengths instead
-        
+
         # OPTIMIZE: is there an alternative way to write this that numba will
         # run faster?
-        
+
         #   numpy.linalg.norm(matrix, axis=1) --> doesn't work with numba
         return numpy.sqrt(numpy.sum(matrix ** 2, axis=1))
 
@@ -87,30 +88,30 @@ class Lattice:
         #   angle_radians = arccos(dot(vector1, vector2)/(vector1.length*vector2.length))
         # And alpha, beta, gamma are just the angles between the b&c, a&c, and a&b
         # vectors, respectively. We cacluate all of these at once here. We also
-        # write a super-optimized numba function to make this method really fast. 
+        # write a super-optimized numba function to make this method really fast.
         # This is defined below as a static method.
         return self._angles_fast(self.matrix, self.lengths)
 
     @staticmethod
     @numba_speedup(cache=True)
     def _angles_fast(matrix, lengths):
-        
+
         # NOTE: users should not call this method! Use lattice.angles instead
-        
+
         # OPTIMIZE: is there an alternative way to write this that numba will
         # run faster?
-        
+
         # keep a list of the angles
         angles = []
-        
+
         # this establishes the three angles we want to calculate
         #   alpha --> angle between b and c
         #   beta --> angle between a and c
         #   gamma --> angle between a and b
-        # So the numbers below are indexes of the matrix! 
+        # So the numbers below are indexes of the matrix!
         # (for example, vector b has index 1)
-        vector_pairs = [(1,2), (0,2), (0,1)]
-        
+        vector_pairs = [(1, 2), (0, 2), (0, 1)]
+
         # The angle between two 3D vectors (xyz) is defined by...
         #   angle_radians = arccos(dot(vector1, vector2)/(vector1.length*vector2.length))
         for vector_index_1, vector_index_2 in vector_pairs:
@@ -121,7 +122,7 @@ class Lattice:
             angle = numpy.arccos(dot_product)
             # convert to degrees before saving
             angles.append(numpy.degrees(angle))
-        
+
         # return the list as a numpy array
         return numpy.array(angles)
 

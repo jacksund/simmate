@@ -13,7 +13,7 @@ class Frozen(ErrorHandler):
     for a long time (i.e. 1 hour), we consider it frozen and want to change the
     ALGO from Normal to Fast or alternatively reduce SYMPREC.
     """
-    
+
     # run this while the VASP calculation is still going
     is_monitor = True
 
@@ -26,19 +26,19 @@ class Frozen(ErrorHandler):
         checking the vasp.out file. If that file is not present, we say that there
         is no error because another handler will address this.
         """
-        
+
         # establish the full path to the output file
         filename = os.path.join(dir, "vasp.out")
 
         # check to see that the file is there first
         if os.path.exists(filename):
-            
+
             # check when the file was last editted
             time_last_edit = os.path.getmtime(self.output_filename)
-            
+
             # see how long ago this was and if it was longer than our timeout
             if time.time() - time_last_edit > self.timeout_limit:
-                
+
                 # if so, we have a frozen error and need to report it
                 return True
 
@@ -47,14 +47,13 @@ class Frozen(ErrorHandler):
         # our timeout specified -- where the job is still running and looks good.
         return False
 
-
     def correct(self, error, dir):
         """
         Perform corrections based on the INCAR.
         """
         # Note "error" here is just True because there is no variation in this ErrorHandler.
         # This value isn't used in fixing the Error anyways.
-        
+
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(dir, "INCAR")
         incar = Incar.from_file(incar_filename)
@@ -64,7 +63,7 @@ class Frozen(ErrorHandler):
         current_algo = incar.get("ALGO", "Normal")
         # also check the SYMPREC, where default is 1e-5
         current_symprec = incar.get("SYMPREC", "1e-5")
-        
+
         # If the current algo is Fast, then switch it to Normal
         if current_algo == "Fast":
             # Set the new value
@@ -83,7 +82,7 @@ class Frozen(ErrorHandler):
             incar.to_file(incar_filename)
             # return the description of what we did
             return f"switched SYMPREC from {current_symprec} to 1e-8"
-        
+
         # If none of the above worked, then we were not able to fix the error
         else:
             raise Exception("Unable to fix Frozen error")

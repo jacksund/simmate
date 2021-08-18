@@ -175,7 +175,7 @@ class SupervisedStagedShellTask(Task):
             # directory.
             # The preexec_fn keyword allows us to properly terminate jobs that
             # are launched with parallel processes (such as mpirun). This assigns
-            # a parent id to it that we use when killing a job (if an error 
+            # a parent id to it that we use when killing a job (if an error
             # handler calls for us to do so)
             future = Popen(
                 command,

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class PotimErrorHandler(ErrorHandler):
     """
     Check if a run has excessively large positive energy changes.
@@ -10,7 +11,9 @@ class PotimErrorHandler(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, input_filename="POSCAR", output_filename="OSZICAR", dE_threshold=1):
+    def __init__(
+        self, input_filename="POSCAR", output_filename="OSZICAR", dE_threshold=1
+    ):
         """
         Initializes the handler with the input and output files to check.
         Args:
@@ -48,7 +51,9 @@ class PotimErrorHandler(ErrorHandler):
         potim = float(vi["INCAR"].get("POTIM", 0.5))
         ibrion = int(vi["INCAR"].get("IBRION", 0))
         if potim < 0.2 and ibrion != 3:
-            actions = [{"dict": "INCAR", "action": {"_set": {"IBRION": 3, "SMASS": 0.75}}}]
+            actions = [
+                {"dict": "INCAR", "action": {"_set": {"IBRION": 3, "SMASS": 0.75}}}
+            ]
         elif potim < 0.1:
             actions = [{"dict": "INCAR", "action": {"_set": {"SYMPREC": 1e-8}}}]
         else:

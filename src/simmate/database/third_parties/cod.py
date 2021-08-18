@@ -6,12 +6,12 @@ from simmate.database.structure import Structure
 
 
 class CodStructure(Structure):
-    
+
     # The id used to symbolize the structure.
     # For example, Materials Project structures are represented by ids such as
     # "mp-12345" while AFLOW structures by "aflow-12345"
     id = models.CharField(max_length=25, primary_key=True)
-    
+
     # These fields overwrite the default Structure fields
     # BUG: We can't use CharField for the COD database because there are a number
     # of structures that have 20+ elements in them and are disordered. The disordered
@@ -27,14 +27,14 @@ class CodStructure(Structure):
 
     # whether the structure contains disordered sites (i.e. mixed occupancies)
     is_ordered = models.BooleanField()
-    
+
     # whether the structure has implicit Hydrogens. This means there should be
     # Hydrogens in the structure, but they weren't explicitly drawn.
     has_implicit_hydrogens = models.BooleanField()
-    
+
     # Title of the paper that the structure is reported in
     # paper_title = models.CharField(blank=True, null=True)
-    
+
     # Extra data by COD
     # See my notes in the scraping file. There's more metadata to add but I leave
     # this out for now.

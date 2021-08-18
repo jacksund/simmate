@@ -81,7 +81,7 @@ if os.path.exists(DATABASE_YAML):
     with open(DATABASE_YAML) as file:
         DATABASES = yaml.full_load(file)
 
-# If this file doesn't exist, we next check our enviornment variable to see if 
+# If this file doesn't exist, we next check our enviornment variable to see if
 # we should use our local sql database. This is the default behavior!
 elif USE_LOCAL_DATABASE is True:
     DATABASES = {

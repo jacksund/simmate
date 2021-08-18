@@ -70,18 +70,17 @@ class NonConverging(ErrorHandler):
         # if the files don't exist, we are not seeing any error yet
         return False
 
-
     def correct(self, error, dir):
         """
         Perform corrections based on the INCAR.
         """
         # Note "error" here is just True because there is no variation in this ErrorHandler.
         # This value isn't used in fixing the Error anyways.
-        
+
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(dir, "INCAR")
         incar = Incar.from_file(incar_filename)
-        
+
         # check what the current ALGO is. If it's not set, that means it's using
         # the default which is "Normal".
         current_algo = incar.get("ALGO", "Normal")
@@ -89,7 +88,7 @@ class NonConverging(ErrorHandler):
         current_amix = incar.get("AMIX", 0.4)
         current_bmix = incar.get("BMIX", 1.0)
         current_amin = incar.get("AMIN", 0.1)
-        
+
         # If the current algo is VeryFast, then switch it to Fast
         if current_algo == "VeryFast":
             # Set the new value
@@ -98,7 +97,7 @@ class NonConverging(ErrorHandler):
             incar.to_file(incar_filename)
             # return the description of what we did
             return "switched ALGO from VeryFast to Fast"
-            
+
         # If the current algo is Fast, then switch it to Normal
         elif current_algo == "Fast":
             # Set the new value
@@ -107,7 +106,7 @@ class NonConverging(ErrorHandler):
             incar.to_file(incar_filename)
             # return the description of what we did
             return "switched ALGO from Fast to Normal"
-        
+
         # If the current algo is Normal, then switch it to All
         elif current_algo == "Normal":
             # Set the new value
@@ -116,7 +115,7 @@ class NonConverging(ErrorHandler):
             incar.to_file(incar_filename)
             # return the description of what we did
             return "switched ALGO from Normal to All"
-        
+
         # try linear mixing
         elif current_amix > 0.1 and current_bmix > 0.01:
             # Set the new values
@@ -126,7 +125,7 @@ class NonConverging(ErrorHandler):
             incar.to_file(incar_filename)
             # return the description of what we did
             return f"switched linear mixing via {new_settings}"
-        
+
         # try increasing bmix
         elif current_bmix < 3.0 and current_amin > 0.01:
             # Set the new values
@@ -136,7 +135,7 @@ class NonConverging(ErrorHandler):
             incar.to_file(incar_filename)
             # return the description of what we did
             return f"switched linear mixing via {new_settings}"
-        
+
         # If none of the above worked, then we were not able to fix the error
         else:
             raise Exception("Unable to fix NonConverging error")

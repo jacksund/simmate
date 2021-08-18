@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class IncorrectSmearingHandler(ErrorHandler):
     """
     Check if a calculation is a metal (zero bandgap), has been run with
@@ -27,7 +28,11 @@ class IncorrectSmearingHandler(ErrorHandler):
             v = Vasprun(self.output_filename)
             # check whether bandgap is zero, tetrahedron smearing was used
             # and relaxation is performed.
-            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("ISMEAR", 1) < -3 and v.incar.get("NSW", 0) > 1:
+            if (
+                v.eigenvalue_band_properties[0] == 0
+                and v.incar.get("ISMEAR", 1) < -3
+                and v.incar.get("NSW", 0) > 1
+            ):
                 return True
         except Exception:
             pass

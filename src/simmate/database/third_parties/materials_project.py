@@ -6,12 +6,12 @@ from simmate.database.structure import Structure
 
 
 class MaterialsProjectStructure(Structure):
-    
+
     # The id used to symbolize the structure.
     # For example, Materials Project structures are represented by ids such as
     # "mp-12345" while AFLOW structures by "aflow-12345"
     id = models.CharField(max_length=25, primary_key=True)
-    
+
     """ Base Info """
 
     # Final calculated energy by Materials Project
@@ -39,7 +39,7 @@ class MaterialsProjectStructure(Structure):
 
     @property
     def external_link(self):
-        # All Materials Project structures have their data mapped to a URL in 
+        # All Materials Project structures have their data mapped to a URL in
         # the same way. For example...
         #   https://materialsproject.org/materials/mp-12345/
         return f"https://materialsproject.org/materials/{self.id}/"

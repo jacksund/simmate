@@ -67,7 +67,9 @@ def load_all_structures(filename="jarvis.json"):
             "structure": structure_sanitized,
             "id": entry["jid"].lower(),
             # the *1000 converts to meV
-            "energy_above_hull": entry["ehull"]*1000 if entry["ehull"] != "na" else None,
+            "energy_above_hull": entry["ehull"] * 1000
+            if entry["ehull"] != "na"
+            else None,
             "formation_energy_per_atom": entry["formation_energy_peratom"]
             if entry["formation_energy_peratom"] != "na"
             else None,

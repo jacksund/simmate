@@ -40,7 +40,7 @@ class MITRelaxation(Calculation):
     structure_final = models.OneToOneField(
         MITRelaxationFinalStructure,
         on_delete=models.CASCADE,
-        blank=True, 
+        blank=True,
         null=True,
     )
 

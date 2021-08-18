@@ -29,7 +29,7 @@ class IncorrectShift(ErrorHandler):
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(dir, "INCAR")
         incar = Incar.from_file(incar_filename)
-        
+
         # Change to Gamma-centered mesh
         incar["KGAMMA"] = True
 

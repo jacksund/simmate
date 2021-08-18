@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class MeshSymmetryErrorHandler(ErrorHandler):
     """
     Corrects the mesh symmetry error in VASP. This error is sometimes
@@ -27,7 +28,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         """
         Check for error.
         """
-        msg = "Reciprocal lattice and k-lattice belong to different class of" " lattices."
+        msg = (
+            "Reciprocal lattice and k-lattice belong to different class of" " lattices."
+        )
 
         vi = VaspInput.from_directory(".")
         # disregard this error if KSPACING is set and no KPOINTS file is generated
@@ -37,7 +40,9 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         # According to VASP admins, you can disregard this error
         # if symmetry is off
         # Also disregard if automatic KPOINT generation is used
-        if (not vi["INCAR"].get("ISYM", True)) or vi["KPOINTS"].style == Kpoints.supported_modes.Automatic:
+        if (not vi["INCAR"].get("ISYM", True)) or vi[
+            "KPOINTS"
+        ].style == Kpoints.supported_modes.Automatic:
             return False
 
         try:

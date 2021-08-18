@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class ScanMetalHandler(ErrorHandler):
     """
     Check if a SCAN calculation is a metal (zero bandgap) but has been run with
@@ -26,7 +27,10 @@ class ScanMetalHandler(ErrorHandler):
         try:
             v = Vasprun(self.output_filename)
             # check whether bandgap is zero and tetrahedron smearing was used
-            if v.eigenvalue_band_properties[0] == 0 and v.incar.get("KSPACING", 1) > 0.22:
+            if (
+                v.eigenvalue_band_properties[0] == 0
+                and v.incar.get("KSPACING", 1) > 0.22
+            ):
                 return True
         except Exception:
             pass
@@ -47,7 +51,12 @@ class ScanMetalHandler(ErrorHandler):
         new_vis = MPScanRelaxSet(_dummy_structure, bandgap=0)
 
         actions = []
-        actions.append({"dict": "INCAR", "action": {"_set": {"KSPACING": new_vis.incar["KSPACING"]}}})
+        actions.append(
+            {
+                "dict": "INCAR",
+                "action": {"_set": {"KSPACING": new_vis.incar["KSPACING"]}},
+            }
+        )
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": ["ScanMetal"], "actions": actions}

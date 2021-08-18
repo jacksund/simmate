@@ -19,7 +19,9 @@ class LongVector(ErrorHandler):
     filename_to_check = "vasp.out"
 
     # These are the error messages that we are looking for in the file
-    possible_error_messages = ["One of the lattice vectors is very long (>50 A), but AMIN"]
+    possible_error_messages = [
+        "One of the lattice vectors is very long (>50 A), but AMIN"
+    ]
 
     def correct(self, error, dir):
 

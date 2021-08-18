@@ -10,7 +10,7 @@ class AflowStructure(Structure):
     # The id used to symbolize the structure.
     # For example, Materials Project structures are represented by ids such as
     # "mp-12345" while AFLOW structures by "aflow-12345"
-    id = models.CharField(max_length=25, primary_key=True)    
+    id = models.CharField(max_length=25, primary_key=True)
 
     """Base Info"""
 

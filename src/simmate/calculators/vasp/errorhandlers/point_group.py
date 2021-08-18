@@ -25,7 +25,7 @@ class PointGroup(ErrorHandler):
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(dir, "INCAR")
         incar = Incar.from_file(incar_filename)
-        
+
         # turn off symmetry
         incar["ISYM"] = 0
         correction = "switched ISYM to 0"

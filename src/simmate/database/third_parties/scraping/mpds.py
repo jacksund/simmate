@@ -48,7 +48,7 @@ def load_all_structures(api_key="9WPgw8xYqYcB91ylff1CogIaXd4MGq6RoEZjwC1L0fh66uM
     # get_data returns a list, while get_dataframe will give us a pandas dataframe
     # I just use a list for now.
     # !!! This doesn't behave the way they claim... it definitely doesn't return
-    # JSON. I'm also only ever getting hits for P-type ids (properties), when I 
+    # JSON. I'm also only ever getting hits for P-type ids (properties), when I
     # want S-type (structures)
     data = client.get_data(
         search={

@@ -99,6 +99,7 @@ class DjangoExecutor(Executor):
         if isinstance(futures, dict):
             print("\n\nWAIT")
             import time
+
             time.sleep(10)
             for key, future in futures.items():
                 print((key, future, future.pk, future.done()))

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class StdErrHandler(ErrorHandler):
     """
     Master StdErr class that handles a number of common errors
@@ -10,7 +11,10 @@ class StdErrHandler(ErrorHandler):
     is_monitor = True
 
     error_msgs = {
-        "kpoints_trans": ["internal error in GENERATE_KPOINTS_TRANS: " "number of G-vector changed in star"],
+        "kpoints_trans": [
+            "internal error in GENERATE_KPOINTS_TRANS: "
+            "number of G-vector changed in star"
+        ],
         "out_of_memory": ["Allocation would exceed memory limit"],
     }
 
@@ -55,13 +59,17 @@ class StdErrHandler(ErrorHandler):
                 m = max(int(round(m ** (1 / 3))), 1)
                 if vi["KPOINTS"].style.name.lower().startswith("m"):
                     m += m % 2
-                actions.append({"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}})
+                actions.append(
+                    {"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}}
+                )
                 self.error_count["kpoints_trans"] += 1
 
         if "out_of_memory" in self.errors:
             if vi["INCAR"].get("KPAR", 1) > 1:
                 reduced_kpar = max(vi["INCAR"].get("KPAR", 1) // 2, 1)
-                actions.append({"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}})
+                actions.append(
+                    {"dict": "INCAR", "action": {"_set": {"KPAR": reduced_kpar}}}
+                )
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}

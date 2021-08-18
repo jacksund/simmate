@@ -9,6 +9,7 @@
 # Maybe I could have the ionic step with None values and fill in the electronic steps
 # where they're available.
 
+
 class Oszicar:
     """
     Reads all data from an OSZICAR file. This includes data on each electronic
@@ -106,18 +107,20 @@ class Oszicar:
                         "energy_kinetic_nose_thermostat": values[6],  # SK
                         "electronic_steps": electronic_steps,
                     }
-                
+
                 # otherwise something went wrong
                 else:
-                    raise Exception("Electronic step had unexpected data. Failed to parse.")
-                
+                    raise Exception(
+                        "Electronic step had unexpected data. Failed to parse."
+                    )
+
                 # take whatever ionic_step that was made above and add it to our
                 # results list!
                 self.ionic_steps.append(ionic_step)
-                
+
             # Otherwise this line is an electronic step
             else:
-                
+
                 # electronic step lines are pretty easy because they are just
                 # a row in a table of electronic steps. First let's split
                 # the values into and list and then convert them into floats.
@@ -125,24 +128,26 @@ class Oszicar:
                 # scheme used (i.e. DAV, RMM, or CG) and electronic step number
                 # which we don't need. (I grab the scheme below though)
                 values = [float(value) for value in line.split()[2:]]
-                
+
                 # now load the data into a dictionary for verbosity
-                # Note that I change the VASP headers to more verbose names so 
+                # Note that I change the VASP headers to more verbose names so
                 # the user can instantly see their meaning. The original headers
                 # are shown as comments next to each.
                 electronic_step = {
                     # The scheme is set by IALGO and is the first thing written
                     # in the line. Rather than grab it above, I just do it here.
-                    "scheme": line.split()[0].replace(":",""),
+                    "scheme": line.split()[0].replace(":", ""),
                     "energy": values[0],  # E
                     "energy_change": values[1],  # dE
                     "band_structure_energy_change": values[2],  # d eps
                     "nhamiltonians": values[3],  # ncg
                     "wavefunctions_residuum_norm": values[4],  # rms
                     # Note not all electronic steps have this value so we need to doublecheck
-                    "charge_density_change": values[5] if len(values) == 6 else None,  # rms(c)
-                    }
-                
+                    "charge_density_change": values[5]
+                    if len(values) == 6
+                    else None,  # rms(c)
+                }
+
                 # add the electronic step to our results!
                 electronic_steps.append(electronic_step)
 
@@ -151,7 +156,7 @@ class Oszicar:
         pass
 
     def all_ionic_step_energies(self):
-       # TODO: move to DftCalc/IonicStep/ElectronicStep class
+        # TODO: move to DftCalc/IonicStep/ElectronicStep class
         pass
 
     @property

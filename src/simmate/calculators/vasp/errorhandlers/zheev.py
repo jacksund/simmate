@@ -25,7 +25,7 @@ class Zheev(ErrorHandler):
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(dir, "INCAR")
         incar = Incar.from_file(incar_filename)
-        
+
         # We make a fix only if ALGO is set less to Fast
         if incar.get("ALGO", "Fast") != "Exact":
             incar["ALGO"] = "Exact"

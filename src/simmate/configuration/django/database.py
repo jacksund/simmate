@@ -9,6 +9,7 @@ from simmate.configuration.django import setup_full  # sets database connection
 from simmate.configuration.django.settings import DJANGO_DIRECTORY, DATABASES
 from simmate.database.symmetry import Spacegroup
 
+
 def update_database(apps_to_migrate=["local_calculations", "third_parties"]):
 
     # execute the following commands to update the database
@@ -41,8 +42,8 @@ def reset_database(apps_to_migrate=["local_calculations", "third_parties"]):
 
     # now update the database based on the registered models
     update_database(apps_to_migrate)
-    
-    # because this is our first time building the database, we also want to 
+
+    # because this is our first time building the database, we also want to
     # load the Spacegroup metadata for us to query Structures by.
     Spacegroup.load_database_from_pymatgen()
 

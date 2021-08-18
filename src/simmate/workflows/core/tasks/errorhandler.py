@@ -31,13 +31,12 @@ class ErrorHandler(ABC):
     # handler to set the flag should be classified as is_terminating = False to
     # not terminate the job.
     is_terminating = True
-    
+
     # NOTE: if you are using the default check() method (shown below), then you'll
     # need two extra attributes: filename_to_check and possible_error_messages.
     # filename_to_check --> a string of the filename
     # possible_error_messages --> a list of messages to find in the file
-    
-    
+
     def check(self, directory):
         """
         This method is called during the job (for monitors) or at the end of

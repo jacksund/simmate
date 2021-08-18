@@ -126,7 +126,7 @@ def load_all_structures(
         # We also do the same with with e_above_hull to energy_above_hull
         # the *1000 converts to meV
         e_hull = entry_cleaned.pop("e_above_hull")
-        entry_cleaned["energy_above_hull"] = e_hull*1000 if e_hull != None else None
+        entry_cleaned["energy_above_hull"] = e_hull * 1000 if e_hull != None else None
 
         # now convert the entry to a database object
         structure_db = MaterialsProjectStructure.from_pymatgen(**entry_cleaned)

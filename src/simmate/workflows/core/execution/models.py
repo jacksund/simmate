@@ -35,7 +35,7 @@ from django.db import models
 
 class WorkItem(models.Model):
 
-    """ Base info """
+    """Base info"""
 
     # The function to be called
     fxn = models.BinaryField()

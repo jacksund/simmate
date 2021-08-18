@@ -34,23 +34,23 @@ def example_function(text, save_path, render_path):
 
     scene = bpy.context.scene
 
-    txt_data = bpy.data.curves.new(name="MyText", type='FONT')
+    txt_data = bpy.data.curves.new(name="MyText", type="FONT")
 
     # Text Object
     txt_ob = bpy.data.objects.new(name="MyText", object_data=txt_data)
-    scene.collection.objects.link(txt_ob)   # add the data to the scene as an object
-    txt_data.body = text         # the body text to the command line arg given
-    txt_data.align_x = 'CENTER'  # center text
+    scene.collection.objects.link(txt_ob)  # add the data to the scene as an object
+    txt_data.body = text  # the body text to the command line arg given
+    txt_data.align_x = "CENTER"  # center text
 
     # Camera
     cam_data = bpy.data.cameras.new("MyCam")
     cam_ob = bpy.data.objects.new(name="MyCam", object_data=cam_data)
     scene.collection.objects.link(cam_ob)  # instance the camera object in the scene
-    scene.camera = cam_ob       # set the active camera
+    scene.camera = cam_ob  # set the active camera
     cam_ob.location = 0.0, 0.0, 10.0
 
     # Light
-    light_data = bpy.data.lights.new("MyLight", 'POINT')
+    light_data = bpy.data.lights.new("MyLight", "POINT")
     light_ob = bpy.data.objects.new(name="MyLight", object_data=light_data)
     scene.collection.objects.link(light_ob)
     light_ob.location = 2.0, 2.0, 5.0
@@ -68,7 +68,7 @@ def example_function(text, save_path, render_path):
 
 
 def main():
-    import sys       # to get command line args
+    import sys  # to get command line args
     import argparse  # to parse options for us and print a nice help message
 
     # get the args passed to blender after "--", all of which are ignored by
@@ -78,7 +78,7 @@ def main():
     if "--" not in argv:
         argv = []  # as if no args are passed
     else:
-        argv = argv[argv.index("--") + 1:]  # get all args after "--"
+        argv = argv[argv.index("--") + 1 :]  # get all args after "--"
 
     # When --help or no args are given, print this help
     usage_text = (
@@ -91,16 +91,26 @@ def main():
     # Example utility, add some text and renders or saves it (with options)
     # Possible types are: string, int, long, choice, float and complex.
     parser.add_argument(
-        "-t", "--text", dest="text", type=str, required=True,
+        "-t",
+        "--text",
+        dest="text",
+        type=str,
+        required=True,
         help="This text will be used to render an image",
     )
 
     parser.add_argument(
-        "-s", "--save", dest="save_path", metavar='FILE',
+        "-s",
+        "--save",
+        dest="save_path",
+        metavar="FILE",
         help="Save the generated file to the specified path",
     )
     parser.add_argument(
-        "-r", "--render", dest="render_path", metavar='FILE',
+        "-r",
+        "--render",
+        dest="render_path",
+        metavar="FILE",
         help="Render an image to the specified path",
     )
 
@@ -111,7 +121,7 @@ def main():
         return
 
     if not args.text:
-        print("Error: --text=\"some string\" argument not given, aborting.")
+        print('Error: --text="some string" argument not given, aborting.')
         parser.print_help()
         return
 

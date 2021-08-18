@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class LrfCommutatorHandler(ErrorHandler):
     """
     Corrects LRF_COMMUTATOR errors by setting LPEAD=True if not already set.
@@ -49,7 +50,9 @@ class LrfCommutatorHandler(ErrorHandler):
         if "lrf_comm" in self.errors:
             if Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False:
                 if not vi["INCAR"].get("LPEAD"):
-                    actions.append({"dict": "INCAR", "action": {"_set": {"LPEAD": True}}})
+                    actions.append(
+                        {"dict": "INCAR", "action": {"_set": {"LPEAD": True}}}
+                    )
 
         VaspModder(vi=vi).apply_actions(actions)
         return {"errors": list(self.errors), "actions": actions}

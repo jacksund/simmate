@@ -5,7 +5,7 @@
 # https://docs.djangoproject.com/en/3.1/topics/db/models/#organizing-models-in-a-package
 
 from simmate.database.local_calculations.relaxation.mit import (
-    MITRelaxationInitialStructure, 
-    MITRelaxationFinalStructure, 
+    MITRelaxationInitialStructure,
+    MITRelaxationFinalStructure,
     MITRelaxation,
 )

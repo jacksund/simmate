@@ -158,7 +158,7 @@ class NudgedElasticBandTask(VaspTask):
         )
 
     def workup(self, directory):
-        
+
         # BUG: For now I assume there are start/end image directories are located
         # in the working directory. This bad assumption is made as I'm just quickly
         # trying to get results for some labmates. In the future, I need to search

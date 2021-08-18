@@ -16,7 +16,7 @@ relax_structure = VaspTask(
     incar=dict(
         ALGO="Normal",  # TEMPORARY SWITCH FROM Fast
         EDIFF=1.0e-05,
-        EDIFFG=-0.02, # From MVL's set
+        EDIFFG=-0.02,  # From MVL's set
         ENCUT=520,
         IBRION=2,
         ICHARG=1,
@@ -45,7 +45,7 @@ run_neb = NudgedElasticBandTask(
         # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/MPRelaxSet.yaml
         ALGO="Normal",  # TEMPORARY SWITCH FROM Fast
         EDIFF=1.0e-05,
-        EDIFFG=-0.02, # From MVL's set
+        EDIFFG=-0.02,  # From MVL's set
         ENCUT=520,
         # IBRION=2, --> overwritten by MITNEBSet below
         ICHARG=1,

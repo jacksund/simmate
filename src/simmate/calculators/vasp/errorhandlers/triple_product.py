@@ -33,7 +33,7 @@ class TripleProduct(ErrorHandler):
         poscar_filename = os.path.join(dir, "POSCAR")
         structure = Structure.from_file(poscar_filename)
         structure.to("POSCAR", poscar_filename + "_original")
-        
+
         # switch the b and c lattice vector of the structure
         structure.make_supercell([[1, 0, 0], [0, 0, 1], [0, 1, 0]])
         structure.to("POSCAR", poscar_filename)

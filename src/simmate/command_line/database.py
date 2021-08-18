@@ -68,6 +68,7 @@ def dumpdata(filename):
         f"Success! You should now see the file {filename} with all of your data."
     )
 
+
 @database.command()
 @click.option(
     "--filename",

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class LargeSigmaHandler(ErrorHandler):
     """
     When ISMEAR > 0 (Gaussian or Methfessel-Paxton), monitor the magnitude of the entropy
@@ -28,7 +29,10 @@ class LargeSigmaHandler(ErrorHandler):
         if incar.get("ISMEAR", 0) > 0:
             # Read the latest entropy term.
             outcar.read_pattern(
-                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"}, postprocess=float, reverse=True, terminate_on_match=True
+                {"entropy": r"entropy T\*S.*= *(\D\d*\.\d*)"},
+                postprocess=float,
+                reverse=True,
+                terminate_on_match=True,
             )
             n_atoms = Structure.from_file("POSCAR").num_sites
             if outcar.data.get("entropy", []):

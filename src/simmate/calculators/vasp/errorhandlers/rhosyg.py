@@ -25,14 +25,14 @@ class Rhosyg(ErrorHandler):
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(dir, "INCAR")
         incar = Incar.from_file(incar_filename)
-        
+
         # We make a fix only if SYMPREC is not the default value
         if incar.get("SYMPREC", 1e-4) == 1e-4:
             incar["ISYM"] = 0
             correction = "switched ISYM to 0"
         else:
             correction = ""
-        
+
         incar["SYMPREC"] = 1e-4
         correction += "switched SYMPREC back to default (1e-4)"
 

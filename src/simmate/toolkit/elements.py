@@ -4,13 +4,14 @@ from enum import Enum
 
 from simmate.materials_science.element_data import ALL_DATA, SUPPORTED_PROPERTIES
 
+
 class Element(Enum):
     """
     The Element class is really just a dictionary of fixed data, but we perform some
     extra python "tricks" to help with performance and usage.
 
     WARNING: This class implements some advanced python topics, and you don't need
-    to understand them to use this class as a beginner. Check out element_data.py 
+    to understand them to use this class as a beginner. Check out element_data.py
     (and the csv file) to see which data is available. Also look at this link for a
     quick tutorial:
         << TODO: INSERT LINK >>
@@ -19,7 +20,7 @@ class Element(Enum):
     means there are fixed number of options to choose from. Further, once one is
     chosen, it never changes. This means we really only need one object instance
     for each element -- and any time we call Element("Al"), it will share that instance
-    and data. This is effectively a "singleton" and helps us save on memory and 
+    and data. This is effectively a "singleton" and helps us save on memory and
     object initialization in a big way.
 
     The second thing we do is "lazy-loading" of an Element's attributes. This helps
@@ -196,7 +197,7 @@ class Element(Enum):
         raise AttributeError(f"Element has no attribute {item}!")
 
     def __str__(self):
-        """ Just return the symbol if we want the Element as a String """
+        """Just return the symbol if we want the Element as a String"""
         return self.symbol
 
     def __lt__(self, other):
@@ -226,7 +227,7 @@ class Element(Enum):
 
     @staticmethod
     def from_atomic_number(atomic_number):
-        """ Returns an element from an atomic number. """
+        """Returns an element from an atomic number."""
 
         # iterate through each element until we find the one where numbers match
         for symbol, data in ALL_DATA.items():
@@ -255,22 +256,21 @@ class Element(Enum):
         raise ValueError(f"No element with row {row_number} and group {group_number}")
 
     def all_data(self):
-        """ Returns the full dictionary of data available for the element """
+        """Returns the full dictionary of data available for the element"""
         return ALL_DATA[self.symbol]
-
 
     # OPTIMIZE: consider changing these properties to check group/row numbers instead
     # of comparing lists. For example, noble gases would check "group_number == 18".
 
     @property
     def is_noble_gas(self):
-        """ True if element is noble gas. """
+        """True if element is noble gas."""
         noble_gases = (2, 10, 18, 36, 54, 86, 118)
         return self.atomic_number in noble_gases
 
     @property
     def is_transition_metal(self):
-        """ True if element is a transition metal. """
+        """True if element is a transition metal."""
         transition_metals = (
             list(range(21, 31))
             + [57]
@@ -282,58 +282,58 @@ class Element(Enum):
 
     @property
     def is_post_transition_metal(self):
-        """ True if element is a post-transition or poor metal. """
+        """True if element is a post-transition or poor metal."""
         post_transition_metals = (13, 31, 49, 50, 81, 82, 83)
         return self.atomic_number in post_transition_metals
 
     @property
     def is_metalloid(self):
-        """ True if element is a metalloid. """
+        """True if element is a metalloid."""
         metalloids = (5, 14, 32, 33, 51, 52, 84)
         return self.atomic_number in metalloids
 
     @property
     def is_alkali(self):
-        """ True if element is an alkali metal. """
+        """True if element is an alkali metal."""
         alkali_metals = (3, 11, 19, 37, 55, 87)
         return self.atomic_number in alkali_metals
 
     @property
     def is_alkaline(self):
-        """ True if element is an alkaline earth metal """
+        """True if element is an alkaline earth metal"""
         alkali_earth_metals = (4, 12, 20, 38, 56, 88)
         return self.atomic_number in alkali_earth_metals
 
     @property
     def is_halogen(self):
-        """ True if element is a halogen. """
+        """True if element is a halogen."""
         halogens = (9, 17, 35, 53, 85)
         return self.atomic_number in halogens
 
     @property
     def is_chalcogen(self):
-        """ True if element is a chalcogen. """
+        """True if element is a chalcogen."""
         chalcogens = (8, 16, 34, 52, 84)
         return self.atomic_number in chalcogens
 
     @property
     def is_lanthanoid(self):
-        """ True if element is a lanthanoid. """
+        """True if element is a lanthanoid."""
         return 56 < self.atomic_number < 72
 
     @property
     def is_actinoid(self):
-        """ True if element is a actinoid. """
+        """True if element is a actinoid."""
         return 88 < self.atomic_number < 104
 
     @property
     def is_rare_earth_metal(self):
-        """ True if element is a rare earth metal. """
+        """True if element is a rare earth metal."""
         return self.is_lanthanoid or self.is_actinoid
 
     @property
     def is_metal(self):
-        """ True if element is a metal. """
+        """True if element is a metal."""
         # if any of these are true, it's a metal
         return (
             self.is_alkali
@@ -346,7 +346,7 @@ class Element(Enum):
 
     @property
     def is_quadrupolar(self):
-        """ Checks if this element can be quadrupolar """
+        """Checks if this element can be quadrupolar"""
         # If the element has nmr_quadrupole_moment data, it can be quadrupolar.
         # Otherwise it is not. We use bool() return true/false
         return bool(self.nmr_quadrupole_moment)

@@ -122,7 +122,7 @@ class Aliasing(ErrorHandler):
 
         # if any corrections were made above, we may want to reset some files
         if corrections:
-            
+
             # Check the current ICHARG setting, where default is 0
             # !!! BUG: isn't the default 2 if we are starting from scratch?
             current_icharg = incar.get("ICHARG", 0)

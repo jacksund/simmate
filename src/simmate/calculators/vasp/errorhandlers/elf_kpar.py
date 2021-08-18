@@ -25,7 +25,7 @@ class ElfKpar(ErrorHandler):
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(dir, "INCAR")
         incar = Incar.from_file(incar_filename)
-        
+
         # make the fix
         incar["KPAR"] = 1
         correction = "switched KPAR to 1"

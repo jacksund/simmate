@@ -23,15 +23,15 @@ class RotationMatrix(ErrorHandler):
     possible_error_messages = ["rotation matrix was not found (increase SYMPREC)"]
 
     def correct(self, error, dir):
-        
+
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(dir, "INCAR")
         incar = Incar.from_file(incar_filename)
-        
+
         # increase the precision
         incar["SYMPREC"] = 1e-8
-        
+
         # rewrite the INCAR with new settings
         incar.to_file(incar_filename)
-        
+
         return "switched SYMPREC to 1e-8"

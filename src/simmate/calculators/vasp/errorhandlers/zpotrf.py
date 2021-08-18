@@ -80,7 +80,7 @@ class Zpotrf(ErrorHandler):
             os.remove(os.path.join(dir, "CHGCAR"))
             os.remove(os.path.join(dir, "WAVECAR"))
             correction += "and deleted CHGCAR and WAVECAR"
-        
+
         # rewrite the INCAR with new settings
         incar.to_file(incar_filename)
 

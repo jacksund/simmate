@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class DriftErrorHandler(ErrorHandler):
     """
     Corrects for total drift exceeding the force convergence criteria.
@@ -56,7 +57,9 @@ class DriftErrorHandler(ErrorHandler):
         outcar = Outcar("OUTCAR")
 
         # Move CONTCAR to POSCAR
-        actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+        actions.append(
+            {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
+        )
 
         # First try adding ADDGRID
         if not incar.get("ADDGRID", False):
@@ -75,7 +78,11 @@ class DriftErrorHandler(ErrorHandler):
             actions.append(
                 {
                     "dict": "INCAR",
-                    "action": {"_set": {"ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)}},
+                    "action": {
+                        "_set": {
+                            "ENAUG": int(incar.get("ENAUG", 1040) * self.enaug_multiply)
+                        }
+                    },
                 }
             )
 

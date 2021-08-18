@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class UnconvergedErrorHandler(ErrorHandler):
     """
     Check if a run is converged.
@@ -42,7 +43,9 @@ class UnconvergedErrorHandler(ErrorHandler):
             if algo == "VeryFast":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Fast"}}})
             elif algo == "Fast":
-                actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}})
+                actions.append(
+                    {"dict": "INCAR", "action": {"_set": {"ALGO": "Normal"}}}
+                )
             elif algo == "Normal":
                 actions.append({"dict": "INCAR", "action": {"_set": {"ALGO": "All"}}})
             else:
@@ -56,14 +59,18 @@ class UnconvergedErrorHandler(ErrorHandler):
                     "BMIX_MAG": 0.001,
                 }
 
-                if not all(v.incar.get(k, "") == val for k, val in new_settings.items()):
+                if not all(
+                    v.incar.get(k, "") == val for k, val in new_settings.items()
+                ):
                     actions.append({"dict": "INCAR", "action": {"_set": new_settings}})
 
         elif not v.converged_ionic:
             # Just continue optimizing and let other handles fix ionic
             # optimizer parameters
             actions.append({"dict": "INCAR", "action": {"_set": {"IBRION": 1}}})
-            actions.append({"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}})
+            actions.append(
+                {"file": "CONTCAR", "action": {"_file_copy": {"dest": "POSCAR"}}}
+            )
 
         if actions:
             vi = VaspInput.from_directory(".")

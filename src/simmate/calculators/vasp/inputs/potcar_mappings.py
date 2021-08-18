@@ -135,40 +135,42 @@ PBE_ELEMENT_MAPPINGS = {
 }
 
 # Another common mapping comes from the MIT project (pre-cursor to Materials Project)
-# The POTCARs here are generally the ones with fewer electrons and convergence 
+# The POTCARs here are generally the ones with fewer electrons and convergence
 # criteria is less tight. A lot of the elements are the same as above, so we
 # just copy those element mappings and update the elements that are actaully
 # lower quality here.
 PBE_ELEMENT_MAPPINGS_LOW_QUALITY = PBE_ELEMENT_MAPPINGS.copy()
-PBE_ELEMENT_MAPPINGS_LOW_QUALITY.update({
-    'Be': 'Be',
-    'Cr': 'Cr',
-    'Cu': 'Cu',
-    'Fe': 'Fe',
-    'Ga': 'Ga',
-    'Ge': 'Ge',
-    'Hf': 'Hf',
-    'In': 'In',
-    'Li': 'Li',
-    'Mg': 'Mg',
-    'Mn': 'Mn',
-    'Na': 'Na',
-    'Nd': 'Nd',
-    'Ni': 'Ni',
-    'Os': 'Os',
-    'Pb': 'Pb',
-    'Pm': 'Pm',
-    'Pr': 'Pr',
-    'Rb': 'Rb_pv',
-    'Re': 'Re',
-    'Rh': 'Rh',
-    'Ta': 'Ta',
-    'Tc': 'Tc',
-    'Ti': 'Ti',
-    'Tl': 'Tl',
-    'Yb': 'Yb',
-    'Zr': 'Zr',
-})
+PBE_ELEMENT_MAPPINGS_LOW_QUALITY.update(
+    {
+        "Be": "Be",
+        "Cr": "Cr",
+        "Cu": "Cu",
+        "Fe": "Fe",
+        "Ga": "Ga",
+        "Ge": "Ge",
+        "Hf": "Hf",
+        "In": "In",
+        "Li": "Li",
+        "Mg": "Mg",
+        "Mn": "Mn",
+        "Na": "Na",
+        "Nd": "Nd",
+        "Ni": "Ni",
+        "Os": "Os",
+        "Pb": "Pb",
+        "Pm": "Pm",
+        "Pr": "Pr",
+        "Rb": "Rb_pv",
+        "Re": "Re",
+        "Rh": "Rh",
+        "Ta": "Ta",
+        "Tc": "Tc",
+        "Ti": "Ti",
+        "Tl": "Tl",
+        "Yb": "Yb",
+        "Zr": "Zr",
+    }
+)
 
 PBE_GW_ELEMENT_MAPPINGS = {
     "Ac": "Ac",
