@@ -6,8 +6,11 @@ from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.inputs.potcar_mappings import (
     PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
 )
-from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
-from simmate.calculators.vasp.errorhandlers.eddrmm import Eddrmm
+from simmate.calculators.vasp.errorhandlers.all import (
+    TetrahedronMesh,
+    Eddrmm,
+    IncorrectSmearingHandler,
+)
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.relaxation.mit import (
@@ -90,7 +93,7 @@ class MITRelaxationTask(VaspTask):
             ),
             "non-metal": dict(
                 ISMEAR=-5,
-                SIMGA=0.05,
+                SIGMA=0.05,
             ),
         },
         # We run LDA+U for certain compositions. This is a complex configuration
@@ -180,7 +183,7 @@ class MITRelaxationTask(VaspTask):
     )
 
     # These are some default error handlers to use
-    errorhandlers = [TetrahedronMesh(), Eddrmm()]
+    errorhandlers = [TetrahedronMesh(), Eddrmm(), IncorrectSmearingHandler()]
 
 
 # we initialize the task here so we can use it in the Prefect flow below
