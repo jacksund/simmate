@@ -38,7 +38,7 @@ class NonConvergingErrorHandler(ErrorHandler):
 
             # then load each file's data
             oszicar = Oszicar(oszicar_filename)
-            incar = Incar(incar_filename)
+            incar = Incar.from_file(incar_filename)
 
             # check what the current NELM is. If it's not set, that means it's using
             # the default which is 60. This is the max SCF steps allowed.
