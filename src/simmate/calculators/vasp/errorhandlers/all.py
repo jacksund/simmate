@@ -8,3 +8,6 @@
 from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
 from simmate.calculators.vasp.errorhandlers.eddrmm import Eddrmm
 from simmate.calculators.vasp.errorhandlers.incorrect_smearing import IncorrectSmearingHandler
+from simmate.calculators.vasp.errorhandlers.mesh_symmetry import MeshSymmetryErrorHandler
+from simmate.calculators.vasp.errorhandlers.unconverged import UnconvergedErrorHandler
+from simmate.calculators.vasp.errorhandlers.nonconverging import NonConvergingErrorHandler

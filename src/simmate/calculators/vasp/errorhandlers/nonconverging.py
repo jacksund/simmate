@@ -7,7 +7,7 @@ from simmate.calculators.vasp.outputs.oszicar import Oszicar
 from simmate.workflows.core.tasks.errorhandler import ErrorHandler
 
 
-class NonConverging(ErrorHandler):
+class NonConvergingErrorHandler(ErrorHandler):
     """
     If a run is hitting the maximum number of electronic steps for a significant
     number of ionic steps (i.e. 10), then we consider the job to be nonconverging
@@ -20,7 +20,7 @@ class NonConverging(ErrorHandler):
     def __init__(self, min_ionic_steps=10):
         self.min_ionic_steps = min_ionic_steps
 
-    def check(self, dir):
+    def check(self, directory):
         """
         Check for error in the specified directory. Note, we assume that we are
         checking the OSZICAR file. If that file is not present, we say that there
@@ -29,9 +29,9 @@ class NonConverging(ErrorHandler):
 
         # We check for this error in the OSZICAR because it's the smallest file
         # that will tell us energies -- and therefore the fastest to read.
-        oszicar_filename = os.path.join(dir, "OSZICAR")
+        oszicar_filename = os.path.join(directory, "OSZICAR")
         # we also need the INCAR for this error handler
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
 
         # check to see that the files are there first
         if os.path.exists(oszicar_filename) and os.path.exists(incar_filename):
@@ -70,7 +70,7 @@ class NonConverging(ErrorHandler):
         # if the files don't exist, we are not seeing any error yet
         return False
 
-    def correct(self, error, dir):
+    def correct(self, error, directory):
         """
         Perform corrections based on the INCAR.
         """
@@ -78,7 +78,7 @@ class NonConverging(ErrorHandler):
         # This value isn't used in fixing the Error anyways.
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # check what the current ALGO is. If it's not set, that means it's using

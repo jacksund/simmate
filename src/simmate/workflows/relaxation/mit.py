@@ -10,6 +10,9 @@ from simmate.calculators.vasp.errorhandlers.all import (
     TetrahedronMesh,
     Eddrmm,
     IncorrectSmearingHandler,
+    MeshSymmetryErrorHandler,
+    UnconvergedErrorHandler,
+    NonConvergingErrorHandler,
 )
 
 from simmate.configuration.django import setup_full  # sets database connection
@@ -183,7 +186,14 @@ class MITRelaxationTask(VaspTask):
     )
 
     # These are some default error handlers to use
-    errorhandlers = [TetrahedronMesh(), Eddrmm(), IncorrectSmearingHandler()]
+    errorhandlers = [
+        TetrahedronMesh(),
+        Eddrmm(),
+        IncorrectSmearingHandler(),
+        MeshSymmetryErrorHandler(),
+        UnconvergedErrorHandler(),
+        NonConvergingErrorHandler(),
+    ]
 
 
 # we initialize the task here so we can use it in the Prefect flow below
