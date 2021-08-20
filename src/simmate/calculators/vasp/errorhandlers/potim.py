@@ -26,7 +26,7 @@ class PotimErrorHandler(ErrorHandler):
 
         # We check for this error in the OSZICAR because it's the smallest file
         # that will tell us energies -- and therefore the fastest to read.
-        oszicar_filename = os.path.join(dir, "OSZICAR")
+        oszicar_filename = os.path.join(directory, "OSZICAR")
 
         # check to see that the file is there first
         if os.path.exists(oszicar_filename):
