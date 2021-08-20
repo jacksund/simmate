@@ -13,6 +13,9 @@ from simmate.calculators.vasp.errorhandlers.all import (
     MeshSymmetryErrorHandler,
     UnconvergedErrorHandler,
     NonConvergingErrorHandler,
+    PotimErrorHandler,
+    PositiveEnergyErrorHandler,
+    FrozenErrorHandler,
 )
 
 from simmate.configuration.django import setup_full  # sets database connection
@@ -193,6 +196,9 @@ class MITRelaxationTask(VaspTask):
         MeshSymmetryErrorHandler(),
         UnconvergedErrorHandler(),
         NonConvergingErrorHandler(),
+        PotimErrorHandler(),
+        PositiveEnergyErrorHandler(),
+        FrozenErrorHandler(),
     ]
 
 

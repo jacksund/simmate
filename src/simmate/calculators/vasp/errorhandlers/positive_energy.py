@@ -7,7 +7,7 @@ from simmate.calculators.vasp.outputs.oszicar import Oszicar
 from simmate.workflows.core.tasks.errorhandler import ErrorHandler
 
 
-class PositiveEnergy(ErrorHandler):
+class PositiveEnergyErrorHandler(ErrorHandler):
     """
     Check if a run has positive absolute energy.
     If so, we trying changeing ALGO to Normal or alternatively halve the POTIM.
@@ -16,7 +16,7 @@ class PositiveEnergy(ErrorHandler):
     # run this while the VASP calculation is still going
     is_monitor = True
 
-    def check(self, dir):
+    def check(self, directory):
         """
         Check for error in the specified directory. Note, we assume that we are
         checking the OSZICAR file. If that file is not present, we say that there
@@ -25,7 +25,7 @@ class PositiveEnergy(ErrorHandler):
 
         # We check for this error in the OSZICAR because it's the smallest file
         # that will tell us energies -- and therefore the fastest to read.
-        filename = os.path.join(dir, "OSZICAR")
+        filename = os.path.join(directory, "OSZICAR")
 
         # check to see that the file is there first
         if os.path.exists(filename):
@@ -42,7 +42,7 @@ class PositiveEnergy(ErrorHandler):
         # negative, we are not seeing any error.
         return False
 
-    def correct(self, error, dir):
+    def correct(self, error, directory):
         """
         Perform corrections based on the INCAR.
         """
@@ -50,7 +50,7 @@ class PositiveEnergy(ErrorHandler):
         # This value isn't used in fixing the Error anyways.
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # check what the current ALGO is. If it's not set, that means it's using

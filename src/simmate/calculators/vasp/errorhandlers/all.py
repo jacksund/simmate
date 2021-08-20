@@ -11,3 +11,6 @@ from simmate.calculators.vasp.errorhandlers.incorrect_smearing import IncorrectS
 from simmate.calculators.vasp.errorhandlers.mesh_symmetry import MeshSymmetryErrorHandler
 from simmate.calculators.vasp.errorhandlers.unconverged import UnconvergedErrorHandler
 from simmate.calculators.vasp.errorhandlers.nonconverging import NonConvergingErrorHandler
+from simmate.calculators.vasp.errorhandlers.potim import PotimErrorHandler
+from simmate.calculators.vasp.errorhandlers.positive_energy import PositiveEnergyErrorHandler
+from simmate.calculators.vasp.errorhandlers.frozen import FrozenErrorHandler
