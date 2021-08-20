@@ -28,13 +28,13 @@ class FrozenErrorHandler(ErrorHandler):
         """
 
         # establish the full path to the output file
-        filename = os.path.join(directory, "vasp.out")
+        output_filename = os.path.join(directory, "vasp.out")
 
         # check to see that the file is there first
-        if os.path.exists(filename):
+        if os.path.exists(output_filename):
 
             # check when the file was last editted
-            time_last_edit = os.path.getmtime(self.output_filename)
+            time_last_edit = os.path.getmtime(output_filename)
 
             # see how long ago this was and if it was longer than our timeout
             if time.time() - time_last_edit > self.timeout_limit:
