@@ -14,3 +14,4 @@ from simmate.calculators.vasp.errorhandlers.nonconverging import NonConvergingEr
 from simmate.calculators.vasp.errorhandlers.potim import PotimErrorHandler
 from simmate.calculators.vasp.errorhandlers.positive_energy import PositiveEnergyErrorHandler
 from simmate.calculators.vasp.errorhandlers.frozen import FrozenErrorHandler
+from simmate.calculators.vasp.errorhandlers.large_sigma import LargeSigmaErrorHandler

@@ -16,6 +16,7 @@ from simmate.calculators.vasp.errorhandlers.all import (
     PotimErrorHandler,
     PositiveEnergyErrorHandler,
     FrozenErrorHandler,
+    LargeSigmaErrorHandler,
 )
 
 from simmate.configuration.django import setup_full  # sets database connection
@@ -199,6 +200,7 @@ class MITRelaxationTask(VaspTask):
         PotimErrorHandler(),
         PositiveEnergyErrorHandler(),
         FrozenErrorHandler(),
+        LargeSigmaErrorHandler(),
     ]
 
 
