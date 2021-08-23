@@ -1,6 +1,6 @@
 #####################################################
 
-from pymatgen import MPRester
+from pymatgen.ext.matproj import MPRester
 import numpy as np
 from pymatgen.analysis.local_env import ValenceIonicRadiusEvaluator, CrystalNN
 import itertools as it
@@ -13,7 +13,7 @@ structure = mpr.get_structure_by_material_id(
     mp_id, conventional_unit_cell=False
 )  # , conventional_unit_cell=True
 structure = structure.copy(sanitize=True)
-structure.make_supercell(2)
+# structure.make_supercell(2)
 
 # run oxidation analysis and predict bonding
 structure = ValenceIonicRadiusEvaluator(structure).structure
