@@ -10,6 +10,35 @@
 import os
 import platform
 import subprocess
+from pathlib import Path
+
+import yaml
+
+# NOTE: You should only need to use the get_blender_command() function below.
+# All other functions are called within it.
+#
+# The exception to this is if you installed a new version of Blender when you
+# already had a older version configured. In this case, just run the
+# find_blender_installation once and you're good to go!
+
+
+def get_blender_command():
+
+    # First we look in the .simmate configuration directory and check if it
+    # has been set there.
+    #   [home_directory] ~/.simmate/blender.yaml
+    blender_filename = os.path.join(Path.home(), ".simmate", "blender.yaml")
+    if os.path.exists(blender_filename):
+        with open(blender_filename) as file:
+            blender_command = yaml.full_load(file)["COMMAND"]
+
+    # If not, we then try to find blender using the find_blender_installation 
+    # function defined below.
+    else:
+        blender_command = find_blender_installation()
+        
+    # we should now have the blender command and can return it for use elsewhere
+    return blender_command
 
 
 def find_blender_installation():
@@ -26,15 +55,18 @@ def find_blender_installation():
     #   Mac: Darwin
     #   Windows: Windows
     operating_system = platform.system()
-    
+
     # Linux includes all distros where we primarily test with Ubuntu.
     if operating_system == "Linux":
-        raise NotImplementedError(
-            "Simmate has not yet added support for Blender on Linux."
-            " We can add this right away if you'd like! Just post a request"
-            " on our forum."
-        )
-    
+
+        # On Linux, we actually have the easiest setup because the blender
+        # command should be directly accessible -- regardless of where blender
+        # was installed.
+        blender_command = "blender"
+
+        # now confirm we can call the blender command
+        test_blender_command(blender_command)
+
     # Windows -- we assume Windows 10 for now.
     elif operating_system == "Windows":
 
@@ -54,22 +86,16 @@ def find_blender_installation():
             # To call blender in python, we write the full path to the blender
             # executable. For example, the command looks like this:
             #   "C:\\Program Files\\Blender Foundation\\Blender 2.93\\blender.exe" --help
-            # Note the quotes are important here.
-            blender_command = os.path.join(
+            full_path_to_blender = os.path.join(
                 expected_folder, blender_version, "blender.exe"
             )
+            # Because there are spaces in the file path, it is important we
+            # wrap this command in quotes
+            blender_command = f'"{full_path_to_blender}"'
 
-            # now confirm we have this configured properly and can successfully
-            # call the blender command.
-            blender_test_command = f'"{blender_command}" --version'
-            result = subprocess.run(
-                blender_test_command,
-                shell=True,  # to access commands in the path
-                capture_output=True,  # capture any ouput + error logs
-            )
+            # now confirm we can call the blender command
+            test_blender_command(blender_command)
 
-            # see if the command works, which means the return code is 0
-            assert result.returncode == 0
         # if this path doesn't exist, we need to tell the user to install
         # Blender before than can use any of this functionality.
         else:
@@ -81,7 +107,7 @@ def find_blender_installation():
                 "with Blender, take a look at Simmate's tutorial on the topic: "
                 " <<TODO: insert link >>"
             )
-            
+
     # Mac -- I don't own a Mac so I haven't implemented this yet.
     elif operating_system == "Darwin":
         raise NotImplementedError(
@@ -89,21 +115,29 @@ def find_blender_installation():
             " We can add this right away if you'd like! Just post a request"
             " on our forum."
         )
-    
-    
+
     # We should now have our blender_command set from above. So that we don't need
     # to search for the Blender installation every time we call a visualization
     # function, we want to save the path to a configuration file in /.simmate
-    # TODO---------------------------------------------------------------------------------------------------
-    
+
+    # We store the command inside the config directory which is located at...
+    #   [home_directory] ~/.simmate/blender.yaml
+    blender_filename = os.path.join(Path.home(), ".simmate", "blender.yaml")
+    with open(blender_filename, "w") as file:
+        file.write(f"COMMAND: {blender_command}")
+
     return blender_command
 
 
-def get_blender_command():
-    
-    # loads the blender command
-    # First we look in the .simmate configuration directory and check if it
-    # has been set there. If not, we then try to find blender using the
-    # find_blender_installation function defined above.
-    
-    pass
+def test_blender_command(blender_command):
+    # To confirm we have blender configured properly, we often need to test it
+    # out. We do this by calling the "blender --help" command
+    command_to_test = f"{blender_command} --version"
+    result = subprocess.run(
+        command_to_test,
+        shell=True,  # to access commands in the path
+        capture_output=True,  # capture any ouput + error logs
+    )
+
+    # see if the command works, which means the return code is 0
+    assert result.returncode == 0
