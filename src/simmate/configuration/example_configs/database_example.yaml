@@ -1,0 +1,16 @@
+
+# This is an example of how to connect to a postgres database on DigitalOcean.
+# Note that our keywords and overall structure map directly to how databases 
+# are defined in Django -- where this is a yaml format instead of a python
+# dictionary (or json). You can have more than one database if you wish, but
+# you MUST have one that is named "default" for Django+Simmate to work properly.
+
+default:
+  ENGINE: django.db.backends.postgresql_psycopg2
+  HOST: db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com
+  NAME: simmate-database-pool
+  USER: doadmin
+  PASSWORD: dibi5n3varep5ad8
+  PORT: 25061
+  OPTIONS:
+    sslmode: require
