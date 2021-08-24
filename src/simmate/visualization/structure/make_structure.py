@@ -152,9 +152,8 @@ def example_function(lattice, sites_to_draw, save_path):
     bpy.ops.wm.read_factory_settings(use_empty=True)
 
     # import Verge3D settings
-    import addon_utils
-
-    addon_utils.enable(module_name="verge3d")
+    # import addon_utils
+    # addon_utils.enable(module_name="verge3d")
 
     scene = bpy.context.scene
 
@@ -275,13 +274,13 @@ def example_function(lattice, sites_to_draw, save_path):
     bpy.context.view_layer.update()
 
     # set verge3D settings
-    bpy.context.scene.v3d_export.use_shadows = False
-    bpy.context.scene.v3d_export.lzma_enabled = (
-        True  # add compressed files (fails for some reason)
-    )
-    bpy.context.scene.v3d_export.aa_method = "MSAA8"
-    bpy.data.objects["MyCam"].data.v3d.orbit_min_distance = 15
-    bpy.data.objects["MyCam"].data.v3d.orbit_max_distance = 100
+    # bpy.context.scene.v3d_export.use_shadows = False
+    # bpy.context.scene.v3d_export.lzma_enabled = (
+    #     True  # add compressed files (fails for some reason)
+    # )
+    # bpy.context.scene.v3d_export.aa_method = "MSAA8"
+    # bpy.data.objects["MyCam"].data.v3d.orbit_min_distance = 15
+    # bpy.data.objects["MyCam"].data.v3d.orbit_max_distance = 100
 
     # save/export files
     if save_path:
@@ -289,16 +288,20 @@ def example_function(lattice, sites_to_draw, save_path):
         bpy.ops.wm.save_as_mainfile(filepath=save_path + ".blend")
 
         # export for Verge3D
-        bpy.ops.export_scene.v3d_gltf(filepath=save_path)
+        # bpy.ops.export_scene.v3d_gltf(filepath=save_path)
 
 
 def main():
+    
+    print("HERE IN COMMAND")
+    
     import sys  # to get command line args
     import argparse  # to parse options for us and print a nice help message
 
     # get the args passed to blender after "--", all of which are ignored by
     # blender so scripts may receive their own arguments
     argv = sys.argv
+    print(argv)
 
     if "--" not in argv:
         argv = []  # as if no args are passed
