@@ -1,29 +1,16 @@
-# This script is an example of how you can run blender from the command line
-# (in background mode with no interface) to automate tasks, in this example it
-# creates a text object, camera and light, then renders and/or saves it.
-# This example also shows how you can parse command line options to scripts.
-#
-# Example usage for this test.
-#  blender --background --factory-startup --python $HOME/background_job.py -- \
-#          --text="Hello World" \
-#          --render="/tmp/hello" \
-#          --save="/tmp/hello.blend"
-#
-# Notice:
-# '--factory-startup' is used to avoid the user default settings from
-#                     interfering with automated scene generation.
-#
-# '--' causes blender to ignore all following arguments so python can use them.
-#
-# See blender --help for details.
+# -*- coding: utf-8 -*-
 
-# cd Anaconda3/envs/jacks_env/Lib/site-packages/jacksund/WarrenLabToolBox/Other
-# blender --background --factory-startup --python background_blender.py -- --text="SUP-BLENDER" --save="C:/Users/jacks/Desktop/test.blend" --render="C:/Users/jacks/Desktop/testy"
+import json
+import sys
+import argparse
+
+import numpy
 
 import bpy
+import bmesh
 
-# convert from standards 255x255x255 rgb to blender's 50x50x50 rgb
-jmol_coloring = {
+# These are the RGB values that JMol uses to color atoms
+JMOL_COLORING = {
     "H": [255, 255, 255],
     "He": [217, 255, 255],
     "Li": [204, 128, 255],
@@ -135,116 +122,151 @@ jmol_coloring = {
     "Mt": [235, 0, 38],
 }
 
-# to add 4th value for blender
-for key in jmol_coloring:
-    jmol_coloring[key].append(255)
+# Blender needs a 4th value for the opacity in addition to the RGB values given
+# above. For all materials, we use 255 and append this to all of them here. Blender
+# needs these values on a 0-1 scale instead of the 0-255. We address
+# this below by dividing all values by 255
+for key in JMOL_COLORING:
+    color = JMOL_COLORING[key]
+    color.append(255)
+    JMOL_COLORING[key] = numpy.array(color) / 255
 
 
-def example_function(lattice, sites_to_draw, save_path):
+def make_structure_blend(lattice, sites_to_draw, filename):
 
     # convert variable from json str to original format
-    import json
-
     lattice = json.loads(lattice)
     sites_to_draw = json.loads(sites_to_draw.replace("'", '"'))
-
-    # Clear existing objects.
-    bpy.ops.wm.read_factory_settings(use_empty=True)
 
     # import Verge3D settings
     # import addon_utils
     # addon_utils.enable(module_name="verge3d")
 
+    # Clear existing objects.
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+
+    # we grab the entire blender scene for reference as it let's us access
+    # all objects later
     scene = bpy.context.scene
 
-    import numpy as np
+    # -------------------------------------------------------------------------
 
-    # draw sites
+    # ADDING THE SITES
+
+    # We start by drawing each of the sites -- which is just a colored sphere
+    # at the proper coordinates
     for site in sites_to_draw:
-        site_element, site_size, site_loc = site
-        site_loc = np.array(site_loc)  # change list to numpy array for functionality
-        site_color = (
-            np.array(jmol_coloring[site_element]) / 255
-        )  # divide each value by 255 to standardize for blender
 
+        # first pull the base information out of the serialized tuple
+        element_symbol, radius, cartesian_coords = site
+
+        # we change the coordinates into a numpy array for functionality
+        cartesian_coords = numpy.array(cartesian_coords)
+
+        # Add a sphere for the site. Note we make the radius size only 0.75% its
+        # true size in order to help with visualization.
         bpy.ops.mesh.primitive_ico_sphere_add(
-            subdivisions=4, radius=site_size * 0.75, location=site_loc
-        )  # creates and sets to active object
+            subdivisions=3,
+            radius=radius * 0.75,
+            location=cartesian_coords,
+        )
 
-        # make material for new object
+        # Now we need to color and style the sphere.
+
+        # grab the site color from our mappings above
+        site_color = JMOL_COLORING[element_symbol]
+
+        # first check if we have made this material already (i.e. an element of
+        # this type has been made before). If so, we use that one.
         materials = bpy.data.materials
-        if site_element in materials.keys():
-            mat = materials[site_element]
+        if element_symbol in materials.keys():
+            mat = materials[element_symbol]
+        # otherwise we make a new material and name it after the element for
+        # future reference.
         else:
-            mat = bpy.data.materials.new(name=site_element)  # create material
+            mat = bpy.data.materials.new(name=element_symbol)
             mat.diffuse_color = site_color
             mat.metallic = 1
             mat.specular_intensity = 0
             mat.roughness = 0.6
-        bpy.context.active_object.data.materials.append(
-            mat
-        )  # append material to selected objects
+        # Now that we have the proper material create/selected, we can now
+        # apply it to our sphere
+        bpy.context.active_object.data.materials.append(mat)
 
-    # make smooth shading for all then deselect
+    # We apply smooth shading to all the spheres and then deselect them before
+    # moving on to the next step
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.shade_smooth()
     bpy.ops.object.select_all(action="DESELECT")
 
-    # Add lattice # ISSUE WHERE EACH LINE ISNT PERFECT CIRCLE >>> WILL FIX BY SEPARATING LINES
+    # -------------------------------------------------------------------------
+
+    # ADDING THE LATTICE
+
+    # We make a lattice by creating a cube, deleting all of the faces, and then
+    # manually placing each of its verticies to match the lattice size.
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=True)
     bpy.ops.mesh.delete(type="ONLY_FACE")
     bpy.ops.object.editmode_toggle()
-
     verts = bpy.context.object.data.vertices
     verts[0].co = (0, 0, 0)
     verts[1].co = lattice[2]
     verts[2].co = lattice[0]
-    verts[3].co = np.add(lattice[0], lattice[2])
+    verts[3].co = numpy.add(lattice[0], lattice[2])
     verts[4].co = lattice[1]
-    verts[5].co = np.add(lattice[1], lattice[2])
-    verts[6].co = np.add(lattice[0], lattice[1])
-    verts[7].co = np.sum(lattice, axis=0)
+    verts[5].co = numpy.add(lattice[1], lattice[2])
+    verts[6].co = numpy.add(lattice[0], lattice[1])
+    verts[7].co = numpy.sum(lattice, axis=0)
 
-    # Split edges, which requires the bmesh module
+    # There's an issue where each lattice edge isn't a perfect line. To fix
+    # this, we split the cube into separate lines and make sure each of those
+    # are "full curves" which is really just a cylinder.
+
+    # This is the easy want to do this with the UI but we get an error here...
     # bpy.ops.mesh.edge_split() # doesn't work because of context/poll check
-    import bmesh as bmesh
-
     lattice = bpy.data.objects[0].data  # regular bpy object
     bm = bmesh.new()  # create new bmesh
     bm.from_mesh(lattice)  # fill bmesh with data from bpy object
     bmesh.ops.split_edges(bm, edges=bm.edges)  # spit the edges on the mesh
     bm.to_mesh(lattice)  # write the result data back to the initial bpy object
 
+    # now fill each vector to a given size
     bpy.ops.object.convert(target="CURVE")
     bpy.context.object.data.fill_mode = "FULL"
     bpy.context.object.data.bevel_depth = 0.1
-    bpy.context.object.data.bevel_resolution = 0
     bpy.context.object.data.bevel_resolution = 3
     bpy.ops.object.shade_smooth()
 
-    # make lattice black
-    mat = bpy.data.materials.new(
-        name="Lattice"
-    )  # create material # can be grabbed later with bpy.data.materials['Test-Material']
-    mat.diffuse_color = (0, 0, 0, 1)  # make black
-    mat.specular_intensity = 0  # turn of specular
-    bpy.context.active_object.data.materials.append(
-        mat
-    )  # append material to selected objects
+    # Now we create a black material to color the lattice with
+    mat = bpy.data.materials.new(name="Lattice")
+    mat.diffuse_color = (0, 0, 0, 1)
+    mat.specular_intensity = 0
+    bpy.context.active_object.data.materials.append(mat)
 
-    # set lattice origin to geometry (so we can set camera to lattice center)
+    # -------------------------------------------------------------------------
+
+    # CENTERING ALL OBJECTS
+
+    # When we created all the objects above, the center of the scene is (0,0,0)
+    # for the cartesian coordinates, but it's better to have the viewpoint and
+    # object rotation about the center of the lattice. Therefore, we grab the
+    # center of the lattice, and use this location to translate all objects in
+    # the scene such that this is the new center.
     bpy.ops.object.origin_set(type="ORIGIN_GEOMETRY", center="MEDIAN")
     lattice_center = bpy.data.objects["Cube"].location.copy()
-    # bpy.data.objects['Cube'].location = (0,0,0) #bpy.context.object.location = (0,0,0)
     for obj in bpy.data.objects:
-        obj.location = np.subtract(obj.location, lattice_center)
+        obj.location = numpy.subtract(obj.location, lattice_center)
+
+    # -------------------------------------------------------------------------
+
+    # CONFIGURING THE REST OF THE SCENE
 
     # Camera
-    cam_data = bpy.data.cameras.new("MyCam")
+    cam_data = bpy.data.cameras.new(name="MyCam")
     cam_ob = bpy.data.objects.new(name="MyCam", object_data=cam_data)
     scene.collection.objects.link(cam_ob)  # instance the camera object in the scene
     scene.camera = cam_ob  # set the active camera
-    cam_ob.rotation_euler = np.radians((70, 0, 93))
+    cam_ob.rotation_euler = numpy.radians((70, 0, 93))
     cam_ob.location = (30, 2, 11)
     # cam_ob.data.type = 'ORTHO' # 'PERSP'
 
@@ -252,15 +274,19 @@ def example_function(lattice, sites_to_draw, save_path):
     light_data = bpy.data.lights.new("MyLight", "SUN")
     light_ob = bpy.data.objects.new(name="MyLight", object_data=light_data)
     scene.collection.objects.link(light_ob)
-    # set sun to move with camera
+    
+    # Set sun to move along with the camera. This is because we don't want 
+    # shadows changing in the viewport for crystal structures.
     light_ob.parent = cam_ob
     light_ob.location = (4, 50, 4)
-    light_ob.rotation_euler = np.radians((60, 10, 150))
+    light_ob.rotation_euler = numpy.radians((60, 10, 150))
 
-    # World
-    world = bpy.data.worlds.new("TESTWorld")
-    world.color = (1, 1, 1)  # blender 2.79 uses .ambient_color
+    # Background (aka the blender "World")
+    world = bpy.data.worlds.new(name="MyWorld")
+    world.color = (1, 1, 1)
     scene.world = world
+
+    # -------------------------------------------------------------------------
 
     ## Center all objects at the origin  # fails as-is. consider centering camera to lattice
     # bpy.ops.object.select_all(action='SELECT')
@@ -270,7 +296,7 @@ def example_function(lattice, sites_to_draw, save_path):
     # bpy.ops.object.select_all(action='SELECT')
     # bpy.ops.transform.resize(value=(1.29349, 1.29349, 1.29349))
 
-    # update view to all changes above
+    # update view to include all the changes we made above
     bpy.context.view_layer.update()
 
     # set verge3D settings
@@ -282,84 +308,41 @@ def example_function(lattice, sites_to_draw, save_path):
     # bpy.data.objects["MyCam"].data.v3d.orbit_min_distance = 15
     # bpy.data.objects["MyCam"].data.v3d.orbit_max_distance = 100
 
-    # save/export files
-    if save_path:
-        # save the *.blend file
-        bpy.ops.wm.save_as_mainfile(filepath=save_path + ".blend")
+    # now save this to a blender file
+    bpy.ops.wm.save_as_mainfile(filepath=filename)
 
-        # export for Verge3D
-        # bpy.ops.export_scene.v3d_gltf(filepath=save_path)
+    # export in the gltf 2.0 format (.glb file)
+    # bpy.ops.export_scene.gltf(filepath="example_filename.glb")
+
+    # export for Verge3D
+    # bpy.ops.export_scene.v3d_gltf(filepath=save_path)
 
 
 def main():
-    
-    print("HERE IN COMMAND")
-    
-    import sys  # to get command line args
-    import argparse  # to parse options for us and print a nice help message
 
-    # get the args passed to blender after "--", all of which are ignored by
-    # blender so scripts may receive their own arguments
-    argv = sys.argv
-    print(argv)
+    # get the arguments passed to blender after "--", all of which are ignored by
+    # blender so scripts may receive their own arguments.
+    arguments = sys.argv[sys.argv.index("--") + 1 :]
 
-    if "--" not in argv:
-        argv = []  # as if no args are passed
-    else:
-        argv = argv[argv.index("--") + 1 :]  # get all args after "--"
+    # To pull out the arguments passed to the script, we need to tell the parser
+    # what they will be in advance.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--lattice", dest="lattice")
+    parser.add_argument("--sites", dest="sites")
+    parser.add_argument("--save", dest="filename")
 
-    # When --help or no args are given, print this help
-    usage_text = (
-        "Run blender in background mode with this script:"
-        "  blender --background --python " + __file__ + " -- [options]"
+    # we can now pull out the arguments passed into the command
+    parsed_arguments = parser.parse_args(arguments)
+
+    # Run the function we defined above
+    make_structure_blend(
+        parsed_arguments.lattice,
+        parsed_arguments.sites,
+        parsed_arguments.filename,
     )
 
-    parser = argparse.ArgumentParser(description=usage_text)
 
-    # Example utility, add some text and renders or saves it (with options)
-    # Possible types are: string, int, long, choice, float and complex.
-    parser.add_argument(
-        "-l",
-        "--lattice",
-        dest="lattice",
-        type=str,
-        required=True,
-        help="The lattice matrix to draw (3x3 matrix to json dump)",
-    )
-
-    parser.add_argument(
-        "-s",
-        "--sites",
-        dest="sites_to_draw",
-        type=str,
-        required=True,
-        help="List of the sites to draw with each entry in format (element, ionic_radius, cart_coords)",
-    )
-
-    parser.add_argument(
-        "-S",
-        "--save",
-        dest="save_path",
-        metavar="FILE",
-        help="Save the generated file to the specified path",
-    )
-
-    args = parser.parse_args(argv)  # In this example we won't use the args
-
-    if not argv:
-        parser.print_help()
-        return
-
-    if not args.lattice or not args.sites_to_draw:
-        print("Error: --lattice and/or sites argument not given, aborting.")
-        parser.print_help()
-        return
-
-    # Run the example function
-    example_function(args.lattice, args.sites_to_draw, args.save_path)
-
-    print("batch job finished, exiting")
-
-
+# This is boiler plate code that calls the main function when this script is
+# ran with python directly.
 if __name__ == "__main__":
     main()

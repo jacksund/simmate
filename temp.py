@@ -135,3 +135,23 @@ structure = Structure.from_file("YFeO3.cif")
 from simmate.workflows.relaxation.mit import workflow
 workflow.run(structure=structure, directory=".", vasp_command="vasp_std > vasp.out")
 
+
+# --------------------------------------------------------------------------------------
+
+from pymatgen.ext.matproj import MPRester
+mpr = MPRester("2Tg7uUvaTAPHJQXl")
+
+# 1078631 # 1206889 # 2686 # 661 # 1228939
+mp_id = "mp-1078631"  # change this to your material of interest
+structure = mpr.get_structure_by_material_id(
+    mp_id, conventional_unit_cell=False
+)  # , conventional_unit_cell=True
+structure = structure.copy(sanitize=True)
+# structure.make_supercell(2)
+
+from simmate.visualization.structure.blender import make_blender_structure
+
+result = make_blender_structure(structure)
+print(result.stderr.decode("utf-8"))
+
+# --------------------------------------------------------------------------------------

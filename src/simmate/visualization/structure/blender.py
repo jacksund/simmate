@@ -9,15 +9,15 @@ import numpy
 
 from simmate.configuration.blender.setup import get_blender_command
 
-
-# You only need to call make_blender_structure here as it calls serialize_structure
+# NOTES for this file:
+# You only need to call make_blender_structure() here as it calls serialize_structure
 # within it.
 
 # load the base blender command for use in function calls below
 BLENDER_COMMAND = get_blender_command()
 
 
-def make_blender_structure(structure, filename="simmate_structure"):
+def make_blender_structure(structure, filename="simmate_structure.blend"):
 
     # This function simply serializes a pymatgen structure object to json
     # and then calls a blender script (make_structure.py) that uses this data
@@ -28,11 +28,16 @@ def make_blender_structure(structure, filename="simmate_structure"):
 
     # The location of the make_structure.py is in the same directory as this file
     executable_directory = os.path.dirname(__file__)
-    path_to_script = os.path.join(executable_directory, "make_structure.py")
-    
+    path_to_script = os.path.join(
+        executable_directory, "blender_scripts", "make_structure.py"
+    )
+
     # Now build all of the our serialized structure data and settings together
     # into the blender command that we will call via the command line
-    command = f'{BLENDER_COMMAND} --background --factory-startup --python {path_to_script} -- --sites="{sites}" --lattice="{lattice}" --save="{filename}"'
+    command = (
+        f"{BLENDER_COMMAND} --background --factory-startup --python {path_to_script} "
+        f'-- --sites="{sites}" --lattice="{lattice}" --save="{filename}"'
+    )
 
     # Now run the command
     result = subprocess.run(
@@ -40,7 +45,7 @@ def make_blender_structure(structure, filename="simmate_structure"):
         shell=True,  # to access commands in the path
         capture_output=True,  # capture any ouput + error logs
     )
-    
+
     return result
 
 
@@ -103,11 +108,12 @@ def serialize_structure_sites(structure):
                 shift_vector = numpy.add(shift_vector, lattice_matrix[x])
             new_coords = site.coords + shift_vector
             sites_to_draw.append((element, radius, new_coords.tolist()))
+
         # We now repeat the above process but now with sites that have coordinate
         # that are close to 1. The key difference here is that we subract 1 instead
         # of adding 1 like we did above. e.g (1, 0.5, 0.5) becomes (0, 0.5, 0.5)
         zero_elements = [
-            i for i, x in enumerate(site.frac_coords) if numpy.isclose(x, 0, atol=0.05)
+            i for i, x in enumerate(site.frac_coords) if numpy.isclose(x, 1, atol=0.05)
         ]
         permutatons = [
             combination
@@ -117,9 +123,10 @@ def serialize_structure_sites(structure):
         for permutaton in permutatons:
             shift_vector = numpy.zeros(3)
             for x in permutaton:
-                shift_vector = numpy.add(shift_vector, lattice_matrix[x])
+                shift_vector = numpy.subtract(shift_vector, lattice_matrix[x])
             new_coords = site.coords + shift_vector
             sites_to_draw.append((element, radius, new_coords.tolist()))
+
     ## Add bonded sites outside of unticell
     ### Two issues exist for this code:
     #### 1. doesn't find bonded sites to atoms that were duplicated along edges
@@ -132,15 +139,3 @@ def serialize_structure_sites(structure):
     #            sites_to_draw.append(connected_site.site.coords)
 
     return sites_to_draw
-
-
-# from pymatgen.ext.matproj import MPRester
-# mpr = MPRester("2Tg7uUvaTAPHJQXl")
-
-# # 1078631 # 1206889 # 2686 # 661 # 1228939
-# mp_id = "mp-1078631"  # change this to your material of interest
-# structure = mpr.get_structure_by_material_id(
-#     mp_id, conventional_unit_cell=False
-# )  # , conventional_unit_cell=True
-# structure = structure.copy(sanitize=True)
-# # structure.make_supercell(2)
