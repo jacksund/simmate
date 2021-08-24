@@ -63,9 +63,8 @@ def setup_cluster(nworkers=8):
         cores=1,
         processes=1,
         memory="50GB",
+        # This script ensures we have django configured for each worker
         extra=["--preload simmate.configuration.dask.init_django_worker"],
-        # BUG: dask-jobqueue doesn't support our preferred kwargs format...
-        #   {"preload": "simmate.configuration.dask.init_django_worker"}
         #
         #
         # Slurm Settings

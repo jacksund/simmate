@@ -4,6 +4,7 @@ import click
 
 from simmate.command_line.database import database
 from simmate.command_line.workflows import workflows
+from simmate.command_line.cluster import cluster
 
 
 @click.group()
@@ -25,3 +26,4 @@ def simmate():
 # them to our base "simmate" command here.
 simmate.add_command(database)
 simmate.add_command(workflows)
+simmate.add_command(cluster)

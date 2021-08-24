@@ -50,6 +50,7 @@ def update():
 @database.command()
 @click.option(
     "--filename",
+    "-f",
     default="database_dump.json",
     help="the file to write the all the JSON data to",
 )
@@ -72,6 +73,7 @@ def dumpdata(filename):
 @database.command()
 @click.option(
     "--filename",
+    "-f",
     default="database_dump.json",
     help="the file to load the all the JSON data from",
 )
