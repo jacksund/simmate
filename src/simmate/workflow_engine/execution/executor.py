@@ -7,8 +7,8 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from prefect.executors.base import Executor  # OPTIMIZE: prefect is slow AF
 
 from simmate.configuration.django import setup_full  # ensures setup
-from simmate.workflows.core.execution.models import WorkItem
-from simmate.workflows.core.execution.future import DjangoFuture
+from simmate.workflow_engine.execution.models import WorkItem
+from simmate.workflow_engine.execution.future import DjangoFuture
 
 # This class is modeled after the following...
 # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/thread.py

@@ -4,7 +4,7 @@ from simmate.configuration.django import reset_database
 
 reset_database()
 
-from simmate.workflows.core.execution.executor import DjangoExecutor
+from simmate.workflow_engine.execution.executor import DjangoExecutor
 
 executor = DjangoExecutor()
 
@@ -23,7 +23,7 @@ def test():
 
 # ----------------------------------------------------------------------------
 
-from simmate.workflows.core.execution.worker import DjangoWorker
+from simmate.workflow_engine.execution.worker import DjangoWorker
 
 worker = DjangoWorker(waittime_on_empty_queue=1)  # nitems_max=1
 worker.start()

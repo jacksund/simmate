@@ -6,7 +6,7 @@ import os
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
-from simmate.workflows.core.tasks.supervisedstagedtask import (
+from simmate.workflow_engine.tasks.supervisedstagedtask import (
     SupervisedStagedShellTask as SSSTask,
 )
 

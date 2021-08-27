@@ -4,7 +4,7 @@ import os
 
 from pymatgen.io.vasp.outputs import Vasprun
 
-from simmate.workflows.core.tasks.errorhandler import ErrorHandler
+from simmate.workflow_engine.tasks.errorhandler import ErrorHandler
 from simmate.calculators.vasp.inputs.incar import Incar
 
 

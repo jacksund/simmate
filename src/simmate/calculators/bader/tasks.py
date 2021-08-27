@@ -4,8 +4,8 @@ import os
 
 from prefect.utilities.tasks import defaults_from_attrs
 
-from simmate.workflows.core.tasks.shelltask import ShellTask
-from simmate.workflows.core.tasks.stagedshelltask import StagedShellTask
+from simmate.workflow_engine.tasks.shelltask import ShellTask
+from simmate.workflow_engine.tasks.stagedshelltask import StagedShellTask
 
 from simmate.calculators.bader.io.outputs.acf import parse_ACF
 from pymatgen.io.vasp.outputs import Chgcar

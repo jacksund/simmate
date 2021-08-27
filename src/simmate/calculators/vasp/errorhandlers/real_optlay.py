@@ -5,7 +5,7 @@ import json
 
 from pymatgen.core.structure import Structure
 
-from simmate.workflows.core.tasks.errorhandler import ErrorHandler
+from simmate.workflow_engine.tasks.errorhandler import ErrorHandler
 from simmate.calculators.vasp.inputs.incar import Incar
 
 

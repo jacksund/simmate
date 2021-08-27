@@ -23,9 +23,9 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from simmate.workflows.core.tasks.shelltask import ShellTask
-from simmate.workflows.core.tasks.errorhandler import ErrorHandler
-from simmate.workflows.core.tasks.supervisedstagedtask import (
+from simmate.workflow_engine.tasks.shelltask import ShellTask
+from simmate.workflow_engine.tasks.errorhandler import ErrorHandler
+from simmate.workflow_engine.tasks.supervisedstagedtask import (
     SupervisedStagedShellTask as SSSTask,
     NonZeroExitError,
     MaxCorrectionsError,

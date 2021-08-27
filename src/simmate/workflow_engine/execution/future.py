@@ -8,7 +8,7 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 # from concurrent.futures import Future # No need to inherit at the moment
 
 from simmate.configuration.django import setup_full  # ensures setup
-from simmate.workflows.core.execution.models import WorkItem
+from simmate.workflow_engine.execution.models import WorkItem
 
 # class based on...
 # https://docs.python.org/3/library/concurrent.futures.html

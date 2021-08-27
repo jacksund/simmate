@@ -9,10 +9,10 @@ from subprocess import Popen
 
 from custodian.custodian import Custodian, Job, ErrorHandler
 
-from simmate.workflows.core.tasks.supervisedstagedtask import (
+from simmate.workflow_engine.tasks.supervisedstagedtask import (
     SupervisedStagedShellTask as SSSTask,
 )
-from simmate.workflows.core.tasks.errorhandler import ErrorHandler as ErrorHandlerS
+from simmate.workflow_engine.tasks.errorhandler import ErrorHandler as ErrorHandlerS
 
 import pandas
 

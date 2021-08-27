@@ -4,7 +4,7 @@ import os
 
 from simmate.calculators.vasp.inputs.incar import Incar
 from simmate.calculators.vasp.outputs.oszicar import Oszicar
-from simmate.workflows.core.tasks.errorhandler import ErrorHandler
+from simmate.workflow_engine.tasks.errorhandler import ErrorHandler
 
 
 class PositiveEnergyErrorHandler(ErrorHandler):
