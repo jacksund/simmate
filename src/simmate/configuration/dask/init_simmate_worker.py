@@ -6,7 +6,7 @@ a worker is started -- rather than have each task connect separately.
 
 You can set this up with...
     from dask.distributed import Client
-    client = Client(preload="simmate.configuration.dask.init_django_worker")
+    client = Client(preload="simmate.configuration.dask.init_simmate_worker")
 """
 
 # First setup django settings for simmate
@@ -76,6 +76,6 @@ ContentType.objects.count()
 # OR...
 # from dask.distributed import Client
 # client = Client(cluster.scheduler.address)
-# from simmate.configuration.dask.init_django_worker import DjangoPlugin
+# from simmate.configuration.dask.init_simmate_worker import DjangoPlugin
 # plugin = DjangoPlugin()
 # client.register_worker_plugin(plugin)

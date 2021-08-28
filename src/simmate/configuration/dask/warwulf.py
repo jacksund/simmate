@@ -64,7 +64,7 @@ def setup_cluster(nworkers=8):
         processes=1,
         memory="50GB",
         # This script ensures we have django configured for each worker
-        extra=["--preload simmate.configuration.dask.init_django_worker"],
+        extra=["--preload simmate.configuration.dask.init_simmate_worker"],
         #
         #
         # Slurm Settings

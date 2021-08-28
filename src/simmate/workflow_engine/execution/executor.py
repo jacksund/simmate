@@ -7,7 +7,7 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from prefect.executors.base import Executor  # OPTIMIZE: prefect is slow AF
 
 from simmate.configuration.django import setup_full  # ensures setup
-from simmate.workflow_engine.execution.models import WorkItem
+from simmate.workflow_engine.execution.database import WorkItem
 from simmate.workflow_engine.execution.future import DjangoFuture
 
 # This class is modeled after the following...
@@ -17,10 +17,10 @@ from simmate.workflow_engine.execution.future import DjangoFuture
 # I don't need the Executor parent class unless I'm using this with Prefect
 
 
-class DjangoExecutor(Executor):
+class SimmateExecutor(Executor):
 
     """
-    Sets up connection to the queue database. Unlike normal executors,
+    Sets up a connection to the queue database. Unlike normal executors,
     this does not set up any workers -- you must launch Worker instances
     elsewhere. It's primary role is to connect to the queue database
     and generate futures for workers. Therefore, think of the Executor

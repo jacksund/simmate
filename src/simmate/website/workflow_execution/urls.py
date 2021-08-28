@@ -3,5 +3,5 @@
 from django.urls import path
 from . import views
 
-app_name = "execution"
+app_name = "workflow_execution"
 urlpatterns = []

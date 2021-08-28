@@ -4,4 +4,4 @@
 # they are located at. I do this based on the directions given by:
 # https://docs.djangoproject.com/en/3.1/topics/db/models/#organizing-models-in-a-package
 
-from simmate.workflow_engine.execution.models import WorkItem
+from simmate.workflow_engine.execution.database import WorkItem

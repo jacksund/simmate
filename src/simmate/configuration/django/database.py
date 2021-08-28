@@ -9,15 +9,21 @@ from simmate.configuration.django import setup_full  # sets database connection
 from simmate.configuration.django.settings import DJANGO_DIRECTORY, DATABASES
 from simmate.database.symmetry import Spacegroup
 
+APPS_TO_MIGRATE = [
+    "local_calculations",
+    "third_parties",
+    "workflow_execution",
+]
 
-def update_database(apps_to_migrate=["local_calculations", "third_parties"]):
+
+def update_database(apps_to_migrate=APPS_TO_MIGRATE):
 
     # execute the following commands to update the database
     call_command("makemigrations", *apps_to_migrate)
     call_command("migrate")
 
 
-def reset_database(apps_to_migrate=["local_calculations", "third_parties"]):
+def reset_database(apps_to_migrate=APPS_TO_MIGRATE):
     # BUG: this is only for SQLite3
 
     # Apps to init.

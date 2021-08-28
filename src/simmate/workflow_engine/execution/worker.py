@@ -8,7 +8,7 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from django.db import transaction
 
 from simmate.configuration.django import setup_full  # ensures setup
-from simmate.workflow_engine.execution.models import WorkItem
+from simmate.workflow_engine.execution.database import WorkItem
 
 # In the future, I might want this worker to be a local dask cluster that has
 # two threads going. One thread will update the queue database with a "heartbeat" to
@@ -29,7 +29,7 @@ HEADER_ART = r"""
 """
 
 
-class DjangoWorker:
+class SimmateWorker:
     def __init__(
         self,
         # limit of tasks and lifetime of the worker
@@ -79,14 +79,14 @@ class DjangoWorker:
             # if we've hit the limit.
             if (time.time() - time_start) > self.timeout:
                 # TODO - check wait_on_timeout if running in parallel.
-                raise TimeoutError("The time-limit for this worker has been hit")
+                print("The time-limit for this worker has been hit.")
+                return
 
             # check the number of jobs completed so far, and exit if we hit
             # the limit
             if ntasks_finished >= self.nitems_max:
-                raise MaxWorkItemsError(
-                    "Maxium number of WorkItems hit for this worker"
-                )
+                print("Maxium number of WorkItems hit for this worker.")
+                return
 
             # check the length of the queue and while it is empty, we want to
             # loop. The exception of looping endlessly is if we want the worker
@@ -101,16 +101,15 @@ class DjangoWorker:
                     # after we just waited, let's check the queue size again
                     if self.queue_size() == 0:
                         # if it's still empty, we should close the worker
-                        raise EmptyQueueError(
-                            "The queue is empty so the worker has been closed"
-                        )
+                        print("The queue is empty so the worker has been closed.")
+                        return
 
             # If we've made it this far, we're ready to grab a new WorkItem
             # and run it!
             # Query for PENDING WorkItems, lock it for editting, and update
             # the status to RUNNING
             workitem = WorkItem.objects.select_for_update().filter(status="P").first()
-
+            
             # our lock exists only within this transation
             with transaction.atomic():
                 # update the status to running before starting it so no other
@@ -118,7 +117,10 @@ class DjangoWorker:
                 workitem.status = "R"
                 # TODO -- indicate that the WorkItem is with this Worker (relationship)
                 workitem.save()
-
+            
+            # Print out the job ID that is being ran for the user to see
+            print(f"Running WorkItem with id {workitem.id}.")
+            
             # now let's unpickle the WorkItem components
             fxn = cloudpickle.loads(workitem.fxn)
             args = cloudpickle.loads(workitem.args)
@@ -152,6 +154,9 @@ class DjangoWorker:
 
             # mark down that we've completed one WorkItem
             ntasks_finished += 1
+            
+            # Print out the job ID that was just finished for the user to see.
+            print(f"Completed WorkItem.")
 
     def queue_size(self):
         """
@@ -163,11 +168,3 @@ class DjangoWorker:
         #   ...filter(Q(status="P") | Q(status="R"))
         queue_size = WorkItem.objects.filter(status="P").count()
         return queue_size
-
-
-class MaxWorkItemsError(Exception):
-    pass
-
-
-class EmptyQueueError(Exception):
-    pass

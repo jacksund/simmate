@@ -71,4 +71,4 @@ class WorkItem(models.Model):
     # worker_id = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
-        app_label = "execution"
+        app_label = "workflow_execution"

@@ -139,7 +139,7 @@ INSTALLED_APPS = [
     "simmate.website.accounts.apps.AccountsConfig",
     "simmate.website.third_parties.apps.ThirdPartyConfig",
     "simmate.website.local_calculations.apps.LocalCalculationsConfig",
-    # "simmate.website.execution.apps.ExecutionConfig",  # using Prefect instead
+    "simmate.website.workflow_execution.apps.WorkflowExecutionConfig",
     #
     # These are built-in django apps that we use for extra features
     "django.contrib.admin",
