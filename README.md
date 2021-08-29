@@ -88,7 +88,7 @@ structures = MaterialsProjectStructure.objects.filter(
 ```
 
 3. _**Common Task Utilities and Toolbox.**_ A lot of times in research, a new method is needed to analyze a structure, so a prebuilt workflow won't exist for you yet. Here, you'll need common functions ready to go (such as grabbing the volume of a crystal or running symmetry analysis). Our core functions and classes are largely inspired from the [PyMatGen](https://github.com/materialsproject/pymatgen) and [ASE](https://gitlab.com/ase/ase) codes, where we decided to write our own version for speed, readability, and usability:
-> :warning: We are still dependent on pymatgen at the moment, but our toolkit replacement is already showing awesome speed ups! Our reliance on pymatgen will fade over time, but it is important to acknowledge how the pymatgen software has helped in getting our project off the ground. So thank you to the pymatgen community!
+> :warning: We are still dependent on pymatgen at the moment, but our toolkit replacement is already showing awesome speed ups! Our reliance on pymatgen will fade over time, but it is important to acknowledge how their software has helped in getting our project off the ground. So thank you to the pymatgen community!
 ```python
 # Load the structure file you'd like to use
 from simmate.toolkit import Structure
