@@ -14,6 +14,7 @@
 - **toolkit** = "core" functions for Simmate, ranging from pulling out symmetry to transforming a crystal lattice
 - **visualization** = visualizing structures, 3D data, and simple plots
 - **website** = runs the simmate.org website
+- **workflow_engine** = tools and utilities that help submit calculations as well as handle errors
 - **workflows** = common analyses used in materials chemistry
 
 
