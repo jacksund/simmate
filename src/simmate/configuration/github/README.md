@@ -27,6 +27,7 @@ https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-
 3. You now use this token as your password when running git commands
 
 
-To remove all changes --> git restore .
+To remove all changes...
+    git restore .
 
 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

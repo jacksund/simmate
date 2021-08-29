@@ -15,39 +15,26 @@ HEADER_ART = r"""
 
 """
 
-# BUG: for scaling Dask to many workers, I initially ran into issues of "too many
-# files open". This is addressed in Dask's FAQ:
-#   https://distributed.dask.org/en/latest/faq.html#too-many-open-file-descriptors
-# To summarize the fix...
-#   (1) check the current soft limit (soft = no sudo permissions) for  files
-#       ulimit -Sn
-#   (2) to increase the softlimit, edit the limits.conf file and add one line
-#       sudo nano /etc/security/limits.conf
-#           # add this line below
-#           * soft nofile 10240
-#   (3) close and reopen the terminal
-#   (4) confirm we changed the limit
-#       ulimit -Sn
-#
-# This may also be a leak of sockets being left open by Dask:
-#   (1) get the PID of the running process with
-#       ps -aef | grep python
-#   (2) look at the fd's (file opened) by the given process
-#       cd /proc/<PID>/fd; ls -l
-#   (3) count the number of files opened by the given process
-#       ls /proc/<PID>/fd/ | wc -l
-#   (4) view overall stats with
-#       cat /proc/<PID>/net/sockstat
-#   (5) another option to list open files is
-#       lsof -p <PID> | wc -l
-#
-# Whenever I see a heartbeat fail, I also see a massive jump in the number of
-# files opened by the process. I believe zombie prefect runs are creating
-# a socket leak.
-#
-
 # nworkers_min=5, nworkers_max=25 BUG: adaptive deploy removed for now
-def setup_cluster(nworkers=8):
+def setup_cluster(
+    nworkers=8,
+    cpus_per_worker=18,
+    memory_per_worker="50GB",
+    walltime_per_worker="300-00:00:00",
+    create_worker_directories=True,
+    extra_worker_commands=None,  # give as a list. ex: ["module load vasp", ...]
+):
+
+    # First let's see what commands each worker should run before starting any
+    # jobs. If none were provided, we start with an empty list
+    extra_worker_commands = extra_worker_commands if extra_worker_commands else []
+    # If the we want a separate working directory for each worker, then we add
+    # one extra command that creates it and moves in to the new directory.
+    # The folder will be named after the SLURM job id to ensure they are all
+    # unique and can be tracked.
+    extra_worker_commands.append(
+        "mkdir daskworker-$SLURM_JOBID; cd daskworker-$SLURM_JOBID;"
+    )
 
     # Consider moving the configuration settings to ~/.config/dask/jobqueue.yaml
     # NOTE: I request SLURM settings much higher than Dask worker settings. This
@@ -62,36 +49,26 @@ def setup_cluster(nworkers=8):
         local_directory="~",  # moves dask-worker-space off the shared drive for speed
         cores=1,
         processes=1,
-        memory="50GB",
+        memory=memory_per_worker,
         # This script ensures we have django configured for each worker
-        extra=["--preload simmate.configuration.dask.init_simmate_worker"],
+        extra=["--preload simmate.configuration.dask.connect_to_database"],
         #
         #
         # Slurm Settings
-        job_cpu=18,  # --cpus-per-task, -c
-        job_mem="50GB",  # --mem
+        job_cpu=cpus_per_worker,  # --cpus-per-task, -c
+        job_mem=memory_per_worker,  # --mem
         job_extra=[
             "--output=slurm-%j.out",
             "-N 1",  # --nodes
             # This overwrites Dask's default. Confirm this with "echo $SLURM_NTASKS"
             # '-n 1' # --ntasks
         ],
-        walltime="300-00:00:00",  # --time, -t
+        walltime=walltime_per_worker,  # --time, -t
         queue="p1",  # --partition, -p
         #
         #
         # Commands to run before staring dask-worker
-        env_extra=[
-            # This makes a folder named after the SLURM job id and moves into it.
-            # I need this because of Custodian -- I give each worker its own directory.
-            "mkdir daskworker-$SLURM_JOBID; cd daskworker-$SLURM_JOBID;",
-            # Load modules
-            # module load intel
-            # module load impi
-            # module load vasp
-            # set python env
-            # conda activate jacks_env
-        ],
+        env_extra=extra_worker_commands,
         #
         #
         # Extras
@@ -124,9 +101,4 @@ def setup_cluster(nworkers=8):
     print("Workers are submitted to SLURM with the following submit.sh...\n")
     print(cluster.job_script())
 
-    # connect to the cluster if you'd like to start submitting jobs
-    # from dask.distributed import Client
-    # client = Client(cluster)
-    # client.submit(fxn, *args, **kwargs)
-
-    return cluster
+    return cluster.scheduler.address
