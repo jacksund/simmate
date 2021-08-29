@@ -17,6 +17,7 @@ class MITRelaxationInitialStructure(Structure):
 
 
 class MITRelaxationFinalStructure(Structure):
+    
     class Meta:
         app_label = "local_calculations"
 
@@ -28,20 +29,22 @@ class MITRelaxation(Calculation):
 
     """Base Info"""
 
-    # Extra data by JARVIS's calculations
+    # Informated extracted from the calculation
     final_energy = models.FloatField(blank=True, null=True)
-
+    
+    # TODO:
+    # energy_per_atom = models.FloatField(blank=True, null=True)
+    # bandgap = models.FloatField(blank=True, null=True)
+    # forces = models.JSONField(blank=True, null=True)
+    # stress = models.JSONField(blank=True, null=True)
+    
     """ Relationships """
     # Map to the input and output structures for the calc
     structure_initial = models.OneToOneField(
-        MITRelaxationInitialStructure,
-        on_delete=models.CASCADE,
+        MITRelaxationInitialStructure, on_delete=models.CASCADE,
     )
     structure_final = models.OneToOneField(
-        MITRelaxationFinalStructure,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
+        MITRelaxationFinalStructure, on_delete=models.CASCADE, blank=True, null=True,
     )
 
     class Meta:

@@ -57,7 +57,7 @@ class Calculation(models.Model):
     # or crystal surface. In such cases, you'll add a relationship like this:
     #
     #   structure = models.ForeignKey(
-    #       Structure,
+    #       ExampleStructureModel,
     #       on_delete=models.CASCADE,
     #   )
     #
