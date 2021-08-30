@@ -7,11 +7,11 @@
 <p align="center">
 <!-- Conda-forge OS support -->
 <a href=https://anaconda.org/conda-forge/pymatgen>
-    <img src="https://img.shields.io/badge/Operating Systems-Windows | Mac | Linux-success">
+    <img src="https://img.shields.io/badge/Operating Systems-Windows | Mac | Linux-043344">
 </a>
 <!-- Pricing statement for begineers that are new to github -->
 <a href=https://anaconda.org/conda-forge/pymatgen>
-    <img src="https://img.shields.io/badge/-Free and Open Source-success">
+    <img src="https://img.shields.io/badge/-Free and Open Source-043344">
 </a>
    
 <!-- 
@@ -21,7 +21,7 @@ Read here for info on markdown, badges, and more:
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 [Shields Badges](https://shields.io/)
 -->
-> :warning: We are still at the early stages for building! The organization of our code is changing frequently as we figure out what works best for users. So many features and tutorials aren't ready yet... If you'd like to be notified when everything is ready, send me an email (jacksund@live.unc.edu). We anticipate a beta version will be publicly available in the first few months of 2022. 
+> :warning: We are still at the early stages for building! The organization of our code changes frequently -- so many features and tutorials aren't ready yet... If you'd like to be notified when Simmate is ready for public use, send me an email (jacksund@live.unc.edu). We anticipate a beta version will be publicly available in the first few months of 2022. 
    
 ## Welcome!
 
