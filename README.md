@@ -21,7 +21,9 @@ Read here for info on markdown, badges, and more:
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 [Shields Badges](https://shields.io/)
 -->
-> :warning: We are still at the early stages for building! The organization of our code changes frequently -- so many features and tutorials aren't ready yet... If you'd like to be notified when Simmate is ready for public use, send me an email (jacksund@live.unc.edu). We anticipate a beta version will be publicly available in the first few months of 2022. 
+> :warning: We are still at the early stages for building! The organization of our code changes frequently -- so many features and tutorials aren't ready yet... For this reason, we've also limited our website access to just team members. 
+
+> :warning: If you'd like to be notified when Simmate is ready for public use or even help test out our site/code, send me an email (jacksund@live.unc.edu). We anticipate a stable version will be publicly available in the first few months of 2022. 
    
 ## Welcome!
 
