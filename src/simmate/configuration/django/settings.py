@@ -186,6 +186,8 @@ if os.path.exists(APPLICATIONS_YAML):
 
 # --------------------------------------------------------------------------------------
 
+# This sets the default field for primary keys in django models
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

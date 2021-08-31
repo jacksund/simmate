@@ -5,6 +5,7 @@ import click
 from simmate.command_line.database import database
 from simmate.command_line.workflows import workflows
 from simmate.command_line.workflow_engine import workflow_engine
+from simmate.command_line.run_server import run_server
 
 
 @click.group()
@@ -27,3 +28,4 @@ def simmate():
 simmate.add_command(database)
 simmate.add_command(workflows)
 simmate.add_command(workflow_engine)
+simmate.add_command(run_server)
