@@ -48,7 +48,7 @@ If you're confortable with Python, you can install Simmate with...
 ```
 conda install -c conda-forge simmate
 ```
-
+> :warning: pip and conda installs are not ready yet. only dev installs work at this time
 
 ## A Sneak-Peak of Features (for experts)
 
