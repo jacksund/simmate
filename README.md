@@ -54,7 +54,7 @@ conda install -c conda-forge simmate
 
 Again, take a look at [our main website](https://simmate.org/) if you'd like to see the end-result of what Simmate has to offer. This section showcases some features of downloading and using Simmate yourself.
 
-1. _**Prebuilt Workflows and Easy Orchestration.**_ All of the most common material properties have workflows ready to go. These range from simple XRD pattern predictions to intensive elastic calculations. Simmate also builds off of [Prefect](https://github.com/PrefectHQ/prefect) for orchestrating and managing workflows. So it's up to you whether to run jobs via an advanced user-interface (shown below) or in custom scripts:
+1. _**Prebuilt Workflows and Easy Orchestration.**_ All of the most common material properties have workflows ready to go. These range from simple XRD pattern predictions to intensive elastic calculations. Simmate also builds off of [Prefect](https://github.com/PrefectHQ/prefect) for orchestrating and managing workflows. So it's up to you whether to run jobs via (i) an advanced user-interface, (ii) the command-line, or (iii) in custom python scripts:
 
 <!-- This is an image of the Prefect UI -->
 <p align="center" style="margin-bottom:40px;">
@@ -62,6 +62,15 @@ Again, take a look at [our main website](https://simmate.org/) if you'd like to 
 </p>
 
 ```python
+# The command line let's you quickly run a workflow
+# from a structure file
+simmate workflows relaxation NaCl.cif
+```
+
+```python
+# Python let's you run workflows within scripts and
+# it also enables advanced setting configurations
+
 # Load the structure file you'd like to use
 from simmate.toolkit import Structure
 my_structure = Structure.from_file('NaCl.cif')
@@ -108,7 +117,7 @@ structure.get_oxidation_states()
 ```
 
 
-4. _**Ease of Scalability.**_ At the beginning of a project, you may want to write and run code on a single computer and single core. But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations. At the extreme, some projects require thousands of computers across numerous locations, including university clusters (using SLURM or PBS) and cloud computing (using Kubernetes and Docker). Simmate can meet all of these needs with ease:
+4. _**Ease of Scalability.**_ At the beginning of a project, you may want to write and run code on a single computer and single core. But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations. At the extreme, some projects require thousands of computers across numerous locations, including university clusters (using SLURM or PBS) and cloud computing (using Kubernetes and Docker). Simmate can meet all of these needs thanks to integration with [Dask](https://github.com/dask/dask) and [Prefect](https://github.com/PrefectHQ/prefect):
 ```python
 # To run the tasks of a single workflow in parallel, use Dask.
 from prefect.executors import DaskExecutor
