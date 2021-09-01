@@ -44,7 +44,7 @@ class UnconvergedErrorHandler(ErrorHandler):
 
         # if the xml fails to load or if it converged successfully, then we
         # don't have this error.
-        return True
+        return False
 
     def correct(self, error, directory):
 
