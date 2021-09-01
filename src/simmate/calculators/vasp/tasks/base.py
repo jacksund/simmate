@@ -111,13 +111,9 @@ class VaspTask(SSSTask):
         function for this vasp module down the road.
         """
 
-        # load the xml file and only parse the bare minimum
+        # load the xml file and all of the vasprun data
         vasprun = Vasprun(
             filename=os.path.join(directory, "vasprun.xml"),
-            parse_dos=False,
-            parse_eigen=False,
-            parse_projected_eigen=False,
-            parse_potcar_file=False,
             exception_on_bad_xml=True,
         )
 
