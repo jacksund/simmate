@@ -25,6 +25,8 @@ def update_database(apps_to_migrate=APPS_TO_MIGRATE):
 
 def reset_database(apps_to_migrate=APPS_TO_MIGRATE):
     # BUG: this is only for SQLite3
+    # Consider wrapping the django-extensions function for this instead:
+    #   https://django-extensions.readthedocs.io/en/latest/reset_db.html
 
     # Apps to init.
     # !!! In the future, I should do a more robust search, rather than hardcode here.
@@ -72,3 +74,8 @@ def load_database_from_json(filename="database_dump.json"):
     # set. Simply ignore this table and everything works. The contenttypes is
     # simply a table that lists all of our different models.
     call_command("loaddata", filename, exclude=["contenttypes"])
+
+
+# TODO: add a method that makes an image of all the available tables. The current
+# command to do this with django-extensions is...
+#   python manage.py graph_models -a -o image_of_models.png

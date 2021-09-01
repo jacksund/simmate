@@ -21,8 +21,7 @@ from simmate.calculators.vasp.errorhandlers.all import (
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.relaxation.mit import (
-    MITRelaxationInitialStructure,
-    MITRelaxationFinalStructure,
+    MITRelaxationStructure,
     MITRelaxation,
 )
 
@@ -94,14 +93,8 @@ class MITRelaxationTask(VaspTask):
         # The type of smearing we use depends on if we have a metal, semiconductor,
         # or insulator. So we need to decide this using a keyword modifier.
         multiple_keywords__smart_ismear={
-            "metal": dict(
-                ISMEAR=2,
-                SIGMA=0.2,
-            ),
-            "non-metal": dict(
-                ISMEAR=-5,
-                SIGMA=0.05,
-            ),
+            "metal": dict(ISMEAR=2, SIGMA=0.2,),
+            "non-metal": dict(ISMEAR=-5, SIGMA=0.05,),
         },
         # We run LDA+U for certain compositions. This is a complex configuration
         # so be sure to read the "__smart_ldau" modifier for more information.
@@ -145,10 +138,7 @@ class MITRelaxationTask(VaspTask):
                     "V": 2,
                     "W": 2,
                 },
-                "S": {
-                    "Fe": 2,
-                    "Mn": 2.5,
-                },
+                "S": {"Fe": 2, "Mn": 2.5,},
             },
             LDAUU={
                 "F": {
@@ -181,10 +171,7 @@ class MITRelaxationTask(VaspTask):
                     "V": 3.1,
                     "W": 4.0,
                 },
-                "S": {
-                    "Fe": 1.9,
-                    "Mn": 2.5,
-                },
+                "S": {"Fe": 1.9, "Mn": 2.5,},
             },
         ),
     )
@@ -213,18 +200,18 @@ relax_structure = MITRelaxationTask()
 @task
 def save_input(structure):
 
-    # save the intial structure to the database
-    structure_initial = MITRelaxationInitialStructure.from_pymatgen(structure)
-    structure_initial.save()
+    # initialize the MITRelaxation with the Prefect run info
+    calculation = MITRelaxation.from_prefect_context(context)
+    calculation.save()
 
-    # now initialize the Calculation with the attached initial_structure
-    # and the Prefect run info
-    calculation = MITRelaxation(
-        prefect_flow_run_name=context.flow_run_name,
-        prefect_flow_run_id=context.flow_run_id,
-        prefect_flow_run_version=context.get("flow_run_version"),
-        structure_initial=structure_initial,
+    # save the intial structure to the database and link it to the calculation
+    structure_start = MITRelaxationStructure.from_pymatgen(
+        structure, ionic_step_number=0, relaxation=calculation,
     )
+    structure_start.save()
+
+    # and make sure this is listed as the starting structure for our calculation too.
+    calculation.structure_start = structure_start
     calculation.save()
 
     return calculation.id
@@ -236,19 +223,13 @@ def save_input(structure):
 @task
 def save_results(result_and_corrections, calculation_id):
 
-    # for now the results are just the final structure and energy
-    (structure, energy), corrections = result_and_corrections
-
-    # save the intial structure to the database
-    structure_final = MITRelaxationFinalStructure.from_pymatgen(structure)
-    structure_final.save()
+    # split our results and corrections (which are give as a tuple) into
+    # separate variables
+    vasprun, corrections = result_and_corrections
 
     # now grab our calculation from before and update it with our results
     calculation = MITRelaxation.objects.get(id=calculation_id)
-    calculation.corrections = corrections
-    calculation.structure_final = structure_final
-    calculation.final_energy = energy
-    calculation.save()
+    calculation.update_from_vasp_run(vasprun, MITRelaxationStructure)
 
     return calculation.id
 
@@ -269,9 +250,7 @@ with Flow("MIT Relaxation") as workflow:
 
     # Now run the calculation
     result_and_corrections = relax_structure(
-        structure=structure,
-        directory=directory,
-        command=vasp_command,
+        structure=structure, directory=directory, command=vasp_command,
     )
 
     # pass these results and corrections into our final task which saves

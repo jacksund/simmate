@@ -2,22 +2,34 @@
 
 from django.db import models
 
-from simmate.database.structure import Structure
-from simmate.database.calculation import Calculation
+from simmate.database.local_calculations.relaxation.base import (
+    IonicStepStructure,
+    Relaxation,
+)
 
 
 # --------------------------------------------------------------------------------------
 
-# Initial and Final Structure of the calculation get their own table
+# All ionic steps of relaxations are stored in the same table. This means the
+# start structure, end structure, and those structure in-between are stored
+# together here.
+# You can limit searches to start structures with...
+# TODO
+# and then final structures to...
+# TODO
 
 
-class MITRelaxationInitialStructure(Structure):
-    class Meta:
-        app_label = "local_calculations"
+class MITRelaxationStructure(IonicStepStructure):
 
+    # All structures in this table come from relaxation calculations, where
+    # there can be many structures (one for each ionic steps) linked to a
+    # single relaxation
+    relaxation = models.ForeignKey(
+        "MITRelaxation",  # in quotes becuase this is defined below
+        on_delete=models.CASCADE,
+        related_name="structures",
+    )
 
-class MITRelaxationFinalStructure(Structure):
-    
     class Meta:
         app_label = "local_calculations"
 
@@ -25,27 +37,35 @@ class MITRelaxationFinalStructure(Structure):
 # --------------------------------------------------------------------------------------
 
 
-class MITRelaxation(Calculation):
+class MITRelaxation(Relaxation):
 
     """Base Info"""
 
-    # Informated extracted from the calculation
-    final_energy = models.FloatField(blank=True, null=True)
-    
-    # TODO:
-    # energy_per_atom = models.FloatField(blank=True, null=True)
-    # bandgap = models.FloatField(blank=True, null=True)
-    # forces = models.JSONField(blank=True, null=True)
-    # stress = models.JSONField(blank=True, null=True)
-    
+    # All the base information is contained with the parent classes
+
     """ Relationships """
-    # Map to the input and output structures for the calc
-    structure_initial = models.OneToOneField(
-        MITRelaxationInitialStructure, on_delete=models.CASCADE,
+    # the source structure for this calculation
+    structure_start = models.OneToOneField(
+        MITRelaxationStructure,
+        on_delete=models.CASCADE,
+        related_name="relaxations_as_start",
+        blank=True,
+        null=True,
     )
+
+    # the final structure for this calculation
     structure_final = models.OneToOneField(
-        MITRelaxationFinalStructure, on_delete=models.CASCADE, blank=True, null=True,
+        MITRelaxationStructure,
+        on_delete=models.CASCADE,
+        related_name="relaxations_as_final",
+        blank=True,
+        null=True,
     )
+
+    # all other structures are accessible through the "structures" field
 
     class Meta:
         app_label = "local_calculations"
+
+
+# --------------------------------------------------------------------------------------

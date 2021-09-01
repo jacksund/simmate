@@ -71,14 +71,26 @@ class Calculation(models.Model):
         return f"https://cloud.prefect.io/simmate/flow-run/{self.prefect_flow_run_id}"
 
     """ Model Methods """
-    # none
+
+    @classmethod
+    def from_prefect_context(cls, prefect_context, **kwargs):
+        # Given a Prefect context, this will return a database calculation
+        # object, but will NOT save it to the database yet. The kwargs input
+        # is only if you inherit from this class and add extra fields.
+        calculation = cls(
+            prefect_flow_run_name=prefect_context.flow_run_name,
+            prefect_flow_run_id=prefect_context.flow_run_id,
+            prefect_flow_run_version=prefect_context.get("flow_run_version"),
+            **kwargs,
+        )
+        return calculation
 
     """ Restrictions """
     # none
 
     """ For website compatibility """
     """ Set as Abstract Model """
-    # I have other model inherit from this one, while this model doesn't need its own
+    # I have other models inherit from this one, while this model doesn't need its own
     # table. Therefore, I set this as an abstract model. Should that change in the
     # future, look here:
     # https://docs.djangoproject.com/en/3.1/topics/db/models/#model-inheritance

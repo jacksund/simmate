@@ -178,7 +178,8 @@ setup(
         # 'spyder',
     
         # For visualization
-        'graphviz',  # python-graphviz on conda. For viewing prefect flows
+        'graphviz',  # python-graphviz on conda. for viewing prefect flows
+        'pygraphviz',  # pygraphviz on conda. for viewing django tables
         'plotly',
         'matplotlib',
         # 'seaborn',

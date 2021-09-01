@@ -93,9 +93,7 @@ class VaspTask(SSSTask):
         # class instance, then we write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
             Kpoints.to_file(
-                structure,
-                self.kpoints,
-                os.path.join(directory, "KPOINTS"),
+                structure, self.kpoints, os.path.join(directory, "KPOINTS"),
             )
 
         # write the POTCAR file
@@ -114,7 +112,7 @@ class VaspTask(SSSTask):
         """
 
         # load the xml file and only parse the bare minimum
-        xmlReader = Vasprun(
+        vasprun = Vasprun(
             filename=os.path.join(directory, "vasprun.xml"),
             parse_dos=False,
             parse_eigen=False,
@@ -124,15 +122,13 @@ class VaspTask(SSSTask):
         )
 
         # grab the final structure
-        final_structure = xmlReader.structures[-1]
+        # final_structure = vasprun.structures[-1]
 
         # grab the energy per atom
-        final_energy = xmlReader.final_energy / final_structure.num_sites
+        # final_energy = vasprun.final_energy / final_structure.num_sites
 
-        # confirm that the calculation converged
-        assert xmlReader.converged
+        # confirm that the calculation converged (ionicly and electronically)
+        assert vasprun.converged
 
-        # return the desired info
-        # TODO: in the future, I may just want to return the VaspRun object
-        # by default.
-        return final_structure, final_energy
+        # return vasprun object
+        return vasprun
