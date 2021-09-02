@@ -14,6 +14,8 @@ from pymatgen.symmetry.groups import SpaceGroup as SpaceGroup_PMG
 
 class Spacegroup(models.Model):
 
+    """ Base Info """
+
     # NOTE: International spacegroup info is also known as Hermann-Mauguin
 
     # International space group number
@@ -28,8 +30,12 @@ class Spacegroup(models.Model):
     # Point group symbol
     point_group = models.CharField(max_length=15)
 
+    """ Django App Association """
+
     class Meta:
         app_label = "third_parties"  # TODO: move to a separate app
+
+    """ Model Methods """
 
     @staticmethod
     def load_database_from_pymatgen():

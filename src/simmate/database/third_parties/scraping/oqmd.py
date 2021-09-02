@@ -22,7 +22,7 @@ import qmpy_rester
 from simmate.configuration.django import setup_full  # sets up database
 
 from simmate.database.third_parties.oqmd import OqmdStructure
-from simmate.database.third_parties.scraping.utilities import get_sanitized_structure
+from simmate.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
 

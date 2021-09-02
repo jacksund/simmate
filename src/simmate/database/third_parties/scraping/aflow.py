@@ -23,7 +23,7 @@ from aflow.control import Query as AflowQuery
 from simmate.configuration.django import setup_full  # sets up database
 
 from simmate.database.third_parties.aflow import AflowStructure
-from simmate.database.third_parties.scraping.utilities import get_sanitized_structure
+from simmate.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
 

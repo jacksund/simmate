@@ -41,7 +41,7 @@ from pymatgen.ext.matproj import MPRester
 from simmate.configuration.django import setup_full  # sets up database
 
 from simmate.database.third_parties.materials_project import MaterialsProjectStructure
-from simmate.database.third_parties.scraping.utilities import get_sanitized_structure
+from simmate.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
 

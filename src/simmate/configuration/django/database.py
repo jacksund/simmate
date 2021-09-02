@@ -13,6 +13,7 @@ APPS_TO_MIGRATE = [
     "local_calculations",
     "third_parties",
     "workflow_execution",
+    "prototypes",
 ]
 
 
