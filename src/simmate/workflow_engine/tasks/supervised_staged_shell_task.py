@@ -32,7 +32,6 @@ from simmate.utilities import get_directory, empty_directory
 # know exactly when a shelltask completes, rather than loop and checking every
 # set timestep.
 
-
 class SupervisedStagedShellTask(Task):
 
     # set a defualt command associated with this specific ShellTask

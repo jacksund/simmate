@@ -25,7 +25,7 @@ import pytest
 
 from simmate.workflow_engine.tasks.shelltask import ShellTask
 from simmate.workflow_engine.tasks.errorhandler import ErrorHandler
-from simmate.workflow_engine.tasks.supervisedstagedtask import (
+from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
     SupervisedStagedShellTask as SSSTask,
     NonZeroExitError,
     MaxCorrectionsError,
