@@ -18,6 +18,7 @@ class AflowPrototype(Structure):
     aflow_id = models.CharField(max_length=30)
     pearson_symbol = models.CharField(max_length=6)
     strukturbericht = models.CharField(max_length=6)
+    nsites_wyckoff = models.IntegerField()
 
     """ Model Methods """
 
