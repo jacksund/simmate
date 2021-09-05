@@ -178,7 +178,7 @@ class Incar(dict):
         # we now have our final string and can return it!
         return final_str
 
-    def to_file(self, structure=None, filename="INCAR"):
+    def to_file(self, filename="INCAR", structure=None):
         """
         Write Incar to a file.
         Args:
