@@ -8,6 +8,9 @@ import os
 import itertools
 from tempfile import TemporaryDirectory
 import shutil
+import warnings
+
+import numpy
 
 
 def get_directory(directory=None):
@@ -116,3 +119,113 @@ def get_sanitized_structure(structure):
 
     # return back the sanitized structure
     return structure_sanitized
+
+
+def estimate_radii(composition, radius_method="ionic"):
+
+    # grab the elements as a list of Element objects
+    elements = composition.elements
+
+    # change the list of elements to radii list (atomic/vdw/metallic/ionic)
+    if radius_method == "atomic":
+        radii = [element.atomic_radius for element in elements]
+    elif radius_method == "atomic_calculated":
+        radii = [element.atomic_radius_calculated for element in elements]
+    elif radius_method == "van_der_waals":
+        radii = [element.van_der_waals_radius for element in elements]
+    elif radius_method == "metallic":
+        radii = [element.metallic_radius for element in elements]
+    elif radius_method == "ionic":
+        # In order to predict the radius here, we first need to predict the
+        # oxidation states. Note that this prediction changes composition to
+        # be made of Specie objects instead of Element objects.
+        # By converting to the reduced_composition first, we see a massive speed
+        # up -- this is done with max_sites=-1
+        composition = composition.add_charges_from_oxi_state_guesses(max_sites=-1)
+        elements = composition.elements
+        # Now we can grab the predicted radii
+        # If the estimated oxidation state is zero OR if the predicted oxidation
+        # state does not have an available radius (e.g H+ doesn't have a reported
+        # radius in our dataset), I grab the atomic radius.
+        # BUG: This will print a lot of warnings when the ionic radius doesn't exist.
+        # I expect these warnings, so I choose to suppress them here.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # dont print the warnings!
+            radii = []
+            for element in elements:
+                # attempt to grab the radius
+                radius = element.ionic_radius
+                # if the radius is None, then we have an error and should grab
+                # the atomic radius instead
+                if not radius:
+                    # note the .element is because we have our element
+                    # variable as a Specie object right now.
+                    radius = element.element.atomic_radius
+                radii.append(radius)
+
+    # Some methods above might not give a radius for elements. For example,
+    # N will not provide a Metallic radius. In cases like this, we should let
+    # the user know.
+    if None in radii:
+        raise Exception(
+            f"{radius_method} radius_method is not allowed for one or more"
+            " of the elements in composition"
+        )
+
+    # this returns a list of radii, where the order is assumed the same as the
+    # order of elements in composition
+    return radii
+
+
+def estimate_volume(composition, radius_method="ionic", packing_factor=1.35):
+
+    # 1.35 is 74% packing efficieny (hexagonal packing) so we select this for
+    # the default packing_factor
+
+    # grab a list of radii (assumed to be in order of elements in composition)
+    radii = estimate_radii(composition, radius_method)
+
+    # take the radii and find the corresponding spherical volume for each atom type
+    volumes = [4 / 3 * numpy.pi * (radius ** 3) for radius in radii]
+
+    # find the total volume of all spheres in the composition
+    total_volume = sum(
+        [
+            composition[element] * volume
+            for element, volume in zip(composition.elements, volumes)
+        ]
+    )
+    # based on the packing of these spheres, we want to scale the volume of the
+    # lattice better packing corresponds to a lower packing_factor
+    total_volume *= packing_factor
+
+    return total_volume
+
+
+def distance_matrix(composition, radius_method="ionic", packing_factor=0.5):
+
+    # grab a list of radii (assumed to be in order of elements in composition)
+    radii = estimate_radii(composition, radius_method)
+
+    # multiply the radii by some factor that you want limit the overlap by
+    # for example, if we don't want sites any closer than 50% their radii so
+    # we can set factor=0.5.
+    # Note, float() strips the unit (ang) from the value to avoid errors.
+    radii = [float(radius * packing_factor) for radius in radii]
+
+    # Create the element distance matrix
+    # There doesn't seem to be an easy way to get iterools.product() to a matrix
+    # so I iterate through the possible combinations manually.
+    # OPTIMIZE: note this is really a symmetrical matrix so I'm actually caclulating
+    # things twice.
+    matrix = []
+    for radius1 in radii:
+        row = []
+        for radius2 in radii:
+            limit = radius1 + radius2
+            row.append(limit)
+        matrix.append(row)
+
+    # convert the result matrix of list matrix to a numpy array before returning
+    element_distance_matrix = numpy.array(matrix)
+    return element_distance_matrix
