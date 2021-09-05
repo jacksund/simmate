@@ -32,6 +32,7 @@ from simmate.utilities import get_directory, empty_directory
 # know exactly when a shelltask completes, rather than loop and checking every
 # set timestep.
 
+
 class SupervisedStagedShellTask(Task):
 
     # set a defualt command associated with this specific ShellTask
@@ -92,7 +93,7 @@ class SupervisedStagedShellTask(Task):
         monitor_freq=None,
         # return, cleanup, and file saving settings
         save_corrections_to_file=True,
-        corrections_filename="simmate_corrections_log.txt",
+        corrections_filename="simmate_corrections.csv",
         empty_directory_on_finish=False,
         files_to_keep=[],  # this is only used when empty_directory_on_finish=True
         compress_output=False,
@@ -164,6 +165,8 @@ class SupervisedStagedShellTask(Task):
         # NOTE: I took out the table headers and may add them back in
         corrections = []
 
+        # ------ start of main while loop ------
+
         # we can try running the shelltask up to max_corrections. Because only one
         # correction is applied per attempt, you can view this as the maximum
         # number of attempts made on the calculation.
@@ -176,12 +179,7 @@ class SupervisedStagedShellTask(Task):
             # are launched with parallel processes (such as mpirun). This assigns
             # a parent id to it that we use when killing a job (if an error
             # handler calls for us to do so)
-            future = Popen(
-                command,
-                cwd=directory,
-                shell=True,
-                preexec_fn=os.setsid,
-            )
+            future = Popen(command, cwd=directory, shell=True, preexec_fn=os.setsid,)
 
             # Assume the shelltask has no errors until proven otherwise
             has_error = False
@@ -192,6 +190,9 @@ class SupervisedStagedShellTask(Task):
             # want to go through the errorhandlers to check for errors until
             # the shelltask completes.
             if self.monitor and self.monitors:
+
+                # ------ start of monitor while loop ------
+
                 # We want to loop until we find an error and keep track of
                 # which loops to run the monitor function on because we don't
                 # want them to run nonstop. This variable allows us to monitor
@@ -226,7 +227,7 @@ class SupervisedStagedShellTask(Task):
                                     # processes if we are using something like
                                     # mpirun to run things in parallel. Instead,
                                     # we use the os module to grab the parent id
-                                    # and send that the termination singal, which
+                                    # and send that the termination signal, which
                                     # is also passed on to all child processes.
                                     os.killpg(os.getpgid(future.pid), signal.SIGTERM)
                                 # Otherwise apply the fix and let the shelltask end
@@ -251,6 +252,8 @@ class SupervisedStagedShellTask(Task):
                                 # end. So update the while-loop condition.
                                 has_error = True
                                 break
+
+                # ------ end of monitor while loop ------
 
             # Now just wait for the process to finish
             future.wait()
@@ -290,6 +293,25 @@ class SupervisedStagedShellTask(Task):
                     # highest priority fix and nothing else.
                     break
 
+            # write the log of corrections to file if requested. This is written
+            # as a CSV file format and done every while-loop cycle because it
+            # lets the user monitor the calculation and error handlers applied
+            # as it goes.
+            if self.save_corrections_to_file:
+                # compile the corrections metadata into a dataframe
+                data = pandas.DataFrame(
+                    corrections,
+                    columns=[
+                        "applied_errorhandler",
+                        "error_details",
+                        "correction_applied",
+                    ],
+                )
+                # write the dataframe to a csv file
+                data.to_csv(
+                    os.path.join(directory, self.corrections_filename), index=False,
+                )
+
             # now that we've gone through the errorhandlers, let's see if any
             # non-terminating errors were found (terminating ones would raise
             # an error above). If there are no errors, we've finished the
@@ -300,24 +322,12 @@ class SupervisedStagedShellTask(Task):
                 # break the while-loop
                 break
 
+        # ------ end of main while loop ------
+
         # make sure the while loop didn't exit because of the correction limit
         if len(corrections) >= self.max_corrections:
             raise MaxCorrectionsError(
                 "the number of maximum corrections has been exceeded"
-            )
-
-        # write the log of corrections to file if requested. This is written
-        # as a CSV file format.
-        if self.save_corrections_to_file:
-            # compile the corrections metadata into a dataframe
-            data = pandas.DataFrame(
-                corrections,
-                columns=["applied_errorhandler", "error_details", "correction_applied"],
-            )
-            # write the dataframe to a csv file
-            data.to_csv(
-                os.path.join(directory, self.corrections_filename),
-                index=False,
             )
 
         # now return the corrections for them to stored/used elsewhere
@@ -365,12 +375,7 @@ class SupervisedStagedShellTask(Task):
             empty_directory(directory, self.files_to_keep)
 
     @defaults_from_attrs("structure", "directory", "command")
-    def run(
-        self,
-        structure=None,
-        directory=None,
-        command=None,
-    ) -> Tuple[Any, list]:
+    def run(self, structure=None, directory=None, command=None,) -> Tuple[Any, list]:
         """
         Runs the entire job in the current working directory without any error
         handling. If you want robust error handling, then you should instead
