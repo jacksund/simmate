@@ -87,7 +87,9 @@ class VaspTask(SSSTask):
         Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
 
         # write the incar file
-        Incar(**self.incar).to_file(structure, os.path.join(directory, "INCAR"))
+        Incar(**self.incar).to_file(
+            filename=os.path.join(directory, "INCAR"), structure=structure,
+        )
 
         # if KSPACING is not provide in the incar AND kpoints is attached to this
         # class instance, then we write the KPOINTS file
@@ -113,8 +115,7 @@ class VaspTask(SSSTask):
 
         # load the xml file and all of the vasprun data
         vasprun = Vasprun(
-            filename=os.path.join(directory, "vasprun.xml"),
-            exception_on_bad_xml=True,
+            filename=os.path.join(directory, "vasprun.xml"), exception_on_bad_xml=True,
         )
 
         # grab the final structure
