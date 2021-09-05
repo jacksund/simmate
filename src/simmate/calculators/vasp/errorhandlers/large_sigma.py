@@ -75,9 +75,9 @@ class LargeSigmaErrorHandler(ErrorHandler):
         # grab the sigma value being used where the default is 0.2
         current_sigma = incar.get("SIGMA", 0.2)
         
-        # If the sigma value is below 0.08, we try reducing it by 0.6
+        # If the sigma value is above 0.08, we try reducing it by 0.06
         if current_sigma > 0.08:
-            new_sigma = current_sigma - 0.6
+            new_sigma = current_sigma - 0.06
             incar["SIGMA"] = new_sigma
             incar.to_file(incar_filename)
             return f"reduced SIGMA from {current_sigma} to {new_sigma}"
