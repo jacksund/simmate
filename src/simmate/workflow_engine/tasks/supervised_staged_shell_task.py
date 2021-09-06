@@ -347,17 +347,17 @@ class SupervisedStagedShellTask(Task):
         # we use the os module to grab the parent id
         # and send that the termination signal, which
         # is also passed on to all child processes.
-        os.killpg(os.getpgid(future.pid), signal.SIGTERM)
+        os.killpg(os.getpgid(future.pid), signal.SIGKILL)
+        # BUG: SIGTERM is the normal signal but I use SIGKILL to try to address
+        # permission errors. Also SIGKILL has not been tested outside of Linux.
 
         # As an example of an alternative approach to killing a job, here is
         # what Custodian (Materials Project) tries when killing a VASP job
         # submitted through mpirun:
-        #   for k in command:
-        #       if "vasp" in k:
-        #           try:
-        #               os.system("killall %s" % k)
-        #           except Exception:
-        #               pass
+        # try:
+        #     os.system("killall vasp")
+        # except Exception:
+        #     pass
     
         # TODO: make it so terminate scripts can be loaded from the user's config
         # directory, which will make it so they don't have to overwrite all the
