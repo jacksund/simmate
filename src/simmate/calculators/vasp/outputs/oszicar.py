@@ -32,6 +32,9 @@ class Oszicar:
         with open(filename) as file:
             lines = file.readlines()
 
+        # Empty lines cause trouble so we remove those before parsing any data.
+        lines = [line for line in lines if line.strip()]
+
         # now let's iterate through the contents and parse the data. We also need
         # to check the line number below, so we use the index too
         for line_number, line in enumerate(lines):
@@ -183,6 +186,6 @@ class Oszicar:
         pass
 
     @property
-    def final_energy(self):
+    def energy_final(self):
         # TODO: move to DftCalc/IonicStep/ElectronicStep class
         return self.ionic_steps[-1]["energy_sigma_zero"]

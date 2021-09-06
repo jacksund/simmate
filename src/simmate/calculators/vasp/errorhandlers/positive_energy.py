@@ -2,6 +2,8 @@
 
 import os
 
+import numpy
+
 from simmate.calculators.vasp.inputs.incar import Incar
 from simmate.calculators.vasp.outputs.oszicar import Oszicar
 from simmate.workflow_engine.tasks.errorhandler import ErrorHandler
@@ -33,13 +35,25 @@ class PositiveEnergyErrorHandler(ErrorHandler):
             # then load the file's data
             oszicar = Oszicar(filename)
 
-            # check if the energy is positive, and if so, we have an error that
-            # needs to be addressed
-            if oszicar.final_energy > 0:
+            # before we check the final energy, we first need to make sure at
+            # least one ionic step is present. If not, there isn't an error yet
+            if not oszicar.ionic_steps:
+                return False
+
+            # the final ionic step may still not have an energy because it's
+            # still going. We therefore check the most recent energy and not
+            # the final energy.
+            for ionic_step in reversed(oszicar.ionic_steps):
+                # where ionic steps are not complete, we have numpy.NAN values
+                if not numpy.isnan(ionic_step["energy_sigma_zero"]):
+                    break
+
+            # If this energy is positive, we have an error.
+            if ionic_step["energy_sigma_zero"] > 0:
                 return True
 
-        # if the file doesn't exist OR if it does exist but the energy is
-        # negative, we are not seeing any error.
+        # if the file doesn't exist OR if we get through our checks above, then
+        # we can say there is no error.
         return False
 
     def correct(self, error, directory):
