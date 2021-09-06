@@ -157,7 +157,7 @@ class Relaxation(Calculation):
             # first pull all the data together and save it to the database
             structure = IonicStepStructure_subclass.from_pymatgen(
                 structure=structure,
-                ionic_step_number=number,
+                ionic_step_number=number+1,  # +1 bc enumerate starts from 0
                 energy=ionic_step["e_wo_entrp"],
                 site_forces=ionic_step["forces"],
                 lattice_stress=ionic_step["stress"],

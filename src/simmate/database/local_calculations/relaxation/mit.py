@@ -13,11 +13,6 @@ from simmate.database.local_calculations.relaxation.base import (
 # All ionic steps of relaxations are stored in the same table. This means the
 # start structure, end structure, and those structure in-between are stored
 # together here.
-# You can limit searches to start structures with...
-# TODO
-# and then final structures to...
-# TODO
-
 
 class MITRelaxationStructure(IonicStepStructure):
 
