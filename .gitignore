@@ -5,8 +5,9 @@
 # If there is a more up-to-date version of this file, it will be
 # located at: https://github.com/github/gitignore/blob/master/Python.gitignore
 
-# VASP POTCARs can't be shared
-POTCAR
+# Ignore any django-db migration files
+# NOTE: some forks comment this out to keep track of their production-level databases
+migrations/
 
 # ignore database files and database json dumps [this may be removed in the future]
 *.sqlite3
