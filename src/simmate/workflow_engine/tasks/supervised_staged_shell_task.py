@@ -219,17 +219,9 @@ class SupervisedStagedShellTask(Task):
                             if error:
                                 # determine if it is_terminating
                                 if errorhandler.is_terminating:
-                                    # kill the process but don't apply the fix
-                                    # quite yet. See below for more on this.
-                                    # The normal line is just...
-                                    #   future.terminate()
-                                    # However this struggles to kill all "child"
-                                    # processes if we are using something like
-                                    # mpirun to run things in parallel. Instead,
-                                    # we use the os module to grab the parent id
-                                    # and send that the termination signal, which
-                                    # is also passed on to all child processes.
-                                    os.killpg(os.getpgid(future.pid), signal.SIGTERM)
+                                    # If so, we kill the process but don't apply
+                                    # the fix quite yet. That step is done below.
+                                    self._terminate_job(future, command)
                                 # Otherwise apply the fix and let the shelltask end
                                 # naturally. An example of this is for codes
                                 # where you add a STOP file to get it to
@@ -332,6 +324,44 @@ class SupervisedStagedShellTask(Task):
 
         # now return the corrections for them to stored/used elsewhere
         return corrections
+
+    @staticmethod
+    def _terminate_job(future, command):
+        """
+        Stopping the command we submitted can be a tricky business if we are running
+        scripts in parallel (such as using mpirun). Therefore, try a series of
+        job-killing approaches here to ensure the job is terminated properly.
+        
+        This method is never used directly, but is instead applied within the
+        execute() method above. 
+        
+        If you know your command needs a special case to kill all of its spawn
+        processes, you can overwrite this method as well.
+        """
+        # The normal line to end a popen process is just...
+        #   future.terminate()
+
+        # However this struggles to kill all "child"
+        # processes if we are using something like
+        # mpirun to run things in parallel. Instead,
+        # we use the os module to grab the parent id
+        # and send that the termination signal, which
+        # is also passed on to all child processes.
+        os.killpg(os.getpgid(future.pid), signal.SIGTERM)
+
+        # As an example of an alternative approach to killing a job, here is
+        # what Custodian (Materials Project) tries when killing a VASP job
+        # submitted through mpirun:
+        #   for k in command:
+        #       if "vasp" in k:
+        #           try:
+        #               os.system("killall %s" % k)
+        #           except Exception:
+        #               pass
+    
+        # TODO: make it so terminate scripts can be loaded from the user's config
+        # directory, which will make it so they don't have to overwrite all the
+        # classes that inherit from this one.
 
     def workup(self, directory):
         """
