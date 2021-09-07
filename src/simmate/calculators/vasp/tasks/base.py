@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from pathlib import Path
 
 # TODO: write my own vasp.outputs classes and remove pymatgen dependency
 from pymatgen.io.vasp.outputs import Vasprun
@@ -9,6 +10,17 @@ from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
 from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
     SupervisedStagedShellTask as SSSTask,
 )
+
+# We load the user's default parallel settings from ~/.simmate/vasp/INCAR_parallel_settings
+# file. If this file doesn't exist, then we just use an empty dictionary
+def get_default_parallel_settings():
+    settings_filename = os.path.join(
+        Path.home(), ".simmate", "vasp", "INCAR_parallel_settings"
+    )
+    if os.path.exists(settings_filename):
+        return Incar.from_file(settings_filename)
+    else:
+        return {}
 
 
 class VaspTask(SSSTask):
@@ -24,6 +36,14 @@ class VaspTask(SSSTask):
     # you *must* set when subclassing VaspTask. An example is:
     #   incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
     incar = None
+
+    # We also load any parallel settings to add on to the base incar. These
+    # should not effect the calculation in any way, but they are still selected
+    # based on the computer specs and what runs fastest on it. Therefore, these
+    # settings are loaded from ~/.simmate/vasp/INCAR_parallel_settings by default.
+    # This can also be overwritten as well.
+    incar_parallel_settings = get_default_parallel_settings()
+
     # TODO: add options for poscar formation
     # add_selective_dynamics=False
     # add_velocities=False
@@ -86,8 +106,10 @@ class VaspTask(SSSTask):
         # write the poscar file
         Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
 
-        # write the incar file
-        Incar(**self.incar).to_file(
+        # Combine our base incar settings with those of our parallelization settings
+        # and then write the incar file
+        incar = Incar(**self.incar) + Incar(**self.incar_parallel_settings)
+        incar.to_file(
             filename=os.path.join(directory, "INCAR"), structure=structure,
         )
 

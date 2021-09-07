@@ -1,0 +1,9 @@
+# This file is where you can add default parallel settings
+# for your VASP calculations. These will be loaded into
+# all calculations, regardless of their type. Read more
+# at the vasp docs for how to choose these:
+# https://www.vasp.at/wiki/index.php/NPAR
+LPLANE = True.
+NCORE  = 8
+LSCALU = False
+NSIM   = 4
