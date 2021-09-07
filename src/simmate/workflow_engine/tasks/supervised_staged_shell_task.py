@@ -161,7 +161,7 @@ class SupervisedStagedShellTask(Task):
 
         # We start with zero corrections that we slowly add to. This can be
         # thought of as a table with headers of...
-        #   ("applied_errorhandler", "error_details", "correction_applied")
+        #   ("applied_errorhandler", "correction_applied")
         # NOTE: I took out the table headers and may add them back in
         corrections = []
 
@@ -233,9 +233,7 @@ class SupervisedStagedShellTask(Task):
                                     # apply the fix now
                                     correction = error_handler.correct(directory)
                                     # record what's been changed
-                                    corrections.append(
-                                        (error_handler.name, error, correction)
-                                    )
+                                    corrections.append((error_handler.name, correction))
 
                                 # there's no need to look at the other monitors
                                 # so break from the for-loop. We also don't
@@ -280,7 +278,7 @@ class SupervisedStagedShellTask(Task):
                     # that the stagedtask is unrecoverable and a lost cause.
                     correction = error_handler.correct(directory)
                     # record what's been changed
-                    corrections.append((error_handler.name, error, correction))
+                    corrections.append((error_handler.name, correction))
                     # break from the error_handler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break
@@ -292,12 +290,7 @@ class SupervisedStagedShellTask(Task):
             if self.save_corrections_to_file:
                 # compile the corrections metadata into a dataframe
                 data = pandas.DataFrame(
-                    corrections,
-                    columns=[
-                        "applied_error_handler",
-                        "error_details",
-                        "correction_applied",
-                    ],
+                    corrections, columns=["error_handler", "correction_applied"],
                 )
                 # write the dataframe to a csv file
                 data.to_csv(
@@ -358,7 +351,7 @@ class SupervisedStagedShellTask(Task):
         #     os.system("killall vasp")
         # except Exception:
         #     pass
-    
+
         # TODO: make it so terminate scripts can be loaded from the user's config
         # directory, which will make it so they don't have to overwrite all the
         # classes that inherit from this one.
