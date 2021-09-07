@@ -1,0 +1,37 @@
+# -*- coding: utf-8 -*-
+
+import os
+
+from simmate.workflow_engine.tasks.error_handler import ErrorHandler
+from simmate.calculators.vasp.inputs.incar import Incar
+
+
+class RotationMatrix(ErrorHandler):
+    """
+    This a simple error handler that is active when VASP struggles to find the
+    rotation matrix. VASP gives us the suggested fix directly, which is to
+    simply increase the symmetry precision.
+    """
+
+    # run this while the VASP calculation is still going
+    is_monitor = True
+
+    # we assume that we are checking the vasp.out file
+    filename_to_check = "vasp.out"
+
+    # These are the error messages that we are looking for in the file
+    possible_error_messages = ["rotation matrix was not found (increase SYMPREC)"]
+
+    def correct(self, error, dir):
+
+        # load the INCAR file to view the current settings
+        incar_filename = os.path.join(dir, "INCAR")
+        incar = Incar.from_file(incar_filename)
+
+        # increase the precision
+        incar["SYMPREC"] = 1e-8
+
+        # rewrite the INCAR with new settings
+        incar.to_file(incar_filename)
+
+        return "switched SYMPREC to 1e-8"

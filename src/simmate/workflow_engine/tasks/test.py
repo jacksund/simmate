@@ -24,7 +24,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from simmate.workflow_engine.tasks.shelltask import ShellTask
-from simmate.workflow_engine.tasks.errorhandler import ErrorHandler
+from simmate.workflow_engine.tasks.error_handler import ErrorHandler
 from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
     SupervisedStagedShellTask as SSSTask,
     NonZeroExitError,
@@ -105,7 +105,7 @@ def test_supervisedstagedshelltask():
 
     # test success, handler, monitor, and special-monitor
     task = DummyTask(
-        errorhandlers=[
+        error_handlers=[
             AlwaysPassesHandler(),
             AlwaysPassesMonitor(),
             AlwaysPassesSpecialMonitor(),
@@ -118,7 +118,7 @@ def test_supervisedstagedshelltask():
     # test result-only return, write corrections file, compressed out, and tempdir
     with TemporaryDirectory() as tempdir:
         task = DummyTask(
-            errorhandlers=[
+            error_handlers=[
                 AlwaysPassesHandler(),
                 AlwaysPassesMonitor(),
                 AlwaysPassesSpecialMonitor(),
@@ -135,7 +135,7 @@ def test_supervisedstagedshelltask():
     # test nonzeo returncode
     task = DummyTask(
         command="NonexistantCommand 404",
-        errorhandlers=[AlwaysPassesHandler()],
+        error_handlers=[AlwaysPassesHandler()],
         polling_timestep=0,
         monitor_freq=2,
     )
@@ -143,7 +143,7 @@ def test_supervisedstagedshelltask():
 
     # testing handler-triggered failures
     task = DummyTask(
-        errorhandlers=[AlwaysFailsHandler()],
+        error_handlers=[AlwaysFailsHandler()],
         return_corrections=False,
         polling_timestep=0,
         monitor_freq=2,
@@ -152,7 +152,7 @@ def test_supervisedstagedshelltask():
 
     # monitor failure
     task = DummyTask(
-        errorhandlers=[AlwaysFailsMonitor()],
+        error_handlers=[AlwaysFailsMonitor()],
         return_corrections=False,
         polling_timestep=0,
         monitor_freq=2,
@@ -161,7 +161,7 @@ def test_supervisedstagedshelltask():
 
     # special-monitor failure
     task = DummyTask(
-        errorhandlers=[AlwaysFailsSpecialMonitor()],
+        error_handlers=[AlwaysFailsSpecialMonitor()],
         return_corrections=False,
         polling_timestep=0,
         monitor_freq=2,

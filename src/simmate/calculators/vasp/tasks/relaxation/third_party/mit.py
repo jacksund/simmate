@@ -4,7 +4,7 @@ from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.inputs.potcar_mappings import (
     PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
 )
-from simmate.calculators.vasp.errorhandlers.all import (
+from simmate.calculators.vasp.error_handlers.all import (
     TetrahedronMesh,
     Eddrmm,
     IncorrectSmearingHandler,
@@ -167,7 +167,7 @@ class MITRelaxationTask(VaspTask):
     )
 
     # These are some default error handlers to use
-    errorhandlers = [
+    error_handlers = [
         TetrahedronMesh(),
         Eddrmm(),
         IncorrectSmearingHandler(),

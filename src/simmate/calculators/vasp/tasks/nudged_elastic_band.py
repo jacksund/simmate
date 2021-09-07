@@ -6,8 +6,8 @@ from pymatgen.analysis.transition_state import NEBAnalysis
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
 from simmate.calculators.vasp.tasks.base import VaspTask
-from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
-from simmate.calculators.vasp.errorhandlers.eddrmm import Eddrmm
+from simmate.calculators.vasp.error_handlers.tetrahedron_mesh import TetrahedronMesh
+from simmate.calculators.vasp.error_handlers.eddrmm import Eddrmm
 
 # NOTE TO USER:
 # This NEB task is very different from all other VASP tasks!
@@ -70,7 +70,7 @@ class NudgedElasticBandTask(VaspTask):
     functional = "PBE"
 
     # We also set up some error handlers that are commonly used with
-    errorhandlers = [TetrahedronMesh()]
+    error_handlers = [TetrahedronMesh()]
 
     def _pre_checks(self, structure, directory):
         # This function is used inside of this class's setup method (shown below),

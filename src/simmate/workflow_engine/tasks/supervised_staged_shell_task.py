@@ -50,7 +50,7 @@ class SupervisedStagedShellTask(Task):
 
     # A list of ErrorHandler objects to use in order of priority (that is, highest
     # priority is first).
-    errorhandlers = []
+    error_handlers = []
 
     # maximum number of times we can apply a handler's correction and retry
     # the shelltask
@@ -85,7 +85,7 @@ class SupervisedStagedShellTask(Task):
         # core parts
         command=None,
         directory=None,
-        errorhandlers=None,
+        error_handlers=None,
         max_corrections=None,
         # settings for the stagedtask supervision/monitoring
         monitor=None,
@@ -112,8 +112,8 @@ class SupervisedStagedShellTask(Task):
             self.command = command
         if structure:
             self.structure = structure
-        if errorhandlers:
-            self.errorhandlers = errorhandlers
+        if error_handlers:
+            self.error_handlers = error_handlers
         if monitor:
             self.monitor = monitor
         if max_corrections or max_corrections == 0:
@@ -152,11 +152,11 @@ class SupervisedStagedShellTask(Task):
         # Establish the working directory for this run.
         directory = get_directory(directory)
 
-        # some errorhandlers run while the shelltask is running. These are known as
+        # some error_handlers run while the shelltask is running. These are known as
         # Monitors and are labled via the is_monitor attribute. It's good for us
-        # to separate these out from other errorhandlers.
+        # to separate these out from other error_handlers.
         self.monitors = [
-            handler for handler in self.errorhandlers if handler.is_monitor
+            handler for handler in self.error_handlers if handler.is_monitor
         ]
 
         # We start with zero corrections that we slowly add to. This can be
@@ -187,7 +187,7 @@ class SupervisedStagedShellTask(Task):
             # If monitor=True, then we want to supervise this shelltask as it
             # runs. If montors=[m1,m2,...], then we have monitors in place to actually
             # perform the monitoring. If both of these cases are true, then we
-            # want to go through the errorhandlers to check for errors until
+            # want to go through the error_handlers to check for errors until
             # the shelltask completes.
             if self.monitor and self.monitors:
 
@@ -212,13 +212,13 @@ class SupervisedStagedShellTask(Task):
                     # check whether we should run monitors on this poll loop
                     if monitor_freq_n % self.monitor_freq == 0:
                         # iterate through each monitor
-                        for errorhandler in self.monitors:
-                            # check if there's an error with this errorhandler
+                        for error_handler in self.monitors:
+                            # check if there's an error with this error_handler
                             # and grab the error if so
-                            error = errorhandler.check(directory)
+                            error = error_handler.check(directory)
                             if error:
                                 # determine if it is_terminating
-                                if errorhandler.is_terminating:
+                                if error_handler.is_terminating:
                                     # If so, we kill the process but don't apply
                                     # the fix quite yet. That step is done below.
                                     self._terminate_job(future, command)
@@ -226,15 +226,15 @@ class SupervisedStagedShellTask(Task):
                                 # naturally. An example of this is for codes
                                 # where you add a STOP file to get it to
                                 # finish rather than just killing the process.
-                                # This is the special case errorhandler that I talk
+                                # This is the special case error_handler that I talk
                                 # about in my notes, where we really want to
                                 # end the shelltask right away.
                                 else:
                                     # apply the fix now
-                                    correction = errorhandler.correct(error, directory)
+                                    correction = error_handler.correct(error, directory)
                                     # record what's been changed
                                     corrections.append(
-                                        (errorhandler.name, error, correction)
+                                        (error_handler.name, error, correction)
                                     )
 
                                 # there's no need to look at the other monitors
@@ -259,29 +259,29 @@ class SupervisedStagedShellTask(Task):
 
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered above (if there was one).
-            # Since the errorhandlers are in order of priority, only the first
+            # Since the error_handlers are in order of priority, only the first
             # will actually be applied and then we can retry the calc.
-            for errorhandler in self.errorhandlers:
+            for error_handler in self.error_handlers:
 
                 # NOTE - The following special case is handled above:
-                #   errorhandler.is_monitor and not errorhandler.is_terminating
+                #   error_handler.is_monitor and not error_handler.is_terminating
                 # BUG: I can see this being a source of bugs in the future so I
                 # need to reconsider subclassing this special case. For now,
                 # users should have this case at the lowest priority.
 
-                # check if there's an error with this errorhandler and grab the
+                # check if there's an error with this error_handler and grab the
                 # error if there is one
-                error = errorhandler.check(directory)
+                error = error_handler.check(directory)
                 if error:
                     # record the error in case it wasn't done so above
                     has_error = True
                     # And apply the proper correction if there is one.
-                    # Some errorhandlers will even raise an error here signaling
+                    # Some error_handlers will even raise an error here signaling
                     # that the stagedtask is unrecoverable and a lost cause.
-                    correction = errorhandler.correct(error, directory)
+                    correction = error_handler.correct(error, directory)
                     # record what's been changed
-                    corrections.append((errorhandler.name, error, correction))
-                    # break from the errorhandler for-loop as we only apply the
+                    corrections.append((error_handler.name, error, correction))
+                    # break from the error_handler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break
 
@@ -294,7 +294,7 @@ class SupervisedStagedShellTask(Task):
                 data = pandas.DataFrame(
                     corrections,
                     columns=[
-                        "applied_errorhandler",
+                        "applied_error_handler",
                         "error_details",
                         "correction_applied",
                     ],
@@ -304,7 +304,7 @@ class SupervisedStagedShellTask(Task):
                     os.path.join(directory, self.corrections_filename), index=False,
                 )
 
-            # now that we've gone through the errorhandlers, let's see if any
+            # now that we've gone through the error_handlers, let's see if any
             # non-terminating errors were found (terminating ones would raise
             # an error above). If there are no errors, we've finished the
             # calculation and can exit the while loop. Otherwise, just leave

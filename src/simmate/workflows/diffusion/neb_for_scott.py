@@ -7,8 +7,8 @@ from prefect import task, Flow, Parameter
 from pymatgen.core.structure import Structure
 
 from simmate.calculators.vasp.tasks.base import VaspTask
-from simmate.calculators.vasp.errorhandlers.tetrahedron_mesh import TetrahedronMesh
-from simmate.calculators.vasp.errorhandlers.eddrmm import Eddrmm
+from simmate.calculators.vasp.error_handlers.tetrahedron_mesh import TetrahedronMesh
+from simmate.calculators.vasp.error_handlers.eddrmm import Eddrmm
 from simmate.calculators.vasp.tasks.nudged_elastic_band import NudgedElasticBandTask
 
 
@@ -36,7 +36,7 @@ relax_structure = VaspTask(
         KSPACING=0.4,  # --> This is VASP default and not the same as pymatgen
     ),
     functional="PBE",
-    errorhandlers=[TetrahedronMesh(), Eddrmm()],
+    error_handlers=[TetrahedronMesh(), Eddrmm()],
 )
 
 # FOR NEB RELAXATION
