@@ -23,14 +23,14 @@ class TripleProduct(ErrorHandler):
     # These are the error messages that we are looking for in the file
     possible_error_messages = ["ERROR: the triple product of the basis vectors"]
 
-    def correct(self, error, dir):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # load the structure and save it as a backup file
-        poscar_filename = os.path.join(dir, "POSCAR")
+        poscar_filename = os.path.join(directory, "POSCAR")
         structure = Structure.from_file(poscar_filename)
         structure.to("POSCAR", poscar_filename + "_original")
 

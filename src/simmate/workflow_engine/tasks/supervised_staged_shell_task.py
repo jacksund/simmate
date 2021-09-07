@@ -231,7 +231,7 @@ class SupervisedStagedShellTask(Task):
                                 # end the shelltask right away.
                                 else:
                                     # apply the fix now
-                                    correction = error_handler.correct(error, directory)
+                                    correction = error_handler.correct(directory)
                                     # record what's been changed
                                     corrections.append(
                                         (error_handler.name, error, correction)
@@ -278,7 +278,7 @@ class SupervisedStagedShellTask(Task):
                     # And apply the proper correction if there is one.
                     # Some error_handlers will even raise an error here signaling
                     # that the stagedtask is unrecoverable and a lost cause.
-                    correction = error_handler.correct(error, directory)
+                    correction = error_handler.correct(directory)
                     # record what's been changed
                     corrections.append((error_handler.name, error, correction))
                     # break from the error_handler for-loop as we only apply the

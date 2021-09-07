@@ -24,16 +24,16 @@ class Zbrent(ErrorHandler):
         "ZBRENT: fatal error in bracketing",
     ]
 
-    def correct(self, error, dir):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # make the fix
         incar["IBRION"] = 1
-        poscar_filename = os.path.join(dir, "POSCAR")
-        contcar_filename = os.path.join(dir, "CONTCAR")
+        poscar_filename = os.path.join(directory, "POSCAR")
+        contcar_filename = os.path.join(directory, "CONTCAR")
         shutil.copyfile(contcar_filename, poscar_filename)
         correction = "switched IBRION to 1 and copied the CONTCAR over to the POSCAR"
 

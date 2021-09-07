@@ -50,7 +50,7 @@ class AlwaysPassesHandler(ErrorHandler):
     def check(self, dir):
         return None
 
-    def correct(self, error, dir):
+    def correct(self, dir):
         # this should never be entered since check() never returns an error
         raise Exception
 
@@ -59,7 +59,7 @@ class AlwaysFailsHandler(ErrorHandler):
     def check(self, dir):
         return "ExampleError"
 
-    def correct(self, error, dir):
+    def correct(self, dir):
         return "ExampleCorrection"
 
 

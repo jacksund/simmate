@@ -25,14 +25,14 @@ class ChangeInChargeDensity(ErrorHandler):
     # These are the error messages that we are looking for in the file
     possible_error_messages = ["BRMIX: very serious problems"]
 
-    def correct(self, error, dir):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # load the error-count file if it exists
-        error_count_filename = os.path.join(dir, "simmate_error_counts.json")
+        error_count_filename = os.path.join(directory, "simmate_error_counts.json")
         if os.path.exists(error_count_filename):
             with open(error_count_filename) as error_count_file:
                 error_counts = json.load(error_count_file)
@@ -51,7 +51,7 @@ class ChangeInChargeDensity(ErrorHandler):
 
         # check if there is a valid OUTCAR
         if error_counts["brmix"] == 0:
-            outcar_filename = os.path.join(dir, "OUTCAR")
+            outcar_filename = os.path.join(directory, "OUTCAR")
             try:
                 assert Outcar(outcar_filename).is_stopped is False
             except Exception:
@@ -115,8 +115,8 @@ class ChangeInChargeDensity(ErrorHandler):
             # and WAVECAR to ensure the next run is a clean start.
             current_icharg = incar.get("ICHARG", 0)
             if current_icharg < 10:
-                os.remove(os.path.join(dir, "CHGCAR"))
-                os.remove(os.path.join(dir, "WAVECAR"))
+                os.remove(os.path.join(directory, "CHGCAR"))
+                os.remove(os.path.join(directory, "WAVECAR"))
             correction = "deleted CHGCAR and WAVECAR"
             # BUG: why doesn't custodian add an attempt here?
             # error_counts["brmix"] += 1

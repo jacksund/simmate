@@ -23,10 +23,10 @@ class LongVector(ErrorHandler):
         "One of the lattice vectors is very long (>50 A), but AMIN"
     ]
 
-    def correct(self, error, dir):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # make the fix

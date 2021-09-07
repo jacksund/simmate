@@ -20,10 +20,10 @@ class Rhosyg(ErrorHandler):
     # These are the error messages that we are looking for in the file
     possible_error_messages = ["RHOSYG"]
 
-    def correct(self, error, dir):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # We make a fix only if SYMPREC is not the default value

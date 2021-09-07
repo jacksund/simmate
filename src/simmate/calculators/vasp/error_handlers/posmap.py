@@ -21,14 +21,14 @@ class Posmap(ErrorHandler):
     # These are the error messages that we are looking for in the file
     possible_error_messages = ["POSMAP"]
 
-    def correct(self, error, dir):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # load the error-count file if it exists
-        error_count_filename = os.path.join(dir, "simmate_error_counts.json")
+        error_count_filename = os.path.join(directory, "simmate_error_counts.json")
         if os.path.exists(error_count_filename):
             with open(error_count_filename) as error_count_file:
                 error_counts = json.load(error_count_file)

@@ -20,7 +20,7 @@ class Eddrmm(ErrorHandler):
     # These are the error messages that we are looking for in the file
     possible_error_messages = ["WARNING in EDDRMM: call to ZHEGV failed"]
 
-    def correct(self, error, directory):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")

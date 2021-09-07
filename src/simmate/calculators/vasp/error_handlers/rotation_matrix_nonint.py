@@ -24,10 +24,10 @@ class RotationMatrix(ErrorHandler):
         "SGRCON",
     ]
 
-    def correct(self, error, dir):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # switch to gamma-centered mesh

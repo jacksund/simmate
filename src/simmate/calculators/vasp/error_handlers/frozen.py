@@ -47,7 +47,7 @@ class FrozenErrorHandler(ErrorHandler):
         # our timeout specified -- where the job is still running and looks good.
         return False
 
-    def correct(self, error, directory):
+    def correct(self, directory):
         """
         Perform corrections based on the INCAR.
         """

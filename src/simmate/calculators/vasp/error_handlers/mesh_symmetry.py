@@ -76,7 +76,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         # class's default function to do this.
         super().check(directory)
 
-    def correct(self, error, directory):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
         kpoints_filename = os.path.join(directory, "KPOINTS")

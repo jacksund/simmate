@@ -50,7 +50,7 @@ class AlwaysPassesHandlerS(ErrorHandlerS):
     def check(self, dir):
         return None
 
-    def correct(self, error, dir):
+    def correct(self, dir):
         # this should never be entered since check() never returns an error
         raise Exception
 

@@ -20,10 +20,10 @@ class ElfKpar(ErrorHandler):
     # These are the error messages that we are looking for in the file
     possible_error_messages = ["ELF: KPAR>1 not implemented"]
 
-    def correct(self, error, dir):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # make the fix

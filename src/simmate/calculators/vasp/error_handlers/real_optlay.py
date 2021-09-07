@@ -37,14 +37,14 @@ class RealOptlay(ErrorHandler):
     # how we treat the error and correct it.
     natoms_large_cell = 100
 
-    def correct(self, error, dir):
+    def correct(self, directory):
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # load the error-count file if it exists
-        error_count_filename = os.path.join(dir, "simmate_error_counts.json")
+        error_count_filename = os.path.join(directory, "simmate_error_counts.json")
         if os.path.exists(error_count_filename):
             with open(error_count_filename) as error_count_file:
                 error_counts = json.load(error_count_file)
@@ -57,7 +57,7 @@ class RealOptlay(ErrorHandler):
         # If it isn't there yet, set the count to 0 and we'll update it below.
         error_counts["real_optlay"] = error_counts.get("real_optlay", 0)
 
-        poscar_filename = os.path.join(dir, "POSCAR")
+        poscar_filename = os.path.join(directory, "POSCAR")
         structure = Structure.from_file(poscar_filename)
 
         if structure.num_sites < self.natoms_large_cell:

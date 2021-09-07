@@ -23,8 +23,8 @@ class ErrorHandler(ABC):
 
     # Whether this handler terminates a job upon error detection. By
     # default, this is True, which means that the current Job will be
-    # terminated upon error detection, corrections applied,
-    # and restarted. In some instances, some errors may not need the job to be
+    # stopped when an error is found, then the corrections are applied,
+    # and job restarted. In some instances, some errors may not need the job to be
     # terminated or may need to wait for some other event to terminate a job.
     # For example, a particular error may require a flag to be set to request
     # a job to terminate gracefully once it finishes its current task. The
@@ -83,18 +83,16 @@ class ErrorHandler(ABC):
         return False
 
     @abstractmethod
-    def correct(self, error, directory):
+    def correct(self, directory):
         """
         This method is called at the end of a job when an error is detected.
         It should perform any corrective measures relating to the detected
-        error(s). It is given the output from the check() method and based on
-        that output, applies a proper fix. It then returns the fix or list
-        of fixes made.
+        error. It then returns the fix or list of fixes made.
         """
-        # NOTE TO USER: you will need this line if your function is directory
-        # specific and even if not, be sure to include dir (or **kwargs) as
-        # input argument for higher-levl compatibility with SupervisedStagedTask
-        # dir = get_directory(dir)
+        # NOTE TO USER:
+        # When you define your own correct method, be sure to include directory
+        # (or **kwargs) as an input argument for higher-level compatibility with
+        # SupervisedStagedTask and other features
         pass
 
     @property

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import numpy
+
 from django.db import models
 
 from simmate.database.structure import Structure
@@ -43,10 +45,18 @@ class IonicStepStructure(Structure):
     lattice_stress = models.JSONField(blank=True, null=True)
 
     """ Query-helper Info """
-    # TODO
-    # energy_per_atom
-    # site_forces_norm
-    # lattice_stress_norm
+    # Takes the energy from above and converts it to per atom units
+    energy_per_atom = models.FloatField(blank=True, null=True)
+
+    # Takes the site forces and reports the vector norm for it.
+    # See numpy.linalg.norm for how this is calculated.
+    site_forces_norm = models.FloatField(blank=True, null=True)
+    site_forces_norm_per_atom = models.FloatField(blank=True, null=True)
+
+    # Takes the site forces and reports the vector norm for it.
+    # # See numpy.linalg.norm for how this is calculated.
+    lattice_stress_norm = models.FloatField(blank=True, null=True)
+    lattice_stress_norm_per_atom = models.FloatField(blank=True, null=True)
 
     """ Relationships """
     # each of these will map to a Relaxation, so you should typically access this
@@ -145,6 +155,17 @@ class Relaxation(Calculation):
         structure_start.energy = ionic_step["e_wo_entrp"]
         structure_start.site_forces = ionic_step["forces"]
         structure_start.lattice_stress = ionic_step["stress"]
+        structure_start.energy_per_atom = (
+            ionic_step["e_wo_entrp"] / structure_start.nsites
+        )
+        structure_start.site_forces_norm = numpy.linalg.norm(ionic_step["forces"])
+        structure_start.sites_forces_norm_per_atom = (
+            numpy.linalg.norm(ionic_step["forces"]) / structure_start.nsites
+        )
+        structure_start.lattice_stress_norm = numpy.linalg.norm(ionic_step["stress"])
+        structure_start.lattice_stress_norm_per_atom = (
+            numpy.linalg.norm(ionic_step["stress"]) / structure_start.nsites
+        )
         structure_start.save()
 
         # Now let's iterate through the remaining ionic steps and save these to
@@ -157,18 +178,27 @@ class Relaxation(Calculation):
             # first pull all the data together and save it to the database
             structure = IonicStepStructure_subclass.from_pymatgen(
                 structure=structure,
-                ionic_step_number=number+1,  # +1 bc enumerate starts from 0
+                ionic_step_number=number + 1,  # +1 bc enumerate starts from 0
                 energy=ionic_step["e_wo_entrp"],
                 site_forces=ionic_step["forces"],
                 lattice_stress=ionic_step["stress"],
+                energy_per_atom=ionic_step["e_wo_entrp"] / structure.nsites,
+                site_forces_norm=numpy.linalg.norm(ionic_step["forces"]),
+                sites_forces_norm_per_atom=(
+                    numpy.linalg.norm(ionic_step["forces"]) / structure.nsites
+                ),
+                lattice_stress_norm=numpy.linalg.norm(ionic_step["stress"]),
+                lattice_stress_norm_per_atom=(
+                    numpy.linalg.norm(ionic_step["stress"]) / structure.nsites
+                ),
                 relaxation=self,  # this links the structure to this relaxation
             )
             structure.save()
-        
+
         # We also need to link the final structure to the relaxation. Because
         # the for-loop above ends with this structure, we can just use it here!
         self.structure_final = structure
-        
+
         # There is also extra data for the final structure that we save directly
         # in the relaxation table
         self.band_gap = data["bandgap"]

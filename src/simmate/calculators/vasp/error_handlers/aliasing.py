@@ -27,7 +27,7 @@ class Aliasing(ErrorHandler):
     # All instances of this ErrorHandler will work exactly the same, so there
     # are no keywords available -- and also there's no need for a __init__()
 
-    def check(self, dir):
+    def check(self, directory):
         """
         Check for errors in the specified directory. Note, we assume that we are
         checking the vasp.out file. If that file is not present, we say that there
@@ -39,7 +39,7 @@ class Aliasing(ErrorHandler):
         errors_found = []
 
         # establish the full path to the output file
-        filename = os.path.join(dir, "vasp.out")
+        filename = os.path.join(directory, "vasp.out")
 
         # check to see that the file is there first
         if os.path.exists(filename):
@@ -58,7 +58,7 @@ class Aliasing(ErrorHandler):
         # also an empty list. Otherwise return the list of errors we found
         return errors_found
 
-    def correct(self, error, dir):
+    def correct(self, directory):
         """
         Perform corrections based on the INCAR.
         """
@@ -71,7 +71,7 @@ class Aliasing(ErrorHandler):
         corrections = []
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         if "aliasing" in error:
@@ -88,7 +88,7 @@ class Aliasing(ErrorHandler):
             # so we open the OUTCAR and find these lines and the suggested fix.
 
             # read the file content and then close it
-            outcar_filename = os.path.join(dir, "OUTCAR")
+            outcar_filename = os.path.join(directory, "OUTCAR")
             with open(outcar_filename) as file:
                 outcar_lines = file.readlines()
 
@@ -130,8 +130,8 @@ class Aliasing(ErrorHandler):
             # If the ICHARG is less than 10, then we want to delete the CHGCAR
             # and WAVECAR to ensure the next run is a clean start.
             if current_icharg < 10:
-                os.remove(os.path.join(dir, "CHGCAR"))
-                os.remove(os.path.join(dir, "WAVECAR"))
+                os.remove(os.path.join(directory, "CHGCAR"))
+                os.remove(os.path.join(directory, "WAVECAR"))
 
             # return the description of what we did
             corrections.append("deleted CHGCAR and WAVECAR")

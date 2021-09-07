@@ -3,7 +3,6 @@
 import os
 from pathlib import Path
 
-# TODO: write my own vasp.outputs classes and remove pymatgen dependency
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
@@ -11,9 +10,10 @@ from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
     SupervisedStagedShellTask as SSSTask,
 )
 
-# We load the user's default parallel settings from ~/.simmate/vasp/INCAR_parallel_settings
-# file. If this file doesn't exist, then we just use an empty dictionary
+
 def get_default_parallel_settings():
+    # We load the user's default parallel settings from ~/.simmate/vasp/INCAR_parallel_settings
+    # If this file doesn't exist, then we just use an empty dictionary
     settings_filename = os.path.join(
         Path.home(), ".simmate", "vasp", "INCAR_parallel_settings"
     )
