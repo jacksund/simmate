@@ -9,6 +9,9 @@ from simmate.configuration.django import setup_full  # sets database connection
 from simmate.configuration.django.settings import DJANGO_DIRECTORY, DATABASES
 from simmate.database.symmetry import Spacegroup
 
+# Apps to init.
+# !!! In the future, I should do a more robust search, rather than hardcode here.
+# !!! maybe just grab all folders in the base directory via os.listdir()?
 APPS_TO_MIGRATE = [
     "local_calculations",
     "third_parties",
@@ -28,10 +31,9 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE):
     # BUG: this is only for SQLite3
     # Consider wrapping the django-extensions function for this instead:
     #   https://django-extensions.readthedocs.io/en/latest/reset_db.html
-
-    # Apps to init.
-    # !!! In the future, I should do a more robust search, rather than hardcode here.
-    # !!! maybe just grab all folders in the base directory via os.listdir()?
+    # An example command to call this (when django-extensions is installed) is...
+    #   django-admin reset_db --settings=simmate.configuration.django.settings
+    # Note: this does not remove migration files or reapply migrating after
 
     # BUG: Why doesn't call_command("flush") do this? How is it different?
 
@@ -77,6 +79,12 @@ def load_database_from_json(filename="database_dump.json"):
     call_command("loaddata", filename, exclude=["contenttypes"])
 
 
-# TODO: add a method that makes an image of all the available tables. The current
-# command to do this with django-extensions is...
-#   python manage.py graph_models -a -o image_of_models.png
+# BUG: This function isn't working as intended
+# def graph_database(filename="database_graph.png"):
+    
+#     # using django-extensions, we want to make an image of all the available
+#     # tables in our database as well as their relationships.
+    
+#     # This is the equivalent of running the following command:
+#     #   django-admin graph_models -a -o image_of_models.png --settings=...
+#     call_command("graph_models", output=filename, all_applications=True, layout="fdp")
