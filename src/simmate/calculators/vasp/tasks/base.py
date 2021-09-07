@@ -1,34 +1,53 @@
 # -*- coding: utf-8 -*-
 
 import os
+from pathlib import Path
 
-# TODO: write my own vasp.outputs classes and remove pymatgen dependency
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
-from simmate.workflows.core.tasks.supervisedstagedtask import (
+from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
     SupervisedStagedShellTask as SSSTask,
 )
 
 
+def get_default_parallel_settings():
+    # We load the user's default parallel settings from ~/.simmate/vasp/INCAR_parallel_settings
+    # If this file doesn't exist, then we just use an empty dictionary
+    settings_filename = os.path.join(
+        Path.home(), ".simmate", "vasp", "INCAR_parallel_settings"
+    )
+    if os.path.exists(settings_filename):
+        return Incar.from_file(settings_filename)
+    else:
+        return {}
+
+
 class VaspTask(SSSTask):
+
+    # Vasp calculations always need an input structure
+    requires_structure = True
 
     # The command to call vasp in the current directory
     # TODO: add support for grabbing a user-set default from their configuration
     command = "vasp > vasp.out"
 
-    # Vasp calculations always need an input structure
-    requires_structure = True
+    # set the default vasp settings from a dictionary. This is the one thing
+    # you *must* set when subclassing VaspTask. An example is:
+    #   incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
+    incar = None
+
+    # We also load any parallel settings to add on to the base incar. These
+    # should not effect the calculation in any way, but they are still selected
+    # based on the computer specs and what runs fastest on it. Therefore, these
+    # settings are loaded from ~/.simmate/vasp/INCAR_parallel_settings by default.
+    # This can also be overwritten as well.
+    incar_parallel_settings = get_default_parallel_settings()
 
     # TODO: add options for poscar formation
     # add_selective_dynamics=False
     # add_velocities=False
     # significant_figures=6
-
-    # set the default vasp settings from a dictionary. This is the one thing
-    # you *must* set when subclassing VaspTask. An example is:
-    #   incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
-    incar = None
 
     # set the KptGrid or KptPath object
     # TODO - KptGrid is just a float for now
@@ -87,15 +106,18 @@ class VaspTask(SSSTask):
         # write the poscar file
         Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
 
-        # write the incar file
-        Incar(**self.incar).to_file(os.path.join(directory, "INCAR"))
+        # Combine our base incar settings with those of our parallelization settings
+        # and then write the incar file
+        incar = Incar(**self.incar) + Incar(**self.incar_parallel_settings)
+        incar.to_file(
+            filename=os.path.join(directory, "INCAR"), structure=structure,
+        )
 
-        # if KSPACING is not provided AND kpoints is, write the KPOINTS file
+        # if KSPACING is not provide in the incar AND kpoints is attached to this
+        # class instance, then we write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
             Kpoints.to_file(
-                structure,
-                self.kpoints,
-                os.path.join(directory, "KPOINTS"),
+                structure, self.kpoints, os.path.join(directory, "KPOINTS"),
             )
 
         # write the POTCAR file
@@ -113,26 +135,19 @@ class VaspTask(SSSTask):
         function for this vasp module down the road.
         """
 
-        # load the xml file and only parse the bare minimum
-        xmlReader = Vasprun(
-            filename=os.path.join(directory, "vasprun.xml"),
-            parse_dos=False,
-            parse_eigen=False,
-            parse_projected_eigen=False,
-            parse_potcar_file=False,
-            exception_on_bad_xml=True,
+        # load the xml file and all of the vasprun data
+        vasprun = Vasprun(
+            filename=os.path.join(directory, "vasprun.xml"), exception_on_bad_xml=True,
         )
 
         # grab the final structure
-        final_structure = xmlReader.structures[-1]
+        # final_structure = vasprun.structures[-1]
 
         # grab the energy per atom
-        final_energy = xmlReader.final_energy / final_structure.num_sites
+        # final_energy = vasprun.final_energy / final_structure.num_sites
 
-        # confirm that the calculation converged
-        assert xmlReader.converged
+        # confirm that the calculation converged (ionicly and electronically)
+        assert vasprun.converged
 
-        # return the desired info
-        # TODO: in the future, I may just want to return the VaspRun object
-        # by default.
-        return final_structure
+        # return vasprun object
+        return vasprun

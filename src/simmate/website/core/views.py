@@ -14,6 +14,7 @@ from simmate.database.third_parties.all import (
     OqmdStructure,
 )
 
+
 @login_required
 def home(request):
 
@@ -58,7 +59,7 @@ def home(request):
                 # structure json -- so that everything runs faster.
                 search_results = database_model.objects.filter(
                     chemical_system__in=chemical_systems
-                ).defer("structure_str")
+                ).defer("structure_string")
 
                 # if the database provides the hull energy, we want to sort
                 # the structures by that (putting highest priority on stable ones)
@@ -94,6 +95,7 @@ def home(request):
     }
     template = "core/home.html"
     return render(request, template, context)
+
 
 def extras(request):
 

@@ -16,7 +16,7 @@ class Kpoints:
         # structure to base off of. this will be passed through the kpoint_method
         structure,
         # either a KptGrid or KptPath object. TODO - KptGrid is just a float (density)
-        kpoint_method,
+        kpoint_method,  # !!! JUST A FLOAT VALUE FOR NOW
         filename="KPOINTS",
         comment=None,
     ):

@@ -1,0 +1,9 @@
+
+# Here you can add any extra Django app to be loaded when Simmate starts
+# Be sure that your app is available in your python path! For example,
+# the following line should work in python:
+#	from mycustomapp.apps import MyCustomAppConfig
+# If not, then be sure to take our tutorial on making custom apps!
+
+mycustomapp.apps.MyCustomAppConfig
+myotherapp.apps.MyOtherAppConfig

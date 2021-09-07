@@ -4,6 +4,7 @@
 
 """
 
+
 def load_structure_from_db(structure_id):
 
     from simmate.configuration import manage_django  # ensures setup

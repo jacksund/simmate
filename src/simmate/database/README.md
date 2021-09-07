@@ -94,3 +94,141 @@ exam.save()
 # add users and instructors to the exam via the .add() method
 exam.students.add(user)
 ```
+
+
+
+
+
+
+
+"""
+
+Every base model class has the sections shown below. These are simply to organize the
+code and make it easier to read:
+
+Base Info
+    These fields are the absolute minimum required for the object and can be
+    considered the object's raw data.
+
+Query-helper Info
+    These fields aren't required but exist simply to help with common query
+    functions. For example, a structure's volume can be calculated using the
+    base info fields, but it helps to have this data in a separate column to
+    improve common query efficiencies at the cost of a larger database.
+
+Relationships
+    These fields point to other models that contain related data. For example,
+    a single structure may be linked to calculations in several other tables.
+    The relationship between a structure and it's calculations can be described
+    in this section. Note that the code establishing the relationship only exists
+    in one of the models -- so we simply add a comment in the other's section.
+    TYPES OF RELATIONSHIPS:
+        ManyToMany - place field in either but not both
+        ManyToOne (ForeignKey) - place field in the many
+        OneToOne - place field in the one that has extra features
+
+Properties
+    In a few cases, you may want to add a convience attribute to a model. However,
+    in the majority of cases, you'll want to convert the model to some other
+    class first which has all of the properties you need. We separate classes
+    in this way for performance and clarity. This also allows our core and
+    database to be separate and thus modular.
+
+Model Methods
+    These are convience functions added onto the model. For example, it's useful
+    to have a method to quickly convert a model Structure (so an object representing
+    a row in a database) to a pymatgen Structure (a really powerful python object)
+
+For website compatibility
+    This contains the extra metadata and code needed to get the class to work
+    with Django and other models properly.
+
+"""
+
+"""
+TODO: these are ideas for other models that I still need to write. Some are based
+off of the Materials Project MapiDoc and will likely change a lot.
+
+NEW: There is now "EMMET" which is a good way to model our database off of.
+        https://github.com/materialsproject/emmet
+
+StructureCluster (or MatchingStructures)
+    This is maps to a given structure in primary structure table and links that
+    structures relations to all other databases. For example, it will map to the
+    list of mp-ids and icsd-ids that match the structure within a given tolerance.
+    This subclasses Calculation because structure matching takes a really long time
+    and even needs to be reran on occasion.
+    ICSD, MP, AFLOW, JARVIS, etc...
+
+EnergyCalculation
+    final_energy
+    e_above_hull
+    final_energy_per_atom
+    formation_energy_per_atom
+
+    # for relaxation
+    delta_volume(%)
+
+    # settings (may be properties!)
+    encut
+    nkpts --> kpt density
+    psudeopotential
+        functional(PBE)
+        label(Y_sv)
+        pot_type(PAW)
+    run_type(GGA,GGAU,HF)
+    is_hubbard
+
+BandStructure + DOS
+    band_gap
+    is_direct
+    type
+    efermi
+
+Dielectric
+    e_electronic
+    e_total
+    n
+    poly_electronic
+    poly_total
+
+Elasticity + ElesticityThirdOrder
+    (G=shear; K=bulk)
+    G_Reuss
+    G_VRH
+    G_Voigt
+    G_Voight_Reuss_Hill
+    K_Reuss
+    K_VRH
+    K_Voight
+    K_Voight_Reuss_Hill
+    compliance_tensor
+    elastic_anisotropy
+    elastic_tensor
+    elastic_tensor_original
+    homogeneous_poisson	nsites
+    poisson_ratio
+    universal_anisotropy
+    warnings
+    **lots for elasticity_third_order so I haven't added these yet
+
+Magnetism
+    exchange_symmetry
+    is_magnetic	magmoms	num_magnetic_sites
+    num_unique_magnetic_sites
+    ordering
+    total
+    total_magnetization
+    total_magnetization_normalized_formula_units
+    total_magnetization_normalized_vol
+    types_of_magnetic_species
+
+Oxides
+    type (peroxide/superoxide/etc)
+
+Piezo
+    eij_max
+    v_max
+    piezoelectric_tensor
+
+"""

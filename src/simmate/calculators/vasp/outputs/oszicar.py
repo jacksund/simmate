@@ -5,9 +5,8 @@
 # storing electronic and ionic steps across different calculators. I think it
 # would be useful to have a ElectronicStep and IonicStep classes.
 
-# BUG: what if the final ionic_step hasn't completed yet? I need to account for this.
-# Maybe I could have the ionic step with None values and fill in the electronic steps
-# where they're available.
+import numpy
+
 
 class Oszicar:
     """
@@ -33,8 +32,12 @@ class Oszicar:
         with open(filename) as file:
             lines = file.readlines()
 
-        # now let's iterate through the contents and parse the data
-        for line in lines:
+        # Empty lines cause trouble so we remove those before parsing any data.
+        lines = [line for line in lines if line.strip()]
+
+        # now let's iterate through the contents and parse the data. We also need
+        # to check the line number below, so we use the index too
+        for line_number, line in enumerate(lines):
 
             # if "N" is in the line, that means we have the start of a new ionic step
             if "N" in line:
@@ -44,7 +47,10 @@ class Oszicar:
                 # a new ionic step.
                 electronic_steps = []
 
-            # if "F" is in the line, that means we have hit the end of an ionic step
+            # if "F" is in the line, that means we have hit the end of an ionic step.
+            # We also need to account for when the calculation is not finished and
+            # in the middle of an ionic step. Therefore we also check if this is the final
+            # line of the file.
             elif "F" in line:
 
                 # parse this line to pull out the ionic_step information
@@ -64,7 +70,7 @@ class Oszicar:
                 )
 
                 # convert the list of strings to float values. We skip the first
-                # value which is just the ionic_step_number and we don't need
+                # value which is just the ionic_step_number that we don't need
                 values = [float(value) for value in values[1:]]
 
                 # Now there are three formats that we need to account for, which
@@ -106,18 +112,20 @@ class Oszicar:
                         "energy_kinetic_nose_thermostat": values[6],  # SK
                         "electronic_steps": electronic_steps,
                     }
-                
+
                 # otherwise something went wrong
                 else:
-                    raise Exception("Electronic step had unexpected data. Failed to parse.")
-                
+                    raise Exception(
+                        "Electronic step had unexpected data. Failed to parse."
+                    )
+
                 # take whatever ionic_step that was made above and add it to our
                 # results list!
                 self.ionic_steps.append(ionic_step)
-                
+
             # Otherwise this line is an electronic step
             else:
-                
+
                 # electronic step lines are pretty easy because they are just
                 # a row in a table of electronic steps. First let's split
                 # the values into and list and then convert them into floats.
@@ -125,36 +133,59 @@ class Oszicar:
                 # scheme used (i.e. DAV, RMM, or CG) and electronic step number
                 # which we don't need. (I grab the scheme below though)
                 values = [float(value) for value in line.split()[2:]]
-                
+
                 # now load the data into a dictionary for verbosity
-                # Note that I change the VASP headers to more verbose names so 
+                # Note that I change the VASP headers to more verbose names so
                 # the user can instantly see their meaning. The original headers
                 # are shown as comments next to each.
                 electronic_step = {
                     # The scheme is set by IALGO and is the first thing written
                     # in the line. Rather than grab it above, I just do it here.
-                    "scheme": line.split()[0].replace(":",""),
+                    "scheme": line.split()[0].replace(":", ""),
                     "energy": values[0],  # E
                     "energy_change": values[1],  # dE
                     "band_structure_energy_change": values[2],  # d eps
                     "nhamiltonians": values[3],  # ncg
                     "wavefunctions_residuum_norm": values[4],  # rms
                     # Note not all electronic steps have this value so we need to doublecheck
-                    "charge_density_change": values[5] if len(values) == 6 else None,  # rms(c)
-                    }
-                
+                    "charge_density_change": values[5]
+                    if len(values) == 6
+                    else None,  # rms(c)
+                }
+
                 # add the electronic step to our results!
                 electronic_steps.append(electronic_step)
+
+                # SPECIAL CASE:
+                # if this is the final line and isn't an ionic step summary,
+                # then that means we are in the middle of the ionic step and
+                # are reading an incomplete file. We still want all the
+                # electronic steps available in the final class so we store
+                # the incomplete ionic step here. This is useful for ErrorHandlers.
+                # We use numpy.NaN instead of None so errors aren't through
+                # elsewhere that expect a float value.
+                if line_number == len(lines) - 1:
+                    # BUG: we don't know what the data should be here (see the
+                    # three formats discussed above). For now, we assume
+                    # the first format as it is most common. We are filling this
+                    # data with "None" values anyways so it shouldn't matter.
+                    ionic_step = {
+                        "energy": numpy.NaN,  # F (total_free_energy)
+                        "energy_sigma_zero": numpy.NaN,  # E0
+                        "energy_change": numpy.NaN,  # dE
+                        "electronic_steps": electronic_steps,
+                    }
+                    self.ionic_steps.append(ionic_step)
 
     def all_electronic_step_energies(self, ionic_step_number):
         # TODO: move to DftCalc/IonicStep/ElectronicStep class
         pass
 
     def all_ionic_step_energies(self):
-       # TODO: move to DftCalc/IonicStep/ElectronicStep class
+        # TODO: move to DftCalc/IonicStep/ElectronicStep class
         pass
 
     @property
-    def final_energy(self):
+    def energy_final(self):
         # TODO: move to DftCalc/IonicStep/ElectronicStep class
         return self.ionic_steps[-1]["energy_sigma_zero"]

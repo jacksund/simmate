@@ -1,0 +1,1 @@
+While we can't share the VASP POTCARs, this should serve as an example of where to put them. The folder structure should match exactly how you recieve the POTCARs from the VASP source files. For example there would be an LDA folder here and it would contain folders potpaw_LDA, potpaw_LDA.52, potpaw_LDA.54, and so on.

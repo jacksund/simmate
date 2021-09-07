@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # This file sets up a shortcut for importing so that you can do...
-# 
+#
 #   from simmate.database.third_parties.all import (
 #       MaterialsProjectStructure,
 #       JarvisStructure,

@@ -2,10 +2,15 @@
 
 from django.db import models
 
-from simmate.database.base import Structure
+from simmate.database.structure import Structure
 
 
 class OqmdStructure(Structure):
+
+    # The id used to symbolize the structure.
+    # For example, Materials Project structures are represented by ids such as
+    # "mp-12345" while AFLOW structures by "aflow-12345"
+    id = models.CharField(max_length=25, primary_key=True)
 
     """ Base Info """
 
@@ -21,6 +26,10 @@ class OqmdStructure(Structure):
     # OPTIMIZE: is it better to just set the attribute than to have a fixed
     # property that's defined via a function?
     source = "OQMD"
+
+    # Make sure Django knows which app this is associated with
+    class Meta:
+        app_label = "third_parties"
 
     @property
     def external_link(self):

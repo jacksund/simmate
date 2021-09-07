@@ -9,10 +9,10 @@ from subprocess import Popen
 
 from custodian.custodian import Custodian, Job, ErrorHandler
 
-from simmate.workflows.core.tasks.supervisedstagedtask import (
+from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
     SupervisedStagedShellTask as SSSTask,
 )
-from simmate.workflows.core.tasks.errorhandler import ErrorHandler as ErrorHandlerS
+from simmate.workflow_engine.tasks.error_handler import ErrorHandler as ErrorHandlerS
 
 import pandas
 
@@ -50,7 +50,7 @@ class AlwaysPassesHandlerS(ErrorHandlerS):
     def check(self, dir):
         return None
 
-    def correct(self, error, dir):
+    def correct(self, dir):
         # this should never be entered since check() never returns an error
         raise Exception
 

@@ -11,7 +11,7 @@ In simple terms, this is how we can access databases from a website url. For exa
 ```
 {
     "url": "http://127.0.0.1:8000/rest-api/jarvis/jvasp-90856/",
-    "structure_str": "Ti2 Cu2 Si2 As2....(truncated for clarity)",
+    "structure_string": "Ti2 Cu2 Si2 As2....(truncated for clarity)",
     "nsites": 8,
     "nelement": 4,
     "chemical_system": "As-Cu-Si-Ti",

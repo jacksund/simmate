@@ -23,9 +23,9 @@ class MyCustomSet(DictSet):
             # 'NBANDS': 643, # Calculate more bands than normal (extra empty)
             "SYMPREC": 1e-8,  # !!! CUSTODIAN FIX - dont use unless needed
             # 'ISYM': 0,
-            'NGX': 75,
-            'NGY': 75,
-            'NGZ': 75,
+            "NGX": 75,
+            "NGY": 75,
+            "NGZ": 75,
             "NCORE": 4,
             #!!! TESTING
             # ELFCAR (optional)
