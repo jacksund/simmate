@@ -156,15 +156,15 @@ class Relaxation(Calculation):
         structure_start.site_forces = ionic_step["forces"]
         structure_start.lattice_stress = ionic_step["stress"]
         structure_start.energy_per_atom = (
-            ionic_step["e_wo_entrp"] / structure_start.num_sites
+            ionic_step["e_wo_entrp"] / structure_start.nsites
         )
         structure_start.site_forces_norm = numpy.linalg.norm(ionic_step["forces"])
         structure_start.sites_forces_norm_per_atom = (
-            numpy.linalg.norm(ionic_step["forces"]) / structure_start.num_sites
+            numpy.linalg.norm(ionic_step["forces"]) / structure_start.nsites
         )
         structure_start.lattice_stress_norm = numpy.linalg.norm(ionic_step["stress"])
         structure_start.lattice_stress_norm_per_atom = (
-            numpy.linalg.norm(ionic_step["stress"]) / structure_start.num_sites
+            numpy.linalg.norm(ionic_step["stress"]) / structure_start.nsites
         )
         structure_start.save()
 
