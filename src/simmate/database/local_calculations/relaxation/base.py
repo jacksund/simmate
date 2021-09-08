@@ -138,7 +138,7 @@ class Relaxation(Calculation):
 
     """ Model Methods """
 
-    def update_from_vasp_run(self, vasprun, IonicStepStructure_subclass):
+    def update_from_vasp_run(self, vasprun, corrections, IonicStepStructure_subclass):
         # Takes a pymatgen VaspRun object, which is what's typically returned
         # from a simmate VaspTask.run() call.
         # The ionic_step_structure_subclass is where to save the structures and
@@ -211,6 +211,9 @@ class Relaxation(Calculation):
         self.energy_fermi = data["efermi"]
         self.conduction_band_minimum = data["cbm"]
         self.valence_band_maximum = data["vbm"]
+
+        # lastly, we also want to save the corrections made
+        self.corrections = corrections
 
         # Now we have the relaxation data all loaded and can save it to the database
         self.save()

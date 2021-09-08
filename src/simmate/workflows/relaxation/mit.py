@@ -52,7 +52,7 @@ def save_results(result_and_corrections, calculation_id):
 
     # now grab our calculation from before and update it with our results
     calculation = MITRelaxation.objects.get(id=calculation_id)
-    calculation.update_from_vasp_run(vasprun, MITRelaxationStructure)
+    calculation.update_from_vasp_run(vasprun, corrections, MITRelaxationStructure)
 
     return calculation.id
 

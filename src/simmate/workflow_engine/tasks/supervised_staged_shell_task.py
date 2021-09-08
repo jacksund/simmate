@@ -4,7 +4,7 @@ import os
 import time
 import signal
 from shutil import make_archive
-from subprocess import Popen
+import subprocess
 from typing import Any, Tuple
 
 import pandas
@@ -31,6 +31,7 @@ from simmate.utilities import get_directory, empty_directory
 # OPTIMIZE: I think this class would greatly benefit from asyncio so that we
 # know exactly when a shelltask completes, rather than loop and checking every
 # set timestep.
+# https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
 
 
 class SupervisedStagedShellTask(Task):
@@ -178,8 +179,16 @@ class SupervisedStagedShellTask(Task):
             # The preexec_fn keyword allows us to properly terminate jobs that
             # are launched with parallel processes (such as mpirun). This assigns
             # a parent id to it that we use when killing a job (if an error
-            # handler calls for us to do so)
-            future = Popen(command, cwd=directory, shell=True, preexec_fn=os.setsid,)
+            # handler calls for us to do so).
+            # Stderr keyword indicates that we should capture the error if one
+            # occurs so that we can report it to the user.
+            process = subprocess.Popen(
+                command,
+                cwd=directory,
+                shell=True,
+                preexec_fn=os.setsid,
+                stderr=subprocess.PIPE,
+            )
 
             # Assume the shelltask has no errors until proven otherwise
             has_error = False
@@ -206,7 +215,7 @@ class SupervisedStagedShellTask(Task):
 
                     # check if the shelltasks is complete. poll will return 0
                     # when it's done, in which case we break the loop
-                    if future.poll() is not None:
+                    if process.poll() is not None:
                         break
 
                     # check whether we should run monitors on this poll loop
@@ -221,7 +230,7 @@ class SupervisedStagedShellTask(Task):
                                 if error_handler.is_terminating:
                                     # If so, we kill the process but don't apply
                                     # the fix quite yet. That step is done below.
-                                    self._terminate_job(future, command)
+                                    self._terminate_job(process, command)
                                 # Otherwise apply the fix and let the shelltask end
                                 # naturally. An example of this is for codes
                                 # where you add a STOP file to get it to
@@ -245,15 +254,22 @@ class SupervisedStagedShellTask(Task):
 
                 # ------ end of monitor while loop ------
 
-            # Now just wait for the process to finish
-            future.wait()
+            # Now just wait for the process to finish. Note we use communicate
+            # instead of the .wait() method. This is the recommended method
+            # when we have stderr=subprocess.PIPE, which we use above.
+            output, errors = process.communicate()
             # check if the return code is non-zero and thus failed.
             # The 'not has_error' is because terminate() will give a nonzero
             # when a monitor is triggered. We don't want to raise that
             # exception here but instead let the monitor handle that
             # error in the code below.
-            if future.returncode != 0 and not has_error:
-                raise NonZeroExitError("command failed with non-zero exitcode")
+            if process.returncode != 0 and not has_error:
+                # convert the error from bytes to a string
+                errors = errors.decode("utf-8") 
+                # and report the error to the user
+                raise NonZeroExitError(
+                    f"The command ({command}) failed. The error output was...\n {errors}"
+                )
 
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered above (if there was one).
@@ -263,7 +279,7 @@ class SupervisedStagedShellTask(Task):
 
                 # NOTE - The following special case is handled above:
                 #   error_handler.is_monitor and not error_handler.is_terminating
-                # BUG: I can see this being a source of bugs in the future so I
+                # BUG: I can see this being a source of bugs in the process so I
                 # need to reconsider subclassing this special case. For now,
                 # users should have this case at the lowest priority.
 
@@ -290,11 +306,13 @@ class SupervisedStagedShellTask(Task):
             if self.save_corrections_to_file:
                 # compile the corrections metadata into a dataframe
                 data = pandas.DataFrame(
-                    corrections, columns=["error_handler", "correction_applied"],
+                    corrections,
+                    columns=["error_handler", "correction_applied"],
                 )
                 # write the dataframe to a csv file
                 data.to_csv(
-                    os.path.join(directory, self.corrections_filename), index=False,
+                    os.path.join(directory, self.corrections_filename),
+                    index=False,
                 )
 
             # now that we've gone through the error_handlers, let's see if any
@@ -319,20 +337,20 @@ class SupervisedStagedShellTask(Task):
         return corrections
 
     @staticmethod
-    def _terminate_job(future, command):
+    def _terminate_job(process, command):
         """
         Stopping the command we submitted can be a tricky business if we are running
         scripts in parallel (such as using mpirun). Therefore, try a series of
         job-killing approaches here to ensure the job is terminated properly.
-        
+
         This method is never used directly, but is instead applied within the
-        execute() method above. 
-        
+        execute() method above.
+
         If you know your command needs a special case to kill all of its spawn
         processes, you can overwrite this method as well.
         """
         # The normal line to end a popen process is just...
-        #   future.terminate()
+        #   process.terminate()
 
         # However this struggles to kill all "child"
         # processes if we are using something like
@@ -340,7 +358,7 @@ class SupervisedStagedShellTask(Task):
         # we use the os module to grab the parent id
         # and send that the termination signal, which
         # is also passed on to all child processes.
-        os.killpg(os.getpgid(future.pid), signal.SIGKILL)
+        os.killpg(os.getpgid(process.pid), signal.SIGKILL)
         # BUG: SIGTERM is the normal signal but I use SIGKILL to try to address
         # permission errors. Also SIGKILL has not been tested outside of Linux.
 
@@ -398,7 +416,12 @@ class SupervisedStagedShellTask(Task):
             empty_directory(directory, self.files_to_keep)
 
     @defaults_from_attrs("structure", "directory", "command")
-    def run(self, structure=None, directory=None, command=None,) -> Tuple[Any, list]:
+    def run(
+        self,
+        structure=None,
+        directory=None,
+        command=None,
+    ) -> Tuple[Any, list]:
         """
         Runs the entire job in the current working directory without any error
         handling. If you want robust error handling, then you should instead
