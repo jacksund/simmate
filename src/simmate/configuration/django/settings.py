@@ -16,7 +16,7 @@ from pathlib import Path
 
 import yaml
 
-from django.core.management.utils import get_random_secret_key
+# from django.core.management.utils import get_random_secret_key
 
 import dj_database_url  # needed for DigitalOcean database connection
 
@@ -46,11 +46,6 @@ DJANGO_DIRECTORY = os.path.dirname(os.path.abspath(website.__file__))
 # We check for these variables in the enviornment, and if they are not set,
 # they fall back to a default.
 
-# Keep the secret key used in production secret!
-# For DigitalOcean, we grab this secret key from an enviornment variable.
-# If this variable isn't set, then we instead generate a random one.
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
-
 # Don't run with debug turned on in production!
 # For DigitalOcean, we try grabbing this from an enviornment variable. If that
 # variable isn't set, then we assume we are debugging. The == at the end converts
@@ -69,6 +64,15 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split("
 #   (3) If USE_LOCAL_DATABASE=False, then check for DATABASE_URL enviornment variable
 USE_LOCAL_DATABASE = os.getenv("USE_LOCAL_DATABASE", "True") == "True"
 # this is not a typical Django setting
+
+# Keep the secret key used in production secret!
+# For DigitalOcean, we grab this secret key from an enviornment variable.
+# If this variable isn't set, then we instead generate a random one.
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY", "pocj6cunub4zi31r02vr5*5a2c(+_a0+(zsswa7fmus^o78v)r"
+)
+# !!! I removed get_random_secret_key() so I don't have to sign out every time
+# while testing my server. I may change this back in the future.
 
 # --------------------------------------------------------------------------------------
 
@@ -188,7 +192,7 @@ if os.path.exists(APPLICATIONS_YAML):
 # --------------------------------------------------------------------------------------
 
 # This sets the default field for primary keys in django models
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

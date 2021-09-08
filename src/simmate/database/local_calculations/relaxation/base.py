@@ -7,6 +7,11 @@ from django.db import models
 from simmate.database.structure import Structure
 from simmate.database.calculation import Calculation
 
+# Extra modules for plotting and visualization.
+from plotly.subplots import make_subplots
+import plotly.graph_objects as plotly_go
+from django_pandas.io import read_frame
+
 
 class IonicStepStructure(Structure):
 
@@ -209,6 +214,67 @@ class Relaxation(Calculation):
 
         # Now we have the relaxation data all loaded and can save it to the database
         self.save()
+
+    def get_convergence_plot(self):
+
+        # Grab the calculation's structure and convert it to a dataframe
+        structures = self.structures.all()
+        structures_dataframe = read_frame(structures)
+
+        # We will be making a figure that consists of 3 stacked subplots that
+        # all share the x-axis of ionic_step_number
+        figure = make_subplots(
+            rows=3,
+            cols=1,
+            shared_xaxes=True,
+        )
+
+        # Generate a plot for Energy (per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["ionic_step_number"],
+                y=structures_dataframe["energy_per_atom"],
+            ),
+            row=1,
+            col=1,
+        )
+
+        # Generate a plot for Forces (norm per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["ionic_step_number"],
+                y=structures_dataframe["site_forces_norm_per_atom"],
+            ),
+            row=2,
+            col=1,
+        )
+
+        # Generate a plot for Stress (norm per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["ionic_step_number"],
+                y=structures_dataframe["lattice_stress_norm_per_atom"],
+            ),
+            row=3,
+            col=1,
+        )
+
+        # Now let's clean up some formatting and add the axes titles
+        figure.update_layout(
+            width=600,
+            height=600,
+            showlegend=False,
+            xaxis3_title="Ionic Step (#)",
+            yaxis_title="Energy (eV/atom)",
+            yaxis2_title="Site Forces",
+            yaxis3_title="Lattice Stress",
+        )
+
+        # we return the figure object for the user
+        return figure
+
+    def view_convergence_plot(self):
+        pass
 
     """ Set as Abstract Model """
     # I have other models inherit from this one, while this model doesn't need

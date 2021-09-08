@@ -1,0 +1,35 @@
+
+{% extends "core/site-base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<!--
+NOTE: in the future, use Bootstraps grid system when I add more cards here
+https://getbootstrap.com/docs/5.0/components/card/#grid-cards
+-->
+
+<div class="container p-4 bg-light border">
+    <div class="card" style="width: 25rem;">
+      <div class="card-body">
+        <h5 class="card-title">Relaxations</h5>
+        <p class="card-text">
+            These workflows take an input structure and relax the lattice and sites.
+            There are many workflows here because there are varying qualities
+            as well as different calculators / programs used.
+            </br></br>
+          <a role="button" class="btn btn-primary btn-sm" href="">Learn More...</a>
+          <a role="button" class="btn btn-primary btn-sm" href="{% url 'relaxations' %}">View Results</a>
+      </div>
+    </div>
+</div>
+{% endblock %}
+
