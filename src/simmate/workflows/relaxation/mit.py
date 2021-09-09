@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from prefect import task, Flow, Parameter, context
+import prefect  # base import is required for prefect context
+from prefect import task, Flow, Parameter
 from prefect.storage import Module
 
 from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxationTask
@@ -25,7 +26,7 @@ relax_structure = MITRelaxationTask()
 def save_input(structure):
 
     # initialize the MITRelaxation with the Prefect run info
-    calculation = MITRelaxation.from_prefect_context(context)
+    calculation = MITRelaxation.from_prefect_context(prefect.context)
     calculation.save()
 
     # save the intial structure to the database and link it to the calculation
