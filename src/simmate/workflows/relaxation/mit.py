@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from prefect import task, Flow, Parameter, context
+from prefect.storage import Module
 
 from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxationTask
 
@@ -79,5 +80,10 @@ with Flow("MIT Relaxation") as workflow:
     # pass these results and corrections into our final task which saves
     # everything to the database
     save_results(result_and_corrections, calculation_id)
+
+# For when this workflow is registered with Prefect Cloud, we indicate that
+# it can be imported from a python module. Note __name__ provides the path
+# to this module.
+workflow.storage = Module(__name__)
 
 # --------------------------------------------------------------------------------------
