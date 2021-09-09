@@ -14,6 +14,27 @@ from simmate.database.local_calculations.relaxation.mit import (
 
 # --------------------------------------------------------------------------------------
 
+from pymatgen.core.structure import Structure
+
+
+@task
+def load_structure(structure):
+
+    # How the structure was submitted as a parameter often depends on if we
+    # are submitting to Prefect Cloud or running the flow locally. Therefore,
+    # the structure parameter could be a number of formats. Here, we use a
+    # task to convert the input to a pymatgen structure
+
+    # if the input is already a pymatgen structure, just return it back
+    if type(structure) == Structure:
+        return structure
+    # otherwise load the structure from the string and return it
+    else:
+        return Structure.from_str(structure, fmt="json")
+
+
+# --------------------------------------------------------------------------------------
+
 
 # we initialize the task here so we can use it in the Prefect flow below
 relax_structure = MITRelaxationTask()
@@ -31,7 +52,9 @@ def save_input(structure):
 
     # save the intial structure to the database and link it to the calculation
     structure_start = MITRelaxationStructure.from_pymatgen(
-        structure, ionic_step_number=0, relaxation=calculation,
+        structure,
+        ionic_step_number=0,
+        relaxation=calculation,
     )
     structure_start.save()
 
@@ -69,13 +92,18 @@ with Flow("MIT Relaxation") as workflow:
     directory = Parameter("directory", default=".")
     vasp_command = Parameter("vasp_command", default="vasp > vasp.out")
 
+    # load the structure
+    structure_pmg = load_structure(structure)
+
     # Add the initial structure to the database and log the Prefect information
     # for the calculation. We save the id so we know where to write results.
-    calculation_id = save_input(structure)
+    calculation_id = save_input(structure_pmg)
 
     # Run the calculation
     result_and_corrections = relax_structure(
-        structure=structure, directory=directory, command=vasp_command,
+        structure=structure_pmg,
+        directory=directory,
+        command=vasp_command,
     )
 
     # pass these results and corrections into our final task which saves
