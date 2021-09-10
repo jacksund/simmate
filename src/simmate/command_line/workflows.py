@@ -31,7 +31,7 @@ def register_all():
 @click.option(
     "--directory",
     "-d",
-    default=".",
+    default=None,
     help="the folder to run this workflow in",
 )
 def mit_relaxation(filename, vasp_command, directory):

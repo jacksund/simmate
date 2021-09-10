@@ -98,16 +98,16 @@ class RunWorkflowTask(Task):
     )
     def run(
         self,
-        executor_type,
-        wait_for_run,
-        project_name,
-        context,
-        labels,
-        run_name,
-        run_config,
-        scheduled_start_time,
-        stream_states,
-        stream_logs,
+        executor_type=None,
+        wait_for_run=None,
+        project_name=None,
+        context=None,
+        labels=None,
+        run_name=None,
+        run_config=None,
+        scheduled_start_time=None,
+        stream_states=None,
+        stream_logs=None,
         **parameters,
     ):
         # The kwargs here are any parameter you would normally pass into the

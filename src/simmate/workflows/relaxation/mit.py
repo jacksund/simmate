@@ -5,32 +5,13 @@ from prefect import task, Flow, Parameter
 from prefect.storage import Module
 
 from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxationTask
+from simmate.workflows.common_tasks.load_structure import load_structure
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.relaxation.mit import (
     MITRelaxationStructure,
     MITRelaxation,
 )
-
-# --------------------------------------------------------------------------------------
-
-from pymatgen.core.structure import Structure
-
-
-@task
-def load_structure(structure):
-
-    # How the structure was submitted as a parameter often depends on if we
-    # are submitting to Prefect Cloud or running the flow locally. Therefore,
-    # the structure parameter could be a number of formats. Here, we use a
-    # task to convert the input to a pymatgen structure
-
-    # if the input is already a pymatgen structure, just return it back
-    if type(structure) == Structure:
-        return structure
-    # otherwise load the structure from the dictionary and return it
-    else:
-        return Structure.from_dict(structure)
 
 
 # --------------------------------------------------------------------------------------
@@ -71,7 +52,7 @@ def save_input(structure):
 @task
 def save_results(result_and_corrections, calculation_id):
 
-    # split our results and corrections (which are give as a tuple) into
+    # split our results and corrections (which are given as a tuple) into
     # separate variables
     vasprun, corrections = result_and_corrections
 
@@ -89,7 +70,7 @@ with Flow("MIT Relaxation") as workflow:
 
     # These are the input parameters for the overall workflow
     structure = Parameter("structure")
-    directory = Parameter("directory", default=".")
+    directory = Parameter("directory", default=None)
     vasp_command = Parameter("vasp_command", default="vasp > vasp.out")
 
     # load the structure
@@ -99,11 +80,12 @@ with Flow("MIT Relaxation") as workflow:
     # for the calculation. We save the id so we know where to write results.
     calculation_id = save_input(structure_pmg)
 
-    # Run the calculation
+    # Run the calculation after we have saved the input
     result_and_corrections = relax_structure(
         structure=structure_pmg,
         directory=directory,
         command=vasp_command,
+        upstream_tasks=[calculation_id],
     )
 
     # pass these results and corrections into our final task which saves

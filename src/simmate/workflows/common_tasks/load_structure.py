@@ -1,28 +1,21 @@
 # -*- coding: utf-8 -*-
 
-"""
+from prefect import task
 
-"""
+from pymatgen.core.structure import Structure
 
 
-def load_structure_from_db(structure_id):
+@task
+def load_structure(structure):
 
-    from simmate.configuration import manage_django  # ensures setup
-    from simmate.database.all import Structure as Structure_DB
+    # How the structure was submitted as a parameter often depends on if we
+    # are submitting to Prefect Cloud or running the flow locally. Therefore,
+    # the structure parameter could be a number of formats. Here, we use a
+    # task to convert the input to a pymatgen structure
 
-    # grab the proper Structure entry and we want only the structure column
-    # This query is ugly to read so here's the breakdown:
-    #   .values_list("structure", flat=True) --> only grab the structure column
-    #   .get(id=structure_id) --> grab the structure by row id (or personal key)
-    #   ['structure'] --> the query gives us a dict where we just want this key's value
-    structure_json = Structure_DB.objects.values_list(
-        "structure",
-        flat=True,
-    ).get(id=structure_id)
-
-    # convert the output from a json string to python dictionary
-    structure_dict = json.loads(structure_json)
-    # convert the output from a dictionary to pymatgen Structure object
-    structure = Structure.from_dict(structure_dict)
-
-    return structure
+    # if the input is already a pymatgen structure, just return it back
+    if type(structure) == Structure:
+        return structure
+    # otherwise load the structure from the dictionary and return it
+    else:
+        return Structure.from_dict(structure)

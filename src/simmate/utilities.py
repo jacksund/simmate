@@ -6,7 +6,7 @@ This file hosts common functions that are used throughout Simmate
 
 import os
 import itertools
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, mkdtemp
 import shutil
 import warnings
 
@@ -20,7 +20,8 @@ def get_directory(directory=None):
     # This includes... None, a string, or a TemporaryDirectory instance.
     # I consistently want to handle these inputs and thus make this utility.
     # Based on the input, I do the following:
-    #   None --> I return the full path to python's current working directory
+    #   None --> I return the full path to a new folder inside python's
+    #            current working directory
     #   TemporaryDirectory --> I return the full path to the given temp directory
     #   str --> I make the directory if it doesnt exist and then return the path
 
@@ -28,9 +29,18 @@ def get_directory(directory=None):
     # for a Task! This means you'll want it in the Task.run() method and
     # nowhere else.
 
-    # if no directory was provided, use the current working directory
+    # if no directory was provided, we create a new folder within the current
+    # working directory. All of these folders are named randomly.
+    # BUG: we can't name these nicely (like simmate-task-001) because that will
+    # introduce race conditions when making these folders in production.
+    # !!! What if I name this folder off of the workflow run id in the future?
     if not directory:
-        directory = os.getcwd()
+
+        # create a directory in the current working directory. Note, even though
+        # we are creating a "TemporaryDirectory" here, this directory is never
+        # actually deleted.
+        directory = mkdtemp(prefix="simmate-task-", dir=os.getcwd())
+
     # if the user provided a tempdir, we want it's name
     elif isinstance(directory, TemporaryDirectory):
         directory = directory.name
