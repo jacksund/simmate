@@ -28,9 +28,9 @@ def load_structure(structure):
     # if the input is already a pymatgen structure, just return it back
     if type(structure) == Structure:
         return structure
-    # otherwise load the structure from the string and return it
+    # otherwise load the structure from the dictionary and return it
     else:
-        return Structure.from_str(structure, fmt="json")
+        return Structure.from_dict(structure)
 
 
 # --------------------------------------------------------------------------------------

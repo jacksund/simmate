@@ -221,7 +221,7 @@ class Relaxation(Calculation):
     def get_convergence_plot(self):
 
         # Grab the calculation's structure and convert it to a dataframe
-        structures = self.structures.all()
+        structures = self.structures.order_by("ionic_step_number").all()
         structures_dataframe = read_frame(structures)
 
         # We will be making a figure that consists of 3 stacked subplots that
