@@ -14,23 +14,26 @@ Simmate
 
 <!-- NOTE: for this section to work, be sure to read datatable.html -->
 
-<div class="container p-4 bg-light border" id="search-results">
 
-<div class="container p-4">
+<div class="container p-4 bg-light border" id="search-results">
 
 <!-- Breadcrumb links -->
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'local_calculations' %}">Workflows</a></li>
     <li class="breadcrumb-item"><a href="{% url 'relaxations' %}">Relaxations</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'mit' %}">MIT-Project Quality</a></li>
-    <li class="breadcrumb-item active">mitrelax-{{ calculation.id }}</li>
+    <li class="breadcrumb-item"><a href="{% url 'mit_about' %}">MIT-Project Quality</a></li>
+    <li class="breadcrumb-item active">Submit</li>
   </ol>
 </nav>
 
-{{ figure_convergence_html | safe }}
 
-</div>
+<form action="{% url 'mit_submit' %}" method="post" enctype="multipart/form-data" >
+    {% csrf_token %}
+    {{ submission_form }}
+    <input type="submit" value="Submit">
+</form>
+
 
 </div>
 

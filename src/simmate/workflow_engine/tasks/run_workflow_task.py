@@ -17,8 +17,12 @@
 #   https://github.com/PrefectHQ/prefect/blob/master/src/prefect/tasks/prefect/flow_run.py
 #   from prefect.tasks.prefect.flow_run import create_flow_run, wait_for_flow_run
 
+import os
 import json
 import cloudpickle
+from pathlib import Path
+
+import yaml
 
 import prefect
 from prefect import Client, Task
@@ -26,14 +30,35 @@ from prefect.backend.flow_run import FlowRunView, FlowView, watch_flow_run
 from prefect.utilities.tasks import defaults_from_attrs
 
 
+def get_default_executor_type():
+    # rather than always specifying the executor type whenever this class is used,
+    # it's much more convenient to set the default value here based on a config
+    # file. We check for this in the file ".simmate/extra_applications".
+    # For windows, this would be something like...
+    #   C:\Users\exampleuser\.simmate\executor.yaml
+    SIMMATE_DIRECTORY = os.path.join(Path.home(), ".simmate")
+    EXECUTOR_YAML = os.path.join(SIMMATE_DIRECTORY, "executor.yaml")
+    if os.path.exists(EXECUTOR_YAML):
+        with open(EXECUTOR_YAML) as file:
+            EXECUTOR_TYPE = yaml.full_load(file)["EXECUTOR_TYPE"]
+    else:
+        EXECUTOR_TYPE = "local"
+    return EXECUTOR_TYPE
+
+
 class RunWorkflowTask(Task):
     def __init__(
         self,
-        # The full workflow to run. This is required to be a Flow object
-        workflow,
+        # The full workflow to run. Only one of these needs to be provided. If you
+        # are running things locally, you MUST provide the workflow as a flow object.
+        # But if you are using Prefect to submit flows, you can instead use
+        # flow_name. This is faster because importing a workflow takes a while
+        # but you don't actually need it when submitting a flow!
+        workflow=None,
+        workflow_name=None,
         # How the workflow should be scheduled and ran. The options are either
         # local or prefect (i.e. prefect cloud).
-        executor_type="local",
+        executor_type=get_default_executor_type(),
         # If Prefect is used to schedule the workflow, then this indicates
         # whether we should wait for the flow to finish or not.
         wait_for_run=True,
@@ -46,7 +71,7 @@ class RunWorkflowTask(Task):
         run_config=None,
         scheduled_start_time=None,
         stream_states=True,
-        stream_logs=False,
+        stream_logs=True,
         # If Prefect is used to schedule the workflow, we also may want to
         # To support other Prefect input options. To see all the options, visit...
         # https://docs.prefect.io/api/latest/core/task.html
@@ -66,8 +91,24 @@ class RunWorkflowTask(Task):
         # workflow's task to the same Cluster can cause issues. So you should
         # stick to Prefect Cloud for advanced parallelization.
 
+        # make sure either workflow or workflow_name is provided, not both. Further,
+        # workflow_name can only be used when the executor_type is "prefect"
+        # because it requires the flow to be registered with Prefect Cloud
+        if workflow and workflow_name:
+            raise Exception(
+                "Only provide a workflow or workflow_name as an input! Not both!"
+            )
+        if not workflow and not workflow_name:
+            raise Exception("Either a workflow or workflow_name needs to be provided!")
+        if workflow and executor_type != "prefect":
+            raise Exception(
+                "Only provide workflow_name as an input when you are using Prefect "
+                "Cloud. When running things locally, you need to provide a workflow."
+            )
+
         # Save our inputs
         self.workflow = workflow
+        self.workflow_name = workflow.name if workflow else workflow_name
         self.executor_type = executor_type
         self.wait_for_run = wait_for_run
 
@@ -151,6 +192,10 @@ class RunWorkflowTask(Task):
                         "you ran this through Prefect Cloud, the flow-run URL "
                         "will give you the most information."
                     )
+            # If we aren't waiting, we return the flow run id so that the user
+            # can monitor the run
+            else:
+                return flow_run_id
 
     def _create_flow_run_prefect(
         self,
@@ -170,17 +215,20 @@ class RunWorkflowTask(Task):
         It does exactly the same thing except it takes a workflow object instead
         of flow_id/flow_name
         """
-
+        
+        
+        # BUG: The prefect context doesn't work when 
+        
         # Grab the logger as we will print useful information below
-        logger = prefect.context.logger
+        # logger = prefect.context.logger
 
         # First, serialize all of the parameters so they can be properly submitted
         parameters_serialized = self._serialize_parameters(parameters)
 
         # Grab the Flow's ID from Prefect Cloud
-        logger.debug("Looking up flow metadata...")
+        # logger.debug("Looking up flow metadata...")
         flow_view = FlowView.from_flow_name(
-            self.workflow.name,
+            self.workflow_name,
             project_name=project_name,
         )
 
@@ -192,7 +240,7 @@ class RunWorkflowTask(Task):
         run_name = f"{current_run}-{flow_view.name}" if current_run else None
 
         # Now we submit the workflow
-        logger.info(f"Creating flow run for {flow_view.name!r}...")
+        # logger.info(f"Creating flow run for {flow_view.name!r}...")
         client = Client()
         flow_run_id = client.create_flow_run(
             flow_id=flow_view.flow_id,
@@ -206,7 +254,7 @@ class RunWorkflowTask(Task):
 
         # we log the website url to the flow for the user
         run_url = client.get_cloud_url("flow-run", flow_run_id, as_user=False)
-        logger.info(f"Created flow run: {run_url}")
+        # logger.info(f"Created flow run: {run_url}")
 
         # return the flow_run_id so it can be used to track this flow run
         return flow_run_id

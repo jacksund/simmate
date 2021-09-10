@@ -22,7 +22,8 @@ Simmate
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'local_calculations' %}">Workflows</a></li>
     <li class="breadcrumb-item"><a href="{% url 'relaxations' %}">Relaxations</a></li>
-    <li class="breadcrumb-item active">MIT-Project Quality</li>
+    <li class="breadcrumb-item"><a href="{% url 'mit_about' %}">MIT-Project Quality</a></li>
+    <li class="breadcrumb-item active">Results</li>
   </ol>
 </nav>
 
@@ -64,7 +65,7 @@ Simmate
             {% for calculation in calculations %}
                 <tr>
                     <td><a href="{{ calculation.prefect_cloud_link }}" target="_blank">{{ calculation.prefect_flow_run_name }}</a></td>
-                    <td><a href="{{ calculation.id }}">mitrelax-{{ calculation.id }}</a></td>
+                    <td><a href="results/{{ calculation.id }}">mitrelax-{{ calculation.id }}</a></td>
                     <td>{{ calculation.structure_final.energy_per_atom | floatformat:3 }}</td>
                     <td>{{ calculation.structure_start.formula_reduced | chemical_formula }}</td>
                     <td>{{ calculation.structure_start.nsites }}</td>

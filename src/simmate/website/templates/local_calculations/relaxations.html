@@ -36,7 +36,10 @@ https://getbootstrap.com/docs/5.0/components/card/#grid-cards
             Materials Project. These calculations are considered low-quality
             but are still used in select high-throughput studies.
             </br></br>
-          <a role="button" class="btn btn-primary btn-sm" href="{% url 'mit' %}">View Results</a>
+          <a role="button" class="btn btn-primary btn" href="{% url 'mit_about' %}">About</a>
+          <a role="button" class="btn btn-secondary btn-sm" href="{% url 'mit_submit' %}">Submit</a>
+          <a role="button" class="btn btn-secondary btn-sm" href="https://cloud.prefect.io/simmate/flow/{{ mit_flow_id }}" target="_blank">Monitor</a>
+          <a role="button" class="btn btn-secondary btn-sm" href="{% url 'mit_all' %}">Results</a>
       </div>
     </div>
 </div>

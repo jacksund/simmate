@@ -1,0 +1,8 @@
+
+# This helps decide how workflows should be scheduled and submitted.
+# If you have Prefect Cloud setup and ready, than you can use this
+# setting below. Otherwise, that means you just want all jobs to
+# run locally. You can have "local" set below or just delete this
+# file altogether if you want this.
+
+EXECUTOR_TYPE: "prefect"

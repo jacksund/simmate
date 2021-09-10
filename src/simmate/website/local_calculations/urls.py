@@ -25,15 +25,22 @@ urlpatterns = [
     # of the different options.
     path(
         route="relaxations/mit/",
-        view=views.mit_all,
-        name="mit",
+        view=views.mit_about,
+        name="mit_about",
     ),
-    #
-    #
     path(
-        route="relaxations/mit/<int:mitrelax_id>",
+        route="relaxations/mit/submit",
+        view=views.mit_submit,
+        name="mit_submit",
+    ),
+    path(
+        route="relaxations/mit/results",
+        view=views.mit_all,
+        name="mit_all",
+    ),
+    path(
+        route="relaxations/mit/results/<int:mitrelax_id>",
         view=views.mit_single,
         name="mit_single",
     ),
-
 ]
