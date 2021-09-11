@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - glTF loader</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	</head>
+
+	<body>
+	
+	<!-- 
+	This code is adapted from...
+    	https://github.com/mrdoob/three.js/blob/dev/examples/webgl_loader_gltf.html
+    
+    The main difference right now is that I switched to CDN loading of resources
+    and also load static files.
+    
+    Notes:
+    - I don't really want the HDR but I also don't understand this code well
+    enough to change it.
+    
+    - The controls are limited when rotating vertically, so I'll need to change
+    from orbital to trackball controls:
+    https://threejs.org/examples/?q=controls#misc_controls_trackball
+        
+	
+	-->
+		<script type="module">
+
+			// Find the latest version by visiting https://cdn.skypack.dev/three
+			import * as THREE from 'https://cdn.skypack.dev/three@0.132.2';
+
+			import { OrbitControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js';
+			import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/GLTFLoader.js';
+			import { RGBELoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/RGBELoader.js';
+			import { RoughnessMipmapper } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/utils/RoughnessMipmapper.js';
+
+			let camera, scene, renderer;
+
+			init();
+			render();
+
+			function init() {
+
+				const container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 20 );
+				camera.position.set( - 18, 6, 27 );
+
+				scene = new THREE.Scene();
+
+				new RGBELoader()
+					{% load static %}
+					.load( '{% static 'third_parties/quarry_01_1k.hdr'%}', function ( texture ) {
+
+						texture.mapping = THREE.EquirectangularReflectionMapping;
+
+						scene.background = texture;
+						scene.environment = texture;
+
+						render();
+
+						// model
+
+						// use of RoughnessMipmapper is optional
+						const roughnessMipmapper = new RoughnessMipmapper( renderer );
+                        
+                        
+                        
+                        {% load static %}
+						const loader = new GLTFLoader();
+						loader.load( '{% static 'third_parties/simmate_structure.glb'%}', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									roughnessMipmapper.generateMipmaps( child.material );
+
+								}
+
+							} );
+
+							scene.add( gltf.scene );
+
+							roughnessMipmapper.dispose();
+
+							render();
+
+						} );
+
+					} );
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.toneMapping = THREE.ACESFilmicToneMapping;
+				renderer.toneMappingExposure = 1;
+				renderer.outputEncoding = THREE.sRGBEncoding;
+				container.appendChild( renderer.domElement );
+
+				const controls = new OrbitControls( camera, renderer.domElement );
+				
+				controls.addEventListener( 'change', render ); // use if there is no animation loop
+				controls.zoomSpeed = 2;
+				controls.minDistance = 2;
+				controls.maxDistance = 15;
+				controls.maxPolarAngle = Infinity;
+				controls.update();
+
+				window.addEventListener( 'resize', onWindowResize );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				render();
+
+			}
+
+			//
+
+			function render() {
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+
+	</body>
+</html>

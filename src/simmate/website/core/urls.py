@@ -43,4 +43,12 @@ urlpatterns = [
         view=include("simmate.website.local_calculations.urls"),
         name="local_calculations",
     ),
+    #
+    # Still testing... Endpoint for crystal structure viewing
+    path(
+        route="structure-viewer/",
+        view=views.structure_viewer,
+        name="structure_viewer",
+    ),
+    
 ]

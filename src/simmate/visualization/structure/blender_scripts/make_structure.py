@@ -312,7 +312,7 @@ def make_structure_blend(lattice, sites_to_draw, filename):
     bpy.ops.wm.save_as_mainfile(filepath=filename)
 
     # export in the gltf 2.0 format (.glb file)
-    # bpy.ops.export_scene.gltf(filepath="example_filename.glb")
+    bpy.ops.export_scene.gltf(filepath="example_filename.glb")
 
     # export for Verge3D
     # bpy.ops.export_scene.v3d_gltf(filepath=save_path)

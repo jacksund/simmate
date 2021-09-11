@@ -103,3 +103,11 @@ def extras(request):
     context = {"active_tab_id": "extras"}
     template = "core/extras.html"
     return render(request, template, context)
+
+
+def structure_viewer(request):
+
+    # now let's put the data and template together to send the user
+    context = {}
+    template = "core/structure_viewer.html"
+    return render(request, template, context)
