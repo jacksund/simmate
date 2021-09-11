@@ -29,8 +29,9 @@
 
 			// Find the latest version by visiting https://cdn.skypack.dev/three
 			import * as THREE from 'https://cdn.skypack.dev/three@0.132.2';
-
-			import { OrbitControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js';
+            
+            import { OrbitControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js';
+			import { TrackballControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/TrackballControls.js';
 			import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/GLTFLoader.js';
 			import { RGBELoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/RGBELoader.js';
 			import { RoughnessMipmapper } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/utils/RoughnessMipmapper.js';
@@ -45,7 +46,7 @@
 				const container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 20 );
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 2000 );
 				camera.position.set( - 18, 6, 27 );
 
 				scene = new THREE.Scene();
@@ -105,7 +106,7 @@
 				controls.addEventListener( 'change', render ); // use if there is no animation loop
 				controls.zoomSpeed = 2;
 				controls.minDistance = 2;
-				controls.maxDistance = 15;
+				//controls.maxDistance = 15;
 				controls.maxPolarAngle = Infinity;
 				controls.update();
 
