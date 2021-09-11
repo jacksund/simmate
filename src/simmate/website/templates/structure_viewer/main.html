@@ -58,7 +58,7 @@
                 // Now load the background image and the gltf file
                 const loader = new RGBELoader()
 				{% load static %}
-				loader.load( '{% static 'third_parties/quarry_01_1k.hdr'%}', function ( texture ) {
+				loader.load( '{% static 'structure_viewer/royal_esplanade_1k.hdr'%}', function ( texture ) {
 
 						texture.mapping = THREE.EquirectangularReflectionMapping;
 						
@@ -77,7 +77,7 @@
 						loader.load( 
     						// path to the file we're loading
     						{% load static %}
-    						'{% static 'third_parties/simmate_structure.glb'%}',
+    						'{% static 'structure_viewer/simmate_structure.glb'%}',
     						
     						// this function is called when the resource is loaded
     						function ( gltf ) {

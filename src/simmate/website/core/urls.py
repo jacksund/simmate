@@ -44,10 +44,10 @@ urlpatterns = [
         name="local_calculations",
     ),
     #
-    # Still testing... Endpoint for crystal structure viewing
+    # This app is for viewing crystal structures in a 3D viewport
     path(
         route="structure-viewer/",
-        view=views.structure_viewer,
+        view=include("simmate.website.structure_viewer.urls"),
         name="structure_viewer",
     ),
     

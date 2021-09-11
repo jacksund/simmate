@@ -145,6 +145,7 @@ INSTALLED_APPS = [
     "simmate.website.local_calculations.apps.LocalCalculationsConfig",
     "simmate.website.workflow_execution.apps.WorkflowExecutionConfig",
     "simmate.website.prototypes.apps.PrototypesConfig",
+    "simmate.website.structure_viewer.apps.StructureViewerConfig",
     #
     # These are built-in django apps that we use for extra features
     "django.contrib.admin",
