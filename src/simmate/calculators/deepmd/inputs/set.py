@@ -7,28 +7,28 @@ import numpy
 
 class DeepmdSet:
     """
-    This class works simply as a converter. You provide it a list of 
+    This class works simply as a converter. You provide it a list of
     IonicStepStructures that have forces and energies, and it will create a
     deepmd input for you.
-    
-    The "set" input is really a folder made of 4 files. An example folder looks 
+
+    The "set" input is really a folder made of 4 files. An example folder looks
     like this:
       set.000
           box.npy
           coord.npy
           energy.npy
           force.npy
-    
+
     These .npy are "numpy" files, where the data included in each is...
       box = lattice matrixes
       coord = site's cartesian coordinates
       energy = calculated energies
       force = calculated forces for sites
-    
+
     All data is collapsed to 1D arrays. For example, this means the 3x3 lattice matrix
     becomes a 1x9 list of numbers and the entire file is a list of matricies. The
     same is done to forces, coords, and energies.
-    
+
     All data here is available from an IonicStepStructure in our database, so
     this is our current input format.
     """
@@ -90,13 +90,15 @@ class DeepmdSet:
             # the energy is just single value so we can add it to our list
             energies.append(structure_data.energy)
 
-        # Now we want to convert all lists to numpy. Note, the dtype used here
-        # is to clear a warning that prints when we have arrays of different
-        # lengths. This happens when we have structures with different nsites.
+        # Now we want to convert all lists to numpy.
         lattices = numpy.array(lattices)
-        coordinates = numpy.array(coordinates, dtype=object)
-        forces = numpy.array(forces, dtype=object)
+        coordinates = numpy.array(coordinates)
+        forces = numpy.array(forces)
         energies = numpy.array(energies)
+        # Note, the dtype=object can be added as a kwarg here in order to clear
+        # a warning that prints when we have arrays of different lengths. This
+        # happens when we have structures with different nsites. However, this
+        # causes errors with DeepMD which can load object type arrays.
 
         # now write our numpy files to the folder specified
         for filename, filedata in [
@@ -106,6 +108,4 @@ class DeepmdSet:
             ("force.npy", forces),
         ]:
             with open(os.path.join(foldername, filename), "wb") as file:
-                numpy.lib.format.write_array(
-                    fp=file, array=filedata,
-                )
+                numpy.lib.format.write_array(fp=file, array=filedata)
