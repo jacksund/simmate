@@ -118,6 +118,17 @@ class Oszicar:
                     raise Exception(
                         "Electronic step had unexpected data. Failed to parse."
                     )
+                
+                # for the very first electronic step, VASP provides an energy-change
+                # value, which they set equal to the energy itself. This is misleading
+                # in analysis so we remove it.
+                # As an example of why this is important, this will cause problems
+                # in the PotimErrorHandler when the original structure is a poor
+                # guess and positive energy. The handler will mistakenly think 
+                # the energy changes are getting worse -- which is not the case
+                # because we only look at the first step!
+                if not self.ionic_steps:
+                    ionic_step["energy_change"] = numpy.NaN
 
                 # take whatever ionic_step that was made above and add it to our
                 # results list!

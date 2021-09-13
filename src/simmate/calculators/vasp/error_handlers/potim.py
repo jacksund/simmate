@@ -42,7 +42,8 @@ class PotimErrorHandler(ErrorHandler):
             # iterate through all of the ionic steps and look at the changes
             # in energy. If any is greater than our threshold, then we have
             # an error!
-            for ionic_step in oszicar.ionic_steps:
+            # We skip the first ionic step too bc there is no energy change there.
+            for ionic_step in oszicar.ionic_steps[1:]:
                 energy_change_per_atom = ionic_step["energy_change"] / nsites
                 if energy_change_per_atom > self.dE_per_atom_threshold:
                     return True
