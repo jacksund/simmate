@@ -331,7 +331,7 @@ class SupervisedStagedShellTask(Task):
         if len(corrections) >= self.max_corrections:
             raise MaxCorrectionsError(
                 "The number of maximum corrections has been exceeded. Note the final "
-                "error and its fix is still listed in the corrections file, but it "
+                "error and its fix are still listed in the corrections file, but it "
                 "was never used."
             )
 
