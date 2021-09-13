@@ -171,7 +171,7 @@ class SupervisedStagedShellTask(Task):
         # we can try running the shelltask up to max_corrections. Because only one
         # correction is applied per attempt, you can view this as the maximum
         # number of attempts made on the calculation.
-        while len(corrections) < self.max_corrections:
+        while len(corrections) <= self.max_corrections:
 
             # launch the shelltask without waiting for it to complete. Also,
             # make sure to use common shell commands and to set the working
@@ -330,7 +330,9 @@ class SupervisedStagedShellTask(Task):
         # make sure the while loop didn't exit because of the correction limit
         if len(corrections) >= self.max_corrections:
             raise MaxCorrectionsError(
-                "the number of maximum corrections has been exceeded"
+                "The number of maximum corrections has been exceeded. Note the final "
+                "error and its fix is still listed in the corrections file, but it "
+                "was never used."
             )
 
         # now return the corrections for them to stored/used elsewhere
