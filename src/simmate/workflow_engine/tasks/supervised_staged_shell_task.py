@@ -342,14 +342,17 @@ class SupervisedStagedShellTask(Task):
     def _terminate_job(process, command):
         """
         Stopping the command we submitted can be a tricky business if we are running
-        scripts in parallel (such as using mpirun). Therefore, try a series of
-        job-killing approaches here to ensure the job is terminated properly.
-
-        This method is never used directly, but is instead applied within the
-        execute() method above.
-
+        scripts in parallel (such as using mpirun). Different computers and OSs
+        can require a different 'kill' command so we establish this separate
+        method that can be overwritten.
+        
         If you know your command needs a special case to kill all of its spawn
         processes, you can overwrite this method as well.
+
+        Users should never call this directly becuase this is instead applied 
+        within the execute() method above.
+
+        
         """
         # The normal line to end a popen process is just...
         #   process.terminate()
