@@ -87,12 +87,10 @@ class Relaxation(Calculation):
     """Base Info"""
 
     # OPTIMIZE
-    # Typically there shouldn't be any base info for a relaxation because all data
-    # is actually related directly to a structure. This data here is something we
-    # only get for the final structure, so it may make sense to move this data
-    # into the IonicStepStructure table (and allow null values for non-final steps)
-    # I instead keep this here because I don't want columns above that are
-    # largely empty.
+    # This data here is something we only get for the final structure, so it
+    # may make sense to move this data into the IonicStepStructure table (and
+    # allow null values for non-final steps). I instead keep this here because
+    # I don't want columns above that are largely empty.
     # Note: all entries are optional because there is no guaruntee the calculation
     # finishes successfully
     band_gap = models.FloatField(blank=True, null=True)
@@ -100,6 +98,13 @@ class Relaxation(Calculation):
     energy_fermi = models.FloatField(blank=True, null=True)
     conduction_band_minimum = models.FloatField(blank=True, null=True)
     valence_band_maximum = models.FloatField(blank=True, null=True)
+
+    """ Query-helper Info """
+
+    # Volume Change (useful for checking if Pulay Stress may be significant)
+    # We store this as a ratio relative to the starting structure
+    #   (final - start) / start
+    volume_change = models.FloatField(blank=True, null=True)
 
     """ Relationships """
 
@@ -148,42 +153,18 @@ class Relaxation(Calculation):
         # we need is stored under the "output" key
         data = vasprun.as_dict()["output"]
 
-        # the exception to this is the list of structures. We can pull the structure
-        # for each ionic step from the vasprun class directly.
+        # The only other data we need to grab is the list of structures. We can
+        # pull the structure for each ionic step from the vasprun class directly.
         structures = vasprun.structures
 
-        # First grab the input structure so we can update its data, which is stored
-        # in the first ionic step. This is the only structure that should be
-        # already located in the database.
-        ionic_step = data["ionic_steps"][0]
-        structure_start = self.structure_start
-        structure_start.energy = ionic_step["e_wo_entrp"]
-        structure_start.site_forces = ionic_step["forces"]
-        structure_start.lattice_stress = ionic_step["stress"]
-        structure_start.energy_per_atom = (
-            ionic_step["e_wo_entrp"] / structure_start.nsites
-        )
-        structure_start.site_forces_norm = numpy.linalg.norm(ionic_step["forces"])
-        structure_start.site_forces_norm_per_atom = (
-            numpy.linalg.norm(ionic_step["forces"]) / structure_start.nsites
-        )
-        structure_start.lattice_stress_norm = numpy.linalg.norm(ionic_step["stress"])
-        structure_start.lattice_stress_norm_per_atom = (
-            numpy.linalg.norm(ionic_step["stress"]) / structure_start.nsites
-        )
-        structure_start.save()
-
-        # Now let's iterate through the remaining ionic steps and save these to
-        # the database. For these, a structure object won't exist yet so we
-        # need to create them. Note we skip the first step because we already did
-        # this one above and are pairing structures with their data using zip
+        # Now let's iterate through the ionic steps and save these to the database.
         for number, (structure, ionic_step) in enumerate(
-            zip(structures[1:], data["ionic_steps"][1:])
+            zip(structures, data["ionic_steps"])
         ):
             # first pull all the data together and save it to the database
             structure = IonicStepStructure_subclass.from_pymatgen(
                 structure=structure,
-                ionic_step_number=number + 1,  # +1 bc enumerate starts from 0
+                ionic_step_number=number,
                 energy=ionic_step["e_wo_entrp"],
                 site_forces=ionic_step["forces"],
                 lattice_stress=ionic_step["stress"],
@@ -200,9 +181,17 @@ class Relaxation(Calculation):
             )
             structure.save()
 
-        # We also need to link the final structure to the relaxation. Because
-        # the for-loop above ends with this structure, we can just use it here!
-        self.structure_final = structure
+            # If this is the first structure, we want to link it as such
+            if number == 0:
+                self.structure_start_id = structure.id
+            # and same for the final structure
+            elif number == len(structures) - 1:
+                self.structure_final_id = structure.id
+
+        # calculate extra data for storing
+        self.volume_change = (
+            structures[-1].volume - structures[0].volume
+        ) / structures[0].volume
 
         # There is also extra data for the final structure that we save directly
         # in the relaxation table
@@ -277,7 +266,12 @@ class Relaxation(Calculation):
         return figure
 
     def view_convergence_plot(self):
-        pass
+        import plotly.io as pio
+
+        pio.renderers.default = "browser"
+
+        figure = self.get_convergence_plot()
+        figure.show()
 
     """ Set as Abstract Model """
     # I have other models inherit from this one, while this model doesn't need

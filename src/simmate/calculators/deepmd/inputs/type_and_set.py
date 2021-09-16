@@ -7,6 +7,7 @@ import numpy
 from sklearn.model_selection import train_test_split
 from django_pandas.io import read_frame
 
+from pymatgen.core.structure import Structure
 from pymatgen.core.composition import Composition
 from simmate.utilities import get_directory
 
@@ -90,9 +91,21 @@ class DeepmdDataset:
 
         # because we are using the database model, we first want to convert to
         # pymatgen structures objects and add a column to the dataframe for these
+        #
+        #   structures_dataframe["structure"] = [
+        #       structure.to_pymatgen() for structure in ionic_step_structures
+        #   ]
+        #
+        # BUG: the read_frame query creates a new query, so it may be a different
+        # length from ionic_step_structures. For this reason, we can't iterate
+        # through the queryset like in the commented out code above. Instead,
+        # we need to iterate through the dataframe rows.
+        # See https://github.com/chrisdev/django-pandas/issues/138 for issue
         structures_dataframe["structure"] = [
-            structure.to_pymatgen() for structure in ionic_step_structures
+            Structure.from_str(s.structure_string, fmt="POSCAR")
+            for _, s in structures_dataframe.iterrows()
         ]
+        
 
         # split the structures into test and training sets randomly
         dataframe_train, dataframe_test = train_test_split(
