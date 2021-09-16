@@ -140,7 +140,7 @@ with Flow("NEB Analysis") as workflow:
     min_atoms = Parameter("min_atoms", default=20)
     max_atoms = Parameter("max_atoms", default=80)
     nimages = Parameter("nimages", default=5)
-    # directory = Parameter("directory", default=".")
+    # directory = Parameter("directory", default=None)
     vasp_cmd = Parameter("vasp_command", default="vasp > vasp.out")
 
     # Relax the starting bulk structure

@@ -1,0 +1,45 @@
+
+{% extends "core/site-base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<!-- NOTE: for this section to work, be sure to read datatable.html -->
+
+
+<div class="container p-4 bg-light border" id="search-results">
+
+<!-- Breadcrumb links -->
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'local_calculations' %}">Workflows</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'relaxations' %}">Relaxations</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'mit_about' %}">MIT-Project Quality</a></li>
+    <li class="breadcrumb-item active">Submit</li>
+  </ol>
+</nav>
+
+
+<form action="{% url 'mit_submit' %}" method="post" enctype="multipart/form-data" >
+    {% csrf_token %}
+    {{ submission_form }}
+    <input type="submit" value="Submit">
+</form>
+
+
+</div>
+
+
+{% endblock %}
+
+{% block extrafooter %}
+{% include "core/datatable.html" %}
+{% endblock %}

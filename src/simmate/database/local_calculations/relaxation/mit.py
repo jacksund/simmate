@@ -8,11 +8,14 @@ from simmate.database.local_calculations.relaxation.base import (
 )
 
 
+# !!! Consider adding a table specifically for failed calculations
+
 # --------------------------------------------------------------------------------------
 
 # All ionic steps of relaxations are stored in the same table. This means the
 # start structure, end structure, and those structure in-between are stored
 # together here.
+
 
 class MITRelaxationStructure(IonicStepStructure):
 

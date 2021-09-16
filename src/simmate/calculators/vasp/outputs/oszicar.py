@@ -31,7 +31,6 @@ class Oszicar:
         # open the file, read it's contents, and close immediately
         with open(filename) as file:
             lines = file.readlines()
-
         # Empty lines cause trouble so we remove those before parsing any data.
         lines = [line for line in lines if line.strip()]
 
@@ -46,7 +45,6 @@ class Oszicar:
                 # steps. Note this will also reset the list every time we start
                 # a new ionic step.
                 electronic_steps = []
-
             # if "F" is in the line, that means we have hit the end of an ionic step.
             # We also need to account for when the calculation is not finished and
             # in the middle of an ionic step. Therefore we also check if this is the final
@@ -89,7 +87,6 @@ class Oszicar:
                         "energy_change": values[2],  # dE
                         "electronic_steps": electronic_steps,
                     }
-
                 # check if we have a magnetic calculation
                 elif len(values) == 4:
                     ionic_step = {
@@ -99,7 +96,6 @@ class Oszicar:
                         "magnetic": values[3],  # mag
                         "electronic_steps": electronic_steps,
                     }
-
                 # check if we have a molecular dynamics calculation
                 elif len(values) == 7:
                     ionic_step = {
@@ -112,17 +108,24 @@ class Oszicar:
                         "energy_kinetic_nose_thermostat": values[6],  # SK
                         "electronic_steps": electronic_steps,
                     }
-
                 # otherwise something went wrong
                 else:
                     raise Exception(
                         "Electronic step had unexpected data. Failed to parse."
                     )
-
+                # for the very first electronic step, VASP provides an energy-change
+                # value, which they set equal to the energy itself. This is misleading
+                # in analysis so we remove it.
+                # As an example of why this is important, this will cause problems
+                # in the PotimErrorHandler when the original structure is a poor
+                # guess and positive energy. The handler will mistakenly think
+                # the energy changes are getting worse -- which is not the case
+                # because we only look at the first step!
+                if not self.ionic_steps:
+                    ionic_step["energy_change"] = numpy.NaN
                 # take whatever ionic_step that was made above and add it to our
                 # results list!
                 self.ionic_steps.append(ionic_step)
-
             # Otherwise this line is an electronic step
             else:
 
@@ -132,7 +135,16 @@ class Oszicar:
                 # Note we remove the first two values because these are the
                 # scheme used (i.e. DAV, RMM, or CG) and electronic step number
                 # which we don't need. (I grab the scheme below though)
-                values = [float(value) for value in line.split()[2:]]
+                # BUG: sometimes VASP prints a value like '-0.33328-312' which
+                # can't be converted to a float. I need a try/except here to
+                # catch this case and return a numpy.NAN instead.
+                def try_float(value):
+                    try:
+                        return float(value)
+                    except:
+                        return numpy.NaN
+
+                values = [try_float(value) for value in line.split()[2:]]
 
                 # now load the data into a dictionary for verbosity
                 # Note that I change the VASP headers to more verbose names so

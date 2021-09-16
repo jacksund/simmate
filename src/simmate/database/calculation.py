@@ -49,7 +49,7 @@ class Calculation(models.Model):
     # Simmate workflows often have ErrorHandlers that fix any issues while the
     # calaculation ran. This often involves changing settings, so we store
     # any of those changes here.
-    corrections = models.TextField(blank=True, null=True)
+    corrections = models.JSONField(blank=True, null=True)
 
     """ Relationships """
     # While there are no base relations for this abstract class, the majority of

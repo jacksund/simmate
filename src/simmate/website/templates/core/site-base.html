@@ -22,8 +22,11 @@
 
         <!-- This is the main portion of the webpage, which I put in a single padded row. The sidebar is always present, and the remainder of the page varies. -->
         <div class="container-fluid">
-            <div class="row m-xxl-5 m-2">
-                {% include "core/sidebar.html" %}
+            <div class="row">
+                <div class="col-auto col-lg-2 p-2 list-group text-truncate bg-dark">
+                  {% include "core/sidebar.html" %}
+                </div>
+                
                 <div class="col-10 overflow-auto h-100">
                     {% block body %}{% endblock %}
                 </div>
@@ -35,6 +38,7 @@
         
         <!-- Sometimes I need to load extra javascript at the bottom of the page -->
         {% block extrafooter %}{% endblock %}
+        
         
     </body>
 

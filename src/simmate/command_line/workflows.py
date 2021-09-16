@@ -10,6 +10,17 @@ def workflows():
 
 
 @workflows.command()
+def register_all():
+    """
+    Registers all workflows with Prefect Cloud.
+    
+    Make sure you have your Prefect API key configured prior to calling this!
+    """
+    from simmate.configuration.prefect.projects import build
+    build()
+    
+
+@workflows.command()
 @click.argument("filename", type=click.Path(exists=True))
 @click.option(
     "--vasp_command",
@@ -20,7 +31,7 @@ def workflows():
 @click.option(
     "--directory",
     "-d",
-    default=".",
+    default=None,
     help="the folder to run this workflow in",
 )
 def mit_relaxation(filename, vasp_command, directory):
