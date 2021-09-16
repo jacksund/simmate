@@ -7,6 +7,9 @@ from simmate.database.local_calculations.relaxation.base import (
     Relaxation,
 )
 
+
+# !!! Consider adding a table specifically for failed calculations
+
 # --------------------------------------------------------------------------------------
 
 # All ionic steps of relaxations are stored in the same table. This means the

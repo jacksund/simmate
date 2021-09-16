@@ -28,10 +28,6 @@ class IonicStepStructure(Structure):
 
     """Base Info"""
 
-    # Note: we allow columns to be empty because the input structure for the
-    # relaxation does not initially have this data below -- but we update it
-    # later once the calculation runs.
-
     # Note: we assume that only converged data is being stored! So there is no
     # "converged_electronic" section here. ErrorHandlers and workups should
     # ensure this.
@@ -40,28 +36,28 @@ class IonicStepStructure(Structure):
     ionic_step_number = models.IntegerField()
 
     # The final energy here includes corrections that VASP may have introduced
-    energy = models.FloatField(blank=True, null=True)
+    energy = models.FloatField()
 
     # A list of forces for each atomic site. So this is a list like...
     # [site1, site2, site3, ...] where site1=[force_x, force_y, force_z]
-    site_forces = models.JSONField(blank=True, null=True)
+    site_forces = models.JSONField()
 
     # This is 3x3 matrix that represents the stress on the structure lattice
-    lattice_stress = models.JSONField(blank=True, null=True)
+    lattice_stress = models.JSONField()
 
     """ Query-helper Info """
     # Takes the energy from above and converts it to per atom units
-    energy_per_atom = models.FloatField(blank=True, null=True)
+    energy_per_atom = models.FloatField()
 
     # Takes the site forces and reports the vector norm for it.
     # See numpy.linalg.norm for how this is calculated.
-    site_forces_norm = models.FloatField(blank=True, null=True)
-    site_forces_norm_per_atom = models.FloatField(blank=True, null=True)
+    site_forces_norm = models.FloatField()
+    site_forces_norm_per_atom = models.FloatField()
 
     # Takes the site forces and reports the vector norm for it.
     # # See numpy.linalg.norm for how this is calculated.
-    lattice_stress_norm = models.FloatField(blank=True, null=True)
-    lattice_stress_norm_per_atom = models.FloatField(blank=True, null=True)
+    lattice_stress_norm = models.FloatField()
+    lattice_stress_norm_per_atom = models.FloatField()
 
     """ Relationships """
     # each of these will map to a Relaxation, so you should typically access this
