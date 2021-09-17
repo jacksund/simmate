@@ -1,74 +1,73 @@
-<div class="sidebar" data-color="purple" data-background-color="white" data-image="/static/assets/img/sidebar-1.jpg">
+<div class="sidebar" data-color="green" data-background-color="white" data-image="/static/green-crystal.jpg">
+  <!-- Background image is from https://www.123freevectors.com/green-and-white-crystal-abstract-background-125853/ -->
   <div class="logo">
-    <a target="_blank" rel="noopener noreferrer" 
-       target="_blank" rel="noopener noreferrer" 
-       href="https://www.creative-tim.com/product/material-dashboard-django" class="simple-text logo-normal">
-      Simmate
+    <a href="{% url 'home' %}" class="simple-text logo-normal">
+      <img src="/static/simmate.svg" style="height: 40px;"/>
     </a>
   </div>
   <div class="sidebar-wrapper">
     <ul class="nav">
       <li id="home" class="nav-item">
-        <a class="nav-link" href="/">
+        <a class="nav-link" href="{% url 'home' %}">
           <i class="material-icons-round">home</i>
           <p>Home</p>
         </a>
       </li>
-      <li id="home" class="nav-item">
-        <a class="nav-link" href="/page-user.html">
+      <li id="profile" class="nav-item">
+        <a class="nav-link" href="{% url 'profile' %}">
           <i class="material-icons-round">account_circle</i>
           <p>Profile</p>
         </a>
       </li>
-      <li id="home" class="nav-item">
-        <a class="nav-link" href="/ui-tables.html">
+      <li id="toolkit" class="nav-item">
+        <a class="nav-link disabled" href="#">
           <i class="material-icons-round">calculate</i>
           <p>Toolkit</p>
         </a>
       </li>
-      <li id="home" class="nav-item">
-        <a class="nav-link" href="/ui-typography.html">
+      <li id="workflows" class="nav-item">
+        <a class="nav-link" href="{% url 'local_calculations' %}">
           <i class="material-icons-round">device_hub</i>
           <p>Workflows</p>
         </a>
       </li>
-      <li id="home" class="nav-item">
-        <a class="nav-link" href="/ui-icons.html">
+      <li id="learn" class="nav-item">
+        <a class="nav-link disabled" href="#">
           <i class="material-icons-round">lightbulb</i>
           <p>Learn</p>
         </a>
       </li>
-      <li id="home" class="nav-item">
-        <a class="nav-link" href="/ui-maps.html">
+      <li id="downloads" class="nav-item">
+        <a class="nav-link disabled" href="#">
           <i class="material-icons-round">download</i>
           <p>Downloads</p>
         </a>
       </li>
-      <li id="home" class="nav-item">
-        <a class="nav-link" href="/ui-notifications.html">
+      <li id="contribute" class="nav-item">
+        <a class="nav-link disabled" href="#">
           <i class="material-icons-round">groups</i>
           <p>Contribute</p>
         </a>
       </li>
       
-      <li id="home" class="nav-item ">
-        <a class="nav-link" href="/page-rtl-support.html">
+      <li id="settings" class="nav-item ">
+        <a class="nav-link disabled" href="{% url 'extras' %}">
+          <i class="material-icons-round">more_horiz</i>
+          <p>Extras</p>
+        </a>
+      </li>
+      
+      <li id="settings" class="nav-item ">
+        <a class="nav-link disabled" href="#">
           <i class="material-icons-round">settings</i>
           <p>Settings</p>
         </a>
       </li>
 
-      <li id="home" class="nav-item ">
-        <a class="nav-link" href="{% url 'logout' %}" >
-          <i class="material-icons-round">directions_run</i>
-          <p>Logout</p>
-        </a>
-      </li>
-
-      <li id="home" class="nav-item active-pro ">
+      <li id="sourcecode" class="nav-item active-pro">
         <a target="_blank" rel="noopener noreferrer"  
            class="nav-link" 
-           href="https://www.creative-tim.com/product/material-dashboard-django">
+           href="https://github.com/jacksund/simmate">
           <i class="material-icons-round">code</i>
           <p>View Source Code</p>
         </a>
