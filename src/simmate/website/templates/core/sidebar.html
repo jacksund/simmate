@@ -1,55 +1,86 @@
+<div class="sidebar" data-color="purple" data-background-color="white" data-image="/static/assets/img/sidebar-1.jpg">
+  <div class="logo">
+    <a target="_blank" rel="noopener noreferrer" 
+       target="_blank" rel="noopener noreferrer" 
+       href="https://www.creative-tim.com/product/material-dashboard-django" class="simple-text logo-normal">
+      Simmate
+    </a>
+  </div>
+  <div class="sidebar-wrapper">
+    <ul class="nav">
+      <li id="home" class="nav-item">
+        <a class="nav-link" href="/">
+          <i class="material-icons-round">home</i>
+          <p>Home</p>
+        </a>
+      </li>
+      <li id="home" class="nav-item">
+        <a class="nav-link" href="/page-user.html">
+          <i class="material-icons-round">account_circle</i>
+          <p>Profile</p>
+        </a>
+      </li>
+      <li id="home" class="nav-item">
+        <a class="nav-link" href="/ui-tables.html">
+          <i class="material-icons-round">calculate</i>
+          <p>Toolkit</p>
+        </a>
+      </li>
+      <li id="home" class="nav-item">
+        <a class="nav-link" href="/ui-typography.html">
+          <i class="material-icons-round">device_hub</i>
+          <p>Workflows</p>
+        </a>
+      </li>
+      <li id="home" class="nav-item">
+        <a class="nav-link" href="/ui-icons.html">
+          <i class="material-icons-round">lightbulb</i>
+          <p>Learn</p>
+        </a>
+      </li>
+      <li id="home" class="nav-item">
+        <a class="nav-link" href="/ui-maps.html">
+          <i class="material-icons-round">download</i>
+          <p>Downloads</p>
+        </a>
+      </li>
+      <li id="home" class="nav-item">
+        <a class="nav-link" href="/ui-notifications.html">
+          <i class="material-icons-round">groups</i>
+          <p>Contribute</p>
+        </a>
+      </li>
+      
+      <li id="home" class="nav-item ">
+        <a class="nav-link" href="/page-rtl-support.html">
+          <i class="material-icons-round">settings</i>
+          <p>Settings</p>
+        </a>
+      </li>
 
-<a id="home" class="list-group-item list-group-item-action text-truncate text-light bg-dark" href="{% url 'home' %}">
-    <i class="bi bi-house fs-4"></i>
-    <span class="d-none d-lg-inline">Home</span>
-</a>
+      <li id="home" class="nav-item ">
+        <a class="nav-link" href="{% url 'logout' %}" >
+          <i class="material-icons-round">directions_run</i>
+          <p>Logout</p>
+        </a>
+      </li>
 
-<a id="profile" class="list-group-item list-group-item-action text-truncate text-light bg-dark" href="{% url 'profile' %}">
-    <i class="bi bi-person-circle fs-4"></i>
-    <span class="d-none d-lg-inline">Profile</span>
-</a>
-
-<a id="toolbox" class="list-group-item text-truncate text-secondary bg-dark" href="#">
-    <i class="bi bi-calculator fs-4"></i>
-    <span class="d-none d-lg-inline">Toolkit</span>
-</a>
-
-<a id="workflows" class="list-group-item list-group-item-action text-truncate text-light bg-dark" href="{% url 'local_calculations' %}">
-    <i class="bi bi-diagram-3 fs-4"></i>
-    <span class="d-none d-lg-inline">Workflows</span>
-</a>
-
-<a id="learn" class="list-group-item text-truncate text-secondary bg-dark" href="#">
-    <i class="bi bi-lightbulb fs-4"></i>
-    <span class="d-none d-lg-inline">Learn</span>
-</a>
-
-<a id="downloads" class="list-group-item text-truncate text-secondary bg-dark" href="#">
-    <i class="bi bi-box-arrow-down fs-4"></i>
-    <span class="d-none d-lg-inline">Downloads</span>
-</a>
-
-<a id="contribute" class="list-group-item text-truncate text-secondary bg-dark" href="#">
-    <i class="bi bi-box-arrow-in-up fs-4"></i>
-    <span class="d-none d-lg-inline">Contribute</span>
-</a>
-
-<a id="settings" class="list-group-item text-truncate text-secondary bg-dark" href="#">
-    <i class="bi bi-gear fs-4"></i>
-    <span class="d-none d-lg-inline">Settings</span>
-</a>
-
-<a id="extras" class="list-group-item list-group-item-action text-truncate text-light bg-dark" href="{% url 'extras' %}">
-    <i class="bi bi-three-dots fs-4"></i>
-    <span class="d-none d-lg-inline">Extras</span>
-</a>
+      <li id="home" class="nav-item active-pro ">
+        <a target="_blank" rel="noopener noreferrer"  
+           class="nav-link" 
+           href="https://www.creative-tim.com/product/material-dashboard-django">
+          <i class="material-icons-round">code</i>
+          <p>View Source Code</p>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
 
 <!-- This javascript helps highlight the correct tab and adds the "active" class to it -->
 {% if active_tab_id %}
 <script>
     var tab = document.getElementById("{{ active_tab_id }}");
     tab.classList.add("active");
-    tab.classList.add("text-primary");
-    tab.classList.remove("text-light");
 </script>
 {% endif %}

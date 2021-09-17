@@ -84,7 +84,6 @@ DATABASE_YAML = os.path.join(SIMMATE_DIRECTORY, "database.yaml")
 if os.path.exists(DATABASE_YAML):
     with open(DATABASE_YAML) as file:
         DATABASES = yaml.full_load(file)
-
 # If this file doesn't exist, we next check our enviornment variable to see if
 # we should use our local sql database. This is the default behavior!
 elif USE_LOCAL_DATABASE is True:
@@ -94,7 +93,6 @@ elif USE_LOCAL_DATABASE is True:
             "NAME": os.path.join(SIMMATE_DIRECTORY, "database.sqlite3"),
         }
     }
-
 # Otherwise, we are likely using DigitalOcean and running a server.
 # When DigitalOcean runs the "collectstatic" command, we don't want to connect
 # any database. So we use the "sys" library to look at the command and ensure
@@ -108,7 +106,6 @@ elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
     DATABASES = {
         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
     }
-
 # Here is an example of connecting to a Postgres server normally...
 # DATABASES = {
 #     "default": {
@@ -189,7 +186,6 @@ if os.path.exists(APPLICATIONS_YAML):
         # now add each app to our list above so Django loads it.
         for app in extra_apps:
             INSTALLED_APPS.append(app)
-
 # --------------------------------------------------------------------------------------
 
 # This sets the default field for primary keys in django models
@@ -291,6 +287,8 @@ USE_TZ = True
 # collect by running 'python manage.py collectstatic'
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(DJANGO_DIRECTORY, "static")
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = [os.path.join(DJANGO_DIRECTORY, "core", "static")]
 # BUG: djangorestframework's static files struggle to load and I'm not sure why.
 # I add these two lines to fix the bug and need to revisit this later.
 # Based on recommendation by...

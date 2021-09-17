@@ -34,37 +34,34 @@
   <div class="wrapper ">
 
     <!-- The sidebar is always present, and the remainder of the page varies. -->
-    {% include 'includes/sidebar.html' %}
+    {% include "core/sidebar.html" %}
 
     <!-- This is the main portion of the webpage --> 
     <div class="main-panel">
       
       <!-- The navigation bar is the same for every webpage -->
-      {% include 'includes/navigation.html' %}
+      {% include "core/navigationbar.html" %}
 
       <!-- End Navbar -->
       <div class="content">
         <div class="container-fluid">
 
-          {% block content %}{% endblock content %}
+          {% block content %}{% endblock %}
 
         </div>
       </div>
 
-      {% include 'includes/footer.html' %}
+      {% include "core/footer.html" %}
 
     </div>
   </div>
   
   
-  {% include 'includes/fixed-plugin.html' %}
-
-  {% include 'includes/scripts.html' %}
-
-  {% include 'includes/scripts-sidebar.html' %}
-  
   <!-- Many packages for JS libraries should be loaded last -->
-  {% include "core/footer.html" %}
+  {% include "core/scripts.html" %}
+  
+  <!-- We also load the JS for the sidebar -->
+  {% include "core/sidebar-script.html" %}
   
   <!-- Sometimes I need to load extra javascript at the bottom of the page -->
   {% block extrafooter %}{% endblock %}

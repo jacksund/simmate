@@ -15,7 +15,7 @@ from simmate.database.third_parties.all import (
 )
 
 
-@login_required
+
 def home(request):
 
     # The home page is also an html "form" because users submit queries from
