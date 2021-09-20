@@ -1,5 +1,28 @@
 # Installing Simmate while Learning the Command-line
 
+### A quick comment on tutorials
+
+All tutorials will have two sections: a short-and-to-the-point one for experts and a much longer one for beginners. The steps in each are **exactly the same** -- we just include extra explanation for beginners in the longer tutorial. 
+
+## The quick version
+
+1. Install [anaconda](https://www.anaconda.com/products/individual-d)
+2. Create a conda enviornment, install Simmate in it, and activate it. *(note: Spyder is optional but recommended)*
+```
+conda create -n my_env -c conda-forge python=3.8 simmate spyder
+conda activate my_env
+```
+3. Run the `simmate` command to make sure it's installed correctly
+
+## The full tutorial
+
+- installing anaconda
+- intro to the GUI
+- intro the command-line
+- creating a custom enviornment
+- installing simmate and spyder
+
+
 > :warning: the conda install is not ready yet. For now I install all dependencies manually and then do a dev install of simmate. You do this with the following commands:
 ```bash
 # Create conda enviornment and activate it
@@ -14,28 +37,3 @@ pip install jarvis-tools;
 git clone https://github.com/jacksund/simmate.git;
 pip install -e simmate;
 ```
-
-### A quick comment on tutorials
-
-All tutorials will have two sections: a short-and-to-the-point one for experts and a much longer one for beginners. The steps in each are **exactly the same** -- we just include extra explanation for beginners in the longer tutorial. 
-
-## The quick version
-
-1. Install [anaconda](https://www.anaconda.com/products/individual-d)
-2. Create a conda enviornment, install Simmate in it, and activate it. *(note: Spyder is optional but recommended)*
-```
-conda create -n my_env -c conda-forge python=3.8 simmate spyder
-conda activate my_env
-```
-4. Run the `simmate` command to make sure it's installed correctly
-5. Initialize our Simmate database with `simmate databate reset`
-6. Start the simmate test server with `simmate run-server`
-7. You can now view the web UI at http://127.0.0.1:8000/
-
-## The full tutorial
-
-- installing anaconda
-- intro to the GUI
-- intro the command-line
-- creating a custom enviornment
-- installing simmate and spyder
