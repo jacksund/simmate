@@ -3,57 +3,92 @@
     [class*="element-"] {
         width: 5%;
         padding: 0.2%;
-        margin: 0.2%;}
-    
-    [class*="-filled"] {
+        margin: 0.2%;
+    }
+
+    [class*="element-filled"] {
         border: 1px solid black;
         border-radius: 4px;
         text-align: center;
-        font-weight: bold;
-        color: black;}
-    
+        font-weight: 400;
+        color: black;
+    }
+
     [class*="-empty"] {
-        background-color: transparent;}
-    
+        background-color: transparent;
+    }
+
     /* Setting format on hover */
-    [class*="-filled"]:hover {
+    [class*="element-filled"]:hover {
         color: white;
         background-color: black;
-        }
-    
+        cursor: pointer;
+    }
+
     /* Coloring each element box and its text */
-    .nonmetal {background-color: lightyellow;}
-    .alkalimetal {background-color: lightpink;}
-    .alkaliearthmetal {background-color: lavender;}
-    .transitionmetal {background-color: lightblue;}
-    .metal {background-color: lightgreen;}
-    .metalloid {background-color: yellowgreen;}    
-    .halogen {background-color: lightyellow;}
-    .noblegas {background-color: lightsalmon;}
-    .lanthanide {background-color: lightskyblue;}
-    .actinide {background-color: lightseagreen;}
-    
+    .nonmetal {
+        background-color: lightyellow;
+    }
+
+    .alkalimetal {
+        background-color: lightpink;
+    }
+
+    .alkaliearthmetal {
+        background-color: lavender;
+    }
+
+    .transitionmetal {
+        background-color: lightblue;
+    }
+
+    .metal {
+        background-color: lightgreen;
+    }
+
+    .metalloid {
+        background-color: yellowgreen;
+    }
+
+    .halogen {
+        background-color: lightyellow;
+    }
+
+    .noblegas {
+        background-color: lightsalmon;
+    }
+
+    .lanthanide {
+        background-color: lightskyblue;
+    }
+
+    .actinide {
+        background-color: lightseagreen;
+    }
+
     /* Setting text format inside of each element */
     .enumber {
         margin: 0;
         font-size: 65%;
-        text-align: left;}
+        text-align: left;
+    }
 
     .symbol {
         margin-top: -8px;
-        font-size: 130%;}
-    
+        font-size: 130%;
+    }
+
     .name {
         margin-top: -5px;
         font-size: 50%;
-        font-style: italic;}
-        
+        font-style: italic;
+    }
+
     /* Setting format on selected (onclick javascript needed here too)  */
     .selected {
         color: white;
         background-color: black;
-        }
-    
+    }
 </style>
 
 <script>
@@ -92,7 +127,7 @@
             <div class="name d-none d-lg-block text-truncate">Helium</div>
         </div>
     </div>
-    
+
     <div class="row" style="flex-wrap: nowrap;">
         <div class="element-filled alkalimetal" onclick="selectElement(this)">
             <div class="enumber">3</div>
@@ -145,7 +180,7 @@
             <div class="name d-none d-lg-block text-truncate">Neon</div>
         </div>
     </div>
-    
+
     <div class="row" style="flex-wrap: nowrap;">
         <div class="element-filled alkalimetal" onclick="selectElement(this)">
             <div class="enumber">11</div>
@@ -198,7 +233,7 @@
             <div class="name d-none d-lg-block text-truncate">Argon</div>
         </div>
     </div>
-    
+
     <div class="row" style="flex-wrap: nowrap;">
         <div class="element-filled alkalimetal" onclick="selectElement(this)">
             <div class="enumber">19</div>
@@ -291,7 +326,7 @@
             <div class="name d-none d-lg-block text-truncate">Krypton</div>
         </div>
     </div>
-    
+
     <div class="row" style="flex-wrap: nowrap;">
         <div class="element-filled alkalimetal" onclick="selectElement(this)">
             <div class="enumber">37</div>
@@ -384,7 +419,7 @@
             <div class="name d-none d-lg-block text-truncate">Xenon</div>
         </div>
     </div>
-    
+
     <div class="row" style="flex-wrap: nowrap;">
         <div class="element-filled alkalimetal" onclick="selectElement(this)">
             <div class="enumber">55</div>
@@ -568,9 +603,9 @@
             <div class="name d-none d-lg-block text-truncate">Oganesson</div>
         </div>
     </div>
-    
+
     <div class="row" style="padding: 0.6%;"></div>
-    
+
     <div class="row" style="flex-wrap: nowrap;">
         <div class="element-empty"></div>
         <div class="element-empty"></div>

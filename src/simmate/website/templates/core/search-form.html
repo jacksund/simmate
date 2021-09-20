@@ -1,78 +1,129 @@
+<!-- 
+Helpful links when editting...
+https://demos.creative-tim.com/material-dashboard/docs/2.1/components/forms.html
+https://github.com/creativetimofficial/material-dashboard-django/blob/master/core/templates/page-user.html
+https://www.creative-tim.com/live/material-dashboard-django
+-->
 
 <div class="container p-4 bg-light border">
-<form action="{% url 'home' %}#search-results" method="post">
-    {% csrf_token %}
-    
-    <!-- 
-     To customize the order of fields as well as how they render, we manually
-     write out this form. If I were to change anything for the form, I would
-     need to look at the formatting here again. To gauge what the form should
-     look like (without Bootstrap), this line is all you need:
-     {{ chemical_system_form }}
-     -->
-     
-    {{ chemical_system_form.non_field_errors }}
-    <div class="fieldWrapper">
-        {{ chemical_system_form.chemical_system.errors }}
-        <label for="id_chemical_system" class="form-label"><b>Search by Chemical System:</b></label>
-        <input type="text" name="chemical_system" maxlength="20" required="" id="id_chemical_system" class="form-control" placeholder="Li-Co-O">
-    </div>
-    <div class="fieldWrapper form-check">
-        {{ chemical_system_form.include_subsystems.errors }}
-        <label for="id_include_subsystems" class="form-check-label">include subsystems</label>
-        <input type="checkbox" name="include_subsystems" id="id_include_subsystems" class="form-check-input">
-        <div id="include_subsystems_help" class="form-text">
-            <i>subsystems of Li-Co-O would be Li, Co, O, Li-Co, Li-O, and Co-O.</i>    
+
+    <div class="card">
+        <div class="card-header card-header-success">
+            <h4 class="card-title"><b>Explore Materials</b></h4>
+            <p class="card-category">These structures come from third-party databases, so be sure to visit their
+                websites and cite them properly!</p>
         </div>
-    </div>
-    
-    <br>
-    
-    <b>Databases to Search:</b>
-    <br>
-    <div class="fieldWrapper form-check">
-        {{ chemical_system_form.include_subsystems.errors }}
-        <input type="checkbox" name="aflow" id="id_aflow" class="form-check-input" disabled>
-        <label for="id_aflow" class="form-check-label">AFLOW</label>
-    </div>
-    <div class="fieldWrapper form-check">
-        {{ chemical_system_form.include_subsystems.errors }}
-        <input type="checkbox" name="cod" id="id_cod" class="form-check-input" checked>
-        <label for="id_cod" class="form-check-label">COD</label>
-    </div>
-    <div class="fieldWrapper form-check">
-        {{ chemical_system_form.include_subsystems.errors }}
-        <input type="checkbox" name="jarvis" id="id_jarvis" class="form-check-input" checked>
-        <label for="id_jarvis" class="form-check-label">JARVIS</label>
-    </div>
-    <div class="fieldWrapper form-check">
-        {{ chemical_system_form.include_subsystems.errors }}
-        <input type="checkbox" name="materials_project" id="id_materials_project" class="form-check-input" checked>
-        <label for="id_materials_project" class="form-check-label">Materials Project</label>
-    </div>
-    <div class="fieldWrapper form-check">
-        {{ chemical_system_form.include_subsystems.errors }}
-        <input type="checkbox" name="simmate" id="id_simmate" class="form-check-input" disabled>
-        <label for="id_simmate" class="form-check-label">Simmate</label>
-        
-    </div>
-    <div class="fieldWrapper form-check">
-        {{ chemical_system_form.include_subsystems.errors }}
-        <input type="checkbox" name="oqmd" id="id_oqmd" class="form-check-input" disabled>
-        <label for="id_oqmd" class="form-check-label">OQMD</label>
-    </div>
-    
-    
-    <br>
-    <b>Advanced filtering criteria is coming soon!</b>
-    <br><br>
-    
-    <button class="btn btn-outline-success" type="submit">Search</button>
 
-</form>
+        <br>
+
+        <div class="card-body">
+            <form action="{% url 'home' %}#search-results" method="post">
+                {% csrf_token %}
+
+                {{ chemical_system_form.non_field_errors }}
+
+                <!-- Chemical System -->
+                <div class="form-group fieldWrapper has-success">
+                    {{ chemical_system_form.chemical_system.errors }}
+                    <label for="id_chemical_system"><b>Chemical System:</b></label>
+                    <input name="chemical_system" type="text" maxlength="20" class="form-control"
+                        id="id_chemical_system" aria-describedby="emailHelp" placeholder="Li-Co-O">
+                </div>
+
+                <!-- Include Subsystems -->
+                <div class="form-check fieldWrapper">
+                    {{ chemical_system_form.include_subsystems.errors }}
+                    <label class="form-check-label" for="id_include_subsystems">
+                        <input class="form-check-input" type="checkbox" name="include_subsystems"
+                            id="id_include_subsystems" value="">
+                        include subsystems
+                        <span class="form-check-sign">
+                            <span class="check"></span>
+                        </span>
+                        <small id="chemical_system_help" class="form-text text-muted">subsystems of Li-Co-O would be Li,
+                            Co, O, Li-Co, Li-O, and Co-O</small>
+                    </label>
+                </div>
+
+                <br>
+
+                <!-- All Databases -->
+                <label class="text-success"><b>Databases to Search:</b></label>
+                <br>
+
+                <div class="form-check fieldWrapper">
+                    <label class="form-check-label" for="id_aflow">
+                        <input class="form-check-input" type="checkbox" name="aflow" id="id_aflow" disabled>
+                        AFLOW
+                        <span class="form-check-sign">
+                            <span class="check"></span>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="form-check fieldWrapper">
+                    <label class="form-check-label" for="id_cod">
+                        <input class="form-check-input" type="checkbox" name="cod" id="id_cod" checked>
+                        COD
+                        <span class="form-check-sign">
+                            <span class="check"></span>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="form-check fieldWrapper">
+                    <label class="form-check-label" for="id_jarvis">
+                        <input class="form-check-input" type="checkbox" name="jarvis" id="id_jarvis" checked>
+                        JARVIS
+                        <span class="form-check-sign">
+                            <span class="check"></span>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="form-check fieldWrapper">
+                    <label class="form-check-label" for="id_materials_project">
+                        <input class="form-check-input" type="checkbox" name="materials_project"
+                            id="id_materials_project" checked>
+                        Materials Project
+                        <span class="form-check-sign">
+                            <span class="check"></span>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="form-check fieldWrapper">
+                    <label class="form-check-label" for="id_simmate">
+                        <input class="form-check-input" type="checkbox" name="simmate" id="id_simmate" disabled>
+                        Simmate
+                        <span class="form-check-sign">
+                            <span class="check"></span>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="form-check fieldWrapper">
+                    <label class="form-check-label" for="id_oqmd">
+                        <input class="form-check-input" type="checkbox" name="oqmd" id="id_oqmd" disabled>
+                        OQMD
+                        <span class="form-check-sign">
+                            <span class="check"></span>
+                        </span>
+                    </label>
+                </div>
+                <!-- End of Databases -->
+
+                <br>
+                <b>Advanced filtering criteria is coming soon!</b>
+                <br><br>
+
+                <button class="btn btn-outline-success" type="submit">Search</button>
+
+            </form>
+        </div>
 
 
-<!--
+        <!--
 <div class="input-group mb-3">
     <select class="selectpicker" data-live-search="true" data-width="auto" data-size="15" data-style="btn-primary">
       <optgroup label="Composition">
@@ -109,4 +160,5 @@
 </div>
 -->
 
+    </div>
 </div>
