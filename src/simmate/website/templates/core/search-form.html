@@ -5,7 +5,7 @@ https://github.com/creativetimofficial/material-dashboard-django/blob/master/cor
 https://www.creative-tim.com/live/material-dashboard-django
 -->
 
-<div class="container p-4 bg-light border">
+<div class="container p-4">
 
     <div class="card">
         <div class="card-header card-header-success">
@@ -27,7 +27,7 @@ https://www.creative-tim.com/live/material-dashboard-django
                     {{ chemical_system_form.chemical_system.errors }}
                     <label for="id_chemical_system"><b>Chemical System:</b></label>
                     <input name="chemical_system" type="text" maxlength="20" class="form-control"
-                        id="id_chemical_system" aria-describedby="emailHelp" placeholder="Li-Co-O">
+                        id="id_chemical_system" aria-describedby="emailHelp" placeholder="Li-Co-O" required="">
                 </div>
 
                 <!-- Include Subsystems -->
@@ -35,7 +35,7 @@ https://www.creative-tim.com/live/material-dashboard-django
                     {{ chemical_system_form.include_subsystems.errors }}
                     <label class="form-check-label" for="id_include_subsystems">
                         <input class="form-check-input" type="checkbox" name="include_subsystems"
-                            id="id_include_subsystems" value="">
+                            id="id_include_subsystems">
                         include subsystems
                         <span class="form-check-sign">
                             <span class="check"></span>
@@ -117,7 +117,7 @@ https://www.creative-tim.com/live/material-dashboard-django
                 <b>Advanced filtering criteria is coming soon!</b>
                 <br><br>
 
-                <button class="btn btn-outline-success" type="submit">Search</button>
+                <button class="btn btn-success" type="submit">Search</button>
 
             </form>
         </div>

@@ -1,0 +1,1 @@
+Inside assets/css/material-dashboard.css I switch all cases of #9c27b0 to #00aa44ff
