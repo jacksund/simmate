@@ -2,7 +2,7 @@
 
 ## The quick version
 
-1. In python console (bottom right) run `import simmate` to make sure everything is set up.
+1. In python console run `import simmate` to make sure everything is set up.
 2. Make sure you still have our `POSCAR` file of Silver (Ag) from the last tutorial. 
 3. Now let's explore the toolkit and a few of its features!
 
