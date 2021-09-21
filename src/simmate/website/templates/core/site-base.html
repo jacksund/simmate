@@ -21,11 +21,11 @@
         {% include "core/navbar.html" %}
 
         <!-- This is the main portion of the webpage, which I put in a single padded row. The sidebar is always present, and the remainder of the page varies. -->
-        <div class="container-fluid">
+        <div class="container-fluid vh-100">
             <div class="row">
-                <div class="col-auto col-lg-2 p-2 list-group text-truncate bg-dark">
-                  {% include "core/sidebar.html" %}
-                </div>
+                
+                {% include "core/sidebar.html" %}
+                
                 
                 <div class="col-10 overflow-auto h-100">
                     {% block body %}{% endblock %}
