@@ -17,7 +17,7 @@ class SearchResults(models.QuerySet):
         search_results = Spacegroup.objects.all()
         dataframe = search_results.to_dataframe()
     """
-    
+
     def to_dataframe(
         self,
         fieldnames=(),
@@ -28,7 +28,7 @@ class SearchResults(models.QuerySet):
     ):
         # This method is coppied from...
         # https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py
-        
+
         # BUG: read_frame runs a NEW query, so it may be a different length from
         # the original queryset.
         # See https://github.com/chrisdev/django-pandas/issues/138 for issue
@@ -44,10 +44,15 @@ class SearchResults(models.QuerySet):
     def to_pymatgen(self):
 
         # This method will only be for structures and other classes that
-        # support this method.
-        # Another thing to note is that Manager methods can access self.model
-        # to get the model class to which they’re attached.
-        return "TESTING-123"
+        # support this method. So we make sure the model has supports it first.
+        if not hasattr(self.model, "to_pymatgen"):
+            raise Exception(
+                "This database model does not have a to_pymatgen method implemented"
+            )
+
+        # now we can iterate through the queryset and return the converted
+        # pymatgen objects as a list
+        return [obj.to_pymatgen() for obj in self]
 
 
 # Copied this line from...
@@ -66,7 +71,7 @@ class DatabaseTable(models.Model):
 
 
 # This line does NOTHING but rename a module. I have this because I want to use
-# "table_column.CharField(...)" instead of models.CharField(...) in my Models. 
+# "table_column.CharField(...)" instead of models.CharField(...) in my Models.
 # This let's beginner read my higher level classes and instantly understand what
 # each thing represents -- without them needing to understand
 # that Django Model == Database Table. Experts may find this annoying, so I'm
