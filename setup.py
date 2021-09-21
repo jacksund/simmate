@@ -175,6 +175,7 @@ setup(
     
         # For development
         'pytest',
+        'black',
         # 'spyder',
     
         # For visualization

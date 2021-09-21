@@ -1,24 +1,22 @@
-<!DOCTYPE html>
+<!--
+=========================================================
+ Material Dashboard - v2.1.1
+=========================================================
 
+ Product Page: https://www.creative-tim.com/product/material-dashboard
+ Copyright 2019 Creative Tim (https://www.creative-tim.com)
+ Licensed under MIT (https://github.com/creativetimofficial/material-dashboard/blob/master/LICENSE.md)
+
+ Coded by Creative Tim
+
+=========================================================
+
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. -->
+
+<!DOCTYPE html>
 <html lang="en">
 
-    <head>
-    
-        <!--Title of the page (located in the tab header) -->
-        <title>{% block tabtitle %}{% endblock %}</title>
-        
-        <!-- Everthing commonly used in the header is stored in this template -->
-        {% include "core/header.html" %}
-        
-        <!-- Some pages may require extra lines in the header such as loading extra libraries -->
-        {% block extraheader %}{% endblock %}
-        
-    </head>
-    
-    <body>
-        
-        <!-- The navigation bar is the same for every webpage, and it is stored in this template -->
-        {% include "core/navbar.html" %}
+<head>
 
         <!-- This is the main portion of the webpage, which I put in a single padded row. The sidebar is always present, and the remainder of the page varies. -->
         <div class="container-fluid vh-100">
@@ -32,14 +30,23 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Many packages for JS libraries should be loaded last -->
-        {% include "core/footer.html" %}
-        
-        <!-- Sometimes I need to load extra javascript at the bottom of the page -->
-        {% block extrafooter %}{% endblock %}
-        
-        
-    </body>
+      </div>
+
+      {% include "core/footer.html" %}
+
+    </div>
+  </div>
+
+
+  <!-- Many packages for JS libraries should be loaded last -->
+  {% include "core/scripts.html" %}
+
+  <!-- We also load the JS for the sidebar -->
+  {% include "core/sidebar-script.html" %}
+
+  <!-- Sometimes I need to load extra javascript at the bottom of the page -->
+  {% block extrafooter %}{% endblock %}
+
+</body>
 
 </html>
