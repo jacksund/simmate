@@ -5,12 +5,8 @@
 Simmate | Login
 {% endblock %}
 
-{% block banner %}
-{% include "core/header.html"%}
-{% endblock %}
 
-
-{% block body %}
+{% block content %}
 {% load crispy_forms_tags %}
 <div class="container mt-3">
 
@@ -22,7 +18,7 @@ Simmate | Login
             <p>Your account doesn't have access to this page. To proceed,
             please login with an account that has access.</p>
             {% else %}
-            <p>Please login to see this page.</p>
+            <h3 class="text-primary">Please login to see this page.</h3>
             {% endif %}
         {% endif %}
     
@@ -33,7 +29,7 @@ Simmate | Login
             </div>
             
             <div class="form-group">
-                <button class="btn btn-outline-info" type="submit">Login</button>
+                <button class="btn btn-success" type="submit">Login</button>
                 <input type="hidden" name="next" value="{{ next }}">
             </div>
             

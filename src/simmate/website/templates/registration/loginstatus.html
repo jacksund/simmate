@@ -5,12 +5,8 @@
 Simmate | Login Status
 {% endblock %}
 
-{% block banner %}
-{% include "core/header.html"%}
-{% endblock %}
 
-
-{% block body %}
+{% block content %}
 <div class="container mt-5">
     <div class="col-6 offset-3">
         {% if user.is_authenticated %}

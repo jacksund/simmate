@@ -5,12 +5,7 @@
 Simmate | Login
 {% endblock %}
 
-{% block banner %}
-{% include "core/header.html"%}
-{% endblock %}
-
-
-{% block body %}
+{% block content %}
 {% load crispy_forms_tags %}
 <div class="container mt-3">
     <div class="col-6 offset-3">
@@ -22,7 +17,7 @@ Simmate | Login
             </div>
             
             <div class="form-group">
-                <button class="btn btn-outline-info" type="submit">Create User</button>
+                <button class="btn btn-success" type="submit">Create User</button>
             </div>
             
         </form> 
