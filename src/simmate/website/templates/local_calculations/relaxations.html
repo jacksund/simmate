@@ -1,4 +1,3 @@
-
 {% extends "core/site-base.html" %}
 
 {% block tabtitle %}
@@ -19,30 +18,30 @@ https://getbootstrap.com/docs/5.0/components/card/#grid-cards
 
 <div class="container p-4 bg-light border">
 
-    <!-- Breadcrumb links -->
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'local_calculations' %}">Workflows</a></li>
-        <li class="breadcrumb-item active">Relaxations</li>
-      </ol>
-    </nav>
+  <!-- Breadcrumb links -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'local_calculations' %}">Workflows</a></li>
+      <li class="breadcrumb-item active">Relaxations</li>
+    </ol>
+  </nav>
 
 
-    <div class="card" style="width: 25rem;">
-      <div class="card-body">
-        <h5 class="card-title">MIT-Project Quality</h5>
-        <p class="card-text">
-            Uses settings from the MIT Project, which is the precursor to the
-            Materials Project. These calculations are considered low-quality
-            but are still used in select high-throughput studies.
-            </br></br>
-          <a role="button" class="btn btn-primary btn" href="{% url 'mit_about' %}">About</a>
-          <a role="button" class="btn btn-secondary btn-sm" href="{% url 'mit_submit' %}">Submit</a>
-          <a role="button" class="btn btn-secondary btn-sm" href="https://cloud.prefect.io/simmate/flow/{{ mit_flow_id }}" target="_blank">Monitor</a>
-          <a role="button" class="btn btn-secondary btn-sm" href="{% url 'mit_all' %}">Results</a>
-      </div>
+  <div class="card" style="width: 25rem;">
+    <div class="card-body">
+      <h5 class="card-title">MIT-Project Quality</h5>
+      <p class="card-text">
+        Uses settings from the MIT Project, which is the precursor to the
+        Materials Project. These calculations are considered low-quality
+        but are still used in select high-throughput studies.
+        </br></br>
+        <a role="button" class="btn btn-primary btn" href="{% url 'mit_about' %}">About</a>
+        <a role="button" class="btn btn-secondary btn-sm" href="{% url 'mit_submit' %}">Submit</a>
+        <a role="button" class="btn btn-secondary btn-sm" href="https://cloud.prefect.io/simmate/flow/{{ mit_flow_id }}"
+          target="_blank">Monitor</a>
+        <a role="button" class="btn btn-secondary btn-sm" href="{% url 'mit_all' %}">Results</a>
     </div>
+  </div>
 </div>
 
 {% endblock %}
-
