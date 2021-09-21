@@ -1,8 +1,6 @@
 # Installing Simmate while Learning the Command-line
 
-### A quick comment on tutorials
-
-All tutorials will have two sections: a short-and-to-the-point one for experts and a much longer one for beginners. The critical steps in each are **exactly the same**. However, the full tutorial includes extra exploration of the software and how to use it. For example, this tutorial includes a guide on the command-line as well as concepts of python enviornments and working directories. Be sure to read the full tutorials if you don't have coding experience!
+> A quick comment on tutorials... All tutorials will have two sections: a short-and-to-the-point one for experts and a much longer one for beginners. The critical steps in each are **exactly the same**. However, the full tutorial includes extra exploration of the software and how to use it. For example, this tutorial includes a guide on the command-line as well as concepts of python enviornments and working directories. Be sure to read the full tutorials if you don't have coding experience!
 
 ## The quick version
 
