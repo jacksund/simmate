@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from django.db import models
+from simmate.database.base import DatabaseTable, table_column
 
 
-class Calculation(models.Model):
+class Calculation(DatabaseTable):
 
     # A calculation is synonmyous with a "Flow-Run". This entire table together
     # can be viewed as the "Flow" which may have extra metadata. This could
@@ -22,43 +22,55 @@ class Calculation(models.Model):
     #   name = jolly-hornet
     #   id = d8a785e1-e344-463a-bede-0e7b3da7bab6
     # The id is still needed because it let's me make the link to the cloud page
-    prefect_flow_run_name = models.CharField(max_length=50, blank=True, null=True)
-    prefect_flow_run_id = models.CharField(max_length=50, blank=True, null=True)
-    prefect_flow_run_version = models.CharField(max_length=50, blank=True, null=True)
+    prefect_flow_run_name = table_column.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+    prefect_flow_run_id = table_column.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+    prefect_flow_run_version = table_column.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
 
     # Indicate what state the calculation is in. This exists to ensure we don't
     # submit multiple to Prefect and also let's us check how many currently exist in
     # the queue.
     # !!! If you choose to change these, consider Prefect's different state labels:
     #       https://docs.prefect.io/api/latest/engine/state.html
-    # class StatusTypeOptions(models.TextChoices):
+    # class StatusTypeOptions(table_column.TextChoices):
     #     SCHEDULED = "S"
     #     COMPLETED = "C"
     #     FAILED = "F"
 
-    # status = models.CharField(
+    # status = table_column.CharField(
     #     max_length=1,
     #     choices=StatusTypeOptions.choices,
     #     default=StatusTypeOptions.SCHEDULED,
     # )
 
     # timestamping for when this was added to the database
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = table_column.DateTimeField(auto_now_add=True)
+    updated_at = table_column.DateTimeField(auto_now=True)
 
     # Simmate workflows often have ErrorHandlers that fix any issues while the
     # calaculation ran. This often involves changing settings, so we store
     # any of those changes here.
-    corrections = models.JSONField(blank=True, null=True)
+    corrections = table_column.JSONField(blank=True, null=True)
 
     """ Relationships """
     # While there are no base relations for this abstract class, the majority of
     # calculations will link to a structure or alternatively a diffusion pathway
     # or crystal surface. In such cases, you'll add a relationship like this:
     #
-    #   structure = models.ForeignKey(
+    #   structure = table_column.ForeignKey(
     #       ExampleStructureModel,
-    #       on_delete=models.CASCADE,
+    #       on_delete=table_column.CASCADE,
     #   )
     #
     # Note that this is a ForeignKey because we want to all the user to attempt

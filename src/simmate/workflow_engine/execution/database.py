@@ -3,7 +3,7 @@
 # import pickle
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 
-from django.db import models
+from simmate.database.base import DatabaseTable, table_column
 
 # TYPES OF RELATIONSHIPS:
 # ManyToMany - place in either but not both
@@ -33,25 +33,25 @@ from django.db import models
 # --------------------------------------------------------------------------------------
 
 
-class WorkItem(models.Model):
+class WorkItem(DatabaseTable):
 
     """Base info"""
 
     # The function to be called
-    fxn = models.BinaryField()
+    fxn = table_column.BinaryField()
 
     # arguments to be passed into fxn
-    args = models.BinaryField(default=cloudpickle.dumps([]))
+    args = table_column.BinaryField(default=cloudpickle.dumps([]))
 
     # keyword arguments to be passed into fxn
-    kwargs = models.BinaryField(default=cloudpickle.dumps({}))
+    kwargs = table_column.BinaryField(default=cloudpickle.dumps({}))
 
     # the output of fxn(*args, **kwargs)
-    result = models.BinaryField(blank=True, null=True)
+    result = table_column.BinaryField(blank=True, null=True)
 
     # the status/state of the workitem
     # These states are based on the python queue module
-    class StatusOptions(models.TextChoices):
+    class StatusOptions(table_column.TextChoices):
         PENDING = "P"
         RUNNING = "R"
         CANCELLED = "C"
@@ -60,7 +60,7 @@ class WorkItem(models.Model):
 
     # TODO -- I should consider indexing this column for speed because it's
     # the most queried column by far.
-    status = models.CharField(
+    status = table_column.CharField(
         max_length=1,
         choices=StatusOptions.choices,
         default=StatusOptions.PENDING,
@@ -68,7 +68,7 @@ class WorkItem(models.Model):
 
     # TODO -- This really should be a separate table with a relationship to WorkItem
     # the worker ID that grabbed the workitem
-    # worker_id = models.CharField(max_length=50, blank=True, null=True)
+    # worker_id = table_column.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         app_label = "workflow_execution"

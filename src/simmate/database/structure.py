@@ -2,50 +2,49 @@
 
 from scipy.constants import Avogadro
 
-from django.db import models
-
 from pymatgen.core.structure import Structure as Structure_PMG
 
 # from pymatgen.analysis.prototypes import AflowPrototypeMatcher
 
+from simmate.database.base import DatabaseTable, table_column
 from simmate.database.symmetry import Spacegroup
 
 
-class Structure(models.Model):
+class Structure(DatabaseTable):
 
     """Base Info"""
 
     # The structure which is written to a string and in a compressed format
     # using the .from_pymatgen() method. To get back to our pymatgen structure
     # object, use the .to_pymatgen() method!
-    structure_string = models.TextField()
+    structure_string = table_column.TextField()
 
     """ Query-helper Info """
 
     # total number of sites in the unitcell
-    nsites = models.IntegerField()
+    nsites = table_column.IntegerField()
 
     # total number of unique elements
-    nelements = models.IntegerField()
+    nelements = table_column.IntegerField()
 
     # the base chemical system (ex: "Y-C-F")
-    chemical_system = models.CharField(max_length=25)
+    chemical_system = table_column.CharField(max_length=25)
 
     # Density of the crystal (g/cm^3)
-    density = models.FloatField()
+    density = table_column.FloatField()
 
     # Molar volume of the crystal (cm^3/mol)
     # Note we prefer this over a "volume" field because volume is highly dependent
     # on the symmetry and the arbitray unitcell. If you are truly after small volumes
     # of the unitcell, it is likely you really just want to search by spacegroup.
-    molar_volume = models.FloatField()
+    molar_volume = table_column.FloatField()
 
     # The composition of the structure formatted in various ways
     # BUG: The max length here is overkill because there are many structures
     # with 8+ elements and disordered formula (e.g. "Ca2.103 N0.98")
-    formula_full = models.CharField(max_length=50)  # more
-    formula_reduced = models.CharField(max_length=50)
-    formula_anonymous = models.CharField(max_length=50)
+    formula_full = table_column.CharField(max_length=50)  # more
+    formula_reduced = table_column.CharField(max_length=50)
+    formula_anonymous = table_column.CharField(max_length=50)
 
     # NOTE: extra fields for the Lattice and Sites are intentionally left out
     # in order to save on overall database size. Things such as...
@@ -66,11 +65,11 @@ class Structure(models.Model):
 
     # symmetry info
     # TODO: this will be a relationship in the future
-    spacegroup = models.ForeignKey(Spacegroup, on_delete=models.PROTECT)
+    spacegroup = table_column.ForeignKey(Spacegroup, on_delete=table_column.PROTECT)
 
     # The AFLOW prototype that this structure maps to.
     # TODO: this will be a relationship in the future
-    # prototype = models.CharField(max_length=50, blank=True, null=True)
+    # prototype = table_column.CharField(max_length=50, blank=True, null=True)
 
     """ Properties """
     # none

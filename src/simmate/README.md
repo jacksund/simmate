@@ -5,7 +5,6 @@
 **Within each folder (aka each python "module"), you'll find more details on what it contains.**
 
 **But as a brief summary...**
-- `beta_features` = new Simmate functions that are still under initial testing
 - `calculators` = third-party programs that run analyses for us (e.g. VASP which runs DFT calculations)
 - `command_line` = makes some common functions available as commands in the terminal (for advanced users)
 - `configuration` = the defualt Simmate settings and how to update them

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.db import models
+from simmate.database.base import table_column
 
 from simmate.database.structure import Structure
 
@@ -10,7 +10,7 @@ class CodStructure(Structure):
     # The id used to symbolize the structure.
     # For example, Materials Project structures are represented by ids such as
     # "mp-12345" while AFLOW structures by "aflow-12345"
-    id = models.CharField(max_length=25, primary_key=True)
+    id = table_column.CharField(max_length=25, primary_key=True)
 
     # These fields overwrite the default Structure fields
     # BUG: We can't use CharField for the COD database because there are a number
@@ -18,22 +18,22 @@ class CodStructure(Structure):
     # aspect throws issues in pymatgen where formulas can be returned as long
     # floats (ex: Ca2.1234567N). Until this is fixed and cleaned up, I'll
     # need to use TextField instead of CharField for these fields.
-    chemical_system = models.TextField()
-    formula_full = models.TextField()
-    formula_reduced = models.TextField()
-    formula_anonymous = models.TextField()
+    chemical_system = table_column.TextField()
+    formula_full = table_column.TextField()
+    formula_reduced = table_column.TextField()
+    formula_anonymous = table_column.TextField()
 
     """ Base Info """
 
     # whether the structure contains disordered sites (i.e. mixed occupancies)
-    is_ordered = models.BooleanField()
+    is_ordered = table_column.BooleanField()
 
     # whether the structure has implicit Hydrogens. This means there should be
     # Hydrogens in the structure, but they weren't explicitly drawn.
-    has_implicit_hydrogens = models.BooleanField()
+    has_implicit_hydrogens = table_column.BooleanField()
 
     # Title of the paper that the structure is reported in
-    # paper_title = models.CharField(blank=True, null=True)
+    # paper_title = table_column.CharField(blank=True, null=True)
 
     # Extra data by COD
     # See my notes in the scraping file. There's more metadata to add but I leave
