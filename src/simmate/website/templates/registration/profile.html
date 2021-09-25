@@ -1,4 +1,3 @@
-
 {% extends "core/site-base.html" %}
 
 {% block tabtitle %}
@@ -13,17 +12,15 @@ Simmate | Profile
 {% block body %}
 
 <section class="jumbotron text-center">
-    <div class="container py-5">
-      <h1>Welcome {{ user.username }}!</h1>
-      <p class="lead text-muted">
-          The <b>Profile</b> page is still under development and is therefore empty at the moment.
-          In the future, this will be a place where you can view your "favorite" 
-          materials as well as track calculations that you've requested. For now,
-          switch to the <b>Home</b> page to explore materials.
-      </p>
-    </div>
+  <div class="container py-5">
+    <h1>Welcome {{ user.username }}!</h1>
+    <p class="lead text-muted">
+      The <b>Profile</b> page is still under development and is therefore empty at the moment.
+      In the future, this will be a place where you can view your "favorite"
+      materials as well as track calculations that you've requested. For now,
+      switch to the <b>Home</b> page to explore materials.
+    </p>
+  </div>
 </section>
 
 {% endblock %}
-
-

@@ -1,50 +1,54 @@
 <!-- This is the collapsable header w. contact information. Not showing at start -->
 <div class="bg-light collapse" id="navbarHeader" style="">
     <div class="container">
-      <div class="row">
-        <div class="col-sm-8 col-md-7 py-4">
-          <h4 class="text-primary">Welcome to Simmate!</h4>
-          <p class="text-muted">
-              </br>
-              The Simulated Materials Ecosystem (<b>Simmate</b>) is a toolbox and helper for materials science research. It lets you explore various crystal databases, predict new materials, and quickly calculate properties -- electronic, elastic, thermodynamic, and more. 
-              </br> </br>
-              All our software is free and open-source, so making an account is 100% optional. If you'd like to download Simmate's framework and access some advanced tools, take a look at <a href="https://github.com/jacksund/simmate" target="_blank">our github page</a>.
-          </p>
+        <div class="row">
+            <div class="col-sm-8 col-md-7 py-4">
+                <h4 class="text-primary">Welcome to Simmate!</h4>
+                <p class="text-muted">
+                    </br>
+                    The Simulated Materials Ecosystem (<b>Simmate</b>) is a toolbox and helper for materials science
+                    research. It lets you explore various crystal databases, predict new materials, and quickly
+                    calculate properties -- electronic, elastic, thermodynamic, and more.
+                    </br> </br>
+                    All our software is free and open-source, so making an account is 100% optional. If you'd like to
+                    download Simmate's framework and access some advanced tools, take a look at <a
+                        href="https://github.com/jacksund/simmate" target="_blank">our github page</a>.
+                </p>
+            </div>
+            <div class="col-sm-4 offset-md-1 py-4">
+                <h4 class="text-primary">Contact</h4>
+                <ul class="list-unstyled">
+                    <li><a href="#">jacksund@live.unc.edu</a></li>
+                    <li><a href="#">scw@live.unc.edu</a></li>
+                </ul>
+            </div>
         </div>
-        <div class="col-sm-4 offset-md-1 py-4">
-          <h4 class="text-primary">Contact</h4>
-          <ul class="list-unstyled">
-            <li><a href="#">jacksund@live.unc.edu</a></li>
-            <li><a href="#">scw@live.unc.edu</a></li>
-          </ul>
-        </div>
-      </div>
     </div>
 </div>
 
 <!-- Add navigation bar that sticks at the top when scrolling -->
 <nav class="navbar navbar-expand-sm sticky-top shadow navbar-light bg-light">
-    
+
     <div class="container">
-    
-    <!-- Add brandname w. link -->
-    <a class="navbar-brand" href="{% url 'home' %}">
-        <i class="bi bi-bootstrap"></i> Simmate
-    </a>
 
-    <!-- Setup collapse button for when screen is small-->
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+        <!-- Add brandname w. link -->
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="/static/images/simmate-logo.svg" height="30" alt="">
+        </a>
 
-    <!-- Setup collapsable links -->
-    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <!-- Setup collapse button for when screen is small-->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <!-- start list of links -->
-        <ul class="navbar-nav ms-auto">
-            
-            <!-- Links shown will depend on whether the user is signed in or not -->
-            {% if user.is_authenticated %}
+        <!-- Setup collapsable links -->
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+
+            <!-- start list of links -->
+            <ul class="navbar-nav ms-auto">
+
+                <!-- Links shown will depend on whether the user is signed in or not -->
+                {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'profile' %}">
                         Profile
@@ -55,7 +59,7 @@
                         Logout
                     </a>
                 </li>
-            {% else %}
+                {% else %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'login' %}">
                         Login
@@ -68,19 +72,19 @@
                     </a>
                 </li>
                 -->
-            {% endif %}
-            
-            <!-- These links will always be shown, regardless of login stats -->
-            <li class="nav-item">
-                <a class="nav-link" data-toggle="collapse" href="#navbarHeader" role="button">
-                    About
-                </a>
-            </li>
+                {% endif %}
 
-        </ul>
+                <!-- These links will always be shown, regardless of login stats -->
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#navbarHeader" role="button">
+                        About
+                    </a>
+                </li>
 
-    </div>
-    
+            </ul>
+
+        </div>
+
     </div>
 
 </nav>

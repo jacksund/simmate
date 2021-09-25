@@ -2,7 +2,7 @@
 
 import numpy
 
-from django.db import models
+from simmate.database.base import table_column
 
 from simmate.database.structure import Structure
 from simmate.database.calculation import Calculation
@@ -33,31 +33,31 @@ class IonicStepStructure(Structure):
     # ensure this.
 
     # This is ionic step number for the given relaxation (starts counting from 0)
-    ionic_step_number = models.IntegerField()
+    ionic_step_number = table_column.IntegerField()
 
     # The final energy here includes corrections that VASP may have introduced
-    energy = models.FloatField()
+    energy = table_column.FloatField()
 
     # A list of forces for each atomic site. So this is a list like...
     # [site1, site2, site3, ...] where site1=[force_x, force_y, force_z]
-    site_forces = models.JSONField()
+    site_forces = table_column.JSONField()
 
     # This is 3x3 matrix that represents the stress on the structure lattice
-    lattice_stress = models.JSONField()
+    lattice_stress = table_column.JSONField()
 
     """ Query-helper Info """
     # Takes the energy from above and converts it to per atom units
-    energy_per_atom = models.FloatField()
+    energy_per_atom = table_column.FloatField()
 
     # Takes the site forces and reports the vector norm for it.
     # See numpy.linalg.norm for how this is calculated.
-    site_forces_norm = models.FloatField()
-    site_forces_norm_per_atom = models.FloatField()
+    site_forces_norm = table_column.FloatField()
+    site_forces_norm_per_atom = table_column.FloatField()
 
     # Takes the site forces and reports the vector norm for it.
     # # See numpy.linalg.norm for how this is calculated.
-    lattice_stress_norm = models.FloatField()
-    lattice_stress_norm_per_atom = models.FloatField()
+    lattice_stress_norm = table_column.FloatField()
+    lattice_stress_norm_per_atom = table_column.FloatField()
 
     """ Relationships """
     # each of these will map to a Relaxation, so you should typically access this
@@ -89,18 +89,18 @@ class Relaxation(Calculation):
     # I don't want columns above that are largely empty.
     # Note: all entries are optional because there is no guaruntee the calculation
     # finishes successfully
-    band_gap = models.FloatField(blank=True, null=True)
-    is_gap_direct = models.BooleanField(blank=True, null=True)
-    energy_fermi = models.FloatField(blank=True, null=True)
-    conduction_band_minimum = models.FloatField(blank=True, null=True)
-    valence_band_maximum = models.FloatField(blank=True, null=True)
+    band_gap = table_column.FloatField(blank=True, null=True)
+    is_gap_direct = table_column.BooleanField(blank=True, null=True)
+    energy_fermi = table_column.FloatField(blank=True, null=True)
+    conduction_band_minimum = table_column.FloatField(blank=True, null=True)
+    valence_band_maximum = table_column.FloatField(blank=True, null=True)
 
     """ Query-helper Info """
 
     # Volume Change (useful for checking if Pulay Stress may be significant)
     # We store this as a ratio relative to the starting structure
     #   (final - start) / start
-    volume_change = models.FloatField(blank=True, null=True)
+    volume_change = table_column.FloatField(blank=True, null=True)
 
     """ Relationships """
 
@@ -110,23 +110,23 @@ class Relaxation(Calculation):
     # of different quality aren't all grouped together. Therefore, each subclass of
     # this should have relationships that look like this...
     #
-    # structure_start = models.OneToOneField(
+    # structure_start = table_column.OneToOneField(
     #     IonicStepStructure,
-    #     on_delete=models.CASCADE,
+    #     on_delete=table_column.CASCADE,
     #     related_name="relaxations_as_start",
     #     blank=True,
     #     null=True,
     # )
-    # structure_final = models.OneToOneField(
+    # structure_final = table_column.OneToOneField(
     #     IonicStepStructure,
-    #     on_delete=models.CASCADE,
+    #     on_delete=table_column.CASCADE,
     #     related_name="relaxations_as_final",
     #     blank=True,
     #     null=True,
     # )
-    # structures = models.ForeignKey(
+    # structures = table_column.ForeignKey(
     #     IonicStepStructure,
-    #     on_delete=models.CASCADE,
+    #     on_delete=table_column.CASCADE,
     #     related_name="relaxations",
     #     blank=True,
     #     null=True,

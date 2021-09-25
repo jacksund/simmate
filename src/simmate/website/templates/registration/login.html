@@ -1,4 +1,3 @@
-
 {% extends "core/site-base.html" %}
 
 {% block tabtitle %}
@@ -16,40 +15,40 @@ Simmate | Login
 
     <!-- Here is the input box -->
     <div class="col-6 offset-3">
-        
+
         {% if next %}
-            {% if user.is_authenticated %}
-            <p>Your account doesn't have access to this page. To proceed,
+        {% if user.is_authenticated %}
+        <p>Your account doesn't have access to this page. To proceed,
             please login with an account that has access.</p>
-            {% else %}
-            <p>Please login to see this page.</p>
-            {% endif %}
+        {% else %}
+        <p>Please login to see this page.</p>
         {% endif %}
-    
+        {% endif %}
+
         <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}
             <div class="form-group">
                 {{ form | crispy }}
             </div>
-            
+
             <div class="form-group">
                 <button class="btn btn-outline-info" type="submit">Login</button>
                 <input type="hidden" name="next" value="{{ next }}">
             </div>
-            
+
         </form>
 
         <div class="border-top pt-3">
             <p class="text-muted">
-            <small>
-                Because this site is still under early development, we are limiting
-                access to the Warren Lab at UNC. Accounts will be optional once our
-                overall framework and website are published.
+                <small>
+                    Because this site is still under early development, we are limiting
+                    access to the Warren Lab at UNC. Accounts will be optional once our
+                    overall framework and website are published.
             </p>
-            
-        </div>   
+
+        </div>
 
     </div>
-    
+
 </div>
 {% endblock %}

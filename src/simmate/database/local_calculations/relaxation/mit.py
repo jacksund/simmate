@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.db import models
+from simmate.database.base import table_column
 
 from simmate.database.local_calculations.relaxation.base import (
     IonicStepStructure,
@@ -22,9 +22,9 @@ class MITRelaxationStructure(IonicStepStructure):
     # All structures in this table come from relaxation calculations, where
     # there can be many structures (one for each ionic steps) linked to a
     # single relaxation
-    relaxation = models.ForeignKey(
+    relaxation = table_column.ForeignKey(
         "MITRelaxation",  # in quotes becuase this is defined below
-        on_delete=models.CASCADE,
+        on_delete=table_column.CASCADE,
         related_name="structures",
     )
 
@@ -43,18 +43,18 @@ class MITRelaxation(Relaxation):
 
     """ Relationships """
     # the source structure for this calculation
-    structure_start = models.OneToOneField(
+    structure_start = table_column.OneToOneField(
         MITRelaxationStructure,
-        on_delete=models.CASCADE,
+        on_delete=table_column.CASCADE,
         related_name="relaxations_as_start",
         blank=True,
         null=True,
     )
 
     # the final structure for this calculation
-    structure_final = models.OneToOneField(
+    structure_final = table_column.OneToOneField(
         MITRelaxationStructure,
-        on_delete=models.CASCADE,
+        on_delete=table_column.CASCADE,
         related_name="relaxations_as_final",
         blank=True,
         null=True,

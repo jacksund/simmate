@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.db import models
+from simmate.database.base import DatabaseTable, table_column
 
 from pymatgen.symmetry.groups import SpaceGroup as SpaceGroup_PMG
 
@@ -12,23 +12,23 @@ from pymatgen.symmetry.groups import SpaceGroup as SpaceGroup_PMG
 # into 530 hall spacegroups, rather than the typical 230 international spacegroups.
 
 
-class Spacegroup(models.Model):
+class Spacegroup(DatabaseTable):
 
-    """ Base Info """
+    """Base Info"""
 
     # NOTE: International spacegroup info is also known as Hermann-Mauguin
 
     # International space group number
-    number = models.IntegerField(primary_key=True)
+    number = table_column.IntegerField(primary_key=True)
 
     # Full international symbol
-    symbol = models.CharField(max_length=15)
+    symbol = table_column.CharField(max_length=15)
 
     # The crystal system (don't confused with crystal family or lattice family)
-    crystal_system = models.CharField(max_length=15)
+    crystal_system = table_column.CharField(max_length=15)
 
     # Point group symbol
-    point_group = models.CharField(max_length=15)
+    point_group = table_column.CharField(max_length=15)
 
     """ Django App Association """
 

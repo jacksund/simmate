@@ -9,6 +9,9 @@
 # NOTE: some forks comment this out to keep track of their production-level databases
 migrations/
 
+# Ignore the material_kit assets in that are unzipped when you run the simmate server
+assets/
+
 # ignore database files and database json dumps [this may be removed in the future]
 *.sqlite3
 db_dump*json

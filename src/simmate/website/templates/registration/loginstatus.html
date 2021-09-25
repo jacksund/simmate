@@ -1,4 +1,3 @@
-
 {% extends "core/site-base.html" %}
 
 {% block tabtitle %}
@@ -14,11 +13,11 @@ Simmate | Login Status
 <div class="container mt-5">
     <div class="col-6 offset-3">
         {% if user.is_authenticated %}
-            <h2><b>You're still logged in!</b></h2>
-            <p><i>If you'd like sign out, select the 'Logout' button in navigation bar above.</i></p>
+        <h2><b>You're still logged in!</b></h2>
+        <p><i>If you'd like sign out, select the 'Logout' button in navigation bar above.</i></p>
         {% else %}
-            <h2><b>Logged off!</b></h2>
-            <p><i>You've successfully logged off! Thanks for visiting our site</i></p>
+        <h2><b>Logged off!</b></h2>
+        <p><i>You've successfully logged off! Thanks for visiting our site</i></p>
         {% endif %}
     </div>
 </div>
