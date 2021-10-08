@@ -21,9 +21,9 @@ Read here for info on markdown, badges, and more:
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 [Shields Badges](https://shields.io/)
 -->
-> :warning: We are still at the early stages for building! The organization of our code changes frequently -- so many features and tutorials aren't ready yet... For this reason, we've also limited our website access to just team members. 
+> :warning: We are still at the early stages for building! The organization of our code changes frequently -- so many features and tutorials aren't ready yet... For this reason, we've also limited our website access to just team members. We anticipate a stable version will be publicly available in the first few months of 2022. 
 
-> :warning: If you'd like to be notified when Simmate is ready for public use or even help test out our site/code, send me an email (jacksund@live.unc.edu). We anticipate a stable version will be publicly available in the first few months of 2022. 
+> :warning: Simmate is currently reliant on VASP, which is an expensive DFT software that can be very difficult to install for beginners. We are working to move away from propriatary softwares and toward free/open-source codes like ABINIT or DFTK.jl. This will take time though... so we recommend that fully experimental labs wait until Simmate hits this milestone. If you'd like to be notified when this occurs, send me an email (jacksund@live.unc.edu).
    
 ## Welcome!
 
