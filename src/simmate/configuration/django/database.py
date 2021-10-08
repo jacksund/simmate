@@ -9,16 +9,10 @@ from simmate.configuration.django import setup_full  # sets database connection
 from simmate.configuration.django.settings import DJANGO_DIRECTORY, DATABASES
 from simmate.database.symmetry import Spacegroup
 
-# Apps to init.
-# !!! In the future, I should do a more robust search, rather than hardcode here.
-# !!! maybe just grab all folders in the base directory via os.listdir()?
-APPS_TO_MIGRATE = [
-    "local_calculations",
-    "third_parties",
-    "workflow_execution",
-    "prototypes",
-]
-
+# Lists off which apps to update/create. By default, I do all apps that are installed
+# so this list is grabbed directly from django
+from django.apps import apps
+APPS_TO_MIGRATE = list(apps.app_configs.keys())
 
 def update_database(apps_to_migrate=APPS_TO_MIGRATE):
 

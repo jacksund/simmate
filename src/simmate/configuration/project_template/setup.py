@@ -20,5 +20,5 @@ setup(
     version="0.0.0",
     python_requires=">=3.5, <4",
     packages=find_packages(where="."),
-    install_requires=["simmate"],
+    install_requires=[],
 )
