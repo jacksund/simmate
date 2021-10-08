@@ -186,6 +186,7 @@ if os.path.exists(APPLICATIONS_YAML):
         # now add each app to our list above so Django loads it.
         for app in extra_apps:
             INSTALLED_APPS.append(app)
+
 # --------------------------------------------------------------------------------------
 
 # This sets the default field for primary keys in django models
