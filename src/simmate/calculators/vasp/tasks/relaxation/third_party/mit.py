@@ -179,7 +179,3 @@ class MITRelaxationTask(VaspTask):
         FrozenErrorHandler(),
         LargeSigmaErrorHandler(),
     ]
-
-
-# we initialize the task here so we can use it in the Prefect flow below
-relax_structure = MITRelaxationTask()

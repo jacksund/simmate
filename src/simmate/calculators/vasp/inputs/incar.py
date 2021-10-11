@@ -416,7 +416,8 @@ class Incar(dict):
                 # If not, we shouldn't allow combining these Incars as it can
                 # lead to undesired results.
                 raise ValueError(
-                    "Incars have conflicting values! One conflict is with {parameter}"
+                    f"Incars have conflicting values! One conflict is with {parameter} "
+                    f"where one incar has {self[parameter]} and the other has {value}"
                 )
             # otherwise just set the value
             else:
