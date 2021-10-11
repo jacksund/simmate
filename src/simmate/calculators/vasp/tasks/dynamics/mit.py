@@ -2,6 +2,11 @@
 
 from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxationTask
 
+from simmate.calculators.vasp.error_handlers.all import (
+    TetrahedronMesh,
+    Eddrmm,
+    NonConvergingErrorHandler,
+)
 
 class MITDynamicsTask(MITRelaxationTask):
 
@@ -45,3 +50,12 @@ class MITDynamicsTask(MITRelaxationTask):
     # Likewise, we set ISMEAR=0 and EDIFF above, so we no longer need smart_ismear
     incar.pop("multiple_keywords__smart_ismear")
     incar.pop("EDIFF")
+
+    # We reduce the number of error handlers used on dynamics because many
+    # error handlers are based on finding the global minimum & converging, which
+    # not what we're doing with dynmaics
+    error_handlers = [
+        TetrahedronMesh(),
+        Eddrmm(),
+        NonConvergingErrorHandler(),
+    ]
