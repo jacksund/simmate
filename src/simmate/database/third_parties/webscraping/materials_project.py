@@ -21,7 +21,6 @@ from pymatgen.ext.matproj import MPRester
 from simmate.configuration.django import setup_full  # sets up database
 
 from simmate.database.third_parties.materials_project import MaterialsProjectStructure
-from simmate.utilities import get_sanitized_structure
 
 
 @transaction.atomic
@@ -29,7 +28,7 @@ def load_all_structures(
     # criteria={"task_id": {"$exists": True}},
     # !!! for testing
     criteria={
-        "task_id": {"$exists": True, "$in": ["mp-" + str(n) for n in range(1, 5000)]},
+        "task_id": {"$exists": True, "$in": ["mp-" + str(n) for n in range(1, 1000)]},
     },
     api_key="2Tg7uUvaTAPHJQXl",  # TODO remove in production - maybe to a config file
 ):
@@ -73,7 +72,7 @@ def load_all_structures(
     # memory (RAM >10GB) and a stable internet connection.
     data = mpr.query(criteria, properties)
 
-    # Let's sanitize all structures first. So iterate through each one in the list
+    # Let's iterate through each structure and save it to the database
     # This also takes a while, so we use a progress bar
     # BUG: We init and update tqdm separately beacuse it conflicts with MPRester's bar
     progress_bar = tqdm(total=len(data), position=0)
@@ -82,15 +81,12 @@ def load_all_structures(
         # update the progress bar
         progress_bar.update(1)
 
-        # Run symmetry analysis and sanitization on the pymatgen structure
-        structure_sanitized = get_sanitized_structure(entry["structure"])
-
         # TODO:
         # bs = mpr.get_bandstructure_by_material_id("mp-323")
 
         structure_db = MaterialsProjectStructure.from_pymatgen(
             id=entry["material_id"],
-            structure=structure_sanitized,
+            structure=entry["structure"],
             energy=entry["final_energy"],
         )
 
