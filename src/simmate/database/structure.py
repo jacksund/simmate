@@ -27,17 +27,30 @@ class Structure(DatabaseTable):
     # total number of unique elements
     nelements = table_column.IntegerField()
 
+    # List of elements in the structure (ex: ["Y", "C", "F"])
+    elements = table_column.JSONField()
     # the base chemical system (ex: "Y-C-F")
     chemical_system = table_column.CharField(max_length=25)
+    # Note: be careful when searching for elements! Running chemical_system__includes="C"
+    # on this field won't do what you expect -- because it will return structures
+    # containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
+    # that contain a specific element, use elements__contains="C" instead.
 
     # Density of the crystal (g/cm^3)
     density = table_column.FloatField()
+
+    # Density of atoms in the crystal (atoms/Angstom^3)
+    density_atomic = table_column.FloatField()
+
+    # Volume of the unitcell.
+    # Note: in most cases, volume_molar should be used instead!
+    volume = table_column.FloatField()
 
     # Molar volume of the crystal (cm^3/mol)
     # Note we prefer this over a "volume" field because volume is highly dependent
     # on the symmetry and the arbitray unitcell. If you are truly after small volumes
     # of the unitcell, it is likely you really just want to search by spacegroup.
-    molar_volume = table_column.FloatField()
+    volume_molar = table_column.FloatField()
 
     # The composition of the structure formatted in various ways
     # BUG: The max length here is overkill because there are many structures
@@ -64,7 +77,6 @@ class Structure(DatabaseTable):
     # Each structure can have many Calculation(s)
 
     # symmetry info
-    # TODO: this will be a relationship in the future
     spacegroup = table_column.ForeignKey(Spacegroup, on_delete=table_column.PROTECT)
 
     # The AFLOW prototype that this structure maps to.
@@ -77,7 +89,7 @@ class Structure(DatabaseTable):
     """ Model Methods """
 
     @classmethod
-    def from_pymatgen(cls, structure, **kwargs):
+    def from_pymatgen(cls, structure, as_dict=False, **kwargs):
 
         # OPTIMIZE: I currently store files as poscar strings for ordered structures
         # and as CIFs for disordered structures. Both of this include excess information
@@ -97,20 +109,19 @@ class Structure(DatabaseTable):
         # Given a pymatgen structure object, this will return a database structure
         # object, but will NOT save it to the database yet. The kwargs input
         # is only if you inherit from this class and add extra fields.
-        structure_db = cls(
-            # OPTIMIZE: The structure_json is not the most compact format. Others
-            # like POSCAR are more compact and can save space. This is at the cost of
-            # being robust to things like fractional occupancies. Perhaps a new compact
-            # format needs to be made specifically for Simmate.
+        structure_dict = dict(
             structure_string=structure.to(fmt=storage_format),
             nsites=structure.num_sites,
             nelements=len(structure.composition),
+            elements=[str(e) for e in structure.composition.elements],
             chemical_system=structure.composition.chemical_system,
             density=structure.density,
+            density_atomic=structure.num_sites / structure.volume,
+            volume=structure.volume,
             # 1e-27 is to convert from cubic angstroms to Liter and then 1e3 to
             # mL. Therefore this value is in mL/mol
             # OPTIMIZE: move this to a class method
-            molar_volume=(structure.volume / structure.num_sites)
+            volume_molar=(structure.volume / structure.num_sites)
             * Avogadro
             * 1e-27
             * 1e3,
@@ -121,7 +132,9 @@ class Structure(DatabaseTable):
             # prototype=prototype_name,
             **kwargs,  # this allows subclasses to add fields with ease
         )
-        return structure_db
+        # If as_dict is false, we build this into an Object. Otherwise, just
+        # return the dictionary
+        return structure_dict if as_dict else cls(**structure_dict)
 
     def to_pymatgen(self):
         # Converts the database object to pymatgen structure object

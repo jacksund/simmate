@@ -38,22 +38,6 @@ class Calculation(DatabaseTable):
         null=True,
     )
 
-    # Indicate what state the calculation is in. This exists to ensure we don't
-    # submit multiple to Prefect and also let's us check how many currently exist in
-    # the queue.
-    # !!! If you choose to change these, consider Prefect's different state labels:
-    #       https://docs.prefect.io/api/latest/engine/state.html
-    # class StatusTypeOptions(table_column.TextChoices):
-    #     SCHEDULED = "S"
-    #     COMPLETED = "C"
-    #     FAILED = "F"
-
-    # status = table_column.CharField(
-    #     max_length=1,
-    #     choices=StatusTypeOptions.choices,
-    #     default=StatusTypeOptions.SCHEDULED,
-    # )
-
     # timestamping for when this was added to the database
     created_at = table_column.DateTimeField(auto_now_add=True)
     updated_at = table_column.DateTimeField(auto_now=True)
@@ -62,6 +46,17 @@ class Calculation(DatabaseTable):
     # calaculation ran. This often involves changing settings, so we store
     # any of those changes here.
     corrections = table_column.JSONField(blank=True, null=True)
+
+    """Archived Data"""
+    # I may want to add these fields because Prefect doesn't store run stats
+    # indefinitely AND it doesn't give detail memory use, number of cores, etc.
+        # average_memory (The average memory used in kb)
+        # max_memory (The maximum memory used in kb)
+        # elapsed_time (The real time elapsed in seconds)
+        # system_time(The system CPU time in seconds)
+        # user_time(The user CPU time spent by VASP in seconds)
+        # total_time (The total CPU time for this calculation)
+        # cores (The number of cores used by VASP (some clusters print `mpi-ranks` here))
 
     """ Relationships """
     # While there are no base relations for this abstract class, the majority of
@@ -73,7 +68,7 @@ class Calculation(DatabaseTable):
     #       on_delete=table_column.CASCADE,
     #   )
     #
-    # Note that this is a ForeignKey because we want to all the user to attempt
+    # Note that this is a ForeignKey because we want to allow the user to attempt
     # the same calculation multiple times. Otherwise it would be a OneToOneField.
 
     """ Properties """
@@ -96,6 +91,9 @@ class Calculation(DatabaseTable):
             **kwargs,
         )
         return calculation
+
+    # Grabs current values from prefect
+    # status
 
     """ Restrictions """
     # none

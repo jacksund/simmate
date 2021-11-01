@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import numpy
-
 from simmate.database.base import table_column
 
 from simmate.database.structure import Structure
+from simmate.database.forces import Forces
+from simmate.database.thermodynamics import Thermodynamics
 from simmate.database.calculation import Calculation
 
 # Extra modules for plotting and visualization.
@@ -13,7 +13,7 @@ import plotly.graph_objects as plotly_go
 from django_pandas.io import read_frame
 
 
-class IonicStepStructure(Structure):
+class IonicStepStructure(Structure, Thermodynamics, Forces):
 
     # You can view this table as a list of Structures that each have some extra
     # data attached to them from a calculation (such as energy) -- this is
@@ -35,30 +35,6 @@ class IonicStepStructure(Structure):
     # This is ionic step number for the given relaxation (starts counting from 0)
     ionic_step_number = table_column.IntegerField()
 
-    # The final energy here includes corrections that VASP may have introduced
-    energy = table_column.FloatField()
-
-    # A list of forces for each atomic site. So this is a list like...
-    # [site1, site2, site3, ...] where site1=[force_x, force_y, force_z]
-    site_forces = table_column.JSONField()
-
-    # This is 3x3 matrix that represents the stress on the structure lattice
-    lattice_stress = table_column.JSONField()
-
-    """ Query-helper Info """
-    # Takes the energy from above and converts it to per atom units
-    energy_per_atom = table_column.FloatField()
-
-    # Takes the site forces and reports the vector norm for it.
-    # See numpy.linalg.norm for how this is calculated.
-    site_forces_norm = table_column.FloatField()
-    site_forces_norm_per_atom = table_column.FloatField()
-
-    # Takes the site forces and reports the vector norm for it.
-    # # See numpy.linalg.norm for how this is calculated.
-    lattice_stress_norm = table_column.FloatField()
-    lattice_stress_norm_per_atom = table_column.FloatField()
-
     """ Relationships """
     # each of these will map to a Relaxation, so you should typically access this
     # data through that class. The exception to this is when you want all ionic
@@ -70,6 +46,45 @@ class IonicStepStructure(Structure):
 
     """ Model Methods """
     # TODO: add a from_ionic_step method in the future when I have this class.
+
+    @classmethod
+    def from_pymatgen(
+        cls,
+        ionic_step_number,
+        structure,
+        energy,
+        site_forces,
+        lattice_stress,
+        as_dict=False,
+    ):
+        # because this is a combination of tables, I need to build the data for
+        # each and then feed all the results into this class
+
+        # first grab the full dictionaries for each parent model
+        thermo_data = Thermodynamics.from_base_data(
+            structure,
+            energy,
+            as_dict=True,
+        )
+        forces_data = Forces.from_base_data(
+            structure,
+            site_forces,
+            lattice_stress,
+            as_dict=True,
+        )
+        structure_data = Structure.from_pymatgen(structure, as_dict=True)
+
+        # Now feed all of this dictionarying into one larger one.
+        all_data = dict(
+            ionic_step_number=ionic_step_number,
+            **structure_data,
+            **thermo_data,
+            **forces_data,
+        )
+
+        # If as_dict is false, we build this into an Object. Otherwise, just
+        # return the dictionary
+        return all_data if as_dict else cls(**all_data)
 
     """ Set as Abstract Model """
     # I have other models inherit from this one, while this model doesn't need
@@ -159,20 +174,11 @@ class Relaxation(Calculation):
         ):
             # first pull all the data together and save it to the database
             structure = IonicStepStructure_subclass.from_pymatgen(
-                structure=structure,
-                ionic_step_number=number,
+                number,
+                structure,
                 energy=ionic_step["e_wo_entrp"],
                 site_forces=ionic_step["forces"],
                 lattice_stress=ionic_step["stress"],
-                energy_per_atom=ionic_step["e_wo_entrp"] / structure.num_sites,
-                site_forces_norm=numpy.linalg.norm(ionic_step["forces"]),
-                site_forces_norm_per_atom=(
-                    numpy.linalg.norm(ionic_step["forces"]) / structure.num_sites
-                ),
-                lattice_stress_norm=numpy.linalg.norm(ionic_step["stress"]),
-                lattice_stress_norm_per_atom=(
-                    numpy.linalg.norm(ionic_step["stress"]) / structure.num_sites
-                ),
                 relaxation=self,  # this links the structure to this relaxation
             )
             structure.save()
@@ -183,7 +189,6 @@ class Relaxation(Calculation):
             # and same for the final structure
             elif number == len(structures) - 1:
                 self.structure_final_id = structure.id
-
         # calculate extra data for storing
         self.volume_change = (
             structures[-1].volume - structures[0].volume
