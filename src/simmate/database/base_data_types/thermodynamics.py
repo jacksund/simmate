@@ -2,7 +2,7 @@
 
 from tqdm import tqdm
 
-from simmate.database.base import DatabaseTable, table_column
+from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.utilities import get_chemical_subsystems
 
 from pymatgen.analysis.phase_diagram import PDEntry

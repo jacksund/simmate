@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base import table_column
+from simmate.database.base_data_types import table_column
 
 from simmate.database.local_calculations.relaxation.base import (
     IonicStepStructure,

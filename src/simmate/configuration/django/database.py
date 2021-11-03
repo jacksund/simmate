@@ -7,7 +7,7 @@ from django.core.management import call_command
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.configuration.django.settings import DJANGO_DIRECTORY, DATABASES
-from simmate.database.symmetry import Spacegroup
+from simmate.database.base_data_types import Spacegroup
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
 # so this list is grabbed directly from django

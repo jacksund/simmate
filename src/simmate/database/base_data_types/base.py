@@ -12,10 +12,12 @@ from django_pandas.io import read_frame
 class SearchResults(models.QuerySet):
     """
     This class adds some extra methods to the results returned from a database
-    search. For example, if you searched all Spacegroup and wanted to convert
-    these to a pandas dataframe, you can now do...
-        search_results = Spacegroup.objects.all()
+    search. For example, if you searched all Structures and wanted to convert
+    these to a pandas dataframe or even a list of pymatgen structures, you can
+    now do...
+        search_results = Structures.objects.all()
         dataframe = search_results.to_dataframe()
+        structures = search_results.to_pymatgen
     """
 
     def to_dataframe(
@@ -72,7 +74,7 @@ class DatabaseTable(models.Model):
 
 # This line does NOTHING but rename a module. I have this because I want to use
 # "table_column.CharField(...)" instead of models.CharField(...) in my Models.
-# This let's beginner read my higher level classes and instantly understand what
+# This let's beginners read my higher level classes and instantly understand what
 # each thing represents -- without them needing to understand
 # that Django Model == Database Table. Experts may find this annoying, so I'm
 # sorry :(

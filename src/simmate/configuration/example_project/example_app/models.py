@@ -15,7 +15,7 @@ to add everything from scratch. The only code that we write here simply connects
 these database tables and/or adds new custom columns.
 """
 
-from simmate.database.base import table_column
+from simmate.database.base_data_types import table_column
 
 from simmate.database.local_calculations.relaxation.base import (
     IonicStepStructure,

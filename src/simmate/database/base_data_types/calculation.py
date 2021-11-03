@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base import DatabaseTable, table_column
+from simmate.database.base_data_types import DatabaseTable, table_column
 
 
 class Calculation(DatabaseTable):

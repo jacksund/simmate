@@ -6,8 +6,11 @@ from pymatgen.core.structure import Structure as Structure_PMG
 
 # from pymatgen.analysis.prototypes import AflowPrototypeMatcher
 
-from simmate.database.base import DatabaseTable, table_column
-from simmate.database.symmetry import Spacegroup
+from simmate.database.base_data_types import (
+    DatabaseTable,
+    table_column,
+    Spacegroup,
+)
 
 
 class Structure(DatabaseTable):
