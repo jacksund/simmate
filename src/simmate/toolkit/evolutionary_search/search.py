@@ -129,9 +129,6 @@ class Search:
 
         while True:  # this loop will go until I hit 'break' below
 
-            # Go through the existing analyses and update them.
-            self.check_workflows()
-
             # save progress to external database #!!! consider moving into a Trigger
             self.save_progress()
 
@@ -148,89 +145,11 @@ class Search:
             # I pass self in as an arg because the triggers need the search arg
             self.run_checks_and_actions()
 
-    def save_progress(self):
-        #!!! make this into a separate class so I can allow for csv vs sql!
-        #!!! This is very inefficient because I rewrite everything instead of just what's new.
-
-        # Go through futures and convert them to keys
-        # For executors like Dask, an actual future object can't be stored
-        # so I mark any non-string (other than None-type) as unsafe to store
-        #!!! change this in the future
-        futures = [
-            future if not future or type(future) == str else future.key
-            for future in self.workflow_futures
-        ]
-
-        # save simple data to a csv
-        import pandas
-
-        df = pandas.DataFrame.from_dict(
-            {
-                "workflow_futures": futures,
-                "fitness": self.fitnesses,
-                "source": self.origins,
-                "parent_ids": self.parent_ids,
-            }
-        )
-        df.to_csv("search_backup.csv")
-
-        # save structures as cif files in a folder names 'structures'
-        import os
-
-        if not os.path.exists("structures"):
-            os.mkdir("structures")
-        os.chdir("structures")
-        for i, structure in enumerate(self.structures):
-            structure.to(
-                "poscar", "{}.vasp".format(i)
-            )  # I use POSCAR format, which can be opened in VESTA with the .vasp ending
-        os.chdir("..")
-
     def submit_new_sample_workflow(self, structure):  #!!! change to args and kwargs?
         future = self.executor.submit(func=self.workflow, args=[structure], kwargs={})
 
         self.workflow_futures.append(future)  # future is either Dask Future or key
         self.fitnesses.append(None)  # empty that will be updated later
-
-    def check_workflows(self):
-
-        # I want to keep track of the number of jobs pending
-        # This is useful for many Triggers and rather than each trigger
-        # running a self.check_njobs_pending() function, its faster/cheaper
-        # to update this variable within this looping function
-        njobs_pending = 0
-        # The same goes for the number of jobs successfully completed.
-        # I init this variable above and update it here.
-
-        for sample_id, future in enumerate(self.workflow_futures):
-            # for speed I deleted the finished futures and replace them with None
-            # This way I'm not constantly making queries for workflows that no
-            # longer exist after completion (like in FireWorks executor)
-            if future:
-                status = self.executor.check(future)
-                if status == "done":
-                    #!!! THIS IS A STRICT DEFINITON OF WORKFLOW OUTPUT
-                    #!!! CHANGE THIS WHEN I CREATE A WORKFLOW CLASS
-                    result = self.executor.get_result(future)
-                    # update the fitness value
-                    self.fitnesses[sample_id] = result["final_energy"]
-                    # update the structure
-                    self.structures[sample_id] = result["final_structure"]
-                    # update the future to None
-                    self.workflow_futures[sample_id] = None
-                    # update the count of successful calcs
-                    self.njobs_completed += 1
-                elif status == "error":
-                    # This line will raise the error: self.executor.get_result(future)
-                    # we don't update the fitness - we just leave it at None
-                    # update the future to None so it is no longer checked
-                    self.workflow_futures[sample_id] = None
-                elif status == "pending":
-                    njobs_pending += 1
-                    pass  # move on until the job is done!
-
-        # update the number of jobs pendings value
-        self.njobs_pending = njobs_pending
 
     def run_checks_and_actions(self):
         # Go through the triggers

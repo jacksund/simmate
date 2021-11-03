@@ -148,32 +148,6 @@ def dynamic_init_creator(
     return cs_object
 
 
-def dynamic_init_trigger(trigger_class, trigger_options, composition=None):
-
-    # note that trigger_options is a dict of custom inputs to use on the class trigger_class
-
-    import pymatdisc.engine.triggers as trigger_module
-
-    # if the trigger class is a string, then assume we want to import from the trigger_module
-    if type(trigger_class) == str:
-        trigger_class = getattr(trigger_module, trigger_class)
-    # otherwise, the user is trying to use their own module/class and we already have that set
-
-    # now that we have the class, we want to initiate it with the settings provided
-    # we also need to see if composition is a required input, which we don't require the user to specify for convenience
-    trigger_class_parameters = signature(trigger_class).parameters
-
-    #!!! in the future, should I just require that all mutators take composition (or **kwargs) as an input even if they don't need it?
-    # now we can init with the dictionary of options depending on if composition is needed or not
-    if "composition" in trigger_class_parameters:
-        trigger_object = trigger_class(composition, **trigger_options)
-    else:
-        trigger_object = trigger_class(**trigger_options)
-
-    # we now have the final trigger object instance and can return it
-    return trigger_object
-
-
 def dynamic_init_stopcondition(sc_class, sc_options, composition=None):
 
     # note that sc_options is a dict of custom inputs to use on the class sc_class

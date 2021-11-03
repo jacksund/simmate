@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# -----------------------------------------------------------------------------
+from inspect import signature
 
-class Trigger:
+
+class TriggeredAction:
     def __init__(
         self,
     ):
@@ -25,6 +26,32 @@ class Trigger:
         # The most common actions (such as search.new_sample) will be accessed via
         # the search class and not custom code here.
         pass
+    
+    @classmethod
+    def from_composition(cls, composition=None, **kwargs):
+
+        # note that trigger_options is a dict of custom inputs to use on the class trigger_class
+
+        import pymatdisc.engine.triggers as trigger_module
+
+        # if the trigger class is a string, then assume we want to import from the trigger_module
+        if type(cls) == str:
+            trigger_class = getattr(trigger_module, trigger_class)
+        # otherwise, the user is trying to use their own module/class and we already have that set
+
+        # now that we have the class, we want to initiate it with the settings provided
+        # we also need to see if composition is a required input, which we don't require the user to specify for convenience
+        trigger_class_parameters = signature(trigger_class).parameters
+
+        #!!! in the future, should I just require that all mutators take composition (or **kwargs) as an input even if they don't need it?
+        # now we can init with the dictionary of options depending on if composition is needed or not
+        if "composition" in trigger_class_parameters:
+            trigger_object = trigger_class(composition, **trigger_options)
+        else:
+            trigger_object = trigger_class(**trigger_options)
+
+        # we now have the final trigger object instance and can return it
+        return trigger_object
 
 
 #!!! In the future, should I reduce triggers down to lower order objects?
