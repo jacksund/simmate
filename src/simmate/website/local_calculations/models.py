@@ -8,3 +8,11 @@ from simmate.database.local_calculations.relaxation.mit import (
     MITRelaxationStructure,
     MITRelaxation,
 )
+
+# TESTING
+from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
+    EvolutionarySearch,
+    StructureSource,
+    Individual,
+    MITIndividuals,
+)

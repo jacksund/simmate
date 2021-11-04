@@ -68,6 +68,44 @@ class DatabaseTable(models.Model):
     # extra methods useful for our querysets.
     objects = DatabaseTableManager()
 
+    @classmethod
+    def create_subclass(cls, name, **new_columns):
+        """
+        This method is useful for dynamically creating a subclass DatabaseTable
+        from some abstract class.
+
+        Let's take an example where we inherit from a Structure table. The two
+        ways we create a NewTable below are exactly the same:
+
+        NewTable(Structure):
+            new_field1 = table_column.FloatField()
+            new_field2 = table_column.FloatField()
+
+        NewTable = Structure.create_subclass(
+            name="NewTable",
+            new_field1 = table_column.FloatField()
+            new_field2 = table_column.FloatField()
+        )
+
+        While this might seem silly, it helps us avoid a bunch of boilerplate
+        code when we need to redefine a bunch of relationships in every single
+        child class (and always in the same way). A great example of it's utility
+        is in local_calculations.relaxations.
+        """
+
+        # because we update values below, we make sure we are editting a copy of the dictionary
+        new_columns = new_columns.copy()
+
+        # BUG: I'm honestly not sure what this does, but it works...
+        # https://stackoverflow.com/questions/27112816/dynamically-creating-django-models-with-type
+        new_columns.update({"__module__": __name__, "Meta": {}})
+
+        # Now we dynamically create a new class that inherits from this main
+        # one and also adds the new columns to it.
+        NewClass = type(name, (cls,), new_columns)
+
+        return NewClass
+
     class Meta:
         abstract = True
 
