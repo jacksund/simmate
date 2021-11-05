@@ -1,129 +1,124 @@
 # -*- coding: utf-8 -*-
 
-# This is the highest-level Class at the moment and all other classes work through
-# this one.
-
 import numpy
 
-from pymatgen.core.composition import Composition
-
-from pymatdisc.engine.startup import (
-    dynamic_init_stopcondition,
-    dynamic_init_trigger,
-    dynamic_init_creator,
-    dynamic_init_mutator,
-    dynamic_init_selector,
-    dynamic_init_executor,
-    dynamic_init_workflow,
+from simmate.configuration.django import setup_full  # sets database connection
+from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
+    EvolutionarySearch as SearchDatatable,
+    # StructureSource as SourceDatatable,
+    # Individual as IndividualDatatable,
 )
+
+import simmate.toolkit.creators.structure.all as creation_module
+import simmate.toolkit.transformations.all as transform_module
 
 
 class Search:
     def __init__(
         self,
-        composition,
+        composition,  # TODO: chemical system? 1,2,3D?
+        workflow="MITRelaxation",
+        individuals_datatable="MITIndividuals",
+        fitness_function="energy",
+        # Instead of specifying a stop_condition class like I did before,
+        # I just assume the stop condition is either (1) the maximum allowed
+        # calculated structures or (2) how long a given structure has been
+        # the "best" one.
+        max_structures=3000,
+        limit_best_survival=250,
+        singleshot_sources=[
+            "prototypes_aflow",
+            "substitution",
+            "third_party_structures",
+            "third_party_substitution",
+        ],
         #!!! Some of these sources should be removed for compositions with 1 element type
-        sources=[
-            (0.20, "RandomSymStructure", {}),
-            (0.40, "HeredityASE", {}),
-            (0.10, "SoftMutationASE", {}),
-            (0.10, "MirrorMutationASE", {}),
-            (0.05, "LatticeStrainASE", {}),
-            (0.05, "RotationalMutationASE", {}),
-            (0.05, "AtomicPermutationASE", {}),
-            (0.05, "CoordinatePerturbationASE", {}),
+        nsteadystate=40,
+        steadystate_sources=[
+            (0.20, "PyXtalStructure"),
+            (0.40, "HeredityASE"),
+            (0.10, "SoftMutationASE"),
+            (0.10, "MirrorMutationASE"),
+            (0.05, "LatticeStrainASE"),
+            (0.05, "RotationalMutationASE"),
+            (0.05, "AtomicPermutationASE"),
+            (0.05, "CoordinatePerturbationASE"),
         ],
         selector=("TruncatedSelection", {"percentile": 0.2, "ntrunc_min": 5}),
-        triggers=[
-            ("InitStructures", {"n_initial_structures": 20}),
-            (
-                "AddStructures",
-                {
-                    "n_pending_limit": 0,
-                    "n_add_structures": 20,
-                },
-            ),
-        ],
-        stop_condition=(
-            "BasicStopConditions",
-            {
-                "max_structures": 200,
-                "energy_limit": float("-inf"),
-                "same_min_structures": 50,
-            },
-        ),
-        workflow="prefect_workflow",  #!!! TO-DO
-        executor=(
-            "DaskExecutor",
-            {"address": "tcp://152.2.175.15:8786"},
-        ),  #!!! Change this to a LocalExecutor for main release
+        # triggered_actions=[],  # TODO: this can be things like "start_ml_potential"
+        # executor= # TODO: I assume Prefect for submitting workflows right now.
     ):
 
-        # Make sure the composition is a pymatgen object - if not, convert it
-        # and then save the composition.
-        if isinstance(composition, Composition):
-            self.composition = composition
-        else:
-            self.composition = Composition(composition)
+        self.composition = composition
+        self.limit_best_survival = limit_best_survival
+        self.max_structures = max_structures
+        self.nsteadystate = nsteadystate
 
-        # data
-        #!!! ADD A STEP HERE TO LOAD FROM EXTERNAL DB
-        #!!! Consider making each sample (row) and object...?
-        self.origins = []
-        self.parent_ids = []
-        self.structures = []
-        self.workflow_futures = []
-        self.fitnesses = []
-        self.njobs_completed = 0  # This can be inferred from the data above but its computationally cheaper to have this running value
+        # Initialize the single-shot sources
+        self.singleshot_sources = []
+        for source in singleshot_sources:
+            # if we are given a string, we want initialize the class
+            # otherwise it should be a class alreadys
+            if type(source) == str:
+                source = self._init_common_class(source)
+            # and add it to our final list
+            self.singleshot_sources.append(source)
 
-        ### Now initialize all the higher order objects ###
+        # Initialize the steady-state sources, which are given as a list of
+        # (proportion, class/class_str, kwargs) for each. As we go through these,
+        # we also collect the proportion list for them.
+        self.steadystate_source_proportions = []
+        self.steadystate_sources = []
+        for proportion, source in steadystate_sources:
 
-        # Initialize the Sources
-        self.source_probabilities = []
-        self.sources = []
-        for prob, creator_class, creator_kwargs in sources:
+            # store proportion value
+            self.steadystate_source_proportions.append(proportion)
 
-            self.source_probabilities.append(prob)
+            # if we are given a string, we want initialize the class
+            # otherwise it should be a class already
+            if type(source) == str:
+                source = self._init_common_class(source)
 
-            # dynamically load the creator/transformation source
-            try:
-                cs_object = dynamic_init_creator(
-                    creator_class, creator_kwargs, self.composition
-                )
-            except AttributeError:
-                cs_object = dynamic_init_mutator(
-                    creator_class, creator_kwargs, self.composition
-                )
-            self.sources.append(cs_object)
-        # Make sure the probabilites sum to 1, otherwise scale them.
-        sum_prob = sum(self.source_probabilities)
-        if sum_prob != 1:
-            self.source_probabilities = [
-                p / sum_prob for p in self.source_probabilities
+            # and add it to our final list
+            self.steadystate_sources.append(source)
+
+        # Make sure the proportions sum to 1, otherwise scale them.
+        sum_proportions = sum(self.steadystate_source_proportions)
+        if sum_proportions != 1:
+            self.steadystate_source_proportions = [
+                p / sum_proportions for p in self.steadystate_source_proportions
             ]
+        # TODO: change to specific values using nsteadystate
 
-        # Initialize Selector
-        #!!! I only support one selector for right now. I should allow one for each source
-        self.selector = dynamic_init_selector(selector[0], selector[1])
+        # Initialize the workflow if a string was given.
+        # Otherwise we should already have a workflow class.
+        if workflow == "MITRelaxation":
+            from simmate.workflows.relaxation.mit import workflow
+        self.workflow = workflow
 
-        # Initialize Triggers
-        self.triggers = []
-        for trigger_class, trigger_kwargs in triggers:
-            trigger_object = dynamic_init_trigger(
-                trigger_class, trigger_kwargs, self.composition
+        # Load the Individuals datatable class.
+        if individuals_datatable == "MITIndividuals":
+            from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
+                MITIndividuals as individuals_datatable,
             )
-            self.triggers.append(trigger_object)
+        self.individuals_datatable = individuals_datatable
 
-        # Initialize Stop Condition
-        self.stop_condition = dynamic_init_stopcondition(
-            stop_condition[0], stop_condition[1], self.composition
-        )
-
-        # Initialize Executor
-        self.executor = dynamic_init_executor(executor[0], executor[1])
-
-        # Load Workflow fxn #!!! make into classes in the future...?
-        self.workflow = dynamic_init_workflow(workflow)
+        # Check if there is an existing search and grab it if so. Otherwise, add
+        # the search entry to the DB.
+        if SearchDatatable.objects.filter(composition=composition.formula).exists():
+            self.search_db = SearchDatatable.objects.filter(
+                composition=composition.formula,
+            ).get()
+            # TODO: update, add logs, compare... I need to decide what to do here.
+        else:
+            self.search_db = SearchDatatable(
+                composition=composition.formula,
+                workflow=workflow.name,
+                individuals_datatable=individuals_datatable.__name__,
+                max_structures=max_structures,
+                limit_best_survival=limit_best_survival,
+            )
+            self.search_db.save()
 
     def run(self):
 
@@ -147,6 +142,48 @@ class Search:
             # Go through the triggers
             # I pass self in as an arg because the triggers need the search arg
             self.run_checks_and_actions()
+
+    def _check_stop_condition(self):
+
+        # first see if we've hit our maximum limit for structures.
+        # Note: because we are only looking at the results table, this is really
+        # only counting the number of successfully calculated individuals.
+        # Nothing is done to stop those that are still running or to count
+        # structures that failed to be calculated
+        if self.individuals_datatable.objects.count() > self.max_structures:
+            return True
+
+        # The 2nd stop condition is based on how long we've have the same
+        # "best" individual. If the number of new individuals calculated (without
+        # any becoming the new "best") is greater than limit_best_survival, then
+        # we can stop the search.
+
+        # grab the best individual for reference
+        best = (
+            self.individuals_datatable.objects.filter(
+                structure__formula=self.compositon.formula
+            )
+            .order_by("structure__energy_per_atom")
+            .include("structure")
+            .first()
+        )
+
+        # count the number of new individuals added AFTER the best one. If it is
+        # more than limit_best_survival, we stop the search.
+        num_new_indivduals_since_best = self.individuals_datatable.objects.filter(
+            structure__formula__gte=self.compositon.formula,
+            # check energies to ensure we only count completed calculations
+            structure__energy_per_atom__gt=best.structure.energy_per_atom,
+            created_at__gte=best.created_at,
+        ).count()
+        if num_new_indivduals_since_best > self.limit_best_survival:
+            return True
+
+        # If we reached this point, then we haven't hit a stop condition yet!
+        return False
+
+    def _get_best_individual(self):
+        pass
 
     def save_progress(self):
         #!!! make this into a separate class so I can allow for csv vs sql!
@@ -314,3 +351,48 @@ class Search:
 
         # return True to indicate success
         return True
+
+    def _init_common_class(self, class_str):
+
+        # CREATORS
+        if class_str in [
+            "RandomSymStructure",
+            "PyXtalStructure",
+        ]:
+            mutation_class = getattr(creation_module, class_str)
+            return mutation_class(self.composition)
+
+        # TRANSFORMATIONS
+        elif class_str in [
+            "HeredityASE",
+            "SoftMutationASE",
+            "MirrorMutationASE",
+            "LatticeStrainASE",
+            "RotationalMutationASE",
+            "AtomicPermutationASE",
+            "CoordinatePerturbationASE",
+        ]:
+            mutation_class = getattr(transform_module, class_str)
+            return mutation_class(self.composition)
+        # !!! There aren't any common transformations that don't accept composition
+        # as an input, but I expect this to change in the future.
+        elif class_str in []:
+            mutation_class = getattr(transform_module, class_str)
+            return mutation_class()
+
+        # These are commonly used Single-shot sources
+        elif class_str == "prototypes_aflow":
+            pass  # TODO
+        elif class_str == "substitution":
+            pass  # TODO
+        elif class_str == "third_party_structures":
+            pass  # TODO
+        elif class_str == "third_party_substitution":
+            pass  # TODO
+
+        else:
+            raise Exception(
+                f"{class_str} is not recognized as a common input. Make sure you"
+                "don't have any typos, and if you are using a custom class, provide"
+                "your input as an object."
+            )

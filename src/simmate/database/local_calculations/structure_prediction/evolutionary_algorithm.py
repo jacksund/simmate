@@ -10,10 +10,23 @@ from simmate.database.local_calculations.relaxation.mit import (
 
 class EvolutionarySearch(DatabaseTable):
 
-    # consider formula_full or chemical_system by making a composition-based datatype
+    # consider formula_full or chemical_system by making a composition-based mixin
     composition = table_column.CharField(max_length=50)
 
-    # sources
+    # Import path for the workflow
+    # !!! Or should this be JSON? Or even an extra table with fields?
+    workflow = table_column.CharField(max_length=200)
+    individuals_datatable = table_column.CharField(max_length=200)
+
+    # Import path that grabs the fitness value
+    # I assume energy for now
+    # fitness_function = table_column.CharField(max_length=200)
+
+    max_structures = table_column.IntegerField()
+    limit_best_survival = table_column.IntegerField()
+
+    # relationships
+    # sources / individuals
     # stop_conditions
 
     # get_stats:
@@ -108,4 +121,4 @@ MITIndividuals = Individual.create_subclass_from_calculation(
 
 
 class StopCondition:
-    pass # TODO
+    pass  # TODO

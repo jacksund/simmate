@@ -6,7 +6,7 @@ from numpy.random import choice
 
 from pymatgen.core.lattice import Lattice
 
-from pymatdisc.core.creators.vector import (
+from simmate.toolkit.creators.vector import (
     UniformlyDistributedVectors,
     NormallyDistributedVectors,
 )
@@ -163,8 +163,8 @@ class RSLFixedVolume(RandomSymLattice):
 
 ##############################################################################
 
-from pymatdisc.core.symmetry.wyckoff import loadWyckoffData
-from pymatdisc.core.estimate import estimate_volume, estimate_radii
+from simmate.toolkit.symmetry.wyckoff import loadWyckoffData
+from simmate.utilities import estimate_volume, estimate_radii
 
 #!!! EASY SPEED/MEMORY IMPROVEMENTS CAN BE MADE HERE (ON INIT)
 class RSLSmartVolume:

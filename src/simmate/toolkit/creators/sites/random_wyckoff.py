@@ -4,12 +4,12 @@ from numpy.random import randint, choice
 
 from tqdm import tqdm
 
-from pymatdisc.core.symmetry.wyckoff import (
+from simmate.toolkit.symmetry.wyckoff import (
     loadAsymmetricUnitData,
     loadWyckoffData,
     findValidWyckoffCombos,
 )
-from pymatdisc.core.creators.vector import UniformlyDistributedVectors
+from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 
 
 class RandomWySites:

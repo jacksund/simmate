@@ -5,7 +5,7 @@
 import numpy
 import itertools
 
-from pymatdisc.core.validators.base import Validator
+from simmate.toolkit.validators.base import Validator
 
 ##############################################################################
 
@@ -31,7 +31,7 @@ class SiteDistance(Validator):
 
 ##############################################################################
 
-from pymatdisc.core.estimate import distance_matrix
+from simmate.utilities import distance_matrix
 
 
 class SiteDistanceMatrix(Validator):

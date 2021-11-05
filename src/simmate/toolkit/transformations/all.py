@@ -9,8 +9,8 @@ from pymatgen.transformations.standard_transformations import (
     PerturbStructureTransformation,
 )
 
-from pymatdisc.core.transformations.base import Transformation
-from pymatdisc.core.creators.vector import UniformlyDistributedVectors
+from simmate.toolkit.transformations.base import Transformation
+from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 
 ##############################################################################
 
