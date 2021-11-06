@@ -7,6 +7,9 @@ from simmate.database.local_calculations.relaxation.mit import (
     MITRelaxationStructure,
 )
 
+from prefect import Client
+from prefect.utilities.graphql import with_args
+
 
 class EvolutionarySearch(DatabaseTable):
 
@@ -39,20 +42,64 @@ class EvolutionarySearch(DatabaseTable):
 
 class StructureSource(DatabaseTable):
 
-    # is_steadystate / is_singleshot
-
     name = table_column.CharField(max_length=50)
 
-    settings = table_column.JSONField(default=None, blank=True, null=True)
+    is_steadystate = table_column.BooleanField()
+    is_singleshot = table_column.BooleanField()
 
-    is_running = table_column.BooleanField()
+    settings = table_column.JSONField(default={})
 
     # timestamping for when this was added to the database
-    started_at = table_column.DateTimeField(auto_now_add=True)
-    stopped_at = table_column.DateTimeField(blank=True, null=True)
+    # This also gives a feel for how long the steady-state was running
+    created_at = table_column.DateTimeField(auto_now_add=True)
+    updated_at = table_column.DateTimeField(auto_now=True)
 
-    # structures
-    # workflows
+    # This list limits to ids that are submitted or running
+    prefect_flow_run_ids = table_column.JSONField(default=[])
+
+    search = table_column.ForeignKey(
+        EvolutionarySearch,
+        on_delete=table_column.CASCADE,
+        related_name="sources",
+    )
+
+    def update_flow_run_ids(self):
+
+        # Using our list of current run ids, we query prefect to see which of
+        # these still are running or in the queue.
+        # OPTIMIZE: This may be a really bad way to query Prefect...
+        query = {
+            "query": {
+                with_args(
+                    "flow_run",
+                    {
+                        "where": {
+                            # "flow": {"name": {"_eq": self.search.workflow}},
+                            "state": {"_in": ["Completed", "Scheduled"]},
+                            "id": {"_in": self.prefect_flow_run_ids},
+                        },
+                    },
+                ): ["id"]
+            }
+        }
+        client = Client()
+        result = client.graphql(query)
+        # graphql gives a weird format, so I reparse it into just a list of ids
+        result = [run["id"] for run in result["data"]["flow_run"]]
+
+        # we now have our new list of IDs! Let's update it to the database
+        self.prefect_flow_run_ids = result
+        self.save()
+
+        # in case we need the list of ids, we return it too
+        return result
+
+    @property
+    def nprefect_flow_runs(self):
+        # update our ids before we report how many there are.
+        runs = self.update_flow_run_ids()
+        # now the currently running ones is just the length of ids!
+        return len(runs)
 
     class Meta:
         app_label = "local_calculations"
@@ -117,6 +164,7 @@ class Individual(DatabaseTable):
 MITIndividuals = Individual.create_subclass_from_calculation(
     name="MITIndividuals",
     calculation=MITRelaxationStructure,
+    workflow="MITRelaxation",
 )
 
 

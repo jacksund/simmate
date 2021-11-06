@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 import numpy
+
+from prefect import Client
+from prefect.utilities.graphql import with_args
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
     EvolutionarySearch as SearchDatatable,
-    # StructureSource as SourceDatatable,
+    StructureSource as SourceDatatable,
     # Individual as IndividualDatatable,
 )
 
@@ -17,7 +22,9 @@ class Search:
     def __init__(
         self,
         composition,  # TODO: chemical system? 1,2,3D?
-        workflow="MITRelaxation",
+        # TODO: what if the workflow changes (e.g. starts with ML relax) but the
+        # final table stays the same?
+        # workflow="MITRelaxation",  # linked to the individuals_datatable
         individuals_datatable="MITIndividuals",
         fitness_function="energy",
         # Instead of specifying a stop_condition class like I did before,
@@ -27,12 +34,14 @@ class Search:
         max_structures=3000,
         limit_best_survival=250,
         singleshot_sources=[
-            "prototypes_aflow",
-            "substitution",
-            "third_party_structures",
-            "third_party_substitution",
+            # "prototypes_aflow",
+            # "substitution",
+            # "third_party_structures",
+            # "third_party_substitution",
+            # "SomeOtherDatatable",  # this could be useful for pulling from a
+            # table of lower quality calculations
         ],
-        #!!! Some of these sources should be removed for compositions with 1 element type
+        # !!! Some of these sources should be removed for compositions with 1 element type
         nsteadystate=40,
         steadystate_sources=[
             (0.20, "PyXtalStructure"),
@@ -45,14 +54,71 @@ class Search:
             (0.05, "CoordinatePerturbationASE"),
         ],
         selector=("TruncatedSelection", {"percentile": 0.2, "ntrunc_min": 5}),
-        # triggered_actions=[],  # TODO: this can be things like "start_ml_potential"
+        # triggered_actions=[],  # TODO: this can be things like "start_ml_potential" or "update volume in sources"
         # executor= # TODO: I assume Prefect for submitting workflows right now.
     ):
 
         self.composition = composition
+
+        # TODO: consider grabbing these from the database so that we can update
+        # them at any point.
         self.limit_best_survival = limit_best_survival
         self.max_structures = max_structures
         self.nsteadystate = nsteadystate
+
+        # Prefect is required for this class, so we connect to the client upfront
+        self.prefect_client = Client()
+
+        # Load the Individuals datatable class.
+        if individuals_datatable == "MITIndividuals":
+            from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
+                MITIndividuals as individuals_datatable,
+            )
+        self.individuals_datatable = individuals_datatable
+
+        # Initialize the workflow if a string was given.
+        # Otherwise we should already have a workflow class.
+        if self.individuals_datatable.workflow == "MITRelaxation":
+            from simmate.workflows.relaxation.mit import workflow
+
+            self.workflow = workflow
+        else:
+            raise Exception("Only MITRelaxation is supported in early testing. -Jack")
+        # BUG: I'll need to rewrite this in the future bc I don't really account
+        # for other workflows yet
+
+        # Check if there is an existing search and grab it if so. Otherwise, add
+        # the search entry to the DB.
+        if SearchDatatable.objects.filter(composition=composition.formula).exists():
+            self.search_db = SearchDatatable.objects.filter(
+                composition=composition.formula,
+            ).get()
+            # TODO: update, add logs, compare... I need to decide what to do here.
+            # also, run _check_stop_condition() to avoid unneccessary restart
+        else:
+            self.search_db = SearchDatatable(
+                composition=composition.formula,
+                workflow=workflow.name,
+                individuals_datatable=individuals_datatable.__name__,
+                max_structures=max_structures,
+                limit_best_survival=limit_best_survival,
+            )
+            self.search_db.save()
+
+        # Grab the list of singleshot sources that have been ran before
+        # and based off of that list, remove repeated sources
+        past_singleshot_sources = (
+            self.search_db.sources.filter(is_singleshot=True)
+            .values_list("name", flat=True)
+            .all()
+        )
+        singleshot_sources = [
+            source
+            for source in singleshot_sources
+            if source not in past_singleshot_sources
+        ]
+        # BUG: what if I want to rerun any of these even though its been ran before?
+        # An example would be rerunning substituitions when new structures are available
 
         # Initialize the single-shot sources
         self.singleshot_sources = []
@@ -90,58 +156,77 @@ class Search:
             ]
         # TODO: change to specific values using nsteadystate
 
-        # Initialize the workflow if a string was given.
-        # Otherwise we should already have a workflow class.
-        if workflow == "MITRelaxation":
-            from simmate.workflows.relaxation.mit import workflow
-        self.workflow = workflow
-
-        # Load the Individuals datatable class.
-        if individuals_datatable == "MITIndividuals":
-            from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
-                MITIndividuals as individuals_datatable,
+        # Throughout our search, we want to keep track of which workflows we've
+        # submitted to prefect for each structure source as well as how long
+        # we were holding a steady-state of submissions. We therefore keep
+        # a log of Sources in our database -- where even if we've ran this search
+        # before, we still.
+        self.singleshot_sources_db = []
+        for source in self.singleshot_sources:
+            source_db = SourceDatatable(
+                name=source.__class__.__name__,
+                is_steadystate=False,
+                is_singleshot=True,
+                search=self.search_db,
             )
-        self.individuals_datatable = individuals_datatable
-
-        # Check if there is an existing search and grab it if so. Otherwise, add
-        # the search entry to the DB.
-        if SearchDatatable.objects.filter(composition=composition.formula).exists():
-            self.search_db = SearchDatatable.objects.filter(
-                composition=composition.formula,
-            ).get()
-            # TODO: update, add logs, compare... I need to decide what to do here.
-        else:
-            self.search_db = SearchDatatable(
-                composition=composition.formula,
-                workflow=workflow.name,
-                individuals_datatable=individuals_datatable.__name__,
-                max_structures=max_structures,
-                limit_best_survival=limit_best_survival,
+            source_db.save()
+            self.singleshot_sources_db.append(source_db)
+        self.steadystate_sources_db = []
+        for source in self.steadystate_sources:
+            source_db = SourceDatatable(
+                name=source.__class__.__name__,
+                is_steadystate=True,
+                is_singleshot=False,
+                search=self.search_db,
             )
-            self.search_db.save()
+            source_db.save()
+            self.steadystate_sources_db.append(source_db)
+        
+        
+    def run(self, sleep_step=10):
 
-    def run(self):
+        # See if the singleshot sources have been ran yet. For restarted calculations
+        # this will likely not be needed (unless a new source was added)
+        self._check_singleshot_sources()
 
-        while True:  # this loop will go until I hit 'break' below
+        # this loop will go until I hit 'break' below
+        while True:
 
-            # Go through the existing analyses and update them.
-            self.check_workflows()
-
-            # save progress to external database #!!! consider moving into a Trigger
-            self.save_progress()
+            # TODO: maybe write summary files to csv...? This may be a mute
+            # point because I expect we can follow along in the web UI in the future
+            # To that end, I can add a "URL" property
 
             # Check the stop condition
             # If it is True, we can stop the calc.
-            if self.stop_condition.check(self):
+            if self._check_stop_condition(self):
                 break  # break out of the while loop
             # Otherwise, keep going!
 
-            # Using the new data, update my generator #!!! consider moving into a Trigger
-            # self.update_sources() #!!! Not implemented yet
+            # Go through the running workflows and see if we need to submit
+            # new ones to meet our steadystate target(s)
+            self._check_steadystate_workflows()
 
-            # Go through the triggers
-            # I pass self in as an arg because the triggers need the search arg
-            self.run_checks_and_actions()
+            # TODO: Go through the triggered actions
+            # self._check_triggered_actions()
+
+            # To save our database load, sleep until we run checks again.
+            # OPTIMIZE: ask Prefect if their is an equivalent to Dask's gather/wait
+            # functions, so we know exactly when a workflow completes
+            # https://docs.dask.org/en/stable/futures.html#waiting-on-futures
+            time.sleep(sleep_step)
+
+        print("Stopping the search (remaining calcs will be left to finish).")
+
+    def get_best_individual(self):
+        best = (
+            self.individuals_datatable.objects.filter(
+                structure__formula_full=self.composition.formula
+            )
+            .order_by("structure__energy_per_atom")
+            .select_related("structure")
+            .first()
+        )
+        return best
 
     def _check_stop_condition(self):
 
@@ -150,7 +235,16 @@ class Search:
         # only counting the number of successfully calculated individuals.
         # Nothing is done to stop those that are still running or to count
         # structures that failed to be calculated
-        if self.individuals_datatable.objects.count() > self.max_structures:
+        if (
+            self.individuals_datatable.objects.filter(
+                structure__formula_full=self.composition.formula,
+                structure__energy_per_atom__isnull=False,
+            ).count()
+            > self.max_structures
+        ):
+            print(
+                f"Maximum number of completed calculations hit (n={self.max_structures}."
+            )
             return True
 
         # The 2nd stop condition is based on how long we've have the same
@@ -159,75 +253,69 @@ class Search:
         # we can stop the search.
 
         # grab the best individual for reference
-        best = (
-            self.individuals_datatable.objects.filter(
-                structure__formula=self.compositon.formula
-            )
-            .order_by("structure__energy_per_atom")
-            .include("structure")
-            .first()
-        )
+        best = self.get_best_individual()
+
+        # We need this if-statement in case no structures have completed yet.
+        if not best:
+            return False
 
         # count the number of new individuals added AFTER the best one. If it is
         # more than limit_best_survival, we stop the search.
         num_new_indivduals_since_best = self.individuals_datatable.objects.filter(
-            structure__formula__gte=self.compositon.formula,
+            structure__formula_full=self.composition.formula,
             # check energies to ensure we only count completed calculations
             structure__energy_per_atom__gt=best.structure.energy_per_atom,
             created_at__gte=best.created_at,
         ).count()
         if num_new_indivduals_since_best > self.limit_best_survival:
+            print(
+                f"Best individual has not changed after {self.limit_best_survival}"
+                " new individuals added."
+            )
             return True
 
         # If we reached this point, then we haven't hit a stop condition yet!
         return False
 
-    def _get_best_individual(self):
-        pass
+    def _check_steadystate_workflows(self):
 
-    def save_progress(self):
-        #!!! make this into a separate class so I can allow for csv vs sql!
-        #!!! This is very inefficient because I rewrite everything instead of just what's new.
-
-        # Go through futures and convert them to keys
-        # For executors like Dask, an actual future object can't be stored
-        # so I mark any non-string (other than None-type) as unsafe to store
-        #!!! change this in the future
-        futures = [
-            future if not future or type(future) == str else future.key
-            for future in self.workflow_futures
-        ]
-
-        # save simple data to a csv
-        import pandas
-
-        df = pandas.DataFrame.from_dict(
-            {
-                "workflow_futures": futures,
-                "fitness": self.fitnesses,
-                "source": self.origins,
-                "parent_ids": self.parent_ids,
+        # a quick pre-check, we can look at the total number of workflows
+        # in prefect that are either running or pending. If this is less than
+        # our target nsteadystate, then we can do a more detailed checks below
+        # to find out which source have fallen below the threshold.
+        query = {
+            "query": {
+                with_args(
+                    "flow_run_aggregate",
+                    {
+                        "where": {
+                            "flow": {"name": {"_eq": self.workflow.name}},
+                            "state": {"_in": ["Running", "Scheduled"]},
+                        },
+                    },
+                ): {"aggregate": {"count"}}
             }
-        )
-        df.to_csv("search_backup.csv")
+        }
+        nworkflows_submitted = self.prefect_client(query)
 
-        # save structures as cif files in a folder names 'structures'
-        import os
+        if nworkflows_submitted >= self.nsteadystate:
+            return  # no need to submit new workflows, so we exit this fxn
 
-        if not os.path.exists("structures"):
-            os.mkdir("structures")
-        os.chdir("structures")
-        for i, structure in enumerate(self.structures):
-            structure.to(
-                "poscar", "{}.vasp".format(i)
-            )  # I use POSCAR format, which can be opened in VESTA with the .vasp ending
-        os.chdir("..")
-
-    def submit_new_sample_workflow(self, structure):  #!!! change to args and kwargs?
-        future = self.executor.submit(func=self.workflow, args=[structure], kwargs={})
-
-        self.workflow_futures.append(future)  # future is either Dask Future or key
-        self.fitnesses.append(None)  # empty that will be updated later
+        # Otherwise let's grab all of the ids that we know are running from our
+        # Individuals table, then grab all of the flow-run ids for these calculations
+        query = {
+            "query": {
+                with_args(
+                    "flow_run",
+                    {
+                        "where": {
+                            "flow": {"name": {"_eq": self.workflow.name}},
+                            "state": {"_in": ["Completed", "Scheduled"]},
+                        },
+                    },
+                ): ["id"]
+            }
+        }
 
     def check_workflows(self):
 
@@ -268,19 +356,6 @@ class Search:
 
         # update the number of jobs pendings value
         self.njobs_pending = njobs_pending
-
-    def run_checks_and_actions(self):
-        # Go through the triggers
-        for trigger in self.triggers:
-            if trigger.check(self):
-                trigger.action(self)
-
-    def select_parents(self, nselect):
-        parents_i = self.selector.select(self.fitnesses, nselect)
-        parents = [
-            self.structures[i] for i in parents_i
-        ]  # grab the corresponding structures
-        return parents_i, parents
 
     def new_sample(self, creators_only=False, max_attempts0=10, max_attempts1=100):
 
