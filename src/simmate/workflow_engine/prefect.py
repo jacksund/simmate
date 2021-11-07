@@ -65,19 +65,20 @@ class Workflow(PrefectFlow):
         # submitted.
         # BUG: Will there be a race condition here? What if the workflow finishes
         # and tries writing to the databse before this is done?
-        self._register_calculation(flow_run_id, **kwargs)
+        calc = self._register_calculation(flow_run_id, **kwargs)
         # -----------------------------------
 
-        # if we want to wait until the job is complete, we do that and
-        # also make sure that it completed successfully
+        # if we want to wait until the job is complete, we do that here
         if wait_for_run:
             flow_run_view = self.wait_for_flow_run(flow_run_id)
-            return flow_run_view
-        # If we aren't waiting, we return the flow run id so that the user
-        # can monitor the run
+            # return flow_run_view # !!! Should I return this moving forward?
+
+        # We return the flow run id so that the user can monitor the run. We also
+        # return a dict with whatever _pre_submit_tasks gave
+        if calc:
+            return flow_run_id, calc
         else:
             return flow_run_id
-        # return a dict of prefect flow run id plus whatever _pre_submit_tasks gave
 
     def _register_calculation(self, flow_run_id, **kwargs):
 
@@ -96,6 +97,8 @@ class Workflow(PrefectFlow):
         else:
             calc = self.calculation_table(prefect_flow_run_id=flow_run_id)
         calc.save()
+
+        return calc
 
     def wait_for_flow_run(self, flow_run_id):
         """

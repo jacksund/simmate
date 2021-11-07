@@ -5,7 +5,7 @@ import time
 from prefect import Client
 
 from simmate.configuration.django import setup_full  # sets database connection
-from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
+from simmate.database.local_calculations.structure_prediction.evolution import (
     EvolutionarySearch as SearchDatatable,
     StructureSource as SourceDatatable,
     # Individual as IndividualDatatable,
@@ -35,8 +35,7 @@ class Search:
             # "substitution",
             # "third_party_structures",
             # "third_party_substitution",
-            # "SomeOtherDatatable",  # this could be useful for pulling from a
-            # table of lower quality calculations
+            # "SomeOtherDatatable",  # e.g. taking the best from table of lower quality calculations
         ],
         # !!! Some of these sources should be removed for compositions with 1 element type
         nsteadystate=40,
@@ -50,7 +49,7 @@ class Search:
             (0.05, "AtomicPermutationASE"),
             (0.05, "CoordinatePerturbationASE"),
         ],
-        selector=("TruncatedSelection", {"percentile": 0.2, "ntrunc_min": 5}),
+        selector="TruncatedSelection",
         # triggered_actions=[],  # TODO: this can be things like "start_ml_potential" or "update volume in sources"
         # executor= # TODO: I assume Prefect for submitting workflows right now.
     ):
@@ -66,11 +65,23 @@ class Search:
         # Prefect is required for this class, so we connect to the client upfront
         self.prefect_client = Client()
 
+        # Initialize the selector
+        if selector == "TruncatedSelection":
+            from simmate.toolkit.structure_prediction.evolution.selectors.all import (
+                TruncatedSelection,
+            )
+
+            selector = TruncatedSelection()
+        else:  # BUG
+            raise Exception("I only support TruncatedSelection right now")
+
         # Load the Individuals datatable class.
         if individuals_datatable == "MITIndividual":
-            from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
+            from simmate.database.local_calculations.structure_prediction.evolution import (
                 MITIndividual as individuals_datatable,
             )
+        else:  # BUG
+            raise Exception("I only support MITIndividual right now")
         self.individuals_datatable = individuals_datatable
 
         # Initialize the workflow if a string was given.
@@ -265,6 +276,9 @@ class Search:
         # If we reached this point, then we haven't hit a stop condition yet!
         return False
 
+    def _check_singleshot_sources(self):
+        pass  # TODO
+
     def _check_steadystate_workflows(self):
 
         # we iterate through each steady-state source and check to see how many
@@ -275,12 +289,34 @@ class Search:
             self.steadystate_sources_db,
             self.steadystate_source_proportions,
         ):
-            if source_db.nprefect_flow_runs < njobs_target:
+            # This loop says for the number of steady state runs we are short,
+            # create that many new individuals! max(x,0) ensure we don't get a
+            # negative value. A value of 0 means we are at steady-state and can
+            # just skip this loop.
+            for n in range(max(source_db.nprefect_flow_runs - njobs_target), 0):
 
                 # now we need to make a new individual and submit it!
-                pass
+                structure = self._make_new_structure(source)
 
-    def _make_new_individual(self, source, max_attempts=100):
+                # sometimes we fail to make a structure with the source. In cases
+                # like this, we warn the user, but just move on. This means
+                # we will be short of our steady-state target.
+
+                # submit the structure workflow
+                flow_run_id, calc = self.workflow.run_cloud(
+                    structure=structure,
+                    wait_for_run=False,
+                )
+
+                # create the individual
+                individual = self.individuals_datatable(
+                    source=source_db,
+                    structure=calc,
+                    structure_parent=None,
+                )
+                individual.save()
+
+    def _make_new_structure(self, source, max_attempts=100):
 
         # TODO: check to make sure this structure is unique and hasn't been
         # submitted already. I may have two nested while loops -- one for
@@ -299,8 +335,9 @@ class Search:
                 type(source)
             ):  # OPTIMIZE: quick way to check for Transformation subclass?
                 # grab parent structures using the selection method
-                parents_i, parents = self.select_parents(source.ninput)
-                #!!! This fixes a bug when there's only one structure input (should be Structure, not List)
+                parents, parents_db = self._select_parents(source.ninput)
+                # This fixes a bug when there's only one structure input
+                # and we need a Structure, not List
                 if source.ninput == 1:
                     parents = parents[0]
                 # make a new structure
@@ -311,7 +348,7 @@ class Search:
                 parents_i = None
                 # make a new structure
                 new_structure = source.create_structure()
-        # see if we got a structure or if we hit the max attempts and there's 
+        # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure:
             print(
@@ -319,33 +356,21 @@ class Search:
                 " contact our team for help."
             )
             return False
-        
-        # now let's add this structure to our database
-        
-        
-        
-        
-        
-        # add the new structure to the db list
-        self.structures.append(new_structure)
-        # add the origin to the db list
-        try:
-            source_name = source.__class__.__name__
-        except:
-            source_name = str(type(source))
-        self.origins.append(
-            source_name
-        )  #!!! I should add a source.name feature #!!! what if two sources share a parent class?
-        self.parent_ids.append(parents_i)
 
-        # add the workflow for the structure
-        # let the analysis object handle adding things to the database
-        self.submit_new_sample_workflow(new_structure)
+        print("Creation Successful.")
 
-        print("Creation Successful and Structure Submitted")
+        # return the structure and its parents
+        return new_structure
 
-        # return True to indicate success
-        return True
+    def _select_parents(self):
+
+        # our selectors just require a dataframe where we specify the fitness
+        # column. So we query our individuals database to give this as an input.
+        individuals_df = self.individuals_datatable.objects.filter(
+            structure__energy_per_atom__isnull=False
+        ).order_by("structure__energy_per_atom")
+
+        # df.id.values.tolist()
 
     def _init_common_class(self, class_str):
 

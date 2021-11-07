@@ -10,7 +10,7 @@ from simmate.database.local_calculations.relaxation.mit import (
 )
 
 # TESTING
-from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
+from simmate.database.local_calculations.structure_prediction.evolution import (
     EvolutionarySearch,
     StructureSource,
     Individual,

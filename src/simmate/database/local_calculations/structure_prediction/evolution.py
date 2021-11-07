@@ -134,7 +134,10 @@ class Individual(DatabaseTable):
 
     @classmethod
     def create_subclass_from_calculation(cls, name, calculation, **extra_columns):
-
+        
+        # TODO: Calculation here should be an ENERGY calc! Not a relaxation or
+        # anything else. In the future, maybe I'll allow other types but not yet.
+        
         # There are the two columns we want to add to our table that both
         # link to some calculation table
         NewClass = cls.create_subclass(
