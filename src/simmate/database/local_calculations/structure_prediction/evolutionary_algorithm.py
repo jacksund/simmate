@@ -3,8 +3,8 @@
 from simmate.database.base_data_types import table_column, DatabaseTable
 
 from simmate.database.local_calculations.relaxation.mit import (
-    # MITRelaxation,
-    MITRelaxationStructure,
+    MITRelaxation,
+    MITIonicStep,
 )
 
 from prefect import Client
@@ -143,6 +143,8 @@ class Individual(DatabaseTable):
                 calculation,
                 on_delete=table_column.CASCADE,
                 primary_key=True,
+                blank=True,
+                null=True,
             ),
             structure_parent=table_column.OneToOneField(
                 calculation,
@@ -161,10 +163,10 @@ class Individual(DatabaseTable):
         app_label = "local_calculations"
 
 
-MITIndividuals = Individual.create_subclass_from_calculation(
-    name="MITIndividuals",
-    calculation=MITRelaxationStructure,
-    workflow="MITRelaxation",
+MITIndividual = Individual.create_subclass_from_calculation(
+    name="MITIndividual",
+    calculation=MITIonicStep,
+    workflow=MITRelaxation,
 )
 
 

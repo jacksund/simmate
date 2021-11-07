@@ -18,21 +18,8 @@ class Calculation(DatabaseTable):
     # for this calculation. Simmate does not store this data directly, but instead
     # we store the flow-run-id so that the user may look this up in the Prefect
     # database if they wish.
-    # I store the name because it's shorter and user friendly. For example,
-    #   name = jolly-hornet
-    #   id = d8a785e1-e344-463a-bede-0e7b3da7bab6
-    # The id is still needed because it let's me make the link to the cloud page
-    prefect_flow_run_name = table_column.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-    )
+    # An example id is... d8a785e1-e344-463a-bede-0e7b3da7bab6
     prefect_flow_run_id = table_column.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-    )
-    prefect_flow_run_version = table_column.CharField(
         max_length=50,
         blank=True,
         null=True,
@@ -50,13 +37,30 @@ class Calculation(DatabaseTable):
     """Archived Data"""
     # I may want to add these fields because Prefect doesn't store run stats
     # indefinitely AND it doesn't give detail memory use, number of cores, etc.
-        # average_memory (The average memory used in kb)
-        # max_memory (The maximum memory used in kb)
-        # elapsed_time (The real time elapsed in seconds)
-        # system_time(The system CPU time in seconds)
-        # user_time(The user CPU time spent by VASP in seconds)
-        # total_time (The total CPU time for this calculation)
-        # cores (The number of cores used by VASP (some clusters print `mpi-ranks` here))
+    # average_memory (The average memory used in kb)
+    # max_memory (The maximum memory used in kb)
+    # elapsed_time (The real time elapsed in seconds)
+    # system_time(The system CPU time in seconds)
+    # user_time(The user CPU time spent by VASP in seconds)
+    # total_time (The total CPU time for this calculation)
+    # cores (The number of cores used by VASP (some clusters print `mpi-ranks` here))
+    
+    # Here are some other Prefect fields too.
+    # agent_id
+    # auto_scheduled
+    # context
+    # created_by_user_id
+    # end_time
+    # flow_id
+    # labels
+    # name
+    # parameters
+    # scheduled_start_time
+    # start_time
+    # state
+    # tenant_id
+    # times_resurrected
+    # version
 
     """ Relationships """
     # While there are no base relations for this abstract class, the majority of
@@ -78,19 +82,6 @@ class Calculation(DatabaseTable):
         return f"https://cloud.prefect.io/simmate/flow-run/{self.prefect_flow_run_id}"
 
     """ Model Methods """
-
-    @classmethod
-    def from_prefect_context(cls, prefect_context, **kwargs):
-        # Given a Prefect context, this will return a database calculation
-        # object, but will NOT save it to the database yet. The kwargs input
-        # is only if you inherit from this class and add extra fields.
-        calculation = cls(
-            prefect_flow_run_name=prefect_context.flow_run_name,
-            prefect_flow_run_id=prefect_context.flow_run_id,
-            prefect_flow_run_version=prefect_context.get("flow_run_version"),
-            **kwargs,
-        )
-        return calculation
 
     # Grabs current values from prefect
     # status

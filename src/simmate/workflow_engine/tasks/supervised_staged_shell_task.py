@@ -186,7 +186,7 @@ class SupervisedStagedShellTask(Task):
                 command,
                 cwd=directory,
                 shell=True,
-                preexec_fn=os.setsid,
+                preexec_fn=os.setsid,  # BUG: This throws an error on Windows
                 stderr=subprocess.PIPE,
             )
 

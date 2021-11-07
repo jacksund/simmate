@@ -2,10 +2,7 @@
 
 import time
 
-import numpy
-
 from prefect import Client
-from prefect.utilities.graphql import with_args
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
@@ -25,7 +22,7 @@ class Search:
         # TODO: what if the workflow changes (e.g. starts with ML relax) but the
         # final table stays the same?
         # workflow="MITRelaxation",  # linked to the individuals_datatable
-        individuals_datatable="MITIndividuals",
+        individuals_datatable="MITIndividual",
         fitness_function="energy",
         # Instead of specifying a stop_condition class like I did before,
         # I just assume the stop condition is either (1) the maximum allowed
@@ -70,9 +67,9 @@ class Search:
         self.prefect_client = Client()
 
         # Load the Individuals datatable class.
-        if individuals_datatable == "MITIndividuals":
+        if individuals_datatable == "MITIndividual":
             from simmate.database.local_calculations.structure_prediction.evolutionary_algorithm import (
-                MITIndividuals as individuals_datatable,
+                MITIndividual as individuals_datatable,
             )
         self.individuals_datatable = individuals_datatable
 
@@ -104,7 +101,6 @@ class Search:
                 limit_best_survival=limit_best_survival,
             )
             self.search_db.save()
-
         # Grab the list of singleshot sources that have been ran before
         # and based off of that list, remove repeated sources
         past_singleshot_sources = (
@@ -129,7 +125,6 @@ class Search:
                 source = self._init_common_class(source)
             # and add it to our final list
             self.singleshot_sources.append(source)
-
         # Initialize the steady-state sources, which are given as a list of
         # (proportion, class/class_str, kwargs) for each. As we go through these,
         # we also collect the proportion list for them.
@@ -144,10 +139,8 @@ class Search:
             # otherwise it should be a class already
             if type(source) == str:
                 source = self._init_common_class(source)
-
             # and add it to our final list
             self.steadystate_sources.append(source)
-
         # Make sure the proportions sum to 1, otherwise scale them.
         sum_proportions = sum(self.steadystate_source_proportions)
         if sum_proportions != 1:
@@ -181,8 +174,7 @@ class Search:
             )
             source_db.save()
             self.steadystate_sources_db.append(source_db)
-        
-        
+
     def run(self, sleep_step=10):
 
         # See if the singleshot sources have been ran yet. For restarted calculations
@@ -214,7 +206,6 @@ class Search:
             # functions, so we know exactly when a workflow completes
             # https://docs.dask.org/en/stable/futures.html#waiting-on-futures
             time.sleep(sleep_step)
-
         print("Stopping the search (remaining calcs will be left to finish).")
 
     def get_best_individual(self):
@@ -246,7 +237,6 @@ class Search:
                 f"Maximum number of completed calculations hit (n={self.max_structures}."
             )
             return True
-
         # The 2nd stop condition is based on how long we've have the same
         # "best" individual. If the number of new individuals calculated (without
         # any becoming the new "best") is greater than limit_best_survival, then
@@ -258,7 +248,6 @@ class Search:
         # We need this if-statement in case no structures have completed yet.
         if not best:
             return False
-
         # count the number of new individuals added AFTER the best one. If it is
         # more than limit_best_survival, we stop the search.
         num_new_indivduals_since_best = self.individuals_datatable.objects.filter(
@@ -273,139 +262,70 @@ class Search:
                 " new individuals added."
             )
             return True
-
         # If we reached this point, then we haven't hit a stop condition yet!
         return False
 
     def _check_steadystate_workflows(self):
 
-        # a quick pre-check, we can look at the total number of workflows
-        # in prefect that are either running or pending. If this is less than
-        # our target nsteadystate, then we can do a more detailed checks below
-        # to find out which source have fallen below the threshold.
-        query = {
-            "query": {
-                with_args(
-                    "flow_run_aggregate",
-                    {
-                        "where": {
-                            "flow": {"name": {"_eq": self.workflow.name}},
-                            "state": {"_in": ["Running", "Scheduled"]},
-                        },
-                    },
-                ): {"aggregate": {"count"}}
-            }
-        }
-        nworkflows_submitted = self.prefect_client(query)
+        # we iterate through each steady-state source and check to see how many
+        # jobs are still running for it. If it's less than the target steady-state,
+        # then we need to submit more!
+        for source, source_db, njobs_target in zip(
+            self.steadystate_sources,
+            self.steadystate_sources_db,
+            self.steadystate_source_proportions,
+        ):
+            if source_db.nprefect_flow_runs < njobs_target:
 
-        if nworkflows_submitted >= self.nsteadystate:
-            return  # no need to submit new workflows, so we exit this fxn
+                # now we need to make a new individual and submit it!
+                pass
 
-        # Otherwise let's grab all of the ids that we know are running from our
-        # Individuals table, then grab all of the flow-run ids for these calculations
-        query = {
-            "query": {
-                with_args(
-                    "flow_run",
-                    {
-                        "where": {
-                            "flow": {"name": {"_eq": self.workflow.name}},
-                            "state": {"_in": ["Completed", "Scheduled"]},
-                        },
-                    },
-                ): ["id"]
-            }
-        }
+    def _make_new_individual(self, source, max_attempts=100):
 
-    def check_workflows(self):
+        # TODO: check to make sure this structure is unique and hasn't been
+        # submitted already. I may have two nested while loops -- one for
+        # max_unique_attempts and one for max_creation_attempts.
 
-        # I want to keep track of the number of jobs pending
-        # This is useful for many Triggers and rather than each trigger
-        # running a self.check_njobs_pending() function, its faster/cheaper
-        # to update this variable within this looping function
-        njobs_pending = 0
-        # The same goes for the number of jobs successfully completed.
-        # I init this variable above and update it here.
-
-        for sample_id, future in enumerate(self.workflow_futures):
-            # for speed I deleted the finished futures and replace them with None
-            # This way I'm not constantly making queries for workflows that no
-            # longer exist after completion (like in FireWorks executor)
-            if future:
-                status = self.executor.check(future)
-                if status == "done":
-                    #!!! THIS IS A STRICT DEFINITON OF WORKFLOW OUTPUT
-                    #!!! CHANGE THIS WHEN I CREATE A WORKFLOW CLASS
-                    result = self.executor.get_result(future)
-                    # update the fitness value
-                    self.fitnesses[sample_id] = result["final_energy"]
-                    # update the structure
-                    self.structures[sample_id] = result["final_structure"]
-                    # update the future to None
-                    self.workflow_futures[sample_id] = None
-                    # update the count of successful calcs
-                    self.njobs_completed += 1
-                elif status == "error":
-                    # This line will raise the error: self.executor.get_result(future)
-                    # we don't update the fitness - we just leave it at None
-                    # update the future to None so it is no longer checked
-                    self.workflow_futures[sample_id] = None
-                elif status == "pending":
-                    njobs_pending += 1
-                    pass  # move on until the job is done!
-
-        # update the number of jobs pendings value
-        self.njobs_pending = njobs_pending
-
-    def new_sample(self, creators_only=False, max_attempts0=10, max_attempts1=100):
-
+        # Until we get a new valid structure (or run out of attempts), keep trying
+        # with our given source. Assume we don't have a valid structure until
+        # proven otherwise
+        print(f"Attempting to create a structure with {source.__class__.__name__}")
         new_structure = False
-        attempt0 = 0
-        while not new_structure and attempt0 <= max_attempts0:
-            attempt0 += 1
-            if creators_only:
-                # randomly select the source until we get a creator
-                source = None  # to start the loop
-                while "creator" not in str(type(source)):
-                    source = numpy.random.choice(
-                        self.sources, p=self.source_probabilities
-                    )
-            else:
-                # randomly select the source
-                source = numpy.random.choice(self.sources, p=self.source_probabilities)
-
-            try:
-                print("Attempting with... " + source.__class__.__name__)
-            except:
-                print("Attempting with... " + str(type(source)))
-
-            # iterate until I get a good structure or run out of attempts
-            attempt1 = 0
-            while not new_structure and attempt1 <= max_attempts1:
-                # add an attempt
-                attempt1 += 1
-                if "transformation" in str(
-                    type(source)
-                ):  #!!! NEED MORE EFFICIENT METHOD
-                    # grab parent structures using the selection method
-                    parents_i, parents = self.select_parents(source.ninput)
-                    #!!! This fixes a bug when there's only one structure input (should be Structure, not List)
-                    if source.ninput == 1:
-                        parents = parents[0]
-                    # make a new structure
-                    new_structure = source.apply_transformation(parents)
-                elif "creator" in str(type(source)):  #!!! NEED MORE EFFICIENT METHOD
-                    parents_i = None
-                    # make a new structure
-                    new_structure = source.create_structure()
-            # see if we got a structure or if we hit the max attempts
-            if not new_structure:
-                print("Failed to create a structure with {}".format(source))
-        # see if we got a structure or if we hit the max attempts
+        attempt = 0
+        while not new_structure and attempt <= max_attempts:
+            # add an attempt
+            attempt += 1
+            if "transformation" in str(
+                type(source)
+            ):  # OPTIMIZE: quick way to check for Transformation subclass?
+                # grab parent structures using the selection method
+                parents_i, parents = self.select_parents(source.ninput)
+                #!!! This fixes a bug when there's only one structure input (should be Structure, not List)
+                if source.ninput == 1:
+                    parents = parents[0]
+                # make a new structure
+                new_structure = source.apply_transformation(parents)
+            elif "creator" in str(
+                type(source)
+            ):  # OPTIMIZE: quick way to check for Creator subclass?
+                parents_i = None
+                # make a new structure
+                new_structure = source.create_structure()
+        # see if we got a structure or if we hit the max attempts and there's 
+        # a serious problem!
         if not new_structure:
-            print("Failed to create a structure! Consider changing your settings.")
+            print(
+                "Failed to create a structure! Consider changing your settings or"
+                " contact our team for help."
+            )
             return False
-
+        
+        # now let's add this structure to our database
+        
+        
+        
+        
+        
         # add the new structure to the db list
         self.structures.append(new_structure)
         # add the origin to the db list
@@ -436,7 +356,6 @@ class Search:
         ]:
             mutation_class = getattr(creation_module, class_str)
             return mutation_class(self.composition)
-
         # TRANSFORMATIONS
         elif class_str in [
             "HeredityASE",
@@ -454,7 +373,6 @@ class Search:
         elif class_str in []:
             mutation_class = getattr(transform_module, class_str)
             return mutation_class()
-
         # These are commonly used Single-shot sources
         elif class_str == "prototypes_aflow":
             pass  # TODO
@@ -464,7 +382,6 @@ class Search:
             pass  # TODO
         elif class_str == "third_party_substitution":
             pass  # TODO
-
         else:
             raise Exception(
                 f"{class_str} is not recognized as a common input. Make sure you"

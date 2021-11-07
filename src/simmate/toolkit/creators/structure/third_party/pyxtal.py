@@ -24,8 +24,7 @@ class PyXtalStructure(StructureCreator):
             from pyxtal import pyxtal
         except ModuleNotFoundError:
             #!!! I should raise an error in the future
-            print("You must have PyXtal installed to use PyXtalStructure!!")
-            return  # exit the function as the script will fail later on otherwise
+            raise Exception("You must have PyXtal installed to use PyXtalStructure!!")
 
         # save the module for reference below
         self.pyxtal = pyxtal()
@@ -44,37 +43,55 @@ class PyXtalStructure(StructureCreator):
         #!!! TO-DO: I need to allow the user to specify the tolerance matrix
         if tolerance_matrix:
             print(
-                "PyMatDisc's wrapper for PyXtal does not currently support setting "
+                "Simmate's wrapper for PyXtal does not currently support setting "
                 "the tolerance matrix for PyXtal's random_crystal(). If you want this "
-                "option added, please contact the PyMatDisc developers."
+                "option added, please contact the Simmate developers."
             )
 
         # make a list of spacegroups that we are allowed to choose from
         self.spacegroup_options = [
             sg for sg in spacegroup_include if sg not in spacegroup_exclude
         ]
+        # Note, there's no easy way to see which spacegroups are compatible with
+        # our composition, so this list is updated as attempts fail in the
+        # create_structure method.
 
     def create_structure(self, spacegroup=None):
-
-        # if a spacegroup is not specified, grab a random one from our options
-        # no check is done to see if the spacegroup specified is compatible with the vector_generator built
+        
+        # If a spacegroup is not specified, grab a random one from our options.
+        # The requested_spacegroup let's us know below if the method wanted a 
+        # given spacegroup -- which tells us whether or not we should raise an 
+        # error if the spacegroup is incompatible with our composition
         if not spacegroup:
             # randomly select a symmetry system
             spacegroup = choice(self.spacegroup_options)
-
-        # now make the new structure using PyXtal's crystal.random_crystal function
-        # NOTE: all of these options are set in the init except for the spacegroup
-        # No structure is returned. Instead they just attach it to the pyxtal object
-        self.pyxtal.from_random(
-            group=int(
-                spacegroup
-            ),  #!!! why do I need int() here? This should already work without it...
-            species=self.species,
-            numIons=self.numIons,
-            factor=self.volume_factor,
-            lattice=self.default_lattice,
-        )
-        # tm=<pyxtal.crystal.Tol_matrix object> # not supported right now!
+            requested_spacegroup = False
+        else:
+            requested_spacegroup = True
+        
+        from pyxtal.msg import Comp_CompatibilityError
+        try:
+            # now make the new structure using PyXtal's crystal.random_crystal function
+            # NOTE: all of these options are set in the init except for the spacegroup
+            # No structure is returned. Instead they just attach it to the pyxtal object
+            self.pyxtal.from_random(
+                group=int(
+                    spacegroup
+                ),  # !!! why do I need int() here? This should already work without it...
+                species=self.species,
+                numIons=self.numIons,
+                factor=self.volume_factor,
+                lattice=self.default_lattice,
+            )
+            # tm=<pyxtal.crystal.Tol_matrix object> # not supported right now!
+        except Comp_CompatibilityError as exception:
+            # if the user wanted this spacegroup, raise the error
+            if requested_spacegroup:
+                raise exception
+            # otherwise remove the spacegroup from our allowed list
+            self.spacegroup_options.remove(spacegroup)
+            # And retry! Note: recursion is a shortcut here, but shouldn't be an issue
+            self.create_structure()
 
         # note that we have a PyXtal structure object, not a PyMatGen one!
         # The PyXtal structure has a *.valid feature that lets you know if structure creation was a success

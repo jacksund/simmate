@@ -5,8 +5,8 @@
 # https://docs.djangoproject.com/en/3.1/topics/db/models/#organizing-models-in-a-package
 
 from simmate.database.local_calculations.relaxation.mit import (
-    MITRelaxationStructure,
     MITRelaxation,
+    MITIonicStep,
 )
 
 # TESTING
@@ -14,5 +14,5 @@ from simmate.database.local_calculations.structure_prediction.evolutionary_algor
     EvolutionarySearch,
     StructureSource,
     Individual,
-    MITIndividuals,
+    MITIndividual,
 )

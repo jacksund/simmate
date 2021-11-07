@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 
-import prefect  # base import is required for prefect context
-from prefect import task, Flow, Parameter
-from prefect.storage import Module
-
 from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxationTask
 from simmate.workflows.common_tasks.load_structure import load_structure
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.relaxation.mit import (
-    MITRelaxationStructure,
+    MITIonicStep,
     MITRelaxation,
 )
 
+from simmate.workflow_engine.prefect import (
+    prefect,
+    Workflow,
+    task,
+    Parameter,
+    ModuleStorage,
+)
 
 # --------------------------------------------------------------------------------------
 
@@ -34,7 +37,7 @@ def save_results(result_and_corrections):
     calculation.save()
 
     # now update the calculation entry with our results
-    calculation.update_from_vasp_run(vasprun, corrections, MITRelaxationStructure)
+    calculation.update_from_vasp_run(vasprun, corrections, MITIonicStep)
 
     return calculation.id
 
@@ -44,7 +47,7 @@ def save_results(result_and_corrections):
 # THIS SECTION PUTS OUR TASKS TOGETHER TO MAKE A WORKFLOW
 
 # now make the overall workflow
-with Flow("MIT Relaxation") as workflow:
+with Workflow("MIT Relaxation") as workflow:
 
     # These are the input parameters for the overall workflow
     structure = Parameter("structure")
@@ -66,6 +69,8 @@ with Flow("MIT Relaxation") as workflow:
 # For when this workflow is registered with Prefect Cloud, we indicate that
 # it can be imported from a python module. Note __name__ provides the path
 # to this module.
-workflow.storage = Module(__name__)
+workflow.storage = ModuleStorage(__name__)
+workflow.project_name = "Simmate-Relaxation"
+workflow.calculation_table = MITRelaxation
 
 # --------------------------------------------------------------------------------------

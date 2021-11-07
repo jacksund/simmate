@@ -14,7 +14,7 @@ import plotly.graph_objects as plotly_go
 from django_pandas.io import read_frame
 
 
-class IonicStepStructure(Structure, Thermodynamics, Forces):
+class IonicStep(Structure, Thermodynamics, Forces):
 
     # You can view this table as a list of Structures that each have some extra
     # data attached to them from a calculation (such as energy) -- this is
@@ -33,7 +33,7 @@ class IonicStepStructure(Structure, Thermodynamics, Forces):
     # "converged_electronic" section here. ErrorHandlers and workups should
     # ensure this.
 
-    # This is ionic step number for the given relaxation (starts counting from 0)
+    # This is ionic step number for the given relaxation. This starts counting from 0.
     ionic_step_number = table_column.IntegerField()
 
     """ Relationships """
@@ -87,14 +87,41 @@ class IonicStepStructure(Structure, Thermodynamics, Forces):
         # return the dictionary
         return all_data if as_dict else cls(**all_data)
 
+    @classmethod
+    def create_subclass_from_relaxation(cls, name, relaxation, **extra_columns):
+
+        # All structures in this table come from relaxation calculations, where
+        # there can be many structures (one for each ionic steps) linked to a
+        # single relaxation. This means the start structure, end structure, and
+        # those structure in-between are stored together here.
+        # Therefore, there's just a simple column stating which relaxation it
+        # belongs to.
+        NewClass = cls.create_subclass(
+            f"{name}IonicStep",
+            relaxation=table_column.ForeignKey(
+                relaxation,
+                on_delete=table_column.CASCADE,
+                related_name="structures",
+            ),
+            **extra_columns,
+        )
+
+        # we now have a new child class and avoided writing some boilerplate code!
+        return NewClass
+
     """ Set as Abstract Model """
     # I have other models inherit from this one, while this model doesn't need
     # its own table.
     class Meta:
         abstract = True
+        app_label = "local_calculations"
 
 
-class Relaxation(Calculation):
+class Relaxation(Structure, Calculation):
+
+    # WARNING: The Structure here is the source structure! If you want the final
+    # structure, be sure to grab it from the structure_final attribute, where
+    # it is saved as an IonicStep
 
     """Base Info"""
 
@@ -120,38 +147,41 @@ class Relaxation(Calculation):
 
     """ Relationships """
 
-    # !!! IMPORTANT !!!
-    #
-    # This class will typically map to specific tables so that relaxations
-    # of different quality aren't all grouped together. Therefore, each subclass of
-    # this should have relationships that look like this...
-    #
-    # structure_start = table_column.OneToOneField(
-    #     IonicStepStructure,
-    #     on_delete=table_column.CASCADE,
-    #     related_name="relaxations_as_start",
-    #     blank=True,
-    #     null=True,
-    # )
-    # structure_final = table_column.OneToOneField(
-    #     IonicStepStructure,
-    #     on_delete=table_column.CASCADE,
-    #     related_name="relaxations_as_final",
-    #     blank=True,
-    #     null=True,
-    # )
-    # structures = table_column.ForeignKey(
-    #     IonicStepStructure,
-    #     on_delete=table_column.CASCADE,
-    #     related_name="relaxations",
-    #     blank=True,
-    #     null=True,
-    # )
-    #
-    # Note that we allow these columns to be empty because we fill them up with
-    # data after the Relaxation has been created.
-    #
-    # !!! IMPORTANT !!!
+    # structure_start
+    # structure_final
+    # structures
+
+    @classmethod
+    def create_all_subclasses(cls, name, **extra_columns):
+
+        # For convience, we add columns that point to the start and end structures
+        NewRelaxationClass = cls.create_subclass(
+            f"{name}Relaxation",
+            structure_start=table_column.OneToOneField(
+                f"{name}IonicStep",
+                on_delete=table_column.CASCADE,
+                related_name="relaxations_as_start",
+                blank=True,
+                null=True,
+            ),
+            structure_final=table_column.OneToOneField(
+                f"{name}IonicStep",
+                on_delete=table_column.CASCADE,
+                related_name="relaxations_as_final",
+                blank=True,
+                null=True,
+            ),
+            **extra_columns,
+        )
+
+        NewIonicStepClass = IonicStep.create_subclass_from_relaxation(
+            name,
+            NewRelaxationClass,
+            **extra_columns,
+        )
+
+        # we now have a new child class and avoided writing some boilerplate code!
+        return NewRelaxationClass, NewIonicStepClass
 
     """ Model Methods """
 
@@ -280,3 +310,4 @@ class Relaxation(Calculation):
     # its own table.
     class Meta:
         abstract = True
+        app_label = "local_calculations"

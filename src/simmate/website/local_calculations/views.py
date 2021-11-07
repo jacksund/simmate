@@ -7,7 +7,7 @@ from prefect.backend.flow_run import FlowView
 
 from simmate.database.local_calculations.relaxation.mit import (
     MITRelaxation,
-    # MITRelaxationStructure,
+    # MITIonicStep,
 )
 from simmate.website.local_calculations.forms import MITRelaxationForm
 from simmate.workflow_engine.tasks.run_workflow_task import RunWorkflowTask

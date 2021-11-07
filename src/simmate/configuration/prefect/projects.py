@@ -25,7 +25,7 @@ def build():
     # register the workflows with the proper projects
     for workflow in workflows:
         workflow_id = workflow.register(
-            project_name="Simmate-Relaxation",
+            project_name=workflow.project_name,
             set_schedule_active=False,
         )
 

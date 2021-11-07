@@ -80,7 +80,6 @@ class StructureCreator(ABC):
         except ValueError:
             print("Set up a Dask cluster before trying to run this!")
             return False
-
         # launch create_structure(spacegroup) iteratively and in parallel
         # The pure=False indicates that we will have different answers, even for the same input
         futures = client.map(self.create_structure, [spacegroup] * n, pure=False)

@@ -9,7 +9,7 @@ from simmate.workflows.common_tasks.load_structure import load_structure
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.relaxation.mit import (
-    MITRelaxationStructure,
+    MITIonicStep,
     MITRelaxation,
 )
 
@@ -34,7 +34,7 @@ def save_results(result_and_corrections):
     calculation.save()
 
     # now update the calculation entry with our results
-    calculation.update_from_vasp_run(vasprun, corrections, MITRelaxationStructure)
+    calculation.update_from_vasp_run(vasprun, corrections, MITIonicStep)
 
     return calculation.id
 
