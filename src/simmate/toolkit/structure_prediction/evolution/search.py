@@ -2,13 +2,10 @@
 
 import time
 
-from prefect import Client
-
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.structure_prediction.evolution import (
     EvolutionarySearch as SearchDatatable,
     StructureSource as SourceDatatable,
-    # Individual as IndividualDatatable,
 )
 
 import simmate.toolkit.creators.structure.all as creation_module
@@ -22,8 +19,9 @@ class Search:
         # TODO: what if the workflow changes (e.g. starts with ML relax) but the
         # final table stays the same?
         # workflow="MITRelaxation",  # linked to the individuals_datatable
-        individuals_datatable="MITIndividual",
-        fitness_function="energy",
+        structure_datatable="MITStructure",
+        workflow="MITRelaxation",
+        # fitness_field="energy_per_atom",  # TODO: I assume this for now.
         # Instead of specifying a stop_condition class like I did before,
         # I just assume the stop condition is either (1) the maximum allowed
         # calculated structures or (2) how long a given structure has been
@@ -38,6 +36,7 @@ class Search:
             # "SomeOtherDatatable",  # e.g. taking the best from table of lower quality calculations
         ],
         # !!! Some of these sources should be removed for compositions with 1 element type
+        nfirst_generation=40,  # no mutations/transforms are done until this many calcs complete
         nsteadystate=40,
         steadystate_sources=[
             (0.20, "PyXtalStructure"),
@@ -50,8 +49,10 @@ class Search:
             (0.05, "CoordinatePerturbationASE"),
         ],
         selector="TruncatedSelection",
-        # triggered_actions=[],  # TODO: this can be things like "start_ml_potential" or "update volume in sources"
-        # executor= # TODO: I assume Prefect for submitting workflows right now.
+        # TODO: this can be things like "start_ml_potential" or "update volume in sources"
+        # triggered_actions=[],
+        # TODO: I assume Prefect for submitting workflows right now.
+        # executor="local",
     ):
 
         self.composition = composition
@@ -61,9 +62,6 @@ class Search:
         self.limit_best_survival = limit_best_survival
         self.max_structures = max_structures
         self.nsteadystate = nsteadystate
-
-        # Prefect is required for this class, so we connect to the client upfront
-        self.prefect_client = Client()
 
         # Initialize the selector
         if selector == "TruncatedSelection":
@@ -76,24 +74,25 @@ class Search:
             raise Exception("I only support TruncatedSelection right now")
 
         # Load the Individuals datatable class.
-        if individuals_datatable == "MITIndividual":
-            from simmate.database.local_calculations.structure_prediction.evolution import (
-                MITIndividual as individuals_datatable,
+        if structure_datatable == "MITStructure":
+            from simmate.database.local_calculations.energy.mit import (
+                MITStructure as structure_datatable,
             )
         else:  # BUG
-            raise Exception("I only support MITIndividual right now")
-        self.individuals_datatable = individuals_datatable
+            raise Exception("I only support MITStructure right now")
+        self.structure_datatable = structure_datatable
 
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.
-        if self.individuals_datatable.workflow == "MITRelaxation":
+        if workflow == "MITRelaxation":
             from simmate.workflows.relaxation.mit import workflow
 
             self.workflow = workflow
         else:
             raise Exception("Only MITRelaxation is supported in early testing. -Jack")
         # BUG: I'll need to rewrite this in the future bc I don't really account
-        # for other workflows yet
+        # for other workflows yet. It would make sense that our workflow changes
+        # as the search progresses (e.g. we incorporate DeePMD relaxation once ready)
 
         # Check if there is an existing search and grab it if so. Otherwise, add
         # the search entry to the DB.
@@ -102,12 +101,14 @@ class Search:
                 composition=composition.formula,
             ).get()
             # TODO: update, add logs, compare... I need to decide what to do here.
-            # also, run _check_stop_condition() to avoid unneccessary restart
+            # also, run _check_stop_condition() to avoid unneccessary restart.
         else:
             self.search_db = SearchDatatable(
                 composition=composition.formula,
-                workflow=workflow.name,
-                individuals_datatable=individuals_datatable.__name__,
+                workflows=[
+                    self.workflow.name
+                ],  # as a list bc we can add new ones later
+                individuals_datatable=structure_datatable.__name__,
                 max_structures=max_structures,
                 limit_best_survival=limit_best_survival,
             )
@@ -152,7 +153,8 @@ class Search:
                 source = self._init_common_class(source)
             # and add it to our final list
             self.steadystate_sources.append(source)
-        # Make sure the proportions sum to 1, otherwise scale them.
+        # Make sure the proportions sum to 1, otherwise scale them. We then convert
+        # these to steady-state integers (and round to the nearest integer)
         sum_proportions = sum(self.steadystate_source_proportions)
         if sum_proportions != 1:
             self.steadystate_source_proportions = [
@@ -221,11 +223,10 @@ class Search:
 
     def get_best_individual(self):
         best = (
-            self.individuals_datatable.objects.filter(
-                structure__formula_full=self.composition.formula
+            self.structure_datatable.objects.filter(
+                formula_full=self.composition.formula
             )
-            .order_by("structure__energy_per_atom")
-            .select_related("structure")
+            .order_by("energy_per_atom")
             .first()
         )
         return best
@@ -238,9 +239,10 @@ class Search:
         # Nothing is done to stop those that are still running or to count
         # structures that failed to be calculated
         if (
-            self.individuals_datatable.objects.filter(
-                structure__formula_full=self.composition.formula,
-                structure__energy_per_atom__isnull=False,
+            self.structure_datatable.objects.filter(
+                formula_full=self.composition.formula,
+                energy_per_atom__isnull=False,
+                # **{f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
             ).count()
             > self.max_structures
         ):
@@ -261,13 +263,13 @@ class Search:
             return False
         # count the number of new individuals added AFTER the best one. If it is
         # more than limit_best_survival, we stop the search.
-        num_new_indivduals_since_best = self.individuals_datatable.objects.filter(
-            structure__formula_full=self.composition.formula,
+        num_new_structures_since_best = self.structure_datatable.objects.filter(
+            formula_full=self.composition.formula,
             # check energies to ensure we only count completed calculations
-            structure__energy_per_atom__gt=best.structure.energy_per_atom,
+            energy_per_atom__gt=best.energy_per_atom,
             created_at__gte=best.created_at,
         ).count()
-        if num_new_indivduals_since_best > self.limit_best_survival:
+        if num_new_structures_since_best > self.limit_best_survival:
             print(
                 f"Best individual has not changed after {self.limit_best_survival}"
                 " new individuals added."
@@ -277,7 +279,7 @@ class Search:
         return False
 
     def _check_singleshot_sources(self):
-        pass  # TODO
+        print("Singleshot sources not implemented yet.")
 
     def _check_steadystate_workflows(self):
 
@@ -322,6 +324,28 @@ class Search:
         # submitted already. I may have two nested while loops -- one for
         # max_unique_attempts and one for max_creation_attempts.
 
+        # check if we have a transformation or a creator
+        # OPTIMIZE: is there a faster way? check subclass maybe?
+        if "transformation" in str(type(source)):
+            is_transformation = True
+        elif "creator" in str(type(source)):
+            is_transformation = False
+        else:
+            raise Exception(
+                "Make sure your steady-state sources are either creators or transformations!"
+            )
+
+        # transformations require that we have completed structures in the
+        # database. We want to wait until there's a set amount before
+        # we start mutating the best. We check that here.
+        if is_transformation and (
+            self.structure_datatable.objects.filter(
+                energy_per_atom__isnull=False
+            ).count()
+            > self.nfirst_generation
+        ):
+            return False
+
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
         # proven otherwise
@@ -331,20 +355,12 @@ class Search:
         while not new_structure and attempt <= max_attempts:
             # add an attempt
             attempt += 1
-            if "transformation" in str(
-                type(source)
-            ):  # OPTIMIZE: quick way to check for Transformation subclass?
+            if is_transformation:
                 # grab parent structures using the selection method
-                parents, parents_db = self._select_parents(source.ninput)
-                # This fixes a bug when there's only one structure input
-                # and we need a Structure, not List
-                if source.ninput == 1:
-                    parents = parents[0]
+                parents, parents_db = self._select_parents(nselect=source.ninput)
                 # make a new structure
                 new_structure = source.apply_transformation(parents)
-            elif "creator" in str(
-                type(source)
-            ):  # OPTIMIZE: quick way to check for Creator subclass?
+            elif not is_transformation: # if it's a creator
                 parents_i = None
                 # make a new structure
                 new_structure = source.create_structure()
@@ -362,13 +378,24 @@ class Search:
         # return the structure and its parents
         return new_structure
 
-    def _select_parents(self):
+    def _select_parents(self, nselect):
 
         # our selectors just require a dataframe where we specify the fitness
         # column. So we query our individuals database to give this as an input.
-        individuals_df = self.individuals_datatable.objects.filter(
-            structure__energy_per_atom__isnull=False
-        ).order_by("structure__energy_per_atom")
+        individuals_df = (
+            self.structure_datatable.objects.filter(energy_per_atom__isnull=False)
+            .order_by("structure__energy_per_atom")[:200]
+            .to_dataframe()
+        )
+        # NOTE: I assume we'll never need more than the best 200 structures, which
+        # may not be true in special cases.
+
+        print(individuals_df)
+        structures_selected = True
+        
+        # When there's only one structure selected we return a Structure, not a List
+        if nselect == 1:
+            structures_selected = structures_selected[0]
 
         # df.id.values.tolist()
 
