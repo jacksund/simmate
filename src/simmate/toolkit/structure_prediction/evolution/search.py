@@ -35,9 +35,12 @@ class Search:
             # "third_party_substitution",
             # "SomeOtherDatatable",  # e.g. taking the best from table of lower quality calculations
         ],
-        # !!! Some of these sources should be removed for compositions with 1 element type
-        nfirst_generation=40,  # no mutations/transforms are done until this many calcs complete
+        # No mutations/transforms are done until this many calcs complete
+        # this includes those from singleshot and steadystate creators.
+        nfirst_generation=40,
+        # this is total number of submitted calcs at any given time
         nsteadystate=40,
+        # !!! Some of these sources should be removed for compositions with 1 element type
         steadystate_sources=[
             (0.20, "PyXtalStructure"),
             (0.40, "HeredityASE"),
@@ -62,6 +65,7 @@ class Search:
         self.limit_best_survival = limit_best_survival
         self.max_structures = max_structures
         self.nsteadystate = nsteadystate
+        self.nfirst_generation = nfirst_generation
 
         # Initialize the selector
         if selector == "TruncatedSelection":
@@ -71,8 +75,9 @@ class Search:
 
             selector = TruncatedSelection()
         else:  # BUG
-            raise Exception("I only support TruncatedSelection right now")
-
+            raise Exception("We only support TruncatedSelection right now. Sorry!")
+        self.selector = selector
+            
         # Load the Individuals datatable class.
         if structure_datatable == "MITStructure":
             from simmate.database.local_calculations.energy.mit import (
@@ -160,7 +165,11 @@ class Search:
             self.steadystate_source_proportions = [
                 p / sum_proportions for p in self.steadystate_source_proportions
             ]
-        # TODO: change to specific values using nsteadystate
+        # While these are percent values, we want specific counts. We convert to
+        # those here.
+        self.steadystate_source_counts = [
+            int(p * nsteadystate) for p in self.steadystate_source_proportions
+        ]
 
         # Throughout our search, we want to keep track of which workflows we've
         # submitted to prefect for each structure source as well as how long
@@ -203,13 +212,15 @@ class Search:
 
             # Check the stop condition
             # If it is True, we can stop the calc.
-            if self._check_stop_condition(self):
+            if self._check_stop_condition():
                 break  # break out of the while loop
             # Otherwise, keep going!
 
             # Go through the running workflows and see if we need to submit
             # new ones to meet our steadystate target(s)
+            print("A")
             self._check_steadystate_workflows()
+            print("DONE")
 
             # TODO: Go through the triggered actions
             # self._check_triggered_actions()
@@ -289,34 +300,40 @@ class Search:
         for source, source_db, njobs_target in zip(
             self.steadystate_sources,
             self.steadystate_sources_db,
-            self.steadystate_source_proportions,
+            self.steadystate_source_counts,
         ):
+            print("C")
             # This loop says for the number of steady state runs we are short,
             # create that many new individuals! max(x,0) ensure we don't get a
             # negative value. A value of 0 means we are at steady-state and can
             # just skip this loop.
-            for n in range(max(source_db.nprefect_flow_runs - njobs_target), 0):
-
+            for n in range(max(int(njobs_target - source_db.nprefect_flow_runs), 0)):
+                print("D")
+                
                 # now we need to make a new individual and submit it!
-                structure = self._make_new_structure(source)
+                parent_ids, structure = self._make_new_structure(source)
 
                 # sometimes we fail to make a structure with the source. In cases
                 # like this, we warn the user, but just move on. This means
-                # we will be short of our steady-state target.
-
+                # we will be short of our steady-state target. The warning for
+                # this is done inside _make_new_structure
+                if not structure:
+                    break
                 # submit the structure workflow
                 flow_run_id, calc = self.workflow.run_cloud(
                     structure=structure,
                     wait_for_run=False,
                 )
-
-                # create the individual
-                individual = self.individuals_datatable(
-                    source=source_db,
-                    structure=calc,
-                    structure_parent=None,
-                )
-                individual.save()
+                
+                # Attached the flow_run_id to our source so we know how many
+                # associated jobs are running.
+                source_db.prefect_flow_run_ids.append(flow_run_id)
+                source_db.save()
+                
+                # update the source on the calculation
+                calc.source = f"{source.__class__.__name__}"
+                calc.source_id = parent_ids
+                calc.save()
 
     def _make_new_structure(self, source, max_attempts=100):
 
@@ -333,6 +350,7 @@ class Search:
         else:
             raise Exception(
                 "Make sure your steady-state sources are either creators or transformations!"
+                f" {source.__class__.__name__} does not meet this requirement."
             )
 
         # transformations require that we have completed structures in the
@@ -342,9 +360,12 @@ class Search:
             self.structure_datatable.objects.filter(
                 energy_per_atom__isnull=False
             ).count()
-            > self.nfirst_generation
+            < self.nfirst_generation
         ):
-            return False
+            print(
+                f"Search isn't ready for transformations yet. Skipping {source.__class__.__name__}"
+            )
+            return False, False
 
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
@@ -353,15 +374,18 @@ class Search:
         new_structure = False
         attempt = 0
         while not new_structure and attempt <= max_attempts:
+            print("E")
             # add an attempt
             attempt += 1
             if is_transformation:
                 # grab parent structures using the selection method
-                parents, parents_db = self._select_parents(nselect=source.ninput)
+                parent_ids, parent_structures = self._select_parents(
+                    nselect=source.ninput
+                )
                 # make a new structure
-                new_structure = source.apply_transformation(parents)
-            elif not is_transformation: # if it's a creator
-                parents_i = None
+                new_structure = source.apply_transformation(parent_structures)
+            elif not is_transformation:  # if it's a creator
+                parent_ids = None
                 # make a new structure
                 new_structure = source.create_structure()
         # see if we got a structure or if we hit the max attempts and there's
@@ -371,12 +395,11 @@ class Search:
                 "Failed to create a structure! Consider changing your settings or"
                 " contact our team for help."
             )
-            return False
-
+            return False, False
         print("Creation Successful.")
 
         # return the structure and its parents
-        return new_structure
+        return parent_ids, new_structure
 
     def _select_parents(self, nselect):
 
@@ -384,20 +407,33 @@ class Search:
         # column. So we query our individuals database to give this as an input.
         individuals_df = (
             self.structure_datatable.objects.filter(energy_per_atom__isnull=False)
-            .order_by("structure__energy_per_atom")[:200]
+            .order_by("energy_per_atom")[:200]
             .to_dataframe()
         )
         # NOTE: I assume we'll never need more than the best 200 structures, which
         # may not be true in special cases.
 
-        print(individuals_df)
-        structures_selected = True
-        
-        # When there's only one structure selected we return a Structure, not a List
-        if nselect == 1:
-            structures_selected = structures_selected[0]
+        # From these individuals, select our parent structures
+        parents_df = self.selector(nselect, individuals_df, "energy_per_atom")
 
-        # df.id.values.tolist()
+        # grab the id column of the parents and convert it to a list
+        parent_ids = parents_df.id.values.tolist()
+
+        # now lets grab these structures from our database and convert them
+        # to a list of pymatgen structures
+        parent_structures = (
+            self.structure_datatable.objects.filter(id__in=parent_ids)
+            .only("structure_string")
+            .to_pymatgen()
+        )
+
+        # When there's only one structure selected we return the structure and
+        # id independents -- not within a list
+        if nselect == 1:
+            parent_ids = parent_ids[0]
+            parent_structures = parent_structures[0]
+        # for record keeping, we also want to return the ids for each structure
+        return parent_ids, parent_structures
 
     def _init_common_class(self, class_str):
 
