@@ -21,34 +21,34 @@ Read here for info on markdown, badges, and more:
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 [Shields Badges](https://shields.io/)
 -->
-> :warning: We are still at the early stages for building! The organization of our code changes frequently -- so many features and tutorials aren't ready yet... For this reason, we've also limited our website access to just team members. We anticipate a stable version will be publicly available in the first few months of 2022. 
+> :warning: We are still at the early stages for building! The organization of our code changes frequently, so many features and tutorials aren't ready yet. We've also limited our website access to just team members, but we anticipate a stable version will be publicly available in the first few months of 2022. 
 
-> :warning: Simmate is currently reliant on VASP, which is an expensive DFT software that can be very difficult to install for beginners. We are working to move away from propriatary softwares and toward free/open-source codes like ABINIT or DFTK.jl. This will take time though... so we recommend that fully experimental labs wait until Simmate hits this milestone. If you'd like to be notified when this occurs, send me an email (jacksund@live.unc.edu).
+> :warning: For Simmate's workflows, we are currently reliant on VASP, which is an expensive DFT software that can be difficult to install for beginners. We are working to move away from propriatary softwares and toward free/open-source codes like ABINIT or DFTK.jl. That way you can just install Simmate and we'll take care of the rest. This will take time though... so we recommend that fully experimental labs wait until Simmate hits this milestone. If you'd like to be notified when this occurs, send me an email (jacksund@live.unc.edu).
    
 ## Welcome!
 
-If you are brand-new to Simmate, jump over to our main website [simmate.org](https://simmate.org/) and take a look at what we have to offer. This page is for when you're ready to use Simmate in your own research and access some advanced functionality. Our software is open-source and free to use, so come back to try it when you're ready! 
+If you are new to Simmate, jump over to our main website [simmate.org](https://simmate.org/) and take a look at what we have to offer. This page is for when you're ready to use Simmate in your own research and access some advanced functionality. Our software is open-source and free to use, so come back to try it when you're ready! 
 
 
 ## What is Simmate?
 
-The Simulated Materials Ecosystem (Simmate) is a toolbox and helper for computational materials research. It lets you explore various crystal databases, predict new materials, and quickly calculate properties (electronic, elastic, thermodynamic, and more).
+The Simulated Materials Ecosystem (Simmate) is a toolbox for computational materials research. It lets you explore various crystal databases, predict new materials, and quickly calculate properties (electronic, elastic, thermodynamic, and more).
 
-Computational research can be intimidating because there are so many programs to choose from, and it's hard to mix-and-match them for your specific project. Simmate aims to be the glue between all these different programs, databases, and utilities. We do the heavy lifting, and explain these other programs to you along the way. 
+Computational research can be intimidating because there are so many programs to choose from, and it's hard to mix-and-match them for your specific project. Simmate aims to be the glue between all these different programs, databases, and utilities. We do the heavy lifting and explain these other programs to you along the way. 
 
-Even if you consider yourself an experimentalist and have little-to-no coding experience, Simmate's barrier to entry is built to be as low as possible -- with a heavy emphasis on clear and beginner-oriented tutorials and documentation. Simmate is designed to guide your studies and generate property predictions with a single mouse click.
+Even if you consider yourself an experimentalist and have little-to-no coding experience, Simmate's barrier to entry is built to be as low as possible. Our web interface can generate property predictions with a single mouse click. And for learning how to code, we wrote our tutorials and documentation for those that have never used python before. Also, be sure attend [our monthly virtual workshop]() if you need help getting started.
 
-At the other end of the spectrum, we provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we opperate under a very different coding philosphy. **Here, usability and readability are our top priortities.** The first step toward that end is an "all-in-one" package rather than many separate programs. This includes a core material science framework, workflow management, database orm, and a website interface. To learn more about the different design choices made in Simmate compared to competing codes, read through our [comparisons and benchmarks page]() and our [initial publication]().
+At the other end of the spectrum, we provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we opperate under a very different coding philosphy. **Here, usability and readability are our top priortities.** We therefore distribute Simmate as an "all-in-one" package rather than many separate programs. This includes a core material science toolkit, workflow management, database orm, and a website interface. **Simmate also focuses heavily on cloud-based storage**, which enables large scale collaborations and avoids researchers repeating calculations. To learn more about the different design choices made in Simmate compared to competing codes, read through our [comparisons and benchmarks page]() and our [initial publication]().
 
 ## Installation
 
-**Don't panic** if your new to coding and Python. When you're ready to start learning, advance to our [15min Start-Up Tutorial]() where we teach you everything from the beginning.
+**Don't panic** if your new to coding and Python. When you're ready, head to our [15min Start-Up Tutorial]() where we teach you everything from the beginning.
 
 If you're confortable with Python, you can install Simmate with...
 ```
 conda install -c conda-forge simmate
 ```
-> :warning: pip and conda installs are not ready yet. only dev installs work at this time
+> :warning: pip and conda installs are not ready yet because we have not been open-sourced. only dev installs work at this time
 
 ## A Sneak-Peak of Features (for experts)
 
@@ -99,7 +99,7 @@ structures = MaterialsProjectStructure.objects.filter(
 ```
 
 3. _**Common Task Utilities and Toolbox.**_ A lot of times in research, a new method is needed to analyze a structure, so a prebuilt workflow won't exist for you yet. Here, you'll need common functions ready to go (such as grabbing the volume of a crystal or running symmetry analysis). Our core functions and classes are largely inspired from the [PyMatGen](https://github.com/materialsproject/pymatgen) and [ASE](https://gitlab.com/ase/ase) codes, where we decided to write our own version for speed, readability, and usability:
-> :warning: We are still dependent on pymatgen at the moment, but our toolkit replacement is already showing awesome speed ups! Our reliance on pymatgen will fade over time, but it is important to acknowledge how their software has helped in getting our project off the ground. So thank you to the pymatgen community!
+> :warning: Our core toolkit is still dependent on pymatgen at the moment. Our reliance on pymatgen will fade over time, but it is important to acknowledge how their software has helped in getting our project off the ground. So thank you to the pymatgen community!
 ```python
 # Load the structure file you'd like to use
 from simmate.toolkit import Structure
