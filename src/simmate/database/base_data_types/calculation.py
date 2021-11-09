@@ -38,6 +38,8 @@ class Calculation(DatabaseTable):
     """Archived Data"""
     # I may want to add these fields because Prefect doesn't store run stats
     # indefinitely AND it doesn't give detail memory use, number of cores, etc.
+    # If all of these are too much, I could do a json field of "run_stats" instead
+    
     # average_memory (The average memory used in kb)
     # max_memory (The maximum memory used in kb)
     # elapsed_time (The real time elapsed in seconds)

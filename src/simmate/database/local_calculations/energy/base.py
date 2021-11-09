@@ -37,8 +37,8 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     @classmethod
     def from_pymatgen(
         cls,
-        prefect_flow_run_id,
-        structure,
+        prefect_flow_run_id=None,
+        structure=None,
         energy=None,
         site_forces=None,
         lattice_stress=None,
@@ -47,9 +47,17 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         # because this is a combination of tables, I need to build the data for
         # each and then feed all the results into this class
 
+        # This is just id for now, so this line is kinda dumb... Is there
+        # a better way to do this?
+        calculation_data = (
+            dict(prefect_flow_run_id=prefect_flow_run_id) if prefect_flow_run_id else {}
+        )
+
         # first grab the full dictionaries for each parent model
-        structure_data = Structure.from_pymatgen(structure, as_dict=True)
-        
+        structure_data = (
+            Structure.from_pymatgen(structure, as_dict=True) if structure else {}
+        )
+
         # This data is optional (bc the calculation might not be complete yet!)
         thermo_data = (
             Thermodynamics.from_base_data(
@@ -57,7 +65,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
                 energy,
                 as_dict=True,
             )
-            if energy
+            if energy and structure
             else {}
         )
         forces_data = (
@@ -67,13 +75,13 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
                 lattice_stress,
                 as_dict=True,
             )
-            if site_forces or lattice_stress
+            if (site_forces or lattice_stress) and structure
             else {}
         )
 
         # Now feed all of this dictionarying into one larger one.
         all_data = dict(
-            prefect_flow_run_id=prefect_flow_run_id,
+            **calculation_data,
             **structure_data,
             **thermo_data,
             **forces_data,
@@ -83,46 +91,30 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         # return the dictionary
         return all_data if as_dict else cls(**all_data)
 
-    def update_from_vasp_run(self, vasprun, corrections, IonicStepStructure_subclass):
+    def update_from_vasp_run(self, vasprun, corrections):
         # Takes a pymatgen VaspRun object, which is what's typically returned
         # from a simmate VaspTask.run() call.
-        # The ionic_step_structure_subclass is where to save the structures and
-        # is a subclass of IonicStepStructure.
 
         # The data is actually easier to access as a dictionary and everything
-        # we need is stored under the "output" key
+        # we need is stored under the "output" key.
         data = vasprun.as_dict()["output"]
+        # In a static energy calculation, there is only one ionic step so we
+        # grab that up front.
+        ionic_step = data["ionic_steps"][0]
 
-        # The only other data we need to grab is the list of structures. We can
-        # pull the structure for each ionic step from the vasprun class directly.
-        structures = vasprun.structures
-
-        # Now let's iterate through the ionic steps and save these to the database.
-        for number, (structure, ionic_step) in enumerate(
-            zip(structures, data["ionic_steps"])
-        ):
-            # first pull all the data together and save it to the database
-            structure = IonicStepStructure_subclass.from_pymatgen(
-                number,
-                structure,
-                energy=ionic_step["e_wo_entrp"],
-                site_forces=ionic_step["forces"],
-                lattice_stress=ionic_step["stress"],
-                relaxation=self,  # this links the structure to this relaxation
-            )
-            structure.save()
-
-            # If this is the first structure, we want to link it as such
-            if number == 0:
-                self.structure_start_id = structure.id
-            # and same for the final structure
-            elif number == len(structures) - 1:
-                self.structure_final_id = structure.id
-        # calculate extra data for storing
-        self.volume_change = (
-            structures[-1].volume - structures[0].volume
-        ) / structures[0].volume
-
+        # Take our structure, energy, and forces to build all of our other
+        # fields for this datatable
+        # OPTIMIZE: this overwrites structure data, which should already be there.
+        # Is there a faster way to grab this data and update attributes?
+        new_kwargs = self.from_pymatgen(
+            structure=vasprun.final_structure,
+            energy=ionic_step["e_wo_entrp"],
+            site_forces=ionic_step["forces"],
+            lattice_stress=ionic_step["stress"],
+            as_dict=True,
+        )
+        for key, value in new_kwargs.items():
+            setattr(self, key, value)
         # There is also extra data for the final structure that we save directly
         # in the relaxation table
         self.band_gap = data["bandgap"]
