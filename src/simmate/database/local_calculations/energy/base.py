@@ -37,31 +37,43 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     @classmethod
     def from_pymatgen(
         cls,
+        prefect_flow_run_id,
         structure,
-        energy,
-        site_forces,
-        lattice_stress,
+        energy=None,
+        site_forces=None,
+        lattice_stress=None,
         as_dict=False,
     ):
         # because this is a combination of tables, I need to build the data for
         # each and then feed all the results into this class
 
         # first grab the full dictionaries for each parent model
-        thermo_data = Thermodynamics.from_base_data(
-            structure,
-            energy,
-            as_dict=True,
-        )
-        forces_data = Forces.from_base_data(
-            structure,
-            site_forces,
-            lattice_stress,
-            as_dict=True,
-        )
         structure_data = Structure.from_pymatgen(structure, as_dict=True)
+        
+        # This data is optional (bc the calculation might not be complete yet!)
+        thermo_data = (
+            Thermodynamics.from_base_data(
+                structure,
+                energy,
+                as_dict=True,
+            )
+            if energy
+            else {}
+        )
+        forces_data = (
+            Forces.from_base_data(
+                structure,
+                site_forces,
+                lattice_stress,
+                as_dict=True,
+            )
+            if site_forces or lattice_stress
+            else {}
+        )
 
         # Now feed all of this dictionarying into one larger one.
         all_data = dict(
+            prefect_flow_run_id=prefect_flow_run_id,
             **structure_data,
             **thermo_data,
             **forces_data,

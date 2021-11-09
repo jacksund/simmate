@@ -14,12 +14,12 @@ class Thermodynamics(DatabaseTable):
     """Base Info"""
 
     # The calculated energy (eV)
-    energy = table_column.FloatField()
+    energy = table_column.FloatField(blank=True, null=True)
 
     """ Query-helper Info """
 
     # If a structure is available, the energy per atom is also stored
-    energy_per_atom = table_column.FloatField()
+    energy_per_atom = table_column.FloatField(blank=True, null=True)
 
     # TODO: These three should be updated on a schedule. I'd run a prefect flow
     # every night that makes sure all values are up to date. I could initialize
@@ -58,15 +58,19 @@ class Thermodynamics(DatabaseTable):
 
     # !!! Maybe make this from_energy and structure input optional...?
     @classmethod
-    def from_base_data(cls, structure, energy, as_dict=False):
+    def from_base_data(cls, structure, energy=None, as_dict=False):
         # Given energy, this function builds the rest of the required fields
         # for this class as an object (or as a dictionary).
-        data = dict(
-            energy=energy,
-            energy_per_atom=energy / structure.num_sites,
-            energy_above_hull=None,
-            is_stable=None,
-            decomposes_to=None,
+        data = (
+            dict(
+                energy=energy,
+                energy_per_atom=energy / structure.num_sites,
+                energy_above_hull=None,
+                is_stable=None,
+                decomposes_to=None,
+            )
+            if energy
+            else {}
         )
 
         # If as_dict is false, we build this into an Object. Otherwise, just

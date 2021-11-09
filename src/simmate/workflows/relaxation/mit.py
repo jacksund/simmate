@@ -32,9 +32,8 @@ def save_results(result_and_corrections):
     # separate variables
     vasprun, corrections = result_and_corrections
 
-    # initialize the MITRelaxation with the Prefect run info
-    calculation = MITRelaxation.from_prefect_context(prefect.context)
-    calculation.save()
+    # load/create the calculation for this workflow run
+    calculation = MITRelaxation.from_prefect_id(prefect.context.flow_run_id)
 
     # now update the calculation entry with our results
     calculation.update_from_vasp_run(vasprun, corrections, MITIonicStep)
@@ -65,7 +64,6 @@ with Workflow("MIT Relaxation") as workflow:
     # pass these results and corrections into our final task which saves
     # everything to the database
     calculation_id = save_results(result_and_corrections)
-
 # For when this workflow is registered with Prefect Cloud, we indicate that
 # it can be imported from a python module. Note __name__ provides the path
 # to this module.

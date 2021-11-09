@@ -5,13 +5,11 @@ import cloudpickle
 
 import prefect
 from prefect import Client
-from prefect import task, Flow as PrefectFlow, Parameter
+from prefect import Flow as PrefectFlow, Parameter, task, Task
 from prefect.storage import Module as ModuleStorage
 from prefect.utilities.graphql import with_args
 
 from prefect.backend.flow_run import FlowRunView, FlowView, watch_flow_run
-
-from simmate.database.base_data_types import Structure as StructureDatatable
 
 
 class Workflow(PrefectFlow):
@@ -65,14 +63,19 @@ class Workflow(PrefectFlow):
         # submitted.
         # BUG: Will there be a race condition here? What if the workflow finishes
         # and tries writing to the databse before this is done?
-        calc = self._register_calculation(flow_run_id, **kwargs)
+        # BUG: When registering a calc, will I ever need anything besides id
+        # and structure? What else should I add here?
+        register_kwargs = {key: kwargs[key] for key in kwargs if key in ["structure"]}
+        calc = self._register_calculation(
+            flow_run_id,
+            **register_kwargs,
+        )
         # -----------------------------------
 
         # if we want to wait until the job is complete, we do that here
         if wait_for_run:
             flow_run_view = self.wait_for_flow_run(flow_run_id)
             # return flow_run_view # !!! Should I return this moving forward?
-
         # We return the flow run id so that the user can monitor the run. We also
         # return a dict with whatever _pre_submit_tasks gave
         if calc:
@@ -86,19 +89,12 @@ class Workflow(PrefectFlow):
         # just skip this step.
         if not hasattr(self, "calculation_table"):
             return
-        # See if the calculation table includes a structure (most simmate calcs do)
-        # and if so, we should save this to the database when registering the
-        # flow.
-        if issubclass(self.calculation_table, StructureDatatable):
-            calc = self.calculation_table.from_pymatgen(
-                structure=kwargs["structure"],
-                prefect_flow_run_id=flow_run_id,
-            )
-        else:
-            calc = self.calculation_table(prefect_flow_run_id=flow_run_id)
-        calc.save()
-
-        return calc
+        # otherwise save/load the calculation to our table
+        calculation = self.calculation_table.from_prefect_id(
+            id=flow_run_id,
+            **kwargs,
+        )
+        return calculation
 
     def wait_for_flow_run(self, flow_run_id):
         """

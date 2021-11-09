@@ -23,6 +23,7 @@ class Calculation(DatabaseTable):
         max_length=50,
         blank=True,
         null=True,
+        unique=True,
     )
 
     # timestamping for when this was added to the database
@@ -44,7 +45,7 @@ class Calculation(DatabaseTable):
     # user_time(The user CPU time spent by VASP in seconds)
     # total_time (The total CPU time for this calculation)
     # cores (The number of cores used by VASP (some clusters print `mpi-ranks` here))
-    
+
     # Here are some other Prefect fields too.
     # agent_id
     # auto_scheduled
@@ -83,8 +84,30 @@ class Calculation(DatabaseTable):
 
     """ Model Methods """
 
-    # Grabs current values from prefect
-    # status
+    @classmethod
+    def from_prefect_id(cls, id, **kwargs):
+        # Depending on how a workflow was submitted, there may be a calculation
+        # extry existing already -- which we need to grab and then update. If it's
+        # not there, we create a new one!
+
+        # check if the calculation already exists in our database, and if so,
+        # grab it and return it.
+        if cls.objects.filter(prefect_flow_run_id=id).exists():
+            return cls.objects.get(prefect_flow_run_id=id)
+        # Otherwise we need to create a new one and return that.
+
+        # See if the calculation table has a from_pymatgen method (most simmate calcs do)
+        # and if so, we should call that instead and pass all of our kwargs to it.
+        if hasattr(cls, "from_pymatgen"):
+            calculation = cls.from_pymatgen(
+                prefect_flow_run_id=id,
+                **kwargs
+            )
+        else:
+            calculation = cls(prefect_flow_run_id=id, **kwargs)
+        calculation.save()
+
+        return calculation
 
     """ Restrictions """
     # none
