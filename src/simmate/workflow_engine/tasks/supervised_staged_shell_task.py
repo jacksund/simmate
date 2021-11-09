@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import platform
 import time
 import signal
 from shutil import make_archive
@@ -179,14 +180,14 @@ class SupervisedStagedShellTask(Task):
             # The preexec_fn keyword allows us to properly terminate jobs that
             # are launched with parallel processes (such as mpirun). This assigns
             # a parent id to it that we use when killing a job (if an error
-            # handler calls for us to do so).
+            # handler calls for us to do so). This isn't possible on Windows though.
             # Stderr keyword indicates that we should capture the error if one
             # occurs so that we can report it to the user.
             process = subprocess.Popen(
                 command,
                 cwd=directory,
                 shell=True,
-                preexec_fn=os.setsid,  # BUG: This throws an error on Windows
+                preexec_fn=None if platform.system() == "Windows" else os.setsid,
                 stderr=subprocess.PIPE,
             )
 
