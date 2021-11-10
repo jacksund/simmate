@@ -205,8 +205,8 @@ class Relaxation(Structure, Calculation):
         ):
             # first pull all the data together and save it to the database. We
             # are saving this to an IonicStepStructure datatable. To access this
-            # model, we look need to use "structures.rel.related_model".
-            structure = self.structures.rel.related_model.from_pymatgen(
+            # model, we look need to use "structures.model".
+            structure = self.structures.model.from_pymatgen(
                 number,
                 structure,
                 energy=ionic_step["e_wo_entrp"],
