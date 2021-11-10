@@ -144,7 +144,7 @@ class Relaxation(Structure, Calculation):
 
     # Volume Change (useful for checking if Pulay Stress may be significant)
     # We store this as a ratio relative to the starting structure
-    #   (final - start) / start
+    #   (volume_final - volume_start) / volume_start
     volume_change = table_column.FloatField(blank=True, null=True)
 
     """ Relationships """
