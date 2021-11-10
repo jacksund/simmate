@@ -56,6 +56,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
         energy,
         site_forces,
         lattice_stress,
+        relaxation,  # gives the related object for the foreign key
         as_dict=False,
     ):
         # because this is a combination of tables, I need to build the data for
@@ -78,6 +79,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
         # Now feed all of this dictionarying into one larger one.
         all_data = dict(
             ionic_step_number=ionic_step_number,
+            relaxation=relaxation,
             **structure_data,
             **thermo_data,
             **forces_data,
