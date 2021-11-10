@@ -20,7 +20,7 @@ class Search:
         # final table stays the same?
         # workflow="MITRelaxation",  # linked to the individuals_datatable
         structure_datatable="MITStructure",
-        workflow="MITRelaxation",
+        workflow="MITStaticEnergy",
         # fitness_field="energy_per_atom",  # TODO: I assume this for now.
         # Instead of specifying a stop_condition class like I did before,
         # I just assume the stop condition is either (1) the maximum allowed
@@ -89,8 +89,8 @@ class Search:
 
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.
-        if workflow == "MITRelaxation":
-            from simmate.workflows.relaxation.mit import workflow
+        if workflow == "MITStaticEnergy":
+            from simmate.workflows.energy.mit import workflow
 
             self.workflow = workflow
         else:
@@ -235,7 +235,8 @@ class Search:
     def get_best_individual(self):
         best = (
             self.structure_datatable.objects.filter(
-                formula_full=self.composition.formula
+                formula_full=self.composition.formula,
+                energy_per_atom__isnull=False,
             )
             .order_by("energy_per_atom")
             .first()
