@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.workflow_engine.prefect import (
-    prefect,
     Workflow,
-    task,
     Parameter,
     ModuleStorage,
 )
@@ -24,6 +22,7 @@ with Workflow("MIT Static Energy") as workflow:
         command=vasp_command,
     )
     calculation_id = save_results(result=result)
+
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"
 workflow.calculation_table = MITStructure

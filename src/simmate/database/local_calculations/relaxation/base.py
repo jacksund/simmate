@@ -185,7 +185,7 @@ class Relaxation(Structure, Calculation):
 
     """ Model Methods """
 
-    def update_from_vasp_run(self, vasprun, corrections, IonicStepStructure_subclass):
+    def update_from_vasp_run(self, vasprun, corrections):
         # Takes a pymatgen VaspRun object, which is what's typically returned
         # from a simmate VaspTask.run() call.
         # The ionic_step_structure_subclass is where to save the structures and
@@ -203,8 +203,10 @@ class Relaxation(Structure, Calculation):
         for number, (structure, ionic_step) in enumerate(
             zip(structures, data["ionic_steps"])
         ):
-            # first pull all the data together and save it to the database
-            structure = IonicStepStructure_subclass.from_pymatgen(
+            # first pull all the data together and save it to the database. We
+            # are saving this to an IonicStepStructure datatable. To access this
+            # model, we look need to use "structures.rel.related_model".
+            structure = self.structures.rel.related_model.from_pymatgen(
                 number,
                 structure,
                 energy=ionic_step["e_wo_entrp"],
