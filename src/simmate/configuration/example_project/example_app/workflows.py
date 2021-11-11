@@ -5,7 +5,7 @@ from prefect import task, Flow, Parameter
 from prefect.storage import Module
 
 from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxationTask
-from simmate.workflows.common_tasks.load_structure import load_structure
+from simmate.workflows.common_tasks.all import load_input
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.relaxation.all import (
@@ -51,7 +51,7 @@ with Flow("MIT Relaxation") as workflow:
     vasp_command = Parameter("vasp_command", default="vasp > vasp.out")
 
     # load the structure to a pymatgen object
-    structure_pmg = load_structure(structure)
+    structure_pmg = load_input(structure)
 
     # Run the calculation after we have saved the input
     result_and_corrections = relax_structure(

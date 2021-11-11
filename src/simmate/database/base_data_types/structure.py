@@ -113,7 +113,17 @@ class Structure(DatabaseTable):
 
     @classmethod
     def from_pymatgen(cls, structure, as_dict=False, **kwargs):
-
+        
+        # --------------------------------------
+        # FIND A BETTER SPOT FOR THIS CODE (likely attached to base Structure class)
+        # I allow the structure input to be a number of inputs
+        # (see workflows.common_tasks.load_input and workflow_engine.prefect for why)
+        # I therefore convert to pymatgen structure object here first.
+        from simmate.workflows.common_tasks.all import load_input
+        structure, _ = load_input.run(structure=structure)
+        # --------------------------------------
+        
+        
         # OPTIMIZE: I currently store files as poscar strings for ordered structures
         # and as CIFs for disordered structures. Both of this include excess information
         # that slightly inflates file size, so I will be making a new string format in

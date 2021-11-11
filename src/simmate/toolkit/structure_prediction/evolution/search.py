@@ -321,7 +321,7 @@ class Search:
                 if not structure:
                     break
                 # submit the structure workflow
-                flow_run_id, calc = self.workflow.run_cloud(
+                flow_run_id = self.workflow.run_cloud(
                     structure=structure,
                     wait_for_run=False,
                 )
@@ -332,6 +332,7 @@ class Search:
                 source_db.save()
                 
                 # update the source on the calculation
+                # TODO: use the flow run id from above to grab the calc
                 calc.source = f"{source.__class__.__name__}"
                 calc.source_id = parent_ids
                 calc.save()

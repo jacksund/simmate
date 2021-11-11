@@ -7,12 +7,6 @@ few extra features this will be MUCH better though. Specifically...
         --> see bug discussion in vasptask base
     a way to grab results from a Prefect workflow runs 
         --> so that I can have this as a workflow of workflows
-
-For grabbing Prefect workflow run results, what if I made a more robust 
-"load_structure" task? One that could take a django table and a prefect flow_run_id?
-Or a django table and a calculation id? This could also be a "load_structure_and_directory".
-I could then save/create the directory before the task even runs!
-
 """
 
 
@@ -22,7 +16,7 @@ from simmate.workflow_engine.prefect import (
     ModuleStorage,
 )
 
-from simmate.workflows.common_tasks.all import load_structure, SaveOutputTask
+from simmate.workflows.common_tasks.all import load_input, SaveOutputTask
 from simmate.calculators.vasp.tasks.relaxation.all import (
     Quality00RelaxationTask,
     Quality01RelaxationTask,
@@ -68,7 +62,7 @@ relax_structure_04.return_final_structure = True
 with Workflow("Staged Relaxation") as workflow:
     structure = Parameter("structure")
     vasp_command = Parameter("vasp_command", default="vasp > vasp.out")
-    structure_pmg = load_structure(structure)
+    structure_pmg = load_input(structure)
 
     # relaxation 00
     output_00 = relax_structure_00(

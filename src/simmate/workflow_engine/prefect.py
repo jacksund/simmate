@@ -69,19 +69,16 @@ class Workflow(PrefectFlow):
         calc = self._register_calculation(
             flow_run_id,
             **register_kwargs,
-        )
+        )  # !!! should I return the calc to the user?
         # -----------------------------------
 
         # if we want to wait until the job is complete, we do that here
         if wait_for_run:
             flow_run_view = self.wait_for_flow_run(flow_run_id)
-            # return flow_run_view # !!! Should I return this moving forward?
-        # We return the flow run id so that the user can monitor the run. We also
-        # return a dict with whatever _pre_submit_tasks gave
-        if calc:
-            return flow_run_id, calc
-        else:
-            return flow_run_id
+            # return flow_run_view # !!! Should I return this instead?
+
+        # return the flow_run_id for the user
+        return flow_run_id
 
     def _register_calculation(self, flow_run_id, **kwargs):
 
