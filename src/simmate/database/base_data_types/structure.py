@@ -113,17 +113,12 @@ class Structure(DatabaseTable):
 
     @classmethod
     def from_pymatgen(cls, structure, as_dict=False, **kwargs):
-        
+
         # --------------------------------------
-        # FIND A BETTER SPOT FOR THIS CODE (likely attached to base Structure class)
-        # I allow the structure input to be a number of inputs
-        # (see workflows.common_tasks.load_input and workflow_engine.prefect for why)
-        # I therefore convert to pymatgen structure object here first.
-        from simmate.workflows.common_tasks.all import load_input
-        structure, _ = load_input.run(structure=structure)
+        # FIND A BETTER SPOT FOR THIS CODE. See _from_dynamic method below for more.
+        structure = cls._from_dynamic(structure)
         # --------------------------------------
-        
-        
+
         # OPTIMIZE: I currently store files as poscar strings for ordered structures
         # and as CIFs for disordered structures. Both of this include excess information
         # that slightly inflates file size, so I will be making a new string format in
@@ -191,6 +186,77 @@ class Structure(DatabaseTable):
             fmt=storage_format,
         )
 
+        return structure
+
+    def _from_dynamic(self, structure):
+        # FIND A BETTER SPOT FOR THIS CODE (likely attached to base Structure class)
+        # For an almost indentical implementatin see...
+        # from simmate.workflows.common_tasks.all import load_input
+        # I should comibine/condense these.
+
+        # I allow the structure input to be a number of inputs
+        # (see workflows.common_tasks.load_input and workflow_engine.prefect for why)
+        # I therefore convert to pymatgen structure object here first.
+
+        # if the input is already a pymatgen structure, just return it back
+        if isinstance(structure, Structure):
+            return structure
+
+        # otherwise we have a dictionary object
+
+        # if the "@module" key is in the dictionary, then we have a pymatgen structure
+        # dict which we convert to a pymatgen object and return
+        if "@module" in structure.keys():
+            return Structure.from_dict(structure)
+
+        # otherwise we now know we have a dictionary pointing to the simmate database
+        from simmate.website.local_calculations import models as all_datatables
+        from django.utils.module_loading import import_string
+
+        # first start by loading the datbase table, which is given as a module path
+        datatable_str = structure["calculation_table"]
+
+        # Import the datatable class -- how this is done depends on if it is from
+        # a simmate supplied class or if the user supplied a full path to the class
+        # OPTIMIZE: is there a better way to do this?
+        if hasattr(all_datatables, datatable_str):
+            datatable = getattr(all_datatables, datatable_str)
+        else:
+            datatable = import_string(datatable_str)
+
+        # These attributes tells us which structure to grab from our datatable. The
+        # user should have only provided one -- if they gave more, we just use whichever
+        # one comes first.
+        prefect_flow_run_id = structure.get("prefect_flow_run_id")
+        calculation_id = structure.get("calculation_id")
+        directory_old = structure.get("directory")
+
+        # we must have either a prefect_flow_run_id or calculation_id
+        if not prefect_flow_run_id and not calculation_id and not directory_old:
+            raise Exception(
+                "You must have either a prefect_flow_run_id, calculation_id, or directory"
+                " provided if you want to load a structure from a previous calculation."
+            )
+
+        # now query the datable with which whichever was provided. Each of these
+        # are unique so all three should return a single calculation.
+        if calculation_id:
+            calculation = datatable.objects.get(id=calculation_id)
+        elif prefect_flow_run_id:
+            calculation = datatable.objects.get(prefect_flow_run_id=prefect_flow_run_id)
+        elif directory_old:
+            calculation = datatable.objects.get(directory=directory_old)
+
+        # In some cases, the structure we want is not within the calculation table.
+        # For example, in relaxations the final structure is attached via table.structure_final
+        structure_field = structure.get("structure_field")
+        if structure_field:
+            structure = getattr(calculation, structure_field).to_pymatgen()
+        # if there's no structure field, that means we already have the correct entry
+        else:
+            structure = calculation.to_pymatgen()
+
+        # structure should now be a pymatgen structure object
         return structure
 
     """ For website compatibility """

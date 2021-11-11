@@ -31,7 +31,10 @@ with Workflow("Staged Relaxation") as workflow:
     structure = Parameter("structure")
     command = Parameter("command", default="vasp > vasp.out")
     directory = Parameter("directory", default=None)
-
+    
+    # Rather than letting our first relaxation handle the directory and structure
+    # loading, we do this up front because we want to pass the directory to all
+    # other tasks.
     structure_pmg, directory_cleaned = load_input(
         structure,
         directory,
@@ -42,6 +45,7 @@ with Workflow("Staged Relaxation") as workflow:
     run_id_00 = relax_task_00(
         structure=structure_pmg,
         command=command,
+        directory=directory_cleaned,
     )
 
     # TODO: Use a for-loop in Prefect 2.0!
@@ -57,7 +61,7 @@ with Workflow("Staged Relaxation") as workflow:
         upstream_tasks=[run_id_00],
     )
 
-    # relaxation 01
+    # relaxation 02
     run_id_02 = relax_task_02(
         structure={
             "calculation_table": "Quality01Relaxation",
@@ -68,7 +72,7 @@ with Workflow("Staged Relaxation") as workflow:
         upstream_tasks=[run_id_01],
     )
 
-    # relaxation 01
+    # relaxation 03
     run_id_03 = relax_task_03(
         structure={
             "calculation_table": "Quality02Relaxation",
@@ -79,7 +83,7 @@ with Workflow("Staged Relaxation") as workflow:
         upstream_tasks=[run_id_02],
     )
 
-    # relaxation 01
+    # relaxation 04
     run_id_04 = relax_task_04(
         structure={
             "calculation_table": "Quality03Relaxation",
@@ -90,7 +94,7 @@ with Workflow("Staged Relaxation") as workflow:
         upstream_tasks=[run_id_03],
     )
 
-    # relaxation 01
+    # Static Energy (MIT)
     run_id_05 = static_task_mit(
         structure={
             "calculation_table": "Quality04Relaxation",
