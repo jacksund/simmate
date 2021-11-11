@@ -12,11 +12,12 @@ from simmate.website.local_calculations import models as all_datatables
 
 # OPTIMIZE:
 # Find a better place for this code. Maybe attach it the core structure class
-# and have from_pymatgen, from_dict, from_database methods. And then a 
+# and have from_pymatgen, from_dict, from_database methods. And then a
 # from_dynamic method that handles this input.
 
-# Also consider splitting into load_structure and load_directory so that 
+# Also consider splitting into load_structure and load_directory so that
 # our flow_visualize looks cleaner
+
 
 @task(nout=2)
 def load_input(structure, directory=None, use_previous_directory=False):
@@ -49,24 +50,24 @@ def load_input(structure, directory=None, use_previous_directory=False):
     parameter is ignored.
 
     """
-    
+
     # even though SSSTask creates a directory when passed None, it is useful
     # to make it here first because some workflows require the folder name between
     # each calculation (see workflows.relaxation.staged for an example). We therefore
     # make the directory upfront! We only create it if a directory wasn't given
     # as an input though.
-    directory = get_directory(directory) if not directory else directory
-    
+    directory_new = get_directory(directory) if not directory else directory
+
     # if the input is already a pymatgen structure, just return it back
     if isinstance(structure, Structure):
-        return structure, directory
+        return structure, directory_new
 
     # otherwise we have a dictionary object
 
     # if the "@module" key is in the dictionary, then we have a pymatgen structure
     # dict which we convert to a pymatgen object and return
     if "@module" in structure.keys():
-        return Structure.from_dict(structure), directory
+        return Structure.from_dict(structure), directory_new
 
     # otherwise we now know we have a dictionary pointing to the simmate database
 
@@ -81,9 +82,12 @@ def load_input(structure, directory=None, use_previous_directory=False):
     else:
         datatable = import_string(datatable_str)
 
+    # These attributes tells us which structure to grab from our datatable. The
+    # user should have only provided one -- if they gave more, we just use whichever
+    # one comes first.
     prefect_flow_run_id = structure.get("prefect_flow_run_id")
     calculation_id = structure.get("calculation_id")
-    directory = structure.get("directory")
+    directory_old = structure.get("directory")
 
     # we must have either a prefect_flow_run_id or calculation_id
     if not prefect_flow_run_id and not calculation_id and not directory:
@@ -92,11 +96,14 @@ def load_input(structure, directory=None, use_previous_directory=False):
             " provided if you want to load a structure from a previous calculation."
         )
 
-    # now query the datable with which whichever was provided. (calculation id gets priority)
+    # now query the datable with which whichever was provided. Each of these
+    # are unique so all three should return a single calculation.
     if calculation_id:
         calculation = datatable.objects.get(id=calculation_id)
     elif prefect_flow_run_id:
         calculation = datatable.objects.get(prefect_flow_run_id=prefect_flow_run_id)
+    elif directory_old:
+        calculation = datatable.objects.get(directory=directory_old)
 
     # In some cases, the structure we want is not within the calculation table.
     # For example, in relaxations the final structure is attached via table.structure_final
@@ -109,7 +116,11 @@ def load_input(structure, directory=None, use_previous_directory=False):
 
     # if the user requested, we grab the previous directory as well
     if use_previous_directory:
-        directory = structure.directory
+        directory_new = structure.directory
+        # this check just makes sure we've been following logic correctly above.
+        # It should never be hit
+        if use_previous_directory and directory_old:
+            assert directory_old == directory_new
 
     # structure should now be a pymatgen structure object
-    return structure, directory
+    return structure, directory_new
