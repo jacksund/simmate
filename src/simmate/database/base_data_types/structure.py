@@ -187,8 +187,9 @@ class Structure(DatabaseTable):
         )
 
         return structure
-
-    def _from_dynamic(self, structure):
+    
+    @staticmethod
+    def _from_dynamic(structure):
         # FIND A BETTER SPOT FOR THIS CODE (likely attached to base Structure class)
         # For an almost indentical implementatin see...
         # from simmate.workflows.common_tasks.all import load_input
