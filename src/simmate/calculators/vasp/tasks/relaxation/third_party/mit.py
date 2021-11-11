@@ -20,6 +20,9 @@ from simmate.calculators.vasp.error_handlers.all import (
 
 class MITRelaxationTask(VaspTask):
 
+    # returns structure separately from vasprun object
+    return_final_structure = True    
+
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria.
     functional = "PBE"

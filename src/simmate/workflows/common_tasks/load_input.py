@@ -32,7 +32,13 @@ def load_input(structure, directory=None, use_previous_directory=False):
         dictionary of pymatgen structure
         dictionary of...
             (1) path to calculation datatable
-            (2) prefect flow run id OR structure id
+            (2) one of the following (only one is used in this priority order):
+                (a) prefect flow id
+                (b) calculation id
+                (c) directory
+                ** these three are chosen because all three are unique for every
+                single calculation and we have access to different ones at different
+                times!
             (3) (optional) attribute to use on table (e.g. structure_final)
                 By default, we assume calculation table is also a structure table
 
@@ -69,12 +75,13 @@ def load_input(structure, directory=None, use_previous_directory=False):
 
     prefect_flow_run_id = structure.get("prefect_flow_run_id")
     calculation_id = structure.get("calculation_id")
+    directory = structure.get("directory")
 
     # we must have either a prefect_flow_run_id or calculation_id
-    if not prefect_flow_run_id and not calculation_id:
+    if not prefect_flow_run_id and not calculation_id and not directory:
         raise Exception(
-            "You must have either a prefect_flow_run_id or calculation_id provided"
-            " if you want to load a structure from a previous calculation."
+            "You must have either a prefect_flow_run_id, calculation_id, or directory"
+            " provided if you want to load a structure from a previous calculation."
         )
 
     # now query the datable with which whichever was provided. (calculation id gets priority)

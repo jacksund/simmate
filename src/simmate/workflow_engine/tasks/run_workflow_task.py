@@ -39,6 +39,10 @@ def get_default_executor_type():
     return EXECUTOR_TYPE
 
 
+# BUG: local_executor causes problems because it's non-trivial to return
+# the prefect flow id.
+
+
 class RunWorkflowTask(Task):
     def __init__(
         self,
@@ -78,7 +82,8 @@ class RunWorkflowTask(Task):
         self.extra_labels = extra_labels
 
         # now inherit the parent Prefect Task class
-        super().__init__(**kwargs)
+        # Note we name this task after our attached workflow
+        super().__init__(name=f"{self.workflow.name}-WorkflowTask", **kwargs)
 
     @defaults_from_attrs(
         "executor_type",
@@ -100,11 +105,11 @@ class RunWorkflowTask(Task):
         # raise an error so that this task is flagged as failed
         if executor_type == "local":
             state = self.workflow.run(**parameters)
-            if not state.is_successful():
-                raise Exception(
-                    "The workflow task did not complete successfully. "
-                    "View the prefect-logs above for more info."
-                )
+            # if not state.is_successful():
+            #     raise Exception(
+            #         "The workflow task did not complete successfully. "
+            #         "View the prefect-logs above for more info."
+            #     )
             return state
 
         # If we are using prefect, we assume that the flow has been registered

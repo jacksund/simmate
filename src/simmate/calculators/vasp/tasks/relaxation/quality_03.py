@@ -8,6 +8,9 @@ from simmate.calculators.vasp.inputs.potcar_mappings import (
 
 class Quality03RelaxationTask(VaspTask):
 
+    # returns structure separately from vasprun object
+    return_final_structure = True    
+
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria when available.
     functional = "PBE"

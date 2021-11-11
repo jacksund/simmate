@@ -11,6 +11,8 @@ from prefect.utilities.graphql import with_args
 
 from prefect.backend.flow_run import FlowRunView, FlowView, watch_flow_run
 
+from simmate.workflow_engine.tasks.run_workflow_task import RunWorkflowTask
+
 
 class Workflow(PrefectFlow):
 
@@ -157,6 +159,9 @@ class Workflow(PrefectFlow):
         client = Client()
         result = client.graphql(query)
         return result["data"]["flow_run_aggregate"]["aggregate"]["count"]
+
+    def to_workflow_task(self):
+        return RunWorkflowTask(workflow=self)
 
 
 # TODO: This is an example query where I grab all ids. This may be useful in the
