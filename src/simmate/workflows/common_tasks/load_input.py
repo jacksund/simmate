@@ -123,7 +123,7 @@ def load_input(structure, directory=None, use_previous_directory=False):
 
     # if the user requested, we grab the previous directory as well
     if use_previous_directory:
-        directory_new = structure.directory
+        directory_new = calculation.directory
         # this check just makes sure we've been following logic correctly above.
         # It should never be hit
         if use_previous_directory and directory_old:
