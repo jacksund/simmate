@@ -108,7 +108,6 @@ def load_input(structure, directory=None, use_previous_directory=False):
     elif directory_old:
         print(f"DIR: {directory}")
         print(f"DIR OLD: {directory_old}")
-        print(f"DIR NEW: {directory_new}")
         print(datatable)
         print(datatable.objects.values_list("directory",flat=True).all())
         calculation = datatable.objects.get(directory=directory_old)
