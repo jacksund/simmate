@@ -55,8 +55,9 @@ def load_input(structure, directory=None, use_previous_directory=False):
     # to make it here first because some workflows require the folder name between
     # each calculation (see workflows.relaxation.staged for an example). We therefore
     # make the directory upfront! We only create it if a directory wasn't given
-    # as an input though.
-    directory_new = get_directory(directory) if not directory else directory
+    # as an input and we aren't using a old directory
+    if not use_previous_directory and not directory:
+        directory_new = get_directory(directory)
 
     # if the input is already a pymatgen structure, just return it back
     if isinstance(structure, Structure):
