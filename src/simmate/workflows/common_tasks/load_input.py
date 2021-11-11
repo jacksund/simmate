@@ -91,7 +91,7 @@ def load_input(structure, directory=None, use_previous_directory=False):
     directory_old = structure.get("directory")
 
     # we must have either a prefect_flow_run_id or calculation_id
-    if not prefect_flow_run_id and not calculation_id and not directory:
+    if not prefect_flow_run_id and not calculation_id and not directory_old:
         raise Exception(
             "You must have either a prefect_flow_run_id, calculation_id, or directory"
             " provided if you want to load a structure from a previous calculation."
