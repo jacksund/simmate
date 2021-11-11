@@ -57,6 +57,7 @@ def load_input(structure, directory=None, use_previous_directory=False):
     # make the directory upfront! We only create it if a directory wasn't given
     # as an input and we aren't using a old directory
     if not use_previous_directory and not directory:
+        print("HERE")
         directory_new = get_directory(directory)
 
     # if the input is already a pymatgen structure, just return it back
@@ -104,6 +105,11 @@ def load_input(structure, directory=None, use_previous_directory=False):
     elif prefect_flow_run_id:
         calculation = datatable.objects.get(prefect_flow_run_id=prefect_flow_run_id)
     elif directory_old:
+        print(f"DIR: {directory}")
+        print(f"DIR OLD: {directory_old}")
+        print(f"DIR NEW: {directory_new}")
+        print(datatable)
+        print(datatable.objects.values_list("directory",flat=True).all())
         calculation = datatable.objects.get(directory=directory_old)
 
     # In some cases, the structure we want is not within the calculation table.
