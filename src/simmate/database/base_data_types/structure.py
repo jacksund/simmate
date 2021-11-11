@@ -200,7 +200,7 @@ class Structure(DatabaseTable):
         # I therefore convert to pymatgen structure object here first.
 
         # if the input is already a pymatgen structure, just return it back
-        if isinstance(structure, Structure):
+        if isinstance(structure, Structure_PMG):
             return structure
 
         # otherwise we have a dictionary object
