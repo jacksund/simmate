@@ -15,8 +15,8 @@ from prefect.backend.flow_run import FlowRunView, FlowView, watch_flow_run
 class Workflow(PrefectFlow):
 
     # This behaves exactly like a normal Prefect workflow, where I add some
-    # common pre-submit tasks. This allows me to register a calculation along
-    # with submitting a workflow to the
+    # common utilities and pre-submit tasks. This allows me to register a
+    # calculation along with submitting a workflow to the cloud
 
     def run_cloud(self, extra_labels=[], wait_for_run=True, **kwargs):
 

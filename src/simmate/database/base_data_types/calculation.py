@@ -14,6 +14,15 @@ class Calculation(DatabaseTable):
 
     """Base info"""
 
+    # This is the folder that the workflow was ran in. It will be something
+    # like... "/path/to/simmate-task-abc123"
+    directory = table_column.CharField(
+        max_length=250,
+        blank=True,
+        null=True,
+    )
+    # TODO: maybe add host computer name too? (via platform.node())
+
     # If this was submitted through Prefect, there is a lot more metadata available
     # for this calculation. Simmate does not store this data directly, but instead
     # we store the flow-run-id so that the user may look this up in the Prefect
@@ -39,7 +48,7 @@ class Calculation(DatabaseTable):
     # I may want to add these fields because Prefect doesn't store run stats
     # indefinitely AND it doesn't give detail memory use, number of cores, etc.
     # If all of these are too much, I could do a json field of "run_stats" instead
-    
+
     # average_memory (The average memory used in kb)
     # max_memory (The maximum memory used in kb)
     # elapsed_time (The real time elapsed in seconds)
@@ -101,10 +110,7 @@ class Calculation(DatabaseTable):
         # See if the calculation table has a from_pymatgen method (most simmate calcs do)
         # and if so, we should call that instead and pass all of our kwargs to it.
         if hasattr(cls, "from_pymatgen"):
-            calculation = cls.from_pymatgen(
-                prefect_flow_run_id=id,
-                **kwargs
-            )
+            calculation = cls.from_pymatgen(prefect_flow_run_id=id, **kwargs)
         else:
             calculation = cls(prefect_flow_run_id=id, **kwargs)
         calculation.save()

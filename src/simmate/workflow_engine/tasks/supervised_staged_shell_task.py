@@ -266,7 +266,7 @@ class SupervisedStagedShellTask(Task):
             # error in the code below.
             if process.returncode != 0 and not has_error:
                 # convert the error from bytes to a string
-                errors = errors.decode("utf-8") 
+                errors = errors.decode("utf-8")
                 # and report the error to the user
                 raise NonZeroExitError(
                     f"The command ({command}) failed. The error output was...\n {errors}"
@@ -346,14 +346,14 @@ class SupervisedStagedShellTask(Task):
         scripts in parallel (such as using mpirun). Different computers and OSs
         can require a different 'kill' command so we establish this separate
         method that can be overwritten.
-        
+
         If you know your command needs a special case to kill all of its spawn
         processes, you can overwrite this method as well.
 
-        Users should never call this directly becuase this is instead applied 
+        Users should never call this directly becuase this is instead applied
         within the execute() method above.
 
-        
+
         """
         # The normal line to end a popen process is just...
         #   process.terminate()
@@ -427,18 +427,13 @@ class SupervisedStagedShellTask(Task):
         structure=None,
         directory=None,
         command=None,
-    ) -> Tuple[Any, list]:
+    ):
         """
         Runs the entire job in the current working directory without any error
         handling. If you want robust error handling, then you should instead
         run this through the SupervisedJobTask class. This method should
         very rarely be used!
         """
-
-        # Note that we have "-> Tuple[Any, list]" at the end of our run method.
-        # This tells Prefect that we are returning two things...
-        #   (1) the result of our workup method (which could be anything)
-        #   (2) all of the corrections made during execution (as a list)
 
         # because the command is something that is frequently changed at the
         # workflow level, then we want to make it so the user can set it for
@@ -463,11 +458,17 @@ class SupervisedStagedShellTask(Task):
         # out from the calculation and is thus our "result".
         result = self.workup(directory)
 
+        # Whatever the result is, I attached the corrections to it.
+
         # run the postprocess in case any zipping/archiving/cleanup was requested
         self.postprocess(directory)
 
-        # Return both our result and our corrections as a tuple
-        return result, corrections
+        # Return our final information as a dictionary
+        return {
+            "result": result,
+            "corrections": corrections,
+            "directory": directory,
+        }
 
 
 # Custom errors that indicate exactly what causes the SupervisedStagedTask

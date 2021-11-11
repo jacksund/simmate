@@ -8,4 +8,5 @@ from simmate.workflows.relaxation.all import (
     relaxation_quality02,
     relaxation_quality03,
     relaxation_quality04,
+    relaxation_staged,
 )

@@ -11,3 +11,4 @@ from simmate.workflows.relaxation.quality_01 import workflow as relaxation_quali
 from simmate.workflows.relaxation.quality_02 import workflow as relaxation_quality02
 from simmate.workflows.relaxation.quality_03 import workflow as relaxation_quality03
 from simmate.workflows.relaxation.quality_04 import workflow as relaxation_quality04
+from simmate.workflows.relaxation.staged import workflow as relaxation_staged

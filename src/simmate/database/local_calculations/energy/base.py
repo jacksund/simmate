@@ -91,7 +91,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         # return the dictionary
         return all_data if as_dict else cls(**all_data)
 
-    def update_from_vasp_run(self, vasprun, corrections):
+    def update_from_vasp_run(self, vasprun, corrections, directory):
         # Takes a pymatgen VaspRun object, which is what's typically returned
         # from a simmate VaspTask.run() call.
 
@@ -123,8 +123,9 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         self.conduction_band_minimum = data["cbm"]
         self.valence_band_maximum = data["vbm"]
 
-        # lastly, we also want to save the corrections made
+        # lastly, we also want to save the corrections made and directory it ran in
         self.corrections = corrections
+        self.directory = directory
 
         # Now we have the relaxation data all loaded and can save it to the database
         self.save()

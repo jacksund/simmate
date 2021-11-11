@@ -6,22 +6,22 @@ from simmate.workflow_engine.prefect import (
     ModuleStorage,
 )
 
-from simmate.workflows.common_tasks.all import load_structure, SaveResultTask
+from simmate.workflows.common_tasks.all import load_structure, SaveOutputTask
 from simmate.calculators.vasp.tasks.relaxation.all import Quality04RelaxationTask
 from simmate.database.local_calculations.relaxation.all import Quality04Relaxation
 
 static_energy = Quality04RelaxationTask()
-save_results = SaveResultTask(Quality04Relaxation)
+save_results = SaveOutputTask(Quality04Relaxation)
 
 with Workflow("Quality 04 Relaxation") as workflow:
     structure = Parameter("structure")
     vasp_command = Parameter("vasp_command", default="vasp > vasp.out")
     structure_pmg = load_structure(structure)
-    result = static_energy(
+    output = static_energy(
         structure=structure_pmg,
         command=vasp_command,
     )
-    calculation_id = save_results(result=result)
+    calculation_id = save_results(output=output)
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"

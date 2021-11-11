@@ -4,16 +4,22 @@ import prefect
 from prefect import Task
 
 
-class SaveResultTask(Task):
+class SaveOutputTask(Task):
     def __init__(self, calculation_table, **kwargs):
         self.calculation_table = calculation_table
         super().__init__(**kwargs)
 
-    def run(self, result):
+    def run(self, output):
 
-        # split our results and corrections (which are given as a tuple) into
+        # split our results and corrections (which are given as a dict) into
         # separate variables
-        vasprun, corrections = result
+        vasprun = output["result"]
+        corrections = output["corrections"]
+        directory = output["directory"]
+
+        # BUG-FIX: see vasptask base for more
+        if isinstance(vasprun, dict):
+            vasprun = vasprun["vasprun"]
 
         # load/create the calculation for this workflow run
         calculation = self.calculation_table.from_prefect_id(
@@ -27,6 +33,6 @@ class SaveResultTask(Task):
         )
 
         # now update the calculation entry with our results
-        calculation.update_from_vasp_run(vasprun, corrections)
+        calculation.update_from_vasp_run(vasprun, corrections, directory)
 
         return calculation.id

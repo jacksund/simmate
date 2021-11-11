@@ -20,6 +20,7 @@ def build():
         relaxation_quality02,
         relaxation_quality03,
         relaxation_quality04,
+        relaxation_staged,
     )
 
     # TODO: grab the user's custom workflows
@@ -33,6 +34,7 @@ def build():
         relaxation_quality02,
         relaxation_quality03,
         relaxation_quality04,
+        relaxation_staged,
     ]
 
     # Iterate through and grab all the unique Project names. The brackets here
