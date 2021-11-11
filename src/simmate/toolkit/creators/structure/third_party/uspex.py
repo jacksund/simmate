@@ -267,7 +267,8 @@ export MCRROOT={uspex_loc}
         # Rather than go through a list like with the directories, it's easier
         # to just delete all .mat files because that's what they all are
         subprocess.run(
-            "rm *.mat*", shell=True,  # use commands instead of local files
+            "rm *.mat*",
+            shell=True,  # use commands instead of local files
         )
 
         # switch back to our original working dir

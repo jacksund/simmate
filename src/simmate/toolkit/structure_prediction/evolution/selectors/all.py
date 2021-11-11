@@ -15,6 +15,7 @@
 # other selection methods throw issues with lower=better and even more issues
 # when we have negative values
 
+
 class Selector:
     def __init__(
         self,
@@ -61,6 +62,6 @@ class TruncatedSelection:
         # the correct number of parents
         df_truncated = individuals.nsmallest(ntruncate, fitness_column)
         df_parents = df_truncated.sample(nselect, replace=self.allow_duplicate)
-        
+
         # return the list of indexes to be selected
         return df_parents

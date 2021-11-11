@@ -57,10 +57,10 @@ class PyXtalStructure(StructureCreator):
         # create_structure method.
 
     def create_structure(self, spacegroup=None):
-        
+
         # If a spacegroup is not specified, grab a random one from our options.
-        # The requested_spacegroup let's us know below if the method wanted a 
-        # given spacegroup -- which tells us whether or not we should raise an 
+        # The requested_spacegroup let's us know below if the method wanted a
+        # given spacegroup -- which tells us whether or not we should raise an
         # error if the spacegroup is incompatible with our composition
         if not spacegroup:
             # randomly select a symmetry system
@@ -68,8 +68,9 @@ class PyXtalStructure(StructureCreator):
             requested_spacegroup = False
         else:
             requested_spacegroup = True
-        
+
         from pyxtal.msg import Comp_CompatibilityError
+
         try:
             # now make the new structure using PyXtal's crystal.random_crystal function
             # NOTE: all of these options are set in the init except for the spacegroup

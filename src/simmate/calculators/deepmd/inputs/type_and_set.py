@@ -105,7 +105,6 @@ class DeepmdDataset:
             Structure.from_str(s.structure_string, fmt="POSCAR")
             for _, s in structures_dataframe.iterrows()
         ]
-        
 
         # split the structures into test and training sets randomly
         dataframe_train, dataframe_test = train_test_split(

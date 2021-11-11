@@ -8,13 +8,13 @@ def setup_env(dask_scheduler_address):
     If you want to start a Prefect Agent that uses a specific Dask Cluster for
     all workflow runs, you can run this command before starting your Prefect
     Agent.
-    
+
     What it does is set two enviornment variables that tell Prefect to default
     all workflows to using a default executor. So this saves us from having to
     repeatedly use this line below when setting ups workflows...
         from prefect.executors import DaskExecutor
         workflow.executor = DaskExecutor(address="tcp://152.2.172.72:8786")
-    
+
     After you run this command, you can start your Prefect Agent as usual...
         from prefect.agent.local import LocalAgent
         agent = LocalAgent(name="ExampleAgent")

@@ -26,7 +26,7 @@ class TriggeredAction:
         # The most common actions (such as search.new_sample) will be accessed via
         # the search class and not custom code here.
         pass
-    
+
     @classmethod
     def from_composition(cls, composition=None, **kwargs):
 

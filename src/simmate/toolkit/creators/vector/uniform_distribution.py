@@ -28,11 +28,11 @@ class UniformlyDistributedVectors:
             # generate random 3x1 matrix where values are uniformly [0,1)
             vector = numpy_random(3)
 
-            # This vector is from 0 to 1 right now, so we shift the vector 
+            # This vector is from 0 to 1 right now, so we shift the vector
             # within the min/max boundries and scale it within this range.
             vector = vector * (self.max_value - self.min_value) + self.min_value
 
-            # check that all extra conditions are met and assume it is valid 
+            # check that all extra conditions are met and assume it is valid
             # until proven otherwise.
             is_valid_vector = True
             for condition in self.extra_conditions:
@@ -45,7 +45,7 @@ class UniformlyDistributedVectors:
 
             # If the for-loop above 'breaks' at any point, check will be False
             # and the while-loop will restart. If the for-loop goes through all
-            # extra_conditions and never breaks, check will be True and the 
+            # extra_conditions and never breaks, check will be True and the
             # while-loop will finish
 
         return vector

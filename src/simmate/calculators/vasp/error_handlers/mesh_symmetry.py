@@ -84,7 +84,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
 
         # !!! I'm not sure what Custodian is doing here exactly, so I need to
         # revisit this when I have my KPOINTS class implemented
-        
+
         # from functools import reduce
         # import operator
         # backup(VASP_BACKUP_FILES | {self.output_filename})

@@ -21,7 +21,7 @@ from simmate.calculators.vasp.error_handlers.all import (
 class MITRelaxationTask(VaspTask):
 
     # returns structure separately from vasprun object
-    return_final_structure = True    
+    return_final_structure = True
 
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria.
@@ -86,8 +86,14 @@ class MITRelaxationTask(VaspTask):
         # The type of smearing we use depends on if we have a metal, semiconductor,
         # or insulator. So we need to decide this using a keyword modifier.
         multiple_keywords__smart_ismear={
-            "metal": dict(ISMEAR=2, SIGMA=0.2,),
-            "non-metal": dict(ISMEAR=-5, SIGMA=0.05,),
+            "metal": dict(
+                ISMEAR=2,
+                SIGMA=0.2,
+            ),
+            "non-metal": dict(
+                ISMEAR=-5,
+                SIGMA=0.05,
+            ),
         },
         # We run LDA+U for certain compositions. This is a complex configuration
         # so be sure to read the "__smart_ldau" modifier for more information.
@@ -131,7 +137,10 @@ class MITRelaxationTask(VaspTask):
                     "V": 2,
                     "W": 2,
                 },
-                "S": {"Fe": 2, "Mn": 2.5,},
+                "S": {
+                    "Fe": 2,
+                    "Mn": 2.5,
+                },
             },
             LDAUU={
                 "F": {
@@ -164,7 +173,10 @@ class MITRelaxationTask(VaspTask):
                     "V": 3.1,
                     "W": 4.0,
                 },
-                "S": {"Fe": 1.9, "Mn": 2.5,},
+                "S": {
+                    "Fe": 1.9,
+                    "Mn": 2.5,
+                },
             },
         ),
     )

@@ -8,6 +8,7 @@ from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxat
 
 # https://www.vasp.at/wiki/index.php/XANES_in_Diamond
 
+
 class InitialStateApprox(VaspTask):
 
     # Take the incar from MIT relaxation and update a few of its inputs.

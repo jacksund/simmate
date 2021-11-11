@@ -17,9 +17,9 @@ def unpack_assets():
     Users should never have to call this function. Instead, it is called when
     the "simmate run-server" command is issued.
     """
-    
+
     # OPTIMIZE: could I instead make this a CDN in the future?
-    
+
     # First we grab the location of the zip file
     django_directory = os.path.dirname(os.path.abspath(website.__file__))
     static_foldername = os.path.join(django_directory, "static_files")

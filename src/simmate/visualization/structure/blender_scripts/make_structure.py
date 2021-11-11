@@ -274,8 +274,8 @@ def make_structure_blend(lattice, sites_to_draw, filename):
     light_data = bpy.data.lights.new("MyLight", "SUN")
     light_ob = bpy.data.objects.new(name="MyLight", object_data=light_data)
     scene.collection.objects.link(light_ob)
-    
-    # Set sun to move along with the camera. This is because we don't want 
+
+    # Set sun to move along with the camera. This is because we don't want
     # shadows changing in the viewport for crystal structures.
     light_ob.parent = cam_ob
     light_ob.location = (4, 50, 4)

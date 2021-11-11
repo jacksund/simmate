@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class ASEStructure:
 
     # see source: https://gitlab.com/ase/ase/-/blob/master/ase/ga/startgenerator.py

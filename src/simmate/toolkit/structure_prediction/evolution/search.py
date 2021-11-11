@@ -77,7 +77,7 @@ class Search:
         else:  # BUG
             raise Exception("We only support TruncatedSelection right now. Sorry!")
         self.selector = selector
-            
+
         # Load the Individuals datatable class.
         if structure_datatable == "MITStructure":
             from simmate.database.local_calculations.energy.mit import (
@@ -310,7 +310,7 @@ class Search:
             # just skip this loop.
             for n in range(max(int(njobs_target - source_db.nprefect_flow_runs), 0)):
                 print("D")
-                
+
                 # now we need to make a new individual and submit it!
                 parent_ids, structure = self._make_new_structure(source)
 
@@ -325,12 +325,12 @@ class Search:
                     structure=structure,
                     wait_for_run=False,
                 )
-                
+
                 # Attached the flow_run_id to our source so we know how many
                 # associated jobs are running.
                 source_db.prefect_flow_run_ids.append(flow_run_id)
                 source_db.save()
-                
+
                 # update the source on the calculation
                 # TODO: use the flow run id from above to grab the calc
                 calc.source = f"{source.__class__.__name__}"

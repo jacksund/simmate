@@ -12,7 +12,7 @@ class MITRelaxationForm(forms.Form):
 
     # The vasp_command to submit with
     vasp_command = forms.CharField(initial="mpirun -n 4 vasp > vasp.out")
-    
+
     # List of labels to submit the workflow with. Use commas to separate.
     labels = forms.CharField(initial="WarWulf")
 

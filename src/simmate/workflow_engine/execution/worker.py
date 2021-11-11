@@ -109,7 +109,7 @@ class SimmateWorker:
             # Query for PENDING WorkItems, lock it for editting, and update
             # the status to RUNNING
             workitem = WorkItem.objects.select_for_update().filter(status="P").first()
-            
+
             # our lock exists only within this transation
             with transaction.atomic():
                 # update the status to running before starting it so no other
@@ -117,10 +117,10 @@ class SimmateWorker:
                 workitem.status = "R"
                 # TODO -- indicate that the WorkItem is with this Worker (relationship)
                 workitem.save()
-            
+
             # Print out the job ID that is being ran for the user to see
             print(f"Running WorkItem with id {workitem.id}.")
-            
+
             # now let's unpickle the WorkItem components
             fxn = cloudpickle.loads(workitem.fxn)
             args = cloudpickle.loads(workitem.args)
@@ -154,7 +154,7 @@ class SimmateWorker:
 
             # mark down that we've completed one WorkItem
             ntasks_finished += 1
-            
+
             # Print out the job ID that was just finished for the user to see.
             print(f"Completed WorkItem.")
 

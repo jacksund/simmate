@@ -37,7 +37,7 @@ def start_project(project_name):
 
     apps_yaml = os.path.join(Path.home(), ".simmate", "applications.yaml")
     new_line = "\nexample_app.apps.ExampleAppConfig"  # \n ensures a new line
-    
+
     # If the file exists, we append this line to the end of the file. Otherwise,
     # we create a new file and add the line!
     with open(apps_yaml, "a+") as file:

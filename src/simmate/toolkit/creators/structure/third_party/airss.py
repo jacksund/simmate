@@ -11,7 +11,8 @@ class AIRSSStructure:
     # see tutorials: https://airss-docs.github.io/
 
     def __init__(
-        self, composition,  # must be a pymatgen Composition object
+        self,
+        composition,  # must be a pymatgen Composition object
     ):
 
         # see if the user has AIRSS installed

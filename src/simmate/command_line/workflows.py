@@ -13,12 +13,13 @@ def workflows():
 def register_all():
     """
     Registers all workflows with Prefect Cloud.
-    
+
     Make sure you have your Prefect API key configured prior to calling this!
     """
     from simmate.configuration.prefect.projects import build
+
     build()
-    
+
 
 @workflows.command()
 @click.argument("filename", type=click.Path(exists=True))

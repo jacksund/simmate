@@ -110,7 +110,7 @@ class Calculation(DatabaseTable):
         # See if the calculation table has a from_pymatgen method (most simmate calcs do)
         # and if so, we should call that instead and pass all of our kwargs to it.
         if hasattr(cls, "from_pymatgen"):
-            
+
             calculation = cls.from_pymatgen(prefect_flow_run_id=id, **kwargs)
         else:
             calculation = cls(prefect_flow_run_id=id, **kwargs)

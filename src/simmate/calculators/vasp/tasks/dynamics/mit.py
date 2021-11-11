@@ -8,6 +8,7 @@ from simmate.calculators.vasp.error_handlers.all import (
     NonConvergingErrorHandler,
 )
 
+
 class MITDynamicsTask(MITRelaxationTask):
 
     # The settings used for this calculation are based on the MITRelaxation, but

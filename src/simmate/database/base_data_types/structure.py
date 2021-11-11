@@ -187,7 +187,7 @@ class Structure(DatabaseTable):
         )
 
         return structure
-    
+
     @staticmethod
     def _from_dynamic(structure):
         # FIND A BETTER SPOT FOR THIS CODE (likely attached to base Structure class)

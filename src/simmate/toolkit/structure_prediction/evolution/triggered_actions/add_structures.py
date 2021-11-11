@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 
+
 class AddStructures:
-    def __init__(self, n_pending_limit, n_add_structures, ):
+    def __init__(
+        self,
+        n_pending_limit,
+        n_add_structures,
+    ):
 
         self.n_pending_limit = n_pending_limit
 
@@ -28,4 +33,3 @@ class AddStructures:
         for n in range(self.n_add_structures):
             # make a new sample
             search.new_sample()
-    

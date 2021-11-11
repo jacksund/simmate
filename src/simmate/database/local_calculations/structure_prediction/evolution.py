@@ -13,7 +13,7 @@ class EvolutionarySearch(DatabaseTable):
 
     # Import path for the workflow(s)
     individuals_datatable = table_column.CharField(max_length=200)
-    
+
     # List of import paths for workflows used at any point. While all workflows
     # populate the individuals_datatable, they might do this in different ways.
     # For example, one may start with a ML prediction, another runs a series

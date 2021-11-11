@@ -50,5 +50,4 @@ urlpatterns = [
         view=include("simmate.website.structure_viewer.urls"),
         name="structure_viewer",
     ),
-    
 ]

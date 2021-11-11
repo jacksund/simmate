@@ -79,11 +79,11 @@ def delete():
             # exist, it's already deleted. We can just move on in this case.
             is_successful = True
             pass
-    
+
     # In the scenario we already deleted everything, just say we were successful
     if not project_names:
         is_successful = True
-    
+
     # BUG advisory
     print(
         "WARNING: Deleting projects in Prefect Cloud is a 'lazy' mutation. This means the "

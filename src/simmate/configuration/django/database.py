@@ -12,7 +12,9 @@ from simmate.database.base_data_types import Spacegroup
 # Lists off which apps to update/create. By default, I do all apps that are installed
 # so this list is grabbed directly from django
 from django.apps import apps
+
 APPS_TO_MIGRATE = list(apps.app_configs.keys())
+
 
 def update_database(apps_to_migrate=APPS_TO_MIGRATE):
 
@@ -75,10 +77,10 @@ def load_database_from_json(filename="database_dump.json"):
 
 # BUG: This function isn't working as intended
 # def graph_database(filename="database_graph.png"):
-    
+
 #     # using django-extensions, we want to make an image of all the available
 #     # tables in our database as well as their relationships.
-    
+
 #     # This is the equivalent of running the following command:
 #     #   django-admin graph_models -a -o image_of_models.png --settings=...
 #     call_command("graph_models", output=filename, all_applications=True, layout="fdp")
