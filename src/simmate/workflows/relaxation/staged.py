@@ -19,13 +19,6 @@ from simmate.database.local_calculations.energy.mit import MITStructure
 
 # OPTIMIZE: Make this a for-loop in Prefect 2.0! We can use a for-loop in the
 # workflow context below too.
-# OPTIMIZE: maybe have a workflow.as_task() method?
-# relax_task_00 = RunWorkflowTask(workflow=relaxation_quality00)
-# relax_task_01 = RunWorkflowTask(workflow=relaxation_quality01)
-# relax_task_02 = RunWorkflowTask(workflow=relaxation_quality02)
-# relax_task_03 = RunWorkflowTask(workflow=relaxation_quality03)
-# relax_task_04 = RunWorkflowTask(workflow=relaxation_quality04)
-# static_task_mit = RunWorkflowTask(workflow=energy_mit)
 relax_task_00 = relaxation_quality00.to_workflow_task()
 relax_task_01 = relaxation_quality01.to_workflow_task()
 relax_task_02 = relaxation_quality02.to_workflow_task()

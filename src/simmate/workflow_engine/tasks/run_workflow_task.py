@@ -3,7 +3,7 @@
 """
 Many times in Material Science, a workflow is made up of other smaller workflows.
 For example, calculations for bandstructure first involve a structure relaxation
-followed by a static energy calculations -- before the bandstructure is even
+followed by a static energy calculation -- before the bandstructure is even
 calculated.
 
 For this reason, we need a way to call these workflows as if they were a task.
@@ -14,33 +14,31 @@ Therefore, we had to make this custom task here -- where it decided whether
 we call the workflow.run_cloud or workflow.run method.
 """
 
-import os
-from pathlib import Path
+# import os
+# from pathlib import Path
 
-import yaml
+# import yaml
 
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
 
-
-def get_default_executor_type():
-    # rather than always specifying the executor type whenever this class is used,
-    # it's much more convenient to set the default value here based on a config
-    # file. We check for this in the file ".simmate/extra_applications".
-    # For windows, this would be something like...
-    #   C:\Users\exampleuser\.simmate\executor.yaml
-    SIMMATE_DIRECTORY = os.path.join(Path.home(), ".simmate")
-    EXECUTOR_YAML = os.path.join(SIMMATE_DIRECTORY, "executor.yaml")
-    if os.path.exists(EXECUTOR_YAML):
-        with open(EXECUTOR_YAML) as file:
-            EXECUTOR_TYPE = yaml.full_load(file)["EXECUTOR_TYPE"]
-    else:
-        EXECUTOR_TYPE = "local"
-    return EXECUTOR_TYPE
-
-
-# BUG: local_executor causes problems because it's non-trivial to return
-# the prefect flow id.
+# BUG: prefect executor causes issues because there is no aysncio. Therefore the
+# "waiting" step means a task will be holding onto two Dask workers.
+#
+# def get_default_executor_type():
+#     # rather than always specifying the executor type whenever this class is used,
+#     # it's much more convenient to set the default value here based on a config
+#     # file. We check for this in the file ".simmate/extra_applications".
+#     # For windows, this would be something like...
+#     #   C:\Users\exampleuser\.simmate\executor.yaml
+#     SIMMATE_DIRECTORY = os.path.join(Path.home(), ".simmate")
+#     EXECUTOR_YAML = os.path.join(SIMMATE_DIRECTORY, "executor.yaml")
+#     if os.path.exists(EXECUTOR_YAML):
+#         with open(EXECUTOR_YAML) as file:
+#             EXECUTOR_TYPE = yaml.full_load(file)["EXECUTOR_TYPE"]
+#     else:
+#         EXECUTOR_TYPE = "local"
+#     return EXECUTOR_TYPE
 
 
 class RunWorkflowTask(Task):
@@ -50,7 +48,7 @@ class RunWorkflowTask(Task):
         workflow,
         # How the workflow should be scheduled and ran. The options are either
         # local or prefect (i.e. prefect cloud).
-        executor_type=get_default_executor_type(),
+        executor_type="local",  # get_default_executor_type(), # BUG
         # If Prefect is used to schedule the workflow, then this indicates
         # whether we should wait for the flow to finish or not. Also what
         # labels should be attached to the flow
@@ -105,11 +103,11 @@ class RunWorkflowTask(Task):
         # raise an error so that this task is flagged as failed
         if executor_type == "local":
             state = self.workflow.run(**parameters)
-            # if not state.is_successful():
-            #     raise Exception(
-            #         "The workflow task did not complete successfully. "
-            #         "View the prefect-logs above for more info."
-            #     )
+            if not state.is_successful():
+                raise Exception(
+                    "The workflow task did not complete successfully. "
+                    "View the prefect-logs above for more info."
+                )
             return state
 
         # If we are using prefect, we assume that the flow has been registered

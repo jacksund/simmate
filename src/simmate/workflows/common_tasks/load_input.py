@@ -6,6 +6,7 @@ from prefect import task
 
 from pymatgen.core.structure import Structure
 
+from simmate.utilities import get_directory
 from simmate.website.local_calculations import models as all_datatables
 
 
@@ -48,7 +49,14 @@ def load_input(structure, directory=None, use_previous_directory=False):
     parameter is ignored.
 
     """
-
+    
+    # even though SSSTask creates a directory when passed None, it is useful
+    # to make it here first because some workflows require the folder name between
+    # each calculation (see workflows.relaxation.staged for an example). We therefore
+    # make the directory upfront! We only create it if a directory wasn't given
+    # as an input though.
+    directory = get_directory(directory) if not directory else directory
+    
     # if the input is already a pymatgen structure, just return it back
     if isinstance(structure, Structure):
         return structure, directory
