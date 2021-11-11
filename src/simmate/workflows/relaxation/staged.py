@@ -7,7 +7,6 @@ from simmate.workflow_engine.prefect import (
 )
 
 from simmate.workflows.common_tasks.all import load_input
-# from simmate.workflow_engine.tasks.run_workflow_task import RunWorkflowTask
 
 from simmate.workflows.relaxation.quality_00 import workflow as relaxation_quality00
 from simmate.workflows.relaxation.quality_01 import workflow as relaxation_quality01
@@ -31,7 +30,7 @@ with Workflow("Staged Relaxation") as workflow:
     structure = Parameter("structure")
     command = Parameter("command", default="vasp > vasp.out")
     directory = Parameter("directory", default=None)
-    
+
     # Rather than letting our first relaxation handle the directory and structure
     # loading, we do this up front because we want to pass the directory to all
     # other tasks.
