@@ -15,7 +15,7 @@ save_results = SaveOutputTask(Quality04Relaxation)
 
 with Workflow("Quality 04 Relaxation") as workflow:
     structure = Parameter("structure")
-    vasp_command = Parameter("vasp_command", default="vasp > vasp.out")
+    command = Parameter("command", default="vasp > vasp.out")
     directory = Parameter("directory", default=None)
     use_previous_directory = Parameter("use_previous_directory", default=False)
 
@@ -26,7 +26,7 @@ with Workflow("Quality 04 Relaxation") as workflow:
     )
     output = relax_structure(
         structure=structure_pmg,
-        command=vasp_command,
+        command=command,
         directory=directory_cleaned,
     )
     calculation_id = save_results(output=output)

@@ -36,7 +36,7 @@ static_task_mit = energy_mit.to_workflow_task()
 with Workflow("Staged Relaxation") as workflow:
 
     structure = Parameter("structure")
-    vasp_command = Parameter("vasp_command", default="vasp > vasp.out")
+    command = Parameter("command", default="vasp > vasp.out")
     directory = Parameter("directory", default=None)
 
     structure_pmg, directory_cleaned = load_input(
@@ -48,7 +48,7 @@ with Workflow("Staged Relaxation") as workflow:
     # pass along results and the working directory
     run_id_00 = relax_task_00(
         structure=structure_pmg,
-        command=vasp_command,
+        command=command,
     )
 
     # TODO: Use a for-loop in Prefect 2.0!
@@ -59,7 +59,7 @@ with Workflow("Staged Relaxation") as workflow:
             "calculation_table": "Quality00Relaxation",
             "directory": directory_cleaned,
         },
-        command=vasp_command,
+        command=command,
         use_previous_directory=True,
         upstream_tasks=[run_id_00],
     )
@@ -70,7 +70,7 @@ with Workflow("Staged Relaxation") as workflow:
             "calculation_table": "Quality01Relaxation",
             "directory": directory_cleaned,
         },
-        command=vasp_command,
+        command=command,
         use_previous_directory=True,
         upstream_tasks=[run_id_01],
     )
@@ -81,7 +81,7 @@ with Workflow("Staged Relaxation") as workflow:
             "calculation_table": "Quality02Relaxation",
             "directory": directory_cleaned,
         },
-        command=vasp_command,
+        command=command,
         use_previous_directory=True,
         upstream_tasks=[run_id_02],
     )
@@ -92,7 +92,7 @@ with Workflow("Staged Relaxation") as workflow:
             "calculation_table": "Quality03Relaxation",
             "directory": directory_cleaned,
         },
-        command=vasp_command,
+        command=command,
         use_previous_directory=True,
         upstream_tasks=[run_id_03],
     )
@@ -103,7 +103,7 @@ with Workflow("Staged Relaxation") as workflow:
             "calculation_table": "Quality04Relaxation",
             "directory": directory_cleaned,
         },
-        command=vasp_command,
+        command=command,
         use_previous_directory=True,
         upstream_tasks=[run_id_04],
     )
