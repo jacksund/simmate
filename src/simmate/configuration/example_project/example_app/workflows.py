@@ -8,7 +8,7 @@ from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxat
 from simmate.workflows.common_tasks.load_structure import load_structure
 
 from simmate.configuration.django import setup_full  # sets database connection
-from simmate.database.local_calculations.relaxation.mit import (
+from simmate.database.local_calculations.relaxation.all import (
     MITIonicStep,
     MITRelaxation,
 )

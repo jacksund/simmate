@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 
 from prefect.backend.flow_run import FlowView
 
-from simmate.database.local_calculations.relaxation.mit import (
+from simmate.database.local_calculations.relaxation.all import (
     MITRelaxation,
     # MITIonicStep,
 )

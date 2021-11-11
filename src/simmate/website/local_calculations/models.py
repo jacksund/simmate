@@ -6,9 +6,19 @@
 
 from simmate.database.local_calculations.energy.mit import MITStructure
 
-from simmate.database.local_calculations.relaxation.mit import (
+from simmate.database.local_calculations.relaxation.all import (
     MITRelaxation,
     MITIonicStep,
+    Quality00Relaxation,
+    Quality00IonicStep,
+    Quality01Relaxation,
+    Quality01IonicStep,
+    Quality02Relaxation,
+    Quality02IonicStep,
+    Quality03Relaxation,
+    Quality03IonicStep,
+    Quality04Relaxation,
+    Quality04IonicStep,
 )
 
 from simmate.database.local_calculations.structure_prediction.evolution import (

@@ -6,22 +6,56 @@ import click
 @click.group()
 def workflow_engine():
     """
-    A group of commands for starting up Prefect Agents and Dask Clusters. 
-    There is also a simple "Simmate Cluster" that you can use too, but it 
+    A group of commands for starting up Prefect Agents and Dask Clusters.
+    There is also a simple "Simmate Cluster" that you can use too, but it
     is only meant for quick testing.
-    
-    Setting up your computational resources can be tricky, so be sure to go 
+
+    Setting up your computational resources can be tricky, so be sure to go
     through our tutorial before trying this on your own: <TODO: INSERT LINK>
     """
     pass
 
 
 @workflow_engine.command()
+def setup_cloud():
+    """
+    This configures Prefect Cloud for all of the Simmate Workflows. This includes
+    registering them as well as organizing them into projects.
+
+    If at any point you'd like to delete all of these and reset them, use the
+    delete-cloud command followed by running this again.
+    """
+    click.echo("Building Prefect Projects and registering Simmate Workflows.")
+    from simmate.configuration.prefect.projects import build
+
+    build()
+
+
+@workflow_engine.command()
+def delete_cloud():
+    """
+    This clears your Prefect Cloud for all of the Simmate Projects and Workflows.
+
+    To rebuild them, use the setup-cloud command. Note, you may have to wait
+    a few minutes before running this second command because it takes a little
+    for your deletion to take place in Prefect Cloud.
+    """
+    click.echo("Deleting all Prefect Projects and Simmate Workflows.")
+    from simmate.configuration.prefect.projects import delete
+
+    delete()
+
+
+@workflow_engine.command()
 @click.option(
-    "--prefect_config", "-p", help="the name of the Prefect Agent configuration to use",
+    "--prefect_config",
+    "-p",
+    help="the name of the Prefect Agent configuration to use",
 )
 @click.option(
-    "--dask_config", "-d", help="the name of the Dask Cluster configuration to use",
+    "--dask_config",
+    "-d",
+    help="the name of the Dask Cluster configuration to use",
 )
 def start_cluster(prefect_config, dask_config):
     """
@@ -96,11 +130,11 @@ def start_singletask_worker():
     """
     This starts a Simmate Worker that only runs one job and then shuts down. Also,
     if no job is available in the queue, it will shut down.
-    
+
     Note: this can be acheived using the start-worker command too, but because
     this is such a common use-case, we include this command for convienence.
     It is the same as...
-    
+
     simmate start-worker -n 1 -c True
 
     """
@@ -118,7 +152,10 @@ def start_singletask_worker():
 
 @workflow_engine.command()
 @click.option(
-    "--nworkers", "-w", default=8, help="the number of separate slurm jobs to submit",
+    "--nworkers",
+    "-w",
+    default=8,
+    help="the number of separate slurm jobs to submit",
 )
 @click.option(
     "--cpus_per_worker",
@@ -152,9 +189,9 @@ def start_warwulf_cluster(
     create_worker_directories,
 ):
     """
-    This sets up a Dask Cluster by submitting jobs to SLURM and then sets up a 
+    This sets up a Dask Cluster by submitting jobs to SLURM and then sets up a
     Prefect Agent that checks for scheduled workflows to run.
-    
+
     This is just for the Warren Lab to use and will be removed in the future.
     """
 
@@ -175,5 +212,8 @@ def start_warwulf_cluster(
     setup_env(cluster_address)
 
     # Now we can start the Prefect Agent which will run and search for jobs.
-    agent = LocalAgent(name="WarWulf", labels=["DESKTOP-PVN50G5", "digital-storm"],)
+    agent = LocalAgent(
+        name="WarWulf",
+        labels=["DESKTOP-PVN50G5", "digital-storm"],
+    )
     agent.start()

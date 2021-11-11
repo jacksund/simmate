@@ -12,31 +12,42 @@ def build():
     #   client.login_to_tenant(tenant_slug='a-tenant-slug')
 
     # grab all of the workflows that need to be registered
-    from simmate.workflows.all import relaxation_mit, energy_mit
+    from simmate.workflows.all import (
+        energy_mit,
+        relaxation_mit,
+        relaxation_quality00,
+        relaxation_quality01,
+        relaxation_quality02,
+        relaxation_quality03,
+        relaxation_quality04,
+    )
 
     # TODO: grab the user's custom workflows
 
     # make these workflows into a list so we can iterate through them
     workflows = [
-        relaxation_mit,
         energy_mit,
+        relaxation_mit,
+        relaxation_quality00,
+        relaxation_quality01,
+        relaxation_quality02,
+        relaxation_quality03,
+        relaxation_quality04,
     ]
-    
-    # Iterate through and grab all the unique Project names. The brackets here,
+
+    # Iterate through and grab all the unique Project names. The brackets here
     # make this return as a set
     project_names = {workflow.project_name for workflow in workflows}
-    
+
     # build each of the projects
     for project_name in project_names:
         project_id = client.create_project(project_name=project_name)
-
     # register the workflows with the proper projects
     for workflow in workflows:
         workflow_id = workflow.register(
             project_name=workflow.project_name,
             set_schedule_active=False,
         )
-
     # TODO: will I need to store the project or workflow IDs? Maybe inside
     # the /.simmate/prefect folder? Or maybe even the /.prefect folder?
     # I could also return a list of what's been done.
@@ -46,14 +57,14 @@ def delete():
 
     # grab the Prefect client
     client = Client()
-    
+
     # query for a list of projects that start with "Simmate-"
     # BUG: I delete all projects for now. I need to update this query to just
     # Simmate projects
     query = "query {project {name}}"
     result = client.graphql(query)
     project_names = [p["name"] for p in result["data"]["project"]]
-    
+
     # delete all of the Simmate projects
     # BUG: if there's too much data in any of these projects, then the command
     # may time-out. In that case, I may need to delete some flow runs manually
@@ -66,11 +77,15 @@ def delete():
             # exist, it's already deleted. We can just move on in this case.
             is_successful = True
             pass
-
+    
+    # In the scenario we already deleted everything, just say we were successful
+    if not project_names:
+        is_successful = True
+    
     # BUG advisory
     print(
-        "Deleting projects in Prefect Cloud is a 'lazy' mutation. This means the "
-        "project is only hidden initally and the deletion could take a few minutes "
+        "WARNING: Deleting projects in Prefect Cloud is a 'lazy' mutation. This means the "
+        "project is only hidden initially and the deletion could take a few minutes "
         "to complete in Prefect's backend. Therefore, you'll need to wait some "
         "time before trying to recreate your projects with build(). 1 minute should "
         "be plenty of time, but the Prefect team says this can take as much as 30+ min."
