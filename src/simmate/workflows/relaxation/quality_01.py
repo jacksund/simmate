@@ -34,3 +34,4 @@ with Workflow("Quality 01 Relaxation") as workflow:
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"
 workflow.calculation_table = Quality01Relaxation
+workflow.result_table = Quality01Relaxation

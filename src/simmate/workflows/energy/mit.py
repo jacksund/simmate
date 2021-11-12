@@ -34,3 +34,4 @@ with Workflow("MIT Static Energy") as workflow:
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Energy"
 workflow.calculation_table = MITStructure
+workflow.result_table = MITStructure

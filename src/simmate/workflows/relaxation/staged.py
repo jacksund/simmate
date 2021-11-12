@@ -121,4 +121,5 @@ with Workflow("Staged Relaxation") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"
-workflow.calculation_table = MITStructure
+workflow.calculation_table = StagedRelaxation
+workflow.result_table = MITStructure
