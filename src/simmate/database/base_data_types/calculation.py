@@ -129,3 +129,66 @@ class Calculation(DatabaseTable):
     # https://docs.djangoproject.com/en/3.1/topics/db/models/#model-inheritance
     class Meta:
         abstract = True
+        app_label = "local_calculations"
+
+
+# EXPERIMENTAL
+class NestedCalculation(Calculation):
+    """
+    A nested calculation is a calculation made up of other calculations. For example,
+    we may want to run a workflow that runs a series of relaxations. Or maybe
+    a relaxation, then energy, then bandstrucuture calculation. This table
+    is for keeping track of workflows ran in series like this.
+    """
+
+    class Meta:
+        abstract = True
+        app_label = "local_calculations"
+
+    # @abstractproperty
+    # child_calculation_tables = [...]
+
+    # TODO:
+    # corrections
+    # should this be a list of all modifications? It could maybe be used to
+    # carry fixes (such as smearing) accross different calcs.
+    # Or maybe a method that just lists the corrections of each subcalc?
+    # For now I don't use this though. This line removes the field.
+    corrections = "not implemented in simmate yet"
+
+    @classmethod
+    def create_subclass_from_calcs(cls, name, child_calculation_tables, **extra_columns):
+
+        # BUG: I assume a workflow won't point to the save calculation table
+        # more than once... What's a scenario where this isn't true?
+        # I can only think of mult-structure workflows (like EvolutionarySearch)
+        # which I don't give their own table for now.
+        new_columns = {}
+        for child_calc in child_calculation_tables:
+            new_column = table_column.OneToOneField(
+                child_calc,
+                on_delete=table_column.CASCADE,
+                # related_name=...,
+                blank=True,
+                null=True,
+            )
+            new_columns[f"{child_calc._meta.model_name}"] = new_column
+
+        # Now put all the fields together to make the new class
+        NewClass = cls.create_subclass(
+            name,
+            **new_columns,
+            **extra_columns,
+            child_calculation_tables=child_calculation_tables,  # also have this as an attribute
+        )
+
+        # we now have a new child class and avoided writing some boilerplate code!
+        return NewClass
+    
+    def update_calculation(self):
+        
+        for child_calc_table in self.child_calculation_tables:
+            if child_calc_table.objects.filter(directory=self.directory).exists():
+                child_calc = child_calc_table.objects.get(directory=self.directory)
+                setattr(self, child_calc._meta.model_name, child_calc)
+        self.save()

@@ -19,6 +19,7 @@ from simmate.database.local_calculations.relaxation.all import (
     Quality03IonicStep,
     Quality04Relaxation,
     Quality04IonicStep,
+    StagedRelaxation,
 )
 
 from simmate.database.local_calculations.structure_prediction.evolution import (

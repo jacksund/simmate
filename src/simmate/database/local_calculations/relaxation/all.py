@@ -47,7 +47,7 @@ Do exactly the same thing as...
 
 """
 
-
+from simmate.database.base_data_types.calculation import NestedCalculation
 from simmate.database.local_calculations.relaxation.base import Relaxation
 
 # Between all of the different relaxations that simmate runs, there's no
@@ -66,3 +66,14 @@ Quality02Relaxation, Quality02IonicStep = Relaxation.create_all_subclasses("Qual
 Quality03Relaxation, Quality03IonicStep = Relaxation.create_all_subclasses("Quality03")
 
 Quality04Relaxation, Quality04IonicStep = Relaxation.create_all_subclasses("Quality04")
+
+StagedRelaxation = NestedCalculation.create_subclass_from_calcs(
+    "StagedRelaxation",
+    [
+        Quality00Relaxation,
+        Quality01Relaxation,
+        Quality02Relaxation,
+        Quality03Relaxation,
+        Quality04Relaxation,
+    ],
+)

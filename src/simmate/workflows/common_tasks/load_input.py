@@ -51,24 +51,16 @@ def load_input(structure, directory=None, use_previous_directory=False):
 
     """
 
-    # even though SSSTask creates a directory when passed None, it is useful
-    # to make it here first because some workflows require the folder name between
-    # each calculation (see workflows.relaxation.staged for an example). We therefore
-    # make the directory upfront! We only create it if a directory wasn't given
-    # as an input and we aren't using a old directory
-    if not use_previous_directory:
-        directory_new = get_directory(directory)
-
     # if the input is already a pymatgen structure, just return it back
     if isinstance(structure, Structure):
-        return structure, directory_new
+        return structure, directory
 
     # otherwise we have a dictionary object
 
     # if the "@module" key is in the dictionary, then we have a pymatgen structure
     # dict which we convert to a pymatgen object and return
     if "@module" in structure.keys():
-        return Structure.from_dict(structure), directory_new
+        return Structure.from_dict(structure), directory
 
     # otherwise we now know we have a dictionary pointing to the simmate database
 

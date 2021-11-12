@@ -6,7 +6,10 @@ from simmate.workflow_engine.prefect import (
     ModuleStorage,
 )
 
-from simmate.workflows.common_tasks.all import load_input
+from simmate.workflows.common_tasks.all import (
+    LoadNestedCalculationTask,
+    SaveNestedCalculationTask,
+)
 
 from simmate.workflows.relaxation.quality_00 import workflow as relaxation_quality00
 from simmate.workflows.relaxation.quality_01 import workflow as relaxation_quality01
@@ -14,8 +17,15 @@ from simmate.workflows.relaxation.quality_02 import workflow as relaxation_quali
 from simmate.workflows.relaxation.quality_03 import workflow as relaxation_quality03
 from simmate.workflows.relaxation.quality_04 import workflow as relaxation_quality04
 from simmate.workflows.energy.mit import workflow as energy_mit
+
+from simmate.database.local_calculations.relaxation.all import StagedRelaxation
 from simmate.database.local_calculations.energy.mit import MITStructure
 
+# init common tasks
+setup_calculation = LoadNestedCalculationTask(StagedRelaxation)
+save_calculation = SaveNestedCalculationTask(StagedRelaxation)
+
+# init workflow tasks
 # OPTIMIZE: Make this a for-loop in Prefect 2.0! We can use a for-loop in the
 # workflow context below too.
 relax_task_00 = relaxation_quality00.to_workflow_task()
@@ -34,15 +44,12 @@ with Workflow("Staged Relaxation") as workflow:
     # Rather than letting our first relaxation handle the directory and structure
     # loading, we do this up front because we want to pass the directory to all
     # other tasks.
-    structure_pmg, directory_cleaned = load_input(
-        structure,
-        directory,
-    )
+    directory_cleaned = setup_calculation(directory)
 
     # Our first relaxation is directly from our inputs. The remaining one
     # pass along results and the working directory
     run_id_00 = relax_task_00(
-        structure=structure_pmg,
+        structure=structure,
         command=command,
         directory=directory_cleaned,
     )
@@ -108,6 +115,9 @@ with Workflow("Staged Relaxation") as workflow:
         use_previous_directory=True,
         upstream_tasks=[run_id_04],
     )
+
+    # save calculation metadata
+    save_calculation(upstream_tasks=[run_id_05])
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"
