@@ -221,8 +221,10 @@ class Relaxation(Structure, Calculation):
             # If this is the first structure, we want to link it as such
             if number == 0:
                 self.structure_start_id = structure.id
-            # and same for the final structure
-            elif number == len(structures) - 1:
+            # and same for the final structure. Note, we can't use elif becuase
+            # there's a chance the start/end structure are the same, which occurs
+            # when the starting structure is found to be relaxed already.
+            if number == len(structures) - 1:
                 self.structure_final_id = structure.id
         # calculate extra data for storing
         self.volume_change = (
