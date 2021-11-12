@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.utilities import get_directory
-
 import prefect
 from prefect import Task
+
+from simmate.utilities import get_directory
 
 
 class LoadNestedCalculationTask(Task):
@@ -20,7 +20,10 @@ class LoadNestedCalculationTask(Task):
         # to make it here first because some workflows require the folder name between
         # each calculation (see workflows.relaxation.staged for an example). We therefore
         # make the directory upfront!
+        new_directory = get_directory(directory)
 
         # set the directory for the calculation
-        calc.directory = get_directory(directory)
+        calc.directory = get_directory(new_directory)
         calc.save()
+
+        return new_directory
