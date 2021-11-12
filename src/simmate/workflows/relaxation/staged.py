@@ -54,6 +54,7 @@ with Workflow("Staged Relaxation") as workflow:
         structure={
             "calculation_table": "Quality00Relaxation",
             "directory": directory_cleaned,
+            "structure_field": "structure_final",
         },
         command=command,
         use_previous_directory=True,
@@ -65,6 +66,7 @@ with Workflow("Staged Relaxation") as workflow:
         structure={
             "calculation_table": "Quality01Relaxation",
             "directory": directory_cleaned,
+            "structure_field": "structure_final",
         },
         command=command,
         use_previous_directory=True,
@@ -76,6 +78,7 @@ with Workflow("Staged Relaxation") as workflow:
         structure={
             "calculation_table": "Quality02Relaxation",
             "directory": directory_cleaned,
+            "structure_field": "structure_final",
         },
         command=command,
         use_previous_directory=True,
@@ -87,6 +90,7 @@ with Workflow("Staged Relaxation") as workflow:
         structure={
             "calculation_table": "Quality03Relaxation",
             "directory": directory_cleaned,
+            "structure_field": "structure_final",
         },
         command=command,
         use_previous_directory=True,
@@ -98,6 +102,7 @@ with Workflow("Staged Relaxation") as workflow:
         structure={
             "calculation_table": "Quality04Relaxation",
             "directory": directory_cleaned,
+            "structure_field": "structure_final",
         },
         command=command,
         use_previous_directory=True,
