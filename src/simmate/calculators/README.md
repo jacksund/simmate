@@ -19,16 +19,10 @@ All calculators have the same folder structure:
 
 In a more logical order (rather than alphabetical like above), here is what each module contains:
 
-The `configuration` module helps to install the program and setup common settings for it.
-
-The `inputs` and `outputs` are for automatically generating files as well as loading their data into python.
-
-The `error_handlers` help correct common errors in calculations that cause the program to fail.
-
-The `tasks` are how the program is actually setup, executed, and worked-up. It ties together all the `inputs`, `outputs`, and `error-handler` functions into one. A single task can be viewed as a single call to the program (i.e. a single calculation).
-
-The `database` holds all of the datatables for storing our results.
-
-The `workflows` bring together `tasks` and `database` -- so these setup individual tasks and handle saving the results to our database.
-
-The `website` module is for letting us submit workflows and view results with our website interface.
+- `configuration` = helps to install the program and setup common settings for it
+- `inputs` & `outputs` = automatically generate files as well as load their data into python
+- `error_handlers` = help correct common errors in calculations that cause the program to fail
+- `tasks` = how the program is actually setup, executed, and worked-up. It ties together all the `inputs`, `outputs`, and `error-handler` functions into one. A single task can be viewed as a single call to the program (i.e. a single calculation).
+- `database` = holds all of the datatables for storing our results
+- `workflows`  = bring together `tasks` and `database`, so these setup individual tasks and handle saving the results to our database
+- `website` = lets us submit workflows and view results with our website interface
