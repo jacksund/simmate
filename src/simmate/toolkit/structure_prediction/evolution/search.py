@@ -18,9 +18,7 @@ class Search:
         composition,  # TODO: chemical system? 1,2,3D?
         # TODO: what if the workflow changes (e.g. starts with ML relax) but the
         # final table stays the same?
-        # workflow="MITRelaxation",  # linked to the individuals_datatable
-        structure_datatable="MITStructure",
-        workflow="MITStaticEnergy",
+        workflow="StagedRelaxation",
         # fitness_field="energy_per_atom",  # TODO: I assume this for now.
         # Instead of specifying a stop_condition class like I did before,
         # I just assume the stop condition is either (1) the maximum allowed
@@ -33,7 +31,7 @@ class Search:
             # "substitution",
             # "third_party_structures",
             # "third_party_substitution",
-            # "SomeOtherDatatable",  # e.g. taking the best from table of lower quality calculations
+            # "SomeOtherDatatable",  # e.g. best from table of lower quality calculations
         ],
         # No mutations/transforms are done until this many calcs complete
         # this includes those from singleshot and steadystate creators.
@@ -75,29 +73,25 @@ class Search:
 
             selector = TruncatedSelection()
         else:  # BUG
-            raise Exception("We only support TruncatedSelection right now. Sorry!")
+            raise Exception("We only support TruncatedSelection right now")
         self.selector = selector
-
-        # Load the Individuals datatable class.
-        if structure_datatable == "MITStructure":
-            from simmate.database.local_calculations.energy.mit import (
-                MITStructure as structure_datatable,
-            )
-        else:  # BUG
-            raise Exception("I only support MITStructure right now")
-        self.structure_datatable = structure_datatable
 
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.
-        if workflow == "MITStaticEnergy":
-            from simmate.workflows.energy.mit import workflow
+        if workflow == "StagedRelaxation":
+            from simmate.workflows.all import relaxation_staged
 
-            self.workflow = workflow
+            self.workflow = relaxation_staged
         else:
-            raise Exception("Only MITRelaxation is supported in early testing. -Jack")
+            raise Exception("Only StagedRelaxation is supported in early testing")
         # BUG: I'll need to rewrite this in the future bc I don't really account
         # for other workflows yet. It would make sense that our workflow changes
         # as the search progresses (e.g. we incorporate DeePMD relaxation once ready)
+
+        # Point to the structure datatable that we'll pull from
+        # For now, I assume its the results table of the workflow
+        self.individuals_datatable = self.workflow.result_table
+        self.calculation_datatable = self.workflow.calculation_table
 
         # Check if there is an existing search and grab it if so. Otherwise, add
         # the search entry to the DB.
@@ -113,11 +107,12 @@ class Search:
                 workflows=[
                     self.workflow.name
                 ],  # as a list bc we can add new ones later
-                individuals_datatable=structure_datatable.__name__,
+                individuals_datatable=self.individuals_datatable.__name__,
                 max_structures=max_structures,
                 limit_best_survival=limit_best_survival,
             )
             self.search_db.save()
+
         # Grab the list of singleshot sources that have been ran before
         # and based off of that list, remove repeated sources
         past_singleshot_sources = (
@@ -175,7 +170,7 @@ class Search:
         # submitted to prefect for each structure source as well as how long
         # we were holding a steady-state of submissions. We therefore keep
         # a log of Sources in our database -- where even if we've ran this search
-        # before, we still.
+        # before, we still want new entries for each.
         self.singleshot_sources_db = []
         for source in self.singleshot_sources:
             source_db = SourceDatatable(
@@ -234,7 +229,7 @@ class Search:
 
     def get_best_individual(self):
         best = (
-            self.structure_datatable.objects.filter(
+            self.individuals_datatable.objects.filter(
                 formula_full=self.composition.formula,
                 energy_per_atom__isnull=False,
             )
@@ -251,7 +246,7 @@ class Search:
         # Nothing is done to stop those that are still running or to count
         # structures that failed to be calculated
         if (
-            self.structure_datatable.objects.filter(
+            self.individuals_datatable.objects.filter(
                 formula_full=self.composition.formula,
                 energy_per_atom__isnull=False,
                 # **{f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
@@ -275,7 +270,7 @@ class Search:
             return False
         # count the number of new individuals added AFTER the best one. If it is
         # more than limit_best_survival, we stop the search.
-        num_new_structures_since_best = self.structure_datatable.objects.filter(
+        num_new_structures_since_best = self.individuals_datatable.objects.filter(
             formula_full=self.composition.formula,
             # check energies to ensure we only count completed calculations
             energy_per_atom__gt=best.energy_per_atom,
@@ -333,9 +328,12 @@ class Search:
 
                 # update the source on the calculation
                 # TODO: use the flow run id from above to grab the calc
-                calc.source = f"{source.__class__.__name__}"
-                calc.source_id = parent_ids
-                calc.save()
+                calculation = self.calculation_datatable.objects.get(
+                    prefect_flow_run_id=flow_run_id
+                )
+                calculation.source = f"{source.__class__.__name__}"
+                calculation.source_id = parent_ids
+                calculation.save()
 
     def _make_new_structure(self, source, max_attempts=100):
 
@@ -359,7 +357,7 @@ class Search:
         # database. We want to wait until there's a set amount before
         # we start mutating the best. We check that here.
         if is_transformation and (
-            self.structure_datatable.objects.filter(
+            self.individuals_datatable.objects.filter(
                 energy_per_atom__isnull=False
             ).count()
             < self.nfirst_generation
@@ -408,7 +406,7 @@ class Search:
         # our selectors just require a dataframe where we specify the fitness
         # column. So we query our individuals database to give this as an input.
         individuals_df = (
-            self.structure_datatable.objects.filter(energy_per_atom__isnull=False)
+            self.individuals_datatable.objects.filter(energy_per_atom__isnull=False)
             .order_by("energy_per_atom")[:200]
             .to_dataframe()
         )
@@ -424,7 +422,7 @@ class Search:
         # now lets grab these structures from our database and convert them
         # to a list of pymatgen structures
         parent_structures = (
-            self.structure_datatable.objects.filter(id__in=parent_ids)
+            self.individuals_datatable.objects.filter(id__in=parent_ids)
             .only("structure_string")
             .to_pymatgen()
         )

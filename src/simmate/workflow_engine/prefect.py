@@ -3,6 +3,7 @@
 import json
 import cloudpickle
 
+# note: extra modules are imported from prefect for convenience imports elsewhere
 import prefect
 from prefect import Client
 from prefect import Flow as PrefectFlow, Parameter, task, Task
@@ -67,7 +68,9 @@ class Workflow(PrefectFlow):
         # and tries writing to the databse before this is done?
         # BUG: When registering a calc, will I ever need anything besides id
         # and structure? What else should I add here?
-        register_kwargs = {key: kwargs[key] for key in kwargs if key in ["structure"]}
+        register_kwargs = {
+            key: kwargs[key] for key in kwargs if key in self.register_kwargs
+        }
         calc = self._register_calculation(
             flow_run_id,
             **register_kwargs,

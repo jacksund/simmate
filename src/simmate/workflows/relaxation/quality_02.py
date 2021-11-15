@@ -35,3 +35,4 @@ workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"
 workflow.calculation_table = Quality02Relaxation
 workflow.result_table = Quality02Relaxation
+workflow.register_kwargs = ["prefect_flow_run_id", "structure"]
