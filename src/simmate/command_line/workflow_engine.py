@@ -48,43 +48,6 @@ def delete_cloud():
 
 @workflow_engine.command()
 @click.option(
-    "--prefect_config",
-    "-p",
-    help="the name of the Prefect Agent configuration to use",
-)
-@click.option(
-    "--dask_config",
-    "-d",
-    help="the name of the Dask Cluster configuration to use",
-)
-def start_cluster(prefect_config, dask_config):
-    """
-    This starts up a Dask cluster and/or a Prefect Agent that can run Simmate jobs.
-
-    This convenience command is really only meant for testing purposes, as Dask
-    and Prefect teams offer their own commands with much more control. For
-    example, this command uses Prefect's LocalAgent, but there are other
-    advanced types available such as DockerAgent which may be better for your
-    use case.
-
-    If you would like this cluster to run endlessly in the background, you can
-    submit it with something like "nohup simmate workflow-engine start-cluster &".
-    The "nohup" and "&" symbol together make it so this runs in the background AND
-    it won't shutdown if you close your terminal (or ssh). To stop this from running,
-    you'll now need to find the running process and kill it. Use something like
-    "ps -aef | grep simmate" to find the running process and grab its ID. Then
-    kill that process id with "kill 123" (if the id was 123).
-
-    For more help on managing your computational resources, see here:
-        <<TODO: insert link>>
-
-    """
-
-    click.echo("This command has not been implemented yet.")
-
-
-@workflow_engine.command()
-@click.option(
     "--nitems_max",
     "-n",
     default=None,
@@ -152,68 +115,60 @@ def start_singletask_worker():
 
 @workflow_engine.command()
 @click.option(
-    "--nworkers",
-    "-w",
-    default=8,
+    "--njobs",
+    "-j",
     help="the number of separate slurm jobs to submit",
+    type=int,
 )
 @click.option(
-    "--cpus_per_worker",
+    "--cpus_per_job",
     "-c",
-    default=18,
     help="the number of cpus that each slurm job will request",
+    type=int,
 )
 @click.option(
-    "--memory_per_worker",
+    "--memory_per_job",
     "-m",
-    default="50GB",
     help="the amount of memory that each slurm job will request",
 )
 @click.option(
-    "--walltime_per_worker",
+    "--walltime_per_job",
     "-t",
-    default="300-00:00:00",
     help="the timelimit set for each slurm job",
 )
-@click.option(
-    "--create_worker_directories",
-    "-d",
-    default=True,
-    help="whether to create separate directories for each worker",
-)
-def start_warwulf_cluster(
-    nworkers,
-    cpus_per_worker,
-    memory_per_worker,
-    walltime_per_worker,
-    create_worker_directories,
+def run_cluster(
+    njobs,
+    cpus_per_job,
+    memory_per_job,
+    walltime_per_job,
 ):
     """
-    This sets up a Dask Cluster by submitting jobs to SLURM and then sets up a
-    Prefect Agent that checks for scheduled workflows to run.
+    This starts up a Dask cluster and a Prefect Agent in order to run Simmate jobs.
 
-    This is just for the Warren Lab to use and will be removed in the future.
+    This convenience command is really only meant for testing purposes, as Dask
+    and Prefect teams offer their own commands with much more control. For
+    example, this command uses Prefect's LocalAgent, but there are other
+    advanced types available such as DockerAgent which may be better for your
+    use case.
+
+    If you would like this cluster to run endlessly in the background, you can
+    submit it with something like "nohup simmate workflow-engine start-cluster &".
+    The "nohup" and "&" symbol together make it so this runs in the background AND
+    it won't shutdown if you close your terminal (or ssh). To stop this from running,
+    you'll now need to find the running process and kill it. Use something like
+    "ps -aef | grep simmate" to find the running process and grab its ID. Then
+    kill that process id with "kill 123" (if the id was 123).
+
+    For more help on managing your computational resources, see here:
+        <<TODO: insert link>>
+
     """
 
-    from simmate.configuration.dask.warwulf import setup_cluster
-    from simmate.configuration.prefect.connect_to_dask import setup_env
-    from prefect.agent.local import LocalAgent
+    from simmate.configuration.prefect.setup_resources import run_cluster_and_agent
 
-    # Setup up the Dask cluster using the pre-defined settings
-    cluster_address = setup_cluster(
-        nworkers,
-        cpus_per_worker,
-        memory_per_worker,
-        walltime_per_worker,
-        create_worker_directories,
+    run_cluster_and_agent(
+        njobs=njobs,
+        job_cpu=cpus_per_job,
+        job_mem=memory_per_job,
+        walltime=walltime_per_job,
     )
-
-    # We now want all Prefect workflows to use this cluster by default
-    setup_env(cluster_address)
-
-    # Now we can start the Prefect Agent which will run and search for jobs.
-    agent = LocalAgent(
-        name="WarWulf",
-        labels=["DESKTOP-PVN50G5", "digital-storm"],
-    )
-    agent.start()

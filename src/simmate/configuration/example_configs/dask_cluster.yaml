@@ -1,0 +1,46 @@
+
+# This is an example of how to setup Dask settings for an HPC cluster. In this
+# example, we want a cluster that submits jobs through SLURM. Each job runs one 
+# task at a time BUT has extra cores for that Task to use.
+# 
+# For more information, see Dask's guide:
+# http://jobqueue.dask.org/en/latest/configuration.html
+# http://jobqueue.dask.org/en/latest/configuration-setup.html
+
+# IMPORTANT:
+# This config file takes preference over the one in ~/.config/dask/jobqueue.yaml
+# ecause we use it to set the DASK_CONFIG enviornment variable
+
+# Note, there are many more options available for SLURM clusters too:
+# http://jobqueue.dask.org/en/latest/generated/dask_jobqueue.SLURMCluster.html
+
+jobqueue:
+    slurm:
+        # General options
+        name: dask-worker
+        scheduler-options:
+            port: 8786
+        local-directory: ~
+        
+        # Dask worker options
+        cores: 1
+        memory: 4GB
+        processes: 1
+        ### IMPORTANT: this preload option is required for all Simmate workflows
+        extra: ["--preload simmate.configuration.dask.connect_to_database"]
+        ###
+        
+        # SLURM job options
+        job-cpu: 18
+        job-mem: 50GB
+        job-extra: ["--output=slurm-%j.out", "-N 1"]
+        walltime: 300-00:00:00
+        queue: p1
+        
+        # If you want each Dask worker to have its own directory, you can add 
+        # this line, which will run before launching the worker:
+        #
+        # env-extra: ["mkdir daskworker-$SLURM_JOBID; cd daskworker-$SLURM_JOBID;"]
+        # 
+        # You can also add on to this env-extra to preload modules. For example...
+        # env-extra: ["module load vasp;"]

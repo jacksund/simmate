@@ -6,7 +6,6 @@ from prefect import task
 
 from pymatgen.core.structure import Structure
 
-from simmate.utilities import get_directory
 from simmate.website.local_calculations import models as all_datatables
 
 
@@ -22,8 +21,6 @@ from simmate.website.local_calculations import models as all_datatables
 @task(nout=2)
 def load_input(structure, directory=None, use_previous_directory=False):
     """
-    The structure parameter could be a number of formats here...
-
     How the structure was submitted as a parameter depends on if we are submitting
     to Prefect Cloud, running the flow locally, or even continuing from a
     previous calculation.  Here, we use a task to convert the input to a pymatgen
@@ -33,7 +30,7 @@ def load_input(structure, directory=None, use_previous_directory=False):
         object of pymatgen structure
         dictionary of pymatgen structure
         dictionary of...
-            (1) path to calculation datatable
+            (1) python path to calculation datatable
             (2) one of the following (only one is used in this priority order):
                 (a) prefect flow id
                 (b) calculation id
@@ -43,8 +40,10 @@ def load_input(structure, directory=None, use_previous_directory=False):
                 times!
             (3) (optional) attribute to use on table (e.g. structure_final)
                 By default, we assume calculation table is also a structure table
+        filename for a structure (cif, poscar, etc.) [TODO]
 
     directory is optional
+
     use_previous_directory is only used when we are pulling a structure from a
     previous calculation. If use_previous_directory=True, then the directory
     parameter is ignored.
