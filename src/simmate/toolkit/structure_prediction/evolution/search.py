@@ -54,7 +54,7 @@ class Search:
         # triggered_actions=[],
         # TODO: I assume Prefect for submitting workflows right now.
         # executor="local",
-        labels=[], # prefect labels to submit workflows with
+        labels=[],  # prefect labels to submit workflows with
     ):
 
         self.composition = composition
@@ -412,18 +412,23 @@ class Search:
         # may not be true in special cases.
 
         # From these individuals, select our parent structures
-        parents_df = self.selector(nselect, individuals_df, "energy_per_atom")
+        parents_df = self.selector.select(nselect, individuals_df, "energy_per_atom")
 
         # grab the id column of the parents and convert it to a list
         parent_ids = parents_df.id.values.tolist()
 
         # now lets grab these structures from our database and convert them
-        # to a list of pymatgen structures
-        parent_structures = (
-            self.individuals_datatable.objects.filter(id__in=parent_ids)
-            .only("structure_string")
+        # to a list of pymatgen structures.
+        # We have to make separate queries for this instead of doing "id__in=parent_ids".
+        # This is because (1) order may be important and (2) we may have duplicate
+        # entries. For example, a hereditary mutation can request parent ids of [123,123]
+        # in which case we want to give the same input structure twice!
+        parent_structures = [
+            self.individuals_datatable.objects.only("structure_string")
+            .get(id=parent_id)
             .to_pymatgen()
-        )
+            for parent_id in parent_ids
+        ]
 
         # When there's only one structure selected we return the structure and
         # id independents -- not within a list
