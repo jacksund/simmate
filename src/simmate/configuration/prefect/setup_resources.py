@@ -103,7 +103,7 @@ def run_cluster_and_agent(
         # grab the class from the module. It will be named something like PBSCluster
         ClusterClass = getattr(dask_jobqueue, f"{cluster_type}Cluster")
         # Now initialize the cluster using the default Dask config.
-        cluster = ClusterClass()
+        cluster = ClusterClass(**cluster_kwargs)
         if not njobs:
             raise Exception("You must provide nworkers when using a JobQueue cluster")
         cluster.scale(njobs)
