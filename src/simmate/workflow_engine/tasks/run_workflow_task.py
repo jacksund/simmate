@@ -53,7 +53,7 @@ class RunWorkflowTask(Task):
         # whether we should wait for the flow to finish or not. Also what
         # labels should be attached to the flow
         wait_for_run=True,
-        extra_labels=[],
+        labels=[],
         # If Prefect is used to schedule the workflow, we also may want to
         # To support other Prefect input options. To see all the options, visit...
         # https://docs.prefect.io/api/latest/core/task.html
@@ -77,7 +77,7 @@ class RunWorkflowTask(Task):
         self.workflow = workflow
         self.executor_type = executor_type
         self.wait_for_run = wait_for_run
-        self.extra_labels = extra_labels
+        self.labels = labels
 
         # now inherit the parent Prefect Task class
         # Note we name this task after our attached workflow
@@ -86,13 +86,13 @@ class RunWorkflowTask(Task):
     @defaults_from_attrs(
         "executor_type",
         "wait_for_run",
-        "extra_labels",
+        "labels",
     )
     def run(
         self,
         executor_type=None,
         wait_for_run=None,
-        extra_labels=None,
+        labels=None,
         **parameters,
     ):
         # The kwargs here are any parameter you would normally pass into the
@@ -115,7 +115,7 @@ class RunWorkflowTask(Task):
         elif executor_type == "prefect":
             # Now create the flow run in the prefect cloud
             flow_run_id = self.workflow.run_cloud(
-                extra_labels,
+                labels,
                 wait_for_run,
                 **parameters,
             )

@@ -90,7 +90,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
         return all_data if as_dict else cls(**all_data)
 
     @classmethod
-    def create_subclass_from_relaxation(cls, name, relaxation, **extra_columns):
+    def create_subclass_from_relaxation(cls, name, relaxation, module, **extra_columns):
 
         # All structures in this table come from relaxation calculations, where
         # there can be many structures (one for each ionic steps) linked to a
@@ -105,6 +105,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
                 on_delete=table_column.CASCADE,
                 related_name="structures",
             ),
+            module=module,
             **extra_columns,
         )
 
@@ -154,7 +155,7 @@ class Relaxation(Structure, Calculation):
     # structures
 
     @classmethod
-    def create_all_subclasses(cls, name, **extra_columns):
+    def create_all_subclasses(cls, name, module, **extra_columns):
 
         # For convience, we add columns that point to the start and end structures
         NewRelaxationClass = cls.create_subclass(
@@ -173,12 +174,14 @@ class Relaxation(Structure, Calculation):
                 blank=True,
                 null=True,
             ),
+            module=module,
             **extra_columns,
         )
 
         NewIonicStepClass = IonicStep.create_subclass_from_relaxation(
             name,
             NewRelaxationClass,
+            module=module,
             **extra_columns,
         )
 

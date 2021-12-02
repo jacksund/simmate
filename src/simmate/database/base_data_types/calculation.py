@@ -157,7 +157,9 @@ class NestedCalculation(Calculation):
     corrections = "not implemented in simmate yet"
 
     @classmethod
-    def create_subclass_from_calcs(cls, name, child_calculation_tables, **extra_columns):
+    def create_subclass_from_calcs(
+        cls, name, child_calculation_tables, module, **extra_columns
+    ):
 
         # BUG: I assume a workflow won't point to the save calculation table
         # more than once... What's a scenario where this isn't true?
@@ -180,13 +182,14 @@ class NestedCalculation(Calculation):
             **new_columns,
             **extra_columns,
             child_calculation_tables=child_calculation_tables,  # also have this as an attribute
+            module=module,
         )
 
         # we now have a new child class and avoided writing some boilerplate code!
         return NewClass
-    
+
     def update_calculation(self):
-        
+
         for child_calc_table in self.child_calculation_tables:
             if child_calc_table.objects.filter(directory=self.directory).exists():
                 child_calc = child_calc_table.objects.get(directory=self.directory)

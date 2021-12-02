@@ -21,7 +21,7 @@ class Workflow(PrefectFlow):
     # common utilities and pre-submit tasks. This allows me to register a
     # calculation along with submitting a workflow to the cloud
 
-    def run_cloud(self, extra_labels=[], wait_for_run=True, **kwargs):
+    def run_cloud(self, labels=[], wait_for_run=True, **kwargs):
 
         """
         This method is a fork of...
@@ -52,7 +52,7 @@ class Workflow(PrefectFlow):
         flow_run_id = client.create_flow_run(
             flow_id=flow_view.flow_id,
             parameters=parameters_serialized,
-            labels=extra_labels,
+            labels=labels,
         )
 
         # we log the website url to the flow for the user

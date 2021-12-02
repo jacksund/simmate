@@ -5,6 +5,8 @@
 # all database models can inherit from. I also switch away from django naming
 # conventions to ones more friendly to beginners
 
+import sys
+
 from django.db import models
 from django_pandas.io import read_frame
 
@@ -98,7 +100,7 @@ class DatabaseTable(models.Model):
     objects = DatabaseTableManager()
 
     @classmethod
-    def create_subclass(cls, name, **new_columns):
+    def create_subclass(cls, name, module, **new_columns):
         """
         This method is useful for dynamically creating a subclass DatabaseTable
         from some abstract class.
@@ -112,6 +114,7 @@ class DatabaseTable(models.Model):
 
         NewTable = Structure.create_subclass(
             name="NewTable",
+            module=__name__, # required for serialization
             new_field1 = table_column.FloatField()
             new_field2 = table_column.FloatField()
         )
@@ -126,8 +129,21 @@ class DatabaseTable(models.Model):
         new_columns = new_columns.copy()
 
         # BUG: I'm honestly not sure what this does, but it works...
-        # https://stackoverflow.com/questions/27112816/dynamically-creating-django-models-with-type
-        new_columns.update({"__module__": __name__, "Meta": {}})
+        # https://stackoverflow.com/questions/27112816/
+        new_columns.update(
+            {
+                "__module__": module,
+                "Meta": {},
+            }
+        )
+        # TODO: make it so I don't have to specify the module, but it is automatically
+        # detected from where the class is created. This would remove boilerplate code.
+        # A good start to this is here:
+        #   https://stackoverflow.com/questions/59912684/
+        # sys._getframe(1).f_globals["__name__"]  <-- grabs where this function is called
+        # but doesn't work for multiple levels of inheritance. For example, this fails for
+        # the Relaxation subclasses because the create_all_subclasses method calls
+        # create_subclass -- therefore we'd need _getframe(3) instead of 1...
 
         # Now we dynamically create a new class that inherits from this main
         # one and also adds the new columns to it.

@@ -54,9 +54,11 @@ class Search:
         # triggered_actions=[],
         # TODO: I assume Prefect for submitting workflows right now.
         # executor="local",
+        labels=[], # prefect labels to submit workflows with
     ):
 
         self.composition = composition
+        self.labels = labels
 
         # TODO: consider grabbing these from the database so that we can update
         # them at any point.
@@ -213,9 +215,7 @@ class Search:
 
             # Go through the running workflows and see if we need to submit
             # new ones to meet our steadystate target(s)
-            print("A")
             self._check_steadystate_workflows()
-            print("DONE")
 
             # TODO: Go through the triggered actions
             # self._check_triggered_actions()
@@ -298,13 +298,11 @@ class Search:
             self.steadystate_sources_db,
             self.steadystate_source_counts,
         ):
-            print("C")
             # This loop says for the number of steady state runs we are short,
             # create that many new individuals! max(x,0) ensure we don't get a
             # negative value. A value of 0 means we are at steady-state and can
             # just skip this loop.
             for n in range(max(int(njobs_target - source_db.nprefect_flow_runs), 0)):
-                print("D")
 
                 # now we need to make a new individual and submit it!
                 parent_ids, structure = self._make_new_structure(source)
@@ -319,6 +317,7 @@ class Search:
                 flow_run_id = self.workflow.run_cloud(
                     structure=structure,
                     wait_for_run=False,
+                    labels=self.labels,
                 )
 
                 # Attached the flow_run_id to our source so we know how many
@@ -374,7 +373,6 @@ class Search:
         new_structure = False
         attempt = 0
         while not new_structure and attempt <= max_attempts:
-            print("E")
             # add an attempt
             attempt += 1
             if is_transformation:
