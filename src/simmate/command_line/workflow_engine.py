@@ -115,6 +115,17 @@ def start_singletask_worker():
 
 @workflow_engine.command()
 @click.option(
+    "--agent_name",
+    "-n",
+    help="the name of the agent that will be visible in prefect cloud",
+)
+@click.option(
+    "--agent_labels",
+    "-l",
+    help="labels that the agent will query for. To list multiple do... -l label1 -l label2",
+    multiple=True,
+)
+@click.option(
     "--njobs",
     "-j",
     help="the number of separate slurm jobs to submit",
@@ -137,6 +148,8 @@ def start_singletask_worker():
     help="the timelimit set for each slurm job",
 )
 def run_cluster(
+    agent_name,
+    agent_labels,
     njobs,
     cpus_per_job,
     memory_per_job,
@@ -152,7 +165,7 @@ def run_cluster(
     use case.
 
     If you would like this cluster to run endlessly in the background, you can
-    submit it with something like "nohup simmate workflow-engine start-cluster &".
+    submit it with something like "nohup simmate workflow-engine run-cluster &".
     The "nohup" and "&" symbol together make it so this runs in the background AND
     it won't shutdown if you close your terminal (or ssh). To stop this from running,
     you'll now need to find the running process and kill it. Use something like
@@ -166,9 +179,18 @@ def run_cluster(
 
     from simmate.configuration.prefect.setup_resources import run_cluster_and_agent
 
+    # agent_name and agent_labels are optional. We want them to grab the config defaults
+    # if they weren't passed, so check if they were set here.
+    agent_kwargs = {}
+    if agent_name:
+        agent_kwargs["agent_name"] = agent_name
+    if agent_labels:
+        agent_kwargs["agent_labels"] = agent_labels
+
     run_cluster_and_agent(
         njobs=njobs,
         job_cpu=cpus_per_job,
         job_mem=memory_per_job,
         walltime=walltime_per_job,
+        **agent_kwargs,
     )
