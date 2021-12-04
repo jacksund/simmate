@@ -107,12 +107,12 @@ class Search:
         # crashed slurm job, but it's never submitted again...
         # OPTIMIZE: should we only do final structures? Or should I include input
         # structures and even all ionic steps as well...?
-        past_structures = self.individuals_datatable.objects.filter(
+        structure_pool = self.individuals_datatable.objects.filter(
             formula_full=self.composition.formula,
-        ).to_pymatgen()
+        )
         self.fingerprint_validator = PartialCrystalNNFingerprint(
             composition=composition,
-            initial_structures=past_structures,
+            structure_pool=structure_pool,
         )
 
         # Check if there is an existing search and grab it if so. Otherwise, add
@@ -173,7 +173,7 @@ class Search:
                     f"{source} is not possible with single-element structures."
                     " This is being removed from your steadystate_sources."
                 )
-                continue # skips to next source
+                continue  # skips to next source
 
             # store proportion value
             self.steadystate_source_proportions.append(proportion)
@@ -241,6 +241,9 @@ class Search:
             if self._check_stop_condition():
                 break  # break out of the while loop
             # Otherwise, keep going!
+            
+            # update the fingerprint database with all of the completed structures
+            self.fingerprint_validator.update_fingerprint_database()
 
             # Go through the running workflows and see if we need to submit
             # new ones to meet our steadystate target(s)

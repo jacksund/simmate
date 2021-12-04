@@ -1,29 +1,34 @@
 # -*- coding: utf-8 -*-
 
 import numpy
-
 from tqdm import tqdm
+
+from django.utils import timezone
 
 from matminer.featurizers.site import CrystalNNFingerprint
 
 from simmate.toolkit.featurizers.fingerprint import PartialsSiteStatsFingerprint
 
-# TODO: what if we want to add to the initial_structures list later on? Should this
-# be integrated with the Simmate database tables? An example use-case is with 
+# TODO: what if we want to add to the structure_pool list later on? Should this
+# be integrated with the Simmate database tables? An example use-case is with
 # evolutionary searches where structures can be added at random times, but those
 # additions won't be reflected here...
 # One potential solution is to have an "update_fingerprint_table" method along with
-# structure_ids list. We'd make this so initial_structures can be either a
+# structure_ids list. We'd make this so structure_pool can be either a
 # list of structures OR a structure database table.
+
 
 class PartialCrystalNNFingerprint:
     def __init__(
         self,
         composition,
         stat_options=["mean", "std_dev", "minimum", "maximum"],
-        initial_structures=[],
+        structure_pool=[],  # either a list of structures OR a queryset
+        add_unique_to_pool=False,  # whether to add fingerprint when check_structure is true
         **crystalnn_options,
     ):
+
+        self.add_unique_to_pool = add_unique_to_pool
 
         # make the matminer featurizer object using the provided settings
         if crystalnn_options:
@@ -49,17 +54,41 @@ class PartialCrystalNNFingerprint:
             [element.symbol for element in composition.elements]
         )
 
-        # Generate the fingerprint for each of the initial input structures
-        # We convert this to a numpy array for speed improvement at later stages
-        # OPTIMIZE: this can be slow and I should support parallel featurization
-        self.fingerprint_database = numpy.array(
-            [
-                self.featurizer.featurize(structure)
-                for structure in tqdm(initial_structures)
-            ]
-        )
+        # check if we were given a list of pymatgen structures.
+        if isinstance(structure_pool, list):
+            # set this variable as none to help with some warnings methods such
+            # as the update_fingerprint_database
+            self.structure_pool_queryset = None
+            # If so, we generate the fingerprint for each of the initial input structures
+            # We convert this to a numpy array for speed improvement at later stages
+            # OPTIMIZE: this can be slow and I should support parallel featurization
+            self.fingerprint_database = numpy.array(
+                [
+                    self.featurizer.featurize(structure)
+                    for structure in tqdm(structure_pool)
+                ]
+            )
 
-    def check_structure(self, structure, tolerance=1e-4):
+        # otherwise we have a queryset that should be used to populate the
+        # fingerprint database
+        else:
+            # we store the queryset as an attribute because we may want to
+            # update the structure pool later on.
+            self.structure_pool_queryset = structure_pool
+            self.fingerprint_database = numpy.array([])
+            # we also keep a log of the last update so we only grab new structures
+            # each time we update the database. To start, we set this as the
+            # eariest possible date, which tells our update_fingerprint_database
+            # method to include ALL structures
+            self.last_update = timezone.make_aware(
+                timezone.datetime.min, timezone.get_default_timezone()
+            )
+            self.update_fingerprint_database()
+
+    def check_structure(self, structure, tolerance=0.075):
+        # OPTIMIZE: my choice of tolerance is based on my evolutionary search.
+        # However, "clustering" after evolutionary search suggests that something
+        # like 0.5 might be a better choice for finding a truly unique structure
 
         # make the fingerprint for this structure and make into a numpy array for speed
         fingerprint1 = numpy.array(self.featurizer.featurize(structure))
@@ -77,13 +106,48 @@ class PartialCrystalNNFingerprint:
         # If we make it through all structures and no distance is below the
         # tolerance, we have a new and unique structure!
 
-        # add this new structure to the database
-        if self.fingerprint_database.size == 0:
-            self.fingerprint_database = numpy.array([fingerprint1])
-        else:
-            self.fingerprint_database = numpy.append(
-                self.fingerprint_database, [fingerprint1], axis=0
-            )
+        # add this new structure to the database if it was requested.
+        if self.add_unique_to_pool:
+            self._add_fingerprint_to_database()
 
         # Return that we were successful
         return True
+
+    def update_fingerprint_database(self):
+
+        if not self.structure_pool_queryset:
+            raise Exception(
+                "This method should only be used when you're structure pool"
+                " is based on a Simmate database table!"
+            )
+
+        # BUG: what if a structure was added to the table WHILE I was running the
+        # last query? This sets up a race condition with new structures and my
+        # last_update timestamp. To avoid this bug, I immediately update our
+        # timestamp, rather than doing it after the query
+        last_update_safe = self.last_update
+        self.last_update = timezone.now()
+
+        # now grab all the new structures!
+        new_structures = (
+            self.structure_pool_queryset.filter(created_at__gte=last_update_safe)
+            .only("structure_string")
+            .to_pymatgen()
+        )
+
+        print(
+            f"Found {len(new_structures)} new structures for the fingerprint database."
+        )
+
+        # calculate each fingerprint and add it to the database
+        for structure in tqdm(new_structures):
+            fingerprint = numpy.array(self.featurizer.featurize(structure))
+            self._add_fingerprint_to_database(fingerprint)
+
+    def _add_fingerprint_to_database(self, fingerprint):
+        if self.fingerprint_database.size == 0:
+            self.fingerprint_database = numpy.array([fingerprint])
+        else:
+            self.fingerprint_database = numpy.append(
+                self.fingerprint_database, [fingerprint], axis=0
+            )

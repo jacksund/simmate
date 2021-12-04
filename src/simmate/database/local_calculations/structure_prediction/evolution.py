@@ -74,7 +74,7 @@ class StructureSource(DatabaseTable):
                     {
                         "where": {
                             # "flow": {"name": {"_eq": self.search.workflow}},
-                            "state": {"_in": ["Completed", "Scheduled"]},
+                            "state": {"_in": ["Running", "Scheduled"]},
                             "id": {"_in": self.prefect_flow_run_ids},
                         },
                     },
