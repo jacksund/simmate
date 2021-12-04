@@ -24,7 +24,7 @@ class PartialCrystalNNFingerprint:
         composition,
         stat_options=["mean", "std_dev", "minimum", "maximum"],
         structure_pool=[],  # either a list of structures OR a queryset
-        add_unique_to_pool=False,  # whether to add fingerprint when check_structure is true
+        add_unique_to_pool=True,  # whether to add fingerprint when check_structure is true
         **crystalnn_options,
     ):
 
@@ -58,7 +58,7 @@ class PartialCrystalNNFingerprint:
         if isinstance(structure_pool, list):
             # set this variable as none to help with some warnings methods such
             # as the update_fingerprint_database
-            self.structure_pool_queryset = None
+            self.structure_pool_queryset = "local_only"
             # If so, we generate the fingerprint for each of the initial input structures
             # We convert this to a numpy array for speed improvement at later stages
             # OPTIMIZE: this can be slow and I should support parallel featurization
@@ -108,16 +108,16 @@ class PartialCrystalNNFingerprint:
 
         # add this new structure to the database if it was requested.
         if self.add_unique_to_pool:
-            self._add_fingerprint_to_database()
+            self._add_fingerprint_to_database(fingerprint1)
 
         # Return that we were successful
         return True
 
     def update_fingerprint_database(self):
 
-        if not self.structure_pool_queryset:
+        if self.structure_pool_queryset == "local_only":
             raise Exception(
-                "This method should only be used when you're structure pool"
+                "This method should only be used when your structure pool"
                 " is based on a Simmate database table!"
             )
 
