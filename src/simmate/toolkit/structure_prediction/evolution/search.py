@@ -10,6 +10,9 @@ from simmate.database.local_calculations.structure_prediction.evolution import (
 
 import simmate.toolkit.creators.structure.all as creation_module
 import simmate.toolkit.transformations.all as transform_module
+from simmate.toolkit.validators.fingerprint.pcrystalnn import (
+    PartialCrystalNNFingerprint,
+)
 
 
 class Search:
@@ -95,6 +98,23 @@ class Search:
         self.individuals_datatable = self.workflow.result_table
         self.calculation_datatable = self.workflow.calculation_table
 
+        # Initialize the fingerprint database
+        # For this we need to grab all previously calculated structures of this
+        # compositon too pass in too.
+        print("Generating fingerprints for past structures. This can be slow...")
+        # BUG: should we only do structures that were successfully calculated?
+        # If not, there's a chance a structure fails because of something like a
+        # crashed slurm job, but it's never submitted again...
+        # OPTIMIZE: should we only do final structures? Or should I include input
+        # structures and even all ionic steps as well...?
+        past_structures = self.individuals_datatable.objects.filter(
+            formula_full=self.composition.formula,
+        ).to_pymatgen()
+        self.fingerprint_validator = PartialCrystalNNFingerprint(
+            composition=composition,
+            initial_structures=past_structures,
+        )
+
         # Check if there is an existing search and grab it if so. Otherwise, add
         # the search entry to the DB.
         if SearchDatatable.objects.filter(composition=composition.formula).exists():
@@ -145,6 +165,15 @@ class Search:
         self.steadystate_source_proportions = []
         self.steadystate_sources = []
         for proportion, source in steadystate_sources:
+
+            # There are certain transformation sources that don't work for single-element
+            # structures, so we check for this here and remove them.
+            if source in ["AtomicPermutationASE"]:
+                print(
+                    f"{source} is not possible with single-element structures."
+                    " This is being removed from your steadystate_sources."
+                )
+                continue # skips to next source
 
             # store proportion value
             self.steadystate_source_proportions.append(proportion)
@@ -224,6 +253,7 @@ class Search:
             # OPTIMIZE: ask Prefect if their is an equivalent to Dask's gather/wait
             # functions, so we know exactly when a workflow completes
             # https://docs.dask.org/en/stable/futures.html#waiting-on-futures
+            print(f"Sleeping for {sleep_step} seconds before running checks again.")
             time.sleep(sleep_step)
         print("Stopping the search (remaining calcs will be left to finish).")
 
@@ -357,7 +387,7 @@ class Search:
         # we start mutating the best. We check that here.
         if is_transformation and (
             self.individuals_datatable.objects.filter(
-                energy_per_atom__isnull=False
+                formula_full=self.composition.formula, energy_per_atom__isnull=False
             ).count()
             < self.nfirst_generation
         ):
@@ -386,6 +416,17 @@ class Search:
                 parent_ids = None
                 # make a new structure
                 new_structure = source.create_structure()
+
+            # check to see if the structure is new and unique so that we don't
+            # have any repeat calculations.
+            if new_structure:
+                # this will return false if the structure is NOT unique
+                if not self.fingerprint_validator.check_structure(new_structure):
+                    # in this case we unset the structure, so we try the loop
+                    # again.
+                    print("Generated structure is not unique. Trying again.")
+                    new_structure = None
+
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure:
