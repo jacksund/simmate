@@ -241,7 +241,7 @@ class Search:
             if self._check_stop_condition():
                 break  # break out of the while loop
             # Otherwise, keep going!
-            
+
             # update the fingerprint database with all of the completed structures
             self.fingerprint_validator.update_fingerprint_database()
 
@@ -448,7 +448,9 @@ class Search:
         # our selectors just require a dataframe where we specify the fitness
         # column. So we query our individuals database to give this as an input.
         individuals_df = (
-            self.individuals_datatable.objects.filter(energy_per_atom__isnull=False)
+            self.individuals_datatable.objects.filter(
+                formula_full=self.composition.formula, energy_per_atom__isnull=False
+            )
             .order_by("energy_per_atom")[:200]
             .to_dataframe()
         )

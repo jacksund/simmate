@@ -134,7 +134,12 @@ class PartialCrystalNNFingerprint:
             .only("structure_string")
             .to_pymatgen()
         )
-
+        
+        # If there aren't any new structures, just exit without printing the 
+        # message and tqdm progress bar below
+        if not new_structures:
+            return
+        
         print(
             f"Found {len(new_structures)} new structures for the fingerprint database."
         )
