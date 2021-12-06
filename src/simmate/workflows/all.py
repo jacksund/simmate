@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflows.energy.mit import workflow as energy_mit
-from simmate.workflows.relaxation.all import (
+from simmate.workflows.energy import energy_mit
+from simmate.workflows.relaxation import (
     relaxation_mit,
     relaxation_quality00,
     relaxation_quality01,

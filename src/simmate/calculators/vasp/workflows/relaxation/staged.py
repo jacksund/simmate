@@ -11,15 +11,25 @@ from simmate.workflows.common_tasks.all import (
     SaveNestedCalculationTask,
 )
 
-from simmate.workflows.relaxation.quality_00 import workflow as relaxation_quality00
-from simmate.workflows.relaxation.quality_01 import workflow as relaxation_quality01
-from simmate.workflows.relaxation.quality_02 import workflow as relaxation_quality02
-from simmate.workflows.relaxation.quality_03 import workflow as relaxation_quality03
-from simmate.workflows.relaxation.quality_04 import workflow as relaxation_quality04
-from simmate.workflows.energy.mit import workflow as energy_mit
+from simmate.calculators.vasp.workflows.relaxation.quality_00 import (
+    workflow as relaxation_quality00,
+)
+from simmate.calculators.vasp.workflows.relaxation.quality_01 import (
+    workflow as relaxation_quality01,
+)
+from simmate.calculators.vasp.workflows.relaxation.quality_02 import (
+    workflow as relaxation_quality02,
+)
+from simmate.calculators.vasp.workflows.relaxation.quality_03 import (
+    workflow as relaxation_quality03,
+)
+from simmate.calculators.vasp.workflows.relaxation.quality_04 import (
+    workflow as relaxation_quality04,
+)
+from simmate.calculators.vasp.workflows.energy.mit import workflow as energy_mit
 
-from simmate.database.local_calculations.relaxation.all import StagedRelaxation
-from simmate.database.local_calculations.energy.mit import MITStructure
+from simmate.calculators.vasp.database.relaxation import StagedRelaxation
+from simmate.calculators.vasp.database.energy import MITStructure
 
 # init common tasks
 setup_calculation = LoadNestedCalculationTask(StagedRelaxation)

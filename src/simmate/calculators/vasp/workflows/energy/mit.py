@@ -8,7 +8,7 @@ from simmate.workflow_engine.prefect import (
 
 from simmate.workflows.common_tasks.all import load_input, SaveOutputTask
 from simmate.calculators.vasp.tasks.energy.mit import MITStaticEnergyTask
-from simmate.database.local_calculations.energy.mit import MITStructure
+from simmate.database.local_calculations.energy import MITStructure
 
 static_energy = MITStaticEnergyTask()
 save_results = SaveOutputTask(MITStructure)

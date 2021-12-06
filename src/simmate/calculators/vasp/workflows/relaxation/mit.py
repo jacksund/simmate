@@ -8,7 +8,7 @@ from simmate.workflow_engine.prefect import (
 
 from simmate.workflows.common_tasks.all import load_input, SaveOutputTask
 from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxationTask
-from simmate.database.local_calculations.relaxation.all import MITRelaxation
+from simmate.database.local_calculations.relaxation import MITRelaxation
 
 relax_structure = MITRelaxationTask()
 save_results = SaveOutputTask(MITRelaxation)
