@@ -5,4 +5,4 @@
 # instead of what's written below. You should only use this shortcut if you are
 # using ALL of the classes below or if you are running some quick interactive test.
 
-from simmate.calculators.vasp.workflows.energy.all import energy_mit
+from simmate.calculators.vasp.workflows.energy.mit import workflow as energy_mit
