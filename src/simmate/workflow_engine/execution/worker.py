@@ -156,7 +156,7 @@ class SimmateWorker:
             ntasks_finished += 1
 
             # Print out the job ID that was just finished for the user to see.
-            print(f"Completed WorkItem.")
+            print("Completed WorkItem.")
 
     def queue_size(self):
         """

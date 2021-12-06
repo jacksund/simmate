@@ -14,17 +14,16 @@ Therefore, we had to make this custom task here -- where it decided whether
 we call the workflow.run_cloud or workflow.run method.
 """
 
-# import os
-# from pathlib import Path
-
-# import yaml
-
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
 
 # BUG: prefect executor causes issues because there is no aysncio. Therefore the
-# "waiting" step means a task will be holding onto two Dask workers.
+# "waiting" step means a task will be holding onto two Dask workers. Because of this
+# Prefect cloud has been disabled as an executor.
 #
+# import os
+# from pathlib import Path
+# import yaml
 # def get_default_executor_type():
 #     # rather than always specifying the executor type whenever this class is used,
 #     # it's much more convenient to set the default value here based on a config
@@ -41,7 +40,7 @@ from prefect.utilities.tasks import defaults_from_attrs
 #     return EXECUTOR_TYPE
 
 
-class RunWorkflowTask(Task):
+class WorkflowTask(Task):
     def __init__(
         self,
         # The full workflow to run.
@@ -103,11 +102,19 @@ class RunWorkflowTask(Task):
         # raise an error so that this task is flagged as failed
         if executor_type == "local":
             state = self.workflow.run(**parameters)
-            if not state.is_successful():
-                raise Exception(
-                    "The workflow task did not complete successfully. "
-                    "View the prefect-logs above for more info."
-                )
+            if state.is_failed():
+                # Grab the very first task error and we raise that.
+                # TODO: what if we want to raise all task errors (excluding those
+                # like "TriggerFailed")?
+                # OPTIMIZE: would the log_stdout=True task option be the better
+                # way to forward information? See here:
+                #   https://docs.prefect.io/core/concepts/logging.html#logging-stdout
+                for task_state in state.result.values():
+                    if task_state.is_failed():
+                        error = task_state.result
+                        break  # exits for-loop
+                # we want the error raised so that the task fails
+                raise error
             return state
 
         # If we are using prefect, we assume that the flow has been registered
@@ -119,4 +126,6 @@ class RunWorkflowTask(Task):
                 wait_for_run,
                 **parameters,
             )
+            if wait_for_run:
+                raise Exception("wait_for_run not implemented for cloud yet")
             return flow_run_id

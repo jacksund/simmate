@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine.prefect import (
+from simmate.workflow_engine.workflow import (
     Workflow,
     Parameter,
     ModuleStorage,

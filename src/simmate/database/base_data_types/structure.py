@@ -196,7 +196,7 @@ class Structure(DatabaseTable):
         # I should comibine/condense these.
 
         # I allow the structure input to be a number of inputs
-        # (see workflows.common_tasks.load_input and workflow_engine.prefect for why)
+        # (see workflows.common_tasks.load_input and workflow_engine.workflow for why)
         # I therefore convert to pymatgen structure object here first.
 
         # if the input is already a pymatgen structure, just return it back

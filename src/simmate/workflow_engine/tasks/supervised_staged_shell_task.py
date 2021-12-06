@@ -6,7 +6,6 @@ import time
 import signal
 from shutil import make_archive
 import subprocess
-from typing import Any, Tuple
 
 import pandas
 from prefect.core.task import Task
@@ -25,12 +24,10 @@ from simmate.utilities import get_directory, empty_directory
 
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
 # reset the working directory between task retries -- in some cases we may
-# want to delete the entire directory. As of now, I only ever use retries
-# on StagedShellTasks through the SupervisedStagedTask class's ErrorHandlers. Thus
-# you should look there for now if you'd like a cleanup_on_fail method.
+# want to delete the entire directory.
 
 # OPTIMIZE: I think this class would greatly benefit from asyncio so that we
-# know exactly when a shelltask completes, rather than loop and checking every
+# know exactly when a shelltask completes, rather than looping and checking every
 # set timestep.
 # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
 
@@ -144,8 +141,8 @@ class SupervisedStagedShellTask(Task):
         pre-processing. This includes creating a directory, writing input files
         or any other function ran before calling the executable.
         """
-        # Be sure to include directory and structure (or **kwargs) as input arguments for
-        # higher-level compatibility with the run method.
+        # Be sure to include directory and structure (or **kwargs) as input arguments
+        # for higher-level compatibility with the run method.
         # You should never need to call this method directly!
         pass
 
@@ -457,8 +454,6 @@ class SupervisedStagedShellTask(Task):
         # run the workup stage of the task. This is where the data/info is pull
         # out from the calculation and is thus our "result".
         result = self.workup(directory)
-
-        # Whatever the result is, I attached the corrections to it.
 
         # run the postprocess in case any zipping/archiving/cleanup was requested
         self.postprocess(directory)

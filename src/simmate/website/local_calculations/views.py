@@ -10,7 +10,7 @@ from simmate.database.local_calculations.relaxation import (
     # MITIonicStep,
 )
 from simmate.website.local_calculations.forms import MITRelaxationForm
-from simmate.workflow_engine.tasks.run_workflow_task import RunWorkflowTask
+from simmate.workflow_engine.tasks.workflow_task import WorkflowTask
 
 
 @login_required
@@ -73,7 +73,7 @@ def mit_submit(request):
             vasp_command = submission_form.cleaned_data["vasp_command"]
 
             # We can now submit the workflow for the structure.
-            flowtask = RunWorkflowTask(workflow_name="MIT Relaxation")
+            flowtask = WorkflowTask(workflow_name="MIT Relaxation")
             flow_run_id = flowtask.run(
                 structure=structure,
                 vasp_command=vasp_command,
