@@ -13,6 +13,12 @@ from prefect.utilities.tasks import defaults_from_attrs
 
 from simmate.utilities import get_directory, empty_directory
 
+# For typing:
+from typing import List, Any
+from pymatgen.core.structure import Structure
+from simmate.workflow_engine.error_handler import ErrorHandler
+
+
 # This is a combination of prefect ShellTask, custodian Job, and Custodian main.
 
 # from abc import ABC, abstractmethod
@@ -79,28 +85,79 @@ class SupervisedStagedShellTask(Task):
 
     def __init__(
         self,
+        structure: Structure = None,
+        command: str = None,
+        directory: str = None,
+        error_handlers: List[ErrorHandler] = None,
+        max_corrections: int = None,
+        monitor: bool = None,
+        polling_timestep: float = None,
+        monitor_freq: int = None,
+        save_corrections_to_file: bool = True,
+        corrections_filename: str = "simmate_corrections.csv",
+        empty_directory_on_finish: bool = False,
+        files_to_keep: List[str] = None,  
+        compress_output: bool = False,
+        **kwargs: Any,
+    ):
+        """
+        To create an instance:
+
+        >>> my_task = SupervisedStagedShellTask()
+
+        All parameters are optional, and if they aren't provided, default values
+        are inherited from class attributes.
+        
+        External hyperlinks, like Simmate_.
+        
+        .. _Simmate: http://www.python.org/
+        
+        
+        Example formula:
+        
+        .. math:: e^{i\pi} + 1 = 0
+        
+        Parameters
+        ----------
+        structure : pymatgen.core.structure.Structure (optional)
+            The structure to use for the task. 
+        command : str, optional
+            DESCRIPTION. The default is None.
+        directory : str, optional
+            DESCRIPTION. The default is None.
+        error_handlers : List[ErrorHandler], optional
+            DESCRIPTION. The default is None.
+        max_corrections : int, optional
+            DESCRIPTION. The default is None.
+        monitor : bool, optional
+            DESCRIPTION. The default is None.
+        polling_timestep : float, optional
+            DESCRIPTION. The default is None.
+        monitor_freq : int, optional
+            DESCRIPTION. The default is None.
+        save_corrections_to_file : bool, optional
+            DESCRIPTION. The default is True.
+        corrections_filename : str, optional
+            DESCRIPTION. The default is "simmate_corrections.csv".
+        empty_directory_on_finish : bool, optional
+            DESCRIPTION. The default is False.
+        files_to_keep : List[str], optional
+            DESCRIPTION. The default is None.
+        compress_output : bool, optional
+            DESCRIPTION. The default is False.
+        **kwargs : Any
+            DESCRIPTION.
+
+        """
+        
         # this is a common input but not required for all SSSTasks
-        structure=None,
         # core parts
-        command=None,
-        directory=None,
-        error_handlers=None,
-        max_corrections=None,
         # settings for the stagedtask supervision/monitoring
-        monitor=None,
-        polling_timestep=None,
-        monitor_freq=None,
         # return, cleanup, and file saving settings
-        save_corrections_to_file=True,
-        corrections_filename="simmate_corrections.csv",
-        empty_directory_on_finish=False,
-        files_to_keep=[],  # this is only used when empty_directory_on_finish=True
-        compress_output=False,
+        # only used if empty_directory_on_finish=True
         # To support other Prefect input options. To see all the options, visit...
         # https://docs.prefect.io/api/latest/core/task.html
-        **kwargs,
-    ):
-
+        
         # if any of these input parameters were given, overwrite the default
         # Note to python devs: this odd formatting is because we set our defaults
         # to None in __init__ while our actual default values are defined above
