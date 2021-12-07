@@ -168,7 +168,7 @@ class Search:
 
             # There are certain transformation sources that don't work for single-element
             # structures, so we check for this here and remove them.
-            if source in ["AtomicPermutationASE"]:
+            if len(composition.elements) == 1 and source in ["AtomicPermutationASE"]:
                 print(
                     f"{source} is not possible with single-element structures."
                     " This is being removed from your steadystate_sources."
