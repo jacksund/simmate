@@ -20,7 +20,7 @@ def start_project(project_name):
     config_directory = os.path.dirname(os.path.abspath(configuration.__file__))
 
     # We add on "project_template" to this file path as that's our full template
-    template_directory = os.path.join(config_directory, "project_template")
+    template_directory = os.path.join(config_directory, "example_project")
 
     # we now make the project folder using our template directory.
     # Note, we are using Django's "startproject" command even though we are just
@@ -37,7 +37,7 @@ def start_project(project_name):
 
     apps_yaml = os.path.join(Path.home(), ".simmate", "applications.yaml")
     new_line = "\nexample_app.apps.ExampleAppConfig"  # \n ensures a new line
-    
+
     # If the file exists, we append this line to the end of the file. Otherwise,
     # we create a new file and add the line!
     with open(apps_yaml, "a+") as file:
@@ -46,11 +46,7 @@ def start_project(project_name):
     # Let the user know what we did and how to continue.
     click.echo(
         f"Successfully made a new project! You'll find it at {new_project_directory}\n\n"
-        "We also added the example_app to your ~/.simmate/applications.yaml file.\n"
-        "If you ever want to remove or rename your apps, make sure you update\n"
-        "this file too.\n\n"
-        "Also, make sure you install this project to your python path with...\n\t "
-        f"pip install -e {project_name}\n\n"
+        "Be sure to go through the README file in your new project.\n\n"
         "Need help? Take a look at our tutorial for making custom apps or post\n"
         "your question in our forum."
     )

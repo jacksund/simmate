@@ -8,12 +8,12 @@ from pymatgen.core.structure import Structure
 
 # from pymatgen.analysis.structure_prediction.volume_predictor import DLSVolumePredictor #, RLSVolumePredictor
 
-from pymatdisc.core.creators.base import StructureCreator
-from pymatdisc.core.creators.lattice import RSLSmartVolume  # RandomSymLattice
-from pymatdisc.core.creators.sites import RandomWySites
-from pymatdisc.core.creators.utils import NestedFixes
+from simmate.toolkit.creators.structure.base import StructureCreator
+from simmate.toolkit.creators.lattice.all import RSLSmartVolume  # RandomSymLattice
+from simmate.toolkit.creators.sites.random_wyckoff import RandomWySites
+from simmate.toolkit.creators.utils import NestedFixes
 
-from pymatdisc.core.validators.structure import SiteDistanceMatrix
+from simmate.toolkit.validators.structure import SiteDistanceMatrix
 
 ##############################################################################
 

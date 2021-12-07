@@ -3,7 +3,7 @@
 # import pickle
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 
-from simmate.database.base import DatabaseTable, table_column
+from simmate.database.base_data_types import DatabaseTable, table_column
 
 # TYPES OF RELATIONSHIPS:
 # ManyToMany - place in either but not both

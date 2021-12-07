@@ -16,6 +16,7 @@ def test():
     futures = [executor.submit(time.sleep, 5) for n in range(10)]
     return executor.wait(futures)
 
+
 test()
 
 # ----------------------------------------------------------------------------

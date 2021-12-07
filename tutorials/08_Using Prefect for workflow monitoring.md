@@ -50,7 +50,7 @@ flow_run_id = create_flow_run.run(
 # I wrote a custom class to handle submitting workflows to Prefect, or
 # running them locally, or even running them within other workflows.
 
-from simmate.workflow_engine.tasks.run_workflow_task import RunWorkflowTask
+from simmate.workflow_engine.tasks.workflow_task import WorkflowTask
 from simmate.workflows.relaxation.mit import workflow
 
 task = RunWorkflowTask(workflow)

@@ -23,7 +23,7 @@ import yaml
 
 
 def get_blender_command():
-    
+
     # First we look in the .simmate configuration directory and check if it
     # has been set there.
     #   [home_directory] ~/.simmate/blender.yaml
@@ -31,20 +31,20 @@ def get_blender_command():
     if os.path.exists(blender_filename):
         with open(blender_filename) as file:
             blender_command = yaml.full_load(file)["COMMAND"]
-        
+
         # BUG: for windows, we need to add quotes around the command because
         # it's actually a path. I couldn't figure out how to store these quotes
         # directly in the yaml file...
         if platform.system() == "Windows":
             blender_command = f'"{blender_command}"'
-        
-    # If not, we then try to find blender using the find_blender_installation 
+
+    # If not, we then try to find blender using the find_blender_installation
     # function defined below.
     else:
         blender_command = find_blender_installation()
-    
+
     test_blender_command(blender_command)
-    
+
     # we should now have the blender command and can return it for use elsewhere
     return blender_command
 
@@ -100,7 +100,7 @@ def find_blender_installation():
             # Because there are spaces in the file path, it is important we
             # wrap this command in quotes. Note we also replace the backslashes
             # in the file path with forward slashes.
-            blender_command = f'"{full_path_to_blender}"'.replace("\\","/")
+            blender_command = f'"{full_path_to_blender}"'.replace("\\", "/")
 
             # now confirm we can call the blender command
             test_blender_command(blender_command)

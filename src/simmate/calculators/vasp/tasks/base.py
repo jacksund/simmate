@@ -28,6 +28,26 @@ class VaspTask(SSSTask):
     # Vasp calculations always need an input structure
     requires_structure = True
 
+    # BUG:
+    # Prefect is unfortunately unable access a task result's attribute when
+    # building a flow. So I am unable to do things like...
+    #
+    #   with Workflow("example") as workflow:
+    #       output = example_task()
+    #       other_example_task(structure=output.structure)
+    #
+    # instead I need to make sure my output is a dictionary like so...
+    #
+    #   with Workflow("example") as workflow:
+    #       output = example_task()
+    #       other_example_task(structure=output["structure"])
+    #
+    # This controls whether we return just the result or a dict of result and
+    # final structure. Really, the result (a Vasprun object) contains the final
+    # structure via result.final_structure, BUT Prefect is causing problems here.
+    # For now, I only set this to True during relaxations.
+    return_final_structure = False
+
     # The command to call vasp in the current directory
     # TODO: add support for grabbing a user-set default from their configuration
     command = "vasp > vasp.out"
@@ -110,14 +130,17 @@ class VaspTask(SSSTask):
         # and then write the incar file
         incar = Incar(**self.incar) + Incar(**self.incar_parallel_settings)
         incar.to_file(
-            filename=os.path.join(directory, "INCAR"), structure=structure,
+            filename=os.path.join(directory, "INCAR"),
+            structure=structure,
         )
 
         # if KSPACING is not provide in the incar AND kpoints is attached to this
         # class instance, then we write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
             Kpoints.to_file(
-                structure, self.kpoints, os.path.join(directory, "KPOINTS"),
+                structure,
+                self.kpoints,
+                os.path.join(directory, "KPOINTS"),
             )
 
         # write the POTCAR file
@@ -137,7 +160,8 @@ class VaspTask(SSSTask):
 
         # load the xml file and all of the vasprun data
         vasprun = Vasprun(
-            filename=os.path.join(directory, "vasprun.xml"), exception_on_bad_xml=True,
+            filename=os.path.join(directory, "vasprun.xml"),
+            exception_on_bad_xml=True,
         )
 
         # grab the final structure
@@ -148,6 +172,10 @@ class VaspTask(SSSTask):
 
         # confirm that the calculation converged (ionicly and electronically)
         assert vasprun.converged
+
+        # OPTIMIZE: see my comment above on this attribute
+        if self.return_final_structure:
+            return {"structure_final": vasprun.final_structure, "vasprun": vasprun}
 
         # return vasprun object
         return vasprun

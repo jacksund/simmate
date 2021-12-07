@@ -5,7 +5,7 @@ import os
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.io.vasp.inputs import Kpoints
 
-from simmate.workflow_engine.tasks.error_handler import ErrorHandler
+from simmate.workflow_engine.error_handler import ErrorHandler
 from simmate.calculators.vasp.inputs.incar import Incar
 
 
@@ -84,7 +84,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
 
         # !!! I'm not sure what Custodian is doing here exactly, so I need to
         # revisit this when I have my KPOINTS class implemented
-        
+
         # from functools import reduce
         # import operator
         # backup(VASP_BACKUP_FILES | {self.output_filename})

@@ -12,7 +12,7 @@ from custodian.custodian import Custodian, Job, ErrorHandler
 from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
     SupervisedStagedShellTask as SSSTask,
 )
-from simmate.workflow_engine.tasks.error_handler import ErrorHandler as ErrorHandlerS
+from simmate.workflow_engine.error_handler import ErrorHandler as ErrorHandlerS
 
 import pandas
 

@@ -15,7 +15,8 @@ class GASPStructure:
     #!!! be used as a python module, which really hinders its reusability.
 
     def __init__(
-        self, composition,  # must be a pymatgen Composition object
+        self,
+        composition,  # must be a pymatgen Composition object
     ):
 
         #!!! this is inside the init because not all users will have this installed!

@@ -4,7 +4,7 @@ import os
 
 from pymatgen.core.structure import Structure
 
-from simmate.workflow_engine.tasks.error_handler import ErrorHandler
+from simmate.workflow_engine.error_handler import ErrorHandler
 from simmate.calculators.vasp.inputs.incar import Incar
 
 

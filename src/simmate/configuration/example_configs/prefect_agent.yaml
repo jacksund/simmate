@@ -1,0 +1,4 @@
+
+agent_name: WarWulf
+agent_labels: [DESKTOP-PVN50G5, digital-storm]
+dask_cluster_type: SLURM

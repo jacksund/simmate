@@ -57,6 +57,8 @@ class Oszicar:
                 # into a list that I can more easily work with.
                 values = (
                     line.strip()
+                    .replace("T= ", "")
+                    .replace("E= ", "")
                     .replace("F= ", "")
                     .replace("E0= ", "")
                     .replace("d E =", "")
@@ -76,28 +78,20 @@ class Oszicar:
                 # figure out the type easy based on the length of our list of
                 # values. These are...
                 #   (1) non-magnetic calculations (F, E0, dE)
-                #   (2) magnetic calculations (F, E0, dE, mag)
-                #   (3) molecular dynamics calculations (T, E, F, E0, EK, SP, SK)
+                #   (2) molecular dynamics calculations (T, E, F, E0, EK, SP, SK)
+                # Further, magnetic calculations will have another value added
+                # on at the end (mag). We account for this below too.
 
-                # check if we have a non-magnetic calculation
-                if len(values) == 3:
+                # check if we have a simple energy calculation
+                if len(values) in [3, 4]:
                     ionic_step = {
                         "energy": values[0],  # F (total_free_energy)
                         "energy_sigma_zero": values[1],  # E0
                         "energy_change": values[2],  # dE
-                        "electronic_steps": electronic_steps,
-                    }
-                # check if we have a magnetic calculation
-                elif len(values) == 4:
-                    ionic_step = {
-                        "energy": values[0],  # F (total_free_energy)
-                        "energy_sigma_zero": values[1],  # E0
-                        "energy_change": values[2],  # dE
-                        "magnetic": values[3],  # mag
                         "electronic_steps": electronic_steps,
                     }
                 # check if we have a molecular dynamics calculation
-                elif len(values) == 7:
+                elif len(values) in [7, 8]:
                     ionic_step = {
                         "temperature": values[0],  # T
                         "energy_gibbs": values[1],  # E (total energy, kinetic, nose)
@@ -108,11 +102,18 @@ class Oszicar:
                         "energy_kinetic_nose_thermostat": values[6],  # SK
                         "electronic_steps": electronic_steps,
                     }
+
                 # otherwise something went wrong
                 else:
                     raise Exception(
                         "Electronic step had unexpected data. Failed to parse."
                     )
+
+                # If the length of the values list is 4 or 8, then that means
+                # we also have a "mag" value attatched at the end of our values
+                if len(values) in [4, 8]:
+                    ionic_step.update({"magnetic": values[-1]})
+
                 # for the very first electronic step, VASP provides an energy-change
                 # value, which they set equal to the energy itself. This is misleading
                 # in analysis so we remove it.

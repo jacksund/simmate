@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import platform
 import time
 import signal
 from shutil import make_archive
 import subprocess
-from typing import Any, Tuple
 
 import pandas
 from prefect.core.task import Task
@@ -24,12 +24,10 @@ from simmate.utilities import get_directory, empty_directory
 
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
 # reset the working directory between task retries -- in some cases we may
-# want to delete the entire directory. As of now, I only ever use retries
-# on StagedShellTasks through the SupervisedStagedTask class's ErrorHandlers. Thus
-# you should look there for now if you'd like a cleanup_on_fail method.
+# want to delete the entire directory.
 
 # OPTIMIZE: I think this class would greatly benefit from asyncio so that we
-# know exactly when a shelltask completes, rather than loop and checking every
+# know exactly when a shelltask completes, rather than looping and checking every
 # set timestep.
 # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
 
@@ -143,8 +141,8 @@ class SupervisedStagedShellTask(Task):
         pre-processing. This includes creating a directory, writing input files
         or any other function ran before calling the executable.
         """
-        # Be sure to include directory and structure (or **kwargs) as input arguments for
-        # higher-level compatibility with the run method.
+        # Be sure to include directory and structure (or **kwargs) as input arguments
+        # for higher-level compatibility with the run method.
         # You should never need to call this method directly!
         pass
 
@@ -179,14 +177,14 @@ class SupervisedStagedShellTask(Task):
             # The preexec_fn keyword allows us to properly terminate jobs that
             # are launched with parallel processes (such as mpirun). This assigns
             # a parent id to it that we use when killing a job (if an error
-            # handler calls for us to do so).
+            # handler calls for us to do so). This isn't possible on Windows though.
             # Stderr keyword indicates that we should capture the error if one
             # occurs so that we can report it to the user.
             process = subprocess.Popen(
                 command,
                 cwd=directory,
                 shell=True,
-                preexec_fn=os.setsid,
+                preexec_fn=None if platform.system() == "Windows" else os.setsid,
                 stderr=subprocess.PIPE,
             )
 
@@ -265,7 +263,7 @@ class SupervisedStagedShellTask(Task):
             # error in the code below.
             if process.returncode != 0 and not has_error:
                 # convert the error from bytes to a string
-                errors = errors.decode("utf-8") 
+                errors = errors.decode("utf-8")
                 # and report the error to the user
                 raise NonZeroExitError(
                     f"The command ({command}) failed. The error output was...\n {errors}"
@@ -345,14 +343,14 @@ class SupervisedStagedShellTask(Task):
         scripts in parallel (such as using mpirun). Different computers and OSs
         can require a different 'kill' command so we establish this separate
         method that can be overwritten.
-        
+
         If you know your command needs a special case to kill all of its spawn
         processes, you can overwrite this method as well.
 
-        Users should never call this directly becuase this is instead applied 
+        Users should never call this directly becuase this is instead applied
         within the execute() method above.
 
-        
+
         """
         # The normal line to end a popen process is just...
         #   process.terminate()
@@ -426,18 +424,13 @@ class SupervisedStagedShellTask(Task):
         structure=None,
         directory=None,
         command=None,
-    ) -> Tuple[Any, list]:
+    ):
         """
         Runs the entire job in the current working directory without any error
         handling. If you want robust error handling, then you should instead
         run this through the SupervisedJobTask class. This method should
         very rarely be used!
         """
-
-        # Note that we have "-> Tuple[Any, list]" at the end of our run method.
-        # This tells Prefect that we are returning two things...
-        #   (1) the result of our workup method (which could be anything)
-        #   (2) all of the corrections made during execution (as a list)
 
         # because the command is something that is frequently changed at the
         # workflow level, then we want to make it so the user can set it for
@@ -465,8 +458,12 @@ class SupervisedStagedShellTask(Task):
         # run the postprocess in case any zipping/archiving/cleanup was requested
         self.postprocess(directory)
 
-        # Return both our result and our corrections as a tuple
-        return result, corrections
+        # Return our final information as a dictionary
+        return {
+            "result": result,
+            "corrections": corrections,
+            "directory": directory,
+        }
 
 
 # Custom errors that indicate exactly what causes the SupervisedStagedTask

@@ -188,9 +188,9 @@ setup(
         # These are from the MP stack and I want to drop dependency
         'pymatgen',
         'pymatgen-analysis-diffusion',
+        'matminer',
         # 'custodian',
         # 'fireworks',
-        # 'matminer',
         # 'dnspython',  # for mongocloud + fireworks
     ],
 

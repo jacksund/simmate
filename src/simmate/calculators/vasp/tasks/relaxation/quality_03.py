@@ -8,6 +8,9 @@ from simmate.calculators.vasp.inputs.potcar_mappings import (
 
 class Quality03RelaxationTask(VaspTask):
 
+    # returns structure separately from vasprun object
+    return_final_structure = True
+
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria when available.
     functional = "PBE"
@@ -29,7 +32,13 @@ class Quality03RelaxationTask(VaspTask):
         # The type of smearing we use depends on if we have a metal, semiconductor,
         # or insulator. So we need to decide this using a keyword modifier.
         multiple_keywords__smart_ismear={
-            "metal": dict(ISMEAR=1, SIGMA=0.06,),
-            "non-metal": dict(ISMEAR=0, SIGMA=0.05,),
+            "metal": dict(
+                ISMEAR=1,
+                SIGMA=0.06,
+            ),
+            "non-metal": dict(
+                ISMEAR=0,
+                SIGMA=0.05,
+            ),
         },
     )

@@ -5,6 +5,9 @@
 # If there is a more up-to-date version of this file, it will be
 # located at: https://github.com/github/gitignore/blob/master/Python.gitignore
 
+# ignore any Dask files created by workers
+dask-worker-space/
+
 # Ignore any django-db migration files
 # NOTE: some forks comment this out to keep track of their production-level databases
 migrations/

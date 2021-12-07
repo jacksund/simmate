@@ -102,7 +102,10 @@ class XtalOptStructure:
         #!!! if there's only one spacegroup option, I could speed this up by moving it to the init
         #!!! For some reason, I can't use kw arguments... I'm forced to list inputs
         input_settings = self.RandSpgInput(
-            spacegroup, self.atomic_nums, self.lattice_min, self.lattice_max,
+            spacegroup,
+            self.atomic_nums,
+            self.lattice_min,
+            self.lattice_max,
         )
         # because I can't use keywords in the input above, I need to set this here...
         input_settings.forceMostGeneralWyckPos = False  #!!! Do I want this?

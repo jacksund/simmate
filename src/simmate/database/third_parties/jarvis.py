@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base import table_column
-
-from simmate.database.structure import Structure
+from simmate.database.base_data_types import table_column, Structure
 
 
 class JarvisStructure(Structure):
