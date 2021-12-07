@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
+from simmate.utilities import get_doc_from_readme
 
-INSTALLATION_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
-
-with open(
-    os.path.join(INSTALLATION_DIRECTORY, "README.rst"), encoding="utf-8"
-) as docs_file:
-    __doc__ = docs_file.read()
+__doc__ = get_doc_from_readme(__file__)
