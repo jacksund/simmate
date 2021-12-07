@@ -101,6 +101,7 @@ class SupervisedStagedShellTask(Task):
         **kwargs: Any,
     ):
         """
+        
         To create an instance:
 
         >>> my_task = SupervisedStagedShellTask()
@@ -117,6 +118,21 @@ class SupervisedStagedShellTask(Task):
         
         .. math:: e^{i\pi} + 1 = 0
         
+        Example list:
+
+        - test 123
+        
+        ``test``
+        
+        .. code-block:: python
+
+           import numpy
+           x = numpy.array([1,2,3])
+        
+        TEST::
+            something1
+            something 2 + 5
+
         Parameters
         ----------
         structure : pymatgen.core.structure.Structure (optional)

@@ -1,5 +1,6 @@
 
-This folder contains all of the code that Simmate runs on! To get started, make sure you have either watched our `introduction tutorial`_ or are comfortable with python.
+This folder contains all of the code that Simmate runs on! To get started, make sure
+you have either watched our `introduction tutorial`_ or are comfortable with python.
 
 Within each subfolder (aka each python “module”), you’ll find more details on what it contains.
 
