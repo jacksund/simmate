@@ -56,6 +56,8 @@ class WorkflowTask(Task):
         # If Prefect is used to schedule the workflow, we also may want to
         # To support other Prefect input options. To see all the options, visit...
         # https://docs.prefect.io/api/latest/core/task.html
+        # We want to pass the logs from the workflow task up!
+        log_stdout=True,
         **kwargs,
     ):
 
@@ -80,7 +82,11 @@ class WorkflowTask(Task):
 
         # now inherit the parent Prefect Task class
         # Note we name this task after our attached workflow
-        super().__init__(name=f"{self.workflow.name}-WorkflowTask", **kwargs)
+        super().__init__(
+            name=f"{self.workflow.name}-WorkflowTask",
+            log_stdout=log_stdout,
+            **kwargs,
+        )
 
     @defaults_from_attrs(
         "executor_type",
