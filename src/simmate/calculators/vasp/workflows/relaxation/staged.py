@@ -26,7 +26,9 @@ from simmate.calculators.vasp.workflows.relaxation.quality_03 import (
 from simmate.calculators.vasp.workflows.relaxation.quality_04 import (
     workflow as relaxation_quality04,
 )
-from simmate.calculators.vasp.workflows.energy.mit import workflow as energy_mit
+from simmate.calculators.vasp.workflows.energy.quality_04 import (
+    workflow as energy_quality04,
+)
 
 from simmate.calculators.vasp.database.relaxation import StagedRelaxation
 from simmate.calculators.vasp.database.energy import MITStructure
@@ -43,7 +45,7 @@ relax_task_01 = relaxation_quality01.to_workflow_task()
 relax_task_02 = relaxation_quality02.to_workflow_task()
 relax_task_03 = relaxation_quality03.to_workflow_task()
 relax_task_04 = relaxation_quality04.to_workflow_task()
-static_task_mit = energy_mit.to_workflow_task()
+static_task_04 = energy_quality04.to_workflow_task()
 
 with Workflow("Staged Relaxation") as workflow:
 
@@ -115,7 +117,7 @@ with Workflow("Staged Relaxation") as workflow:
     )
 
     # Static Energy (MIT)
-    run_id_05 = static_task_mit(
+    run_id_05 = static_task_04(
         structure={
             "calculation_table": "Quality04Relaxation",
             "directory": directory_cleaned,

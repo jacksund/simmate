@@ -14,6 +14,7 @@ def build():
     # grab all of the workflows that need to be registered
     from simmate.workflows.all import (
         energy_mit,
+        energy_quality04,
         relaxation_mit,
         relaxation_quality00,
         relaxation_quality01,
@@ -28,6 +29,7 @@ def build():
     # make these workflows into a list so we can iterate through them
     workflows = [
         energy_mit,
+        energy_quality04,
         relaxation_mit,
         relaxation_quality00,
         relaxation_quality01,

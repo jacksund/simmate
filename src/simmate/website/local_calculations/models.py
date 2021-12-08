@@ -4,7 +4,7 @@
 # they are located at. I do this based on the directions given by:
 # https://docs.djangoproject.com/en/3.1/topics/db/models/#organizing-models-in-a-package
 
-from simmate.database.local_calculations.energy import MITStructure
+from simmate.database.local_calculations.energy import MITStructure, Quality04Structure
 
 from simmate.database.local_calculations.relaxation import (
     MITRelaxation,
