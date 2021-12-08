@@ -8,10 +8,10 @@ from simmate.workflow_engine.workflow import (
 
 from simmate.workflows.common_tasks.all import load_input, SaveOutputTask
 from simmate.calculators.vasp.tasks.energy.quality_04 import Quality04RelaxationTask
-from simmate.database.local_calculations.energy import Quality04Structure
+from simmate.database.local_calculations.energy import Quality04StaticEnergy
 
 static_energy = Quality04RelaxationTask()
-save_results = SaveOutputTask(Quality04Structure)
+save_results = SaveOutputTask(Quality04StaticEnergy)
 
 with Workflow("Quality 04 Static Energy") as workflow:
     structure = Parameter("structure")
@@ -33,6 +33,6 @@ with Workflow("Quality 04 Static Energy") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Energy"
-workflow.calculation_table = Quality04Structure
-workflow.result_table = Quality04Structure
+workflow.calculation_table = Quality04StaticEnergy
+workflow.result_table = Quality04StaticEnergy
 workflow.register_kwargs = ["prefect_flow_run_id", "structure"]

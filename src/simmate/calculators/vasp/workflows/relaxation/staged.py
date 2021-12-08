@@ -31,7 +31,7 @@ from simmate.calculators.vasp.workflows.energy.quality_04 import (
 )
 
 from simmate.calculators.vasp.database.relaxation import StagedRelaxation
-from simmate.calculators.vasp.database.energy import MITStructure
+from simmate.calculators.vasp.database.energy import Quality04StaticEnergy
 
 # init common tasks
 setup_calculation = LoadNestedCalculationTask(StagedRelaxation)
@@ -134,5 +134,5 @@ with Workflow("Staged Relaxation") as workflow:
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"
 workflow.calculation_table = StagedRelaxation
-workflow.result_table = MITStructure
+workflow.result_table = Quality04StaticEnergy
 workflow.register_kwargs = ["prefect_flow_run_id"]
