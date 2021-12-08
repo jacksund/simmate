@@ -8,10 +8,8 @@ from simmate.database.base_data_types import (
     Calculation,
 )
 
-# Extra modules for plotting and visualization.
 from plotly.subplots import make_subplots
 import plotly.graph_objects as plotly_go
-from django_pandas.io import read_frame
 
 
 class IonicStep(Structure, Thermodynamics, Forces):
@@ -252,8 +250,9 @@ class Relaxation(Structure, Calculation):
     def get_convergence_plot(self):
 
         # Grab the calculation's structure and convert it to a dataframe
-        structures = self.structures.order_by("ionic_step_number").all()
-        structures_dataframe = read_frame(structures)
+        structures_dataframe = self.structures.order_by(
+            "ionic_step_number"
+        ).to_dataframe()
 
         # We will be making a figure that consists of 3 stacked subplots that
         # all share the x-axis of ionic_step_number

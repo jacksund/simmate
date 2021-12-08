@@ -98,47 +98,30 @@ class Search:
         self.individuals_datatable = self.workflow.result_table
         self.calculation_datatable = self.workflow.calculation_table
 
-        # Initialize the fingerprint database
-        # For this we need to grab all previously calculated structures of this
-        # compositon too pass in too.
-        print("Generating fingerprints for past structures. This can be slow...")
-        # BUG: should we only do structures that were successfully calculated?
-        # If not, there's a chance a structure fails because of something like a
-        # crashed slurm job, but it's never submitted again...
-        # OPTIMIZE: should we only do final structures? Or should I include input
-        # structures and even all ionic steps as well...?
-        structure_pool = self.individuals_datatable.objects.filter(
-            formula_full=self.composition.formula,
-        )
-        self.fingerprint_validator = PartialCrystalNNFingerprint(
-            composition=composition,
-            structure_pool=structure_pool,
-        )
-
         # Check if there is an existing search and grab it if so. Otherwise, add
         # the search entry to the DB.
         if SearchDatatable.objects.filter(composition=composition.formula).exists():
-            self.search_db = SearchDatatable.objects.filter(
+            self.search_datatable = SearchDatatable.objects.filter(
                 composition=composition.formula,
             ).get()
             # TODO: update, add logs, compare... I need to decide what to do here.
             # also, run _check_stop_condition() to avoid unneccessary restart.
         else:
-            self.search_db = SearchDatatable(
+            self.search_datatable = SearchDatatable(
                 composition=composition.formula,
                 workflows=[
                     self.workflow.name
                 ],  # as a list bc we can add new ones later
-                individuals_datatable=self.individuals_datatable.__name__,
+                individuals_datatable_str=self.individuals_datatable.__name__,
                 max_structures=max_structures,
                 limit_best_survival=limit_best_survival,
             )
-            self.search_db.save()
+            self.search_datatable.save()
 
         # Grab the list of singleshot sources that have been ran before
         # and based off of that list, remove repeated sources
         past_singleshot_sources = (
-            self.search_db.sources.filter(is_singleshot=True)
+            self.search_datatable.sources.filter(is_singleshot=True)
             .values_list("name", flat=True)
             .all()
         )
@@ -208,7 +191,7 @@ class Search:
                 name=source.__class__.__name__,
                 is_steadystate=False,
                 is_singleshot=True,
-                search=self.search_db,
+                search=self.search_datatable,
             )
             source_db.save()
             self.singleshot_sources_db.append(source_db)
@@ -218,10 +201,24 @@ class Search:
                 name=source.__class__.__name__,
                 is_steadystate=True,
                 is_singleshot=False,
-                search=self.search_db,
+                search=self.search_datatable,
             )
             source_db.save()
             self.steadystate_sources_db.append(source_db)
+
+        # Initialize the fingerprint database
+        # For this we need to grab all previously calculated structures of this
+        # compositon too pass in too.
+        print("Generating fingerprints for past structures. This can be slow...")
+        # BUG: should we only do structures that were successfully calculated?
+        # If not, there's a chance a structure fails because of something like a
+        # crashed slurm job, but it's never submitted again...
+        # OPTIMIZE: should we only do final structures? Or should I include input
+        # structures and even all ionic steps as well...?
+        self.fingerprint_validator = PartialCrystalNNFingerprint(
+            composition=composition,
+            structure_pool=self.search_datatable.individuals,
+        )
 
     def run(self, sleep_step=10):
 
@@ -260,17 +257,6 @@ class Search:
             time.sleep(sleep_step)
         print("Stopping the search (remaining calcs will be left to finish).")
 
-    def get_best_individual(self):
-        best = (
-            self.individuals_datatable.objects.filter(
-                formula_full=self.composition.formula,
-                energy_per_atom__isnull=False,
-            )
-            .order_by("energy_per_atom")
-            .first()
-        )
-        return best
-
     def _check_stop_condition(self):
 
         # first see if we've hit our maximum limit for structures.
@@ -278,14 +264,8 @@ class Search:
         # only counting the number of successfully calculated individuals.
         # Nothing is done to stop those that are still running or to count
         # structures that failed to be calculated
-        if (
-            self.individuals_datatable.objects.filter(
-                formula_full=self.composition.formula,
-                energy_per_atom__isnull=False,
-                # **{f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-            ).count()
-            > self.max_structures
-        ):
+        # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
+        if self.search_datatable.individuals_completed.count() > self.max_structures:
             print(
                 f"Maximum number of completed calculations hit (n={self.max_structures}."
             )
@@ -296,15 +276,15 @@ class Search:
         # we can stop the search.
 
         # grab the best individual for reference
-        best = self.get_best_individual()
+        best = self.search_datatable.best_individual
 
         # We need this if-statement in case no structures have completed yet.
         if not best:
             return False
+
         # count the number of new individuals added AFTER the best one. If it is
         # more than limit_best_survival, we stop the search.
-        num_new_structures_since_best = self.individuals_datatable.objects.filter(
-            formula_full=self.composition.formula,
+        num_new_structures_since_best = self.search_datatable.individuals.filter(
             # check energies to ensure we only count completed calculations
             energy_per_atom__gt=best.energy_per_atom,
             created_at__gte=best.created_at,
@@ -389,13 +369,11 @@ class Search:
         # database. We want to wait until there's a set amount before
         # we start mutating the best. We check that here.
         if is_transformation and (
-            self.individuals_datatable.objects.filter(
-                formula_full=self.composition.formula, energy_per_atom__isnull=False
-            ).count()
-            < self.nfirst_generation
+            self.search_datatable.individuals_completed.count() < self.nfirst_generation
         ):
             print(
-                f"Search isn't ready for transformations yet. Skipping {source.__class__.__name__}"
+                "Search isn't ready for transformations yet."
+                f" Skipping {source.__class__.__name__}"
             )
             return False, False
 
@@ -447,13 +425,9 @@ class Search:
 
         # our selectors just require a dataframe where we specify the fitness
         # column. So we query our individuals database to give this as an input.
-        individuals_df = (
-            self.individuals_datatable.objects.filter(
-                formula_full=self.composition.formula, energy_per_atom__isnull=False
-            )
-            .order_by("energy_per_atom")[:200]
-            .to_dataframe()
-        )
+        individuals_df = self.search_datatable.individuals_completed.order_by(
+            "energy_per_atom"
+        )[:200].to_dataframe()
         # NOTE: I assume we'll never need more than the best 200 structures, which
         # may not be true in special cases.
 
