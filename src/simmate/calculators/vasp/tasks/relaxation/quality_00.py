@@ -16,6 +16,10 @@ class Quality00RelaxationTask(VaspTask):
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS_LOW_QUALITY
 
+    # because this calculation is such a low quality we don't raise an error
+    # if the calculation fails to converge
+    confirm_convergence = False
+
     # These are all input settings for this task.
     incar = dict(
         # These settings are the same for all structures regardless of composition.

@@ -26,7 +26,7 @@ class MITStaticEnergyTask(MITRelaxationTask):
             KSPACING=0.4,  # was 0.5 # !!! This is where we are different from pymatgen right now
         )
     )
-    # We set ISMEAR=0 and EDIFF above, so we no longer need smart_ismear
+    # We set ISMEAR=0 and SIGMA above, so we no longer need smart_ismear
     incar.pop("multiple_keywords__smart_ismear")
 
     # We reduce the number of error handlers used on dynamics because many
