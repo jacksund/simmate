@@ -22,6 +22,7 @@ class Search:
         # TODO: what if the workflow changes (e.g. starts with ML relax) but the
         # final table stays the same?
         workflow="StagedRelaxation",
+        workflow_command=None,
         # fitness_field="energy_per_atom",  # TODO: I assume this for now.
         # Instead of specifying a stop_condition class like I did before,
         # I just assume the stop condition is either (1) the maximum allowed
@@ -62,6 +63,7 @@ class Search:
 
         self.composition = composition
         self.labels = labels
+        self.workflow_command = workflow_command
 
         # TODO: consider grabbing these from the database so that we can update
         # them at any point.
@@ -326,11 +328,17 @@ class Search:
                 # this is done inside _make_new_structure
                 if not structure:
                     break
+
                 # submit the structure workflow
+                # Note, we only pass the workflow_command if it's been supplied.
+                extra_kwargs = (
+                    {"command": self.workflow_command} if self.workflow_command else {}
+                )
                 flow_run_id = self.workflow.run_cloud(
                     structure=structure,
                     wait_for_run=False,
                     labels=self.labels,
+                    **extra_kwargs,
                 )
 
                 # Attached the flow_run_id to our source so we know how many
