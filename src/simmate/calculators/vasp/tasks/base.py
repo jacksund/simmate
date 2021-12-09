@@ -90,24 +90,24 @@ class VaspTask(SSSTask):
     #   element_mappings = {"C": "C_h"}
     # Read more on this inside the Potcar class and be careful with updating!
     potcar_mappings = None
-    
+
     # In somecases we still want results from calculations that did NOT converge
     # successfully. This flag controls whether or not we raise an error when
     # the calculation failed to converge.
     # OPTIMIZE: What if I updated the ErrorHandler class to allow for "warnings"
     # instead of raising the error and applying the correction...? This functionality
     # could then be moved to the UnconvergedErrorHandler. I'd have a fix_error=True
-    # attribute that is used in the .check() method. and If fix_error=False, I 
+    # attribute that is used in the .check() method. and If fix_error=False, I
     # simply print a warning & also add that warning to simmate_corrections.csv
     confirm_convergence = True
-    
+
     def __init__(
         self,
         incar=None,
         kpoints=None,
         functional=None,
         potcar_mappings=None,
-        confirm_convergence = True,
+        confirm_convergence=None,
         # To support other options from the Simmate SSSTask and Prefect Task
         **kwargs,
     ):
@@ -167,7 +167,7 @@ class VaspTask(SSSTask):
     def workup(self, directory):
         """
         This is the most basic VASP workup where I simply load the final structure,
-        final energy, and (if requested) confirm convergence. I will likely make 
+        final energy, and (if requested) confirm convergence. I will likely make
         this a common function for this vasp module down the road.
         """
 

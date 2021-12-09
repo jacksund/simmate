@@ -16,6 +16,7 @@ we call the workflow.run_cloud or workflow.run method.
 
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
+from prefect.engine.state import TriggerFailed
 
 # BUG: prefect executor causes issues because there is no aysncio. Therefore the
 # "waiting" step means a task will be holding onto two Dask workers. Because of this
@@ -109,18 +110,31 @@ class WorkflowTask(Task):
         if executor_type == "local":
             state = self.workflow.run(**parameters)
             if state.is_failed():
-                # Grab the very first task error and we raise that.
-                # TODO: what if we want to raise all task errors (excluding those
-                # like "TriggerFailed")?
+                # Grab the all task errors except for those that never ran
+                # because the trigger failed.
                 # OPTIMIZE: would the log_stdout=True task option be the better
                 # way to forward information? See here:
                 #   https://docs.prefect.io/core/concepts/logging.html#logging-stdout
+                errors = []
                 for task_state in state.result.values():
-                    if task_state.is_failed():
+                    if task_state.is_failed() and not isinstance(
+                        task_state, TriggerFailed
+                    ):
                         error = task_state.result
-                        break  # exits for-loop
-                # we want the error raised so that the task fails
-                raise error
+                        errors.append(error)
+
+                # TODO: how do you raise a list of errors?
+                if len(errors) > 1:
+                    raise Exception(
+                        "More than one task failed in the workflow and Simmate does "
+                        "not currently have a way to raise a list of errors."
+                    )
+                # otherwise we just have one failure
+                else:
+                    # we want the error raised so that the task fails
+                    raise errors[0]
+            # if we reached this point, the workflow was successful and we just return
+            # the state as a normal task would
             return state
 
         # If we are using prefect, we assume that the flow has been registered
