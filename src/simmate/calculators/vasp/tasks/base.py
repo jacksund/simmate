@@ -172,10 +172,26 @@ class VaspTask(SSSTask):
         """
 
         # load the xml file and all of the vasprun data
-        vasprun = Vasprun(
-            filename=os.path.join(directory, "vasprun.xml"),
-            exception_on_bad_xml=True,
-        )
+        try:
+            vasprun = Vasprun(
+                filename=os.path.join(directory, "vasprun.xml"),
+                exception_on_bad_xml=True,
+            )
+        except:
+            print(
+                "XML is malformed. This typically means there's an error with your"
+                " calculation that wasn't caught by your ErrorHandlers. We try"
+                " salvaging data here though."
+            )
+            vasprun = Vasprun(
+                filename=os.path.join(directory, "vasprun.xml"),
+                exception_on_bad_xml=False,
+            )
+            vasprun.final_structure = vasprun.structures[-1]
+        # BUG: This try/except is 100% just for my really rough calculations
+        # where I don't use any ErrorHandlers and still want the final structure
+        # regarless of what when wrong. In the future, I should consider writing
+        # a separate method for those that loads the CONTCAR and moves on.
 
         # grab the final structure
         # final_structure = vasprun.structures[-1]
