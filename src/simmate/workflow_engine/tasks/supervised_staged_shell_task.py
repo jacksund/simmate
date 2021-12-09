@@ -51,6 +51,18 @@ class SupervisedStagedShellTask(Task):
     output files for common errors/issues. If an error is found, we stop the
     program, fix the issue, and then restart it. Any fixes that were made are
     written to "simmate_corrections.csv".
+    
+    TODO: Make a simple diagram to visualize the overall process and add it here.
+    It will be similar to Custodian's, but we don't have a list of jobs here.
+    https://materialsproject.github.io/custodian/index.html#usage
+    The steps are...
+    
+    - Write Input Files based on custom+defualt settings
+    - Run the calculation by calling the program
+    - Load ouput files
+    - check for errors
+    - [correct them, rerun]
+    - postprocess/analysis
 
     This entire process (the different stages and monitoring) is carried out
     using the ``run()`` method. You rarely use this class directly. Instead,
