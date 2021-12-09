@@ -41,6 +41,7 @@ class PartialCrystalNNFingerprint:
             sitefingerprint_method = CrystalNNFingerprint.from_preset(
                 "ops", distance_cutoffs=None, x_diff_weight=3
             )
+
         # now that we made the sitefingerprint_method, we can input it into the
         # structurefingerprint_method which finishes up the featurizer
         self.featurizer = PartialsSiteStatsFingerprint(

@@ -7,7 +7,6 @@ from django.apps import apps as django_apps
 from prefect import Client
 from prefect.utilities.graphql import with_args
 
-from plotly.subplots import make_subplots
 import plotly.graph_objects as plotly_go
 
 
@@ -72,58 +71,16 @@ class EvolutionarySearch(DatabaseTable):
     def get_convergence_plot(self):
 
         # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = self.structures.order_by(
-            "ionic_step_number"
-        ).to_dataframe()
+        structures_dataframe = self.individuals_completed.to_dataframe()
 
-        # We will be making a figure that consists of 3 stacked subplots that
-        # all share the x-axis of ionic_step_number
-        figure = make_subplots(
-            rows=3,
-            cols=1,
-            shared_xaxes=True,
+        # There's only one plot here, no subplot. So we make the scatter
+        # object and just pass it directly to a Figure object
+        scatter = plotly_go.Scatter(
+            x=structures_dataframe["id"],
+            y=structures_dataframe["energy_per_atom"],
+            mode="markers",
         )
-
-        # Generate a plot for Energy (per atom)
-        figure.add_trace(
-            plotly_go.Scatter(
-                x=structures_dataframe["ionic_step_number"],
-                y=structures_dataframe["energy_per_atom"],
-            ),
-            row=1,
-            col=1,
-        )
-
-        # Generate a plot for Forces (norm per atom)
-        figure.add_trace(
-            plotly_go.Scatter(
-                x=structures_dataframe["ionic_step_number"],
-                y=structures_dataframe["site_forces_norm_per_atom"],
-            ),
-            row=2,
-            col=1,
-        )
-
-        # Generate a plot for Stress (norm per atom)
-        figure.add_trace(
-            plotly_go.Scatter(
-                x=structures_dataframe["ionic_step_number"],
-                y=structures_dataframe["lattice_stress_norm_per_atom"],
-            ),
-            row=3,
-            col=1,
-        )
-
-        # Now let's clean up some formatting and add the axes titles
-        figure.update_layout(
-            width=600,
-            height=600,
-            showlegend=False,
-            xaxis3_title="Ionic Step (#)",
-            yaxis_title="Energy (eV/atom)",
-            yaxis2_title="Site Forces",
-            yaxis3_title="Lattice Stress",
-        )
+        figure = plotly_go.Figure(data=scatter)
 
         # we return the figure object for the user
         return figure
@@ -134,6 +91,85 @@ class EvolutionarySearch(DatabaseTable):
         pio.renderers.default = "browser"
 
         figure = self.get_convergence_plot()
+        figure.show()
+
+    def get_correctness_plot(self, structure_known):
+
+        # --------------------------------------------------------
+        # This code is from simmate.toolkit.validators.fingerprint.pcrystalnn
+        # OPTIMIZE: There should be a convience method to make this featurizer
+        # since I use it so much
+        import numpy
+        from pymatgen.core.composition import Composition
+        from matminer.featurizers.site import CrystalNNFingerprint
+        from simmate.toolkit.featurizers.fingerprint import PartialsSiteStatsFingerprint
+
+        sitefingerprint_method = CrystalNNFingerprint.from_preset(
+            "ops", distance_cutoffs=None, x_diff_weight=3
+        )
+        featurizer = PartialsSiteStatsFingerprint(
+            sitefingerprint_method,
+            stats=["mean", "std_dev", "minimum", "maximum"],
+        )
+        featurizer.elements_ = numpy.array(
+            [element.symbol for element in Composition(self.composition).elements]
+        )
+        # --------------------------------------------------------
+
+        # Grab the calculation's structure and convert it to a dataframe
+        structures_dataframe = self.individuals_completed.to_dataframe()
+
+        # because we are using the database model, we first want to convert to
+        # pymatgen structures objects and add a column to the dataframe for these
+        #
+        #   structures_dataframe["structure"] = [
+        #       structure.to_pymatgen() for structure in ionic_step_structures
+        #   ]
+        #
+        # BUG: the read_frame query creates a new query, so it may be a different
+        # length from ionic_step_structures. For this reason, we can't iterate
+        # through the queryset like in the commented out code above. Instead,
+        # we need to iterate through the dataframe rows.
+        # See https://github.com/chrisdev/django-pandas/issues/138 for issue
+        from pymatgen.core.structure import Structure
+
+        structures_dataframe["structure"] = [
+            Structure.from_str(s.structure_string, fmt="POSCAR")
+            for _, s in structures_dataframe.iterrows()
+        ]
+
+        from tqdm import tqdm
+
+        structures_dataframe["fingerprint"] = [
+            numpy.array(featurizer.featurize(s.structure))
+            for _, s in tqdm(structures_dataframe.iterrows())
+        ]
+
+        fingerprint_known = numpy.array(featurizer.featurize(structure_known))
+
+        structures_dataframe["fingerprint_distance"] = [
+            numpy.linalg.norm(fingerprint_known - s.fingerprint)
+            for _, s in tqdm(structures_dataframe.iterrows())
+        ]
+
+        # There's only one plot here, no subplot. So we make the scatter
+        # object and just pass it directly to a Figure object
+        scatter = plotly_go.Scatter(
+            x=structures_dataframe["updated_at"],
+            y=structures_dataframe["fingerprint_distance"],
+            mode="markers",
+        )
+        figure = plotly_go.Figure(data=scatter)
+
+        # we return the figure object for the user
+        return figure
+
+    def view_correctness_plot(self, structure_known):
+        import plotly.io as pio
+
+        pio.renderers.default = "browser"
+
+        figure = self.get_correctness_plot(structure_known)
         figure.show()
 
 
