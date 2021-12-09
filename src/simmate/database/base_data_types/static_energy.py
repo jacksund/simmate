@@ -8,9 +8,6 @@ from simmate.database.base_data_types import (
     Calculation,
 )
 
-# WARNING:
-# The from_pymatgen and update_from_vasp_run methods don't work yet!
-
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
@@ -115,13 +112,14 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         )
         for key, value in new_kwargs.items():
             setattr(self, key, value)
+
         # There is also extra data for the final structure that we save directly
-        # in the relaxation table
-        self.band_gap = data["bandgap"]
-        self.is_gap_direct = data["is_gap_direct"]
-        self.energy_fermi = data["efermi"]
-        self.conduction_band_minimum = data["cbm"]
-        self.valence_band_maximum = data["vbm"]
+        # in the relaxation table. We use .get() in case the key isn't provided
+        self.band_gap = data.get("bandgap")
+        self.is_gap_direct = data.get("is_gap_direct")
+        self.energy_fermi = data.get("efermi")
+        self.conduction_band_minimum = data.get("cbm")
+        self.valence_band_maximum = data.get("vbm")
 
         # lastly, we also want to save the corrections made and directory it ran in
         self.corrections = corrections
