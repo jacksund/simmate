@@ -113,6 +113,9 @@ def load_input(structure, directory=None, use_previous_directory=False):
         # It should never be hit
         if use_previous_directory and directory_old:
             assert directory_old == directory_new
+    # Otherwise use the directory provided
+    else:
+        directory_new = directory
 
     # structure should now be a pymatgen structure object
     return structure, directory_new
