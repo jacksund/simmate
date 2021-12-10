@@ -36,3 +36,4 @@ workflow.project_name = "Simmate-Energy"
 workflow.calculation_table = Quality04StaticEnergy
 workflow.result_table = Quality04StaticEnergy
 workflow.register_kwargs = ["prefect_flow_run_id", "structure"]
+workflow.result_task = output

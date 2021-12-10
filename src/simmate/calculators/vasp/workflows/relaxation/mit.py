@@ -36,3 +36,4 @@ workflow.project_name = "Simmate-Relaxation"
 workflow.calculation_table = MITRelaxation
 workflow.result_table = MITRelaxation
 workflow.register_kwargs = ["prefect_flow_run_id", "structure"]
+workflow.result_task = output
