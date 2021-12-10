@@ -59,6 +59,7 @@ class WorkflowTask(Task):
     def __init__(
         self,
         workflow: Workflow,
+        return_result=True,
         executor_type: str = "local",  # get_default_executor_type(), # BUG
         wait_for_run: bool = True,
         labels: List[str] = [],
@@ -73,6 +74,10 @@ class WorkflowTask(Task):
         ----------
         workflow : Workflow
             The full workflow to run.
+        return_result : bool
+            If True, the task run will return the result of the task set as the
+            worfklow.result_task attribute. If False, the workflow State is returned.
+            The default is True.
         executor_type : str (optional)
             How the workflow should be scheduled and ran. The options are either
             local or prefect (i.e. prefect cloud). The default is "local".
@@ -109,9 +114,14 @@ class WorkflowTask(Task):
 
         # Save our inputs
         self.workflow = workflow
+        self.return_result = return_result
         self.executor_type = executor_type
         self.wait_for_run = wait_for_run
         self.labels = labels
+
+        # BUG: so far I only support local execution
+        if executor_type != "local":
+            raise Exception("Only executor_type=local is supported right now.")
 
         # now inherit the parent Prefect Task class
         # Note we name this task after our attached workflow
@@ -123,12 +133,14 @@ class WorkflowTask(Task):
 
     @defaults_from_attrs(
         "executor_type",
+        "return_result",
         "wait_for_run",
         "labels",
     )
     def run(
         self,
         executor_type: str = None,
+        return_result: bool = None,
         wait_for_run: bool = None,
         labels: List[str] = None,
         **parameters,
@@ -141,6 +153,10 @@ class WorkflowTask(Task):
         executor_type : str (optional)
             How the workflow should be scheduled and ran. The options are either
             local or prefect (i.e. prefect cloud).
+        return_result : bool
+            If True, the task run will return the result of the task set as the
+            worfklow.result_task attribute. If False, the workflow State is returned.
+            The default is True.
         wait_for_run : bool (optional)
             If Prefect is used to schedule the workflow, then this indicates
             whether we should wait for the flow to finish or not.
@@ -191,11 +207,24 @@ class WorkflowTask(Task):
                     raise errors[0]
             # if we reached this point, the workflow was successful and we just return
             # the state as a normal task would
-            return state
+
+            # Workflows typically return a prefect State object, but when we run
+            # workflows as a task, we often want to pass along extra information
+            # beyond just some "state". So return_result is True, we return the
+            # result of a specific task (determined by flow.result_task).
+            if self.return_result:
+                # The prefect api for this is ugly... nothing I can really do
+                # about it: https://docs.prefect.io/core/concepts/results.html
+                return state.result[self.workflow.result_task].result
+            else:
+                return state
 
         # If we are using prefect, we assume that the flow has been registered
         # and simply submit it from here.
         elif executor_type == "prefect":
+
+            raise Exception
+
             # Now create the flow run in the prefect cloud
             flow_run_id = self.workflow.run_cloud(
                 labels,

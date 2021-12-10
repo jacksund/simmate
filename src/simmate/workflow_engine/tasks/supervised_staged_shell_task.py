@@ -8,12 +8,13 @@ from shutil import make_archive
 import subprocess
 
 import pandas
+
+import prefect
 from prefect.core.task import Task
 from prefect.utilities.tasks import defaults_from_attrs
 
 from simmate.utilities import get_directory, empty_directory
 
-# For typing:
 from typing import List, Any
 from pymatgen.core.structure import Structure
 from simmate.workflow_engine.error_handler import ErrorHandler
@@ -51,12 +52,12 @@ class SupervisedStagedShellTask(Task):
     output files for common errors/issues. If an error is found, we stop the
     program, fix the issue, and then restart it. Any fixes that were made are
     written to "simmate_corrections.csv".
-    
+
     TODO: Make a simple diagram to visualize the overall process and add it here.
     It will be similar to Custodian's, but we don't have a list of jobs here.
     https://materialsproject.github.io/custodian/index.html#usage
     The steps are...
-    
+
     - Write Input Files based on custom+defualt settings
     - Run the calculation by calling the program
     - Load ouput files
@@ -712,6 +713,7 @@ class SupervisedStagedShellTask(Task):
             "result": result,
             "corrections": corrections,
             "directory": directory,
+            "prefect_flow_run_id": prefect.context.flow_run_id,
         }
 
 

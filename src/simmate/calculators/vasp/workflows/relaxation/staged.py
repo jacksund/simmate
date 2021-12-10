@@ -76,7 +76,6 @@ with Workflow("Staged Relaxation") as workflow:
             "structure_field": "structure_final",
         },
         command=command,
-        upstream_tasks=[run_id_00],
     )
 
     # relaxation 02
@@ -97,7 +96,6 @@ with Workflow("Staged Relaxation") as workflow:
             "structure_field": "structure_final",
         },
         command=command,
-        use_previous_directory=True,
     )
 
     # relaxation 04
@@ -108,7 +106,6 @@ with Workflow("Staged Relaxation") as workflow:
             "structure_field": "structure_final",
         },
         command=command,
-        use_previous_directory=True,
     )
 
     # Static Energy (MIT)
@@ -119,7 +116,6 @@ with Workflow("Staged Relaxation") as workflow:
             "structure_field": "structure_final",
         },
         command=command,
-        use_previous_directory=True,
     )
 
     # save calculation metadata
@@ -130,3 +126,4 @@ workflow.project_name = "Simmate-Relaxation"
 workflow.calculation_table = StagedRelaxation
 workflow.result_table = Quality04StaticEnergy
 workflow.register_kwargs = ["prefect_flow_run_id"]
+workflow.result_task = run_id_05

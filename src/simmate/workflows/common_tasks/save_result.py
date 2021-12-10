@@ -24,6 +24,8 @@ class SaveOutputTask(Task):
         # load/create the calculation for this workflow run
         calculation = self.calculation_table.from_prefect_id(
             prefect.context.flow_run_id,
+            # We pass the initial structure in can the calculation wasn't created
+            # yet (and creation requires the structure)
             structure=vasprun.initial_structure,
             # BUG: what if the initial structure changed? An example of this happening
             # is with a relaxation where a correction was applied and the calc
