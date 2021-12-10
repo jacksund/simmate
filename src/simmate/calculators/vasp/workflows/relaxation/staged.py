@@ -34,7 +34,6 @@ from simmate.calculators.vasp.database.relaxation import StagedRelaxation
 from simmate.calculators.vasp.database.energy import Quality04StaticEnergy
 
 # init common tasks
-setup_calculation = LoadNestedCalculationTask(StagedRelaxation)
 save_calculation = SaveNestedCalculationTask(StagedRelaxation)
 
 # init workflow tasks

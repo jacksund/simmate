@@ -19,6 +19,9 @@ class Quality03RelaxationTask(VaspTask):
     # because this calculation is such a low quality we don't raise an error
     # if the calculation fails to converge
     confirm_convergence = False
+    
+    # Make the unitcell relatively cubic before relaxing
+    pre_sanitize_structure = True
 
     # These are all input settings for this task.
     incar = dict(

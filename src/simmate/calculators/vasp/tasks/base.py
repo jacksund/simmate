@@ -101,6 +101,10 @@ class VaspTask(SSSTask):
     # simply print a warning & also add that warning to simmate_corrections.csv
     confirm_convergence = True
 
+    # In some cases, we may want to sanitize the structure during our setup().
+    # This means converting to the LLL-reduced primitive cell.
+    pre_sanitize_structure = False
+
     def __init__(
         self,
         incar=None,
@@ -108,6 +112,7 @@ class VaspTask(SSSTask):
         functional=None,
         potcar_mappings=None,
         confirm_convergence=None,
+        pre_sanitize_structure=None,
         # To support other options from the Simmate SSSTask and Prefect Task
         **kwargs,
     ):
@@ -128,13 +133,18 @@ class VaspTask(SSSTask):
             self.potcar_mappings = potcar_mappings
         if confirm_convergence:
             self.confirm_convergence = confirm_convergence
+        if pre_sanitize_structure:
+            self.pre_sanitize_structure = pre_sanitize_structure
 
         # now inherit from parent SSSTask class
         super().__init__(**kwargs)
 
     def setup(self, structure, directory):
 
-        # TODO should I sanitize the structure first? primitive and LLL reduce?
+        # If requested, we convert to the LLL-reduced unit cell, which aims to 
+        # be as cubic as possible.
+        if self.pre_sanitize_structure:
+            structure = structure.copy(sanitize=True)
 
         # write the poscar file
         Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
