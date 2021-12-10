@@ -7,10 +7,10 @@ from simmate.workflow_engine.workflow import (
 )
 
 from simmate.workflows.common_tasks.all import load_input, SaveOutputTask
-from simmate.calculators.vasp.tasks.energy.quality_04 import Quality04RelaxationTask
+from simmate.calculators.vasp.tasks.energy.quality_04 import Quality04EnergyTask
 from simmate.database.local_calculations.energy import Quality04StaticEnergy
 
-static_energy = Quality04RelaxationTask()
+static_energy = Quality04EnergyTask()
 save_results = SaveOutputTask(Quality04StaticEnergy)
 
 with Workflow("Quality 04 Static Energy") as workflow:

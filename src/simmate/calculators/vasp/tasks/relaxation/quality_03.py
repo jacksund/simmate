@@ -16,7 +16,7 @@ class Quality03RelaxationTask(VaspTask):
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS_LOW_QUALITY
 
-    # because this calculation is such a low quality we don't raise an error 
+    # because this calculation is such a low quality we don't raise an error
     # if the calculation fails to converge
     confirm_convergence = False
 

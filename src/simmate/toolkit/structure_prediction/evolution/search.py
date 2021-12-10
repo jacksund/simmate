@@ -2,6 +2,8 @@
 
 import time
 
+from pymatgen.core import Composition
+
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.structure_prediction.evolution import (
     EvolutionarySearch as SearchDatatable,
@@ -14,52 +16,169 @@ from simmate.toolkit.validators.fingerprint.pcrystalnn import (
     PartialCrystalNNFingerprint,
 )
 
+from typing import List, Union, Tuple
+from simmate.workflow_engine.workflow import Workflow
 
-class Search:
+# TODO:
+#
+# what if the workflow changes (e.g. starts with ML relax) but the
+# final table stays the same?
+#
+# chemical system instead of composition input? Allow 1,2,3D?
+#
+# I assume fitness_field="energy_per_atom" for now. Allow other fields from
+# the individuals_table, like "conductivity" or "electride character"
+#
+# Specifying a stop_condition class to allow custom ones?
+# I just assume the stop condition is either (1) the maximum allowed
+# calculated structures or (2) how long a given structure has been
+# the "best" one.
+#
+# add triggered_actions which can be things like "start_ml_potential" or
+# "update volume in sources" or "switch workflow to __"
+#
+# I assume we are using Prefect for workflow submission right now. Add support
+# for local execution or even dask.
+#
+# Add singleshot sources
+# "prototypes_aflow",
+# "substitution",
+# "third_party_structures",
+# "third_party_substitution",
+# "SomeOtherDatatable",  # e.g. best from table of lower quality calculations
+
+
+class SearchEngine:
+    """
+    This class is the entry point for predicting crystal structures with an
+    evolutionary search algorithm.
+
+    Once you initialize a SearchEngine with a composition (and any other
+    optional parameters), you simply need to call the run() method to start
+    the search:
+
+    .. code-block:: python
+
+        from simmate.toolkit.structure_prediction.evolution.search import SearchEngine
+
+        search = SearchEngine(
+            composition="C4",
+            labels=["WarWulf"],
+            workflow_command="mpirun -n 8 vasp > vasp.out",
+        )
+
+        search.run()
+
+    This class is only for creating (or continuing) searches. If you only want
+    to view results, you should instead look directly at the database table for
+    previously ran searches:
+
+    .. code-block:: python
+
+       from simmate.shortcuts import setup  # connects to database
+       from simmate.database.local_calculations.structure_prediction.evolution import (
+           EvolutionarySearch,
+       )
+
+       search = EvolutionarySearch.objects.get(composition="Sr4 Si4 N8")
+
+    If you start a separate terminal from where a search is running, you can
+    actually use this table to view results WHILE the search is still running!
+
+
+    WARNING: For now, we assume you have Prefect Cloud and a cloud database backend
+    (e.g. Postgres) properly configured. We will allow local runs in the future though.
+
+    Alternative Codes/Softwares
+    ----------------------------
+    `USPEX`_, `XtalOpt`_, `CALYPSO`_, `AIRSS`_, `ASE-GA`_, `GASP`_
+
+    .. _USPEX: https://uspex-team.org/en
+    .. _XtalOpt: https://github.com/xtalopt/XtalOpt
+    .. _CALYPSO: http://www.calypso.cn/
+    .. _AIRSS: https://www.mtg.msm.cam.ac.uk/Codes/AIRSS
+    .. _ASE-GA: https://wiki.fysik.dtu.dk/ase/ase/ga/ga.html#module-ase.ga
+    .. _GASP: https://github.com/henniggroup/GASP-python
+
+    """
+
     def __init__(
         self,
-        composition,  # TODO: chemical system? 1,2,3D?
-        # TODO: what if the workflow changes (e.g. starts with ML relax) but the
-        # final table stays the same?
-        workflow="StagedRelaxation",
-        workflow_command=None,
-        # fitness_field="energy_per_atom",  # TODO: I assume this for now.
-        # Instead of specifying a stop_condition class like I did before,
-        # I just assume the stop condition is either (1) the maximum allowed
-        # calculated structures or (2) how long a given structure has been
-        # the "best" one.
-        max_structures=3000,
-        limit_best_survival=250,
-        singleshot_sources=[
-            # "prototypes_aflow",
-            # "substitution",
-            # "third_party_structures",
-            # "third_party_substitution",
-            # "SomeOtherDatatable",  # e.g. best from table of lower quality calculations
+        composition: Union[str, Composition],
+        workflow: Union[str, Workflow] = "StagedRelaxation",
+        workflow_command: str = None,
+        max_structures: int = 3000,
+        limit_best_survival: int = 250,
+        singleshot_sources: List[str] = [],
+        nfirst_generation: int = 20,
+        nsteadystate: int = 40,
+        steadystate_sources: List[Tuple[float, str]] = [
+            (0.30, "PyXtalStructure"),
+            (0.50, "HeredityASE"),
+            (0.10, "SoftMutationASE"),
+            # (0.10, "MirrorMutationASE"),
+            # (0.05, "LatticeStrainASE"),
+            # (0.05, "RotationalMutationASE"),
+            # (0.05, "AtomicPermutationASE"),
+            # (0.05, "CoordinatePerturbationASE"),
         ],
+        selector: str = "TruncatedSelection",
+        labels: List[str] = [],
+    ):
+
+        """
+        Sets up the search engine and its settings.
+
+        Parameters
+        ----------
+        composition : pymatgen.core.composition.Composition or str
+            The composition to run the evolutionary search for. Note that the
+            number of sites is fixed to what is set here. (Ca2N vs Ca4N2)
+        workflow : simmate.workflow_engine.workflow.Workflow or str (optional)
+            The workflow to run all individuals through. Note, the result_database
+            of this workflow will be treated as the individuals in this search.
+            The default is "StagedRelaxation"
+        workflow_command : str (optional)
+            The command that will be passed to the workflow.run() method.
+        max_structures : int (optional)
+            The maximum number of individuals that will be calculated before
+            stopping the search. The default is 3000.
+        limit_best_survival : int (optional)
+            The search is stopped when the best individual remains unbeaten for
+            this number of new individuals. The default is 250.
+        singleshot_sources : list of strings (optional)
+            TODO: This is not implemented yet
+        nfirst_generation : int (optional)
+            No mutations or "child" individuals will be carried out until this
+            number of individuals have been calculated. The default is 20.
+        nsteadystate : int (optional)
+            The total number of individuals from steady-state sources that will
+            be running/submitted at any given time. The default is 40.
+        steadystate_sources : List[Tuple[float, str]]
+            A list of tuples where each tuple is (percent, source). The percent
+            determines the number of steady stage calculations that will be
+            running for this at any given time. For example, 0.25 means
+            0.25*40=10 individuals will be running/submitted at all times. The
+            source can be from either the toolkit.creator or toolkit.transformations
+            modules. Don't change this default unless you know what you're doing!
+        selector : str (optional)
+            The defualt method to use for choosing the parent individual(s). The
+            default is TruncatedSelection.
+        """
+
         # No mutations/transforms are done until this many calcs complete
         # this includes those from singleshot and steadystate creators.
-        nfirst_generation=40,
+
+        # prefect labels to submit workflows with
+
         # this is total number of submitted calcs at any given time
-        nsteadystate=40,
+
         # !!! Some of these sources should be removed for compositions with 1 element type
-        steadystate_sources=[
-            (0.20, "PyXtalStructure"),
-            (0.40, "HeredityASE"),
-            (0.10, "SoftMutationASE"),
-            (0.10, "MirrorMutationASE"),
-            (0.05, "LatticeStrainASE"),
-            (0.05, "RotationalMutationASE"),
-            (0.05, "AtomicPermutationASE"),
-            (0.05, "CoordinatePerturbationASE"),
-        ],
-        selector="TruncatedSelection",
-        # TODO: this can be things like "start_ml_potential" or "update volume in sources"
-        # triggered_actions=[],
-        # TODO: I assume Prefect for submitting workflows right now.
-        # executor="local",
-        labels=[],  # prefect labels to submit workflows with
-    ):
+
+        # make sure we were givent a Composition object, and if not, we have
+        # a string that should be converted to one.
+        if not isinstance(composition, Composition):
+            composition = Composition(composition)
 
         self.composition = composition
         self.labels = labels
@@ -82,6 +201,10 @@ class Search:
         else:  # BUG
             raise Exception("We only support TruncatedSelection right now")
         self.selector = selector
+        print(
+            "The default parent selection for mutations will use "
+            f"{self.selector.__class__.__name__}."
+        )
 
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.
@@ -94,6 +217,9 @@ class Search:
         # BUG: I'll need to rewrite this in the future bc I don't really account
         # for other workflows yet. It would make sense that our workflow changes
         # as the search progresses (e.g. we incorporate DeePMD relaxation once ready)
+        print(
+            f"All individuals will be evaulated through the {self.workflow.name} workflow."
+        )
 
         # Point to the structure datatable that we'll pull from
         # For now, I assume its the results table of the workflow
@@ -119,6 +245,15 @@ class Search:
                 limit_best_survival=limit_best_survival,
             )
             self.search_datatable.save()
+        print(
+            "To track the progress while this search runs, you can use the following"
+            " in a separate python terminal:\n\n"
+            "\tfrom simmate.shortcuts import setup  # connects to database\n"
+            "\tfrom simmate.database.local_calculations.structure_prediction.evolution import EvolutionarySearch\n"
+            f"\tsearch = EvolutionarySearch.objects.get(id={self.search_datatable.id})\n\n"
+            f"So your search ID is {self.search_datatable.id}.\n"
+            "View the documentation on the EvolutionarySearch datatable for more info."
+        )
 
         # Grab the list of singleshot sources that have been ran before
         # and based off of that list, remove repeated sources
@@ -211,7 +346,7 @@ class Search:
         # Initialize the fingerprint database
         # For this we need to grab all previously calculated structures of this
         # compositon too pass in too.
-        print("Generating fingerprints for past structures. This can be slow...")
+        print("Generating fingerprints for past structures...")
         # BUG: should we only do structures that were successfully calculated?
         # If not, there's a chance a structure fails because of something like a
         # crashed slurm job, but it's never submitted again...
@@ -221,6 +356,7 @@ class Search:
             composition=composition,
             structure_pool=self.search_datatable.individuals,
         )
+        print("Done.")
 
     def run(self, sleep_step=10):
 

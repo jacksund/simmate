@@ -76,11 +76,16 @@ class EvolutionarySearch(DatabaseTable):
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
         scatter = plotly_go.Scatter(
-            x=structures_dataframe["id"],
+            x=structures_dataframe["updated_at"],
             y=structures_dataframe["energy_per_atom"],
             mode="markers",
         )
         figure = plotly_go.Figure(data=scatter)
+
+        figure.update_layout(
+            xaxis_title="Date Completed",
+            yaxis_title="Energy (eV/atom)",
+        )
 
         # we return the figure object for the user
         return figure
@@ -160,6 +165,11 @@ class EvolutionarySearch(DatabaseTable):
             mode="markers",
         )
         figure = plotly_go.Figure(data=scatter)
+
+        figure.update_layout(
+            xaxis_title="Date Completed",
+            yaxis_title="Distance from Known Structure",
+        )
 
         # we return the figure object for the user
         return figure

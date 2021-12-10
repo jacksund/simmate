@@ -12,8 +12,6 @@ from prefect.utilities.graphql import with_args
 
 from prefect.backend.flow_run import FlowRunView, FlowView, watch_flow_run
 
-from simmate.workflow_engine.tasks.workflow_task import WorkflowTask
-
 
 class Workflow(PrefectFlow):
 
@@ -164,6 +162,8 @@ class Workflow(PrefectFlow):
         return result["data"]["flow_run_aggregate"]["aggregate"]["count"]
 
     def to_workflow_task(self):
+        from simmate.workflow_engine.tasks.workflow_task import WorkflowTask
+
         return WorkflowTask(workflow=self)
 
 
