@@ -51,7 +51,6 @@ with Workflow("Staged Relaxation") as workflow:
 
     structure = Parameter("structure")
     command = Parameter("command", default="vasp > vasp.out")
-    directory = Parameter("directory", default=None)
 
     # Our first relaxation is directly from our inputs. The remaining one
     # pass along results
