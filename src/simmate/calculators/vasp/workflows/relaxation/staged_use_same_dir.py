@@ -72,10 +72,11 @@ with Workflow("Staged Relaxation") as workflow:
     run_id_01 = relax_task_01(
         structure={
             "calculation_table": "Quality00Relaxation",
-            "directory": run_id_00["directory"],
+            "directory": directory_cleaned,
             "structure_field": "structure_final",
         },
         command=command,
+        use_previous_directory=True,
         upstream_tasks=[run_id_00],
     )
 
@@ -83,43 +84,48 @@ with Workflow("Staged Relaxation") as workflow:
     run_id_02 = relax_task_02(
         structure={
             "calculation_table": "Quality01Relaxation",
-            "directory": run_id_01["directory"],
+            "directory": directory_cleaned,
             "structure_field": "structure_final",
         },
         command=command,
+        use_previous_directory=True,
+        upstream_tasks=[run_id_01],
     )
 
     # relaxation 03
     run_id_03 = relax_task_03(
         structure={
             "calculation_table": "Quality02Relaxation",
-            "directory": run_id_02["directory"],
+            "directory": directory_cleaned,
             "structure_field": "structure_final",
         },
         command=command,
         use_previous_directory=True,
+        upstream_tasks=[run_id_02],
     )
 
     # relaxation 04
     run_id_04 = relax_task_04(
         structure={
             "calculation_table": "Quality03Relaxation",
-            "directory": run_id_03["directory"],
+            "directory": directory_cleaned,
             "structure_field": "structure_final",
         },
         command=command,
         use_previous_directory=True,
+        upstream_tasks=[run_id_03],
     )
 
     # Static Energy (MIT)
     run_id_05 = static_task_04(
         structure={
             "calculation_table": "Quality04Relaxation",
-            "directory": run_id_04["directory"],
+            "directory": directory_cleaned,
             "structure_field": "structure_final",
         },
         command=command,
         use_previous_directory=True,
+        upstream_tasks=[run_id_04],
     )
 
     # save calculation metadata
