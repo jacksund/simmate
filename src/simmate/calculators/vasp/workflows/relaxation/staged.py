@@ -53,17 +53,11 @@ with Workflow("Staged Relaxation") as workflow:
     command = Parameter("command", default="vasp > vasp.out")
     directory = Parameter("directory", default=None)
 
-    # Rather than letting our first relaxation handle the directory and structure
-    # loading, we do this up front because we want to pass the directory to all
-    # other tasks.
-    directory_cleaned = setup_calculation(directory)
-
     # Our first relaxation is directly from our inputs. The remaining one
-    # pass along results and the working directory
+    # pass along results
     run_id_00 = relax_task_00(
         structure=structure,
         command=command,
-        directory=directory_cleaned,
     )
 
     # TODO: Use a for-loop in Prefect 2.0!
