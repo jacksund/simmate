@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+# NOTE: This task isn't used at all yet because my update_calculation method
+# of NestedCalculation is broken.
+
 import prefect
 from prefect import Task
 
