@@ -163,6 +163,7 @@ class EvolutionarySearch(DatabaseTable):
             x=structures_dataframe["updated_at"],
             y=structures_dataframe["fingerprint_distance"],
             mode="markers",
+            marker_color=structures_dataframe["energy_per_atom"],
         )
         figure = plotly_go.Figure(data=scatter)
 

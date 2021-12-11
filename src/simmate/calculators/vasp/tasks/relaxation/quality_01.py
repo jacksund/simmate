@@ -36,7 +36,6 @@ class Quality01RelaxationTask(VaspTask):
         LCHARG=False,
         LWAVE=False,
         KSPACING=0.6,
-        ISYM=0,  # turn off symmetry
         # The type of smearing we use depends on if we have a metal, semiconductor,
         # or insulator. So we need to decide this using a keyword modifier.
         multiple_keywords__smart_ismear={

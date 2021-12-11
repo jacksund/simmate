@@ -113,7 +113,7 @@ class SearchEngine:
         nfirst_generation: int = 20,
         nsteadystate: int = 40,
         steadystate_sources: List[Tuple[float, str]] = [
-            (0.30, "PyXtalStructure"),
+            (0.30, "RandomSymStructure"),
             (0.50, "HeredityASE"),
             (0.10, "SoftMutationASE"),
             # (0.10, "MirrorMutationASE"),
@@ -609,8 +609,8 @@ class SearchEngine:
             "RandomSymStructure",
             "PyXtalStructure",
         ]:
-            mutation_class = getattr(creation_module, class_str)
-            return mutation_class(self.composition)
+            creator_class = getattr(creation_module, class_str)
+            return creator_class(self.composition)
         # TRANSFORMATIONS
         elif class_str in [
             "HeredityASE",
