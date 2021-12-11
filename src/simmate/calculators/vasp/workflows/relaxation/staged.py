@@ -6,11 +6,6 @@ from simmate.workflow_engine.workflow import (
     ModuleStorage,
 )
 
-from simmate.workflows.common_tasks.all import (
-    LoadNestedCalculationTask,
-    SaveNestedCalculationTask,
-)
-
 from simmate.calculators.vasp.workflows.relaxation.quality_00 import (
     workflow as relaxation_quality00,
 )
@@ -33,8 +28,6 @@ from simmate.calculators.vasp.workflows.energy.quality_04 import (
 from simmate.calculators.vasp.database.relaxation import StagedRelaxation
 from simmate.calculators.vasp.database.energy import Quality04StaticEnergy
 
-# init common tasks
-save_calculation = SaveNestedCalculationTask(StagedRelaxation)
 
 # init workflow tasks
 # OPTIMIZE: Make this a for-loop in Prefect 2.0! We can use a for-loop in the
@@ -109,9 +102,6 @@ with Workflow("Staged Relaxation") as workflow:
         },
         command=command,
     )
-
-    # save calculation metadata
-    save_calculation(upstream_tasks=[run_id_05])
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"
