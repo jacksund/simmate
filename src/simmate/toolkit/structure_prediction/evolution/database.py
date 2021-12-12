@@ -11,6 +11,75 @@ import plotly.graph_objects as plotly_go
 
 
 class EvolutionarySearch(DatabaseTable):
+    """
+    This database table holds all of the information related to an evolutionary
+    search and also has convient methods to analyze the data.
+
+    Loading Results
+    ---------------
+
+    Typically, you'll load your search through a search id or a composition:
+
+    .. code-block:: python
+
+        from simmate.shortcuts import SearchResults
+
+        # if you know the id
+        search_results = SearchResults.objects.get(id=123)
+
+        # if you know the composition
+        search_results = SearchResults.objects.get(id="Ca2 N1")
+
+    Alternatively, you can find these out by looking at a table of all the
+    evolutionary searches that have been ran:
+
+    .. code-block:: python
+
+        all_searches = SearchResults.objects.to_dataframe()
+
+    Viewing Results
+    ---------------
+
+    The first thing you may want to check is the best structure found. To access
+    this and write it to a file:
+
+    .. code-block:: python
+
+        # loads the best structure and converts it to a pymatgen structure object
+        structure = search_results.best_individual.to_pymatgen()
+
+        # writes it to a cif file
+        structure.to("cif", "best_structure.cif")
+
+    To view convergence of the search, you can use the convenient plotting methods.
+
+    Note: this will open up the plot in your default browser, so this command
+    won't work properly through an ssh terminal.
+
+    .. code-block:: python
+
+        search_results.view_convergence_plot()
+
+    If you are benchmarking Simmate to see if it found a particular structure,
+    you can use:
+
+    .. code-block:: python
+
+        from pymatgen.core import Structure
+
+        structure = Structure.from_file("example123.cif")
+
+        search_results.view_correctness_plot(structure)
+
+    Beyond plots, you can also access a table of all calculated structures:
+
+    .. code-block:: python
+
+        dataframe = search_results.individuals_completed.to_dataframe()
+
+
+    """
+
     class Meta:
         app_label = "local_calculations"
 
