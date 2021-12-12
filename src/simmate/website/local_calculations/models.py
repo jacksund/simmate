@@ -25,7 +25,7 @@ from simmate.database.local_calculations.relaxation import (
     StagedRelaxation,
 )
 
-from simmate.database.local_calculations.structure_prediction.evolution import (
+from simmate.database.local_calculations.evolution import (
     EvolutionarySearch,
     StructureSource,
 )

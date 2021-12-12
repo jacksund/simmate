@@ -5,7 +5,7 @@ import time
 from pymatgen.core import Composition
 
 from simmate.configuration.django import setup_full  # sets database connection
-from simmate.database.local_calculations.structure_prediction.evolution import (
+from simmate.database.local_calculations.evolution import (
     EvolutionarySearch as SearchDatatable,
     StructureSource as SourceDatatable,
 )
@@ -55,16 +55,17 @@ class SearchEngine:
 
     Once you initialize a SearchEngine with a composition (and any other
     optional parameters), you simply need to call the run() method to start
-    the search:
+    the search. Note that we've added this class to the shortcuts module for
+    convenience:
 
     .. code-block:: python
 
-        from simmate.toolkit.structure_prediction.evolution.search import SearchEngine
+        from simmate.shortcuts import SearchEngine
 
-        search = SearchEngine(
+        search_engine = SearchEngine(
             composition="C4",
-            labels=["WarWulf"],
-            workflow_command="mpirun -n 8 vasp > vasp.out",
+            labels=["WarWulf"],  # optional
+            workflow_command="mpirun -n 8 vasp > vasp.out",  # optional
         )
 
         search.run()
@@ -75,22 +76,30 @@ class SearchEngine:
 
     .. code-block:: python
 
-       from simmate.shortcuts import setup  # connects to database
-       from simmate.database.local_calculations.structure_prediction.evolution import (
-           EvolutionarySearch,
-       )
+       from simmate.shortcuts import SearchResults
 
-       search = EvolutionarySearch.objects.get(composition="Sr4 Si4 N8")
+       search_results = SearchResults.objects.get(composition="Sr4 Si4 N8")
 
     If you start a separate terminal from where a search is running, you can
     actually use this table to view results WHILE the search is still running!
 
+    You can also access the search results from your search_engine object. So 
+    once your search is finished or stopped, you can do:
 
-    WARNING: For now, we assume you have Prefect Cloud and a cloud database backend
-    (e.g. Postgres) properly configured. We will allow local runs in the future though.
+    .. code-block:: python
 
-    Alternative Codes/Softwares
+       search_results = search_engine.search_datatable
+
+    To better understand how to view/analyze results, please read the documentation
+    for the SearchResults class.
+    
+    **WARNING** This search engine assumes you have properly configured
+    Prefect Cloud and a cloud database backend (e.g. Postgres). In the future,
+    we will accommodate local runs and other backends.
+
+    Alternative Codes & Softwares
     ----------------------------
+
     `USPEX`_, `XtalOpt`_, `CALYPSO`_, `AIRSS`_, `ASE-GA`_, `GASP`_
 
     .. _USPEX: https://uspex-team.org/en
@@ -248,9 +257,8 @@ class SearchEngine:
         print(
             "To track the progress while this search runs, you can use the following"
             " in a separate python terminal:\n\n"
-            "\tfrom simmate.shortcuts import setup  # connects to database\n"
-            "\tfrom simmate.database.local_calculations.structure_prediction.evolution import EvolutionarySearch\n"
-            f"\tsearch = EvolutionarySearch.objects.get(id={self.search_datatable.id})\n\n"
+            "\tfrom simmate.shortcuts import SearchResults\n"
+            f"\tsearch = SearchResults.objects.get(id={self.search_datatable.id})\n\n"
             f"So your search ID is {self.search_datatable.id}.\n"
             "View the documentation on the EvolutionarySearch datatable for more info."
         )

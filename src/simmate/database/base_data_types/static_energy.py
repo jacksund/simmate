@@ -34,21 +34,18 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     @classmethod
     def from_pymatgen(
         cls,
-        prefect_flow_run_id=None,
         structure=None,
         energy=None,
         site_forces=None,
         lattice_stress=None,
         as_dict=False,
+        **kwargs,
     ):
         # because this is a combination of tables, I need to build the data for
         # each and then feed all the results into this class
-
-        # This is just id for now, so this line is kinda dumb... Is there
-        # a better way to do this?
-        calculation_data = (
-            dict(prefect_flow_run_id=prefect_flow_run_id) if prefect_flow_run_id else {}
-        )
+        
+        # Note prefect_flow_run_id should be given as a kwarg or this class will
+        # fail to initialize with the Calculation mixin
 
         # first grab the full dictionaries for each parent model
         structure_data = (
@@ -78,10 +75,10 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
         # Now feed all of this dictionarying into one larger one.
         all_data = dict(
-            **calculation_data,
             **structure_data,
             **thermo_data,
             **forces_data,
+            **kwargs,
         )
 
         # If as_dict is false, we build this into an Object. Otherwise, just
