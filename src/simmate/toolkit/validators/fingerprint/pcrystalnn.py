@@ -86,7 +86,7 @@ class PartialCrystalNNFingerprint:
             )
             self.update_fingerprint_database()
 
-    def check_structure(self, structure, tolerance=0.075):
+    def check_structure(self, structure, tolerance=0.001):
         # OPTIMIZE: my choice of tolerance is based on my evolutionary search.
         # However, "clustering" after evolutionary search suggests that something
         # like 0.5 might be a better choice for finding a truly unique structure
