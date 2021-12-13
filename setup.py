@@ -15,7 +15,7 @@ import pathlib
 here = pathlib.Path(__file__).parent.resolve()
 
 # Get the long description from the README file
-long_description = (here / "README_temp.md").read_text(encoding="utf-8")
+long_description = (here / "README.md").read_text(encoding="utf-8")
 
 
 def get_package_data(base_dir):
@@ -49,8 +49,9 @@ def get_package_data(base_dir):
 
     return all_files
 
+
 # For debugging get_package_data
-raise Exception(get_package_data(here))
+# raise Exception(get_package_data(here))
 
 setup(
     # published name for pip install to use
