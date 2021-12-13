@@ -13,6 +13,19 @@ import warnings
 import numpy
 
 
+def get_doc_from_readme(file):
+    
+    # We assume the file is in the same directory and named "README.rst"
+    file_directory = os.path.dirname(os.path.abspath(__file__))
+    with open(
+        os.path.join(file_directory, "README.rst"),
+        encoding="utf-8",
+    ) as doc_file:
+        doc = doc_file.read()
+    
+    return doc
+
+
 def get_directory(directory=None):
 
     # There are many cases where the user can choose their working directory

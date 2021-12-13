@@ -1,21 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""
-Many times in Material Science, a workflow is made up of other smaller workflows.
-For example, calculations for bandstructure first involve a structure relaxation
-followed by a static energy calculation -- before the bandstructure is even
-calculated.
-
-For this reason, we need a way to call these workflows as if they were a task.
-Prefect has a module prefect.tasks.prefect.flow_run which is close to this
-idea -- but this module requires you to be using Prefect Cloud and have all
-of the flows registered. We need to account for running flows locally too!
-Therefore, we had to make this custom task here -- where it decided whether
-we call the workflow.run_cloud or workflow.run method.
-"""
-
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
+from prefect.engine.state import TriggerFailed
+
+from typing import List
+from simmate.workflow_engine.workflow import Workflow
 
 # BUG: prefect executor causes issues because there is no aysncio. Therefore the
 # "waiting" step means a task will be holding onto two Dask workers. Because of this
@@ -41,23 +31,73 @@ from prefect.utilities.tasks import defaults_from_attrs
 
 
 class WorkflowTask(Task):
+    """
+    Many times in Material Science, a workflow is made up of other smaller workflows.
+    For example, calculations for bandstructure first involve a structure relaxation
+    followed by a static energy calculation -- before the bandstructure is even
+    calculated.
+
+    For this reason, we need a way to call these workflows as if they were a task.
+
+    The easiest way to make your Workflow into a WorkflowTask is actually NOT
+    calling this class. But instead using the to_workflow_task method:
+
+    .. code-block:: python
+
+       from simmate.workflows.all import example_workflow
+       my_task = example_workflow.to_workflow_task()
+
+    DEV NOTE:
+    Prefect has a module prefect.tasks.prefect.flow_run which is close to this
+    idea -- but this module requires you to be using Prefect Cloud and have all
+    of the flows registered. We need to account for running flows locally too!
+    Therefore, we had to make this custom task here -- where it decided whether
+    we call the workflow.run_cloud or workflow.run method.
+    Consider moving this functionality to Prefect down the line.
+    """
+
     def __init__(
         self,
-        # The full workflow to run.
-        workflow,
-        # How the workflow should be scheduled and ran. The options are either
-        # local or prefect (i.e. prefect cloud).
-        executor_type="local",  # get_default_executor_type(), # BUG
-        # If Prefect is used to schedule the workflow, then this indicates
-        # whether we should wait for the flow to finish or not. Also what
-        # labels should be attached to the flow
-        wait_for_run=True,
-        labels=[],
+        workflow: Workflow,
+        return_result=True,
+        executor_type: str = "local",  # get_default_executor_type(), # BUG
+        wait_for_run: bool = True,
+        labels: List[str] = [],
+        log_stdout: bool = True,
+        **kwargs,
+    ):
+        """
+        Creates a Prefect task instance from a workflow and determines how it
+        should be ran when task.run() is called.
+
+        Parameters
+        ----------
+        workflow : Workflow
+            The full workflow to run.
+        return_result : bool
+            If True, the task run will return the result of the task set as the
+            worfklow.result_task attribute. If False, the workflow State is returned.
+            The default is True.
+        executor_type : str (optional)
+            How the workflow should be scheduled and ran. The options are either
+            local or prefect (i.e. prefect cloud). The default is "local".
+        wait_for_run : bool (optional)
+            If Prefect is used to schedule the workflow, then this indicates
+            whether we should wait for the flow to finish or not.
+        labels : List[str] (optional)
+            If Prefect is used to schedule the workflow, then this indicates
+            what labels should be attached to the flow
+        log_stdout : bool (optional)
+            Whether to log anything printed by the workflow. The default is True.
+        **kwargs : TYPE
+            All extra arguments supported by prefect.core.task.Task.
+
+        """
+
         # If Prefect is used to schedule the workflow, we also may want to
         # To support other Prefect input options. To see all the options, visit...
         # https://docs.prefect.io/api/latest/core/task.html
-        **kwargs,
-    ):
+        # We want to pass the logs from the workflow task up!
 
         # make sure the user selected a valid option
         if executor_type not in ["local", "prefect"]:
@@ -74,26 +114,65 @@ class WorkflowTask(Task):
 
         # Save our inputs
         self.workflow = workflow
+        self.return_result = return_result
         self.executor_type = executor_type
         self.wait_for_run = wait_for_run
         self.labels = labels
 
+        # BUG: so far I only support local execution
+        if executor_type != "local":
+            raise Exception("Only executor_type=local is supported right now.")
+
         # now inherit the parent Prefect Task class
         # Note we name this task after our attached workflow
-        super().__init__(name=f"{self.workflow.name}-WorkflowTask", **kwargs)
+        super().__init__(
+            name=f"{self.workflow.name}-WorkflowTask",
+            log_stdout=log_stdout,
+            **kwargs,
+        )
 
     @defaults_from_attrs(
         "executor_type",
+        "return_result",
         "wait_for_run",
         "labels",
     )
     def run(
         self,
-        executor_type=None,
-        wait_for_run=None,
-        labels=None,
+        executor_type: str = None,
+        return_result: bool = None,
+        wait_for_run: bool = None,
+        labels: List[str] = None,
         **parameters,
     ):
+        """
+
+
+        Parameters
+        ----------
+        executor_type : str (optional)
+            How the workflow should be scheduled and ran. The options are either
+            local or prefect (i.e. prefect cloud).
+        return_result : bool
+            If True, the task run will return the result of the task set as the
+            worfklow.result_task attribute. If False, the workflow State is returned.
+            The default is True.
+        wait_for_run : bool (optional)
+            If Prefect is used to schedule the workflow, then this indicates
+            whether we should wait for the flow to finish or not.
+        labels : List[str] (optional)
+            If Prefect is used to schedule the workflow, then this indicates
+            what labels should be attached to the flow
+        **parameters : TYPE
+            All options to pass the workflow.run() method.
+
+        Returns
+        -------
+        str
+            The flow-run-id if submitted with prefect OR the prefect state if
+            the workflow was ran locally
+
+        """
         # The kwargs here are any parameter you would normally pass into the
         # workflow.run() method.
 
@@ -103,23 +182,49 @@ class WorkflowTask(Task):
         if executor_type == "local":
             state = self.workflow.run(**parameters)
             if state.is_failed():
-                # Grab the very first task error and we raise that.
-                # TODO: what if we want to raise all task errors (excluding those
-                # like "TriggerFailed")?
+                # Grab the all task errors except for those that never ran
+                # because the trigger failed.
                 # OPTIMIZE: would the log_stdout=True task option be the better
                 # way to forward information? See here:
                 #   https://docs.prefect.io/core/concepts/logging.html#logging-stdout
+                errors = []
                 for task_state in state.result.values():
-                    if task_state.is_failed():
+                    if task_state.is_failed() and not isinstance(
+                        task_state, TriggerFailed
+                    ):
                         error = task_state.result
-                        break  # exits for-loop
-                # we want the error raised so that the task fails
-                raise error
-            return state
+                        errors.append(error)
+
+                # TODO: how do you raise a list of errors?
+                if len(errors) > 1:
+                    raise Exception(
+                        "More than one task failed in the workflow and Simmate does "
+                        "not currently have a way to raise a list of errors."
+                    )
+                # otherwise we just have one failure
+                else:
+                    # we want the error raised so that the task fails
+                    raise errors[0]
+            # if we reached this point, the workflow was successful and we just return
+            # the state as a normal task would
+
+            # Workflows typically return a prefect State object, but when we run
+            # workflows as a task, we often want to pass along extra information
+            # beyond just some "state". So return_result is True, we return the
+            # result of a specific task (determined by flow.result_task).
+            if self.return_result:
+                # The prefect api for this is ugly... nothing I can really do
+                # about it: https://docs.prefect.io/core/concepts/results.html
+                return state.result[self.workflow.result_task].result
+            else:
+                return state
 
         # If we are using prefect, we assume that the flow has been registered
         # and simply submit it from here.
         elif executor_type == "prefect":
+
+            raise Exception
+
             # Now create the flow run in the prefect cloud
             flow_run_id = self.workflow.run_cloud(
                 labels,

@@ -8,10 +8,8 @@ from simmate.database.base_data_types import (
     Calculation,
 )
 
-# Extra modules for plotting and visualization.
 from plotly.subplots import make_subplots
 import plotly.graph_objects as plotly_go
-from django_pandas.io import read_frame
 
 
 class IonicStep(Structure, Thermodynamics, Forces):
@@ -235,12 +233,12 @@ class Relaxation(Structure, Calculation):
         ) / structures[0].volume
 
         # There is also extra data for the final structure that we save directly
-        # in the relaxation table
-        self.band_gap = data["bandgap"]
-        self.is_gap_direct = data["is_gap_direct"]
-        self.energy_fermi = data["efermi"]
-        self.conduction_band_minimum = data["cbm"]
-        self.valence_band_maximum = data["vbm"]
+        # in the relaxation table.  We use .get() in case the key isn't provided.
+        self.band_gap = data.get("bandgap")
+        self.is_gap_direct = data.get("is_gap_direct")
+        self.energy_fermi = data.get("efermi")
+        self.conduction_band_minimum = data.get("cbm")
+        self.valence_band_maximum = data.get("vbm")
 
         # lastly, we also want to save the corrections made and directory it ran in
         self.corrections = corrections
@@ -252,8 +250,9 @@ class Relaxation(Structure, Calculation):
     def get_convergence_plot(self):
 
         # Grab the calculation's structure and convert it to a dataframe
-        structures = self.structures.order_by("ionic_step_number").all()
-        structures_dataframe = read_frame(structures)
+        structures_dataframe = self.structures.order_by(
+            "ionic_step_number"
+        ).to_dataframe()
 
         # We will be making a figure that consists of 3 stacked subplots that
         # all share the x-axis of ionic_step_number

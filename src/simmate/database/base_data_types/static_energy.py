@@ -8,9 +8,6 @@ from simmate.database.base_data_types import (
     Calculation,
 )
 
-# WARNING:
-# The from_pymatgen and update_from_vasp_run methods don't work yet!
-
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
@@ -37,21 +34,18 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     @classmethod
     def from_pymatgen(
         cls,
-        prefect_flow_run_id=None,
         structure=None,
         energy=None,
         site_forces=None,
         lattice_stress=None,
         as_dict=False,
+        **kwargs,
     ):
         # because this is a combination of tables, I need to build the data for
         # each and then feed all the results into this class
-
-        # This is just id for now, so this line is kinda dumb... Is there
-        # a better way to do this?
-        calculation_data = (
-            dict(prefect_flow_run_id=prefect_flow_run_id) if prefect_flow_run_id else {}
-        )
+        
+        # Note prefect_flow_run_id should be given as a kwarg or this class will
+        # fail to initialize with the Calculation mixin
 
         # first grab the full dictionaries for each parent model
         structure_data = (
@@ -81,10 +75,10 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
         # Now feed all of this dictionarying into one larger one.
         all_data = dict(
-            **calculation_data,
             **structure_data,
             **thermo_data,
             **forces_data,
+            **kwargs,
         )
 
         # If as_dict is false, we build this into an Object. Otherwise, just
@@ -115,13 +109,14 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         )
         for key, value in new_kwargs.items():
             setattr(self, key, value)
+
         # There is also extra data for the final structure that we save directly
-        # in the relaxation table
-        self.band_gap = data["bandgap"]
-        self.is_gap_direct = data["is_gap_direct"]
-        self.energy_fermi = data["efermi"]
-        self.conduction_band_minimum = data["cbm"]
-        self.valence_band_maximum = data["vbm"]
+        # in the relaxation table. We use .get() in case the key isn't provided
+        self.band_gap = data.get("bandgap")
+        self.is_gap_direct = data.get("is_gap_direct")
+        self.energy_fermi = data.get("efermi")
+        self.conduction_band_minimum = data.get("cbm")
+        self.valence_band_maximum = data.get("vbm")
 
         # lastly, we also want to save the corrections made and directory it ran in
         self.corrections = corrections

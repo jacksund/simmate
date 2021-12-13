@@ -91,12 +91,28 @@ class VaspTask(SSSTask):
     # Read more on this inside the Potcar class and be careful with updating!
     potcar_mappings = None
 
+    # In somecases we still want results from calculations that did NOT converge
+    # successfully. This flag controls whether or not we raise an error when
+    # the calculation failed to converge.
+    # OPTIMIZE: What if I updated the ErrorHandler class to allow for "warnings"
+    # instead of raising the error and applying the correction...? This functionality
+    # could then be moved to the UnconvergedErrorHandler. I'd have a fix_error=True
+    # attribute that is used in the .check() method. and If fix_error=False, I
+    # simply print a warning & also add that warning to simmate_corrections.csv
+    confirm_convergence = True
+
+    # In some cases, we may want to sanitize the structure during our setup().
+    # This means converting to the LLL-reduced primitive cell.
+    pre_sanitize_structure = False
+
     def __init__(
         self,
         incar=None,
         kpoints=None,
         functional=None,
         potcar_mappings=None,
+        confirm_convergence=None,
+        pre_sanitize_structure=None,
         # To support other options from the Simmate SSSTask and Prefect Task
         **kwargs,
     ):
@@ -115,13 +131,20 @@ class VaspTask(SSSTask):
             self.functional = functional
         if potcar_mappings:
             self.potcar_mappings = potcar_mappings
+        if confirm_convergence:
+            self.confirm_convergence = confirm_convergence
+        if pre_sanitize_structure:
+            self.pre_sanitize_structure = pre_sanitize_structure
 
         # now inherit from parent SSSTask class
         super().__init__(**kwargs)
 
     def setup(self, structure, directory):
 
-        # TODO should I sanitize the structure first? primitive and LLL reduce?
+        # If requested, we convert to the LLL-reduced unit cell, which aims to 
+        # be as cubic as possible.
+        if self.pre_sanitize_structure:
+            structure = structure.copy(sanitize=True)
 
         # write the poscar file
         Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
@@ -154,15 +177,31 @@ class VaspTask(SSSTask):
     def workup(self, directory):
         """
         This is the most basic VASP workup where I simply load the final structure,
-        final energy, and confirm convergence. I will likely make this a common
-        function for this vasp module down the road.
+        final energy, and (if requested) confirm convergence. I will likely make
+        this a common function for this vasp module down the road.
         """
 
         # load the xml file and all of the vasprun data
-        vasprun = Vasprun(
-            filename=os.path.join(directory, "vasprun.xml"),
-            exception_on_bad_xml=True,
-        )
+        try:
+            vasprun = Vasprun(
+                filename=os.path.join(directory, "vasprun.xml"),
+                exception_on_bad_xml=True,
+            )
+        except:
+            print(
+                "XML is malformed. This typically means there's an error with your"
+                " calculation that wasn't caught by your ErrorHandlers. We try"
+                " salvaging data here though."
+            )
+            vasprun = Vasprun(
+                filename=os.path.join(directory, "vasprun.xml"),
+                exception_on_bad_xml=False,
+            )
+            vasprun.final_structure = vasprun.structures[-1]
+        # BUG: This try/except is 100% just for my really rough calculations
+        # where I don't use any ErrorHandlers and still want the final structure
+        # regarless of what when wrong. In the future, I should consider writing
+        # a separate method for those that loads the CONTCAR and moves on.
 
         # grab the final structure
         # final_structure = vasprun.structures[-1]
@@ -171,7 +210,8 @@ class VaspTask(SSSTask):
         # final_energy = vasprun.final_energy / final_structure.num_sites
 
         # confirm that the calculation converged (ionicly and electronically)
-        assert vasprun.converged
+        if self.confirm_convergence:
+            assert vasprun.converged
 
         # OPTIMIZE: see my comment above on this attribute
         if self.return_final_structure:

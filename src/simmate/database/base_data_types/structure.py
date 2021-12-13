@@ -12,6 +12,38 @@ from simmate.database.base_data_types import (
     Spacegroup,
 )
 
+# TODO: 
+# Explore polymorphic relations instead of a JSON dictionary.
+# Making relationships to different tables makes things difficult to use, so 
+# these columns are just standalone.
+#
+# This is will be very important for "source" and "parent_nested_calculations"
+# fields because I have no way to efficiently convert these fields to the objects
+# that they refer to. There's also no good way to access a structure's "children"
+# (i.e. structure where they are the source).
+#
+# I should investigate generic relations in django though:
+# https://docs.djangoproject.com/en/3.2/ref/contrib/contenttypes/#generic-relations
+#
+# Another option is using django-polymorphic.
+# https://django-polymorphic.readthedocs.io/en/latest/
+# This thread is really helpful on the subject:
+# https://stackoverflow.com/questions/30343212/
+
+# TODO:
+# Consider adding some methods to track the history of a structure. This
+# would be useful for things like evolutionary algorithms.
+# get_source_parent:
+#   this would iterate through sources until we find one in the same table
+#   as this one. Parent sources are often the most recent transformation
+#   or mutation applied to a structure, such as a MirrorMutation.
+# get_source_seed:
+#   this would iterate through sources until we hit a dead-end. So the seed
+#   source would be something like a third-party database, a method that
+#   randomly create structures, or a prototype.
+# Both of these get more complex when we consider transformation that have
+# multiple parents (and therefore multiple seeds too). An example of this
+# is the HereditaryMutation.
 
 class Structure(DatabaseTable):
 
@@ -22,9 +54,11 @@ class Structure(DatabaseTable):
     # object, use the .to_pymatgen() method!
     structure_string = table_column.TextField()
 
+    # EXPERIMENTAL
     # Where the structure came from. This could be a number of things, including
     # a third party id, a transformation of another structure, a creation method,
     # or just a custom submission by the user.
+    #
     # Source can be the name of another table or a python transformation.
     # Source id can be thought of as the "parent structure id", which can be a
     # string (mp-123), an integer (123 of same table), a list of these ([123,321]),
@@ -35,12 +69,15 @@ class Structure(DatabaseTable):
     # AtomicPurmutation --> 123
     # HereditaryMutation --> [123,124]
     # user_submission --> null
-    source = table_column.CharField(max_length=25, default="user_submission")
-    source_id = table_column.JSONField(blank=True, null=True)
-    # TODO: Making relationships to different tables makes things difficult
-    # to use, so these columns are just standalone. I should investigate generic
-    # relations in django though:
-    # https://docs.djangoproject.com/en/3.2/ref/contrib/contenttypes/#generic-relations
+    source = table_column.JSONField(blank=True, null=True)
+
+    # EXPERIMENTAL
+    # Where this calculation plays a role within a "nested" workflow calculation.
+    # Becuase this structure can be reused by multiple workflows, we make this
+    # a list of source-like objects. For example, a relaxation could be part of 
+    # a series of relaxations (like in StagedRelaxation) or it can be an initial
+    # step of a BandStructure calculation.
+    # parent_nested_calculations = table_column.JSONField(blank=True, null=True)
 
     """ Query-helper Info """
 

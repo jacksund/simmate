@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """
-This file establishes the info needed for installing simmate via pip and also how to
+This file establishes the info needed to install simmate via pip and also how to
 upload it to PyPI. This file was copied and editted from the following source:
     https://github.com/pypa/sampleproject
-
-For more info on changing this file, look here:
-    https://packaging.python.org/guides/distributing-packages-using-setuptools/
 """
 
-# Always prefer setuptools over distutils
+import os
+from glob import glob
 from setuptools import setup, find_packages
 import pathlib
 
@@ -17,235 +15,135 @@ import pathlib
 here = pathlib.Path(__file__).parent.resolve()
 
 # Get the long description from the README file
-long_description = (here / 'README.md').read_text(encoding='utf-8')
+long_description = (here / "README_temp.md").read_text(encoding="utf-8")
 
-# Arguments marked as "Required" below must be included for upload to PyPI.
-# Fields marked as "Optional" may be commented out.
+
+def get_package_data(base_dir):
+
+    # convert PosixPath to string
+    base_dir = str(base_dir)
+
+    # all designate the path to source code
+    source_dir = os.path.join("src", "simmate")
+
+    queries = [
+        "**/*.md",
+        "**/*.rst",
+        "**/*.json",
+        "**/*.csv",
+        "**/*.yaml",
+        "**/*.html",
+    ]
+    # add the base directory to the start of each query
+    # we also add the source directory
+    queries = [os.path.join(base_dir, source_dir, q) for q in queries]
+
+    # now grab all the files
+    all_files = []
+    for query in queries:
+        files = glob(query, recursive=True)
+        all_files += files
+
+    # each filename will still start with base_dir, which we want to remove.
+    all_files = [os.path.relpath(f, start=source_dir) for f in all_files]
+
+    return all_files
+
+# For debugging get_package_data
+# raise Exception(get_package_data(here))
 
 setup(
-    # This is the name of your project. The first time you publish this
-    # package, this name will be registered for you. It will determine how
-    # users can install this project, e.g.:
-    #
-    # $ pip install sampleproject
-    #
-    # And where it will live on PyPI: https://pypi.org/project/sampleproject/
-    #
-    # There are some restrictions on what makes a valid project name
-    # specification here:
-    # https://packaging.python.org/specifications/core-metadata/#name
-    name='simmate',  # Required
-
+    # published name for pip install to use
+    name="simmate",
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
-    #
-    # For a discussion on single-sourcing the version across setup.py and the
-    # project code, see
-    # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.0',  # Required
-
-    # This is a one-line description or tagline of what your project does. This
-    # corresponds to the "Summary" metadata field:
-    # https://packaging.python.org/specifications/core-metadata/#summary
-    description='Simmate is the Simulated Materials Ecosystem which has everything you'
-                ' need for materials chemistry research all in one repo.',  # Optional
-
-    # This is an optional longer description of your project that represents
-    # the body of text which users will see when they visit PyPI.
-    #
-    # Often, this is the same as your README, so you can just read it in from
-    # that file directly (as we have already done above)
-    #
-    # This field corresponds to the "Description" metadata field:
-    # https://packaging.python.org/specifications/core-metadata/#description-optional
-    long_description=long_description,  # Optional
-
-    # Denotes that our long_description is in Markdown; valid values are
-    # text/plain, text/x-rst, and text/markdown
-    #
-    # Optional if long_description is written in reStructuredText (rst) but
-    # required for plain-text or Markdown; if unspecified, "applications should
-    # attempt to render [the long_description] as text/x-rst; charset=UTF-8 and
-    # fall back to text/plain if it is not valid rst" (see link below)
-    #
-    # This field corresponds to the "Description-Content-Type" metadata field:
-    # https://packaging.python.org/specifications/core-metadata/#description-content-type-optional
-    long_description_content_type='text/markdown',  # Optional (see note above)
-
-    # This should be a valid link to your project's main homepage.
-    #
-    # This field corresponds to the "Home-Page" metadata field:
-    # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url='https://github.com/jacksund/simmate',  # Optional
-
-    # This should be your name or the name of the organization which owns the
-    # project.
-    author='Jack D. Sundberg',  # Optional
-
-    # This should be a valid email address corresponding to the author listed
-    # above.
-    author_email='jacksund@live.unc.edu',  # Optional
-
+    version="0.0.0.dev1",
+    # a quick summary and then README
+    description="Simmate is a toolbox for computational materials research.",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    # Link to our homepage. Use github for now.
+    url="https://github.com/jacksund/simmate",
+    # Lead dev info
+    author="Jack D. Sundberg",
+    author_email="jacksund@live.unc.edu",
     # Classifiers help users find your project by categorizing it.
-    #
     # For a list of valid classifiers, see https://pypi.org/classifiers/
-    # classifiers=[  # Optional
-    #     # How mature is this project? Common values are
-    #     #   3 - Alpha
-    #     #   4 - Beta
-    #     #   5 - Production/Stable
-    #     'Development Status :: 3 - Alpha',
-
-    #     # Indicate who your project is intended for
-    #     'Intended Audience :: Developers',
-    #     'Topic :: Software Development :: Build Tools',
-
-    #     # Pick your license as you wish
-    #     'License :: OSI Approved :: MIT License',
-
-    #     # Specify the Python versions you support here. In particular, ensure
-    #     # that you indicate you support Python 3. These classifiers are *not*
-    #     # checked by 'pip install'. See instead 'python_requires' below.
-    #     'Programming Language :: Python :: 3',
-    #     'Programming Language :: Python :: 3.5',
-    #     'Programming Language :: Python :: 3.6',
-    #     'Programming Language :: Python :: 3.7',
-    #     'Programming Language :: Python :: 3.8',
-    #     'Programming Language :: Python :: 3 :: Only',
-    # ],
-
-    # This field adds keywords for your project which will appear on the
-    # project page. What does your project relate to?
-    #
-    # Note that this is a list of additional keywords, separated
-    # by commas, to be used to assist searching for the distribution in a
-    # larger catalog.
-    keywords='sample, setuptools, development',  # Optional
-
-    # When your source code is in a subdirectory under the project root, e.g.
-    # `src/`, it is necessary to specify the `package_dir` argument.
-    package_dir={'': 'src'},  # Optional
-
-    # You can just specify package directories manually here if your project is
-    # simple. Or you can use find_packages().
-    #
-    # Alternatively, if you just want to distribute a single Python file, use
-    # the `py_modules` argument instead as follows, which will expect a file
-    # called `my_module.py` to exist:
-    #
-    #   py_modules=["my_module"],
-    #
-    packages=find_packages(where='src'),  # Required
-
-    # Specify which Python versions you support. In contrast to the
-    # 'Programming Language' classifiers above, 'pip install' will check this
-    # and refuse to install the project if the version does not match. See
-    # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-    python_requires='>=3.5, <4',
-
+    classifiers=[
+        "Development Status :: 1 - Planning",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: BSD License",
+    ],
+    # Keywords
+    keywords="sample, setuptools, development",
+    # Indicate which directory the source coude is in
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
+    # Specify which Python versions supported.
+    python_requires=">=3.5, <4",
     # This field lists other packages that your project depends on to run.
-    # Any package you put here will be installed by pip when your project is
-    # installed, so they must be valid existing projects.
-    #
-    # For an analysis of "install_requires" vs pip's requirements files see:
-    # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         # Core dependencies
-        'numpy',
-        'pandas',
-        'django',
-        'prefect',
-        'dask',
-        'click',
-        'numba',
-    
+        "numpy==1.21.4",
+        "pandas==1.3.4",
+        "django==3.2.9",
+        "prefect==0.15.10",
+        "dask==2021.11.2",
+        "click==8.0.3",
+        "numba==0.53.0rc2",
         # Extra dependencies
-        'django-crispy-forms',  # for formatting of online forms
-        'django-pandas',  # for converting QuerySets to PandasDF
-        'psycopg2',  # for Postgres connections
+        "django-crispy-forms==1.13.0",  # for formatting of online forms
+        "django-pandas==0.6.1",  # for converting QuerySets to PandasDF
+        "psycopg2-binary==2.9.2",  # for Postgres connections  # BUG: added -binary
         # 'selenium',  # for web scraping (slow but robust)
-        'dask-jobqueue',  # for submitting on clusters
-        'scikit-learn',
-        'dj-database-url',  # for DigitalOcean URL conversion
-        'gunicorn',  # for website server (Django+DigitalOcean)
-        'djangorestframework',  # for our REST API
-        'django-filter',  # sets up automatic filters for our REST API
-        'django-extensions',  # simple tools to help with django development
-        'pyyaml',  # for yaml configuration files
-    
+        "dask-jobqueue==0.7.3",  # for submitting on clusters
+        "scikit-learn==1.0.1",
+        "dj-database-url==0.5.0",  # for DigitalOcean URL conversion
+        # 'gunicorn',  # for website server (Django+DigitalOcean) # !!! NOT WINDOWS
+        "djangorestframework==3.12.4",  # for our REST API
+        "django-filter==21.1",  # sets up automatic filters for our REST API
+        "django-extensions==3.1.5",  # simple tools to help with django development
+        "pyyaml==6.0",  # for yaml configuration files
         # For development
-        'pytest',
-        'black',
+        "pytest==6.2.5",
+        "black==21.11b1",
         # 'spyder',
-    
         # For visualization
-        'graphviz',  # python-graphviz on conda. for viewing prefect flows
-        'pygraphviz',  # pygraphviz on conda. for viewing django tables
-        'plotly',
-        'matplotlib',
+        # "graphviz==1.7",  # python-graphviz on conda. for viewing prefect flows
+        # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
+        "plotly==5.4.0",
+        "matplotlib==3.5.0",
         # 'seaborn',
-    
         # These are from the MP stack and I want to drop dependency
-        'pymatgen',
-        'pymatgen-analysis-diffusion',
-        'matminer',
+        "pymatgen==2022.0.16",
+        "pymatgen-analysis-diffusion==2021.4.29",
+        "matminer==0.7.4",
         # 'custodian',
         # 'fireworks',
         # 'dnspython',  # for mongocloud + fireworks
     ],
-
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). Users will be able to install these using the "extras"
-    # syntax, for example:
-    #
-    #   $ pip install sampleproject[dev]
-    #
-    # Similar to `install_requires` above, these must be valid existing
-    # projects.
-    # extras_require={  # Optional
-    #     'dev': ['check-manifest'],
-    #     'test': ['coverage'],
-    # },
-
-    # If there are data files included in your packages that need to be
-    # installed, specify them here.
-    # package_data={  # Optional
-    #     'sample': ['package_data.dat'],
-    # },
-
-    # Although 'package_data' is the preferred approach, in some case you may
-    # need to place data files outside of your packages. See:
-    # http://docs.python.org/distutils/setupscript.html#installing-additional-files
-    #
-    # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
-    # data_files=[('my_data', ['data/data_file'])],  # Optional
-
-    # To provide executable scripts, use entry points in preference to the
-    # "scripts" keyword. Entry points provide cross-platform support and allow
-    # `pip` to create the appropriate form of executable for the target
-    # platform.
-    #
-    # For example, the following would provide a command called `simmate` which
-    # executes the function `main` from this package when invoked:
+    # Register command line interface
     entry_points={
-        'console_scripts': [
-            'simmate = simmate.command_line.base_command:simmate',
+        "console_scripts": [
+            "simmate = simmate.command_line.base_command:simmate",
         ],
     },
-
-    # List additional URLs that are relevant to your project as a dict.
-    #
-    # This field corresponds to the "Project-URL" metadata fields:
-    # https://packaging.python.org/specifications/core-metadata/#project-url-multiple-use
-    #
-    # Examples listed include a pattern for specifying where the package tracks
-    # issues, where the source is hosted, where to say thanks to the package
-    # maintainers, and where to support the project financially. The key is
-    # what's used to render the link text on PyPI.
-    # project_urls={  # Optional
-    #     'Bug Reports': 'https://github.com/pypa/sampleproject/issues',
-    #     'Funding': 'https://donate.pypi.org',
-    #     'Say Thanks!': 'http://saythanks.io/to/example',
-    #     'Source': 'https://github.com/pypa/sampleproject/',
-    # },
+    # All files that aren't *.py need to be defined explicitly. Don't "automate"
+    # this to grab all files because this could break installation. This can
+    # be effectively the opposite of .gitignore.
+    include_package_data=True,
+    package_data={
+        # Recursive calls are not supported yet, so keep an eye on this issue
+        # https://github.com/pypa/setuptools/issues/1806
+        # "simmate": [
+        #     "**/*.md",
+        #     "**/*.rst",
+        #     "**/*.json",
+        #     "**/*.csv",
+        #     "**/*.yaml",
+        #     "**/*.html",
+        # ],
+        # For now, I make a custom function that calls glob recursively
+        "simmate": get_package_data(here),
+    },
 )

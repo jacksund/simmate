@@ -33,8 +33,30 @@ class SearchResults(models.QuerySet):
         coerce_float=False,
         datetime_index=False,
     ):
-        # This method is coppied from...
-        # https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py
+        """
+        Returns a DataFrame from the queryset
+        
+        This method is coppied from...
+        https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py
+        
+        Paramaters
+        -----------
+        fieldnames:  The model field names(columns) to utilise in creating
+                     the DataFrame. You can span a relationships in the usual
+                     Django ORM way by using the foreign key field name
+                     separated by double underscores and refer to a field
+                     in a related model.
+        index:  specify the field to use  for the index. If the index
+                field is not in fieldnames it will be appended. This
+                is mandatory for timeseries.
+        verbose: If  this is ``True`` then populate the DataFrame with the
+                 human readable versions for foreign key fields else
+                 use the actual values set in the model
+        coerce_float:   Attempt to convert values to non-string, non-numeric
+                        objects (like decimal.Decimal) to floating point.
+        datetime_index: specify whether index should be converted to a
+                        DateTimeIndex.
+        """
 
         # BUG: read_frame runs a NEW query, so it may be a different length from
         # the original queryset.

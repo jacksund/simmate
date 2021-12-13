@@ -154,7 +154,7 @@ class NestedCalculation(Calculation):
     # carry fixes (such as smearing) accross different calcs.
     # Or maybe a method that just lists the corrections of each subcalc?
     # For now I don't use this though. This line removes the field.
-    corrections = "not implemented in simmate yet"
+    corrections = None
 
     @classmethod
     def create_subclass_from_calcs(
@@ -181,7 +181,8 @@ class NestedCalculation(Calculation):
             name,
             **new_columns,
             **extra_columns,
-            child_calculation_tables=child_calculation_tables,  # also have this as an attribute
+            # also have child calcs list as an attribute
+            child_calculation_tables=child_calculation_tables,
             module=module,
         )
 
@@ -189,7 +190,14 @@ class NestedCalculation(Calculation):
         return NewClass
 
     def update_calculation(self):
-
+        
+        raise Exception(
+            "NestedCalculation datatable is experimental so this method doesn't "
+            "work yet."
+        )
+        
+        # BUG: This assumes we ran all calculations within the same directory,
+        # which isn't true in all cases.
         for child_calc_table in self.child_calculation_tables:
             if child_calc_table.objects.filter(directory=self.directory).exists():
                 child_calc = child_calc_table.objects.get(directory=self.directory)

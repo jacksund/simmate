@@ -41,6 +41,7 @@ class PartialCrystalNNFingerprint:
             sitefingerprint_method = CrystalNNFingerprint.from_preset(
                 "ops", distance_cutoffs=None, x_diff_weight=3
             )
+
         # now that we made the sitefingerprint_method, we can input it into the
         # structurefingerprint_method which finishes up the featurizer
         self.featurizer = PartialsSiteStatsFingerprint(
@@ -85,7 +86,7 @@ class PartialCrystalNNFingerprint:
             )
             self.update_fingerprint_database()
 
-    def check_structure(self, structure, tolerance=0.075):
+    def check_structure(self, structure, tolerance=0.001):
         # OPTIMIZE: my choice of tolerance is based on my evolutionary search.
         # However, "clustering" after evolutionary search suggests that something
         # like 0.5 might be a better choice for finding a truly unique structure

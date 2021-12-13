@@ -7,10 +7,10 @@
 
 default:
   ENGINE: django.db.backends.postgresql_psycopg2
-  HOST: db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com
+  HOST: db-postgresql-nyc3-1235-do-user-123456-0.b.db.ondigitalocean.com
   NAME: simmate-database-pool
   USER: doadmin
-  PASSWORD: dibi5n3varep5ad8
+  PASSWORD: 1234abcd1234
   PORT: 25061
   OPTIONS:
     sslmode: require
