@@ -101,7 +101,7 @@ setup(
         "scikit-learn==1.0.1",
         "dj-database-url==0.5.0",  # for DigitalOcean URL conversion
         # 'gunicorn',  # for website server (Django+DigitalOcean) # !!! NOT WINDOWS
-        "djangorestframework==3.12.4",  # for our REST API
+        "djangorestframework==3.13.0",  # for our REST API
         "django-filter==21.1",  # sets up automatic filters for our REST API
         "django-extensions==3.1.5",  # simple tools to help with django development
         "pyyaml==6.0",  # for yaml configuration files
