@@ -19,7 +19,14 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 
 def get_package_data(base_dir):
+    """
+    This function goes through the src/simmate directory and grabs all of our
+    non-python files (md, rst, json, csv, yaml, html). It returns a list of
+    paths to these files with the relative path starting from src/simmate.
 
+    These should all be passed to package_data to ensure these files are
+    included when simmate is installed.
+    """
     # convert PosixPath to string
     base_dir = str(base_dir)
 
@@ -81,7 +88,7 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     # Specify which Python versions supported.
-    python_requires=">=3.5, <4",
+    python_requires=">=3.7, <4",
     # This field lists other packages that your project depends on to run.
     install_requires=[
         # Core dependencies
@@ -91,11 +98,11 @@ setup(
         "prefect==0.15.10",
         "dask==2021.11.2",
         "click==8.0.3",
-        "numba==0.53.0rc2",
+        "numba==0.53.0",
         # Extra dependencies
         "django-crispy-forms==1.13.0",  # for formatting of online forms
         "django-pandas==0.6.1",  # for converting QuerySets to PandasDF
-        "psycopg2-binary==2.9.2",  # for Postgres connections  # BUG: added -binary
+        # "psycopg2-binary==2.9.2",  # for Postgres connections  # BUG: added -binary
         # 'selenium',  # for web scraping (slow but robust)
         "dask-jobqueue==0.7.3",  # for submitting on clusters
         "scikit-learn==1.0.1",
@@ -113,11 +120,10 @@ setup(
         # "graphviz==1.7",  # python-graphviz on conda. for viewing prefect flows
         # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
         "plotly==5.4.0",
-        "matplotlib==3.5.0",
-        # 'seaborn',
+        # "matplotlib==3.5",
         # These are from the MP stack and I want to drop dependency
         "pymatgen==2022.0.16",
-        "pymatgen-analysis-diffusion==2021.4.29",
+        "pymatgen-analysis-diffusion==2021.4.29",  # pymatgen-diffusion on conda
         "matminer==0.7.4",
         # 'custodian',
         # 'fireworks',
