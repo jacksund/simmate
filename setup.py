@@ -122,7 +122,7 @@ setup(
         "plotly==5.4.0",
         # "matplotlib==3.5",
         # These are from the MP stack and I want to drop them as dependencies
-        "pymatgen==2022.0.16",
+        "pymatgen==2022.0.17",
         "pymatgen-analysis-diffusion==2021.4.29",  # pymatgen-diffusion on conda
         # BUG: matminer's windows conda install is broken and I need to drop
         # this dependency until it's fixed. See here:
