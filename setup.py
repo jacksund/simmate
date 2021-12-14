@@ -101,8 +101,8 @@ setup(
         "numba==0.53.0",
         # Extra dependencies
         "django-crispy-forms==1.13.0",  # for formatting of online forms
-        "django-pandas==0.6.1",  # for converting QuerySets to PandasDF
-        # "psycopg2-binary==2.9.2",  # for Postgres connections  # BUG: added -binary
+        "django-pandas==0.6.1",  # for converting QuerySets to PandasDataFrames
+        "psycopg2-binary==2.9.2",  # for Postgres connections (added -binary to fix bug)
         # 'selenium',  # for web scraping (slow but robust)
         "dask-jobqueue==0.7.3",  # for submitting on clusters
         "scikit-learn==1.0.1",
