@@ -113,7 +113,7 @@ setup(
         # "graphviz==1.7",  # python-graphviz on conda. for viewing prefect flows
         # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
         "plotly==5.4.0",
-        "matplotlib==3.5.0",
+        "matplotlib==3.5.1",
         # 'seaborn',
         # These are from the MP stack and I want to drop dependency
         "pymatgen==2022.0.16",
