@@ -65,7 +65,7 @@ setup(
     name="simmate",
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
-    version="0.0.0.dev2",
+    version="0.0.0.dev3",
     # a quick summary and then README
     description="Simmate is a toolbox for computational materials research.",
     long_description=long_description,
@@ -121,13 +121,13 @@ setup(
         # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
         "plotly==5.4.0",
         # "matplotlib==3.5",
-        # These are from the MP stack and I want to drop dependency
+        # These are from the MP stack and I want to drop them as dependencies
         "pymatgen==2022.0.16",
         "pymatgen-analysis-diffusion==2021.4.29",  # pymatgen-diffusion on conda
-        "matminer==0.7.4",
-        # 'custodian',
-        # 'fireworks',
-        # 'dnspython',  # for mongocloud + fireworks
+        # BUG: matminer's windows conda install is broken and I need to drop
+        # this dependency until it's fixed. See here:
+        # https://github.com/conda-forge/staged-recipes/pull/17250#issuecomment-993896253
+        # "matminer==0.7.4",
     ],
     # Register command line interface
     entry_points={
