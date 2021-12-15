@@ -717,7 +717,15 @@ class SupervisedStagedShellTask(Task):
         }
 
     # EXPERIMENTAL
-    def get_workflow(self, name: str, module: str):
+    @classmethod
+    def get_workflow(
+        cls,
+        name: str,
+        module: str,
+        project_name: str,
+        calculation_table,  # simmate.database.base_data_types.calculation.Calculation
+        register_kwargs: List[str],
+    ):
         """
         Builds a workflow from a S3Task and it's corresponding database table.
 
@@ -729,13 +737,8 @@ class SupervisedStagedShellTask(Task):
         Task 1 and 3 always use the same functions, where we just need to tell
         it which database table we are registering/saving to.
 
-        Because of this common structure, we use this method to make the workflow
-        for us.
-
-        Note, the task should have the following attributes set (with examples given):
-            project_name = "Simmate-Relaxation"
-            calculation_table = Quality00Relaxation
-            workflow.result_table = Quality00Relaxation
+        Because of this common recipe for workflows, we use this method to make
+        the workflow for us.
         """
         from simmate.workflow_engine.workflow import (
             Workflow,
@@ -747,8 +750,9 @@ class SupervisedStagedShellTask(Task):
             SaveOutputTask,
         )
 
-        load_input_and_register = LoadInputAndRegister(self.calculation_table)
-        save_results = SaveOutputTask(self.calculation_table)
+        s3task = cls()  # Use defaults
+        load_input_and_register = LoadInputAndRegister(calculation_table)
+        save_results = SaveOutputTask(calculation_table)
 
         with Workflow(name) as workflow:
             structure = Parameter("structure")
@@ -763,19 +767,21 @@ class SupervisedStagedShellTask(Task):
                 directory,
                 use_previous_directory,
             )
-            output = self(
+            output = s3task(
                 structure=structure_pmg,
                 command=command,
                 directory=directory_cleaned,
             )
             calculation_id = save_results(output=output)
 
-        workflow.storage = ModuleStorage(__name__)
-        workflow.project_name = self.project_name
-        workflow.calculation_table = self.calculation_table
-        workflow.result_table = self.calculation_table
-        workflow.register_kwargs = ["prefect_flow_run_id", "structure", "source"]
+        workflow.storage = ModuleStorage(module)
+        workflow.project_name = project_name
+        workflow.calculation_table = calculation_table
+        workflow.result_table = calculation_table
+        workflow.register_kwargs = register_kwargs
         workflow.result_task = output
+
+        return workflow
 
 
 # Custom errors that indicate exactly what causes the SupervisedStagedTask
