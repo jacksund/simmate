@@ -114,7 +114,7 @@ setup(
         "pyyaml==6.0",  # for yaml configuration files
         # For development
         "pytest==6.2.5",
-        "black==21.11b1",
+        "black==21.12b0",
         # 'spyder',
         # For visualization
         # "graphviz==1.7",  # python-graphviz on conda. for viewing prefect flows
