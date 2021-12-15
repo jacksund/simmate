@@ -12,23 +12,47 @@ from prefect.utilities.graphql import with_args
 
 from prefect.backend.flow_run import FlowRunView, FlowView, watch_flow_run
 
+from typing import List
+
 
 class Workflow(PrefectFlow):
-
     # This behaves exactly like a normal Prefect workflow, where I add some
     # common utilities and pre-submit tasks. This allows me to register a
     # calculation along with submitting a workflow to the cloud
 
-    def run_cloud(self, labels=[], wait_for_run=True, **kwargs):
-
+    def run_cloud(
+        self,
+        labels: List[str] = [],
+        wait_for_run: bool = True,
+        **kwargs,
+    ) -> str:
         """
-        This method is a fork of...
-            from prefect.tasks.prefect.flow_run import create_flow_run
-        It can also be view as a convience call to client.create_flow_run
+        This schedules the workflow to run remotely.
 
-        I'm attaching this directly to the workflow object for convience, and
-        I also don't accept any client.create_flow_run() inputs besides 'labels'.
+        Make sure you have Prefect properly configured and have registered your
+        workflow with the backend.
+
+        Note that this method can be viewed as a fork of...
+            from prefect.tasks.prefect.flow_run import create_flow_run
+        It can also be viewed as a more convenient way to call to client.create_flow_run.
+        I don't accept any other client.create_flow_run() inputs besides 'labels'.
         This may change in the future if I need to set flow run names or schedules.
+
+        Parameters
+        ----------
+
+        labels: List[str]
+            a list of labels to schedule the workflow with
+        wait_for_run: bool
+            whether to wait for the workflow to finish. If False, the workflow
+            will simply be submitted and then exit. The default is True.
+        **kwargs:
+            all options that are normally passed to the run() method
+
+        Returns
+        -------
+        str:
+            The flow run id that was used in prefect cloud.
         """
 
         # Grab the logger as we will print useful information below
@@ -83,8 +107,14 @@ class Workflow(PrefectFlow):
         # return the flow_run_id for the user
         return flow_run_id
 
-    def _register_calculation(self, flow_run_id, **kwargs):
+    def _register_calculation(self, flow_run_id: str, **kwargs):
+        """
+        If the workflow is linked to a calculation table in the Simmate database,
+        this adds the flow run to the Simmate database.
 
+        This method should not be called directly as it is used within the
+        run_cloud() method.
+        """
         # If there's no calculation database table in Simmate for this workflow,
         # just skip this step.
         if not hasattr(self, "calculation_table"):
@@ -96,8 +126,10 @@ class Workflow(PrefectFlow):
         )
         return calculation
 
-    def wait_for_flow_run(self, flow_run_id):
+    def wait_for_flow_run(self, flow_run_id: str):
         """
+        Waits for a given flow run to complete
+
         This method is a direct fork of...
             from prefect.tasks.prefect.flow_run import wait_for_flow_run
 
@@ -113,16 +145,22 @@ class Workflow(PrefectFlow):
         return flow_run.get_latest()
 
     @staticmethod
-    def _serialize_parameters(parameters):
+    def _serialize_parameters(parameters: dict) -> dict:
+        """
+        Converts input parameters to json-sealiziable objects that Prefect can
+        use.
+
+        This method should not be called directly as it is used within the
+        run_cloud() method.
+        """
         # Because many flows allow object-type inputs (such as structure object),
         # we need to serialize these inputs before scheduling them with prefect
         # cloud. To do this, I only check for two potential methods:
-        #   as_dict
-        #   to_dict
+        #     as_dict
+        #     to_dict
         # These were chosen based on common pymatgen methods, but I may change
         # this in the future. As another alternative, I could also cloudpickle
         # input objects when they are not JSON serializable.
-
         # OPTIMIZE: Prefect current tries to JSON serialize within their
         # client.create_flow_run method. In the future, we may want to move
         # this functionality there.
@@ -143,7 +181,13 @@ class Workflow(PrefectFlow):
         return parameters_serialized
 
     @property
-    def nflows_submitted(self):
+    def nflows_submitted(self) -> int:
+        """
+        Queries Prefect to see how many workflows are in a running or submitted
+        state. It will return a count (integer).
+
+        Note, your workflow must be registered with Prefect for this to work.
+        """
         query = {
             "query": {
                 with_args(
@@ -162,6 +206,11 @@ class Workflow(PrefectFlow):
         return result["data"]["flow_run_aggregate"]["aggregate"]["count"]
 
     def to_workflow_task(self):
+        """
+        Converts a prefect workflow to a prefect task (aka a "workflow task")
+
+        See the documentation in workflow_engine.tasks.workflow_task for more.
+        """
         from simmate.workflow_engine.tasks.workflow_task import WorkflowTask
 
         return WorkflowTask(workflow=self)

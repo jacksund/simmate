@@ -8,7 +8,7 @@ import os
 class ErrorHandler(ABC):
     """
     Abstract base class for an ErrorHandler. These handlers should be used in
-    combination with Job and SupervisedJob classes.
+    combination with SupervisedStagedShell tasks.
     """
 
     # This class property indicates whether the error handler is a monitor,
@@ -37,7 +37,7 @@ class ErrorHandler(ABC):
     # filename_to_check --> a string of the filename
     # possible_error_messages --> a list of messages to find in the file
 
-    def check(self, directory):
+    def check(self, directory: str) -> bool:
         """
         This method is called during the job (for monitors) or at the end of
         the job to check for errors. It searches for errors and returns the
@@ -83,7 +83,7 @@ class ErrorHandler(ABC):
         return False
 
     @abstractmethod
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
         """
         This method is called at the end of a job when an error is detected.
         It should perform any corrective measures relating to the detected
