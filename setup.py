@@ -93,7 +93,7 @@ setup(
     install_requires=[
         # Core dependencies
         "numpy==1.21.4",
-        "pandas==1.3.4",
+        "pandas==1.3.5",
         "django==3.2.9",
         "prefect==0.15.10",
         "dask==2021.11.2",
