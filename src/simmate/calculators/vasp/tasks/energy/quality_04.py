@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.relaxation.quality_04 import Quality04RelaxationTask
+from simmate.calculators.vasp.tasks.relaxation.quality_04 import Quality04Relaxation
 
 
-class Quality04EnergyTask(Quality04RelaxationTask):
+class Quality04Energy(Quality04Relaxation):
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.
     # !!! we hardcode temperatures and time steps here, but may take these as inputs
     # in the future
-    incar = Quality04RelaxationTask.incar.copy()
+    incar = Quality04Relaxation.incar.copy()
     incar.update(
         dict(
             ALGO="Normal",

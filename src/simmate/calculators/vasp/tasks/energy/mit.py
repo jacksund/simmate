@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxationTask
+from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 
 from simmate.calculators.vasp.error_handlers.all import (
     TetrahedronMesh,
@@ -9,13 +9,13 @@ from simmate.calculators.vasp.error_handlers.all import (
 )
 
 
-class MITStaticEnergyTask(MITRelaxationTask):
+class MITStaticEnergy(MITRelaxation):
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.
     # !!! we hardcode temperatures and time steps here, but may take these as inputs
     # in the future
-    incar = MITRelaxationTask.incar.copy()
+    incar = MITRelaxation.incar.copy()
     incar.update(
         dict(
             ALGO="Normal",
