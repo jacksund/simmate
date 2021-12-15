@@ -96,7 +96,7 @@ setup(
         "pandas==1.3.5",
         "django==3.2.9",
         "prefect==0.15.10",
-        "dask==2021.11.2",
+        "dask==2021.12.0",
         "click==8.0.3",
         "numba==0.53.0",
         # Extra dependencies
