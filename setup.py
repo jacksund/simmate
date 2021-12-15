@@ -93,7 +93,7 @@ setup(
     install_requires=[
         # Core dependencies
         "numpy==1.21.4",
-        "pandas==1.3.4",
+        "pandas==1.3.5",
         "django==3.2.9",
         "prefect==0.15.10",
         "dask==2021.11.2",
@@ -101,7 +101,7 @@ setup(
         "numba==0.53.0",
         # Extra dependencies
         "django-crispy-forms==1.13.0",  # for formatting of online forms
-        "django-pandas==0.6.1",  # for converting QuerySets to PandasDataFrames
+        "django-pandas==0.6.6",  # for converting QuerySets to PandasDataFrames
         "psycopg2-binary==2.9.2",  # for Postgres connections (added -binary to fix bug)
         # 'selenium',  # for web scraping (slow but robust)
         "dask-jobqueue==0.7.3",  # for submitting on clusters
