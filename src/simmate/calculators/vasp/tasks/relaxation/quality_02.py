@@ -6,7 +6,7 @@ from simmate.calculators.vasp.inputs.potcar_mappings import (
 )
 
 
-class Quality02RelaxationTask(VaspTask):
+class Quality02Relaxation(VaspTask):
 
     # returns structure separately from vasprun object
     return_final_structure = True
