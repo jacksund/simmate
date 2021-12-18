@@ -69,7 +69,7 @@ Now, try typing in the command `cd Desktop` and then hit enter. This will open u
 
 For other simple commands, you can take a look at [this cheat sheet](https://www.git-tower.com/blog/command-line-cheat-sheet/) or take [a full tutorial](https://www.codecademy.com/learn/learn-the-command-line). Learning other commands will come slowly over time, and we'll tell you
 
-Obviously, the tricky part with the command-line is knowing what to type. Typically, programs have a base command where you can start though. For anaconda, the command is `conda`. If you aren't sure what it doesn or how to use it, you just add `--help` to it. Type in the command `conda --help` and you'll see an output like this:
+Obviously, the tricky part with the command-line is knowing what to type. Typically, programs have a base command where you can start though. For anaconda, the command is `conda`. If you aren't sure what it does or how to use it, you just add `--help` to it. Type in the command `conda --help` and you'll see an output like this:
 
 ```
 usage: conda [-h] [-V] command ...
@@ -102,7 +102,7 @@ conda activate my_env
 You'll see the start of your command line switch from `(base)` to `(my_env)` if this worked successfully. Next, we want to install Simmate and Spyder. Spyder is what we will use to write custom Python in later tutorials, so we'll talk more on this later.
 
 ```
-conda install -n my_env simmate spyder
+conda install -c conda-forge -n my_env simmate spyder
 ```
 
 This may take a few minutes to run and install. But once it's done, you've now successfully installed Simmate! If you ran into any errors with this very last command, please let our team know immediately by [posting a new issue here](https://github.com/jacksund/simmate/issues/new).
@@ -110,7 +110,7 @@ This may take a few minutes to run and install. But once it's done, you've now s
 
 ### Exploring Simmate's command-line
 
-Just how we were using commands like `conda --help` above, we can do the same thing with Simmate's base command, which is just `simmate`. Start with trying the command `simmate --help` and you should see: (note, there may be slight differences as we add updates to simmate)
+Just like we were using `conda --help` above, we also ask for help with Simmate's base command, which is just `simmate`. Start with trying the command `simmate --help` and you should see:
 
 ```
 Usage: simmate [OPTIONS] COMMAND [ARGS]...
