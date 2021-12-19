@@ -132,7 +132,7 @@ composition.formula_reduced
 composition.elements
 ```
 
-### Structure properties
+### Structure methods
 
 Not all aspects of a class are just fixed values. So in addition to `properties`, we also have `methods`. Methods modify our object, perform some analysis, grab other information for us. For our structure, a common method is converting the the smallest possible unitcell with symmetry. You can do this with `structure.get_primitive_structure()`. Try this in your terminal. You'll see it prints out a new structure. We can also save it to a new variable and access its properties (which will be the same because we already had the primitive unit cell):
 
@@ -162,7 +162,7 @@ To get a quick look at **all** of the properties and methods available, type `na
 
 This can be done with any class and object! There are many different classes in Simmate, but you'll interact with `Structure` the most. To fully understand all of the options for these classes, you'll need to explore the code's documentation, which we will cover in the next tutorial.
 
-### Advanced simmate
+### Advanced classes
 
 To give you a sneak-peak of some advanced classes and functionality, here are some example. 
 
