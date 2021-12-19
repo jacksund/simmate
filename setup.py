@@ -92,42 +92,46 @@ setup(
     # This field lists other packages that your project depends on to run.
     install_requires=[
         # Core dependencies
-        "numpy==1.21.4",
-        "pandas==1.3.5",
+        "numpy>=1.21.4",
+        "pandas>=1.3.5",
         "django==3.2.10",
         "prefect==0.15.10",
-        "dask==2021.12.0",
-        "click==8.0.3",
-        "numba==0.53.0",
-        # Extra dependencies
-        "django-crispy-forms==1.13.0",  # for formatting of online forms
-        "django-pandas==0.6.6",  # for converting QuerySets to PandasDataFrames
-        "psycopg2-binary==2.9.2",  # for Postgres connections (added -binary to fix bug)
-        # 'selenium',  # for web scraping (slow but robust)
-        "dask-jobqueue==0.7.3",  # for submitting on clusters
-        "scikit-learn==1.0.1",
-        "dj-database-url==0.5.0",  # for DigitalOcean URL conversion
-        # 'gunicorn',  # for website server (Django+DigitalOcean) # !!! NOT WINDOWS
-        "djangorestframework==3.13.1",  # for our REST API
-        "django-filter==21.1",  # sets up automatic filters for our REST API
-        "django-extensions==3.1.5",  # simple tools to help with django development
-        "pyyaml==6.0",  # for yaml configuration files
+        "dask>=2021.12.0",
+        "click>=8.0.3",
+        "numba>=0.53.0",
+        # Extra (smaller) dependencies & utilities
+        "django-crispy-forms>=1.13.0",  # for formatting of online forms
+        "django-pandas>=0.6.6",  # for converting QuerySets to PandasDataFrames
+        "dask-jobqueue>=0.7.3",  # for submitting on clusters
+        "scikit-learn>=1.0.1",
+        "dj-database-url>=0.5.0",  # for DigitalOcean URL conversion
+        "djangorestframework>=3.13.1",  # for our REST API
+        "django-filter>=21.1",  # sets up automatic filters for our REST API
+        "django-extensions>=3.1.5",  # simple tools to help with django development
+        "pyyaml>=6.0",  # for yaml configuration files
+        "plotly>=5.4.0", # for interactive plots and visualization
+        #
         # For development
-        "pytest==6.2.5",
-        "black==21.12b0",
-        # 'spyder',
-        # For visualization
-        # "graphviz==1.7",  # python-graphviz on conda. for viewing prefect flows
-        # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
-        "plotly==5.4.0",
-        # "matplotlib==3.5",
-        # These are from the MP stack and I want to drop them as dependencies
+        "pytest>=6.2.5",
+        "black>=21.12b0",
+        #
+        # These are from the MP stack and I want to phase them out over time
         "pymatgen==2022.0.17",
         "pymatgen-analysis-diffusion==2021.4.29",  # pymatgen-diffusion on conda
+        # "matminer==0.7.4",
         # BUG: matminer's windows conda install is broken and I need to drop
         # this dependency until it's fixed. See here:
         # https://github.com/conda-forge/staged-recipes/pull/17250#issuecomment-993896253
-        # "matminer==0.7.4",
+        #
+        # These are packages that I commonly use alongside simmate. I plan to
+        # organize these into optional dependencies and/or documentation. But until
+        # then, I keep them here for my own reference.
+        # "psycopg2-binary>=2.9.2",  # for Postgres connections (added -binary to fix bug)
+        # 'selenium',  # for web scraping (slow but robust)
+        # 'spyder',  # IDE for writing/editting
+        # 'gunicorn',  # for website server (Django+DigitalOcean) # !!! NOT WINDOWS
+        # "graphviz==1.7",  # python-graphviz on conda. for viewing prefect flows
+        # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
     ],
     # Register command line interface
     entry_points={
