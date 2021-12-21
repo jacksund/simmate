@@ -8,11 +8,17 @@
 2. Make sure you still have our `POSCAR` file of NaCl from the last tutorial. 
 3. Now let's explore the toolkit and a few of its features!
 
-Load the structure into python and then write it to a CIF file
+Load the structure into python and then write it to various file formats
 ```python
-from simmate.shortcuts import Structure
+from simmate.toolkit import Structure
 structure = Structure.from_file("POSCAR")
 structure.to("cif", "NaCl.cif")
+```
+
+The `Structure` class (aka a `ToolkitStructure`) provides many extra properties and methods, so nearly all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial:
+```python
+from simmate.workflows.all import relaxation_mit
+result = relaxation_mit.run(structure=structure)
 ```
 
 Grab varius properties of the structure
