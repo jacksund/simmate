@@ -2,7 +2,7 @@
 
 > :warning: we assume you have VASP installed and that the `vasp` command is in the available path. In the future, we hope to update this tutorial with a workflow that doesn't require any extra installations. Until then, we apologize for the inconvenience. :cry: (note: maybe do something like an XRD?)
 
-## The quick version
+# The quick version
 
 2. View a list of all workflows available with `simmate workflows list-all`
 4. See the settings used for the `relaxation_mit` with `simmate workflows show-config relaxation_mit`
@@ -27,9 +27,9 @@ direct
 9. You can now view the web UI at http://127.0.0.1:8000/
 10. In the web UI, navigate to `calculations` --> `relaxations` --> `EMT` to view our results
 
-## The full tutorial
+# The full tutorial
 
-### Viewing available workflows
+## Viewing available workflows
 
 At the most basic level, you'll want to use Simmate to calculate a structure's energy, band structure, or some other characteristic. For that, we have prebuilt workflows that you can run using simple commands. All of these are accessible through the `simmate workflows` command.
 
@@ -52,7 +52,7 @@ These are all workflows you can use:
 
 In this tutorial, we will be using `relaxation_mit` which runs a simple static energy calculation using MIT Project settings (these settings are based off of pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)). Before we run this, we should understand
 
-### The basic components of a workflow
+## The basic components of a workflow
 
 Before running any of these workflows, it is important to understand what's happening behind the scenes. The simplest workflows involve just a single calculation (such as an energy calculation), and when we `run` a workflow, there are the four steps all workflows go through:
 
@@ -77,7 +77,7 @@ Before we can actually run these different stages of a workflow, the next two se
 1. set up our database tables
 2. make an input structure
 
-### Setting up our database
+## Setting up our database
 
 We often want to run the same exact calculation on many materials, so Simmate pre-builds database tables for us to fill. This just means we make tables (just like those used in Excel), where we have all the column headers ready to go. For example, you can imagine a table of structures would have columns like formula, density, number of sites, etc.. Simmate builds these tables for you and automatically fills all the columns with data after a calculation is ran. We will explore what these datatables look like in tutorial 4, but for now, we just want to run our first workflow.
 
@@ -94,7 +94,7 @@ You won't be able to double-click this file. Just like how you need Excel to ope
 
 But just after that one command, our database is setup any ready! We can now run workflows and start adding data to it.
 
-### Making a structure file to test
+## Making a structure file to test
 
 Before we run a workflow, we need a crystal structure to run it on. There are many ways to get a crystal structure -- such as downloading one online or using a program to create one from scratch. Here, in order to learn about structure files, we are going to make one from scratch without any program.
 
@@ -150,7 +150,7 @@ Nearly all files that you will interact with are text files -- just in different
 
 We now have our structure ready to go! Let's get back to running our workflow.
 
-### Viewing the workflow settings and inputs
+## Viewing the workflow settings and inputs
 
 Take a look back at the 4 key steps of a workflow above. Here, we will inspect a workflow to see how it `configures` it's settings.
 
@@ -162,7 +162,7 @@ So we can now view the settings used for *all* compositions/structures, but now 
 
 For absolute beginners, you don't need to need to immediately understand these files/settings, but they will be important for knowing the scientific limitations of your results and for running your own custom calculations. For whichever program you end up using the most, be sure to also go through their tutorials -- rather than always using Simmate to run their program for you. Here, we're using VASP where you can learn to use VASP independently with [their tutorials](https://www.vasp.at/wiki/index.php/Category:Tutorials). Until you reach that point, we'll have Simmate do it all for us!
 
-### Finally running our workflow!
+## Finally running our workflow!
 
 Recall from above that the default Simmate settings run everything immediately and locally on your desktop. When running the workflow, it will create a new folder, write the inputs in it, run the calculation, and then save the results to your database.
 
@@ -177,6 +177,6 @@ If any errors come up, please let our team know by [posting a question](https://
 
 If not, congrats :partying_face: :partying_face: :partying_face: !!! You now know how to run workflows with a single command and understand what Simmate is doing behind the scenes.
 
-### Viewing results
+## Viewing results
 
 > :warning: The website interface isn't ready yet, so you'll have to manually go through the files to see the results. You can still move on to the other tutorials, which will show you how to see the results with python as well.

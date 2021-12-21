@@ -2,15 +2,15 @@
 
 > :warning: we have not added a documentation server yet, but will have either [sphinx](https://www.sphinx-doc.org/en/master/examples.html) or [pdoc](https://pdoc.dev/) implemented shortly
 
-## The quick version
+# The quick version
 
 For advanced users, we have README.rst files in each of our python modules -- so you can explore our source code on github just how you would explore documentation produced by sphinx. We do this because we are a high-level code and want to avoid researchers using it as a [black box](https://en.wikipedia.org/wiki/Black_box), and having docs right next to our code helps us keep our guides up-to-date too. Start by jumping to our [src/simmate directory](https://github.com/jacksund/simmate/tree/main/src/simmate).
 
-## The full tutorial
+# The full tutorial
 
 Even though you can run workflows without understanding what happens behind the scenes, you should avoid using Simmate like a [black box](https://en.wikipedia.org/wiki/Black_box). In this tutorial, we'll show you the first steps to exploring our code, rather than just copy/pasting code from other tutorials.
 
-### Getting help through Spyder
+## Getting help through Spyder
 
 Where we left off in Tutorial 3, we saw how to list all available properties and methods on an object. We did this by typing the object variable name plus a period (ex: `my_structure.`) and then hitting `tab`.
 
@@ -24,7 +24,7 @@ Let's try this with our NaCl structure from before. To review, we loaded the str
 
 *Hint: you can also get this help information by typing `s.get_primitive_structure` in the python terminal and then using the `crtl+I` shortcut*
 
-### Code Folders (aka "Modules")
+## Code Folders (aka "Modules")
 
 One big question still remains though -- how did we know to do the line `from simmate.shortcuts import Structure`? Here, you should learn to think of python packages (such as Simmate) as many classes and functions organized into folders. 
 
@@ -44,7 +44,7 @@ To prove it, let's go through these steps:
 
 Each of these folders and files are referred to as python "modules" -- it's just python terminology.
 
-### Exploring the source-code
+## Exploring the source-code
 
 Now that we know Simmate is just a bunch of classes organized into folders, let's explore a bit. 
 
@@ -56,6 +56,6 @@ A good folder to look through is the `simmate.toolkit.creators` module, which pr
 
 Take some time to look through the features and functions. Always feel free to ask if a feature exists, and if not, request one too. Post those questions in our [discussions page](https://github.com/jacksund/simmate/discussions/new?category=q-a).
 
-### Using the web docs
+## Using the web docs
 
 > :warning: we don't have our web server set up yet.

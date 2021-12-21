@@ -1,8 +1,8 @@
 # Trying out the toolkit while learning python
 
-> :warning: simmate still uses [pymatgen](https://pymatgen.org/) under the hood, so this tutorial is really one for using pymatgen. Pymatgen is central to using Simmate, so we still include this in our tutorial series!
+> :warning: simmate still uses [pymatgen](https://pymatgen.org/) under the hood, so this tutorial is really one for using pymatgen.
 
-## The quick version
+# The quick version
 
 1. In Spyder's python console, run `import simmate` to make sure everything is set up.
 2. Make sure you still have our `POSCAR` file of NaCl from the last tutorial. 
@@ -15,7 +15,7 @@ structure = Structure.from_file("POSCAR")
 structure.to("cif", "NaCl.cif")
 ```
 
-The `Structure` class (aka a `ToolkitStructure`) provides many extra properties and methods, so nearly all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial:
+The `Structure` class (aka a `ToolkitStructure`) provides many extra properties and methods, so nearly all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial. All available workflows can be loaded from the `simmate.workflows.all` module:
 ```python
 from simmate.workflows.all import relaxation_mit
 result = relaxation_mit.run(structure=structure)
@@ -69,9 +69,9 @@ is_matching = matcher.match(structure1, structure2)
 ```
 There are many more features available! If you can't find what you're looking for, be sure to ask for help before trying to code something on your own. Chances are that the feature exists somewhere -- and if we don't have it, we'll direct you to a package that does.
 
-## The full tutorial
+# The full tutorial
 
-### An introduction to Spyder
+## An introduction to Spyder
 
 Prebuilt workflows can only take you so far when carrying out materials research. At some point, you'll want to make new crystal structures, modify them in some way, and perform a novel analysis on it. To do all of this, we turn away from the command-line and now start using python. If you are a brand new to coding and python, we will introduce the bare-minimum of python needed to start using simmate's toolkit in this tutorial, but we highly recommend spending 2-3 days on learning all the python fundamentals. [Codecademy's python lessons](https://www.codecademy.com/learn/learn-python-3) are a great way to learn without installing anything.
 
@@ -88,7 +88,7 @@ If you are comfortable with python or took the Codecademy intro course, you can 
 
 For this tutorial, we will only be using the Python terminal (bottom-right of the screen).
 
-### The `Structure` class
+## The `Structure` class
 
 In python, you'll always want to think of things as types and classify them. Individual things (or "objects") are grouped into "classes". For example, we can say that McDonalds, Burger King, and Wendy's are all **objects** of the **class** `Restaurants`. 
 
@@ -118,7 +118,7 @@ s = Structure(
 
 Either way, we now have our structure loaded and Simmate now knows exactly what it is.
 
-### Structure properties
+## Structure properties
 
 The reason we make classes and objects in python is because, once we have them, we can automate a ton of common functions and calculations. For example, all structures have a `density`, which is easily calculated once you know the lattice and atomic sites. These are known as properties. You can access this and other properties through our structure object. Try typing `nacl_structure.density` in the python terminal and hit enter. It should tell you the density!
 
@@ -138,7 +138,7 @@ composition.formula_reduced
 composition.elements
 ```
 
-### Structure methods
+## Structure methods
 
 Not all aspects of a class are just fixed values. So in addition to `properties`, we also have `methods`. Methods modify our object, perform some analysis, grab other information for us. For our structure, a common method is converting the the smallest possible unitcell with symmetry. You can do this with `structure.get_primitive_structure()`. Try this in your terminal. You'll see it prints out a new structure. We can also save it to a new variable and access its properties (which will be the same because we already had the primitive unit cell):
 
@@ -168,7 +168,7 @@ To get a quick look at **all** of the properties and methods available, type `na
 
 This can be done with any class and object! There are many different classes in Simmate, but you'll interact with `Structure` the most. To fully understand all of the options for these classes, you'll need to explore the code's documentation, which we will cover in the next tutorial.
 
-### Advanced classes
+## Advanced classes
 
 To give you a sneak-peak of some advanced classes and functionality, here are some example. 
 
