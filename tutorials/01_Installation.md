@@ -1,5 +1,13 @@
 # Installing Simmate while Learning the Command-line
 
+1. [The quick tutorial](#the-quick-version)
+2. [The full tutorial](#the-full-tutorial)
+    - [Why Anaconda?](#why-anaconda)
+    - [Installing Anaconda and a first look](#installing-anaconda-and-a-first look)
+    - [Switching to the Command-line](#switching-to-the-command-line)
+    - [Creating our environment and installing Simmate](#creating-our-environment-and-installing-simmate)
+    - [Exploring Simmate's command-line](#exploring-simmates-command-line)
+
 # The quick version
 
 1. Install [anaconda](https://www.anaconda.com/products/individual-d)
