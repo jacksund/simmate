@@ -25,6 +25,8 @@ conda activate my_env
 <br/><br/>
 # The full tutorial
 
+<br/>
+
 ## Why Anaconda?
 
 Ideally, you could download Simmate like any desktop app and then you'd be good to go. But have you ever installed a new program and then everything else on your computer goes haywire? With python, the chances of that happening are extremely high, so we want to be careful. For example, say I wanted two programs installed:
@@ -36,6 +38,7 @@ The conflicting python versions would give issues here. To overcome this, we use
 
 In reality, installing Simmate and other python packages is much more complicated than just needing two different python versions. We are going to Anaconda to manage all of this for us. Anaconda also installs programs that let's us write our own custom code too.
 
+<br/>
 
 ## Installing Anaconda and a first look
 
@@ -58,6 +61,8 @@ On the left of the screen, you'll see an "Enviornments" tab. Go ahaead and open 
 That's really it to the Anaconda interface! While we can install Simmate with this interface, it's actually even easier with the command-line. We'll switch to that next.
 
 If you want a more complete overview of Anaconda, they have a series of [getting-started guides](https://docs.anaconda.com/anaconda/user-guide/) available, but these guides aren't required for using Simmate (so don't spend any more than 10 minutes looking through them).
+
+<br/>
 
 ## Switching to the Command-line
 
@@ -99,6 +104,8 @@ For example, the line `-h, --help     Show this help message and exit.` is telli
 
 It also tells us there are other "subcommands" available. One is `create` which says it creates a new environment. To learn more about that one, we can run the command `conda create --help`. There's a bunch here... But again, you don't need to memorize all of this. Just remember how to get this help page when you need it. Up next, we'll use these commands to create our enviornment and install Simmate.
 
+<br/>
+
 ## Creating our environment and installing Simmate
 
 For now, let's create a new environment that uses the [conda-forge](https://conda-forge.org/) channel. A channel is where anaconda downloads packages from -- and to keep things simple, we will ALWAYS use conda-forge (this is the standard in the python community). Now let's run this command below. Note you can switch out the name "my_env" for whatever you want here, just make sure you use underscores instead of spaces ("my_env" will work while "my env" will give an error).
@@ -125,6 +132,8 @@ As an extra, let's use Anaconda to install [Sypder](https://www.spyder-ide.org/)
 ```
 conda install -c conda-forge -n my_env spyder
 ```
+
+<br/>
 
 ## Exploring Simmate's command-line
 
@@ -153,10 +162,12 @@ You can see there are many other commands like `simmate database` and `simmate w
 
 But we're now ready to start using the code!
 
+<br/>
+
 ## Extra Resources
 - [Anconda's getting-started guides](https://docs.anaconda.com/anaconda/user-guide/) (we recommend taking ~10min to glance through)
 - [A command-line cheat sheet](https://www.git-tower.com/blog/command-line-cheat-sheet/) (useful printout to have at your desk)
 - [A full tutorial for the command-line](https://www.codecademy.com/learn/learn-the-command-line) (we HIGHLY recommended parts 1 and 2, which will take 1-2 hours)
 
-*all tutorials that we recommend from codecademy.com can be completed before your free trial expires
+*All tutorials that we recommend from codecademy.com can be completed before your free trial expires.*
 
