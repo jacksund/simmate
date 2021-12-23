@@ -95,7 +95,7 @@ setup(
         "numpy>=1.21.4",
         "pandas>=1.3.5",
         "django==3.2.10",
-        "prefect==0.15.10",
+        "prefect==0.15.11",
         "dask>=2021.12.0",
         "click>=8.0.3",
         "numba>=0.53.0",
