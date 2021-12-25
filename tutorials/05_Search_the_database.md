@@ -1,9 +1,19 @@
-# Accessing your database and others
+# Search the database
+
+In this tutorial, you will learn how to explore your database as well as load data from third-party providers.
+
+1. [The quick tutorial](#the-quick-tutorial)
+2. [The full tutorial](#the-full-tutorial)
+    - [Python Inheritance with Datatables](#python-inheritance-with-datatables)
+    - [Accessing results from local calculations](#accessing-results-from-local-calculations)
+    - [Accessing third-party data](#accessing-third-party-data)
+
+<br/><br/>
 
 # The quick tutorial
 
 1. Make sure you've initialized your database. This was done in tutorial 2 with the command `simmate database reset`.
-2. Go to the `simmate.database` module to view all available tables. Note, many of the tables `local_calculations` are actually defined in their corresponding `calculators` module.
+2. Go to the `simmate.database` module to view all available tables.
 3. The table for Tutorial 1's results are located in the `MITRelaxation` datatable class, which can be loaded via either of these options:
 ```python
 # OPTION 1
@@ -30,7 +40,7 @@ nacl_structure = single_relaxation.structure_final.to_pymatgen()
 from simmate.shortcuts import setup  # this connects to our database
 from simmate.database.third_parties.jarvis import JarvisStructure
 
-# This only needs to ran once
+# This only needs to ran once -- then data is stored locally.
 JarvisStructure.load_data_archive()
 
 # now explore the data (only the first 150 structures here)
@@ -39,8 +49,11 @@ dataframe = first_150_rows.to_dataframe()
 ```
 > :warning: To protect our servers, you can only call `load_data_archive()` a few times per month. Don't overuse this feature.
 
+<br/><br/>
 
 # The full tutorial
+
+<br/>
 
 ## Python Inheritance with Datatables
 
@@ -89,7 +102,7 @@ class Person(DatabaseTable):
 Next, we want a separate table to contain this type of information and more:
 
 ```python
-class Student(Person):
+class Student(Person):  # <--- note we have Person here instead of DatabaseTable
    year = table_columns.IntField()  # e.g. class of 2020
    gpa = table_columns.FloatField()
 ```
@@ -107,7 +120,9 @@ Simmate uses this idea with common materials science data -- such as structures,
 
 All of our datatables start from here and build up. Up next, we'll look at an actual database table and learn how to use it to view data.
 
-## Practice with an example table: `MITRelaxation` 
+<br/>
+
+## Accessing results from local calculations
 
 In Tutorial 2, we ran a calculation and then added results to our database table. Here, we will now go through the results. 
 
@@ -149,9 +164,7 @@ Open up this variable by double-clicking `data` in Spyder's variable explorer (t
 <img src="https://www.spyder-ide.org/blog/spyder-variable-explorer/table-headings.png"  height=330 style="max-height: 330px;">
 </p>
 
-Next, we can use our table columns to start filtering through our results. Your search (or "query") results will be given back as a list of rows matching your filtering criteria. In the example above, we converted all of these results to into a dataframe for easy viewing. The other route we may want to go is converting each row into our `ToolkitStructure` from tutorial 3! There are a bunch of things to try, so play around with each:
-
-There are built-in ways to get your results as a DatabaseTable object, convert everything to a dataframe like we did :
+Next, we can use our table columns to start filtering through our results. Your search results will be given back as a list of rows that met the filtering criteria. In the example above, we converted that list of results to into a dataframe for easy viewing. You can also convert each row into our `ToolkitStructure` from tutorial 3! There are a bunch of things to try, so play around with each:
 
 ```python
 
@@ -173,9 +186,11 @@ structures = search_results.to_toolkit()
 
 This isn't very exciting now because we just have one row/structure in our table :cry:, but we'll do some more exciting filtering in the next section.
 
+<br/>
+
 ## Accessing third-party data
 
-When running our own calculations with Simmate, it is also important to know what other researchers have already calculated for a given material. Many research teams around the world have built databases made of hundreds of thousands of structures -- and many of these teams even ran calculations on all of them. Here, we see how we can use Simmate to explore their data.
+When running our own calculations with Simmate, it is also important to know what other researchers have already calculated for a given material. Many research teams around the world have built databases made of 100,000+ structures -- and many of these teams even ran calculations on all of them. Here, we will use Simmate to explore their data.
 
 Let's start with one of the smaller databases out there: [JARVIS](https://jarvis.nist.gov/). It may be smaller than the others, but their dataset still includes ><<12345>> structures! Simmate makes the download for all of these under <<12345>> GB.
 
@@ -193,7 +208,7 @@ from simmate.database.third_parties.jarvis import JarvisStructure
 ```
 
 :fire: :fire: :fire:
-This is very important: `results_table` above and the `MITRelaxation` class here **are the exact same class**. Just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.shortcuts import setup`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! Don't forget!
+IMPORTANT: `results_table` above and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.shortcuts import setup`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! So don't forget to include `from simmate.shortcuts import setup`!
 :fire: :fire: :fire:
 
 Now that we have our datatable class (`JarvisStructure`) loaded, you'll notice it's empty to when you first access it. We can quickly load all of the data using the `load_data_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database.
@@ -210,12 +225,10 @@ JarvisStructure.load_data_archive()
 data = JarvisStructure.objects.to_dataframe()[:150]
 ```
 
-> :warning: It is very important that you follow the warnings printed by `load_data_archive`. This data was NOT made by Simmate. We are just helping to distribute it on behalf of these other teams. Be sure to cite them for their work!
+> :warning: It is very important that you read the warnings printed by `load_data_archive`. This data was NOT made by Simmate. We are just helping to distribute it on behalf of these other teams. Be sure to cite them for their work!
 
 :fire: :fire: :fire:
-This is very important: Calling `load_data_archive` loads ALL data to your computer and saves it. This data will not be updated unless you call `load_data_archive` again. This should only be done every time we release a new archive version (typically once per year). To protect our servers from misuse, you can only call `load_data_archive()` a few times per month -- no matter what. **Don't overuse this feature.**
-
-You may think "I want my data constantly updated with the source database", but this can hurt you down the road. If a structure entry were to change or be removed, it will become difficult (or impossible) to reproduce results in your high-throughput study. We've made this mistake before and had to restart a study because of it.
+IMPORTANT: Calling `load_data_archive` loads ALL data to your computer and saves it. This data will not be updated unless you call `load_data_archive` again. This should only be done every time we release a new archive version (typically once per year). To protect our servers from misuse, you can only call `load_data_archive()` a few times per month -- no matter what. **Don't overuse this feature.**
 :fire: :fire: :fire:
 
 Now let's really test out our filtering ability with this new data:
