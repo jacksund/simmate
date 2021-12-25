@@ -1,14 +1,26 @@
-# Exploring our documentation and code on github
+# Explore the code
+
+Even though you can run workflows without understanding what happens behind the scenes, you should avoid using Simmate like a [black box](https://en.wikipedia.org/wiki/Black_box). In this tutorial, you will learn how to explore Simmate's code and features, rather than just copying/pasting code from other tutorials.
+
+1. [The quick tutorial](#the-quick-tutorial)
+2. [The full tutorial](#the-full-tutorial)
+    - [Getting help through Spyder](#getting-help-through-spyder)
+    - [Introduction to Python Modules](#introduction-to-python-modules)
+    - [Exploring Simmate's Modules](#exploring-simmates-modules)
 
 > :warning: we have not added a documentation server yet, but will have either [sphinx](https://www.sphinx-doc.org/en/master/examples.html) or [pdoc](https://pdoc.dev/) implemented shortly
 
-# The quick version
+<br/><br/>
 
-For advanced users, we have README.rst files in each of our python modules -- so you can explore our source code on github just how you would explore documentation produced by sphinx. We do this because we are a high-level code and want to avoid researchers using it as a [black box](https://en.wikipedia.org/wiki/Black_box), and having docs right next to our code helps us keep our guides up-to-date too. Start by jumping to our [src/simmate directory](https://github.com/jacksund/simmate/tree/main/src/simmate).
+# The quick tutorial
+
+For advanced users, we have README.rst files in each of our python modules -- so you can explore our source code on github just how you would explore documentation produced by sphinx. We do this because we are a high-level code and want to avoid researchers using it as a [black box](https://en.wikipedia.org/wiki/Black_box). Start by jumping to our [src/simmate directory](https://github.com/jacksund/simmate/tree/main/src/simmate) and scrolling down to read the page description.
+
+<br/><br/>
 
 # The full tutorial
 
-Even though you can run workflows without understanding what happens behind the scenes, you should avoid using Simmate like a [black box](https://en.wikipedia.org/wiki/Black_box). In this tutorial, we'll show you the first steps to exploring our code, rather than just copy/pasting code from other tutorials.
+<br/>
 
 ## Getting help through Spyder
 
@@ -24,7 +36,9 @@ Let's try this with our NaCl structure from before. To review, we loaded the str
 
 *Hint: you can also get this help information by typing `s.get_primitive_structure` in the python terminal and then using the `crtl+I` shortcut*
 
-## Code Folders (aka "Modules")
+<br/>
+
+## Introduction to Python Modules
 
 One big question still remains though -- how did we know to do the line `from simmate.shortcuts import Structure`? Here, you should learn to think of python packages (such as Simmate) as many classes and functions organized into folders. 
 
@@ -44,7 +58,9 @@ To prove it, let's go through these steps:
 
 Each of these folders and files are referred to as python "modules" -- it's just python terminology.
 
-## Exploring the source-code
+<br/>
+
+## Exploring Simmate's Modules
 
 Now that we know Simmate is just a bunch of classes organized into folders, let's explore a bit. 
 
@@ -55,6 +71,8 @@ A good folder to look through is the `simmate.toolkit.creators` module, which pr
 > :warning: because simmate is still at the early stages, some folders will be more complete than others. Keep this in mind while exploring. If you aren't seeing a guide or documentation, we probably haven't finished that module yet.
 
 Take some time to look through the features and functions. Always feel free to ask if a feature exists, and if not, request one too. Post those questions in our [discussions page](https://github.com/jacksund/simmate/discussions/new?category=q-a).
+
+<br/>
 
 ## Using the web docs
 
