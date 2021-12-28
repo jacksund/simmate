@@ -1,6 +1,8 @@
 
 # Directions on setting up our DigitalOcean servers for Django
 
+To start, make an account on DigitalOcean using [this link](https://m.do.co/c/8aeef2ea807c) (which uses our refferal).
+
 ## Stage 1: Setting up our PostgreSQL Database
 
 ### creating the database server
@@ -28,8 +30,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "defaultdb",
         "USER": "doadmin",
-        "PASSWORD": "s63keewaux8w8irf",
-        "HOST": "db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com",
+        "PASSWORD": "asdf234jkn2kbjsd8",
+        "HOST": "db-postgresql-nyc3-49797-do-user-234334-0.b.db.ondigitalocean.com",
         "PORT": "25060",
         'OPTIONS': {'sslmode': 'require'},
     }
