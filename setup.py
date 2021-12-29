@@ -65,7 +65,7 @@ setup(
     name="simmate",
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
-    version="0.0.0.dev4",
+    version="0.0.0.dev5",
     # a quick summary and then README
     description="Simmate is a toolbox for computational materials research.",
     long_description=long_description,
@@ -109,7 +109,8 @@ setup(
         "django-filter>=21.1",  # sets up automatic filters for our REST API
         "django-extensions>=3.1.5",  # simple tools to help with django development
         "pyyaml>=6.0",  # for yaml configuration files
-        "plotly>=5.4.0", # for interactive plots and visualization
+        "plotly>=5.4.0",  # for interactive plots and visualization
+        "tqdm>=4.62.3",  # for monitoring progress on long for-loops
         #
         # For development
         "pytest>=6.2.5",
