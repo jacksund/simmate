@@ -120,6 +120,9 @@ setup(
         "pymatgen==2022.0.17",
         "pymatgen-analysis-diffusion==2021.4.29",  # pymatgen-diffusion on conda
         "matminer>=0.7.4",
+        # BUG: more issues with matminer and conda...
+        # https://github.com/conda-forge/matminer-feedstock/pull/17
+        "jsonschema>=4.2.1",
         #
         # These are packages that I commonly use alongside simmate. I plan to
         # organize these into optional dependencies and/or documentation. But until
