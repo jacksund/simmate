@@ -101,7 +101,7 @@ setup(
         "numba>=0.53.0",
         # Extra (smaller) dependencies & utilities
         "django-crispy-forms>=1.13.0",  # for formatting of online forms
-        "django-pandas>=0.6.6",  # for converting QuerySets to PandasDataFrames
+        "django-pandas>=0.6.1",  # for converting QuerySets to PandasDataFrames
         "dask-jobqueue>=0.7.3",  # for submitting on clusters
         "scikit-learn>=1.0.1",
         "dj-database-url>=0.5.0",  # for DigitalOcean URL conversion
