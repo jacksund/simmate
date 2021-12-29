@@ -25,14 +25,3 @@ convient modules too. So you're actually loading extra things!
 
 # This import sets up Django so we can connect with the Simmate database
 from simmate.configuration.django import setup_full as setup
-
-# This is the python object for a Structure
-from pymatgen.core.structure import Structure as StructureToolkit
-
-# Evolutionary searches are commonly used in the WarrenLab at the moment, but the
-# module is pretty burried. I add these shortcuts to my team to use.
-# OPTIMIZE: These imports are why this module is slow to load
-from simmate.toolkit.structure_prediction.evolution.search_engine import SearchEngine
-from simmate.toolkit.structure_prediction.evolution.database import (
-    EvolutionarySearch as SearchResults,
-)
