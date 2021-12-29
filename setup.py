@@ -65,7 +65,7 @@ setup(
     name="simmate",
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
-    version="0.0.0.dev3",
+    version="0.0.0.dev4",
     # a quick summary and then README
     description="Simmate is a toolbox for computational materials research.",
     long_description=long_description,
@@ -118,10 +118,7 @@ setup(
         # These are from the MP stack and I want to phase them out over time
         "pymatgen==2022.0.17",
         "pymatgen-analysis-diffusion==2021.4.29",  # pymatgen-diffusion on conda
-        # "matminer==0.7.4",
-        # BUG: matminer's windows conda install is broken and I need to drop
-        # this dependency until it's fixed. See here:
-        # https://github.com/conda-forge/staged-recipes/pull/17250#issuecomment-993896253
+        "matminer>=0.7.4",
         #
         # These are packages that I commonly use alongside simmate. I plan to
         # organize these into optional dependencies and/or documentation. But until
