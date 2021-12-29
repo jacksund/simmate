@@ -109,3 +109,14 @@ workflow.calculation_table = StagedRelaxation
 workflow.result_table = Quality04StaticEnergy
 workflow.register_kwargs = ["prefect_flow_run_id"]
 workflow.result_task = run_id_05
+workflow.s3tasks = [
+    w.s3task
+    for w in [
+        relaxation_quality00,
+        relaxation_quality01,
+        relaxation_quality02,
+        relaxation_quality03,
+        relaxation_quality04,
+        energy_quality04,
+    ]
+]

@@ -141,7 +141,7 @@ class VaspTask(SSSTask):
 
     def setup(self, structure, directory):
 
-        # If requested, we convert to the LLL-reduced unit cell, which aims to 
+        # If requested, we convert to the LLL-reduced unit cell, which aims to
         # be as cubic as possible.
         if self.pre_sanitize_structure:
             structure = structure.copy(sanitize=True)
@@ -219,3 +219,22 @@ class VaspTask(SSSTask):
 
         # return vasprun object
         return vasprun
+
+    @classmethod
+    def get_config(cls):
+        """
+        Grabs the overall settings from the class. This is useful for printing out
+        settings for users to inspect.
+        """
+        return {
+            key: getattr(cls, key)
+            for key in [
+                "__module__",
+                "incar",
+                "pre_sanitize_structure",
+                "incar",
+                "functional",
+                "potcar_mappings",
+                "confirm_convergence",
+            ]
+        }

@@ -34,7 +34,33 @@ def show_config(workflow_name):
     details how INCAR settings are selected.
     """
 
-    raise click.ClickException("This feature hasn't been implemented yet, sorry!")
+    click.echo("LOADING WORKFLOW...")
+    from simmate.workflows import all as all_workflows
+    from simmate.workflows.utilities import get_list_of_all_workflows
+
+    allowed_workflows = get_list_of_all_workflows()
+
+    # make sure we have a proper workflow name provided
+    if workflow_name not in allowed_workflows:
+        raise click.ClickException(
+            "The workflow you provided isn't known. Make sure you don't have any "
+            "typos! If you want a list of all available workflows, use the command "
+            " 'simmate workflows list-all'"
+        )
+    workflow = getattr(all_workflows, workflow_name)
+
+    click.echo("PRINTING WORKFLOW CONFIG...")
+
+    # Not all workflows have a single config because some are NestWorkflows,
+    # meaning they are made of multiple smaller workflows.
+    if hasattr(workflow, "s3task"):
+        workflow.s3task.print_config()
+    elif hasattr(workflow, "s3tasks"):
+        click.echo(
+            "This is a NestedWorkflow, meaning it is made up of multiple smaller "
+            "workflows. We have not added a show-config feature for these yet. "
+            "This will be added before version 0.0.0 though."
+        )
 
 
 @workflows.command()
