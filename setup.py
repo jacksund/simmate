@@ -65,7 +65,7 @@ setup(
     name="simmate",
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
-    version="0.0.0.dev8",
+    version="0.0.0.dev9",
     # a quick summary and then README
     description="Simmate is a toolbox for computational materials research.",
     long_description=long_description,
@@ -88,14 +88,14 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     # Specify which Python versions supported.
-    python_requires=">=3.7, <4",
+    python_requires=">=3.7",
     # This field lists other packages that your project depends on to run.
     install_requires=[
         # Core dependencies
         "numpy>=1.21.4",
         "pandas>=1.3.5",
-        "django==3.2.10",
-        "prefect==0.15.11",
+        "django>=3.2.10",
+        "prefect>=0.15.11",
         "dask>=2021.12.0",
         "click>=8.0.3",
         "numba>=0.53.0",
@@ -103,23 +103,24 @@ setup(
         "django-crispy-forms>=1.13.0",  # for formatting of online forms
         "django-pandas>=0.6.1",  # for converting QuerySets to PandasDataFrames
         "dask-jobqueue>=0.7.3",  # for submitting on clusters
-        "scikit-learn>=1.0.1",
         "dj-database-url>=0.5.0",  # for DigitalOcean URL conversion
         "djangorestframework>=3.13.1",  # for our REST API
         "django-filter>=21.1",  # sets up automatic filters for our REST API
         "django-extensions>=3.1.5",  # simple tools to help with django development
         "pyyaml>=6.0",  # for yaml configuration files
         "plotly>=5.4.0",  # for interactive plots and visualization
-        "tqdm>=4.62.3",  # for monitoring progress on long for-loops
+        "tqdm>=4.62.3",  # for monitoring progress of long for-loops
         #
-        # For development
+        # For development and testing
         "pytest>=6.2.5",
         "black>=21.12b0",
         #
         # These are from the MP stack and I want to phase them out over time
-        "pymatgen==2022.0.17",
-        "pymatgen-analysis-diffusion==2021.4.29",  # pymatgen-diffusion on conda
-        # "matminer>=0.7.4", BUG: conda install is broken.
+        "pymatgen>=2022.0.16",
+        # BUG: matminer's conda install is broken at the moment so we need to
+        # add this dependency on our own.
+        "pymatgen-analysis-diffusion>=2021.4.29",  # pymatgen-diffusion on conda
+        "matminer>=0.7.4",
         #
         # These are packages that I commonly use alongside simmate. I plan to
         # organize these into optional dependencies and/or documentation. But until
@@ -130,6 +131,7 @@ setup(
         # 'gunicorn',  # for website server (Django+DigitalOcean) # !!! NOT WINDOWS
         # "graphviz==1.7",  # python-graphviz on conda. for viewing prefect flows
         # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
+        # "scikit-learn>=1.0.1",  # for machine-learning
     ],
     # Register command line interface
     entry_points={
