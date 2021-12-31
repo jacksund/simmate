@@ -12,28 +12,28 @@ In this tutorial, you will learn how to explore your database as well as load da
 
 # The quick tutorial
 
-1. Make sure you've initialized your database. This was done in tutorial 2 with the command `simmate database reset`.
+1. Make sure you've initialized your database. This was done in tutorial 2 with the command `simmate database reset`. Do NOT rerun this command as it will empty your database and delete your results.
 2. Go to the `simmate.database` module to view all available tables.
-3. The table for Tutorial 1's results are located in the `MITRelaxation` datatable class, which can be loaded via either of these options:
+3. The table for Tutorial 2's results are located in the `MITStaticEnergy` datatable class, which can be loaded via either of these options:
 ```python
 # OPTION 1
 from simmate.shortcuts import setup  # this connects to our database
-from simmate.database.local_calculations.relaxation import MITRelaxation
+from simmate.database.local_calculations.energy import MITStaticEnergy
 
 # OPTION 2 (slower but recommended for convenience)
-from simmate.workflows.all import relaxation_mit
-results = relaxation_mit.result_table  # results here is the same thing as MITRelaxation above
+from simmate.workflows.all import energy_mit
+results = energy_mit.result_table  # results here is the same thing as MITStaticEnergy above
 ```
-4. View all the possible table columns with `MITRelaxation.list_all_columns()`
-5. View the full table as pandas dataframe with `MITRelaxation.objects.to_dataframe()`
+4. View all the possible table columns with `MITStaticEnergy.show_columns()`
+5. View the full table as pandas dataframe with `MITStaticEnergy.objects.to_dataframe()`
 6. Filter results using [django-based queries](https://docs.djangoproject.com/en/4.0/topics/db/queries/). For example:
 ```python
-filtered_results = MITRelaxation.objects.filter(formula_reduced="NaCl", nsites__lte=2).all()
+filtered_results = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites__lte=2).all()
 ```
 7. Convert the final structure from a database object (aka `DatabaseStructure`) to a structure object (aka `ToolkitStructure`).
 ```python
-single_relaxation = MITRelaxation.objects.filter(formula_reduced="NaCl", nsites__lte=2).first()
-nacl_structure = single_relaxation.structure_final.to_pymatgen()
+single_relaxation = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites__lte=2).first()
+nacl_structure = single_relaxation.to_pymatgen()
 ```
 8. For third-party data (like [Material Project](https://materialsproject.org/), [AFLOW](http://aflowlib.org/), [COD](http://www.crystallography.net/cod/), etc.) load the database table and then request to download all the available data:
 ```python
@@ -126,30 +126,54 @@ All of our datatables start from here and build up. Up next, we'll look at an ac
 
 In Tutorial 2, we ran a calculation and then added results to our database table. Here, we will now go through the results. 
 
-We know our workflow's name was `relaxation_mit`, so let's start by grabbing that workflow again. The results table (the class for it) is always attached to the workflow as the `result_table` attribute. You can load it like this:
+We know our workflow's name was `energy_mit`, so let's start by grabbing that workflow again. The results table (the class for it) is always attached to the workflow as the `result_table` attribute. You can load it like this:
 
 ```python
-from simmate.workflows.all import relaxation_mit
+from simmate.workflows.all import energy_mit
 result_table = energy_mit.result_table
 ```
 
-To see all of the data this table stores, we can use it's `result_table.all_columns_headers` attribute. Here, we'll a bunch of columns printed for us...
+To see all of the data this table stores, we can use it's `result_table.show_columns()` method. Here, we'll see a bunch of columns printed for us...
 ```
-final_energy
-final_energy_per_atom
-formation_energy_per_atom
-energy_above_hull
-band_gap
-structure_string
-nsites
-nelements
-chemical_system
-density
-molar_volume
-formula_full
-formula_reduced
-formula_anonymous
-spacegroup (points to another table with more columns)
+- id
+- structure_string
+- source
+- nsites
+- nelements
+- elements
+- chemical_system
+- density
+- density_atomic
+- volume
+- volume_molar
+- formula_full
+- formula_reduced
+- formula_anonymous
+- spacegroup (relation to Spacegroup)
+- directory
+- prefect_flow_run_id
+- created_at
+- updated_at
+- corrections
+- site_forces
+- lattice_stress
+- site_force_norm_max
+- site_forces_norm
+- site_forces_norm_per_atom
+- lattice_stress_norm
+- lattice_stress_norm_per_atom
+- energy
+- energy_per_atom
+- energy_above_hull
+- is_stable
+- decomposes_to
+- formation_energy
+- formation_energy_per_atom
+- band_gap
+- is_gap_direct
+- energy_fermi
+- conduction_band_minimum
+- valence_band_maximum
 ```
 
 This is a lot of columns... and you may not need all of them. But Simmate still builds all of these for you right away because they don't take up very much storage space.
@@ -181,7 +205,7 @@ print(search_results)
 data = search_results.to_dataframe()
 
 # Or we can convert to a list of structure objects (ToolkitStructure)
-structures = search_results.to_toolkit()
+structures = search_results.to_pymatgen()
 ```
 
 This isn't very exciting now because we just have one row/structure in our table :cry:, but we'll do some more exciting filtering in the next section.
