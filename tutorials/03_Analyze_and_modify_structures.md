@@ -43,7 +43,7 @@ structure.cart_coords
 structure.num_sites
 
 # grab the structure's composition and access it's properties
-compositon = structure.composition
+composition = structure.composition
 composition.reduced_formula
 composition.elements
 
@@ -154,7 +154,7 @@ lattice.beta
 
 And we can apply the same idea to the list of elements in our `Structure` (known as a `Composition`):
 ```
-compositon = structure.composition
+composition = structure.composition
 composition.reduced_formula
 composition.elements
 ```

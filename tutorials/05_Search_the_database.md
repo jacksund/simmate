@@ -22,7 +22,7 @@ from simmate.database.local_calculations.relaxation import MITRelaxation
 
 # OPTION 2 (slower but recommended for convenience)
 from simmate.workflows.all import relaxation_mit
-results = relaxation_mit.results_table  # results here is the same thing as MITRelaxation above
+results = relaxation_mit.result_table  # results here is the same thing as MITRelaxation above
 ```
 4. View all the possible table columns with `MITRelaxation.list_all_columns()`
 5. View the full table as pandas dataframe with `MITRelaxation.objects.to_dataframe()`
@@ -130,10 +130,10 @@ We know our workflow's name was `relaxation_mit`, so let's start by grabbing tha
 
 ```python
 from simmate.workflows.all import relaxation_mit
-results_table = energy_mit.results_table
+result_table = energy_mit.result_table
 ```
 
-To see all of the data this table stores, we can use it's `results_table.all_columns_headers` attribute. Here, we'll a bunch of columns printed for us...
+To see all of the data this table stores, we can use it's `result_table.all_columns_headers` attribute. Here, we'll a bunch of columns printed for us...
 ```
 final_energy
 final_energy_per_atom
@@ -156,7 +156,7 @@ This is a lot of columns... and you may not need all of them. But Simmate still 
 
 Next we'd want to see the table with all of its data. To access the table rows, we use the `objects` attribute, and then to get this into a table, we convert to a "dataframe". A dataframe is a filtered portion of a database table -- and because we didn't filter any of our results yet, our dataframe is just the whole table. 
 ```python
-data = results_table.objects.to_dataframe()
+data = result_table.objects.to_dataframe()
 ```
 Open up this variable by double-clicking `data` in Spyder's variable explorer (top right window) and you can view the table. Here's what a typical dataframe looks like in Spyder:
 <!-- This is an image of an Pandas Dataframe in Spyder -->
@@ -169,7 +169,7 @@ Next, we can use our table columns to start filtering through our results. Your 
 ```python
 
 # We can filter off rows in the table. Any column can be used!
-search_results = results_table.objects.filter(
+search_results = result_table.objects.filter(
     formula_reduced="NaCl",  # check an exact match for any column
     nelements=2,  # filter a column based on a greater or equal to (gte) condition
 ).all()
@@ -200,7 +200,7 @@ In the previous section, we loaded our `DatabaseTable` from the workflow. But no
 # This line MUST be ran before any tables can be loaded
 from simmate.shortcuts import setup  # this connects to our database
 
-# This gives the results_table we were using in the previous section
+# This gives the result_table we were using in the previous section
 from simmate.database.local_calculations.relaxation import MITRelaxation
 
 # This loads the table where we store all of the JARVIS data.
@@ -208,7 +208,7 @@ from simmate.database.third_parties.jarvis import JarvisStructure
 ```
 
 :fire: :fire: :fire:
-IMPORTANT: `results_table` above and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.shortcuts import setup`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! So don't forget to include `from simmate.shortcuts import setup`!
+IMPORTANT: `result_table` above and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.shortcuts import setup`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! So don't forget to include `from simmate.shortcuts import setup`!
 :fire: :fire: :fire:
 
 Now that we have our datatable class (`JarvisStructure`) loaded, you'll notice it's empty to when you first access it. We can quickly load all of the data using the `load_data_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database.
