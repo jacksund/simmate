@@ -135,12 +135,6 @@ def setup_only(workflow_name, filename, directory):
     default=None,
     help="the folder to run this workflow in. Defaults to simmate-task-12345, where 12345 is randomized",
 )
-@click.option(
-    "--local",
-    "-l",
-    default=False,
-    help="whether to run this flow locally. if false, it will be scheduled on prefect cloud",
-)
 def run(workflow_name, filename, command, directory):
     """Runs a workflow using an input structure file"""
 
@@ -158,6 +152,48 @@ def run(workflow_name, filename, command, directory):
     command_kwargs = {"command": command} if command else {}
 
     result = workflow.run(
+        structure=structure,
+        directory=directory,
+        **command_kwargs,
+    )
+
+    # Let the user know everything succeeded
+    if result.is_successful():
+        click.echo("Success! All results are also stored in your database.")
+
+
+@workflows.command()
+@click.argument("workflow_name")
+@click.argument("filename", type=click.Path(exists=True))
+@click.option(
+    "--command",
+    "-c",
+    default=None,
+    help="the command used to call call the calculator (e.g. 'mpirun -n 12 vasp > vasp.out')",
+)
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="the folder to run this workflow in. Defaults to simmate-task-12345, where 12345 is randomized",
+)
+def run_cloud(workflow_name, filename, command, directory):
+    """Runs a workflow using an input structure file"""
+
+    click.echo("LOADING STRUCTURE AND WORKFLOW...")
+    from pymatgen.core.structure import Structure
+
+    workflow = get_workflow(workflow_name)
+    structure = Structure.from_file(filename)
+
+    click.echo("RUNNING WORKFLOW...")
+
+    # we don't want to pass command=None if the user didn't provide one. Instead
+    # we want the workflow to use its own default value. To do this, we pass
+    # the command input as a kwarg -- or an empty dict if it wasn't given.
+    command_kwargs = {"command": command} if command else {}
+
+    result = workflow.run_cloud(
         structure=structure,
         directory=directory,
         **command_kwargs,
