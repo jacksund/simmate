@@ -262,7 +262,7 @@ class StructureSource(DatabaseTable):
     is_steadystate = table_column.BooleanField()
     is_singleshot = table_column.BooleanField()
 
-    settings = table_column.JSONField(default={})
+    settings = table_column.JSONField(default=dict)
 
     # timestamping for when this was added to the database
     # This also gives a feel for how long the steady-state was running
@@ -270,7 +270,7 @@ class StructureSource(DatabaseTable):
     updated_at = table_column.DateTimeField(auto_now=True)
 
     # This list limits to ids that are submitted or running
-    prefect_flow_run_ids = table_column.JSONField(default=[])
+    prefect_flow_run_ids = table_column.JSONField(default=list)
 
     search = table_column.ForeignKey(
         EvolutionarySearch,

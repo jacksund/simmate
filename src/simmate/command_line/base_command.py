@@ -14,9 +14,11 @@ def simmate():
     """
     This is the base command that all others stem from.
 
-    If you are a beginner for the command line, take a look at our tutorial:
-        << TODO: insert link >>
+    If you are a beginner to the command line, be sure to start with our tutorials:
+    https://github.com/jacksund/simmate/tree/main/tutorials
 
+    Below you will see a list of sub-commands to try. For example, you can run `simmate
+    database --help` to learn more about it.
     """
     # When we call the command "simmate" this is where we start, and it then
     # looks for all other functions that have the decorator "@simmate.command()"

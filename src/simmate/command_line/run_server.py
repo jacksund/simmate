@@ -17,9 +17,4 @@ def run_server():
     from simmate.configuration.django import setup_full  # loads settings
     from django.core.management import call_command
 
-    # make sure we unpacked our material_kit assets before running
-    from simmate.configuration.django.assets import unpack_assets
-
-    unpack_assets()
-
     call_command("runserver")

@@ -45,7 +45,7 @@ def list_all():
 
     from simmate.workflows.utilities import get_list_of_all_workflows
 
-    click.echo("These are all workflows you can use:")
+    click.echo("These are the workflows that have been registerd:")
     all_workflows = get_list_of_all_workflows()
     for i, workflow in enumerate(all_workflows):
         click.echo(f"\t({i+1}) {workflow}")  # gives "(1) example_flow"
