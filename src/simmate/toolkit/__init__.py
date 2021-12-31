@@ -1,1 +1,1 @@
-from pymatgen.core.structure import Structure
+from pymatgen.core import Structure, Composition
