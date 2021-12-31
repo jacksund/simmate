@@ -58,7 +58,7 @@ Make new structures using some tranformation or analysis:
 ```python
 structure.add_oxidation_state_by_guess()
 structure.make_supercell([2,2,2])
-new_structure_03 = structure.get_primitive_structure()
+new_structure = structure.get_primitive_structure()
 ```
 
 What about advanced features? Simmate is slowly adding these to our toolkit module, but many more are available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) (which are preinstalled for you).
@@ -67,9 +67,9 @@ What about advanced features? Simmate is slowly adding these to our toolkit modu
 # creating a random structure from a spacegroup and composition
 from simmate.toolkit import Composition
 from simmate.toolkit.creators.structure.all import RandomSymStructure
-composition = Composition("Ca2N"
+composition = Composition("Ca2N")
 creator = RandomSymStructure(composition)
-structure = creator.new_structure(spacegroup=166)
+structure = creator.create_structure(spacegroup=166)
 
 # Matminer is handy for analyzing structures and making
 # machine-learning inputs. One common analysis is the generating
@@ -149,7 +149,7 @@ Either way, we now have our structure loaded and Simmate knows exactly what it i
 
 The reason we make classes and objects in python is because, once we have them, we can automate a ton of common functions and calculations. For example, all structures have a `density`, which is easily calculated once you know the lattice and atomic sites. These are known as properties. You can access this and other properties through our structure object. Try typing `nacl_structure.density` in the python terminal and hit enter. It should tell you the density!
 
-Now what about properties for the lattice? Like volume, angles, and vectors? For all of these things, it would make sense to have a `Lattice` class that calculates all of these things for us. So that's exactly what we do -- we attach a `Lattice` object to our `Structure` object. You access it through `structure.lattice`. Try out these in your python terminal:
+Now what about properties for the lattice? Like volume, angles, and vectors? For all of these things, it would make sense to have a `Lattice` class that calculates all of these things for us. So that's exactly what we do -- we attach a `Lattice` object to our `Structure` object. You access it through `structure.lattice`. Try out these in your python terminal (only run one line at a time!):
 
 ```
 lattice = structure.lattice
@@ -188,7 +188,7 @@ structure.add_oxidation_state_by_guess()
 structure.make_supercell([2,2,2])
 ```
 
-To get a quick look at **all** of the properties and methods available, type `nacl_structure` into the terminal but don't hit enter yet. Then add a period so you have `nacl_structure.`, and finally, hit tab. You should see a list pop up with everything available. Try selecting lattice, and then do this tab trick again! The list should look like this (this image isn't for a structure object though):
+To get a quick look at **all** of the properties and methods available, type `nacl_structure` into the terminal but don't hit enter yet. Then add a period so you have `nacl_structure.`, and finally, hit tab. You should see a list pop up with everything available. Try selecting lattice, and then do this tab trick again! The list should look similar to this (this image isn't for a structure object though):
 
 <!-- This is an image of the Spyder's code-completion -->
 <p align="center" style="margin-bottom:40px;">
@@ -204,16 +204,16 @@ This can be done with any class and object! There are many different classes in 
 To give you a sneak-peak of some advanced classes and functionality, we outline some examples in this section. Note that Simmate is still early in development, so there are many more features available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) packages, which were installed alongside Simmate.
 
 Simmate's toolkit is (at the moment) most useful for structure creation. This includes creating structures from random symmetry, prototype structures, and more.
-We also can randomly create structures with a structure-creator class. We only need to give it a composition object:
+We only need to give these "creator" classes a composition object:
 ```python
 from simmate.toolkit import Composition
 from simmate.toolkit.creators.structure.all import RandomSymStructure
-composition = Composition("Ca2N"
+composition = Composition("Ca2N")
 creator = RandomSymStructure(composition)
-structure = creator.new_structure(spacegroup=166)
+structure = creator.create_structure(spacegroup=166)
 ```
 
-Matminer is particularly useful for analyzing "features" of a structure and making machine-learning inputs. One common analysis gives the "fingerprint" of the structure, which helps characterize bonding in the crystal. The most basic fingerprint is the radial distribution function (rdf). It shows the distribution of all atoms from one another. We take any structure object and can feed it a fingerprint-analyzer object:
+Matminer is particularly useful for analyzing "features" of a structure and making machine-learning inputs. One common analysis gives the "fingerprint" of the structure, which helps characterize bonding in the crystal. The most basic fingerprint is the radial distribution function (rdf) -- it shows the distribution of all atoms from one another. We take any structure object and can feed it a fingerprint-analyzer object:
 
 ```python
 from matminer.featurizers.structure.rdf import RadialDistributionFunction
@@ -228,7 +228,7 @@ matcher = StructureMatcher()
 is_matching = matcher.fit(structure1, structure2)
 ```
 
-If you're trying to follow a paper and analyze a structure, odds are that someone made a class/function for that analysis! Be sure to search around our documentation for it (next tutorial teaches you how to do this) or just [post a question](https://github.com/jacksund/simmate/discussions/new?category=q-a) and we'll point you in the right direction.
+If you're trying to follow a paper and analyze a structure, odds are that someone made a class/function for that analysis! Be sure to search around the documentation for it (next tutorial teaches you how to do this) or just [post a question](https://github.com/jacksund/simmate/discussions/new?category=q-a) and we'll point you in the right direction.
 
 <br/> <!-- add empty line -->
 
