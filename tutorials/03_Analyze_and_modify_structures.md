@@ -60,24 +60,30 @@ structure.add_oxidation_state_by_guess()
 structure.make_supercell([2,2,2])
 new_structure_03 = structure.get_primitive_structure()
 ```
-> :warning: pymatgen is consistent on when a method returns a new structure vs changes your current one. Simmate will in the future convert all methods to leave the original structure unchanged and return a new structure (and all with have the prefix get_*)
 
-What about advanced features?
+What about advanced features? Simmate is slowly adding these to our toolkit module, but many more are available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) (which are preinstalled for you).
 ```python
-# Generate a RDF fingerprint to help analyze and compare structures
-from simmate.toolkit.fingerprints.all import RdfFingerprint
-fingerprint_analyzer = RdfFingerprint()
-rdf = fingerprint_analyzer.get_fingerprint(structure)
-
-# Create a random structure from a spacegroup and composition
-from simmate.toolkit.creators.all import PyXtalCreator
-creator = PyXtalCreator(composition)
+# Simmate is in the process of adding new features. One example
+# creating a random structure from a spacegroup and composition
+from simmate.toolkit import Composition
+from simmate.toolkit.creators.structure.all import RandomSymStructure
+composition = Composition("Ca2N"
+creator = RandomSymStructure(composition)
 structure = creator.new_structure(spacegroup=166)
 
-# Check if two structures are matching
-from simmate.toolkit.matching import StructureMatcher
-matcher = StructureMatcher
-is_matching = matcher.match(structure1, structure2)
+# Matminer is handy for analyzing structures and making
+# machine-learning inputs. One common analysis is the generating
+# a RDF fingerprint to help analyze bonding and compare structures
+from matminer.featurizers.structure.rdf import RadialDistributionFunction
+rdf_analyzer = RadialDistributionFunction()
+rdf = rdf_analyzer.featurize(structure)
+
+# Pymatgen currently has the most functionality. One common
+# function is checking if two structures are symmetrically
+# equivalent (under some tolerance).
+from pymatgen.analysis.structure_matcher import StructureMatcher
+matcher = StructureMatcher()
+is_matching = matcher.fit(structure1, structure2)
 ```
 
 There are many more features available! If you can't find what you're looking for, be sure to ask for help before trying to code something on your own. Chances are that the feature exists somewhere -- and if we don't have it, we'll direct you to a package that does.
@@ -195,31 +201,34 @@ This can be done with any class and object! There are many different classes in 
 
 ## Advanced classes
 
-To give you a sneak-peak of some advanced classes and functionality, here are some examples. 
+To give you a sneak-peak of some advanced classes and functionality, we outline some examples in this section. Note that Simmate is still early in development, so there are many more features available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) packages, which were installed alongside Simmate.
 
-First, there are advanced analyses you can use. One is known as a "fingerprint" of the structure, which helps characterize bonding in the crystal. The most basic fingerprint is the radial distribution function (rdf). It shows the distribution of all atoms from one another. We take any structure object and can feed it a fingerprint-analyzer object:
-
-```python
-from simmate.toolkit.fingerprints.all import RdfFingerprint
-fingerprint_analyzer = RdfFingerprint()
-rdf = fingerprint_analyzer.get_fingerprint(structure)
-```
-
+Simmate's toolkit is (at the moment) most useful for structure creation. This includes creating structures from random symmetry, prototype structures, and more.
 We also can randomly create structures with a structure-creator class. We only need to give it a composition object:
 ```python
-from simmate.toolkit.creators.all import PyXtalCreator
-creator = PyXtalCreator(composition)
+from simmate.toolkit import Composition
+from simmate.toolkit.creators.structure.all import RandomSymStructure
+composition = Composition("Ca2N"
+creator = RandomSymStructure(composition)
 structure = creator.new_structure(spacegroup=166)
 ```
 
-Lastly, it's common to compare two structures and seeing if are symmetrically the same structure. There's a StructureMatcher class for that:
+Matminer is particularly useful for analyzing "features" of a structure and making machine-learning inputs. One common analysis gives the "fingerprint" of the structure, which helps characterize bonding in the crystal. The most basic fingerprint is the radial distribution function (rdf). It shows the distribution of all atoms from one another. We take any structure object and can feed it a fingerprint-analyzer object:
+
 ```python
-from simmate.toolkit.matching import StructureMatcher
-matcher = StructureMatcher
-is_matching = matcher.match(structure1, structure2)
+from matminer.featurizers.structure.rdf import RadialDistributionFunction
+rdf_analyzer = RadialDistributionFunction()
+rdf = rdf_analyzer.featurize(structure)
 ```
 
-If you're to follow a paper and analyze a structure, odds are that someone made a class/function for that analysis! Be sure to search around our documentation for it (next tutorial teaches you how to do this) or just [post a question](https://github.com/jacksund/simmate/discussions/new?category=q-a) and we'll point you in the right direction.
+Pymatgen is currently the largest package and has the most toolkit-like features. As a small example, it's common to compare two structures and see if are symmetrically equivalent (within a given tolerance). You give it two structures and it will return True or False on whether they are matching:
+```python
+from pymatgen.analysis.structure_matcher import StructureMatcher
+matcher = StructureMatcher()
+is_matching = matcher.fit(structure1, structure2)
+```
+
+If you're trying to follow a paper and analyze a structure, odds are that someone made a class/function for that analysis! Be sure to search around our documentation for it (next tutorial teaches you how to do this) or just [post a question](https://github.com/jacksund/simmate/discussions/new?category=q-a) and we'll point you in the right direction.
 
 <br/> <!-- add empty line -->
 
