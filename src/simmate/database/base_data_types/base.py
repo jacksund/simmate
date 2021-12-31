@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import yaml
+
 from django.db import models
 from django_pandas.io import read_frame
 
@@ -126,10 +128,30 @@ DatabaseTableManager = models.Manager.from_queryset(SearchResults)
 
 
 class DatabaseTable(models.Model):
+    class Meta:
+        abstract = True
 
     # I override the default manager with the one we define above, which has
     # extra methods useful for our querysets.
     objects = DatabaseTableManager()
+
+    @classmethod
+    def show_columns(cls):
+        """
+        Prints a list of all the column names for this table and indicates which
+        columns are related to other tables. This is primarily used to help users
+        interactively view what data is available.
+        """
+        # Iterate through and grab the columns
+        column_names = [
+            column.name + f" (relation to {column.related_model.__name__})"
+            if column.is_relation
+            else column.name
+            for column in cls._meta.get_fields()
+        ]
+
+        # Then use yaml to make the printout pretty (no quotes and separate lines)
+        print(yaml.dump(column_names))
 
     @classmethod
     def create_subclass(cls, name: str, module: str, **new_columns):
@@ -141,12 +163,12 @@ class DatabaseTable(models.Model):
         ways we create a NewTable below are exactly the same:
 
         .. code-block:: python
-            
+
             # Normal way to create a child class
             NewTable(Structure):
                 new_field1 = table_column.FloatField()
                 new_field2 = table_column.FloatField()
-    
+
             # How this method makes the same child class
             NewTable = Structure.create_subclass(
                 name="NewTable",
@@ -161,7 +183,7 @@ class DatabaseTable(models.Model):
         is in local_calculations.relaxations.
         """
 
-        # because we update values below, we make sure we are editting a 
+        # because we update values below, we make sure we are editting a
         # copy of the dictionary
         new_columns = new_columns.copy()
 
@@ -187,9 +209,6 @@ class DatabaseTable(models.Model):
         NewClass = type(name, (cls,), new_columns)
 
         return NewClass
-
-    class Meta:
-        abstract = True
 
 
 # This line does NOTHING but rename a module. I have this because I want to use
