@@ -33,12 +33,11 @@ direct
 0.500000 0.500000 0.500000 Cl
 ```
 3. View a list of all workflows available with `simmate workflows list-all`
-4. View the settings used for the `relaxation_mit` workflow with `simmate workflows show-config relaxation_mit`
-5. View the input files with `simmate workflows setup-only relaxation_mit POSCAR`
-7. Run a workflow with `simmate workflows run relaxation_mit POSCAR` (run = configure + schedule + execute + save)
-8. Start the simmate test server with `simmate run-server`
-9. You can now view the web UI at http://127.0.0.1:8000/
-10. In the web UI, navigate to `calculations` --> `relaxations` --> `EMT` to view our results
+4. View the settings used for the `energy_mit` workflow with `simmate workflows show-config energy_mit`
+5. View the input files with `simmate workflows setup-only energy_mit POSCAR`
+7. Run a workflow with `simmate workflows run energy_mit POSCAR` (run = configure + schedule + execute + save)
+
+> :warning: The website interface isn't ready yet, so you'll have to manually go through the files to see the results. You can still move on to the other tutorials, which will show you how to see the results with python.
 
 <br/><br/>
 
@@ -179,7 +178,7 @@ To view the settings a workflow uses before actually running it, we can use the 
 
 Next, look at an advanced calculation. Run the command `simmate workflows show-config energy_mit`. Here, you'll see some INCAR settings rely on composition and we have a list of error handlers to help ensure a calculation completes.
 
-So we can now view the settings used for *all* compositions/structures, but now we want to give it a specific structure. We'll give it the POSCAR structure we just made. To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can run `cd Desktop` to change your active folder to your Desktop. Then run the command `simmate workflows setup-only relaxation_mit POSCAR`. You'll see a new folder created named `relaxation_mit_input`. When you open it, these are all of the files that Simmate made for VASP to use. This is useful when you're an advanced user that wants to alter these files before calling VASP manually -- this happens often when testing out new workflows or unique systems.
+So we can now view the settings used for *all* compositions/structures, but now we want to give it a specific structure. We'll give it the POSCAR structure we just made. To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can run `cd Desktop` to change your active folder to your Desktop. Then run the command `simmate workflows setup-only energy_mit POSCAR`. You'll see a new folder created named `MIT_Static_Energy_inputs`. When you open it, these are all of the files that Simmate made for VASP to use. This is useful when you're an advanced user that wants to alter these files before calling VASP manually -- this happens often when testing out new workflows or unique systems.
 
 For absolute beginners, you don't need to need to immediately understand these files/settings, but they will be important for knowing the scientific limitations of your results and for running your own custom calculations. For whichever program you end up using the most, be sure to also go through their tutorials -- rather than always using Simmate to run their program for you. For example, if you use VASP the most, you can learn to use VASP independently with [their tutorials](https://www.vasp.at/wiki/index.php/Category:Tutorials). Until you reach that point, we'll have Simmate do it all for us!
 
@@ -189,11 +188,11 @@ For absolute beginners, you don't need to need to immediately understand these f
 
 Recall from above that the default Simmate settings run everything immediately and locally on your desktop. When running the workflow, it will create a new folder, write the inputs in it, run the calculation, and then save the results to your database.
 
-The command to do this with our POSCAR and relaxation_mit workflow is `simmate workflows run relaxation_mit POSCAR`. By default, Simmate uses the command `vasp > vasp.out` and creates a random folder name for this to run in (ex: `simmate-task-j8djk3mn8`).
+The command to do this with our POSCAR and energy_mit workflow is `simmate workflows run energy_mit POSCAR`. By default, Simmate uses the command `vasp > vasp.out` and creates a random folder name for this to run in (ex: `simmate-task-j8djk3mn8`).
 
 Alternatively, we can change the command used to call VASP as well as the directory we want this ran in. All of the options are given in `simmate workflows run --help`. For the command and directory, we can update our command to look something like this:
 ```
-simmate workflows run relaxation_mit POSCAR -c "mpirun -n 4 vasp > vasp.out" -d my_custom_folder
+simmate workflows run energy_mit POSCAR -c "mpirun -n 4 vasp > vasp.out" -d my_custom_folder
 ```
 
 If any errors come up, please let our team know by [posting a question](https://github.com/jacksund/simmate/discussions/new?category=q-a).
