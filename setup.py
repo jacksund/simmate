@@ -94,7 +94,10 @@ setup(
         # Core dependencies
         "numpy>=1.21.4",
         "pandas>=1.3.5",
-        "django>=3.2.10",
+        # BUG: need django-pandas>=0.6.6 for django>=4.0
+        # When this is done, also bump python to >=3.9
+        # https://github.com/conda-forge/django-pandas-feedstock/issues
+        "django==3.2.10",
         "prefect>=0.15.11",
         "dask>=2021.12.0",
         "click>=8.0.3",
