@@ -76,7 +76,7 @@ We often want to run the same calculation on many materials, so Simmate pre-buil
 
 Every time you run the command `simmate database reset`, you should be aware that the database is deleted and a new one is written with empty tables.  If you want to keep your previous runs, you should save a copy of your database.
 
-So where is the database stored?  After running `simmate database reset`, you'll find it in a file named `~/.simmate/database.sqlite3`. However, finding this may be tricky for beginners *(note, if you struggle here, you can simply move on to the next section. don't worry.)*. Here are some tips to help you:
+So where is the database stored? After running `simmate database reset`, you'll find it in a file named `~/.simmate/database.sqlite3`. However, finding this may be tricky for beginners *(note, if you struggle here, you can simply move on to the next section. don't worry.)*. Here are some tips to help you:
 1. remember from tutorial 1 that `~` is short for our home directory -- typically something like `/home/jacksund/` or `C:\Users\jacksund`. 
 2. the period in `.simmate` means that the simmate folder is hidden. It won't show up in your file viewer unless you have "show hidden files" turned on in your File Explorer (on Windows, check "Hidden Items" under the "View" tab). 
 3. we want to get in the habit of viewing file extensions, so make sure you also have "show file name extensions" enabled. Then you'll see a file named `database.sqlite3` instead of just `database`.
