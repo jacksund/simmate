@@ -18,15 +18,12 @@
 # test max_errors limit
 
 import os
-from subprocess import CalledProcessError
-from tempfile import TemporaryDirectory
 
 import pytest
 
-from simmate.workflow_engine.tasks.shelltask import ShellTask
 from simmate.workflow_engine.error_handler import ErrorHandler
 from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
-    SupervisedStagedShellTask as SSSTask,
+    SupervisedStagedShellTask as S3Task,
     NonZeroExitError,
     MaxCorrectionsError,
     StructureRequiredError,
@@ -34,16 +31,11 @@ from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
 
 # ----------------------------------------------------------------------------
 
-# make some simple StagedShellTasks for us to test with
+# make some a simple S3Task and ErrorHandlers for us to test with
 
 
-class DummyTask(SSSTask):
+class DummyTask(S3Task):
     command = "echo dummy"
-
-
-# ----------------------------------------------------------------------------
-
-# make some simple Handlers to run tests with
 
 
 class AlwaysPassesHandler(ErrorHandler):
@@ -82,28 +74,43 @@ class AlwaysFailsSpecialMonitor(AlwaysFailsMonitor):
 # ----------------------------------------------------------------------------
 
 
-def test_shelltask():
-    task = ShellTask()
-    task.run(command="echo dummy")
-    # TODO - I should silence prefect logging at a higher level for all tests
-    pytest.raises(
-        CalledProcessError,
-        task.run,
-        command="NonexistantCommand 404",
-    )
-
-
-def test_supervisedstagedshelltask():
-
-    # running a basic task
+def test_s3task_1():
+    # run a basic task
     task = DummyTask(monitor=False)
-    task.run()
+    output = task.run()
 
-    # requires structure failure
+    # make sure that a "simmate-task-*" directory was created
+    assert os.path.exists(output["directory"])
+
+    # and delete that directory
+    os.rmdir(output["directory"])
+
+
+def test_s3task_2():
+    # run a basic task
+    task = DummyTask(monitor=False, compress_output=True)
+    output = task.run()
+
+    # make sure that a "simmate-task-*.zip" archive was created
+    assert os.path.exists(output["directory"] + ".zip")
+
+    # make sure that a "simmate-task-*" directory was removed
+    assert not os.path.exists(output["directory"])
+
+    # and delete the archive
+    os.remove(output["directory"] + ".zip")
+
+
+def test_s3task_3():
+    # Make sure an error is raised when the task requires a structure but isn't
+    # given one
+    task = DummyTask(monitor=False)
     task.requires_structure = True
     pytest.raises(StructureRequiredError, task.run)
 
-    # test success, handler, monitor, and special-monitor
+
+def test_s3task_4(tmpdir):
+    # Make a task with error handlers and monitoring
     task = DummyTask(
         error_handlers=[
             AlwaysPassesHandler(),
@@ -113,60 +120,54 @@ def test_supervisedstagedshelltask():
         polling_timestep=0,
         monitor_freq=2,
     )
-    assert task.run() == (None, [])
+    # use the temporary directory
+    assert task.run(directory=tmpdir) == {
+        "result": None,
+        "corrections": [],
+        "directory": tmpdir,
+        "prefect_flow_run_id": None,
+    }
 
-    # test result-only return, write corrections file, compressed out, and tempdir
-    with TemporaryDirectory() as tempdir:
-        task = DummyTask(
-            error_handlers=[
-                AlwaysPassesHandler(),
-                AlwaysPassesMonitor(),
-                AlwaysPassesSpecialMonitor(),
-            ],
-            return_corrections=False,
-            save_corrections_tofile=True,
-            compress_output=True,
-            polling_timestep=0,
-            monitor_freq=2,
-        )
-        assert task.run(dir=tempdir) is None
-        assert os.path.exists(tempdir)
 
-    # test nonzeo returncode
+def test_s3task_5(tmpdir):
+    # test nonzero returncode
     task = DummyTask(
         command="NonexistantCommand 404",
         error_handlers=[AlwaysPassesHandler()],
         polling_timestep=0,
         monitor_freq=2,
     )
-    pytest.raises(NonZeroExitError, task.run)
+    pytest.raises(NonZeroExitError, task.run, directory=tmpdir)
 
+
+def test_s3task_6(tmpdir):
     # testing handler-triggered failures
     task = DummyTask(
         error_handlers=[AlwaysFailsHandler()],
-        return_corrections=False,
         polling_timestep=0,
         monitor_freq=2,
     )
-    pytest.raises(MaxCorrectionsError, task.run)
+    pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)
 
+
+def test_s3task_7(tmpdir):
     # monitor failure
     task = DummyTask(
         error_handlers=[AlwaysFailsMonitor()],
-        return_corrections=False,
         polling_timestep=0,
         monitor_freq=2,
     )
-    pytest.raises(MaxCorrectionsError, task.run)
+    pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)
 
-    # special-monitor failure
+
+def test_s3task_8(tmpdir):
+    # special-monitor failure (non-terminating monitor)
     task = DummyTask(
         error_handlers=[AlwaysFailsSpecialMonitor()],
-        return_corrections=False,
         polling_timestep=0,
         monitor_freq=2,
     )
-    pytest.raises(MaxCorrectionsError, task.run)
+    pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)
 
 
 # For manual testing

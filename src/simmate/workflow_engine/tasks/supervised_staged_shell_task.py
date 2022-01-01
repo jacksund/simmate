@@ -4,7 +4,6 @@ import os
 import platform
 import time
 import signal
-from shutil import make_archive
 import subprocess
 import yaml
 
@@ -14,7 +13,7 @@ import prefect
 from prefect.core.task import Task
 from prefect.utilities.tasks import defaults_from_attrs
 
-from simmate.utilities import get_directory, empty_directory
+from simmate.utilities import get_directory, make_archive
 
 from typing import List, Any
 from pymatgen.core.structure import Structure
@@ -185,8 +184,6 @@ class SupervisedStagedShellTask(Task):
         monitor_freq: int = None,
         save_corrections_to_file: bool = True,
         corrections_filename: str = "simmate_corrections.csv",
-        empty_directory_on_finish: bool = False,
-        files_to_keep: List[str] = None,
         compress_output: bool = False,
         **kwargs: Any,
     ):
@@ -235,29 +232,15 @@ class SupervisedStagedShellTask(Task):
         corrections_filename : str (optional)
             If save_corrections_to_file is True, this is the filename of where
             to write the corrections. The default is "simmate_corrections.csv".
-        empty_directory_on_finish : bool (optional)
-            Whether to delete all directory contents at the end of the task (after
-            workup), or not. This is only used to save on file space The default
-            is False.
-        files_to_keep : List[str] (optional)
-            If empty_directory_on_finish is True, the deletion process will skip
-            all files in this list is of filenames.
         compress_output : bool (optional)
             Whether to compress the directory to a zip file at the end of the
-            task run. This is done BEFORE empty_directory_on_finish and
-            files_to_keep are used. The default is False.
+            task run. After compression, it will also delete the directory.
+            The default is False.
         **kwargs : Any
-            All extra arguments supported by prefect.core.task.Task
+            All extra arguments supported by prefect.core.task.Task. To see all
+            the options, visit https://docs.prefect.io/api/latest/core/task.html
 
         """
-
-        # this is a common input but not required for all SSSTasks
-        # core parts
-        # settings for the stagedtask supervision/monitoring
-        # return, cleanup, and file saving settings
-        # only used if empty_directory_on_finish=True
-        # To support other Prefect input options. To see all the options, visit...
-        # https://docs.prefect.io/api/latest/core/task.html
 
         # if any of these input parameters were given, overwrite the default
         # Note to python devs: this odd formatting is because we set our defaults
@@ -279,7 +262,6 @@ class SupervisedStagedShellTask(Task):
             self.polling_timestep = polling_timestep
         if monitor_freq:
             self.monitor_freq = monitor_freq
-
         # These parameters will never have a default which is set to the attribute,
         # so go ahead and set them from what was given in the init
         self.directory = directory
@@ -287,8 +269,6 @@ class SupervisedStagedShellTask(Task):
         self.compress_output = compress_output
         self.save_corrections_to_file = save_corrections_to_file
         self.corrections_filename = corrections_filename
-        self.empty_directory_on_finish = empty_directory_on_finish
-        self.files_to_keep = files_to_keep
 
         # now inherit the parent Prefect Task class
         super().__init__(**kwargs)
@@ -407,7 +387,6 @@ class SupervisedStagedShellTask(Task):
                     # when it's done, in which case we break the loop
                     if process.poll() is not None:
                         break
-
                     # check whether we should run monitors on this poll loop
                     if monitor_freq_n % self.monitor_freq == 0:
                         # iterate through each monitor
@@ -433,7 +412,6 @@ class SupervisedStagedShellTask(Task):
                                     correction = error_handler.correct(directory)
                                     # record what's been changed
                                     corrections.append((error_handler.name, correction))
-
                                 # there's no need to look at the other monitors
                                 # so break from the for-loop. We also don't
                                 # need to monitor the stagedtask anymore since we just
@@ -441,9 +419,7 @@ class SupervisedStagedShellTask(Task):
                                 # end. So update the while-loop condition.
                                 has_error = True
                                 break
-
                 # ------ end of monitor while loop ------
-
             # Now just wait for the process to finish. Note we use communicate
             # instead of the .wait() method. This is the recommended method
             # when we have stderr=subprocess.PIPE, which we use above.
@@ -460,7 +436,6 @@ class SupervisedStagedShellTask(Task):
                 raise NonZeroExitError(
                     f"The command ({command}) failed. The error output was...\n {errors}"
                 )
-
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered above (if there was one).
             # Since the error_handlers are in order of priority, only the first
@@ -488,12 +463,11 @@ class SupervisedStagedShellTask(Task):
                     # break from the error_handler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break
-
             # write the log of corrections to file if requested. This is written
             # as a CSV file format and done every while-loop cycle because it
             # lets the user monitor the calculation and error handlers applied
-            # as it goes.
-            if self.save_corrections_to_file:
+            # as it goes. If no corrections were applied, we skip writing the file.
+            if self.save_corrections_to_file and corrections:
                 # compile the corrections metadata into a dataframe
                 data = pandas.DataFrame(
                     corrections,
@@ -504,7 +478,6 @@ class SupervisedStagedShellTask(Task):
                     os.path.join(directory, self.corrections_filename),
                     index=False,
                 )
-
             # now that we've gone through the error_handlers, let's see if any
             # non-terminating errors were found (terminating ones would raise
             # an error above). If there are no errors, we've finished the
@@ -514,7 +487,6 @@ class SupervisedStagedShellTask(Task):
             if not has_error:
                 # break the while-loop
                 break
-
         # ------ end of main while loop ------
 
         # make sure the while loop didn't exit because of the correction limit
@@ -524,7 +496,6 @@ class SupervisedStagedShellTask(Task):
                 "error and its fix are still listed in the corrections file, but it "
                 "was never used."
             )
-
         # now return the corrections for them to stored/used elsewhere
         return corrections
 
@@ -550,18 +521,29 @@ class SupervisedStagedShellTask(Task):
             the command used to launch the process. This is sometimes useful
             when searching for all running processes under this name.
         """
+
+        # The operating system (Windows, OSX, or Linux) will give us the best guess
+        # as to where to access the blender command. The results are as you'd expect
+        # except for Macs, which return "Darwin".
+        #   Linux: Linux
+        #   Mac: Darwin
+        #   Windows: Windows
+        operating_system = platform.system()
+
         # The normal line to end a popen process is just...
         #   process.terminate()
-
-        # However this struggles to kill all "child"
-        # processes if we are using something like
-        # mpirun to run things in parallel. Instead,
-        # we use the os module to grab the parent id
-        # and send that the termination signal, which
-        # is also passed on to all child processes.
-        os.killpg(os.getpgid(process.pid), signal.SIGKILL)
-        # BUG: SIGTERM is the normal signal but I use SIGKILL to try to address
-        # permission errors. Also SIGKILL has not been tested outside of Linux.
+        # However this struggles to kill all "child" processes if we are using
+        # something like mpirun to run things in parallel. Instead, we use the
+        # os module to grab the parent id and send that the termination signal,
+        # which # is also passed on to all child processes.
+        # This command also doesn not work on windows, so I need to address this
+        # as well.
+        if operating_system != "Windows":
+            os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+        # note: SIGTERM is the normal signal but I use SIGKILL to try to address
+        # permission errors.
+        else:
+            process.terminate()
 
         # As an example of an alternative approach to killing a job, here is
         # what Custodian (Materials Project) tries when killing a VASP job
@@ -598,52 +580,6 @@ class SupervisedStagedShellTask(Task):
         # higher-level compatibility with the run method and SupervisedStagedTask
         # You should never need to call this method directly!
         pass
-
-    def postprocess(self, directory: str):
-        """
-        This method (if requested) compresses the directory and removes files from
-        it. The parameters that control it's behavior are set as attributes
-        or in the __init__. This includes:
-
-        - empty_directory_on_finish
-        - files_to_keep
-        - compress_output
-
-        You should never call this method directly unless you are debugging. This
-        is becuase postprocess() is normally called within the run() method.
-
-        Parameters
-        ----------
-        directory : str
-            The directory to run everything in.
-        """
-        # compress the output directory for storage if requested
-        if self.compress_output:
-            make_archive(
-                # full path to where to save the archive
-                # !!! By default I choose within the current directory and save
-                # !!! it as the same name of the directory. This will be a
-                # !!! overwritten if I run another stagedtask right after it.
-                # !!! Consider using a unique filename for each save and returning
-                # !!! it, or just using a generic simmate_checkpoint name.
-                base_name=os.path.join(
-                    os.path.abspath(directory), os.path.basename(directory)
-                ),
-                # format to use switch to gztar after testing
-                format="zip",
-                # full path to up tp directory that will be archived
-                root_directory=os.path.dirname(directory),
-                # directory within root_directory to archive
-                base_directory=os.path.basename(directory),
-            )
-
-        # In many cases, the user may want to delete everything inside the
-        # directory to save on filespace. Note that this will NOT delete the
-        # folder itself. This is because we want to leave the folder in case in
-        # case it's something like "SpyderWorkingDirectory" or the user
-        # wants to keep some folders/file (which they set in self.files_to_keep)
-        if self.empty_directory_on_finish:
-            empty_directory(directory, self.files_to_keep)
 
     @defaults_from_attrs("structure", "directory", "command")
     def run(
@@ -691,7 +627,6 @@ class SupervisedStagedShellTask(Task):
         # make sure a structure was given if it's required
         if not structure and self.requires_structure:
             raise StructureRequiredError("a structure is required as an input")
-
         # establish the working directory
         directory = get_directory(directory)
 
@@ -706,15 +641,18 @@ class SupervisedStagedShellTask(Task):
         # out from the calculation and is thus our "result".
         result = self.workup(directory)
 
-        # run the postprocess in case any zipping/archiving/cleanup was requested
-        self.postprocess(directory)
-
+        # if requested, compresses the directory to a zip file and then removes
+        # the directory.
+        if self.compress_output:
+            make_archive(directory)
         # Return our final information as a dictionary
         return {
             "result": result,
             "corrections": corrections,
             "directory": directory,
-            "prefect_flow_run_id": prefect.context.flow_run_id,
+            "prefect_flow_run_id": prefect.context.flow_run_id
+            if hasattr(prefect.context, "flow_run_id")
+            else None,  # when not ran within a prefect flow, there won't be an id
         }
 
     @classmethod

@@ -1,7 +1,35 @@
 > :warning: This module is entirely experimental and should not be used at the moment. Instead, users should configure their computational resources using Prefect.
 
-This is an SQL executor that intends to be a stripped down version of FireWorks. I really like how the database queue server makes it so you don't have to deal with firewalls -- any worker that can connect to the database will work just fine. This is a big step up over Dask, where I need to mess with ports and firewalls.
+This is an SQL executor that intends to be a stripped down version of FireWorks. I really like how the database scheduler makes it so you don't have to deal with firewalls -- any worker that can connect to the database will work just fine. This is a big step up over Dask, where I need to mess with ports and firewalls. Dask and Prefect also don't have workers that run one job and then exit.
 
-I really want to find an executor that's a happy-medium between Dask and a DatabaseServer executor. It needs to be fast, easily configured for a single computer or many distributed, and also have one-directional workers to avoid firewalls/porting setups. Executor libraries based on Rabbitmq or Reddis might be able to do this, but I'm not sure yet. So far, the setup of Rabbitmq and Reddis looks like more work than I would like -- it but may be worth investigating. So far the most popular package for this looks to be Celery, whereas a simple implementation for me could be django-carrot.
+Example usage:
 
-If monitoring is desired, I can amp this up to mimic Prefect's Cloud+Agent architecture. For example, there can be a table for Workers where every time the worker queries for tasks to run, it updates the table with a heartbeat. I'll likely need to do this (and more) at some point because if a worker shutdown for some reason, I need convience functions (or a maintence thread) to cleanup zombies and lost jobs. This would also allow for advanced monitoring (specifically number of workers, worker heartbeats, queued tasks, and more).
+```python
+from simmate.workflow_engine.execution.executor import SimmateExecutor
+
+executor = SimmateExecutor()
+
+# EXAMPLE 1
+future = executor.submit(sum, [4, 3, 2, 1])
+assert future.result() == 10
+
+# EXAMPLE 2
+import time
+
+
+def test():
+    futures = [executor.submit(time.sleep, 5) for n in range(10)]
+    return executor.wait(futures)
+
+
+test()
+
+# ----------------------------------------------------------------------------
+
+from simmate.workflow_engine.execution.worker import SimmateWorker
+
+worker = SimmateWorker(waittime_on_empty_queue=1)  # nitems_max=1
+worker.start()
+
+# ----------------------------------------------------------------------------
+```

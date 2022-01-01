@@ -12,48 +12,69 @@ import warnings
 
 import numpy
 
+from typing import List, Union
 
-def get_doc_from_readme(file):
-    
+
+def get_doc_from_readme(file: str) -> str:
+    """
+    Loads the docstring from a README.rst file in the same directory.
+
+    This is commonly used in __init__.py files because we like having our
+    documentation isolated (so that github renders it).
+
+    To use, simply pass the file property:
+
+    .. code-block:: python
+
+        from simmate.utilities import get_doc_from_readme
+
+        __doc__ = get_doc_from_readme(__file__)
+    """
+
     # We assume the file is in the same directory and named "README.rst"
-    file_directory = os.path.dirname(os.path.abspath(__file__))
+    file_directory = os.path.dirname(os.path.abspath(file))
     with open(
         os.path.join(file_directory, "README.rst"),
         encoding="utf-8",
     ) as doc_file:
         doc = doc_file.read()
-    
     return doc
 
 
-def get_directory(directory=None):
+def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
+    """
+    Initializes a directory.
 
-    # There are many cases where the user can choose their working directory
-    # for a given calculation, where they can pass a number of options in.
-    # This includes... None, a string, or a TemporaryDirectory instance.
-    # I consistently want to handle these inputs and thus make this utility.
-    # Based on the input, I do the following:
-    #   None --> I return the full path to a new folder inside python's
-    #            current working directory
-    #   TemporaryDirectory --> I return the full path to the given temp directory
-    #   str --> I make the directory if it doesnt exist and then return the path
+    There are many cases where the user can choose their working directory
+    for a calculation, and they may want to provide their directory in various
+    formats. This includes... None, a string, or a TemporaryDirectory instance.
+    Based on the input, this function does the following:
+      None --> returns the full path to a new folder inside python's
+                current working directory named "simmate-task-<randomID>"
+      TemporaryDirectory --> returns the full path to the given temp directory
+      str --> makes the directory if it doesnt exist and then returns the path
 
-    # Avoid overusing this! It should often only exist at the highest level
-    # for a Task! This means you'll want it in the Task.run() method and
-    # nowhere else.
+    Parameters
+    ----------
+    directory : Union[str,tempfile.TemporaryDirectory], optional
+        Either None, a path to the directory, or a tempdir. The default is None.
+
+    Returns
+    -------
+    directory : str
+        The path to the initialized directory
+    """
 
     # if no directory was provided, we create a new folder within the current
     # working directory. All of these folders are named randomly.
-    # BUG: we can't name these nicely (like simmate-task-001) because that will
+    # Note: we can't name these nicely (like simmate-task-001) because that will
     # introduce race conditions when making these folders in production.
-    # !!! What if I name this folder off of the workflow run id in the future?
     if not directory:
 
         # create a directory in the current working directory. Note, even though
         # we are creating a "TemporaryDirectory" here, this directory is never
         # actually deleted.
         directory = mkdtemp(prefix="simmate-task-", dir=os.getcwd())
-
     # if the user provided a tempdir, we want it's name
     elif isinstance(directory, TemporaryDirectory):
         directory = directory.name
@@ -69,8 +90,48 @@ def get_directory(directory=None):
     return directory
 
 
-def empty_directory(directory, files_to_keep=[]):
+def make_archive(directory: str):
+    """
+    Compresses the directory to a zip file of the same name. After compressing,
+    it then deletes the original directory.
 
+    Parameters
+    ----------
+    directory : str
+        Path to the folder that should be archived
+    """
+    # This wraps shutil.make_archive to change the default parameters. Normally,
+    # it writes the archive in the working directory, but we update it to use the
+    # the same directory that the folder being archived. The format is also set
+    # to zip
+    shutil.make_archive(
+        # By default I choose within the current directory and save
+        # it as the same name of the directory (+ zip ending)
+        base_name=os.path.join(os.path.abspath(directory)),
+        # format to use switch to gztar after testing
+        format="zip",
+        # full path to up tp directory that will be archived
+        root_dir=os.path.dirname(directory),
+        # directory within root_directory to archive
+        base_dir=os.path.basename(directory),
+    )
+    # now remove the directory we just archived
+    shutil.rmtree(directory)
+
+
+def empty_directory(directory: str, files_to_keep: List[str] = []):
+    """
+    Deletes all files and folders within a directory, except for those provided
+    to the files_to_keep parameter.
+
+    Parameters
+    ----------
+    directory : str
+        base directory that should be emptied
+    files_to_keep : List[str], optional
+        A list of file and folder names within the base directory that should
+        not be deleted. The default is [].
+    """
     # grab all of the files and folders inside the listed directory
     for filename in os.listdir(directory):
         if filename not in files_to_keep:
@@ -108,7 +169,6 @@ def get_chemical_subsystems(chemical_system):
             #   ex: ("Y", "C", "F") ---> "C-F-Y"
             subsystem = "-".join(sorted(combo))
             subsystems.append(subsystem)
-
     return subsystems
 
 
@@ -185,7 +245,6 @@ def estimate_radii(composition, radius_method="ionic"):
                     # variable as a Specie object right now.
                     radius = element.element.atomic_radius
                 radii.append(radius)
-
     # Some methods above might not give a radius for elements. For example,
     # N will not provide a Metallic radius. In cases like this, we should let
     # the user know.
@@ -194,7 +253,6 @@ def estimate_radii(composition, radius_method="ionic"):
             f"{radius_method} radius_method is not allowed for one or more"
             " of the elements in composition"
         )
-
     # this returns a list of radii, where the order is assumed the same as the
     # order of elements in composition
     return radii
@@ -248,7 +306,6 @@ def distance_matrix(composition, radius_method="ionic", packing_factor=0.5):
             limit = radius1 + radius2
             row.append(limit)
         matrix.append(row)
-
     # convert the result matrix of list matrix to a numpy array before returning
     element_distance_matrix = numpy.array(matrix)
     return element_distance_matrix
