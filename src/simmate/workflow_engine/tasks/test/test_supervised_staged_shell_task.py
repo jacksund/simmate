@@ -168,30 +168,3 @@ def test_s3task_8(tmpdir):
         monitor_freq=2,
     )
     pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)
-
-
-# For manual testing
-# %time test_shelltask()
-# %time test_supervisedstagedshelltask()
-
-# Notes on testing WorkflowRunTask...
-#
-# import prefect
-# from prefect import task, Flow, Parameter
-# from simmate.workflow_engine.tasks.workflow_task import WorkflowTask
-# @task
-# def hello_task1():
-#     logger = prefect.context.get("logger")
-#     logger.info("Hello world 1!")
-# with Flow("hello-flow") as flow1:
-#     hello_task1()
-# flowtask1 = WorkflowTask(flow1)
-# @task
-# def hello_task2():
-#     logger = prefect.context.get("logger")
-#     logger.info("Hello world 2!")
-# with Flow("hello-flow") as flow2:
-#     labels = Parameter("labels")
-#     flowtask1(labels=labels)
-#     hello_task2()
-# flow2.run(labels=["TEST"])

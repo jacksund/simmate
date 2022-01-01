@@ -20,6 +20,12 @@ class Workflow(PrefectFlow):
     # common utilities and pre-submit tasks. This allows me to register a
     # calculation along with submitting a workflow to the cloud
 
+    # In many ETL workflows, we may also want the result of the some terminating
+    # task directly. This would save us from having to go find the result in
+    # the database. So by setting this, we are able get access a specific task's
+    # result -- directly as a python object(s). This is optional though.
+    result_task = None
+
     def run_cloud(
         self,
         labels: List[str] = [],
@@ -103,7 +109,6 @@ class Workflow(PrefectFlow):
         if wait_for_run:
             flow_run_view = self.wait_for_flow_run(flow_run_id)
             # return flow_run_view # !!! Should I return this instead?
-
         # return the flow_run_id for the user
         return flow_run_id
 

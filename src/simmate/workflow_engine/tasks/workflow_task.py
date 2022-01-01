@@ -212,7 +212,7 @@ class WorkflowTask(Task):
             # workflows as a task, we often want to pass along extra information
             # beyond just some "state". So return_result is True, we return the
             # result of a specific task (determined by flow.result_task).
-            if self.return_result:
+            if self.return_result and self.workflow.result_task:
                 # The prefect api for this is ugly... nothing I can really do
                 # about it: https://docs.prefect.io/core/concepts/results.html
                 return state.result[self.workflow.result_task].result
