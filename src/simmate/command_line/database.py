@@ -10,17 +10,22 @@ def database():
 
 
 @database.command()
-def reset():
+@click.option(
+    "--confirm-delete",
+    is_flag=True,
+    help="automatically confirms that you want to delete your existing database",
+)
+def reset(confirm_delete):
     """Removes any existing data and sets up a clean database."""
 
     # make sure the user knows what they are doing and actually wants to continue
-    click.confirm(
-        "Note that this deletes your current database and cannot be undone. "
-        "We highly recommend you make a copy of your database before doing this. Do"
-        " you still want to continue?",
-        abort=True,
-    )
-
+    if not confirm_delete:
+        click.confirm(
+            "Note that this deletes your current database and cannot be undone. "
+            "We highly recommend you make a copy of your database before doing this. "
+            "Do you still want to continue?",
+            abort=True,
+        )
     # We can now proceed with reseting the database
     click.echo("Removing database and rebuilding...")
 
