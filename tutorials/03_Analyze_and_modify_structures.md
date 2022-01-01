@@ -1,6 +1,6 @@
 # Analyze and modify structures
 
-In this tutorial, you will learn about coding in python and about the most important class in Simmate: the `Structure` class.
+In this tutorial, you will learn about coding in python and the most important class in Simmate: the `Structure` class.
 
 1. [The quick tutorial](#the-quick-tutorial)
 2. [The full tutorial](#the-full-tutorial)

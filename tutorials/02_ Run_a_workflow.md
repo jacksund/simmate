@@ -9,7 +9,7 @@ In this tutorial, you will use the command line to view all available workflows 
     - [Making a structure file for practice](#making-a-structure-file-for-practice)
     - [Viewing available workflows](#viewing-available-workflows)
     - [Viewing a workflow's settings and inputs](#viewing-a-workflows-settings-and-inputs)
-    - [Finally running our workflow!](#finally-running-our-workflow)
+    - [Finally running your workflow!](#finally-running-our-workflow)
     - [Viewing results in the web UI](#viewing-results-in-the-web-ui) *(this feature is not ready yet!)*
 
 > :warning: we assume you have VASP installed and that the `vasp` command is in the available path. In the future, we hope to update this tutorial with a workflow that doesn't require any extra installations. Until then, we apologize for the inconvenience. :cry:
@@ -35,7 +35,7 @@ direct
 3. View a list of all workflows available with `simmate workflows list-all`
 4. View the settings used for the `energy_mit` workflow with `simmate workflows show-config energy_mit`
 5. View the input files with `simmate workflows setup-only energy_mit POSCAR`
-7. Run a workflow with `simmate workflows run energy_mit POSCAR` (run = configure + schedule + execute + save)
+6. Run a workflow with `simmate workflows run energy_mit POSCAR` (run = configure + schedule + execute + save)
 
 > :warning: The website interface isn't ready yet, so you'll have to manually go through the files to see the results. You can still move on to the other tutorials, which will show you how to see the results with python.
 
@@ -79,7 +79,7 @@ Every time you run the command `simmate database reset`, you should be aware tha
 So where is the database stored?  After running `simmate database reset`, you'll find it in a file named `~/.simmate/database.sqlite3`. However, finding this may be tricky for beginners *(note, if you struggle here, you can simply move on to the next section. don't worry.)*. Here are some tips to help you:
 1. remember from tutorial 1 that `~` is short for our home directory -- typically something like `/home/jacksund/` or `C:\Users\jacksund`. 
 2. the period in `.simmate` means that the simmate folder is hidden. It won't show up in your file viewer unless you have "show hidden files" turned on in your File Explorer (on Windows, check "Hidden Items" under the "View" tab). 
-3. we want to get in the habbit of viewing file extensions, so make sure you also have "show file name extensions" enabled. Then you'll see a file named `database.sqlite3` instead of just `database`.
+3. we want to get in the habit of viewing file extensions, so make sure you also have "show file name extensions" enabled. Then you'll see a file named `database.sqlite3` instead of just `database`.
 
 You won't be able to double-click this file. Just like how you need Excel to open and read Excel (.xlsx) files, we need a separate program to read database (.sqlite3) files. We'll use Simmate to do this later on.
 
