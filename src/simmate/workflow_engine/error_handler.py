@@ -8,7 +8,7 @@ import os
 class ErrorHandler(ABC):
     """
     Abstract base class for an ErrorHandler. These handlers should be used in
-    combination with SupervisedStagedShell tasks.
+    combination with SupervisedStagedShellTasks.
     """
 
     # This class property indicates whether the error handler is a monitor,
@@ -34,8 +34,11 @@ class ErrorHandler(ABC):
 
     # NOTE: if you are using the default check() method (shown below), then you'll
     # need two extra attributes: filename_to_check and possible_error_messages.
-    # filename_to_check --> a string of the filename
-    # possible_error_messages --> a list of messages to find in the file
+    # This should be a string of the filename (relative path to main directory)
+    filename_to_check = None
+    # And then give a list of messages to find in the file. As soon as one is
+    # found, an error is raised
+    possible_error_messages = None
 
     def check(self, directory: str) -> bool:
         """
@@ -60,6 +63,14 @@ class ErrorHandler(ABC):
         error. It then returns True if the errors is found and False otherwise.
         """
 
+        # make sure filename_to_check and possible_error_messages have been set
+        # if they are using the default method.
+        if not self.filename_to_check or not self.possible_error_messages:
+            raise Exception(
+                "ErrorHandler's default check() method requires filename_to_check "
+                "and possible_error_messages attributes to be set. Either set "
+                "these or provide an updated check() method."
+            )
         # establish the full path to the output file
         filename = os.path.join(directory, self.filename_to_check)
 
@@ -69,7 +80,6 @@ class ErrorHandler(ABC):
             # read the file content and then close it
             with open(filename) as file:
                 file_text = file.read()
-
             # Check if each error is present
             for message in self.possible_error_messages:
                 # if the error is NOT present, find() returns a -1
@@ -77,7 +87,6 @@ class ErrorHandler(ABC):
                     # If one of the messages is found, we immediately return that
                     # the error has been found.
                     return True
-
         # If the file doesn't exist, then we are not seeing any error yet. This line
         # will also be reached if no error was found above.
         return False

@@ -39,19 +39,19 @@ class DummyTask(S3Task):
 
 
 class AlwaysPassesHandler(ErrorHandler):
-    def check(self, dir):
+    def check(self, directory):
         return None
 
-    def correct(self, dir):
+    def correct(self, directory):
         # this should never be entered since check() never returns an error
         raise Exception
 
 
 class AlwaysFailsHandler(ErrorHandler):
-    def check(self, dir):
-        return "ExampleError"
+    def check(self, directory):
+        return True
 
-    def correct(self, dir):
+    def correct(self, directory):
         return "ExampleCorrection"
 
 
