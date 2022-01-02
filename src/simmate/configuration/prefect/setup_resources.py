@@ -6,7 +6,7 @@ from pathlib import Path
 import yaml
 
 # This must be done BEFORE importing any other dask modules
-from simmate.configuration import dask # loads default cluster settings
+from simmate.configuration import dask  # loads default cluster settings
 
 from dask.distributed import LocalCluster
 import dask_jobqueue

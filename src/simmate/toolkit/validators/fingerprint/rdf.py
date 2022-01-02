@@ -95,4 +95,3 @@ class RDFFingerprint:
         # If we make it through all of the cutoff list, that means we exceeded the maximum attempts allowed
         # In this case, we don't return return an object from the on_fail list
         return False
-

@@ -105,7 +105,7 @@ images = idpp_solver.run()
 # you can write these images to files
 # Note: this list of images include the start/end structures as well
 for i, image in enumerate(images):
-    image.to("poscar", f"POSCAR_{i}") 
+    image.to("poscar", f"POSCAR_{i}")
 
 # Take the two optimized endpoints and make images from them.
 # Note that directory here is the base directory where we'll find the 00 and

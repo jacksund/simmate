@@ -12,9 +12,9 @@ from simmate.database.base_data_types import (
     Spacegroup,
 )
 
-# TODO: 
+# TODO:
 # Explore polymorphic relations instead of a JSON dictionary.
-# Making relationships to different tables makes things difficult to use, so 
+# Making relationships to different tables makes things difficult to use, so
 # these columns are just standalone.
 #
 # This is will be very important for "source" and "parent_nested_calculations"
@@ -45,6 +45,7 @@ from simmate.database.base_data_types import (
 # multiple parents (and therefore multiple seeds too). An example of this
 # is the HereditaryMutation.
 
+
 class Structure(DatabaseTable):
 
     """Base Info"""
@@ -74,7 +75,7 @@ class Structure(DatabaseTable):
     # EXPERIMENTAL
     # Where this calculation plays a role within a "nested" workflow calculation.
     # Becuase this structure can be reused by multiple workflows, we make this
-    # a list of source-like objects. For example, a relaxation could be part of 
+    # a list of source-like objects. For example, a relaxation could be part of
     # a series of relaxations (like in StagedRelaxation) or it can be an initial
     # step of a BandStructure calculation.
     # parent_nested_calculations = table_column.JSONField(blank=True, null=True)

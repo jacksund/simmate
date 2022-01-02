@@ -22,7 +22,7 @@ def test_workflowtask_1():
 
     # convert to a workflow task
     flowtask_1a = WorkflowTask(flow_1)
-    
+
     # also try converting by the method
     flowtask_1b = flow_1.to_workflow_task()
 

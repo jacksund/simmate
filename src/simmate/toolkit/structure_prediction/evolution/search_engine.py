@@ -83,7 +83,7 @@ class SearchEngine:
     If you start a separate terminal from where a search is running, you can
     actually use this table to view results WHILE the search is still running!
 
-    You can also access the search results from your search_engine object. So 
+    You can also access the search results from your search_engine object. So
     once your search is finished or stopped, you can do:
 
     .. code-block:: python
@@ -92,7 +92,7 @@ class SearchEngine:
 
     To better understand how to view/analyze results, please read the documentation
     for the SearchResults class.
-    
+
     **WARNING** This search engine assumes you have properly configured
     Prefect Cloud and a cloud database backend (e.g. Postgres). In the future,
     we will accommodate local runs and other backends.

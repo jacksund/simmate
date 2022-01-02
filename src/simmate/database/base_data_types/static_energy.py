@@ -43,7 +43,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     ):
         # because this is a combination of tables, I need to build the data for
         # each and then feed all the results into this class
-        
+
         # Note prefect_flow_run_id should be given as a kwarg or this class will
         # fail to initialize with the Calculation mixin
 

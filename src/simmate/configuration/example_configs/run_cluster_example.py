@@ -18,7 +18,7 @@ cluster = SLURMCluster(
     processes=1,
     memory="4GB",
     # REQUIRED: Make sure you preload this script!
-    extra=["--preload simmate.configuration.dask.connect_to_database"],  
+    extra=["--preload simmate.configuration.dask.connect_to_database"],
     #
     #
     # SLURM Job Options

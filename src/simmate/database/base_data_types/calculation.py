@@ -190,12 +190,12 @@ class NestedCalculation(Calculation):
         return NewClass
 
     def update_calculation(self):
-        
+
         raise Exception(
             "NestedCalculation datatable is experimental so this method doesn't "
             "work yet."
         )
-        
+
         # BUG: This assumes we ran all calculations within the same directory,
         # which isn't true in all cases.
         for child_calc_table in self.child_calculation_tables:
