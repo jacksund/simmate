@@ -1,0 +1,32 @@
+
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Run linting and tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: psf/black@stable
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.10
+    - name: Install dependencies and Simmate
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+    - name: Run unmarked tests only
+      run: |
+        pytest
+    - name: Run no_django_setup marked tests
+      run: |
+        pytest -m no_django_setup -p no:django
