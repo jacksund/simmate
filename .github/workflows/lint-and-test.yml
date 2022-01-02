@@ -1,5 +1,5 @@
 
-# Rhis workflow will check for Black formating, install Python dependencies using Anaconda, and then run tests with a single version of Python.
+# This workflow will check for Black formating, install Python dependencies using Anaconda, and then run tests with a single version of Python.
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Run linting and tests with Anaconda
@@ -33,5 +33,4 @@ jobs:
         pytest
     - name: Run no_django_setup marked tests
       run: |
-        which pytest
-        sudo pytest -m no_django_setup -p no:django
+        sudo /usr/share/miniconda/bin/pytest -m no_django_setup -p no:django
