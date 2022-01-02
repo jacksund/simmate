@@ -33,4 +33,4 @@ jobs:
         pytest
     - name: Run no_django_setup marked tests
       run: |
-        sudo /usr/share/miniconda/bin/pytest -m no_django_setup -p no:django
+        sudo -u root /usr/share/miniconda/bin/pytest -m no_django_setup -p no:django
