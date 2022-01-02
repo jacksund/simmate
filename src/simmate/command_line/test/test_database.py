@@ -2,11 +2,14 @@
 
 import os
 
+import pytest
 from click.testing import CliRunner
+
 from simmate.command_line.database import database
 
 
-def test_database():
+@pytest.mark.no_django_setup
+def test_database_reset():
     # make the dummy terminal
     runner = CliRunner()
 
@@ -17,6 +20,12 @@ def test_database():
     # update the database
     result = runner.invoke(database, ["update"])
     assert result.exit_code == 0
+
+
+@pytest.mark.django_db
+def test_database_dump_and_load():
+    # make the dummy terminal
+    runner = CliRunner()
 
     # dump the database to json
     result = runner.invoke(database, ["dumpdata"])

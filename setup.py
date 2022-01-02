@@ -116,6 +116,7 @@ setup(
         #
         # For development and testing
         "pytest>=6.2.5",
+        "pytest-django>=4.5.2",
         "black>=21.12b0",
         #
         # These are from the MP stack and I want to phase them out over time
