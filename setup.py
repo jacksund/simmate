@@ -113,6 +113,7 @@ setup(
         "pyyaml>=6.0",  # for yaml configuration files
         "plotly>=5.4.0",  # for interactive plots and visualization
         "tqdm>=4.62.3",  # for monitoring progress of long for-loops
+        "fabric>=2.6.0",  # for remote ssh connections
         #
         # For development and testing
         "pytest>=6.2.5",
