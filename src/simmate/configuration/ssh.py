@@ -5,6 +5,10 @@ import time
 
 from fabric import Connection
 
+# BUG: This class is currently broken because Spyder needs to use a jump-host
+# in order to connect with the batch-job process.
+# ssh -J WarrenLab@warwulf.net WarrenLab@c18
+# see https://github.com/spyder-ide/spyder-kernels/issues/359
 
 class SSHConnection(Connection):
     """
