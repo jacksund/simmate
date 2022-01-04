@@ -166,7 +166,7 @@ nacl_lat.matrix
 nacl_lat.beta
 ```
 
-We can apply the same idea to other `Structure` sub-classes, such as `Structure.composition`.  This allows us to see properties related to composition:
+We can apply the same idea to other `Structure` sub-classes, such as `Structure.composition`. This allows us to see properties related to composition:
 ```
 nacl_compo = nacl_structure.composition
 nacl_compo.reduced_formula
