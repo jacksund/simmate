@@ -1,6 +1,6 @@
 # Run a workflow
 
-In this tutorial, you will use the command line to view all available workflows and their settings. You'll then run a workflow and view the results on a local webserver.
+In this tutorial, you will use the command line to view all available workflows and their settings. Beginners will also be introduced to remote terminals (SSH) and jobs queue (such as SLURM).
 
 1. [The quick tutorial](#the-quick-tutorial)
 2. [The full tutorial](#the-full-tutorial)
@@ -10,13 +10,13 @@ In this tutorial, you will use the command line to view all available workflows 
     - [Viewing available workflows](#viewing-available-workflows)
     - [Viewing a workflow's settings and inputs](#viewing-a-workflows-settings-and-inputs)
     - [Finally running your workflow!](#finally-running-our-workflow)
-    - [Viewing results in the web UI](#viewing-results-in-the-web-ui) *(this feature is not ready yet!)*
-
-> :warning: we assume you have VASP installed and that the `vasp` command is in the available path. In the future, we hope to update this tutorial with a workflow that doesn't require any extra installations. Until then, we apologize for the inconvenience. :cry:
+    - [Switching to a remote cluster](#switching-to-a-remote-cluster)
 
 <br/><br/>
 
 # The quick tutorial
+
+> :warning: we assume you have VASP installed and that the `vasp` command is in the available path. In the future, we hope to update this tutorial with a workflow that doesn't require any extra installations. Until then, we apologize for the inconvenience. :cry:
 
 1. Before running any workflows, we must initialize our Simmate database with `simmate databate reset`
 2. To practice calculating, make structure file for tablesalt (NaCl). Name it `POSCAR`, where the contents are...
@@ -34,14 +34,16 @@ direct
 ```
 3. View a list of all workflows available with `simmate workflows list-all`
 4. View the settings used for the `energy_mit` workflow with `simmate workflows show-config energy_mit`
-5. View the input files with `simmate workflows setup-only energy_mit POSCAR`
-6. Run a workflow with `simmate workflows run energy_mit POSCAR` (run = configure + schedule + execute + save)
-
-> :warning: The website interface isn't ready yet, so you'll have to manually go through the files to see the results. You can still move on to the other tutorials, which will show you how to see the results with python.
+5. Copy and paste VASP POTCAR files to the folder ~/.simmate/vasp/Potentials. This folder will have the potentials that came with VASP -- and with their original folder+file names. For example there would be an LDA folder that contains subfolders potpaw_LDA, potpaw_LDA.52, potpaw_LDA.54, and so on. Make sure these folders aren't compressed (so not *.zip files).
+6. View the input files with `simmate workflows setup-only energy_mit POSCAR`
+7. Run a workflow with `simmate workflows run energy_mit POSCAR` (run = configure + schedule + execute + save)
+8. For now, you can manually go through the files to see the results. We will cover how to access your database in a later tutorial (05).
 
 <br/><br/>
 
 # The full tutorial
+
+> :bulb: For beginners, you will start this tutorial on your local computer, even if you don't have VASP installed. By the end of the tutorial, you will have switched to a computer with VASP (likely a remote university or federal supercomputer).
 
 <br/> <!-- add empty line -->
 
@@ -178,6 +180,10 @@ To view a workflow's configuration before using it, we type the command `simmate
 
 Next, look at a more advanced calculation. Run the command `simmate workflows show-config energy_mit`. Here, you'll see that some INCAR settings rely on composition and that we have a list of error handlers to help ensure that the calculation finishes successfully.
 
+> :warning: For this next step, you need to have VASP POTCARs available, which our team is not allowed to distribute. You can either (1) configure them now, or (2) skip to the next section (we will address the installation of VASP in the "Switching to a remote cluster" section below. 
+
+> (from the section below) To "configure" POTCARs with Simmate, we need to only copy/paste them to the folder ~/.simmate/vasp/Potentials. This is where Simmate will look for them. This folder will have the potentials that came with VASP -- and with their original folder+file names. For example there would be an LDA folder that contains subfolders potpaw_LDA, potpaw_LDA.52, potpaw_LDA.54, and so on. Make sure these folders aren't compressed (so not *.zip files).
+
 Now, let's go one step further and feed a specific structure (the POSCAR we just made) into a specific workflow (energy_MIT). To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can type `cd Desktop` to change your active folder to your Desktop. Then run the command `simmate workflows setup-only energy_mit POSCAR`. You'll see a new folder created named `MIT_Static_Energy_inputs`. When you open it, you'll see all the files that Simmate made for VASP to use. This is useful when you're an advanced user who wants to alter these files before running VASP manually -- this could happen when you want to test new workflows or unique systems.
 
 For absolute beginners, you don't immediately need to understand these files, but they will eventually be important for understanding the scientific limitations of your results or for running your own custom calculations. Whether you use [VASP](https://www.vasp.at/wiki/index.php/Category:Tutorials), [ABINIT](https://docs.abinit.org/tutorial/), or another program, be sure to go through their tutorials, rather than always depending on Simmate to run the program for you.  Until you reach that point, we'll have Simmate do it all for us!
@@ -186,7 +192,9 @@ For absolute beginners, you don't immediately need to understand these files, bu
 
 ## Finally running our workflow!
 
-The default Simmate settings will run everything immediately and locally on your desktop, as long as you have installed VASP or a similar program. When running the workflow, it will create a new folder, write the inputs in it, run the calculation, and save the results to your database.
+The default Simmate settings will run everything immediately and locally on your desktop. When running the workflow, it will create a new folder, write the inputs in it, run the calculation, and save the results to your database.
+
+> :warning: Unless you have both (1) your POTCARs configured and (2) VASP installed on your local computer, these next commands will fail. **That is okay!** Let's go ahead and try running these commands anyways. It will be helpful to see how Simmate workflows fail when VASP is not configured properly. If you didn't configure your POTCARs, you'll see an error that states `FileNotFoundError: [Errno 2] No such file or directory: '/example/path/to/POTCAR'`. If you don't have VASP installed, you'll see an error stating that the `vasp` command isn't known (such as `vasp: not found` on Linux). The next section will help you address these errors.
 
 The command to do this with our POSCAR and energy_mit workflow is `simmate workflows run energy_mit POSCAR`. By default, Simmate uses the command `vasp > vasp.out` and creates a new `simmate-task` folder with a unique identifier (ex: `simmate-task-j8djk3mn8`).
 
@@ -201,6 +209,67 @@ If any errors come up, please let our team know by [posting a question](https://
 
 <br/> <!-- add empty line -->
 
-## Viewing results in the web UI
+## Switching to a remote cluster
 
-> :warning: The website interface isn't ready yet, so you'll have to manually go through the files to see the results. You can still move on to the other tutorials, which will show you how to see the results with python as well.
+> :warning: This section can be extremely difficult for beginners. If you can, try to sit down with an experienced user or someone from your IT department as you work through it. Don't get discouraged if this section takes your more than an hour -- it's a lot to learn!
+
+Thus far, you've been running Simmate on your local desktop or laptop, but we saw in the two previous sections, that we actually need VASP (which needs to be on Linux) for Simmate's workflows. VASP is a very popular software for running DFT calculations, but our team can't install it for you because VASP is commercially licensed (i.e. you need to [buy it from their team](https://www.vasp.at/), which we are not affiliated with). Simmate is working to switch to another DFT software -- specifically one that is free/open-source, that can be preinstalled for you, and that you can use on Windows+Mac+Linux. Until Simmate reaches this milestone, you'll have to use VASP. We apologize for the inconvenience.
+
+Once you have a VASP license, the next step is installing it somewhere -- likely a University or Federal supercomputer. Many of these supercomputers (aka "high performance computing (HPC) clusters") will have VASP already installed. Simply contact your IT team and they can get you started -- simply ask your IT team to install VASP for you (if it's not there already).. For example, the University of North Carolina (where Simmate is developed) has the [LongLeaf](https://its.unc.edu/research-computing/longleaf-cluster/) cluster and guides on making an account. 
+
+Signing into a remote cluster is typically done through SSH. For example, to sign in to the LongLeaf cluster, you would run the following command on your local terminal/command-line:
+
+```
+ssh my_username@longleaf.unc.edu
+```
+
+After giving your password, you are now using a terminal on the remote supercomputer! Try running the command `pwd` ("print working directory") to show that your terminal is indeed running commands on the remote cluster, not your desktop.
+
+To load VASP, you typically need to run the command `module load vasp` or even `module load vasp/5.4.4` Now try the command `vasp`. If everything was installed correctly, you won't get the `vasp: command not found` anymore!
+
+If you see `(base)` at the start of your command-line, Anaconda is already installed! If not, ask your IT team how they want you install it (typically it's by using [miniconda](https://docs.conda.io/en/latest/miniconda.html) which is just anaconda without the userinterface). With Anaconda set up, you can create your environment and install Simmate just like we did in tutorial 01:
+
+```
+conda create -n my_env -c conda-forge python=3.8 simmate
+conda activate my_env
+
+# also, don't forget to initialize your database on this new installation
+simmate database reset
+```
+
+We now have Simmate and VASP installed. Next, we need to tell Simmate where the VASP POTCARs are located. If you're unsure where these files are, you can ask your IT team where VASP's installation files are. These installation files will include the POTCARs in the Potentials folder.
+
+To "configure" POTCARs with Simmate, copy/paste the Potentials folder into the ~/.simmate/vasp/Potentials. This is where Simmate will look for them. This folder will have the potentials that came with VASP -- and with their original folder+file names. For example there would be an LDA folder that contains subfolders potpaw_LDA, potpaw_LDA.52, potpaw_LDA.54, and so on. Make sure these folders aren't compressed (so not *.zip files).
+
+> :bulb: It can be diffult in the command line to move files around or even transfer them back and forth from your local computer to the supercomputer. It's much easier with a program like [FileZilla](https://filezilla-project.org/), [MobaXTerm](https://mobaxterm.mobatek.net/), or another file transfer window. We recommend FileZilla, but it's entirely optional and up to you.
+
+You can check that POTCARs are configured properly with the command `simmate workflows setup-only energy_mit POSCAR` (using the POSCAR from earlier in this tutorial).
+
+Next, let's submit a Simmate workflow on our cluster! In the previous section, we called `simmate workflows run ...` directly in our terminal, but this should NEVER be done on a supercomputer. Instead we should submit the workflow to their cluster's job queue. Typically, supercomputers use SLURM or PBS to submit jobs. 
+
+> :warning: PBS has very similar commands and setup. Again, talk with your IT team to get you started.
+
+For example, UNC's longleaf cluster uses SLURM. To submit, we would make a file named `submit.sh` with the contents:
+
+```
+#! /bin/sh
+
+#SBATCH --job-name=my_example_job
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4GB
+#SBATCH --time=01:00:00
+#SBATCH --partition=general
+#SBATCH --output=slurm.out 
+#SBATCH --mail-type=ALL 
+#SBATCH --mail-user=my_username@live.unc.edu
+
+simmate workflows run energy_mit POSCAR
+```
+
+Make sure you have VASP and your correct conda enviornment loaded. Then submit your job with `sbatch submit.sh`.
+
+You've now submitted a Simmate workflow to a remote cluster :partying_face: :partying_face: :partying_face: !!! 
+
+Be sure to go back through this tutorial a few times before moving on. Submitting remote jobs can be very tedious but it's important to understand. Advanced features of Simmate will let you skip a lot of this work down the road, but that won't happen until tutorial 07.

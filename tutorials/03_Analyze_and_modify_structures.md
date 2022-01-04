@@ -92,6 +92,8 @@ There are many more features available! If you can't find what you're looking fo
 
 # The full tutorial
 
+> :bulb: This entire tutorial should be ran on your local computer. Just be aware that the command `workflow.run` will fail on your local computer (for reasons discussed in tutorial 02).
+
 <br/> <!-- add empty line -->
 
 ## An introduction to Spyder

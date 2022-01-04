@@ -20,6 +20,8 @@ For advanced users, we have README.rst files in each of our python modules -- so
 
 # The full tutorial
 
+> :bulb: This entire tutorial should be ran on your local computer because we will be using Spyder.
+
 <br/>
 
 ## Getting help through Spyder

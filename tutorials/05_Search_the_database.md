@@ -53,6 +53,8 @@ dataframe = first_150_rows.to_dataframe()
 
 # The full tutorial
 
+> :bulb: This entire tutorial should be ran on your local computer because we will be using Spyder. To use results from your remote calculations, you can copy/paste your database file from your remote computer to where our local database one should be (~/.simmate/database.sqlite3). Note, copy/pasting will go away when we switch to a cloud database in the next tutorial.
+
 <br/>
 
 ## Python Inheritance with Datatables

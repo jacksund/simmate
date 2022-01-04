@@ -63,7 +63,9 @@ In reality, different versions of packages can also conflict in addition to pyth
 
 ## Installing Anaconda and a first look
 
-You don't need to make an account on their website. Just use their [their download page](https://www.anaconda.com/products/individual-d) and install Anaconda (individual edition). Use all of the default options when installing and open up the application when you're done! The application will be called "Anaconda Navigator".
+For this tutorial, we'll be installing Anaconda to your local desktop/laptop. Even if you'll be using a university supercomputer (or some other remote resource) to run workflows, stick to your local computer. We'll switch over to your remote supercomputer near the end of tutorial 02.
+
+To install Anaconda, you don't need to make an account on their website. Just use their [their download page](https://www.anaconda.com/products/individual-d) and install Anaconda (individual edition). Use all of the default options when installing and open up the application when you're done! The application will be called "Anaconda Navigator".
 
 On the homescreen, you'll see a bunch of programs listed out for you, such as Orange3, Jupyter Notebook, Spyder, and others. These programs are for you to write your own python code. Just like how there is Microsoft Word, Google Docs, LibreOffice, and others for writing papers, all of these programs are different ways to write Python. Our prefered program is [Spyder](https://www.spyder-ide.org/), which we will walk through in tutorial 3.
 
