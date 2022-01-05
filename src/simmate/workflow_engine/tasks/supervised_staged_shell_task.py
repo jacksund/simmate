@@ -39,7 +39,7 @@ class SupervisedStagedShellTask(Task):
     Let's breakdown what this means...
 
     A *shell* command is a single call to some external program. For example,
-    VASP requires that we call the "vasp > vasp.out" command in order to run a
+    VASP requires that we call the "vasp_std > vasp.out" command in order to run a
     calculation. We consider calling external programs a *staged* task made
     up of three steps:
 

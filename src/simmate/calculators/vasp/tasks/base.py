@@ -50,7 +50,7 @@ class VaspTask(SSSTask):
 
     # The command to call vasp in the current directory
     # TODO: add support for grabbing a user-set default from their configuration
-    command = "vasp > vasp.out"
+    command = "vasp_std > vasp.out"
 
     # set the default vasp settings from a dictionary. This is the one thing
     # you *must* set when subclassing VaspTask. An example is:

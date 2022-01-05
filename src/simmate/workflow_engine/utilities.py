@@ -45,7 +45,7 @@ def s3task_to_workflow(
 
     with Workflow(name) as workflow:
         structure = Parameter("structure")
-        command = Parameter("command", default="vasp > vasp.out")
+        command = Parameter("command", default="vasp_std > vasp.out")
         source = Parameter("source", default=None)
         directory = Parameter("directory", default=None)
         use_previous_directory = Parameter("use_previous_directory", default=False)

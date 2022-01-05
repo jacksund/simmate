@@ -196,11 +196,11 @@ The default Simmate settings will run everything immediately and locally on your
 
 > :warning: Unless you have both (1) your POTCARs configured and (2) VASP installed on your local computer, these next commands will fail. **That is okay!** Let's go ahead and try running these commands anyways. It will be helpful to see how Simmate workflows fail when VASP is not configured properly. If you didn't configure your POTCARs, you'll see an error that states `FileNotFoundError: [Errno 2] No such file or directory: '/example/path/to/POTCAR'`. If you don't have VASP installed, you'll see an error stating that the `vasp` command isn't known (such as `vasp: not found` on Linux). The next section will help you address these errors.
 
-The command to do this with our POSCAR and energy_mit workflow is `simmate workflows run energy_mit POSCAR`. By default, Simmate uses the command `vasp > vasp.out` and creates a new `simmate-task` folder with a unique identifier (ex: `simmate-task-j8djk3mn8`).
+The command to do this with our POSCAR and energy_mit workflow is `simmate workflows run energy_mit POSCAR`. By default, Simmate uses the command `vasp_std > vasp.out` and creates a new `simmate-task` folder with a unique identifier (ex: `simmate-task-j8djk3mn8`).
 
 Alternatively, we can change our folder name as well as the command used to run VASP. For example, we can update our command to this:
 ```
-simmate workflows run energy_mit POSCAR -c "mpirun -n 4 vasp > vasp.out" -d my_custom_folder
+simmate workflows run energy_mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out" -d my_custom_folder
 ```
 
 To see all the options for running workflows, type `simmate workflows run --help`.  

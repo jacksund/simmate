@@ -42,7 +42,7 @@ static_task_04 = energy_quality04.to_workflow_task()
 with Workflow("Staged Relaxation") as workflow:
 
     structure = Parameter("structure")
-    command = Parameter("command", default="vasp > vasp.out")
+    command = Parameter("command", default="vasp_std > vasp.out")
 
     # Our first relaxation is directly from our inputs. The remaining one
     # pass along results

@@ -92,7 +92,7 @@ with Flow("NEB Analysis") as workflow:
     # These are the input parameters for the overall workflow
     # images = Parameter("images")
     # directory = Parameter("directory", default=None)
-    vasp_cmd = Parameter("vasp_command", default="vasp > vasp.out")
+    vasp_cmd = Parameter("vasp_command", default="vasp_std > vasp.out")
 
     # grab our start/end structures of a target supercell size
     start_structure, images, end_structure = load_images_from_files()
