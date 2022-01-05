@@ -48,7 +48,7 @@ with Flow("MIT Relaxation") as workflow:
 
     # These are the input parameters for the overall workflow
     structure = Parameter("structure")
-    vasp_command = Parameter("vasp_command", default="vasp > vasp.out")
+    vasp_command = Parameter("vasp_command", default="vasp_std > vasp.out")
 
     # load the structure to a pymatgen object
     structure_pmg = load_input(structure)

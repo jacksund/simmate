@@ -127,7 +127,7 @@ def setup_only(workflow_name, filename, directory):
     "--command",
     "-c",
     default=None,
-    help="the command used to call call the calculator (e.g. 'mpirun -n 12 vasp > vasp.out')",
+    help="the command used to call call the calculator (e.g. 'mpirun -n 12 vasp_std > vasp.out')",
 )
 @click.option(
     "--directory",
@@ -169,7 +169,7 @@ def run(workflow_name, filename, command, directory):
     "--command",
     "-c",
     default=None,
-    help="the command used to call call the calculator (e.g. 'mpirun -n 12 vasp > vasp.out')",
+    help="the command used to call call the calculator (e.g. 'mpirun -n 12 vasp_std > vasp.out')",
 )
 @click.option(
     "--directory",

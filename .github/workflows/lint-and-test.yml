@@ -9,6 +9,9 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    # Runs the schedule every day at 5:30 and at 17:30 UTC
+    - cron:  '30 5,17 * * *'
 
 jobs:
   build-linux:
@@ -31,7 +34,8 @@ jobs:
     - name: Run unmarked tests only
       run: |
         pytest
-# I can figure out permissions to run these tests... I skip them for now and just run locally.
+# I can't figure out permissions to run these tests... so I skip them for now 
+# and just run them locally.
 #    - name: Run no_django_setup marked tests
 #     run: |
 #       sudo /usr/share/miniconda/bin/pytest -m no_django_setup -p no:django

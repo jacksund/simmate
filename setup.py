@@ -137,6 +137,7 @@ setup(
         # "graphviz==1.7",  # python-graphviz on conda. for viewing prefect flows
         # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
         # "scikit-learn>=1.0.1",  # for machine-learning
+        # "fabric>=2.6.0",  # for remote ssh connections
     ],
     # Register command line interface
     entry_points={

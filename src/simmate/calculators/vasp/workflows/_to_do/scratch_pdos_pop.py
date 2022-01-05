@@ -153,7 +153,7 @@ print("Running vasp...")
 # run vasp
 import subprocess
 
-subprocess.run("module load vasp; mpirun -np 12 vasp > vasp.out", shell=True)
+subprocess.run("module load vasp; mpirun -np 12 vasp_std > vasp.out", shell=True)
 
 # -----------------------------------------------------------------------------
 

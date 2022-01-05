@@ -11,7 +11,7 @@ class MITRelaxationForm(forms.Form):
     structure_file = forms.FileField(max_length=100)
 
     # The vasp_command to submit with
-    vasp_command = forms.CharField(initial="mpirun -n 4 vasp > vasp.out")
+    vasp_command = forms.CharField(initial="mpirun -n 4 vasp_std > vasp.out")
 
     # List of labels to submit the workflow with. Use commas to separate.
     labels = forms.CharField(initial="WarWulf")

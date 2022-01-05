@@ -35,44 +35,46 @@ conda activate my_env
 
 As you read through our tutorials, we try to explain many of the python terms and concepts, but for your reference, we have written out some quick definitions here. You won't be expected to understand all of these terms until tutorial 06. Beginners should revisit these definitions after each tutorial to review their understanding.
 
-- `package`: (aka a python program) a collection of python code that you install to access features and functions. Simmate is a package.
-- `package manager`: used to install python and manage python packages (and their versions). Anaconda is our package manager.
-- `channel`: where our package manager downloads packages from. We tell Anaconda to use conda-forge as it's main channel.
-- `environment`: an isolated installation of python packages at specific versions. In this tutorial, "my_env" is the name of our environment and it has Simmate and many other packages installed within it.
-- `module`: a folder within a python package with related functionality. "simmate.database" is a module that holds all of the code used to run our database.
-- `IDE`: the program we write and run python code in. Microsoft Word would be an IDE for writing essays. Spyder is our IDE for python.
+- `package`: a package is, essentially, a software program written in python.  Simmate is a package.
+- `package manager`: this manages the installation of python and its packages.  It automatically installs the correct version of packages to ensure that different packages are compatible with each other. Anaconda is our package manager.
+- `channel`: python packages are downloaded from a specific channel on the internet. For Simmate, we tell Anaconda to use conda-forge as its main channel.
+- `environment`: python packages are installed into a specific environment on your computer.  Within that environment, all packages are compatible with each other.  A single computer can have many environments.  In this tutorial, "my_env" is the name of our environment and Simmate is installed in it.
+- `module`: A python package is made from modules.  Each module provides a related set of functions. For example, "simmate.database" is a module that holds all of the code used to run our database.
+- `IDE`: the program we write and run python code in. Microsoft Word would be an IDE for writing essays. Spyder is our IDE for python. IDE is short for integrated development environment.
 
-Also, don't confuse two types programming languages we will use:
-- `command-line`: (aka the terminal) used for simple and common functions. Doesn't require opening extra programs to run python. "simmate workflows run ..." is a command used in the terminal.
-- `python`: used when we have to write out complex logic for functions and customize their settings. "workflow.run(structure=...)" is python code used in our IDE.
+Also, don't confuse two types of programming language we will use:
+- `command-line`: Whether you are on Windows, Mac, or Linux, the command line (aka the terminal) is used for common functions like changing directories (cd Desktop) or running programs. This includes running python modules, such as: "simmate workflows run".
+- `python`: used when we write complex logic and customize its settings. "workflow.run(structure=...)" is python code used in our IDE.
 
 <br/>
 
 ## Why Anaconda?
 
-Ideally, you could download Simmate like any desktop app and then be good to go. But have you ever installed a new program and then everything else on your computer goes haywire? With python, the chances of that happening are extremely high, so we want to be careful. For example, say I wanted two programs installed:
+Ideally, you could download Simmate like any desktop app and then be good to go. But have you ever updated your operating system and then everything else on your computer goes haywire? With python, the chances of that happening are extremely high, so we want to be careful. For example, say I wanted two packages installed:
 
-1. Simmate, which requires Python version 3.8 or greater
-2. Another old program, which requires Python version 2.6 exactly
+1. Simmate version 1.0, which requires python version 3.8 or greater
+2. Numpy version 1.15, which requires python version 2.7
 
-The conflicting python versions would give issues here. To overcome this, we use [Anaconda](https://www.anaconda.com/products/individual-d). Anaconda installs Python and all of our extra packages, including Simmate. To make sure nothing ever breaks, it separates all of our installations into folders known as "environments". So using our example programs, we could have two environments: one named "simmate_env" and another named "old_program_env" (these can be named anything). The two different python versions and codes would be installed into separate folders -- so that they don't interact.
+The conflicting versions of python creates a problem. To solve this, we use [Anaconda](https://www.anaconda.com/products/individual-d). Anaconda installs python and all of our extra packages, including Simmate. To make sure nothing ever breaks, it separates each of our installations into folders known as "environments". So using our example programs, we could have two environments: one named "simmate_env" and another named "numpy_env" (these can be named anything). The two different python versions and codes would be installed into separate folders so that they don't interact.
 
-In reality, different versions of packages can also conflict in addition to python versions. For example, Simmate requires a package named Django that is version 3.2 or greater, so if you installed an earlier version of Django (e.g. v2.0), it would break your Simmate installation. To avoid these conflicts, Anaconda will orchestrate the versions of each package installed within your environment.
+Package versions can also conflict with each other. For example, Simmate requires the package Django (version >3.2), so if you installed Django 2.0, it would break your Simmate installation. Therefore, Anaconda prevents you from installing conflicting versions within a single environment.
 
 <br/>
 
 ## Installing Anaconda and a first look
 
-You don't need to make an account on their website. Just use their [their download page](https://www.anaconda.com/products/individual-d) and install Anaconda (individual edition). Use all of the default options when installing and open up the application when you're done! The application will be called "Anaconda Navigator".
+For this tutorial, we'll install Anaconda to your local desktop/laptop. Even if you'll be using a university supercomputer (or some other remote computer system) to run workflows, stick to your local computer. We'll switch to your remote supercomputer near the end of tutorial 02.
 
-On the homescreen, you'll see a bunch of programs listed out for you, such as Orange3, Jupyter Notebook, Spyder, and others. These programs are for you to write your own python code. Just like how there is Microsoft Word, Google Docs, LibreOffice, and others for writing papers, all of these programs are different ways to write Python. Our prefered program is [Spyder](https://www.spyder-ide.org/), which we will walk through in tutorial 3.
+To install Anaconda, you don't need to make an account on their website. Just use [their download page](https://www.anaconda.com/products/individual-d) and install Anaconda (individual edition). Use all of the default options when installing. Open the application when you're done! The application will be called "Anaconda Navigator".
+
+On the homescreen, you'll see several IDEs, such as Orange3, Jupyter Notebook, Spyder, and others. These IDEs are for you to write your own python code. Just like how there is Microsoft Word, Google Docs, LibreOffice, and others for writing papers, all of these IDEs are different ways to write python. Our prefered IDE is [Spyder](https://www.spyder-ide.org/), which we will introduce in tutorial 3.
 
 <!-- This is an image of the Anaconda GUI home -->
 <p align="center" style="margin-bottom:40px;">
 <img src="https://docs.anaconda.com/_images/nav-defaults.png"  height=440 style="max-height: 440px;">
 </p>
 
-On the left of the screen, you'll see an "Environments" tab. Go ahaead and open it. When you first install Anaconda, there will only be a "base" environment that has a bunch of popular programs installed for you already. You can create new environments here and install new packages into each -- all without affecting what's already installed.
+On the left, you'll see an "Environments" tab. Go ahead and open it. When you first install Anaconda, there will only be a "base" environment that  already has popular packages installed. You can create new environments here and install new packages into each -- all without affecting what's already installed.
 
 <!-- This is an image of the Anaconda GUI environments -->
 <p align="center" style="margin-bottom:40px;">
@@ -87,14 +89,14 @@ If you want a more complete overview of Anaconda, they have a series of [getting
 
 ## Switching to the Command-line
 
-While the interface is convenient if you've never written code before, it is much quicker (and easier!) to use the command-line. Don't worry, it's much simpler than most expect. Even if you don't know how to code, you can master the command-line in just a few minutes.
+While the Anaconda Navigator interface is convenient if you've never written code before, it is much quicker (and easier!) to use the command-line. Don't worry, it's much simpler than you probably expect. Even if you don't know how to code, you can master the command-line in just a few minutes.
 
 Each command can be viewed as a "button". For example, the command `cd` stands for "change directory". When you call it, it just opens up a new folder to view the contents -- so the same thing as double-clicking a folder to open it up!
 
 Let's try this out with our command-line.
 
-- On Windows 10, search for "Anaconda Powershell Prompt" in your apps (search bar in the bottom left of the screen) and open it up.
-- On Macs and Linux, search for the app named "Terminal"
+- On Windows, search for and open "Anaconda Powershell Prompt" using your Start menu.
+- On Mac and Linux, search for and open the app named "Terminal"
 
 You should see something like this:
 
@@ -123,7 +125,7 @@ Don't get overwhelmed by the amount of information printed out. Each line is get
 
 For example, the line `-h, --help     Show this help message and exit.` is telling us what the `conda --help` command does! It also tells us that we could have done `conda -h` for the same output.
 
-It also tells us there are other "subcommands" available. One is `create` which says it creates a new environment. To learn more about that one, we can run the command `conda create --help`. There's a bunch here... But again, you don't need to memorize all of this. Just remember how to get this help page when you need it. Up next, we'll use these commands to create our enviornment and install Simmate.
+It also tells us there are other "subcommands" available. One is `create` which says it creates a new environment. To learn more about that one, we can run the command `conda create --help`. There's a bunch here... But again, you don't need to memorize all of this. Just remember how to get this help page when you need it. Up next, we'll use these commands to create our environment and install Simmate.
 
 <br/>
 
@@ -149,7 +151,7 @@ conda install -c conda-forge -n my_env simmate
 
 This may take a few minutes to run and install. But once it's done, you've now successfully installed Simmate! If you ran into any errors with this very last command, please let our team know immediately by [posting a new issue here](https://github.com/jacksund/simmate/issues/new).
 
-As an extra, let's use Anaconda to install [Sypder](https://www.spyder-ide.org/) too. Spyder is what we will use to write custom Python in later tutorials, so we'll discuss this more in the next tutorial. But now that we have Anaconda all set up, installing new programs can be done in just one line:
+As an extra, let's use Anaconda to install [Sypder](https://www.spyder-ide.org/). Spyder is what we will use to write python in later tutorials. But now that we have Anaconda  set up, installing new programs can be done in just one line:
 ```
 conda install -c conda-forge -n my_env spyder
 ```
@@ -158,7 +160,7 @@ conda install -c conda-forge -n my_env spyder
 
 ## Exploring Simmate's command-line
 
-Just like we were using `conda --help` above, we can also ask for help with Simmate's base command. Start with running the command `simmate --help` and you should see:
+Just like we used `conda --help` above, we can also ask for help with Simmate. Start with running the command `simmate --help` and you should see:
 
 ```
 Usage: simmate [OPTIONS] COMMAND [ARGS]...

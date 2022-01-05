@@ -65,7 +65,7 @@ class SearchEngine:
         search_engine = SearchEngine(
             composition="C4",
             labels=["WarWulf"],  # optional
-            workflow_command="mpirun -n 8 vasp > vasp.out",  # optional
+            workflow_command="mpirun -n 8 vasp_std > vasp.out",  # optional
         )
 
         search.run()
