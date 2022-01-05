@@ -115,15 +115,15 @@ For this tutorial, we will only be using the Python terminal (bottom-right of th
 
 ## The `Structure` class
 
-In python, you'll always want to think of things as types and classify them. Individual things (or "objects") are grouped into "classes". For example, we can say that McDonalds, Burger King, and Wendy's are all **objects** of the **class** `Restaurants`.
+In real life, we might say that McDonald's, Burger King, and Wendy's are examples of restauraunts.  In python, we could say that mcdonalds, burgerking, and wendys are **objects** of the **class** `Restaurants`.  By organizing **objects** into **class**es, python simplifies the way we program. For example, we could design the `Restaurants` class to have a property called `menu`.  Then, we could view the menu simply by typing `wendys.menu` because `wendys` belongs to the **class** `Restaraunts` and all `Restaraunts` have a `menu`.
 
-In materials science, the class we use the most is for crystal structures, which we just call `Structure`. A crystal structure is _**always**_ made up of a lattice and a list of atomic sites. If we have those things, we have a `Structure`. This is exactly what we have in our `POSCAR` file from tutorial 2, so let's tell python that we have a `Structure`.
+In materials science, the class we use most is crystal structure. In Simmate, we call this class `Structure`. A crystal structure is _**always**_ made up of a lattice and a list of atomic sites. Fortunately, this is exactly what we have in our `POSCAR` file from tutorial 2, so let's use Simmate to create an instance of the `Structure` class using our POSCAR file.
 
-Start by entering `from simmate.toolkit import Structure` into the python console (bottom-right of Spyder) and hit enter. Here, we are saying we want the `Structure` class from Simmate's code. It loaded this and is now waiting for you to do something with that class.
+Start by entering `from simmate.toolkit import Structure` into the python console (bottom-right of Spyder) and hit enter. This line says we want to use the `Structure` class from Simmate's code. The `Structure` class is now loaded into memory and is waiting for you to do something with it.
 
-Next, make sure you have the correct working directory (just like we did with the command-line). Spyder lists this in the top right -- and you can hit the folder icon to change it. We want it to be the same folder as where our POSCAR file is.
+Next, make sure you have the correct working directory (just like we did with the command-line). Spyder lists this in the top right -- and you can hit the folder icon to change it. We want to be in the same folder as our POSCAR file.
 
-Next, run the line `nacl_structure = Structure.from_file("POSCAR")` in your python terminal. Here, we told python that we have a `Structure` and the information for it is located in the `POSCAR` file. This could be many other formats too -- such as a CIF file. But we now have a Structure object and it's saved as the variable named `nacl_structure`. Alternatively, we could have made this structure by hand here, instead of making a file like we did in tutorial 2:
+Next, run the line `nacl_structure = Structure.from_file("POSCAR")` in your python terminal. Here, we told python that we have a `Structure` and the information for it is located in the `POSCAR` file. This could be in many other formats, such as a CIF file. But we now have a Structure object and it is named `nacl_structure`. Alternatively, we could have created this structure manually:
 
 ```python
 # note we can name the object whatever we want. I chose s here.
@@ -141,61 +141,71 @@ s = Structure(
 )
 ```
 
-Either way, we now have our structure loaded and Simmate knows exactly what it is.
+Whatever your method for creating a structure, we now have our `Structure` object and we can use its properties (and methods) to simplify our calculations.
 
 <br/> <!-- add empty line -->
 
-## Structure properties
+## Properties of a `Structure` object
 
-The reason we make classes and objects in python is because, once we have them, we can automate a ton of common functions and calculations. For example, all structures have a `density`, which is easily calculated once you know the lattice and atomic sites. These are known as properties. You can access this and other properties through our structure object. Try typing `nacl_structure.density` in the python terminal and hit enter. It should tell you the density!
+We make classes because they allow us to automate common calculations. For example, all structures have a `density`, which is easily calculated once you know the lattice and atomic sites. You can access this and other properties through our structure object. Try typing `nacl_structure.density` in the python terminal and hit enter. It should tell you the density!
 
-Now what about properties for the lattice? Like volume, angles, and vectors? For all of these things, it would make sense to have a `Lattice` class that calculates all of these things for us. So that's exactly what we do -- we attach a `Lattice` object to our `Structure` object. You access it through `structure.lattice`. Try out these in your python terminal (only run one line at a time!):
+Now what about other properties for the lattice, like volume, angles, and vectors? For the sake of organization, the `Structure` class has a sub-class called `lattice`, and within `lattice` we find properties like `volume`. Try out these in your python terminal (only run one line at a time!):
 
 ```
-lattice = structure.lattice
-lattice.volume
-lattice.matrix
-lattice.beta
+nacl_structure.lattice.volume
+nacl_structure.lattice.matrix
+nacl_structure.lattice.beta
 ```
 
-And we can apply the same idea to the list of elements in our `Structure` (known as a `Composition`):
+If you don't like to type long lines, there is a shortcut.  We create a `lattice` object (here, we call it as `nacl_lat`, but you can pick a different name) and then call its properties:
+
 ```
-composition = structure.composition
-composition.reduced_formula
-composition.elements
+nacl_lat = nacl_structure.lattice
+nacl_lat.volume
+nacl_lat.matrix
+nacl_lat.beta
+```
+
+We can apply the same idea to other `Structure` sub-classes, such as `Structure.composition`. This allows us to see properties related to composition:
+```
+nacl_compo = nacl_structure.composition
+nacl_compo.reduced_formula
+nacl_compo.elements
 ```
 
 <br/> <!-- add empty line -->
 
-## Structure methods
+## Methods of a `Structure` object
 
-Not all aspects of a class are just fixed values. So in addition to `properties`, we also have `methods`. Methods modify our object, perform some analysis, grab other information for us. For our structure, a common method is converting to the smallest possible unitcell with symmetry. You can do this with `structure.get_primitive_structure()`. Try this in your terminal. You'll see it prints out a new structure. We can also save it to a new variable and access its properties (note, values here will be the same as our original structure because we already had the primitive unit cell):
+In addition to `properties`, an object can also have `methods`. Typically, a method will perform a calculation; it may also save the results of that calculation. For example, you might want to convert a conventional unit cell into a primitive unit cell.  You can do this with `nacl_structure.get_primitive_structure()`. Try this in your terminal. You'll see it prints out a new structure. For this method, we save it by defining a new `Structure` object:
 
 ```python
-new_structure = nacl_structure.get_primitive_structure()
-new_structure.density
+nacl_prim = nacl_structure.get_primitive_structure()
+nacl_prim.density
 ```
 
-Note we need paratheses `()` at the end of the method. This is because methods act like functions -- that is they can often accept options to change their analysis and output. For example, we could have changed our symmetry tolerance by doing:
+Note that all methods end with parentheses `()`. This allows us to alter the method.  For example, get_primitive_structure() makes use of symmetry in its calculation, so if we do:
 
 ```python
 nacl_structure.get_primitive_structure(tolerance=0.1)
 ```
 
+the calculation will allow atoms that are nearly in their 'symmetrically correct' positions (within 0.1 Å) to be identiified as symmetrical.
+
 There are many other methods available for structures too:
 ```python
-structure.add_oxidation_state_by_guess()
-structure.make_supercell([2,2,2])
+nacl_structure.add_oxidation_state_by_guess()
+nacl_structure.make_supercell([2,2,2])
 ```
 
-To get a quick look at **all** of the properties and methods available, type `nacl_structure` into the terminal but don't hit enter yet. Then add a period so you have `nacl_structure.`, and finally, hit tab. You should see a list pop up with everything available. Try selecting lattice, and then do this tab trick again! The list should look similar to this (this image isn't for a structure object though):
+To get a quick look at **all** of the properties and methods available, type `nacl_structure` into the terminal but don't hit enter yet. Then add a period so you have `nacl_structure.`, and finally, hit tab. You should see a list pop up with everything available. Select lattice, then do this tab trick again! The list should look similar to this (this image isn't for a structure object though):
 
 <!-- This is an image of the Spyder's code-completion -->
 <p align="center" style="margin-bottom:40px;">
 <img src="https://docs.spyder-ide.org/current/_images/console-completion.png"  height=330 style="max-height: 330px;">
 </p>
 
-This can be done with any class and object! There are many different classes in Simmate, but you'll interact with `Structure` the most. To fully understand all of the options for these classes, you'll need to explore the code's documentation, which we will cover in the next tutorial.
+This can be done with any class or any object! There are many different classes in Simmate, but you'll interact with `Structure` the most. To fully understand all of the options for these classes, you'll need to explore the code's documentation, which we will cover in the next tutorial.
 
 <br/> <!-- add empty line -->
 
@@ -221,7 +231,7 @@ rdf_analyzer = RadialDistributionFunction()
 rdf = rdf_analyzer.featurize(structure)
 ```
 
-Pymatgen is currently the largest package and has the most toolkit-like features. As a small example, it's common to compare two structures and see if are symmetrically equivalent (within a given tolerance). You give it two structures and it will return True or False on whether they are matching:
+Pymatgen is currently the largest package and has the most toolkit-like features. As an example, it's common to compare two structures and see if are symmetrically equivalent (within a given tolerance). You give it two structures and it will return True or False on whether they are matching:
 ```python
 from pymatgen.analysis.structure_matcher import StructureMatcher
 matcher = StructureMatcher()
