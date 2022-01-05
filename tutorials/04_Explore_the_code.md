@@ -20,29 +20,29 @@ For advanced users, we have README.rst files in each of our python modules -- so
 
 # The full tutorial
 
-> :bulb: This entire tutorial should be ran on your local computer because we will be using Spyder.
+> :bulb: This entire tutorial should be run on your local computer because we will be using Spyder.
 
 <br/>
 
 ## Getting help through Spyder
 
-Where we left off in Tutorial 3, we saw how to list all available properties and methods on an object. We did this by typing the object variable name plus a period (ex: `my_structure.`) and then hitting `tab`.
+Where we left off in Tutorial 3, we saw how to list all available properties and methods on an object. We did this by typing the object name plus a period (ex: `nacl_structure.`) and then hitting `tab`.
 
 > :warning: for this next part, pymatgen's documentation isn't always complete or beginner-friendly. This is why you won't see much. We're working on this at Simmate, so we hope this improves in the future. For now, don't expect too much guidance from the `Structure` class.
 
-Now let's take a step back and get a full guide on a these methods and properties. We'll start with the `Structure` class that we imported using `from simmate.shortcuts import Structure`. If you restarted your python terminal, run this import again. Next, try typing the line `Structure?` and hit enter. What pops up is the documentation. Just like how we were using `--help` in the command-line for tutorial 1, we can use `?` this to get help with python classes and objects!
+Now let's take a step back and get a full guide on a these methods and properties. We'll start with the `Structure` class that we previously imported using `from simmate.toolkit import Structure`. If you restarted your python terminal, run this import again. Note that you can also type `from simmate.shortcuts import Structure` to accomplish the same thing. The instructions below assume that you've used `shortcuts` rather than `toolkit`. Next, try typing the line `Structure?` and hit enter. What pops up is the documentation. Just like how we were using `--help` in the command-line for tutorial 1, we can use `?` this to get help with python classes and objects!
 
 We can also format this nicely using Spyder. In bottom part of Spyder's top-right window, select the `help` tab. And in the search bar (with "object") right next to it, type in `Structure`. You'll see the help information pop up again, but now it's nicely formatted for us.
 
-Let's try this with our NaCl structure from before. To review, we loaded the structure with `s = Structure.from_file("POSCAR")`. Now try typing `s.get_primitive_structure` in our help window. We can now see a description of what this does and the arguments/options ("Args") that it accepts. 
+Let's try this with our NaCl structure from before. To review, we loaded the structure with `NaCl_structure = Structure.from_file("POSCAR")`. Now try typing `NaCl_structure.get_primitive_structure` in our help window. We can now see a description of what this does and the arguments/options ("Args") that it accepts. 
 
-*Hint: you can also get this help information by typing `s.get_primitive_structure` in the python terminal and then using the `crtl+I` shortcut*
+*Hint: you can also get this help information by typing `NaCl_structure.get_primitive_structure` in the python terminal and then using the `crtl+I` shortcut*
 
 <br/>
 
 ## Introduction to Python Modules
 
-One big question still remains though -- how did we know to do the line `from simmate.shortcuts import Structure`? Here, you should learn to think of python packages (such as Simmate) as many classes and functions organized into folders. 
+One big question still remains, though: how did we know to type `from simmate.shortcuts import Structure`? Here, you should learn to think of python packages (such as Simmate) as many classes and functions organized into folders. 
 
 As an example, you can read `from simmate.shortcuts import Structure` as "Inside of the `simmate` folder, go to the `shortcuts` file and load the `Structure` class". 
 
@@ -66,9 +66,9 @@ Each of these folders and files are referred to as python "modules" -- it's just
 
 Now that we know Simmate is just a bunch of classes organized into folders, let's explore a bit. 
 
-We'll start with the `toolkit` module ([here](https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit), but try finding it yourself without the link too). When you open it up, you'll see a overview/guide written. You can also access this module using `from simmate import toolkit` and getting help directly in spyder. 
+We'll start with the `toolkit` module ([here](https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit), but try finding it yourself without the link). When you open it up, you'll see a overview/guide. You can also access this module using `from simmate import toolkit` and getting help directly in spyder. 
 
-A good folder to look through is the `simmate.toolkit.creators` module, which provides many ways to create lattices, sites, and structures with various method (e.g. randomly, random symmetry, etc.) and also incorporates third-party codes.
+A good folder to look through is the `simmate.toolkit.creators` module, which provides many ways to create lattices, sites, and structures (e.g. randomly, random symmetry, etc.) and also incorporates third-party codes.
 
 > :warning: because simmate is still at the early stages, some folders will be more complete than others. Keep this in mind while exploring. If you aren't seeing a guide or documentation, we probably haven't finished that module yet.
 
