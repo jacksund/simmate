@@ -46,7 +46,7 @@ One big question still remains, though: how did we know to type `from simmate.sh
 
 As an example, you can read `from simmate.shortcuts import Structure` as "Inside of the `simmate` folder, go to the `shortcuts` file and load the `Structure` class". 
 
-Here's a second example: `from simmate.toolkit.core.lattice import Lattice` is the same as saying "Go to the `simmate` folder --> `toolkit` folder --> `core` folder --> `lattice.py` file --> grab the `Lattice` class".
+Here's a second example: `from simmate.toolkit.base_data_types.lattice import Lattice` is the same as saying "Go to the `simmate` folder --> `toolkit` folder --> `base_data_types` folder --> `lattice.py` file --> grab the `Lattice` class".
 
 So whenever you see an `import` line, it's just telling you where the actual code is located. All of Simmate's code (and all python codes everywhere) is organized like this.
 

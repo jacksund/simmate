@@ -186,19 +186,92 @@ We skimmed over a lot of the fundamentals for Prefect here, so we highly recomme
 
 # Setting up your cluster with Dask
 
-Because there is such a diverse set of computational resources that teams can have, we can only point you to key tutorials and documentation on how to set up your cluster. You can [ask our team](https://github.com/jacksund/simmate/discussions/categories/q-a) which setup is the best fit for your team. We'll try to guide you through it or point you to the proper documentation. Setting up your cluster shouldn't take longer than a hour, so post a question if you're struggling.
+Because there is such a diverse set of computational resources that teams can have, we can't cover all setup scenarios in this tutorial. Instead, we will go through some examples of submitting Simmate workflows to a Dask cluster. This will all be on your local computer. For switching to remote resources (and job queue clusters like SLURM), we can only point you to key tutorials and documentation on how to set up your cluster. You can [ask our team](https://github.com/jacksund/simmate/discussions/categories/q-a) which setup is the best fit for your team, and we'll try to guide you through the process. Setting up your cluster shouldn't take longer than a hour, so post a question if you're struggling!
 
-Here are some useful resources on setting up a cluster with Dask:
+Here are some useful resources for setting up a cluster with Dask. We recommend going through these before trying to use Dask with Simmate:
 - [Introduction to Dask Futures](https://docs.dask.org/en/latest/futures.html)
     - This is the best tutorial to start with! Then go through [their example](https://examples.dask.org/futures.html). Dask can do a lot, but Simmate only really uses this feature. If you understand how to use the `client.submit`, then you understand how Simmate is using Dask :smile: 
 - [Introduction to Dask Jobqueue](http://jobqueue.dask.org/en/latest/)
     - If you use a queue system like PBS, Slurm, MOAB, SGE, LSF, and HTCondor, then this will show you how to set up a cluster on your resource.
-- [Simmate's documentation in the workflow-engine module](https://github.com/jacksund/simmate/tree/main/src/simmate/workflow_engine)
-    - This page expect you to understand Dask futures. Our example cases span a lot of scenarios, but it still isn't complete.
-- [Simmate's example `~/.simmate/` configuration folder](https://github.com/jacksund/simmate/tree/main/src/simmate/configuration/example_configs)
-    - Explore each file and you'll find more directions in each. (note that a lot of this documentation is incomplete at the moment)
+
+Here's a simple example of using Dask to run a function that "sleeps" for 1 second
+```python
+import time
+
+# This loop will take 60 seconds to complete
+for n in range(60):  # run this 60 times
+    time.sleep(1)  # sleeps 1 second
+    
+# Now we switch to using Dask
+from dask.distributed import Client
+
+client = Client()
+
+# Futures are basically our "job_id". They let us check the status and result
+futures = []
+for n in range(60):  # run this 60 times
+    # submits time.sleep(1) to Dask. pure=False tells Dask to rerun each instead
+    # of loading past results from each time.sleep(1). 
+    future = client.submit(time.sleep, 1, pure=False) 
+    futures.append(future)
+
+# now wait for all the jobs to finish
+# This will take much less than 60 seconds!
+results = [future.result() for future in futures]
+```
+
+We'll now try using Dask to run our Simmate workflows.
+
+### In serial (one item at time)
+
+Let's start with how we've been submitting workflows: using `workflow.run`. This runs the workflow immediately and on your local computer. If we were to run a workflow of many structures, only one workflow would run at a time. Once a workflow completes, it moves on to the next one:
+
+```python
+from simmate.workflows import example_workflow
+
+for structure in structures:
+    result = example_workflow.run(structure=structure)
+```
+
+### In parallel (many workflows at once)
+To use your entire computer and all of its CPUs, we can set up a Dask cluster. There's one added thing you need to do though -- and that's make sure all of Dask workers are able to connect to the Simmate database. This example let's you submit a bunch of workflows and multiple workflows can run at the same time. You can do this with...
+
+```python
+# first setup Dask so that it can connect to Simmate
+from dask.distributed import Client
+client = Client(preload="simmate.configuration.dask.connect_to_database")
+
+# now submit your workflows and 
+futures = []
+for structure in structures:
+    future = client.submit(example_workflow.run, structure=structure)
+    
+result = future.result()
+
+# wait for all workflows to finish
+# you can monitor progress at http://localhost:8787/status
+```
+
+### In parallel (many tasks from a single workflow at once)
+ But what if you want to run a single workflow with all of it's tasks in parallel? To do that, we use...
+
+```python
+# first setup Dask so that it can connect to Simmate
+from dask.distributed import Client
+client = Client(preload="simmate.configuration.dask.connect_to_database")
+
+# Tell Prefect that we should submit each task to Dask
+from prefect.executors import DaskExecutor
+example_workflow.executor = DaskExecutor(address=client.scheduler.address)
+
+# now run your workflow and wait for it to finish
+result = example_workflow.run()
+```
+
+### Connecting your Dask cluster to your Prefect Agent
 
 Once you learned how to set up your Dask cluster, the next step is tell Prefect where it is. You can always write your python script as two steps:
+
 1. Configure and then start your Dask Cluster.
 2. Configure and then start your Prefect Agent, which will start submitting workflows!
 
