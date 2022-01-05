@@ -1,6 +1,9 @@
 
-This folder contains all of the code that Simmate runs on! To get started, make sure
-you have either watched our `introduction tutorial`_ or are comfortable with python.
+Welcome to Simmate!
+-------------------
+
+This module contains all of the code that Simmate runs on. To get started, make sure
+you have either completed our `introduction tutorials`_ or are comfortable with python.
 
 Within each subfolder (aka each python “module”), you’ll find more details on what it contains.
 
@@ -22,4 +25,4 @@ Within each subfolder (aka each python “module”), you’ll find more details
 - ``shortcuts`` = let’s you import common functions with ease 
 - ``utilities`` = contains simple functions that are used throughout the other modules
 
-.. _introduction tutorial: google.com
+.. _introduction tutorials: https://github.com/jacksund/simmate/tree/main/tutorials

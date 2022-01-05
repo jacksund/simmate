@@ -160,12 +160,8 @@ class EvolutionarySearch(DatabaseTable):
         return figure
 
     def view_convergence_plot(self):
-        import plotly.io as pio
-
-        pio.renderers.default = "browser"
-
         figure = self.get_convergence_plot()
-        figure.show()
+        figure.show(renderer="browser")
 
     def get_correctness_plot(self, structure_known):
 
@@ -245,12 +241,8 @@ class EvolutionarySearch(DatabaseTable):
         return figure
 
     def view_correctness_plot(self, structure_known):
-        import plotly.io as pio
-
-        pio.renderers.default = "browser"
-
         figure = self.get_correctness_plot(structure_known)
-        figure.show()
+        figure.show(renderer="browser")
 
 
 class StructureSource(DatabaseTable):

@@ -307,12 +307,8 @@ class Relaxation(Structure, Calculation):
         return figure
 
     def view_convergence_plot(self):
-        import plotly.io as pio
-
-        pio.renderers.default = "browser"
-
         figure = self.get_convergence_plot()
-        figure.show()
+        figure.show(renderer="browser")
 
     """ Set as Abstract Model """
     # I have other models inherit from this one, while this model doesn't need

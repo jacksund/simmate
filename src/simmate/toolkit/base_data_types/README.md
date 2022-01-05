@@ -1,5 +1,9 @@
-This module is empty at the moment, but I plan for it to be a fork/merge of pymatgen.core and ase in the future. For now, I just use these packages as dependencies directly. I call this 'materials_science' instead of 'core' or 'engine' to help beginner users, but I may change this back in the future.
 
+> :warning: This module is entirely experimental and should not be used at the moment. Instead, users should use the `pymatgen.core` module.
+
+This is intended to be a fork and refactor of the `pymatgen.core` module. We are still at the outlining stage for it.
+
+## notes on types on classes
 
 element (string + mapped data)
 lattice (3x3 matrix)

@@ -1,1 +1,0 @@
-This module is empty at the moment, but I plan for it to be extremely similar to pymatgen.cli's module except using Click instead of Argparse. To take things further, it will be a cli for every other module in this repo (rather than having a cli folder for each) -- so more accurately it will be a combination of pymatgen.cli, atomate.cli, and more.
