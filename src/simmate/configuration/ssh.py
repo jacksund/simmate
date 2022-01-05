@@ -10,6 +10,7 @@ from fabric import Connection
 # ssh -J WarrenLab@warwulf.net WarrenLab@c18
 # see https://github.com/spyder-ide/spyder-kernels/issues/359
 
+
 class SSHConnection(Connection):
     """
     This is a utility for running python code through a remote ssh terminal and
