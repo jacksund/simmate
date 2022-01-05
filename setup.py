@@ -118,14 +118,12 @@ setup(
         "pytest>=6.2.5",
         "pytest-django>=4.5.2",
         "black>=21.12b0",
+        "coverage>=6.2",
         #
         # These are from the MP stack and I want to phase them out over time
         "pymatgen>=2022.0.16",
         "pymatgen-analysis-diffusion>=2021.4.29",  # pymatgen-diffusion on conda
         "matminer>=0.7.4",
-        # BUG: matminer's conda install is broken at the moment so we need to
-        # add this dependency on our own.
-        "jsonschema>=4.2.1",
         #
         # These are packages that I commonly use alongside simmate. I plan to
         # organize these into optional dependencies and/or documentation. But until
