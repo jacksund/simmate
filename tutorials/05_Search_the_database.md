@@ -1,6 +1,6 @@
 # Search the database
 
-In this tutorial, you will learn how to explore your database as well as load data from third-party providers.
+In this tutorial, you will learn how to explore your database as well as load data from third-party providers. Beginners will also be introduced to python inheritance.
 
 1. [The quick tutorial](#the-quick-tutorial)
 2. [The full tutorial](#the-full-tutorial)
@@ -53,7 +53,7 @@ dataframe = first_150_rows.to_dataframe()
 
 # The full tutorial
 
-> :bulb: This entire tutorial should be ran on your local computer because we will be using Spyder. To use results from your remote calculations, you can copy/paste your database file from your remote computer to where our local database one should be (~/.simmate/database.sqlite3). Note, copy/pasting will go away when we switch to a cloud database in the next tutorial.
+> :bulb: This entire tutorial should be ran on your local computer because we will be using Spyder. To use results from your remote calculations, you can copy/paste your database file from your remote computer to where our local database one should be (~/.simmate/database.sqlite3). Note, copy/pasting will no longer be necessary when we switch to a cloud database in the next tutorial.
 
 <br/>
 
@@ -64,7 +64,7 @@ To review key concepts up until this point...
 - In tutorials 3, we learned about python classes, and in particular, the importance of the `Structure` class.
 - In tutorial 4, we learned how to explore the documentation and use new classes.
 
-Now, we want to bring these ideas together in order to expolore our database (as well as data from third-parties). 
+Now, we want to bring these ideas together in order to expolore our database. 
 
 Let's start simple... All datatables are represented by a class, where the general format looks like this:
 
@@ -76,7 +76,8 @@ class MyExampleTable(DatabaseTable):
    column_02 = table_columns.BoolField()  # BoolField --> means we store True/False
    column_03 = table_columns.FloatField()  # FloatField --> means we store a number/decimal
 ```
-And the corresponding table would look like...
+
+And the corresponding table (with random data added) would look like...
 
 | column_01  | column_02 | column_03 |
 | ---------- | --------- | --------- |
@@ -90,7 +91,7 @@ That's how all tables are made! We just make a class, say it is a `DatabaseTable
 
 However, this could get really repetitive if we have a bunch of tables that contain similar information. For example, we may want to store structures in many different tables -- each one with columns like density, number of sites, number of elements, etc.. To save time, we use what is known as python "inheritance". Here's how it works:
 
-First, we define a table with common information (let's say a person for example).
+First, we define a table with common information (let's say a `Person`).
 
 ```python
 from simmate.database.base_data_types import DatabaseTable, table_column
@@ -108,6 +109,7 @@ class Student(Person):  # <--- note we have Person here instead of DatabaseTable
    year = table_columns.IntField()  # e.g. class of 2020
    gpa = table_columns.FloatField()
 ```
+
 The `Student` datatable now looks like this:
 
 | name  | age | height | year | gpa |
@@ -120,7 +122,7 @@ The `Student` datatable now looks like this:
 
 Simmate uses this idea with common materials science data -- such as structures, thermodynamic data, site forces, and more. You'll find our fundamental building blocks for tables in the `simmate.database.base_data_types` module ([here](https://github.com/jacksund/simmate/tree/main/src/simmate/database/base_data_types))
 
-All of our datatables start from here and build up. Up next, we'll look at an actual database table and learn how to use it to view data.
+All of our datatables start from these classes and build up. Up next, we'll look at an actual database table and learn how to use it to view data.
 
 <br/>
 
@@ -178,13 +180,14 @@ To see all of the data this table stores, we can use it's `result_table.show_col
 - valence_band_maximum
 ```
 
-This is a lot of columns... and you may not need all of them. But Simmate still builds all of these for you right away because they don't take up very much storage space.
+These are a lot of columns... and you may not need all of them. But Simmate still builds all of these for you right away because they don't take up very much storage space.
 
 Next we'd want to see the table with all of its data. To access the table rows, we use the `objects` attribute, and then to get this into a table, we convert to a "dataframe". A dataframe is a filtered portion of a database table -- and because we didn't filter any of our results yet, our dataframe is just the whole table. 
 ```python
 data = result_table.objects.to_dataframe()
 ```
 Open up this variable by double-clicking `data` in Spyder's variable explorer (top right window) and you can view the table. Here's what a typical dataframe looks like in Spyder:
+
 <!-- This is an image of an Pandas Dataframe in Spyder -->
 <p align="center" style="margin-bottom:40px;">
 <img src="https://www.spyder-ide.org/blog/spyder-variable-explorer/table-headings.png"  height=330 style="max-height: 330px;">
@@ -216,6 +219,10 @@ This isn't very exciting now because we just have one row/structure in our table
 
 ## Accessing third-party data
 
+:warning: :warning: :warning:
+This section is broken at the moment. We can not yet distribute third-party data.
+:warning: :warning: :warning:
+
 When running our own calculations with Simmate, it is also important to know what other researchers have already calculated for a given material. Many research teams around the world have built databases made of 100,000+ structures -- and many of these teams even ran calculations on all of them. Here, we will use Simmate to explore their data.
 
 Let's start with one of the smaller databases out there: [JARVIS](https://jarvis.nist.gov/). It may be smaller than the others, but their dataset still includes ><<12345>> structures! Simmate makes the download for all of these under <<12345>> GB.
@@ -233,9 +240,7 @@ from simmate.database.local_calculations.relaxation import MITRelaxation
 from simmate.database.third_parties.jarvis import JarvisStructure
 ```
 
-:fire: :fire: :fire:
-IMPORTANT: `result_table` above and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.shortcuts import setup`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! So don't forget to include `from simmate.shortcuts import setup`!
-:fire: :fire: :fire:
+`result_table` above and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.shortcuts import setup`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! So don't forget to include `from simmate.shortcuts import setup`!
 
 Now that we have our datatable class (`JarvisStructure`) loaded, you'll notice it's empty to when you first access it. We can quickly load all of the data using the `load_data_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database.
 
@@ -253,9 +258,7 @@ data = JarvisStructure.objects.to_dataframe()[:150]
 
 > :warning: It is very important that you read the warnings printed by `load_data_archive`. This data was NOT made by Simmate. We are just helping to distribute it on behalf of these other teams. Be sure to cite them for their work!
 
-:fire: :fire: :fire:
-IMPORTANT: Calling `load_data_archive` loads ALL data to your computer and saves it. This data will not be updated unless you call `load_data_archive` again. This should only be done every time we release a new archive version (typically once per year). To protect our servers from misuse, you can only call `load_data_archive()` a few times per month -- no matter what. **Don't overuse this feature.**
-:fire: :fire: :fire:
+Calling `load_data_archive` loads ALL data to your computer and saves it. This data will not be updated unless you call `load_data_archive` again. This should only be done every time we release a new archive version (typically once per year). To protect our servers from misuse, you can only call `load_data_archive()` a few times per month -- no matter what. **Don't overuse this feature.**
 
 Now let's really test out our filtering ability with this new data:
 ```python
