@@ -135,7 +135,7 @@ This help message also tells us there are other "subcommands" available. One is 
 For now, let's create a new environment that uses the [conda-forge](https://conda-forge.org/) channel. A channel is where anaconda downloads packages from -- and to keep things simple, we will ALWAYS use conda-forge (this is the standard in the python community). Now let's run this command below. Note you can switch out the name "my_env" for whatever you want here, just make sure you use underscores instead of spaces ("my_env" will work while "my env" will give an error).
 
 ```
-conda install -c conda-forge -n my_env python=3.8
+conda create -c conda-forge -n my_env python=3.8
 ```
 
 Say yes when the installation asks for confirmation. Next, switch to this new environment. To do that we use...
