@@ -1,6 +1,6 @@
 # Analyze and modify structures
 
-In this tutorial, you will learn about coding in python and about the most important class in Simmate: the `Structure` class.
+In this tutorial, you will learn about the most important class in Simmate: the `Structure` class. Beginners will also be introduced to classes and the Spyder IDE.
 
 1. [The quick tutorial](#the-quick-tutorial)
 2. [The full tutorial](#the-full-tutorial)
@@ -11,11 +11,11 @@ In this tutorial, you will learn about coding in python and about the most impor
     - [Advanced classes](#advanced-classes)
     - [Extra Resources](#extra-resources)
 
-> :warning: simmate still uses [pymatgen](https://pymatgen.org/) under the hood, so this tutorial is really one for using pymatgen. [Their guides](https://pymatgen.org/usage.html) also are useful, but they are written for those already familiar with python.
-
 <br/><br/> <!-- add empty line -->
 
 # The quick tutorial
+
+> :warning: Simmate still uses [pymatgen](https://pymatgen.org/) under the hood, so this tutorial is really one for using pymatgen. [Their guides](https://pymatgen.org/usage.html) also are useful, but they are written for those already familiar with python.
 
 1. In Spyder's python console, run `import simmate` to make sure everything is set up.
 2. Make sure you still have our `POSCAR` file of NaCl from the last tutorial. 
@@ -111,24 +111,24 @@ If you followed tutorial 1 exactly, you should have Spyder installed and ready t
 
 If you are comfortable with python or took the Codecademy intro course, you can get up to speed with Spyder with their intro videos. [There are 3 videos, and each is under 4 minutes](https://docs.spyder-ide.org/current/videos/first-steps-with-spyder.html).
 
-For this tutorial, we will only be using the Python terminal (bottom-right of the screen).
+For this tutorial, we will only be using the Python console (bottom-right of the screen).
 
 <br/> <!-- add empty line -->
 
 ## The `Structure` class
 
-In real life, we might say that McDonald's, Burger King, and Wendy's are examples of restauraunts.  In python, we could say that mcdonalds, burgerking, and wendys are **objects** of the **class** `Restaurants`.  By organizing **objects** into **class**es, python simplifies the way we program. For example, we could design the `Restaurants` class to have a property called `menu`.  Then, we could view the menu simply by typing `wendys.menu` because `wendys` belongs to the **class** `Restaraunts` and all `Restaraunts` have a `menu`.
+In real life, we might say that McDonald's, Burger King, and Wendy's are examples of restauraunts.  In python, we could say that `mcdonalds`, `burgerking`, and `wendys` are **objects** of the **class** `Restaurants`.  By organizing **objects** into **class**es, python simplifies the way we program. For example, we could design the `Restaurants` class to have a property called `menu`.  Then, we could view the menu simply by typing `wendys.menu` because `wendys` belongs to the **class** `Restaraunts` and all `Restaraunts` have a `menu`.
 
 In materials science, the class we use most is crystal structure. In Simmate, we call this class `Structure`. A crystal structure is _**always**_ made up of a lattice and a list of atomic sites. Fortunately, this is exactly what we have in our `POSCAR` file from tutorial 2, so let's use Simmate to create an instance of the `Structure` class using our POSCAR file.
 
-Start by entering `from simmate.toolkit import Structure` into the python console (bottom-right of Spyder) and hit enter. This line says we want to use the `Structure` class from Simmate's code. The `Structure` class is now loaded into memory and is waiting for you to do something with it.
+Start by entering `from simmate.toolkit import Structure` into the python console and hit enter. This line says we want to use the `Structure` class from Simmate's code. The `Structure` class is now loaded into memory and is waiting for you to do something with it.
 
 Next, make sure you have the correct working directory (just like we did with the command-line). Spyder lists this in the top right -- and you can hit the folder icon to change it. We want to be in the same folder as our POSCAR file.
 
-Next, run the line `nacl_structure = Structure.from_file("POSCAR")` in your python terminal. Here, we told python that we have a `Structure` and the information for it is located in the `POSCAR` file. This could be in many other formats, such as a CIF file. But we now have a Structure object and it is named `nacl_structure`. Alternatively, we could have created this structure manually:
+Next, run the line `nacl_structure = Structure.from_file("POSCAR")` in your python terminal. Here, we told python that we have a `Structure` and the information for it is located in the `POSCAR` file. This could be in many other formats, such as a CIF file. But we now have a `Structure` object and it is named `nacl_structure`. Alternatively, we could have created this structure manually:
 
 ```python
-# note we can name the object whatever we want. I chose s here.
+# note we can name the object whatever we want. I chose 's' here.
 s = Structure(
     lattice=[
         [3.48543651, 0.0, 2.01231771],
@@ -151,7 +151,7 @@ Whatever your method for creating a structure, we now have our `Structure` objec
 
 We make classes because they allow us to automate common calculations. For example, all structures have a `density`, which is easily calculated once you know the lattice and atomic sites. You can access this and other properties through our structure object. Try typing `nacl_structure.density` in the python terminal and hit enter. It should tell you the density!
 
-Now what about other properties for the lattice, like volume, angles, and vectors? For the sake of organization, the `Structure` class has a sub-class called `lattice`, and within `lattice` we find properties like `volume`. Try out these in your python terminal (only run one line at a time!):
+Now what about other properties for the lattice, like volume, angles, and vectors? For the sake of organization, the `Structure` class has a sub-class called `lattice`, and within `lattice` we find properties like `volume`. Try out these in your python terminal (only run one line at a time):
 
 ```
 nacl_structure.lattice.volume
@@ -159,7 +159,7 @@ nacl_structure.lattice.matrix
 nacl_structure.lattice.beta
 ```
 
-If you don't like to type long lines, there is a shortcut.  We create a `lattice` object (here, we call it as `nacl_lat`, but you can pick a different name) and then call its properties:
+If you don't like to type long lines, there is a shortcut.  We create a `Lattice` object (here, we call it as `nacl_lat`, but you can pick a different name) and then call its properties:
 
 ```
 nacl_lat = nacl_structure.lattice
@@ -168,7 +168,7 @@ nacl_lat.matrix
 nacl_lat.beta
 ```
 
-We can apply the same idea to other `Structure` sub-classes, such as `Structure.composition`. This allows us to see properties related to composition:
+We can apply the same idea to other `Structure` sub-classes, such as `Composition`. This allows us to see properties related to composition:
 ```
 nacl_compo = nacl_structure.composition
 nacl_compo.reduced_formula
@@ -186,13 +186,13 @@ nacl_prim = nacl_structure.get_primitive_structure()
 nacl_prim.density
 ```
 
-Note that all methods end with parentheses `()`. This allows us to alter the method.  For example, get_primitive_structure() makes use of symmetry in its calculation, so if we do:
+Note that all methods end with parentheses `()`. This allows us to alter the method. For example, get_primitive_structure() makes use of symmetry in its calculation, so if we do:
 
 ```python
 nacl_structure.get_primitive_structure(tolerance=0.1)
 ```
 
-the calculation will allow atoms that are nearly in their 'symmetrically correct' positions (within 0.1 Å) to be identiified as symmetrical.
+the calculation will allow atoms that are nearly in their 'symmetrically correct' positions (within 0.1 Å) to be identiified as symmetrical. Note, we didn't have to set a tolerance before because there are default values being used. Some methods don't have defaults. For example, the `make_supercell` method require you to specify a supercell size. 
 
 There are many other methods available for structures too:
 ```python
@@ -207,7 +207,7 @@ To get a quick look at **all** of the properties and methods available, type `na
 <img src="https://docs.spyder-ide.org/current/_images/console-completion.png"  height=330 style="max-height: 330px;">
 </p>
 
-This can be done with any class or any object! There are many different classes in Simmate, but you'll interact with `Structure` the most. To fully understand all of the options for these classes, you'll need to explore the code's documentation, which we will cover in the next tutorial.
+This can be done with any class or any object. There are many different classes in Simmate, but you'll interact with `Structure` the most. To fully understand all of the options for these classes, you'll need to explore the code's documentation, which we will cover in the next tutorial (4).
 
 <br/> <!-- add empty line -->
 
@@ -220,23 +220,45 @@ We only need to give these "creator" classes a composition object:
 ```python
 from simmate.toolkit import Composition
 from simmate.toolkit.creators.structure.all import RandomSymStructure
+
 composition = Composition("Ca2N")
 creator = RandomSymStructure(composition)
-structure = creator.create_structure(spacegroup=166)
+
+structure1 = creator.create_structure(spacegroup=166)
+structure2 = creator.create_structure(spacegroup=225)
 ```
 
-Matminer is particularly useful for analyzing "features" of a structure and making machine-learning inputs. One common analysis gives the "fingerprint" of the structure, which helps characterize bonding in the crystal. The most basic fingerprint is the radial distribution function (rdf) -- it shows the distribution of all atoms from one another. We take any structure object and can feed it a fingerprint-analyzer object:
+Matminer is particularly useful for analyzing "features" of a structure and making machine-learning inputs. One common analysis gives the "fingerprint" of the structure, which helps characterize bonding in the crystal. The most basic fingerprint is the radial distribution function (rdf) -- it shows the distribution of all atoms from one another. We take any structure object and can feed it to a matminer `Featurizer` object:
 
 ```python
 from matminer.featurizers.structure.rdf import RadialDistributionFunction
-rdf_analyzer = RadialDistributionFunction()
-rdf = rdf_analyzer.featurize(structure)
+
+rdf_analyzer = RadialDistributionFunction(bin_size=0.1)
+
+rdf1 = rdf_analyzer.featurize(structure1)
+rdf2 = rdf_analyzer.featurize(structure2)
+```
+
+We can plot an RDF using python too. Matminer doesn't have a convenient way to plot this for us yet (with Simmate there would be a `show_plot` method), so we can use this opportunity to learn how to plot things ourselves:
+
+```python
+from matplotlib.pyplot import plot
+
+# The x-axis goes from 0.1 to 20 in steps 0.1 (in Angstroms).
+# Matminer doesn't give us a list of these values but
+# we can make it using this line.
+rdf_x = [n/10 + 0.1 for n in range(0, 200)]
+
+# Show the plot without any fancy formatting or labels.
+plot(rdf_x, rdf1)
 ```
 
 Pymatgen is currently the largest package and has the most toolkit-like features. As an example, it's common to compare two structures and see if are symmetrically equivalent (within a given tolerance). You give it two structures and it will return True or False on whether they are matching:
 ```python
 from pymatgen.analysis.structure_matcher import StructureMatcher
+
 matcher = StructureMatcher()
+
 is_matching = matcher.fit(structure1, structure2)
 ```
 
@@ -248,4 +270,3 @@ If you're trying to follow a paper and analyze a structure, odds are that someon
 
 - [Codecademy's python lessons](https://www.codecademy.com/learn/learn-python-3) (we HIGHLY recommend spending 2-3 days going through if you're new to python. Learning the fundamentals is very important to using Simmate effectively.)
 - [Introduction to Spyder](https://docs.spyder-ide.org/current/videos/first-steps-with-spyder.html) (The 3 videos are under 4 minutes each, so worth a quick watcg) 
-
