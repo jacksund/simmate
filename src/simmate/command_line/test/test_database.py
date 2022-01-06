@@ -6,29 +6,30 @@ import pytest
 from click.testing import CliRunner
 
 from simmate.command_line.database import database
-from simmate.configuration.django.database import update_database
 
 
-@pytest.mark.no_django_setup
-def test_database_reset():
+@pytest.fixture
+def test_database_reset(django_db_blocker):
 
-    # make the dummy terminal
-    runner = CliRunner()
+    # django-pytest does not let us to test the initial setup/configuration of the
+    # database, so we need to do it within this context.
+    #   https://pytest-django.readthedocs.io/en/latest/database.html#django-db-blocker
+    with django_db_blocker.unblock():
 
-    # reset the database
-    result = runner.invoke(database, ["reset", "--confirm-delete"])
-    assert result.exit_code == 0
+        # make the dummy terminal
+        runner = CliRunner()
 
-    # update the database
-    result = runner.invoke(database, ["update"])
-    assert result.exit_code == 0
+        # reset the database
+        result = runner.invoke(database, ["reset", "--confirm-delete"])
+        assert result.exit_code == 0
+
+        # update the database
+        result = runner.invoke(database, ["update"])
+        assert result.exit_code == 0
 
 
 @pytest.mark.django_db
 def test_database_dump_and_load():
-
-    # make sure all models are updated
-    update_database()
 
     # make the dummy terminal
     runner = CliRunner()
