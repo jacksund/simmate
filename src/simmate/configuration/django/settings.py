@@ -21,6 +21,7 @@ import yaml
 import dj_database_url  # needed for DigitalOcean database connection
 
 from simmate import website  # needed to specify location of built-in apps
+from simmate.utilities import get_directory
 
 # --------------------------------------------------------------------------------------
 
@@ -30,7 +31,8 @@ from simmate import website  # needed to specify location of built-in apps
 # folder named ".simmate/extra_applications".
 # For windows, this would be something like...
 #   C:\Users\exampleuser\.simmate\extra_applications
-SIMMATE_DIRECTORY = os.path.join(Path.home(), ".simmate")
+# Note, we use get_directory in order to create that folder if it does not exist.
+SIMMATE_DIRECTORY = get_directory(os.path.join(Path.home(), ".simmate"))
 
 # This directory is where simmate.website is located and helps us indicate
 # where things like our templates or static files are located. We find this

@@ -6,10 +6,12 @@ import pytest
 from click.testing import CliRunner
 
 from simmate.command_line.database import database
+from simmate.configuration.django.database import update_database
 
 
 @pytest.mark.no_django_setup
 def test_database_reset():
+
     # make the dummy terminal
     runner = CliRunner()
 
@@ -24,6 +26,10 @@ def test_database_reset():
 
 @pytest.mark.django_db
 def test_database_dump_and_load():
+
+    # make sure all models are updated
+    update_database()
+
     # make the dummy terminal
     runner = CliRunner()
 
