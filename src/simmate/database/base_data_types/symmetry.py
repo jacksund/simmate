@@ -33,7 +33,7 @@ class Spacegroup(DatabaseTable):
     """ Django App Association """
 
     class Meta:
-        app_label = "third_parties"  # TODO: move to a separate app
+        app_label = "local_calculations"  # TODO: move to a separate app
 
     """ Model Methods """
 
