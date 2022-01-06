@@ -34,8 +34,6 @@ jobs:
     - name: Run unmarked tests only
       run: |
         pytest
-# I can't figure out permissions to run these tests... so I skip them for now 
-# and just run them locally.
-#    - name: Run no_django_setup marked tests
-#     run: |
-#       sudo /usr/share/miniconda/bin/pytest -m no_django_setup -p no:django
+    - name: Run no_django_setup marked tests
+    run: |
+      pytest -m no_django_setup -p no:django
