@@ -18,7 +18,7 @@ In this tutorial, you will use the command line to view all available workflows 
 
 > :warning: we assume you have VASP installed and that the `vasp_std` command is in the available path. In the future, we hope to update this tutorial with a workflow that doesn't require VASP. Until then, we apologize for the inconvenience. :cry:
 
-1. Before running a workflow, we must initialize our Simmate database with `simmate databate reset`. Your database will be built at `~/.simmate/database.sqlite3`.
+1. Before running a workflow, we must initialize our Simmate database with `simmate database reset`. Your database will be built at `~/.simmate/database.sqlite3`.
 2. To practice calculating, make structure file for tablesalt (NaCl). Name it `POSCAR`, where the contents are...
 ```
 Na1 Cl1
