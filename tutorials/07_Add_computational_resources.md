@@ -18,7 +18,7 @@ In this tutorial, you will learn how to run workflows on distributed computation
 
 # The quick tutorial
 
-> :bulb: [prefect](https://github.com/PrefectHQ/prefect), [dask](https://github.com/dask/distributed), and [dask_jobqueue](https://github.com/dask/dask-jobqueue) will be already installed for you because thet are dependencies of Simmate
+> :bulb: [prefect](https://github.com/PrefectHQ/prefect), [dask](https://github.com/dask/distributed), and [dask_jobqueue](https://github.com/dask/dask-jobqueue) will be already installed for you because they are dependencies of Simmate
 
 1. Be aware that you can share a cloud database *without* sharing computational resources. This flexibility is very important for many collaborations. 
 2. Just like with your cloud database, designate a point-person to manage your private computational resources. Everyone else can skip to step 9.
