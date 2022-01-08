@@ -13,6 +13,7 @@ In this tutorial, you will learn how to install Simmate with Anaconda. Beginners
     - [Extra Resources](#extra-resources)
 
 <br/><br/>
+
 # The quick tutorial
 
 > :warning: In this tutorial and others, beginners should skip the **quick tutorial** section and jump straight to the **full tutorial**. The critical steps in each are exactly the same, but the full tutorial includes extra exploration of the software and how to use it. So be sure to read the full tutorials if you don't have coding experience!
@@ -27,6 +28,7 @@ conda activate my_env
 3. Run the `simmate` command to make sure it's installed correctly
 
 <br/><br/>
+
 # The full tutorial
 
 <br/>
@@ -110,9 +112,19 @@ You'll see `(base)` at the start of the line. This is our anaconda enviornment t
 
 Now, try typing in the command `cd Desktop` and then hit enter. This will open up your Desktop folder. Then enter the command `ls`, which will list all files and folders on your Desktop. 
 
+```
+# run these two commands
+cd Desktop
+ls
+```
+
 For other simple commands, you can take a look at [this cheat sheet](https://www.git-tower.com/blog/command-line-cheat-sheet/) or take [a full tutorial](https://www.codecademy.com/learn/learn-the-command-line). Memorizing commands will come slowly over time, so keep this cheat-sheet handy. We highly recommend that you spend 30 minutes going through these links once you finish this tutorial.
 
 Obviously, the tricky part with the command-line is knowing what to type. Fortunately, however, most programs have a single command that forms the base of more complex commands. For anaconda, the command is `conda`. If you aren't sure what it does or how to use it, you just add `--help` to it. Type in the command `conda --help` and you'll see an output like this:
+
+```
+conda --help
+```
 
 ```
 usage: conda [-h] [-V] command ...
@@ -150,7 +162,7 @@ You'll see the start of your command line switch from `(base)` to `(my_env)` if 
 conda install -c conda-forge -n my_env simmate
 ```
 
-This may take a few minutes to run and install. But once it's done, you've now successfully installed Simmate! If you ran into any errors with this very last command, please let our team know immediately by [posting a new issue here](https://github.com/jacksund/simmate/issues/new).
+This may take a few minutes to run and install. But once it's done, you've now successfully installed Simmate! If you ran into any errors with this very last command, please let our team know immediately by [posting a new issue here](https://github.com/jacksund/simmate/issues/).
 
 As an extra, let's use Anaconda to install [Spyder](https://www.spyder-ide.org/). Spyder is what we will use to write python in later tutorials. But now that we have Anaconda set up, installing new programs can be done in just one line:
 ```
@@ -164,12 +176,19 @@ conda install -c conda-forge -n my_env spyder
 Just like we used `conda --help` above, we can also ask for help with Simmate. Start with running the command `simmate --help` and you should see the following output:
 
 ```
+simmate --help
+```
+
+```
 Usage: simmate [OPTIONS] COMMAND [ARGS]...
 
   This is the base command that all others stem from.
 
-  If you are a beginner for the command line, take a look at our tutorial:
-  << TODO: insert link >>
+  If you are a beginner to the command line, be sure to start with our
+  tutorials: https://github.com/jacksund/simmate/tree/main/tutorials
+
+  Below you will see a list of sub-commands to try. For example, you can run
+  `simmate database --help` to learn more about it.
 
 Options:
   --help  Show this message and exit.
@@ -184,7 +203,7 @@ Commands:
 
 You can see there are many other commands like `simmate database` and `simmate workflows` that we will explore in other tutorials. 
 
-But we're now ready to start using the code!
+But we're now ready to start using the code! Spend some time with the extra resources (next section) and then continue on to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md).
 
 <br/>
 
