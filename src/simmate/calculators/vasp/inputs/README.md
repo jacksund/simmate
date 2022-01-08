@@ -194,19 +194,19 @@ Pymatgen stores all of your vasp potcar files inside of a folder called my_psp
 and they save it to the module location. Because of this, I think conda envs
 actually get messed up when you try to initialize multiple enviornments for the
 potcar files. Instead, I think you should either 1) let the user indicate exactly
-where the files are located or 2) have a .simmate/ folder in their home directory.
+where the files are located or 2) have a simmate/ folder in their home directory.
 This makes it so users can see exactly where their files are located. I don't
 think you should mess with the site-packages folder as this could even cause issues
-on shared installs. There should instead be at .simmate configuration folder that
+on shared installs. There should instead be at simmate configuration folder that
 is easily accessible.
 
 Vasp provides their POTCARs in a dist/Potentials folder. Pymatgen takes their
 format and changes it. I don't think this should be done. Instead I want to keep
-their original folder structure and just move it to /.simmate/vasp/Potentials
+their original folder structure and just move it to /simmate/vasp/Potentials
 This saves the user from having to rename anything and also saves us from having
 to code it and confuse the user where it's being stored
 
-Together, the .simmate folder means I can also just copy/paste a configuration
+Together, the simmate folder means I can also just copy/paste a configuration
 folder to a new computer if I'd like.
 
 I need to learn more about other DFT programs but I'm sure there's a generic

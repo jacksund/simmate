@@ -37,7 +37,7 @@ HEADER_ART = r"""
 
 # Load our default cluster type, agent name, and agent labels
 def load_agent_settings():
-    SIMMATE_DIRECTORY = os.path.join(Path.home(), ".simmate")
+    SIMMATE_DIRECTORY = os.path.join(Path.home(), "simmate")
     AGENT_YAML = os.path.join(SIMMATE_DIRECTORY, "prefect_agent.yaml")
     if os.path.exists(AGENT_YAML):
         with open(AGENT_YAML) as file:

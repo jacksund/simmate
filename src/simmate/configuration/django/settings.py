@@ -28,11 +28,11 @@ from simmate.utilities import get_directory
 # SET MAIN DIRECTORIES
 
 # We check for extra django apps in the user's home directory and in a "hidden"
-# folder named ".simmate/extra_applications".
+# folder named "simmate/extra_applications".
 # For windows, this would be something like...
-#   C:\Users\exampleuser\.simmate\extra_applications
+#   C:\Users\exampleuser\simmate\extra_applications
 # Note, we use get_directory in order to create that folder if it does not exist.
-SIMMATE_DIRECTORY = get_directory(os.path.join(Path.home(), ".simmate"))
+SIMMATE_DIRECTORY = get_directory(os.path.join(Path.home(), "simmate"))
 
 # This directory is where simmate.website is located and helps us indicate
 # where things like our templates or static files are located. We find this

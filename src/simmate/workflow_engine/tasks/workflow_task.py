@@ -17,10 +17,10 @@ from simmate.workflow_engine.workflow import Workflow
 # def get_default_executor_type():
 #     # rather than always specifying the executor type whenever this class is used,
 #     # it's much more convenient to set the default value here based on a config
-#     # file. We check for this in the file ".simmate/extra_applications".
+#     # file. We check for this in the file "simmate/extra_applications".
 #     # For windows, this would be something like...
-#     #   C:\Users\exampleuser\.simmate\executor.yaml
-#     SIMMATE_DIRECTORY = os.path.join(Path.home(), ".simmate")
+#     #   C:\Users\exampleuser\simmate\executor.yaml
+#     SIMMATE_DIRECTORY = os.path.join(Path.home(), "simmate")
 #     EXECUTOR_YAML = os.path.join(SIMMATE_DIRECTORY, "executor.yaml")
 #     if os.path.exists(EXECUTOR_YAML):
 #         with open(EXECUTOR_YAML) as file:

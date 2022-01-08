@@ -19,7 +19,7 @@ In this tutorial, you will learn how to switch from saving results locally to sa
 ```
 conda install -n my_env -c conda-forge psycopg2
 ```
-4. Add the file `~/.simmate/database.yaml` with your connection details that match [django format](https://docs.djangoproject.com/en/dev/ref/settings/#databases). As an example, this `database.yaml` file gives a `default` database to use:
+4. Add the file `~/simmate/database.yaml` with your connection details that match [django format](https://docs.djangoproject.com/en/dev/ref/settings/#databases). As an example, this `database.yaml` file gives a `default` database to use:
 ```
 default:
   ENGINE: django.db.backends.postgresql_psycopg2
@@ -65,13 +65,13 @@ PostgreSQL is free and open-source, so you can avoid costs and set it up manuall
 
 If you decide to use Postgres, you'll also need to install the extra package `psycopg2`, which let's Django talk with Postgres. To install this, run the command `conda install -n my_env -c conda-forge psycopg2`.
 
-Once you have your database set-up, add the connection parameters to `~/.simmate/database.yaml` (see the quick tutorial above for an example) and then run `simmate database reset` to build all of your tables. You can then share your `database.yaml` (or alternatively, make new user profiles and share those connection details) with your team members.
+Once you have your database set-up, add the connection parameters to `~/simmate/database.yaml` (see the quick tutorial above for an example) and then run `simmate database reset` to build all of your tables. You can then share your `database.yaml` (or alternatively, make new user profiles and share those connection details) with your team members.
 
 <br/>
 
 ## Connecting to your cloud database
 
-This will be the easiest thing we've done yet! Once you have the connection parameters for your cloud database, simply create the file `~/.simmate/database.yaml` and add the connection parameters that your point-person provided. As an example, this `database.yaml` file gives a `default` database to use:
+This will be the easiest thing we've done yet! Once you have the connection parameters for your cloud database, simply create the file `~/simmate/database.yaml` and add the connection parameters that your point-person provided. As an example, this `database.yaml` file gives a `default` database to use:
 ```
 default:
   ENGINE: django.db.backends.postgresql_psycopg2

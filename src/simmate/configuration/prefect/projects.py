@@ -53,7 +53,7 @@ def build():
             set_schedule_active=False,
         )
     # TODO: will I need to store the project or workflow IDs? Maybe inside
-    # the /.simmate/prefect folder? Or maybe even the /.prefect folder?
+    # the /simmate/prefect folder? Or maybe even the /.prefect folder?
     # I could also return a list of what's been done.
 
 
