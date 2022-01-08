@@ -8,6 +8,6 @@ import os
 # in the init.
 os.environ.setdefault(
     "DASK_CONFIG",
-    os.path.join(os.path.expanduser("~"), ".simmate", "dask_cluster.yaml"),
+    os.path.join(os.path.expanduser("~"), "simmate", "dask_cluster.yaml"),
 )
 # TODO: I need to update this to allow for other directories

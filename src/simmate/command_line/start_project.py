@@ -30,12 +30,12 @@ def start_project(project_name):
     # grab the full path to the new project for the user to see
     new_project_directory = os.path.join(os.getcwd(), project_name)
 
-    # also navigate to the user's ~/.simmate/applications.yaml file and we
+    # also navigate to the user's ~/simmate/applications.yaml file and we
     # want to add a new line at the end of it (or create the file if it isn't
     # there yet)
     from pathlib import Path
 
-    apps_yaml = os.path.join(Path.home(), ".simmate", "applications.yaml")
+    apps_yaml = os.path.join(Path.home(), "simmate", "applications.yaml")
     new_line = "\nexample_app.apps.ExampleAppConfig"  # \n ensures a new line
 
     # If the file exists, we append this line to the end of the file. Otherwise,

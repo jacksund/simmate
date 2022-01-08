@@ -12,10 +12,10 @@ from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
 
 
 def get_default_parallel_settings():
-    # We load the user's default parallel settings from ~/.simmate/vasp/INCAR_parallel_settings
+    # We load the user's default parallel settings from ~/simmate/vasp/INCAR_parallel_settings
     # If this file doesn't exist, then we just use an empty dictionary
     settings_filename = os.path.join(
-        Path.home(), ".simmate", "vasp", "INCAR_parallel_settings"
+        Path.home(), "simmate", "vasp", "INCAR_parallel_settings"
     )
     if os.path.exists(settings_filename):
         return Incar.from_file(settings_filename)
@@ -60,7 +60,7 @@ class VaspTask(SSSTask):
     # We also load any parallel settings to add on to the base incar. These
     # should not effect the calculation in any way, but they are still selected
     # based on the computer specs and what runs fastest on it. Therefore, these
-    # settings are loaded from ~/.simmate/vasp/INCAR_parallel_settings by default.
+    # settings are loaded from ~/simmate/vasp/INCAR_parallel_settings by default.
     # This can also be overwritten as well.
     incar_parallel_settings = get_default_parallel_settings()
 
