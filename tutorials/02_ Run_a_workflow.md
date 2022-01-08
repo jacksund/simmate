@@ -394,7 +394,7 @@ For example, UNC's longleaf cluster uses [SLURM](https://slurm.schedmd.com/docum
 #SBATCH --job-name=my_example_job
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=4GB
 #SBATCH --time=01:00:00
 #SBATCH --partition=general
@@ -402,13 +402,31 @@ For example, UNC's longleaf cluster uses [SLURM](https://slurm.schedmd.com/docum
 #SBATCH --mail-type=ALL 
 #SBATCH --mail-user=my_username@live.unc.edu
 
-simmate workflows run energy_mit POSCAR
+simmate workflows run energy_mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
 ```
+
+Each of these `SBATCH` parameters set how we would like to sumbit a job and how many resources we expect to use. These are explained in [SLURM's documnetation for sbatch](https://slurm.schedmd.com/sbatch.html), but you may need help from your IT team to update them. But to break down these example parameters...
+
+- `job-name`: the name that identifies your job. It will be visible when you check the status of your job
+- `nodes`: the number of server nodes (or CPUs) that you request. Typically leave this at 1.
+- `ntasks`: the number tasks that you'll be running. We run one workflow at a time here, so we use 1.
+- `cpus-per-task`: the number of CPU tasks required for each run. We run our workflow using 4 cores (`mpirun -n 4`) so we need to request 4 cores for it here
+- `mem`: the memory requested for this job. If it is exceeded, the job will be terminated.
+- `time`: the maximum time requested for this job. If it is exceeded, the job will be terminated.
+- `partition`: the group of nodes that we request resources on. You can often remove this line and use the cluster's default.
+- `output`: the name of the file to write the job output (including errors)
+- `mail-type` + `mail-user`: will send an email alerts when a jobs starts/stops/fails/etc.
 
 Make sure you have VASP and your correct conda enviornment loaded. Then submit your job with:
 
 ```
 sbatch submit.sh
+```
+
+You can then monitor your jobs progress with:
+
+```
+squeue -u my_username
 ```
 
 You've now submitted a Simmate workflow to a remote cluster :partying_face: :partying_face: :partying_face: !!! 
