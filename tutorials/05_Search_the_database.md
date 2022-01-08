@@ -137,7 +137,14 @@ from simmate.workflows.all import energy_mit
 result_table = energy_mit.result_table
 ```
 
-To see all of the data this table stores, we can use it's `result_table.show_columns()` method. Here, we'll see a bunch of columns printed for us...
+To see all of the data this table stores, we can use it's `show_columns()` method. Here, we'll see a bunch of columns printed for us...
+
+```python
+result_table.show_columns()
+```
+
+... which will output ...
+
 ```
 - id
 - structure_string
@@ -183,6 +190,7 @@ To see all of the data this table stores, we can use it's `result_table.show_col
 These are a lot of columns... and you may not need all of them. But Simmate still builds all of these for you right away because they don't take up very much storage space.
 
 Next we'd want to see the table with all of its data. To access the table rows, we use the `objects` attribute, and then to get this into a table, we convert to a "dataframe". A dataframe is a filtered portion of a database table -- and because we didn't filter any of our results yet, our dataframe is just the whole table. 
+
 ```python
 data = result_table.objects.to_dataframe()
 ```
@@ -277,4 +285,6 @@ structures = JarvisStructure.objects.filter(
 ).all()
 ```
 
-There are many ways to search through your tables, and we only covered the basics here. Advanced users will benefit from knowing that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a long time to master, so we only recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) if you plan on joining our team or are a fully computational student. Beginners can just ask for help. Figuring out the correct filter can take new users hours while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/new?category=q-a).
+There are many ways to search through your tables, and we only covered the basics here. Advanced users will benefit from knowing that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a long time to master, so we only recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) if you plan on joining our team or are a fully computational student. Beginners can just ask for help. Figuring out the correct filter can take new users hours while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/categories/q-a).
+
+Up next, we can start sharing results with others! Continue to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md) when you're ready.

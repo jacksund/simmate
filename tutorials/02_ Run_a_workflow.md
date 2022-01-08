@@ -415,4 +415,4 @@ You've now submitted a Simmate workflow to a remote cluster :partying_face: :par
 
 Be sure to go back through this tutorial a few times before moving on. Submitting remote jobs can be tedious but it's important to understand. Advanced features of Simmate will let you skip a lot of this work down the road, but that won't happen until tutorial 07.
 
-When you're ready, you can advance to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/03_Analyze_and_modify_structures.md), which be back on your local computer.
+When you're ready, you can advance to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/03_Analyze_and_modify_structures.md), which can be completed on your local computer.
