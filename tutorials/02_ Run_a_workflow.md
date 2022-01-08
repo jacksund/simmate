@@ -333,7 +333,7 @@ If any errors come up, please let our team know by [posting a question](https://
 
 Thus far, you've been running Simmate on your local desktop or laptop, but we saw in the previous section, that we actually need VASP (which needs to be on Linux) for Simmate's workflows to run. 99% of the time, you'll be using a University or Federal supercomputer (aka "high performance computing (HPC) clusters"), which will have VASP already installed.
 
-For teams that are actively using Simmate, we have a guides on submitting to that particular cluster. [Check to see if your university or federal cluster is listed](#). Use these guides as you work through the rest of this section. If your cluster/university is not listed, contact your IT team for help in completing this tutorial.
+For teams that are actively using Simmate, we have a guides on submitting to that particular cluster. [Check to see if your university or federal cluster is listed](https://github.com/jacksund/simmate/tree/main/tutorials/Guides_for_HPC_clusters). Use these guides as you work through the rest of this section. If your cluster/university is not listed, contact your IT team for help in completing this tutorial.
 
 For workflows to run correctly, the following requirements need to be met:
 
