@@ -3,11 +3,11 @@
 
 WarWulf is the Warren Lab's Beowulf cluster.
 
-# Guide
+> :bulb: This guide should be used alongside tutorial 02 ([here](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md#switching-to-a-remote-cluster)).
 
-This guide should be used alongside tutorial 02 when switching to a remote cluster ([here](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md#switching-to-a-remote-cluster)).
+<br/>
 
-## The Simmate checklist
+# The Simmate checklist
 
 From the posted requirements:
 
@@ -23,27 +23,38 @@ For the uncompleted requirements:
 2. everyone shares the profile "WarrenLab". Ask Scott for the password (scw@email.unc.edu)
 5. make your personal environment named `yourname_env` (e.g. `jacks_env`)
 
-## Example commands and scripts
+<br/>
+
+# Example commands and scripts
 
 Substitute these commands with the ones you see in the main tutorial.
 
-Sign in with...
+<br/>
+
+## Sign in with...
 ```
 ssh WarrenLab@warwulf.net
 ```
 
-Load VASP with...
+<br/>
+
+## Load VASP with...
 ```
 module purge
 module load gnu11 impi vasp libfabric ucx
 ```
 
-Call VASP with... (we don't use `vasp_std` for our default command)
+<br/>
+
+## Call VASP with... 
+We don't use `vasp_std` for our default command.
 ```
 vasp > vasp.out 
 ```
 
-Create your conda env with...
+<br/>
+
+## Create your conda env with...
 ```
 conda create -n my_env -c conda-forge python=3.8 simmate
 conda activate my_env
@@ -55,17 +66,21 @@ conda activate my_env
 Do **NOT** run the `simmate database reset`. Because we share a username, we share a home directory and database. Calling this command will reset EVERYONE's database. If you think the database needs reset, contact Scott first.
 :warning::warning::warning:
 
+<br/>
 
-Switch to the temporary working directory before submitting:
+## Access scratch directory with...
 ```
 cd /media/synology/user/your_name
 ```
 
+<br/>
 
-Create a SLURM script with...
+## Create a SLURM script with...
 ```
 nano submit.sh
 ```
+
+<br/>
 
 And paste in the example content...
 ```
@@ -87,7 +102,10 @@ And paste in the example content...
 simmate workflows run energy_mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
 ```
 
-Check list before submitting:
+<br/>
+
+## Submit with...
+Checklist before submitting:
 1. loaded the VASP module
 2. activated your conda environment
 3. in the temporary working directory (/media/synology/user/your_name)
@@ -99,7 +117,10 @@ Once all of these are met, you can submit with...
 sbatch submit.sh
 ```
 
-Monitor progress with... (a short cut for `squeue` with extra info)
+<br/>
+
+## Monitor progress with... 
+We use a short cut for `squeue` with extra info
 ```
 sq
 ```
