@@ -65,24 +65,41 @@ What about advanced features? Simmate is slowly adding these to our toolkit modu
 ```python
 # Simmate is in the process of adding new features. One example
 # creating a random structure from a spacegroup and composition
+
 from simmate.toolkit import Composition
 from simmate.toolkit.creators.structure.all import RandomSymStructure
+
 composition = Composition("Ca2N")
 creator = RandomSymStructure(composition)
-structure = creator.create_structure(spacegroup=166)
+
+structure1 = creator.create_structure(spacegroup=166)
+structure2 = creator.create_structure(spacegroup=225)
+
+# ----------------------------------------------------------------------
 
 # Matminer is handy for analyzing structures and making
 # machine-learning inputs. One common analysis is the generating
 # a RDF fingerprint to help analyze bonding and compare structures
+
 from matminer.featurizers.structure.rdf import RadialDistributionFunction
-rdf_analyzer = RadialDistributionFunction()
-rdf = rdf_analyzer.featurize(structure)
+
+rdf_analyzer = RadialDistributionFunction(bin_size=0.1)
+
+rdf1 = rdf_analyzer.featurize(structure1)
+rdf2 = rdf_analyzer.featurize(structure2)
+
+# ----------------------------------------------------------------------
 
 # Pymatgen currently has the most functionality. One common
 # function is checking if two structures are symmetrically
 # equivalent (under some tolerance).
+
 from pymatgen.analysis.structure_matcher import StructureMatcher
+
 matcher = StructureMatcher()
+
+# Now compare our two random structures!
+# This should give False. Check in your Spyder variable explorer.
 is_matching = matcher.fit(structure1, structure2)
 ```
 
@@ -177,6 +194,25 @@ s = Structure(
 ```
 
 Whatever your method for creating a structure, we now have our `Structure` object and we can use its properties (and methods) to simplify our calculations.
+
+For example, we can use it to run a workflow. We did this with the command-line in the last tutorial but can accomplish the same thing with python:
+
+```
+# Using the command-line (from our previous tutorial)
+simmate workflows run energy_mit POSCAR
+```
+
+```python
+# Using Python (in Spyder)
+
+# This code does the exact same thing as the command above
+
+from simmate.toolkit import Structure
+from simmate.workflows.all import relaxation_mit
+
+nacl_structure = Structure.from_file("POSCAR")
+result = relaxation_mit.run(structure=nacl_structure)
+```
 
 <br/> <!-- add empty line -->
 
