@@ -10,6 +10,7 @@
 # if "simmate.calculators.vasp" in installed_apps:
 from simmate.calculators.vasp.workflows.relaxation.all import (
     relaxation_mit,
+    relaxation_matproj,
     relaxation_quality00,
     relaxation_quality01,
     relaxation_quality02,

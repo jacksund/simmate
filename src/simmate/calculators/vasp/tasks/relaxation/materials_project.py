@@ -2,7 +2,7 @@
 
 from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.inputs.potcar_mappings import (
-    PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
+    PBE_ELEMENT_MAPPINGS,
 )
 from simmate.calculators.vasp.error_handlers.all import (
     TetrahedronMesh,
@@ -18,7 +18,7 @@ from simmate.calculators.vasp.error_handlers.all import (
 )
 
 
-class MITRelaxation(VaspTask):
+class MaterialsProjectRelaxation(VaspTask):
 
     # returns structure separately from vasprun object
     return_final_structure = True
@@ -26,28 +26,29 @@ class MITRelaxation(VaspTask):
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria.
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS_LOW_QUALITY
+    potcar_mappings = PBE_ELEMENT_MAPPINGS
 
     # These are all input settings for this task. Note a lot of settings
     # depend on the structure/composition being analyzed.
     incar = dict(
         # These settings are the same for all structures regardless of composition
         ALGO="Fast",
-        EDIFF=1.0e-05,
+        EDIFF__per_atom=5.0e-05,
         ENCUT=520,
         IBRION=2,
-        ICHARG=1,
         ISIF=3,
+        ISMEAR=-5,
         ISPIN=2,
         ISYM=0,
+        KSPACING=0.4,  # !!! This is where we are different from pymatgen right now
+        LASPH=True,
         LORBIT=11,
         LREAL="Auto",
         LWAVE=False,
-        NELM=200,
-        NELMIN=6,
+        NELM=100,
         NSW=99,
         PREC="Accurate",
-        KSPACING=0.5,  # !!! This is where we are different from pymatgen right now
+        SIGMA=0.05,
         # The magnetic moments are dependent on what the composition and oxidation
         # states are. Note our default of 0.6 is different from the VASP default too.
         MAGMOM__smart_magmom={
@@ -83,18 +84,6 @@ class MITRelaxation(VaspTask):
             "W": 5,
             "Yb3+": 1,
         },
-        # The type of smearing we use depends on if we have a metal, semiconductor,
-        # or insulator. So we need to decide this using a keyword modifier.
-        multiple_keywords__smart_ismear={
-            "metal": dict(
-                ISMEAR=2,
-                SIGMA=0.2,
-            ),
-            "non-metal": dict(
-                ISMEAR=-5,
-                SIGMA=0.05,
-            ),
-        },
         # We run LDA+U for certain compositions. This is a complex configuration
         # so be sure to read the "__smart_ldau" modifier for more information.
         # But as an example for how the mappings work...
@@ -108,74 +97,46 @@ class MITRelaxation(VaspTask):
             LDAUJ={},  # pymatgen sets these, but they're all default values anyways
             LDAUL={
                 "F": {
-                    "Ag": 2,
                     "Co": 2,
                     "Cr": 2,
-                    "Cu": 2,
                     "Fe": 2,
                     "Mn": 2,
                     "Mo": 2,
-                    "Nb": 2,
                     "Ni": 2,
-                    "Re": 2,
-                    "Ta": 2,
                     "V": 2,
                     "W": 2,
                 },
                 "O": {
-                    "Ag": 2,
                     "Co": 2,
                     "Cr": 2,
-                    "Cu": 2,
                     "Fe": 2,
                     "Mn": 2,
                     "Mo": 2,
-                    "Nb": 2,
                     "Ni": 2,
-                    "Re": 2,
-                    "Ta": 2,
                     "V": 2,
                     "W": 2,
-                },
-                "S": {
-                    "Fe": 2,
-                    "Mn": 2.5,
                 },
             },
             LDAUU={
                 "F": {
-                    "Ag": 1.5,
-                    "Co": 3.4,
-                    "Cr": 3.5,
-                    "Cu": 4,
-                    "Fe": 4.0,
+                    "Co": 3.32,
+                    "Cr": 3.7,
+                    "Fe": 5.3,
                     "Mn": 3.9,
                     "Mo": 4.38,
-                    "Nb": 1.5,
-                    "Ni": 6,
-                    "Re": 2,
-                    "Ta": 2,
-                    "V": 3.1,
-                    "W": 4.0,
+                    "Ni": 6.2,
+                    "V": 3.25,
+                    "W": 6.2,
                 },
                 "O": {
-                    "Ag": 1.5,
-                    "Co": 3.4,
-                    "Cr": 3.5,
-                    "Cu": 4,
-                    "Fe": 4.0,
+                    "Co": 3.32,
+                    "Cr": 3.7,
+                    "Fe": 5.3,
                     "Mn": 3.9,
                     "Mo": 4.38,
-                    "Nb": 1.5,
-                    "Ni": 6,
-                    "Re": 2,
-                    "Ta": 2,
-                    "V": 3.1,
-                    "W": 4.0,
-                },
-                "S": {
-                    "Fe": 1.9,
-                    "Mn": 2.5,
+                    "Ni": 6.2,
+                    "V": 3.25,
+                    "W": 6.2,
                 },
             },
         ),
