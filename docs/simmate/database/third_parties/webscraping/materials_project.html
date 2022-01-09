@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="pdoc 8.2.0" />
+    <title>simmate.database.third_parties.webscraping.materials_project API documentation</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%2244.5%202.5%2015%2015%22%3E%3Cpath%20d%3D%22M49.351%2021.041c-.233-.721-.546-2.408-.772-4.076-.042-.09-.067-.187-.046-.288-.166-1.347-.277-2.625-.241-3.351-1.378-1.008-2.271-2.586-2.271-4.362%200-.976.272-1.935.788-2.774.057-.094.122-.18.184-.268-.033-.167-.052-.339-.052-.516%200-1.477%201.202-2.679%202.679-2.679.791%200%201.496.352%201.987.9a6.3%206.3%200%200%201%201.001.029c.492-.564%201.207-.929%202.012-.929%201.477%200%202.679%201.202%202.679%202.679a2.65%202.65%200%200%201-.269%201.148c.383.747.595%201.572.595%202.41%200%202.311-1.507%204.29-3.635%205.107.037.699.147%202.27.423%203.294l.137.461c.156%202.136-4.612%205.166-5.199%203.215zm.127-4.919a4.78%204.78%200%200%200%20.775-.584c-.172-.115-.505-.254-.88-.378zm.331%202.302l.828-.502c-.202-.143-.576-.328-.984-.49zm.45%202.157l.701-.403c-.214-.115-.536-.249-.891-.376l.19.779zM49.13%204.141c0%20.152.123.276.276.276s.275-.124.275-.276-.123-.276-.276-.276-.275.124-.275.276zm.735-.389a1.15%201.15%200%200%201%20.314.783%201.16%201.16%200%200%201-1.162%201.162c-.457%200-.842-.27-1.032-.653-.026.117-.042.238-.042.362a1.68%201.68%200%200%200%201.679%201.679%201.68%201.68%200%200%200%201.679-1.679c0-.843-.626-1.535-1.436-1.654zm3.076%201.654a1.68%201.68%200%200%200%201.679%201.679%201.68%201.68%200%200%200%201.679-1.679c0-.037-.009-.072-.011-.109-.21.3-.541.508-.935.508a1.16%201.16%200%200%201-1.162-1.162%201.14%201.14%200%200%201%20.474-.912c-.015%200-.03-.005-.045-.005-.926.001-1.679.754-1.679%201.68zm1.861-1.265c0%20.152.123.276.276.276s.275-.124.275-.276-.123-.276-.276-.276-.275.124-.275.276zm1.823%204.823c0-.52-.103-1.035-.288-1.52-.466.394-1.06.64-1.717.64-1.144%200-2.116-.725-2.499-1.738-.383%201.012-1.355%201.738-2.499%201.738-.867%200-1.631-.421-2.121-1.062-.307.605-.478%201.267-.478%201.942%200%202.486%202.153%204.51%204.801%204.51s4.801-2.023%204.801-4.51zm-3.032%209.156l-.146-.492c-.276-1.02-.395-2.457-.444-3.268a6.11%206.11%200%200%201-1.18.115%206.01%206.01%200%200%201-2.536-.562l.006.175c.802.215%201.848.612%202.021%201.25.079.295-.021.601-.274.837l-.598.501c.667.304%201.243.698%201.311%201.179.02.144.022.507-.393.787l-.564.365c1.285.521%201.361.96%201.381%201.126.018.142.011.496-.427.746l-.854.489c.064-1.19%201.985-2.585%202.697-3.248zM49.34%209.925c0-.667%201-.667%201%200%200%20.653.818%201.205%201.787%201.205s1.787-.552%201.787-1.205c0-.667%201-.667%201%200%200%201.216-1.25%202.205-2.787%202.205s-2.787-.989-2.787-2.205zm-.887-7.633c-.093.077-.205.114-.317.114a.5.5%200%200%201-.318-.886L49.183.397a.5.5%200%200%201%20.703.068.5.5%200%200%201-.069.703zm7.661-.065c-.086%200-.173-.022-.253-.068l-1.523-.893c-.575-.337-.069-1.2.506-.863l1.523.892a.5.5%200%200%201%20.179.685c-.094.158-.261.247-.432.247z%22%20fill%3D%22%233bb300%22/%3E%3C/svg%3E"/>
+
+
+<style>/*! * Bootstrap Reboot v5.0.0 (https://getbootstrap.com/) * Copyright 2011-2021 The Bootstrap Authors * Copyright 2011-2021 Twitter, Inc. * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE) * Forked from Normalize.css, licensed MIT (https://github.com/necolas/normalize.css/blob/master/LICENSE.md) */*,::after,::before{box-sizing:border-box}@media (prefers-reduced-motion:no-preference){:root{scroll-behavior:smooth}}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#fff;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}hr{margin:1rem 0;color:inherit;background-color:currentColor;border:0;opacity:.25}hr:not([size]){height:1px}h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}h1{font-size:calc(1.375rem + 1.5vw)}@media (min-width:1200px){h1{font-size:2.5rem}}h2{font-size:calc(1.325rem + .9vw)}@media (min-width:1200px){h2{font-size:2rem}}h3{font-size:calc(1.3rem + .6vw)}@media (min-width:1200px){h3{font-size:1.75rem}}h4{font-size:calc(1.275rem + .3vw)}@media (min-width:1200px){h4{font-size:1.5rem}}h5{font-size:1.25rem}h6{font-size:1rem}p{margin-top:0;margin-bottom:1rem}abbr[data-bs-original-title],abbr[title]{-webkit-text-decoration:underline dotted;text-decoration:underline dotted;cursor:help;-webkit-text-decoration-skip-ink:none;text-decoration-skip-ink:none}address{margin-bottom:1rem;font-style:normal;line-height:inherit}ol,ul{padding-left:2rem}dl,ol,ul{margin-top:0;margin-bottom:1rem}ol ol,ol ul,ul ol,ul ul{margin-bottom:0}dt{font-weight:700}dd{margin-bottom:.5rem;margin-left:0}blockquote{margin:0 0 1rem}b,strong{font-weight:bolder}small{font-size:.875em}mark{padding:.2em;background-color:#fcf8e3}sub,sup{position:relative;font-size:.75em;line-height:0;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}a{color:#0d6efd;text-decoration:underline}a:hover{color:#0a58ca}a:not([href]):not([class]),a:not([href]):not([class]):hover{color:inherit;text-decoration:none}code,kbd,pre,samp{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em;direction:ltr;unicode-bidi:bidi-override}pre{display:block;margin-top:0;margin-bottom:1rem;overflow:auto;font-size:.875em}pre code{font-size:inherit;color:inherit;word-break:normal}code{font-size:.875em;color:#d63384;word-wrap:break-word}a>code{color:inherit}kbd{padding:.2rem .4rem;font-size:.875em;color:#fff;background-color:#212529;border-radius:.2rem}kbd kbd{padding:0;font-size:1em;font-weight:700}figure{margin:0 0 1rem}img,svg{vertical-align:middle}table{caption-side:bottom;border-collapse:collapse}caption{padding-top:.5rem;padding-bottom:.5rem;color:#6c757d;text-align:left}th{text-align:inherit;text-align:-webkit-match-parent}tbody,td,tfoot,th,thead,tr{border-color:inherit;border-style:solid;border-width:0}label{display:inline-block}button{border-radius:0}button:focus:not(:focus-visible){outline:0}button,input,optgroup,select,textarea{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,select{text-transform:none}[role=button]{cursor:pointer}select{word-wrap:normal}select:disabled{opacity:1}[list]::-webkit-calendar-picker-indicator{display:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]:not(:disabled),[type=reset]:not(:disabled),[type=submit]:not(:disabled),button:not(:disabled){cursor:pointer}::-moz-focus-inner{padding:0;border-style:none}textarea{resize:vertical}fieldset{min-width:0;padding:0;margin:0;border:0}legend{float:left;width:100%;padding:0;margin-bottom:.5rem;font-size:calc(1.275rem + .3vw);line-height:inherit}@media (min-width:1200px){legend{font-size:1.5rem}}legend+*{clear:left}::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-text,::-webkit-datetime-edit-year-field{padding:0}::-webkit-inner-spin-button{height:auto}[type=search]{outline-offset:-2px;-webkit-appearance:textfield}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-color-swatch-wrapper{padding:0}::file-selector-button{font:inherit}::-webkit-file-upload-button{font:inherit;-webkit-appearance:button}output{display:inline-block}iframe{border:0}summary{display:list-item;cursor:pointer}progress{vertical-align:baseline}[hidden]{display:none!important}</style>
+<style>/*! pygments syntax highlighting */pre{line-height:125%;}td.linenos pre{color:#000000; background-color:#f0f0f0; padding-left:5px; padding-right:5px;}span.linenos{color:#000000; background-color:#f0f0f0; padding-left:5px; padding-right:5px;}td.linenos pre.special{color:#000000; background-color:#ffffc0; padding-left:5px; padding-right:5px;}span.linenos.special{color:#000000; background-color:#ffffc0; padding-left:5px; padding-right:5px;}.pdoc .hll{background-color:#ffffcc}.pdoc{background:#f8f8f8;}.pdoc .c{color:#408080; font-style:italic}.pdoc .err{border:1px solid #FF0000}.pdoc .k{color:#008000; font-weight:bold}.pdoc .o{color:#666666}.pdoc .ch{color:#408080; font-style:italic}.pdoc .cm{color:#408080; font-style:italic}.pdoc .cp{color:#BC7A00}.pdoc .cpf{color:#408080; font-style:italic}.pdoc .c1{color:#408080; font-style:italic}.pdoc .cs{color:#408080; font-style:italic}.pdoc .gd{color:#A00000}.pdoc .ge{font-style:italic}.pdoc .gr{color:#FF0000}.pdoc .gh{color:#000080; font-weight:bold}.pdoc .gi{color:#00A000}.pdoc .go{color:#888888}.pdoc .gp{color:#000080; font-weight:bold}.pdoc .gs{font-weight:bold}.pdoc .gu{color:#800080; font-weight:bold}.pdoc .gt{color:#0044DD}.pdoc .kc{color:#008000; font-weight:bold}.pdoc .kd{color:#008000; font-weight:bold}.pdoc .kn{color:#008000; font-weight:bold}.pdoc .kp{color:#008000}.pdoc .kr{color:#008000; font-weight:bold}.pdoc .kt{color:#B00040}.pdoc .m{color:#666666}.pdoc .s{color:#BA2121}.pdoc .na{color:#7D9029}.pdoc .nb{color:#008000}.pdoc .nc{color:#0000FF; font-weight:bold}.pdoc .no{color:#880000}.pdoc .nd{color:#AA22FF}.pdoc .ni{color:#999999; font-weight:bold}.pdoc .ne{color:#D2413A; font-weight:bold}.pdoc .nf{color:#0000FF}.pdoc .nl{color:#A0A000}.pdoc .nn{color:#0000FF; font-weight:bold}.pdoc .nt{color:#008000; font-weight:bold}.pdoc .nv{color:#19177C}.pdoc .ow{color:#AA22FF; font-weight:bold}.pdoc .w{color:#bbbbbb}.pdoc .mb{color:#666666}.pdoc .mf{color:#666666}.pdoc .mh{color:#666666}.pdoc .mi{color:#666666}.pdoc .mo{color:#666666}.pdoc .sa{color:#BA2121}.pdoc .sb{color:#BA2121}.pdoc .sc{color:#BA2121}.pdoc .dl{color:#BA2121}.pdoc .sd{color:#BA2121; font-style:italic}.pdoc .s2{color:#BA2121}.pdoc .se{color:#BB6622; font-weight:bold}.pdoc .sh{color:#BA2121}.pdoc .si{color:#BB6688; font-weight:bold}.pdoc .sx{color:#008000}.pdoc .sr{color:#BB6688}.pdoc .s1{color:#BA2121}.pdoc .ss{color:#19177C}.pdoc .bp{color:#008000}.pdoc .fm{color:#0000FF}.pdoc .vc{color:#19177C}.pdoc .vg{color:#19177C}.pdoc .vi{color:#19177C}.pdoc .vm{color:#19177C}.pdoc .il{color:#666666}</style>
+<style>/*! pdoc */:root{--pdoc-background:#fff;}.pdoc{--text:#212529;--muted:#6c757d;--link:#3660a5;--link-hover:#1659c5;--code:#f7f7f7;--active:#fff598;--accent:#eee;--accent2:#c1c1c1;--nav-hover:rgba(255, 255, 255, 0.5);--name:#0066BB;--def:#008800;--annotation:#007020;}body{background-color:var(--pdoc-background);}html, body{width:100%;height:100%;}@media (max-width:769px){#navtoggle{cursor:pointer;position:absolute;width:50px;height:40px;top:1rem;right:1rem;border-color:var(--text);color:var(--text);display:flex;opacity:0.8;}#navtoggle:hover{opacity:1;}#togglestate + div{display:none;}#togglestate:checked + div{display:inherit;}main, header{padding:2rem 3vw;}.git-button{display:none !important;}nav input[type="search"]:valid ~ *{display:none !important;}}@media (min-width:770px){:root{--sidebar-width:clamp(12.5rem, 28vw, 22rem);}nav{position:fixed;overflow:auto;height:100vh;width:var(--sidebar-width);}main, header{padding:3rem 2rem 3rem calc(var(--sidebar-width) + 3rem);width:calc(54rem + var(--sidebar-width));max-width:100%;}#navtoggle{display:none;}}#togglestate{display:none;}nav.pdoc{--pad:1.75rem;--indent:1.5rem;background-color:var(--accent);border-right:1px solid var(--accent2);box-shadow:0 0 20px rgba(50, 50, 50, .2) inset;padding:0 0 0 var(--pad);overflow-wrap:anywhere;scrollbar-width:thin; scrollbar-color:var(--accent2) transparent }nav.pdoc::-webkit-scrollbar{width:.4rem; }nav.pdoc::-webkit-scrollbar-thumb{background-color:var(--accent2); }nav.pdoc > div{padding:var(--pad) 0;}nav.pdoc .module-list-button{display:inline-flex;align-items:center;color:var(--text);border-color:var(--muted);margin-bottom:1rem;}nav.pdoc .module-list-button:hover{border-color:var(--text);}nav.pdoc input[type=search]{display:block;outline-offset:0;width:calc(100% - var(--pad));}nav.pdoc .logo{max-width:calc(100% - var(--pad));max-height:35vh;display:block;margin:0 auto 1rem;transform:translate(calc(-.5 * var(--pad)), 0);}nav.pdoc ul{list-style:none;padding-left:0;}nav.pdoc li{display:block;margin:0;padding:.2rem 0 .2rem var(--indent);transition:all 100ms;}nav.pdoc > div > ul > li{padding-left:0;}nav.pdoc li:hover{background-color:var(--nav-hover);}nav.pdoc a, nav.pdoc a:hover{color:var(--text);}nav.pdoc a{display:block;}nav.pdoc > h2:first-of-type{margin-top:1.5rem;}nav.pdoc .class:before{content:"class ";color:var(--muted);}nav.pdoc .function:after{content:"()";color:var(--muted);}nav.pdoc footer:before{content:"";display:block;width:calc(100% - var(--pad));border-top:solid var(--accent2) 1px;margin-top:1.5rem;padding-top:.5rem;}nav.pdoc footer{font-size:small;}html, main{scroll-behavior:smooth;}.pdoc{color:var(--text);box-sizing:border-box;line-height:1.5;background:none;}.pdoc .pdoc-button{display:inline-block;border:solid black 1px;border-radius:2px;font-size:.75rem;padding:calc(0.5em - 1px) 1em;transition:100ms all;}.pdoc .visually-hidden{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border:0 !important;}.pdoc h1, .pdoc h2, .pdoc h3{font-weight:300;margin:.3em 0;padding:.2em 0;}.pdoc a{text-decoration:none;color:var(--link);}.pdoc a:hover{color:var(--link-hover);}.pdoc blockquote{margin-left:2rem;}.pdoc pre{background-color:var(--code);border-top:1px solid var(--accent2);border-bottom:1px solid var(--accent2);margin-bottom:1em;padding:.5rem 0 .5rem .5rem;overflow-x:auto;}.pdoc code{color:var(--text);padding:.2em .4em;margin:0;font-size:85%;background-color:var(--code);border-radius:6px;}.pdoc a > code{color:inherit;}.pdoc pre > code{display:inline-block;font-size:inherit;background:none;border:none;padding:0;}.pdoc .modulename{margin-top:0;font-weight:bold;}.pdoc .modulename a{color:var(--link);transition:100ms all;}.pdoc .git-button{float:right;border:solid var(--link) 1px;}.pdoc .git-button:hover{background-color:var(--link);color:var(--pdoc-background);}.pdoc details{--shift:-40px;text-align:right;margin-top:var(--shift);margin-bottom:calc(0px - var(--shift));clear:both;filter:opacity(1);}.pdoc details:not([open]){height:0;overflow:visible;}.pdoc details > summary{font-size:.75rem;cursor:pointer;color:var(--muted);border-width:0;padding:0 .7em;display:inline-block;display:inline list-item;user-select:none;}.pdoc details > summary:focus{outline:0;}.pdoc details > div{margin-top:calc(0px - var(--shift) / 2);text-align:left;}.pdoc .docstring{margin-bottom:1.5rem;}.pdoc > section:first-of-type > .docstring{margin-bottom:3rem;}.pdoc .docstring pre{margin-left:1em;margin-right:1em;}.pdoc h1:target,.pdoc h2:target,.pdoc h3:target,.pdoc h4:target,.pdoc h5:target,.pdoc h6:target{background-color:var(--active);box-shadow:-1rem 0 0 0 var(--active);}.pdoc div:target > .attr,.pdoc section:target > .attr,.pdoc dd:target > a{background-color:var(--active);}.pdoc .attr:hover{filter:contrast(0.95);}.pdoc .headerlink{position:absolute;width:0;margin-left:-1.5rem;line-height:1.4rem;font-size:1.5rem;font-weight:normal;transition:all 100ms ease-in-out;opacity:0;}.pdoc .attr > .headerlink{margin-left:-2.5rem;}.pdoc *:hover > .headerlink,.pdoc *:target > .attr > .headerlink{opacity:1;}.pdoc .attr{display:block;color:var(--text);margin:1rem 0 .5rem;padding:.4rem 5rem .4rem 1rem;background-color:var(--accent);}.pdoc .classattr{margin-left:2rem;}.pdoc .name{color:var(--name);font-weight:bold;}.pdoc .def{color:var(--def);font-weight:bold;}.pdoc .signature{white-space:pre-wrap;}.pdoc .annotation{color:var(--annotation);}.pdoc .inherited{margin-left:2rem;}.pdoc .inherited dt{font-weight:700;}.pdoc .inherited dt, .pdoc .inherited dd{display:inline;margin-left:0;margin-bottom:.5rem;}.pdoc .inherited dd:not(:last-child):after{content:", ";}.pdoc .inherited .class:before{content:"class ";}.pdoc .inherited .function a:after{content:"()";}.pdoc .search-result .docstring{overflow:auto;max-height:25vh;}.pdoc .search-result.focused > .attr{background-color:var(--active);}.pdoc .attribution{margin-top:2rem;display:block;opacity:0.5;transition:all 200ms;filter:grayscale(100%);}.pdoc .attribution:hover{opacity:1;filter:grayscale(0%);}.pdoc .attribution img{margin-left:5px;height:35px;vertical-align:middle;width:70px;transition:all 200ms;}.pdoc table{display:block;width:max-content;max-width:100%;overflow:auto;margin-bottom:1rem;}.pdoc table th{font-weight:600;}.pdoc table th, .pdoc table td{padding:6px 13px;border:1px solid var(--accent2);}</style>
+</head>
+<body>        <nav class="pdoc">
+            <label id="navtoggle" for="togglestate" class="pdoc-button"><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke-linecap='round' stroke="currentColor" stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg></label>
+            <input id="togglestate" type="checkbox">
+            <div>
+                        <a class="pdoc-button module-list-button" href="../webscraping.html">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-left" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M10 3.5a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 1 1 0v2A1.5 1.5 0 0 1 9.5 14h-8A1.5 1.5 0 0 1 0 12.5v-9A1.5 1.5 0 0 1 1.5 2h8A1.5 1.5 0 0 1 11 3.5v2a.5.5 0 0 1-1 0v-2z"/>
+  <path fill-rule="evenodd" d="M4.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H14.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/>
+</svg>                            &nbsp;simmate.database.third_parties.webscraping</a>
+
+<a href="https://github.com/jacksund/simmate">                        <img src="https://github.com/jacksund/simmate/blob/main/logo/simmate.svg?raw=true" class="logo" alt="project logo"/>
+</a>
+                        <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
+                               pattern=".+" required>
+
+
+
+                    <h2>API Documentation</h2>
+                        <ul class="memberlist">
+            <li>
+                    <a class="function" href="#load_all_structures">load_all_structures</a>
+            </li>
+    </ul>
+
+
+
+                    <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev">
+                        built with <span class="visually-hidden">pdoc</span><img
+                            alt="pdoc logo"
+                            src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20role%3D%22img%22%20aria-label%3D%22pdoc%20logo%22%20width%3D%22300%22%20height%3D%22150%22%20viewBox%3D%22-1%200%2060%2030%22%3E%3Ctitle%3Epdoc%3C/title%3E%3Cpath%20d%3D%22M29.621%2021.293c-.011-.273-.214-.475-.511-.481a.5.5%200%200%200-.489.503l-.044%201.393c-.097.551-.695%201.215-1.566%201.704-.577.428-1.306.486-2.193.182-1.426-.617-2.467-1.654-3.304-2.487l-.173-.172a3.43%203.43%200%200%200-.365-.306.49.49%200%200%200-.286-.196c-1.718-1.06-4.931-1.47-7.353.191l-.219.15c-1.707%201.187-3.413%202.131-4.328%201.03-.02-.027-.49-.685-.141-1.763.233-.721.546-2.408.772-4.076.042-.09.067-.187.046-.288.166-1.347.277-2.625.241-3.351%201.378-1.008%202.271-2.586%202.271-4.362%200-.976-.272-1.935-.788-2.774-.057-.094-.122-.18-.184-.268.033-.167.052-.339.052-.516%200-1.477-1.202-2.679-2.679-2.679-.791%200-1.496.352-1.987.9a6.3%206.3%200%200%200-1.001.029c-.492-.564-1.207-.929-2.012-.929-1.477%200-2.679%201.202-2.679%202.679A2.65%202.65%200%200%200%20.97%206.554c-.383.747-.595%201.572-.595%202.41%200%202.311%201.507%204.29%203.635%205.107-.037.699-.147%202.27-.423%203.294l-.137.461c-.622%202.042-2.515%208.257%201.727%2010.643%201.614.908%203.06%201.248%204.317%201.248%202.665%200%204.492-1.524%205.322-2.401%201.476-1.559%202.886-1.854%206.491.82%201.877%201.393%203.514%201.753%204.861%201.068%202.223-1.713%202.811-3.867%203.399-6.374.077-.846.056-1.469.054-1.537zm-4.835%204.313c-.054.305-.156.586-.242.629-.034-.007-.131-.022-.307-.157-.145-.111-.314-.478-.456-.908.221.121.432.25.675.355.115.039.219.051.33.081zm-2.251-1.238c-.05.33-.158.648-.252.694-.022.001-.125-.018-.307-.157-.217-.166-.488-.906-.639-1.573.358.344.754.693%201.198%201.036zm-3.887-2.337c-.006-.116-.018-.231-.041-.342.635.145%201.189.368%201.599.625.097.231.166.481.174.642-.03.049-.055.101-.067.158-.046.013-.128.026-.298.004-.278-.037-.901-.57-1.367-1.087zm-1.127-.497c.116.306.176.625.12.71-.019.014-.117.045-.345.016-.206-.027-.604-.332-.986-.695.41-.051.816-.056%201.211-.031zm-4.535%201.535c.209.22.379.47.358.598-.006.041-.088.138-.351.234-.144.055-.539-.063-.979-.259a11.66%2011.66%200%200%200%20.972-.573zm.983-.664c.359-.237.738-.418%201.126-.554.25.237.479.548.457.694-.006.042-.087.138-.351.235-.174.064-.694-.105-1.232-.375zm-3.381%201.794c-.022.145-.061.29-.149.401-.133.166-.358.248-.69.251h-.002c-.133%200-.306-.26-.45-.621.417.091.854.07%201.291-.031zm-2.066-8.077a4.78%204.78%200%200%201-.775-.584c.172-.115.505-.254.88-.378l-.105.962zm-.331%202.302a10.32%2010.32%200%200%201-.828-.502c.202-.143.576-.328.984-.49l-.156.992zm-.45%202.157l-.701-.403c.214-.115.536-.249.891-.376a11.57%2011.57%200%200%201-.19.779zm-.181%201.716c.064.398.194.702.298.893-.194-.051-.435-.162-.736-.398.061-.119.224-.3.438-.495zM8.87%204.141c0%20.152-.123.276-.276.276s-.275-.124-.275-.276.123-.276.276-.276.275.124.275.276zm-.735-.389a1.15%201.15%200%200%200-.314.783%201.16%201.16%200%200%200%201.162%201.162c.457%200%20.842-.27%201.032-.653.026.117.042.238.042.362a1.68%201.68%200%200%201-1.679%201.679%201.68%201.68%200%200%201-1.679-1.679c0-.843.626-1.535%201.436-1.654zM5.059%205.406A1.68%201.68%200%200%201%203.38%207.085a1.68%201.68%200%200%201-1.679-1.679c0-.037.009-.072.011-.109.21.3.541.508.935.508a1.16%201.16%200%200%200%201.162-1.162%201.14%201.14%200%200%200-.474-.912c.015%200%20.03-.005.045-.005.926.001%201.679.754%201.679%201.68zM3.198%204.141c0%20.152-.123.276-.276.276s-.275-.124-.275-.276.123-.276.276-.276.275.124.275.276zM1.375%208.964c0-.52.103-1.035.288-1.52.466.394%201.06.64%201.717.64%201.144%200%202.116-.725%202.499-1.738.383%201.012%201.355%201.738%202.499%201.738.867%200%201.631-.421%202.121-1.062.307.605.478%201.267.478%201.942%200%202.486-2.153%204.51-4.801%204.51s-4.801-2.023-4.801-4.51zm24.342%2019.349c-.985.498-2.267.168-3.813-.979-3.073-2.281-5.453-3.199-7.813-.705-1.315%201.391-4.163%203.365-8.423.97-3.174-1.786-2.239-6.266-1.261-9.479l.146-.492c.276-1.02.395-2.457.444-3.268a6.11%206.11%200%200%200%201.18.115%206.01%206.01%200%200%200%202.536-.562l-.006.175c-.802.215-1.848.612-2.021%201.25-.079.295.021.601.274.837.219.203.415.364.598.501-.667.304-1.243.698-1.311%201.179-.02.144-.022.507.393.787.213.144.395.26.564.365-1.285.521-1.361.96-1.381%201.126-.018.142-.011.496.427.746l.854.489c-.473.389-.971.914-.999%201.429-.018.278.095.532.316.713.675.556%201.231.721%201.653.721.059%200%20.104-.014.158-.02.207.707.641%201.64%201.513%201.64h.013c.8-.008%201.236-.345%201.462-.626.173-.216.268-.457.325-.692.424.195.93.374%201.372.374.151%200%20.294-.021.423-.068.732-.27.944-.704.993-1.021.009-.061.003-.119.002-.179.266.086.538.147.789.147.15%200%20.294-.021.423-.069.542-.2.797-.489.914-.754.237.147.478.258.704.288.106.014.205.021.296.021.356%200%20.595-.101.767-.229.438.435%201.094.992%201.656%201.067.106.014.205.021.296.021a1.56%201.56%200%200%200%20.323-.035c.17.575.453%201.289.866%201.605.358.273.665.362.914.362a.99.99%200%200%200%20.421-.093%201.03%201.03%200%200%200%20.245-.164c.168.428.39.846.68%201.068.358.273.665.362.913.362a.99.99%200%200%200%20.421-.093c.317-.148.512-.448.639-.762.251.157.495.257.726.257.127%200%20.25-.024.37-.071.427-.17.706-.617.841-1.314.022-.015.047-.022.068-.038.067-.051.133-.104.196-.159-.443%201.486-1.107%202.761-2.086%203.257zM8.66%209.925a.5.5%200%201%200-1%200c0%20.653-.818%201.205-1.787%201.205s-1.787-.552-1.787-1.205a.5.5%200%201%200-1%200c0%201.216%201.25%202.205%202.787%202.205s2.787-.989%202.787-2.205zm4.4%2015.965l-.208.097c-2.661%201.258-4.708%201.436-6.086.527-1.542-1.017-1.88-3.19-1.844-4.198a.4.4%200%200%200-.385-.414c-.242-.029-.406.164-.414.385-.046%201.249.367%203.686%202.202%204.896.708.467%201.547.7%202.51.7%201.248%200%202.706-.392%204.362-1.174l.185-.086a.4.4%200%200%200%20.205-.527c-.089-.204-.326-.291-.527-.206zM9.547%202.292c.093.077.205.114.317.114a.5.5%200%200%200%20.318-.886L8.817.397a.5.5%200%200%200-.703.068.5.5%200%200%200%20.069.703l1.364%201.124zm-7.661-.065c.086%200%20.173-.022.253-.068l1.523-.893a.5.5%200%200%200-.506-.863l-1.523.892a.5.5%200%200%200-.179.685c.094.158.261.247.432.247z%22%20transform%3D%22matrix%28-1%200%200%201%2058%200%29%22%20fill%3D%22%233bb300%22/%3E%3Cpath%20d%3D%22M.3%2021.86V10.18q0-.46.02-.68.04-.22.18-.5.28-.54%201.34-.54%201.06%200%201.42.28.38.26.44.78.76-1.04%202.38-1.04%201.64%200%203.1%201.54%201.46%201.54%201.46%203.58%200%202.04-1.46%203.58-1.44%201.54-3.08%201.54-1.64%200-2.38-.92v4.04q0%20.46-.04.68-.02.22-.18.5-.14.3-.5.42-.36.12-.98.12-.62%200-1-.12-.36-.12-.52-.4-.14-.28-.18-.5-.02-.22-.02-.68zm3.96-9.42q-.46.54-.46%201.18%200%20.64.46%201.18.48.52%201.2.52.74%200%201.24-.52.52-.52.52-1.18%200-.66-.48-1.18-.48-.54-1.26-.54-.76%200-1.22.54zm14.741-8.36q.16-.3.54-.42.38-.12%201-.12.64%200%201.02.12.38.12.52.42.16.3.18.54.04.22.04.68v11.94q0%20.46-.04.7-.02.22-.18.5-.3.54-1.7.54-1.38%200-1.54-.98-.84.96-2.34.96-1.8%200-3.28-1.56-1.48-1.58-1.48-3.66%200-2.1%201.48-3.68%201.5-1.58%203.28-1.58%201.48%200%202.3%201v-4.2q0-.46.02-.68.04-.24.18-.52zm-3.24%2010.86q.52.54%201.26.54.74%200%201.22-.54.5-.54.5-1.18%200-.66-.48-1.22-.46-.56-1.26-.56-.8%200-1.28.56-.48.54-.48%201.2%200%20.66.52%201.2zm7.833-1.2q0-2.4%201.68-3.96%201.68-1.56%203.84-1.56%202.16%200%203.82%201.56%201.66%201.54%201.66%203.94%200%201.66-.86%202.96-.86%201.28-2.1%201.9-1.22.6-2.54.6-1.32%200-2.56-.64-1.24-.66-2.1-1.92-.84-1.28-.84-2.88zm4.18%201.44q.64.48%201.3.48.66%200%201.32-.5.66-.5.66-1.48%200-.98-.62-1.46-.62-.48-1.34-.48-.72%200-1.34.5-.62.5-.62%201.48%200%20.96.64%201.46zm11.412-1.44q0%20.84.56%201.32.56.46%201.18.46.64%200%201.18-.36.56-.38.9-.38.6%200%201.46%201.06.46.58.46%201.04%200%20.76-1.1%201.42-1.14.8-2.8.8-1.86%200-3.58-1.34-.82-.64-1.34-1.7-.52-1.08-.52-2.36%200-1.3.52-2.34.52-1.06%201.34-1.7%201.66-1.32%203.54-1.32.76%200%201.48.22.72.2%201.06.4l.32.2q.36.24.56.38.52.4.52.92%200%20.5-.42%201.14-.72%201.1-1.38%201.1-.38%200-1.08-.44-.36-.34-1.04-.34-.66%200-1.24.48-.58.48-.58%201.34z%22%20fill%3D%22green%22/%3E%3C/svg%3E"/>
+                    </a>
+            </div>
+        </nav>
+    <main class="pdoc">
+            <section>
+                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/database/third_parties/webscraping/materials_project.py">Edit on GitHub</a>
+                    <h1 class="modulename">
+<a href="./../../../../simmate.html">simmate</a><wbr>.<a href="./../../../database.html">database</a><wbr>.<a href="./../../third_parties.html">third_parties</a><wbr>.<a href="./../webscraping.html">webscraping</a><wbr>.materials_project    </h1>
+
+                        <div class="docstring"><p>This file is for pulling Materials Project data into the Simmate database. 
+PyMatGen offers an easy way to do this in python -- the MPRester class. All you
+need is an API key from https://materialsproject.org/open and pymatgen installed.
+For now, we only pull the mp-id, structure, final energy, and energy above hull.</p>
+
+<p>Note, that the structures we pull into our database may not be exact matches to
+what's shown in their database. This is beacuse we run symmetry analysis on the
+structure and convert to a LLL reduced cell.</p>
+</div>
+
+                        <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">This file is for pulling Materials Project data into the Simmate database. </span>
+<span class="sd">PyMatGen offers an easy way to do this in python -- the MPRester class. All you</span>
+<span class="sd">need is an API key from https://materialsproject.org/open and pymatgen installed.</span>
+<span class="sd">For now, we only pull the mp-id, structure, final energy, and energy above hull.</span>
+
+<span class="sd">Note, that the structures we pull into our database may not be exact matches to</span>
+<span class="sd">what&#39;s shown in their database. This is beacuse we run symmetry analysis on the</span>
+<span class="sd">structure and convert to a LLL reduced cell.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">transaction</span>
+
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">pymatgen.ext.matproj</span> <span class="kn">import</span> <span class="n">MPRester</span>
+
+<span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># sets up database</span>
+
+<span class="kn">from</span> <span class="nn">simmate.database.third_parties.materials_project</span> <span class="kn">import</span> <span class="n">MaterialsProjectStructure</span>
+
+
+<span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+<span class="k">def</span> <span class="nf">load_all_structures</span><span class="p">(</span>
+    <span class="c1"># criteria={&quot;task_id&quot;: {&quot;$exists&quot;: True}},</span>
+    <span class="c1"># !!! for testing</span>
+    <span class="n">criteria</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;task_id&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$exists&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)]},</span>
+    <span class="p">},</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;2Tg7uUvaTAPHJQXl&quot;</span><span class="p">,</span>  <span class="c1"># TODO remove in production - maybe to a config file</span>
+<span class="p">):</span>
+
+    <span class="c1"># We save a lot of structures to the database here, but we don&#39;t want to make an</span>
+    <span class="c1"># new database call each time we save. That could overload our server and cause</span>
+    <span class="c1"># it to crash. Instead, the &quot;@transaction.atomic&quot; let&#39;s us save all structures in</span>
+    <span class="c1"># just one call to the database.</span>
+
+    <span class="c1"># Filtering criteria for which structures to look at in the Materials Project</span>
+    <span class="c1"># Catagories such as &#39;elements&#39; that we can filter off of are listed here:</span>
+    <span class="c1">#       https://github.com/materialsproject/mapidoc</span>
+    <span class="c1"># Conditions such as $in or $exists that we filter based on are listed here:</span>
+    <span class="c1">#       https://docs.mongodb.com/manual/reference/operator/query/</span>
+    <span class="c1"># As the simplest example, I only want one structure and I grab it by it&#39;s</span>
+    <span class="c1"># mp-id in this code:</span>
+    <span class="c1">#   criteria = {&quot;task_id&quot;: mp_id}</span>
+    <span class="c1"># Here, we want all structures! Which is why we use:</span>
+    <span class="c1">#   criteria = {&quot;task_id&quot;: {&quot;$exists&quot;: True}}</span>
+
+    <span class="c1"># Connect to their database with my personal API key</span>
+    <span class="n">mpr</span> <span class="o">=</span> <span class="n">MPRester</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="c1"># For the filtered structures, which properties I want to grab.</span>
+    <span class="c1"># All properties that we can grab are listed here:</span>
+    <span class="c1">#       https://github.com/materialsproject/mapidoc</span>
+    <span class="c1"># All of these properties listed are what I include in the main SQL table</span>
+    <span class="c1"># see website.diffusion.models.Structure for the table schema</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;material_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;final_energy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;structure&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;bandstructure&quot;,</span>
+        <span class="c1"># &quot;bandstructure_uniform&quot;,</span>
+    <span class="p">]</span>
+
+    <span class="c1"># now make the query and grab everything from the Materials Project!</span>
+    <span class="c1"># the output dictionary is given back within a list, where each entry is</span>
+    <span class="c1"># a specific structure (so a single mp-id)</span>
+    <span class="c1"># Note: this is a very large query, so make sure your computer has enough</span>
+    <span class="c1"># memory (RAM &gt;10GB) and a stable internet connection.</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">mpr</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+
+    <span class="c1"># Let&#39;s iterate through each structure and save it to the database</span>
+    <span class="c1"># This also takes a while, so we use a progress bar</span>
+    <span class="c1"># BUG: We init and update tqdm separately beacuse it conflicts with MPRester&#39;s bar</span>
+    <span class="n">progress_bar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+
+        <span class="c1"># update the progress bar</span>
+        <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># TODO:</span>
+        <span class="c1"># bs = mpr.get_bandstructure_by_material_id(&quot;mp-323&quot;)</span>
+
+        <span class="n">structure_db</span> <span class="o">=</span> <span class="n">MaterialsProjectStructure</span><span class="o">.</span><span class="n">from_pymatgen</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;material_id&quot;</span><span class="p">],</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">],</span>
+            <span class="n">energy</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;final_energy&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="c1"># and save it to our database!</span>
+        <span class="n">structure_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+            </section>
+                <section id="load_all_structures">
+                            <div class="attr function"><a class="headerlink" href="#load_all_structures">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@transaction.atomic</div>
+
+            <span class="def">def</span>
+            <span class="name">load_all_structures</span><span class="signature">(
+    criteria={&#39;task_id&#39;: {&#39;$exists&#39;: True, &#39;$in&#39;: [&#39;mp-1&#39;, &#39;mp-2&#39;, &#39;mp-3&#39;, &#39;mp-4&#39;, &#39;mp-5&#39;, &#39;mp-6&#39;, &#39;mp-7&#39;, &#39;mp-8&#39;, &#39;mp-9&#39;, &#39;mp-10&#39;, &#39;mp-11&#39;, &#39;mp-12&#39;, &#39;mp-13&#39;, &#39;mp-14&#39;, &#39;mp-15&#39;, &#39;mp-16&#39;, &#39;mp-17&#39;, &#39;mp-18&#39;, &#39;mp-19&#39;, &#39;mp-20&#39;, &#39;mp-21&#39;, &#39;mp-22&#39;, &#39;mp-23&#39;, &#39;mp-24&#39;, &#39;mp-25&#39;, &#39;mp-26&#39;, &#39;mp-27&#39;, &#39;mp-28&#39;, &#39;mp-29&#39;, &#39;mp-30&#39;, &#39;mp-31&#39;, &#39;mp-32&#39;, &#39;mp-33&#39;, &#39;mp-34&#39;, &#39;mp-35&#39;, &#39;mp-36&#39;, &#39;mp-37&#39;, &#39;mp-38&#39;, &#39;mp-39&#39;, &#39;mp-40&#39;, &#39;mp-41&#39;, &#39;mp-42&#39;, &#39;mp-43&#39;, &#39;mp-44&#39;, &#39;mp-45&#39;, &#39;mp-46&#39;, &#39;mp-47&#39;, &#39;mp-48&#39;, &#39;mp-49&#39;, &#39;mp-50&#39;, &#39;mp-51&#39;, &#39;mp-52&#39;, &#39;mp-53&#39;, &#39;mp-54&#39;, &#39;mp-55&#39;, &#39;mp-56&#39;, &#39;mp-57&#39;, &#39;mp-58&#39;, &#39;mp-59&#39;, &#39;mp-60&#39;, &#39;mp-61&#39;, &#39;mp-62&#39;, &#39;mp-63&#39;, &#39;mp-64&#39;, &#39;mp-65&#39;, &#39;mp-66&#39;, &#39;mp-67&#39;, &#39;mp-68&#39;, &#39;mp-69&#39;, &#39;mp-70&#39;, &#39;mp-71&#39;, &#39;mp-72&#39;, &#39;mp-73&#39;, &#39;mp-74&#39;, &#39;mp-75&#39;, &#39;mp-76&#39;, &#39;mp-77&#39;, &#39;mp-78&#39;, &#39;mp-79&#39;, &#39;mp-80&#39;, &#39;mp-81&#39;, &#39;mp-82&#39;, &#39;mp-83&#39;, &#39;mp-84&#39;, &#39;mp-85&#39;, &#39;mp-86&#39;, &#39;mp-87&#39;, &#39;mp-88&#39;, &#39;mp-89&#39;, &#39;mp-90&#39;, &#39;mp-91&#39;, &#39;mp-92&#39;, &#39;mp-93&#39;, &#39;mp-94&#39;, &#39;mp-95&#39;, &#39;mp-96&#39;, &#39;mp-97&#39;, &#39;mp-98&#39;, &#39;mp-99&#39;, &#39;mp-100&#39;, &#39;mp-101&#39;, &#39;mp-102&#39;, &#39;mp-103&#39;, &#39;mp-104&#39;, &#39;mp-105&#39;, &#39;mp-106&#39;, &#39;mp-107&#39;, &#39;mp-108&#39;, &#39;mp-109&#39;, &#39;mp-110&#39;, &#39;mp-111&#39;, &#39;mp-112&#39;, &#39;mp-113&#39;, &#39;mp-114&#39;, &#39;mp-115&#39;, &#39;mp-116&#39;, &#39;mp-117&#39;, &#39;mp-118&#39;, &#39;mp-119&#39;, &#39;mp-120&#39;, &#39;mp-121&#39;, &#39;mp-122&#39;, &#39;mp-123&#39;, &#39;mp-124&#39;, &#39;mp-125&#39;, &#39;mp-126&#39;, &#39;mp-127&#39;, &#39;mp-128&#39;, &#39;mp-129&#39;, &#39;mp-130&#39;, &#39;mp-131&#39;, &#39;mp-132&#39;, &#39;mp-133&#39;, &#39;mp-134&#39;, &#39;mp-135&#39;, &#39;mp-136&#39;, &#39;mp-137&#39;, &#39;mp-138&#39;, &#39;mp-139&#39;, &#39;mp-140&#39;, &#39;mp-141&#39;, &#39;mp-142&#39;, &#39;mp-143&#39;, &#39;mp-144&#39;, &#39;mp-145&#39;, &#39;mp-146&#39;, &#39;mp-147&#39;, &#39;mp-148&#39;, &#39;mp-149&#39;, &#39;mp-150&#39;, &#39;mp-151&#39;, &#39;mp-152&#39;, &#39;mp-153&#39;, &#39;mp-154&#39;, &#39;mp-155&#39;, &#39;mp-156&#39;, &#39;mp-157&#39;, &#39;mp-158&#39;, &#39;mp-159&#39;, &#39;mp-160&#39;, &#39;mp-161&#39;, &#39;mp-162&#39;, &#39;mp-163&#39;, &#39;mp-164&#39;, &#39;mp-165&#39;, &#39;mp-166&#39;, &#39;mp-167&#39;, &#39;mp-168&#39;, &#39;mp-169&#39;, &#39;mp-170&#39;, &#39;mp-171&#39;, &#39;mp-172&#39;, &#39;mp-173&#39;, &#39;mp-174&#39;, &#39;mp-175&#39;, &#39;mp-176&#39;, &#39;mp-177&#39;, &#39;mp-178&#39;, &#39;mp-179&#39;, &#39;mp-180&#39;, &#39;mp-181&#39;, &#39;mp-182&#39;, &#39;mp-183&#39;, &#39;mp-184&#39;, &#39;mp-185&#39;, &#39;mp-186&#39;, &#39;mp-187&#39;, &#39;mp-188&#39;, &#39;mp-189&#39;, &#39;mp-190&#39;, &#39;mp-191&#39;, &#39;mp-192&#39;, &#39;mp-193&#39;, &#39;mp-194&#39;, &#39;mp-195&#39;, &#39;mp-196&#39;, &#39;mp-197&#39;, &#39;mp-198&#39;, &#39;mp-199&#39;, &#39;mp-200&#39;, &#39;mp-201&#39;, &#39;mp-202&#39;, &#39;mp-203&#39;, &#39;mp-204&#39;, &#39;mp-205&#39;, &#39;mp-206&#39;, &#39;mp-207&#39;, &#39;mp-208&#39;, &#39;mp-209&#39;, &#39;mp-210&#39;, &#39;mp-211&#39;, &#39;mp-212&#39;, &#39;mp-213&#39;, &#39;mp-214&#39;, &#39;mp-215&#39;, &#39;mp-216&#39;, &#39;mp-217&#39;, &#39;mp-218&#39;, &#39;mp-219&#39;, &#39;mp-220&#39;, &#39;mp-221&#39;, &#39;mp-222&#39;, &#39;mp-223&#39;, &#39;mp-224&#39;, &#39;mp-225&#39;, &#39;mp-226&#39;, &#39;mp-227&#39;, &#39;mp-228&#39;, &#39;mp-229&#39;, &#39;mp-230&#39;, &#39;mp-231&#39;, &#39;mp-232&#39;, &#39;mp-233&#39;, &#39;mp-234&#39;, &#39;mp-235&#39;, &#39;mp-236&#39;, &#39;mp-237&#39;, &#39;mp-238&#39;, &#39;mp-239&#39;, &#39;mp-240&#39;, &#39;mp-241&#39;, &#39;mp-242&#39;, &#39;mp-243&#39;, &#39;mp-244&#39;, &#39;mp-245&#39;, &#39;mp-246&#39;, &#39;mp-247&#39;, &#39;mp-248&#39;, &#39;mp-249&#39;, &#39;mp-250&#39;, &#39;mp-251&#39;, &#39;mp-252&#39;, &#39;mp-253&#39;, &#39;mp-254&#39;, &#39;mp-255&#39;, &#39;mp-256&#39;, &#39;mp-257&#39;, &#39;mp-258&#39;, &#39;mp-259&#39;, &#39;mp-260&#39;, &#39;mp-261&#39;, &#39;mp-262&#39;, &#39;mp-263&#39;, &#39;mp-264&#39;, &#39;mp-265&#39;, &#39;mp-266&#39;, &#39;mp-267&#39;, &#39;mp-268&#39;, &#39;mp-269&#39;, &#39;mp-270&#39;, &#39;mp-271&#39;, &#39;mp-272&#39;, &#39;mp-273&#39;, &#39;mp-274&#39;, &#39;mp-275&#39;, &#39;mp-276&#39;, &#39;mp-277&#39;, &#39;mp-278&#39;, &#39;mp-279&#39;, &#39;mp-280&#39;, &#39;mp-281&#39;, &#39;mp-282&#39;, &#39;mp-283&#39;, &#39;mp-284&#39;, &#39;mp-285&#39;, &#39;mp-286&#39;, &#39;mp-287&#39;, &#39;mp-288&#39;, &#39;mp-289&#39;, &#39;mp-290&#39;, &#39;mp-291&#39;, &#39;mp-292&#39;, &#39;mp-293&#39;, &#39;mp-294&#39;, &#39;mp-295&#39;, &#39;mp-296&#39;, &#39;mp-297&#39;, &#39;mp-298&#39;, &#39;mp-299&#39;, &#39;mp-300&#39;, &#39;mp-301&#39;, &#39;mp-302&#39;, &#39;mp-303&#39;, &#39;mp-304&#39;, &#39;mp-305&#39;, &#39;mp-306&#39;, &#39;mp-307&#39;, &#39;mp-308&#39;, &#39;mp-309&#39;, &#39;mp-310&#39;, &#39;mp-311&#39;, &#39;mp-312&#39;, &#39;mp-313&#39;, &#39;mp-314&#39;, &#39;mp-315&#39;, &#39;mp-316&#39;, &#39;mp-317&#39;, &#39;mp-318&#39;, &#39;mp-319&#39;, &#39;mp-320&#39;, &#39;mp-321&#39;, &#39;mp-322&#39;, &#39;mp-323&#39;, &#39;mp-324&#39;, &#39;mp-325&#39;, &#39;mp-326&#39;, &#39;mp-327&#39;, &#39;mp-328&#39;, &#39;mp-329&#39;, &#39;mp-330&#39;, &#39;mp-331&#39;, &#39;mp-332&#39;, &#39;mp-333&#39;, &#39;mp-334&#39;, &#39;mp-335&#39;, &#39;mp-336&#39;, &#39;mp-337&#39;, &#39;mp-338&#39;, &#39;mp-339&#39;, &#39;mp-340&#39;, &#39;mp-341&#39;, &#39;mp-342&#39;, &#39;mp-343&#39;, &#39;mp-344&#39;, &#39;mp-345&#39;, &#39;mp-346&#39;, &#39;mp-347&#39;, &#39;mp-348&#39;, &#39;mp-349&#39;, &#39;mp-350&#39;, &#39;mp-351&#39;, &#39;mp-352&#39;, &#39;mp-353&#39;, &#39;mp-354&#39;, &#39;mp-355&#39;, &#39;mp-356&#39;, &#39;mp-357&#39;, &#39;mp-358&#39;, &#39;mp-359&#39;, &#39;mp-360&#39;, &#39;mp-361&#39;, &#39;mp-362&#39;, &#39;mp-363&#39;, &#39;mp-364&#39;, &#39;mp-365&#39;, &#39;mp-366&#39;, &#39;mp-367&#39;, &#39;mp-368&#39;, &#39;mp-369&#39;, &#39;mp-370&#39;, &#39;mp-371&#39;, &#39;mp-372&#39;, &#39;mp-373&#39;, &#39;mp-374&#39;, &#39;mp-375&#39;, &#39;mp-376&#39;, &#39;mp-377&#39;, &#39;mp-378&#39;, &#39;mp-379&#39;, &#39;mp-380&#39;, &#39;mp-381&#39;, &#39;mp-382&#39;, &#39;mp-383&#39;, &#39;mp-384&#39;, &#39;mp-385&#39;, &#39;mp-386&#39;, &#39;mp-387&#39;, &#39;mp-388&#39;, &#39;mp-389&#39;, &#39;mp-390&#39;, &#39;mp-391&#39;, &#39;mp-392&#39;, &#39;mp-393&#39;, &#39;mp-394&#39;, &#39;mp-395&#39;, &#39;mp-396&#39;, &#39;mp-397&#39;, &#39;mp-398&#39;, &#39;mp-399&#39;, &#39;mp-400&#39;, &#39;mp-401&#39;, &#39;mp-402&#39;, &#39;mp-403&#39;, &#39;mp-404&#39;, &#39;mp-405&#39;, &#39;mp-406&#39;, &#39;mp-407&#39;, &#39;mp-408&#39;, &#39;mp-409&#39;, &#39;mp-410&#39;, &#39;mp-411&#39;, &#39;mp-412&#39;, &#39;mp-413&#39;, &#39;mp-414&#39;, &#39;mp-415&#39;, &#39;mp-416&#39;, &#39;mp-417&#39;, &#39;mp-418&#39;, &#39;mp-419&#39;, &#39;mp-420&#39;, &#39;mp-421&#39;, &#39;mp-422&#39;, &#39;mp-423&#39;, &#39;mp-424&#39;, &#39;mp-425&#39;, &#39;mp-426&#39;, &#39;mp-427&#39;, &#39;mp-428&#39;, &#39;mp-429&#39;, &#39;mp-430&#39;, &#39;mp-431&#39;, &#39;mp-432&#39;, &#39;mp-433&#39;, &#39;mp-434&#39;, &#39;mp-435&#39;, &#39;mp-436&#39;, &#39;mp-437&#39;, &#39;mp-438&#39;, &#39;mp-439&#39;, &#39;mp-440&#39;, &#39;mp-441&#39;, &#39;mp-442&#39;, &#39;mp-443&#39;, &#39;mp-444&#39;, &#39;mp-445&#39;, &#39;mp-446&#39;, &#39;mp-447&#39;, &#39;mp-448&#39;, &#39;mp-449&#39;, &#39;mp-450&#39;, &#39;mp-451&#39;, &#39;mp-452&#39;, &#39;mp-453&#39;, &#39;mp-454&#39;, &#39;mp-455&#39;, &#39;mp-456&#39;, &#39;mp-457&#39;, &#39;mp-458&#39;, &#39;mp-459&#39;, &#39;mp-460&#39;, &#39;mp-461&#39;, &#39;mp-462&#39;, &#39;mp-463&#39;, &#39;mp-464&#39;, &#39;mp-465&#39;, &#39;mp-466&#39;, &#39;mp-467&#39;, &#39;mp-468&#39;, &#39;mp-469&#39;, &#39;mp-470&#39;, &#39;mp-471&#39;, &#39;mp-472&#39;, &#39;mp-473&#39;, &#39;mp-474&#39;, &#39;mp-475&#39;, &#39;mp-476&#39;, &#39;mp-477&#39;, &#39;mp-478&#39;, &#39;mp-479&#39;, &#39;mp-480&#39;, &#39;mp-481&#39;, &#39;mp-482&#39;, &#39;mp-483&#39;, &#39;mp-484&#39;, &#39;mp-485&#39;, &#39;mp-486&#39;, &#39;mp-487&#39;, &#39;mp-488&#39;, &#39;mp-489&#39;, &#39;mp-490&#39;, &#39;mp-491&#39;, &#39;mp-492&#39;, &#39;mp-493&#39;, &#39;mp-494&#39;, &#39;mp-495&#39;, &#39;mp-496&#39;, &#39;mp-497&#39;, &#39;mp-498&#39;, &#39;mp-499&#39;, &#39;mp-500&#39;, &#39;mp-501&#39;, &#39;mp-502&#39;, &#39;mp-503&#39;, &#39;mp-504&#39;, &#39;mp-505&#39;, &#39;mp-506&#39;, &#39;mp-507&#39;, &#39;mp-508&#39;, &#39;mp-509&#39;, &#39;mp-510&#39;, &#39;mp-511&#39;, &#39;mp-512&#39;, &#39;mp-513&#39;, &#39;mp-514&#39;, &#39;mp-515&#39;, &#39;mp-516&#39;, &#39;mp-517&#39;, &#39;mp-518&#39;, &#39;mp-519&#39;, &#39;mp-520&#39;, &#39;mp-521&#39;, &#39;mp-522&#39;, &#39;mp-523&#39;, &#39;mp-524&#39;, &#39;mp-525&#39;, &#39;mp-526&#39;, &#39;mp-527&#39;, &#39;mp-528&#39;, &#39;mp-529&#39;, &#39;mp-530&#39;, &#39;mp-531&#39;, &#39;mp-532&#39;, &#39;mp-533&#39;, &#39;mp-534&#39;, &#39;mp-535&#39;, &#39;mp-536&#39;, &#39;mp-537&#39;, &#39;mp-538&#39;, &#39;mp-539&#39;, &#39;mp-540&#39;, &#39;mp-541&#39;, &#39;mp-542&#39;, &#39;mp-543&#39;, &#39;mp-544&#39;, &#39;mp-545&#39;, &#39;mp-546&#39;, &#39;mp-547&#39;, &#39;mp-548&#39;, &#39;mp-549&#39;, &#39;mp-550&#39;, &#39;mp-551&#39;, &#39;mp-552&#39;, &#39;mp-553&#39;, &#39;mp-554&#39;, &#39;mp-555&#39;, &#39;mp-556&#39;, &#39;mp-557&#39;, &#39;mp-558&#39;, &#39;mp-559&#39;, &#39;mp-560&#39;, &#39;mp-561&#39;, &#39;mp-562&#39;, &#39;mp-563&#39;, &#39;mp-564&#39;, &#39;mp-565&#39;, &#39;mp-566&#39;, &#39;mp-567&#39;, &#39;mp-568&#39;, &#39;mp-569&#39;, &#39;mp-570&#39;, &#39;mp-571&#39;, &#39;mp-572&#39;, &#39;mp-573&#39;, &#39;mp-574&#39;, &#39;mp-575&#39;, &#39;mp-576&#39;, &#39;mp-577&#39;, &#39;mp-578&#39;, &#39;mp-579&#39;, &#39;mp-580&#39;, &#39;mp-581&#39;, &#39;mp-582&#39;, &#39;mp-583&#39;, &#39;mp-584&#39;, &#39;mp-585&#39;, &#39;mp-586&#39;, &#39;mp-587&#39;, &#39;mp-588&#39;, &#39;mp-589&#39;, &#39;mp-590&#39;, &#39;mp-591&#39;, &#39;mp-592&#39;, &#39;mp-593&#39;, &#39;mp-594&#39;, &#39;mp-595&#39;, &#39;mp-596&#39;, &#39;mp-597&#39;, &#39;mp-598&#39;, &#39;mp-599&#39;, &#39;mp-600&#39;, &#39;mp-601&#39;, &#39;mp-602&#39;, &#39;mp-603&#39;, &#39;mp-604&#39;, &#39;mp-605&#39;, &#39;mp-606&#39;, &#39;mp-607&#39;, &#39;mp-608&#39;, &#39;mp-609&#39;, &#39;mp-610&#39;, &#39;mp-611&#39;, &#39;mp-612&#39;, &#39;mp-613&#39;, &#39;mp-614&#39;, &#39;mp-615&#39;, &#39;mp-616&#39;, &#39;mp-617&#39;, &#39;mp-618&#39;, &#39;mp-619&#39;, &#39;mp-620&#39;, &#39;mp-621&#39;, &#39;mp-622&#39;, &#39;mp-623&#39;, &#39;mp-624&#39;, &#39;mp-625&#39;, &#39;mp-626&#39;, &#39;mp-627&#39;, &#39;mp-628&#39;, &#39;mp-629&#39;, &#39;mp-630&#39;, &#39;mp-631&#39;, &#39;mp-632&#39;, &#39;mp-633&#39;, &#39;mp-634&#39;, &#39;mp-635&#39;, &#39;mp-636&#39;, &#39;mp-637&#39;, &#39;mp-638&#39;, &#39;mp-639&#39;, &#39;mp-640&#39;, &#39;mp-641&#39;, &#39;mp-642&#39;, &#39;mp-643&#39;, &#39;mp-644&#39;, &#39;mp-645&#39;, &#39;mp-646&#39;, &#39;mp-647&#39;, &#39;mp-648&#39;, &#39;mp-649&#39;, &#39;mp-650&#39;, &#39;mp-651&#39;, &#39;mp-652&#39;, &#39;mp-653&#39;, &#39;mp-654&#39;, &#39;mp-655&#39;, &#39;mp-656&#39;, &#39;mp-657&#39;, &#39;mp-658&#39;, &#39;mp-659&#39;, &#39;mp-660&#39;, &#39;mp-661&#39;, &#39;mp-662&#39;, &#39;mp-663&#39;, &#39;mp-664&#39;, &#39;mp-665&#39;, &#39;mp-666&#39;, &#39;mp-667&#39;, &#39;mp-668&#39;, &#39;mp-669&#39;, &#39;mp-670&#39;, &#39;mp-671&#39;, &#39;mp-672&#39;, &#39;mp-673&#39;, &#39;mp-674&#39;, &#39;mp-675&#39;, &#39;mp-676&#39;, &#39;mp-677&#39;, &#39;mp-678&#39;, &#39;mp-679&#39;, &#39;mp-680&#39;, &#39;mp-681&#39;, &#39;mp-682&#39;, &#39;mp-683&#39;, &#39;mp-684&#39;, &#39;mp-685&#39;, &#39;mp-686&#39;, &#39;mp-687&#39;, &#39;mp-688&#39;, &#39;mp-689&#39;, &#39;mp-690&#39;, &#39;mp-691&#39;, &#39;mp-692&#39;, &#39;mp-693&#39;, &#39;mp-694&#39;, &#39;mp-695&#39;, &#39;mp-696&#39;, &#39;mp-697&#39;, &#39;mp-698&#39;, &#39;mp-699&#39;, &#39;mp-700&#39;, &#39;mp-701&#39;, &#39;mp-702&#39;, &#39;mp-703&#39;, &#39;mp-704&#39;, &#39;mp-705&#39;, &#39;mp-706&#39;, &#39;mp-707&#39;, &#39;mp-708&#39;, &#39;mp-709&#39;, &#39;mp-710&#39;, &#39;mp-711&#39;, &#39;mp-712&#39;, &#39;mp-713&#39;, &#39;mp-714&#39;, &#39;mp-715&#39;, &#39;mp-716&#39;, &#39;mp-717&#39;, &#39;mp-718&#39;, &#39;mp-719&#39;, &#39;mp-720&#39;, &#39;mp-721&#39;, &#39;mp-722&#39;, &#39;mp-723&#39;, &#39;mp-724&#39;, &#39;mp-725&#39;, &#39;mp-726&#39;, &#39;mp-727&#39;, &#39;mp-728&#39;, &#39;mp-729&#39;, &#39;mp-730&#39;, &#39;mp-731&#39;, &#39;mp-732&#39;, &#39;mp-733&#39;, &#39;mp-734&#39;, &#39;mp-735&#39;, &#39;mp-736&#39;, &#39;mp-737&#39;, &#39;mp-738&#39;, &#39;mp-739&#39;, &#39;mp-740&#39;, &#39;mp-741&#39;, &#39;mp-742&#39;, &#39;mp-743&#39;, &#39;mp-744&#39;, &#39;mp-745&#39;, &#39;mp-746&#39;, &#39;mp-747&#39;, &#39;mp-748&#39;, &#39;mp-749&#39;, &#39;mp-750&#39;, &#39;mp-751&#39;, &#39;mp-752&#39;, &#39;mp-753&#39;, &#39;mp-754&#39;, &#39;mp-755&#39;, &#39;mp-756&#39;, &#39;mp-757&#39;, &#39;mp-758&#39;, &#39;mp-759&#39;, &#39;mp-760&#39;, &#39;mp-761&#39;, &#39;mp-762&#39;, &#39;mp-763&#39;, &#39;mp-764&#39;, &#39;mp-765&#39;, &#39;mp-766&#39;, &#39;mp-767&#39;, &#39;mp-768&#39;, &#39;mp-769&#39;, &#39;mp-770&#39;, &#39;mp-771&#39;, &#39;mp-772&#39;, &#39;mp-773&#39;, &#39;mp-774&#39;, &#39;mp-775&#39;, &#39;mp-776&#39;, &#39;mp-777&#39;, &#39;mp-778&#39;, &#39;mp-779&#39;, &#39;mp-780&#39;, &#39;mp-781&#39;, &#39;mp-782&#39;, &#39;mp-783&#39;, &#39;mp-784&#39;, &#39;mp-785&#39;, &#39;mp-786&#39;, &#39;mp-787&#39;, &#39;mp-788&#39;, &#39;mp-789&#39;, &#39;mp-790&#39;, &#39;mp-791&#39;, &#39;mp-792&#39;, &#39;mp-793&#39;, &#39;mp-794&#39;, &#39;mp-795&#39;, &#39;mp-796&#39;, &#39;mp-797&#39;, &#39;mp-798&#39;, &#39;mp-799&#39;, &#39;mp-800&#39;, &#39;mp-801&#39;, &#39;mp-802&#39;, &#39;mp-803&#39;, &#39;mp-804&#39;, &#39;mp-805&#39;, &#39;mp-806&#39;, &#39;mp-807&#39;, &#39;mp-808&#39;, &#39;mp-809&#39;, &#39;mp-810&#39;, &#39;mp-811&#39;, &#39;mp-812&#39;, &#39;mp-813&#39;, &#39;mp-814&#39;, &#39;mp-815&#39;, &#39;mp-816&#39;, &#39;mp-817&#39;, &#39;mp-818&#39;, &#39;mp-819&#39;, &#39;mp-820&#39;, &#39;mp-821&#39;, &#39;mp-822&#39;, &#39;mp-823&#39;, &#39;mp-824&#39;, &#39;mp-825&#39;, &#39;mp-826&#39;, &#39;mp-827&#39;, &#39;mp-828&#39;, &#39;mp-829&#39;, &#39;mp-830&#39;, &#39;mp-831&#39;, &#39;mp-832&#39;, &#39;mp-833&#39;, &#39;mp-834&#39;, &#39;mp-835&#39;, &#39;mp-836&#39;, &#39;mp-837&#39;, &#39;mp-838&#39;, &#39;mp-839&#39;, &#39;mp-840&#39;, &#39;mp-841&#39;, &#39;mp-842&#39;, &#39;mp-843&#39;, &#39;mp-844&#39;, &#39;mp-845&#39;, &#39;mp-846&#39;, &#39;mp-847&#39;, &#39;mp-848&#39;, &#39;mp-849&#39;, &#39;mp-850&#39;, &#39;mp-851&#39;, &#39;mp-852&#39;, &#39;mp-853&#39;, &#39;mp-854&#39;, &#39;mp-855&#39;, &#39;mp-856&#39;, &#39;mp-857&#39;, &#39;mp-858&#39;, &#39;mp-859&#39;, &#39;mp-860&#39;, &#39;mp-861&#39;, &#39;mp-862&#39;, &#39;mp-863&#39;, &#39;mp-864&#39;, &#39;mp-865&#39;, &#39;mp-866&#39;, &#39;mp-867&#39;, &#39;mp-868&#39;, &#39;mp-869&#39;, &#39;mp-870&#39;, &#39;mp-871&#39;, &#39;mp-872&#39;, &#39;mp-873&#39;, &#39;mp-874&#39;, &#39;mp-875&#39;, &#39;mp-876&#39;, &#39;mp-877&#39;, &#39;mp-878&#39;, &#39;mp-879&#39;, &#39;mp-880&#39;, &#39;mp-881&#39;, &#39;mp-882&#39;, &#39;mp-883&#39;, &#39;mp-884&#39;, &#39;mp-885&#39;, &#39;mp-886&#39;, &#39;mp-887&#39;, &#39;mp-888&#39;, &#39;mp-889&#39;, &#39;mp-890&#39;, &#39;mp-891&#39;, &#39;mp-892&#39;, &#39;mp-893&#39;, &#39;mp-894&#39;, &#39;mp-895&#39;, &#39;mp-896&#39;, &#39;mp-897&#39;, &#39;mp-898&#39;, &#39;mp-899&#39;, &#39;mp-900&#39;, &#39;mp-901&#39;, &#39;mp-902&#39;, &#39;mp-903&#39;, &#39;mp-904&#39;, &#39;mp-905&#39;, &#39;mp-906&#39;, &#39;mp-907&#39;, &#39;mp-908&#39;, &#39;mp-909&#39;, &#39;mp-910&#39;, &#39;mp-911&#39;, &#39;mp-912&#39;, &#39;mp-913&#39;, &#39;mp-914&#39;, &#39;mp-915&#39;, &#39;mp-916&#39;, &#39;mp-917&#39;, &#39;mp-918&#39;, &#39;mp-919&#39;, &#39;mp-920&#39;, &#39;mp-921&#39;, &#39;mp-922&#39;, &#39;mp-923&#39;, &#39;mp-924&#39;, &#39;mp-925&#39;, &#39;mp-926&#39;, &#39;mp-927&#39;, &#39;mp-928&#39;, &#39;mp-929&#39;, &#39;mp-930&#39;, &#39;mp-931&#39;, &#39;mp-932&#39;, &#39;mp-933&#39;, &#39;mp-934&#39;, &#39;mp-935&#39;, &#39;mp-936&#39;, &#39;mp-937&#39;, &#39;mp-938&#39;, &#39;mp-939&#39;, &#39;mp-940&#39;, &#39;mp-941&#39;, &#39;mp-942&#39;, &#39;mp-943&#39;, &#39;mp-944&#39;, &#39;mp-945&#39;, &#39;mp-946&#39;, &#39;mp-947&#39;, &#39;mp-948&#39;, &#39;mp-949&#39;, &#39;mp-950&#39;, &#39;mp-951&#39;, &#39;mp-952&#39;, &#39;mp-953&#39;, &#39;mp-954&#39;, &#39;mp-955&#39;, &#39;mp-956&#39;, &#39;mp-957&#39;, &#39;mp-958&#39;, &#39;mp-959&#39;, &#39;mp-960&#39;, &#39;mp-961&#39;, &#39;mp-962&#39;, &#39;mp-963&#39;, &#39;mp-964&#39;, &#39;mp-965&#39;, &#39;mp-966&#39;, &#39;mp-967&#39;, &#39;mp-968&#39;, &#39;mp-969&#39;, &#39;mp-970&#39;, &#39;mp-971&#39;, &#39;mp-972&#39;, &#39;mp-973&#39;, &#39;mp-974&#39;, &#39;mp-975&#39;, &#39;mp-976&#39;, &#39;mp-977&#39;, &#39;mp-978&#39;, &#39;mp-979&#39;, &#39;mp-980&#39;, &#39;mp-981&#39;, &#39;mp-982&#39;, &#39;mp-983&#39;, &#39;mp-984&#39;, &#39;mp-985&#39;, &#39;mp-986&#39;, &#39;mp-987&#39;, &#39;mp-988&#39;, &#39;mp-989&#39;, &#39;mp-990&#39;, &#39;mp-991&#39;, &#39;mp-992&#39;, &#39;mp-993&#39;, &#39;mp-994&#39;, &#39;mp-995&#39;, &#39;mp-996&#39;, &#39;mp-997&#39;, &#39;mp-998&#39;, &#39;mp-999&#39;]}},
+    api_key=&#39;2Tg7uUvaTAPHJQXl&#39;
+)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+<span class="k">def</span> <span class="nf">load_all_structures</span><span class="p">(</span>
+    <span class="c1"># criteria={&quot;task_id&quot;: {&quot;$exists&quot;: True}},</span>
+    <span class="c1"># !!! for testing</span>
+    <span class="n">criteria</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;task_id&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$exists&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)]},</span>
+    <span class="p">},</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;2Tg7uUvaTAPHJQXl&quot;</span><span class="p">,</span>  <span class="c1"># TODO remove in production - maybe to a config file</span>
+<span class="p">):</span>
+
+    <span class="c1"># We save a lot of structures to the database here, but we don&#39;t want to make an</span>
+    <span class="c1"># new database call each time we save. That could overload our server and cause</span>
+    <span class="c1"># it to crash. Instead, the &quot;@transaction.atomic&quot; let&#39;s us save all structures in</span>
+    <span class="c1"># just one call to the database.</span>
+
+    <span class="c1"># Filtering criteria for which structures to look at in the Materials Project</span>
+    <span class="c1"># Catagories such as &#39;elements&#39; that we can filter off of are listed here:</span>
+    <span class="c1">#       https://github.com/materialsproject/mapidoc</span>
+    <span class="c1"># Conditions such as $in or $exists that we filter based on are listed here:</span>
+    <span class="c1">#       https://docs.mongodb.com/manual/reference/operator/query/</span>
+    <span class="c1"># As the simplest example, I only want one structure and I grab it by it&#39;s</span>
+    <span class="c1"># mp-id in this code:</span>
+    <span class="c1">#   criteria = {&quot;task_id&quot;: mp_id}</span>
+    <span class="c1"># Here, we want all structures! Which is why we use:</span>
+    <span class="c1">#   criteria = {&quot;task_id&quot;: {&quot;$exists&quot;: True}}</span>
+
+    <span class="c1"># Connect to their database with my personal API key</span>
+    <span class="n">mpr</span> <span class="o">=</span> <span class="n">MPRester</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="c1"># For the filtered structures, which properties I want to grab.</span>
+    <span class="c1"># All properties that we can grab are listed here:</span>
+    <span class="c1">#       https://github.com/materialsproject/mapidoc</span>
+    <span class="c1"># All of these properties listed are what I include in the main SQL table</span>
+    <span class="c1"># see website.diffusion.models.Structure for the table schema</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;material_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;final_energy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;structure&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;bandstructure&quot;,</span>
+        <span class="c1"># &quot;bandstructure_uniform&quot;,</span>
+    <span class="p">]</span>
+
+    <span class="c1"># now make the query and grab everything from the Materials Project!</span>
+    <span class="c1"># the output dictionary is given back within a list, where each entry is</span>
+    <span class="c1"># a specific structure (so a single mp-id)</span>
+    <span class="c1"># Note: this is a very large query, so make sure your computer has enough</span>
+    <span class="c1"># memory (RAM &gt;10GB) and a stable internet connection.</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">mpr</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+
+    <span class="c1"># Let&#39;s iterate through each structure and save it to the database</span>
+    <span class="c1"># This also takes a while, so we use a progress bar</span>
+    <span class="c1"># BUG: We init and update tqdm separately beacuse it conflicts with MPRester&#39;s bar</span>
+    <span class="n">progress_bar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+
+        <span class="c1"># update the progress bar</span>
+        <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># TODO:</span>
+        <span class="c1"># bs = mpr.get_bandstructure_by_material_id(&quot;mp-323&quot;)</span>
+
+        <span class="n">structure_db</span> <span class="o">=</span> <span class="n">MaterialsProjectStructure</span><span class="o">.</span><span class="n">from_pymatgen</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;material_id&quot;</span><span class="p">],</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">],</span>
+            <span class="n">energy</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;final_energy&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="c1"># and save it to our database!</span>
+        <span class="n">structure_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+    
+
+                </section>
+    </main>
+<script>
+    function escapeHTML(html) {
+        return document.createElement('div').appendChild(document.createTextNode(html)).parentNode.innerHTML;
+    }
+
+    const originalContent = document.querySelector("main.pdoc");
+    let currentContent = originalContent;
+
+    function setContent(innerHTML) {
+        let elem;
+        if (innerHTML) {
+            elem = document.createElement("main");
+            elem.classList.add("pdoc");
+            elem.innerHTML = innerHTML;
+        } else {
+            elem = originalContent;
+        }
+        if (currentContent !== elem) {
+            currentContent.replaceWith(elem);
+            currentContent = elem;
+        }
+    }
+
+    function getSearchTerm() {
+        return (new URL(window.location)).searchParams.get("search");
+    }
+
+    const searchBox = document.querySelector(".pdoc input[type=search]");
+    searchBox.addEventListener("input", function () {
+        let url = new URL(window.location);
+        if (searchBox.value.trim()) {
+            url.hash = "";
+            url.searchParams.set("search", searchBox.value);
+        } else {
+            url.searchParams.delete("search");
+        }
+        history.replaceState("", "", url.toString());
+        onInput();
+    });
+    window.addEventListener("popstate", onInput);
+
+
+    let search, searchErr;
+
+    async function initialize() {
+        try {
+            search = await new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.type = "text/javascript";
+                script.async = true;
+                script.onload = () => resolve(window.pdocSearch);
+                script.onerror = (e) => reject(e);
+                script.src = "../../../../search.js";
+                document.getElementsByTagName("head")[0].appendChild(script);
+            });
+        } catch (e) {
+            console.error("Cannot fetch pdoc search index");
+            searchErr = "Cannot fetch search index.";
+        }
+        onInput();
+
+        document.querySelector("nav.pdoc").addEventListener("click", e => {
+            if (e.target.hash) {
+                searchBox.value = "";
+                searchBox.dispatchEvent(new Event("input"));
+            }
+        });
+    }
+
+    function onInput() {
+        setContent((() => {
+            const term = getSearchTerm();
+            if (!term) {
+                return null
+            }
+            if (searchErr) {
+                return `<h3>Error: ${searchErr}</h3>`
+            }
+            if (!search) {
+                return "<h3>Searching...</h3>"
+            }
+
+            window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+
+            const results = search(term);
+
+            let html;
+            if (results.length === 0) {
+                html = `No search results for '${escapeHTML(term)}'.`
+            } else {
+                html = `<h4>${results.length} search result${results.length > 1 ? "s" : ""} for '${escapeHTML(term)}'.</h4>`;
+            }
+            for (let result of results.slice(0, 10)) {
+                let doc = result.doc;
+                let url = `../../../../${doc.modulename.replaceAll(".", "/")}.html`;
+                if (doc.qualname) {
+                    url += `#${doc.qualname}`;
+                }
+
+                let heading;
+                switch (result.doc.type) {
+                    case "function":
+                        heading = `<span class="def">${doc.funcdef}</span> <span class="name">${doc.fullname}</span><span class="signature">(${doc.parameters.join(", ")})</span>`;
+                        break;
+                    case "class":
+                        heading = `<span class="def">class</span> <span class="name">${doc.fullname}</span>`;
+                        break;
+                    default:
+                        heading = `<span class="name">${doc.fullname}</span>`;
+                        break;
+                }
+                html += `
+                        <section class="search-result">
+                        <a href="${url}" class="attr ${doc.type}">${heading}</a>
+                        <div class="docstring">${doc.doc}</div>
+                        </section>
+                    `;
+
+            }
+            return html;
+        })());
+    }
+
+    if (getSearchTerm()) {
+        initialize();
+        searchBox.value = getSearchTerm();
+        onInput();
+    } else {
+        searchBox.addEventListener("focus", initialize, {once: true});
+    }
+
+    searchBox.addEventListener("keydown", e => {
+        if (["ArrowDown", "ArrowUp", "Enter"].includes(e.key)) {
+            let focused = currentContent.querySelector(".search-result.focused");
+            if (!focused) {
+                currentContent.querySelector(".search-result").classList.add("focused");
+            } else if (
+                e.key === "ArrowDown"
+                && focused.nextElementSibling
+                && focused.nextElementSibling.classList.contains("search-result")
+            ) {
+                focused.classList.remove("focused");
+                focused.nextElementSibling.classList.add("focused");
+                focused.nextElementSibling.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "nearest"
+                });
+            } else if (
+                e.key === "ArrowUp"
+                && focused.previousElementSibling
+                && focused.previousElementSibling.classList.contains("search-result")
+            ) {
+                focused.classList.remove("focused");
+                focused.previousElementSibling.classList.add("focused");
+                focused.previousElementSibling.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "nearest"
+                });
+            } else if (
+                e.key === "Enter"
+            ) {
+                focused.querySelector("a").click();
+            }
+        }
+    });
+</script></body>
+</html>

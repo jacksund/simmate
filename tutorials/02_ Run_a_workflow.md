@@ -344,23 +344,29 @@ For workflows to run correctly, the following requirements need to be met:
 5. Simmate installed on the remote cluster
 6. VASP Potentials in `~/simmate/vasp/Potentials` on the remote cluster
 
-The remainder of this tutorial gives example commands to use. Replace these commands and scripts with the ones in your cluster's guide.
+The remainder of this tutorial gives example commands to use. Replace these commands and scripts with the ones in your cluster's guide. (For example, the next command titled "Sign in with...", you should use the "Sign in with..." section of your guide.)
 
 If you've never signed into a remote cluster before, we will do this by using SSH (Secure Shell). For example, to sign in to University of North Carolina's LongLeaf cluster, you would run the following command in your local terminal (on windows, use your Command-prompt -- not the Anaconda Powershell Prompt):
 
 ```
+Sign in with...
+
 ssh my_username@longleaf.unc.edu
 ```
 
 After entering your password, you are now using a terminal on the remote supercomputer. Try running the command `pwd` ("print working directory") to show that your terminal is indeed running commands on the remote cluster, not your desktop:
 
 ```
+# This is the same for all linux clusters
+
 pwd
 ```
 
 To load VASP into your environment, you typically need to run the command:
 
 ```
+# Load VASP with...
+
 module load vasp
 vasp_std
 ```
@@ -368,12 +374,16 @@ vasp_std
 If the vasp_std command worked correctly, you will see (their command doesn't print help information like `simmate` or `conda`):
 
 ```
+# Error output may vary between different VASP versions
+
 Error reading item 'VCAIMAGES' from file INCAR.
 ```
 
 Next we need to ensure Simmate is installed. If you see `(base)` at the start of your command-line, Anaconda is already installed! If not, ask your IT team how they want you install it (typically it's by using [miniconda](https://docs.conda.io/en/latest/miniconda.html) which is just anaconda without the graphical user interface). With Anaconda set up, you can create your environment and install Simmate just like we did in tutorial 01:
 
 ```
+# Create your conda env with...
+
 conda create -n my_env -c conda-forge python=3.8 simmate
 conda activate my_env
 
@@ -382,11 +392,27 @@ conda activate my_env
 simmate database reset
 ```
 
-Lastly, copy your Potentials into `~/simmate/vasp/Potentials` and also copy the `POSCAR` file above on your cluster. It can be diffult in the command line to move files around or even transfer them back and forth from your local computer to the supercomputer. It's much easier with a program like [FileZilla](https://filezilla-project.org/), [MobaXTerm](https://mobaxterm.mobatek.net/), or another file transfer window. We recommend FileZilla, but it's entirely optional and up to you.
+Next, copy your Potentials into `~/simmate/vasp/Potentials` and also copy the `POSCAR` file above onto your cluster. It can be diffult in the command line to move files around or even transfer them back and forth from your local computer to the supercomputer. It's much easier with a program like [FileZilla](https://filezilla-project.org/), [MobaXTerm](https://mobaxterm.mobatek.net/), or another file transfer window. We recommend FileZilla, but it's entirely optional and up to you.
+
+Typically, clusters will have a "scratch" directory that you should submit jobs from -- which is different from your home directory. Make sure you switch to that before submitting and workflows. (note, your `POSCAR` should be in this directory too). Here is what LongLeaf's looks like as an example:
+
+```
+# Access scratch directory with...
+
+cd /pine/scr/j/a/jacksund
+```
 
 Finally, let's submit a Simmate workflow on our cluster! In the previous section, we called `simmate workflows run ...` directly in our terminal, but this should **NEVER** be done on a supercomputer. Instead we should submit the workflow to the cluster's job queue. Typically, supercomputers use SLURM or PBS to submit jobs.
 
-For example, UNC's longleaf cluster uses [SLURM](https://slurm.schedmd.com/documentation.html). To submit, we would make a file named `submit.sh` with the contents:
+For example, UNC's longleaf cluster uses [SLURM](https://slurm.schedmd.com/documentation.html). To submit, we would make a file named `submit.sh`:
+
+```
+# Create a SLURM script with...
+
+nano submit.sh
+```
+
+... and use contents likes ...
 
 ```
 #! /bin/sh
@@ -420,12 +446,16 @@ Each of these `SBATCH` parameters set how we would like to sumbit a job and how 
 Make sure you have VASP and your correct conda enviornment loaded. Then submit your job with:
 
 ```
+# Submit with...
+
 sbatch submit.sh
 ```
 
 You can then monitor your jobs progress with:
 
 ```
+# Monitor progress with...
+
 squeue -u my_username
 ```
 
