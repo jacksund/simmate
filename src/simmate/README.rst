@@ -1,9 +1,10 @@
 
-Welcome to Simmate!
--------------------
+Welcome!
+--------
 
-This module contains all of the code that Simmate runs on. To get started, make sure
-you have either completed our `introduction tutorials`_ or are comfortable with python.
+``simmate`` is the base module and contains all of the code that Simmate runs on.
+To get started, make sure you have either completed our `introduction tutorials`_
+or are comfortable with python.
 
 Within each subfolder (aka each python “module”), you’ll find more details on what it contains.
 

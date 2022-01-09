@@ -29,6 +29,13 @@ def get_doc_from_readme(file: str) -> str:
         from simmate.utilities import get_doc_from_readme
 
         __doc__ = get_doc_from_readme(__file__)
+
+    This is an alternative to using "include" in rst files, which `pdoc recommends`_.
+    We prefer this utility because it allows Spyder to load the docs -- although
+    it's slower in production (bc of opening/closing files).
+
+    .. _pdoc recommends: https://pdoc.dev/docs/pdoc.html#include-markdown-files
+
     """
 
     # We assume the file is in the same directory and named "README.rst"
