@@ -2,41 +2,30 @@
 
 import os
 
-# TODO: write my own vasp.outputs classes and remove pymatgen dependency
 from pymatgen.io.vasp.inputs import Kpoints
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Potcar
-from simmate.calculators.vasp.tasks.base import VaspTask
-
-# TODO: This class only exists because I don't have the core KptPath class
-# written yet. Because my labmates have a high priority on BandStructure
-# calculations, I needed to make this temporary workaround class.
+from simmate.calculators.vasp.tasks.energy.materials_project import (
+    MaterialsProjectStaticEnergy,
+)
 
 
-class BandStructureTask(VaspTask):
+class MaterialsProjectBandStructureTask(MaterialsProjectStaticEnergy):
 
     # The default settings to use for this calculation.
     # The key thing for band structures is that this follows a static energy
     # calculation. We use the CHGCAR from that previous calculation. We also
     # hold the charge density static during this calculation so this is a
     # non-selfconsistent (non-SCF) calculation.
-    incar = dict(
-        EDIFF=1.0e-07,
-        ENCUT=520,
-        ICHARG=11,  # this indicates we are using a previous CHGCAR
+    incar = MaterialsProjectStaticEnergy.incar.copy()
+    incar.update(
+        ICHARGE=11,
         ISMEAR=0,
-        LCHARG=False,
-        LWAVE=False,
-        NSW=0,
-        PREC="Accurate",
-        SIGMA=0.05,
+        SIGMA=0.01,
     )
-
-    # We will use the PBE functional with all default mappings
-    functional = "PBE"
 
     # set the KptGrid or KptPath object
     # TODO: in the future, all functionality of this class will be available
@@ -104,9 +93,10 @@ def check_for_standardization_bugs(structure_original, structure_new):
 
     if abs(vpa_old - vpa_new) / vpa_old > 0.02:
         raise ValueError(
-            f"Standardizing cell failed! Volume-per-atom changed... old: {vpa_old}, new: {vpa_new}"
+            "Standardizing failed! Volume-per-atom changed... "
+            f"old: {vpa_old}, new: {vpa_new}"
         )
 
     sm = StructureMatcher()
     if not sm.fit(structure_original, structure_new):
-        raise ValueError("Standardizing cell failed! Old structure doesn't match new.")
+        raise ValueError("Standardizing failed! Old structure doesn't match new.")
