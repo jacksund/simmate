@@ -88,23 +88,20 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     # Specify which Python versions supported.
-    python_requires=">=3.7",
+    python_requires=">=3.9",
     # This field lists other packages that your project depends on to run.
     install_requires=[
         # Core dependencies
         "numpy>=1.21.4",
         "pandas>=1.3.5",
-        # BUG: need django-pandas>=0.6.6 for django>=4.0
-        # When this is done, also bump python to >=3.9
-        # https://github.com/conda-forge/django-pandas-feedstock/issues
-        "django==4.0.1",
+        "django>=4.0.0",
         "prefect>=0.15.11",
         "dask>=2021.12.0",
         "click>=8.0.3",
         "numba>=0.53.0",
         # Extra (smaller) dependencies & utilities
         "django-crispy-forms>=1.13.0",  # for formatting of online forms
-        "django-pandas>=0.6.1",  # for converting QuerySets to PandasDataFrames
+        "django-pandas>=0.6.6",  # for converting QuerySets to PandasDataFrames
         "dask-jobqueue>=0.7.3",  # for submitting on clusters
         "dj-database-url>=0.5.0",  # for DigitalOcean URL conversion
         "djangorestframework>=3.13.1",  # for our REST API
