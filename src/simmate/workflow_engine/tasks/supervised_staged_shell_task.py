@@ -168,7 +168,7 @@ class SupervisedStagedShellTask(Task):
     # based on the polling_timestep loops. For example, if we have a
     # polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
     # the monitor checks every other loop -- or every 2*10 = 20 seconds. Another
-    # example is values of polling_timestep=10 and monitor_freq=30. Here, we'd 
+    # example is values of polling_timestep=10 and monitor_freq=30. Here, we'd
     # run monitoring functions every 5 minutes (10*30=300s=5min).
     monitor_freq = 300
 
