@@ -8,11 +8,34 @@ import os
 import itertools
 from tempfile import TemporaryDirectory, mkdtemp
 import shutil
+import sys
 import warnings
 
 import numpy
 
 from typing import List, Union
+
+
+def get_conda_env() -> str:
+    """
+    Grab the name of the activate conda environment and returns it as a string.
+    If there is no env, then an empty string is returned.
+    """
+    # Check the list of python paths and grab the first path that has "envs" in it.
+    # Assume we don't have a conda env until proven otherwise
+    env_name = ""
+    for path in sys.path:
+        if "envs" in path:
+            # split the path into individual folder names (os.sep gives / or \\)
+            folders = path.split(os.sep)
+            # the conda env name will the name immediately after the /envs.
+            # example path is '/home/jacksund/anaconda3/envs/simmate_dev/lib/python3.9'
+            # where we want the name simmate_dev here.
+            env_name = folders[folders.index("envs") + 1]
+            # once we have found this, we can exit the loop
+            break
+
+    return env_name
 
 
 def get_doc_from_readme(file: str) -> str:
