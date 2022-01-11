@@ -59,12 +59,9 @@ vasp > vasp.out
 conda create -n my_env -c conda-forge python=3.8 simmate
 conda activate my_env
 
-# SEE WARNING BELOW -- skip the database reset
+# and initialize your database for the first time
+simmate database reset
 ```
-
-:warning::warning::warning:
-Do **NOT** run the `simmate database reset`. Because we share a username, we share a home directory and database. Calling this command will reset EVERYONE's database. If you think the database needs reset, contact Scott first.
-:warning::warning::warning:
 
 <br/>
 

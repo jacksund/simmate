@@ -19,7 +19,7 @@ In this tutorial, you will use the command line to view all available workflows 
 
 > :warning: for the quick tutorial, we assume you have VASP installed and that the `vasp_std` command is in the available path. In the future, we hope to update this tutorial with a workflow that doesn't require VASP or remote Linux cluster. Until then, we apologize for the inconvenience. :cry:
 
-1. Before running a workflow, we must initialize our Simmate database with `simmate database reset`. Your database will be built at `~/simmate/database.sqlite3`.
+1. Before running a workflow, we must initialize our Simmate database with `simmate database reset`. Your database will be built at `~/simmate/my_env-database.sqlite3`, where "my_env" is the name of your active conda environment.
 2. To practice calculating, make structure file for tablesalt (NaCl). Name it `POSCAR`, where the contents are...
 ```
 Na1 Cl1
@@ -104,11 +104,12 @@ simmate database reset
 
 When you call this command, Simmate will print out a bunch of information -- this can be ignored for now. It's just making all of your tables.
 
-> :warning: Every time you run the command `simmate database reset`, the database is deleted and a new one is written with empty tables.  If you want to keep your previous runs, you should save a copy of your database. If you share a home directory with other users, check with them before running this command.
+> :warning: Every time you run the command `simmate database reset`, your database is deleted and a new one is written with empty tables.  If you want to keep your previous runs, you should save a copy of your database, which can be done by just copy and pasting the database file
 
-So where is the database stored? After running `simmate database reset`, you'll find it in a file named `~/simmate/database.sqlite3`. To find this file:
+So where is the database stored? After running `simmate database reset`, you'll find it in a file named `~/simmate/my_env-database.sqlite3`. Note that your conda envirnment (`my_env` here) is used in the database file name. Simmate does this so you can easily switch between databases just by switching your Anaconda environment. This is useful for testing and developing new workflows, which we will cover in a later tutorial. But let's focus on just finding this file for now. To find this file:
+
 1. remember from tutorial 1 that `~` is short for our home directory -- typically something like `/home/jacksund/` or `C:\Users\jacksund`.
-2. have "show hidden files" turned on in your File Explorer (on Windows, check "show file name extensions" under the "View" tab). Then you'll see a file named `database.sqlite3` instead of just `database`.
+2. have "show hidden files" turned on in your File Explorer (on Windows, check "show file name extensions" under the "View" tab). Then you'll see a file named `my_env-database.sqlite3` instead of just `my_env-database`.
 
 You won't be able to double-click this file. Just like how you need Excel to open and read Excel (.xlsx) files, we need a separate program to read database (.sqlite3) files. We'll use Simmate to do this later on.
 
@@ -204,7 +205,7 @@ Once you have the potentials, paste them into a folder named `~/simmate/vasp/Pot
 ```
 # Located at /home/my_username (~)
 simmate/
-├── database.sqlite3
+├── my_env-database.sqlite3
 └── vasp
     └── Potentials
         ├── LDA
