@@ -21,7 +21,7 @@ import yaml
 import dj_database_url  # needed for DigitalOcean database connection
 
 from simmate import website  # needed to specify location of built-in apps
-from simmate.utilities import get_directory
+from simmate.utilities import get_directory, get_conda_env
 
 # --------------------------------------------------------------------------------------
 
@@ -38,6 +38,11 @@ SIMMATE_DIRECTORY = get_directory(os.path.join(Path.home(), "simmate"))
 # where things like our templates or static files are located. We find this
 # by looking at the import path to see where python installed it.
 DJANGO_DIRECTORY = os.path.dirname(os.path.abspath(website.__file__))
+
+# Some settings below also depend on the conda env name. This makes switching
+# between different databases and settings as easy as activating different
+# conda environments
+CONDA_ENV = get_conda_env()
 
 # --------------------------------------------------------------------------------------
 
@@ -80,26 +85,46 @@ SECRET_KEY = os.getenv(
 
 # DATBASE CONNECTION
 
-# We first check if the user has a "database.yaml" file and we use the databases
-# specified there as our first priority.
+# There are three types of database files that we check for -- in order of priority:
+#   1. database.yaml
+#   2. my_env-database.yaml
+#   3. my_env-database.sqlite3 (if USE_LOCAL_DATABASE=True) <-- and create this if doesn't exist
+#   4. use a DATABASE_URL env variable
 DATABASE_YAML = os.path.join(SIMMATE_DIRECTORY, "database.yaml")
+CONDA_DATABASE_YAML = os.path.join(SIMMATE_DIRECTORY, f"{CONDA_ENV}-database.yaml")
+CONDA_DATABASE_SQLITE3 = os.path.join(
+    SIMMATE_DIRECTORY, f"{CONDA_ENV}-database.sqlite3"
+).strip("-")
+# if the user is in the (base) env or not using conda, then we will have a
+# value of "-database.sqlite3". We remove the starting "-" here.
+
+
+# Our 1st priority is checking for a "simmate/database.yaml" file
 if os.path.exists(DATABASE_YAML):
     with open(DATABASE_YAML) as file:
         DATABASES = yaml.full_load(file)
-# If this file doesn't exist, we next check our enviornment variable to see if
-# we should use our local sql database. This is the default behavior!
+
+# Our 2nd priority is checking for a file like "/simmate/my_env-database.yaml
+elif os.path.exists(DATABASE_YAML):
+    with open(DATABASE_YAML) as file:
+        DATABASES = yaml.full_load(CONDA_DATABASE_YAML)
+
+# This is the default behavior
+# Our 3rd prioirity is a local sqlite database name "my_env-database.sqlite3"
+
 elif USE_LOCAL_DATABASE is True:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(SIMMATE_DIRECTORY, "database.sqlite3"),
+            "NAME": CONDA_DATABASE_SQLITE3,
         }
     }
-# Otherwise, we are likely using DigitalOcean and running a server.
-# When DigitalOcean runs the "collectstatic" command, we don't want to connect
-# any database. So we use the "sys" library to look at the command and ensure
-# it doesn't involve "collectstatic". Otherwise we use the URL that is set with
-# our enviornment variable.
+
+# Lastly, if we make it to this point, we are likely using DigitalOcean and
+# running a server. When DigitalOcean runs the "collectstatic" command, we don't
+#  want to connect any database. So we use the "sys" library to look at the
+# command and ensure it doesn't involve "collectstatic". Otherwise we use the
+# URL that is set with our enviornment variable.
 elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
     # ensure that we have the database URL properly configured in DigitalOcean
     if os.getenv("DATABASE_URL", None) is None:
@@ -108,6 +133,7 @@ elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
     DATABASES = {
         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
     }
+
 # Here is an example of connecting to a Postgres server normally...
 # DATABASES = {
 #     "default": {

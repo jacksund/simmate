@@ -19,11 +19,11 @@ from typing import List, Union
 def get_conda_env() -> str:
     """
     Grab the name of the activate conda environment and returns it as a string.
-    If there is no env, then None is returned.
+    If there is no env, then an empty string is returned.
     """
     # Check the list of python paths and grab the first path that has "envs" in it.
     # Assume we don't have a conda env until proven otherwise
-    env_name = None
+    env_name = ""
     for path in sys.path:
         if "envs" in path:
             # split the path into individual folder names (os.sep gives / or \\)
