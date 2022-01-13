@@ -3,6 +3,8 @@
 import os
 from pathlib import Path
 
+import yaml
+
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
@@ -104,6 +106,9 @@ class VaspTask(SSSTask):
     # In some cases, we may want to sanitize the structure during our setup().
     # This means converting to the LLL-reduced primitive cell.
     pre_sanitize_structure = False
+    # The same might be true for converting the structure to the standard primitive
+    # of a structure. For example, this is required when calculating band structures.
+    pre_standardize_structure = False  # TODO: not implemented yet
 
     def __init__(
         self,
@@ -157,7 +162,7 @@ class VaspTask(SSSTask):
             structure=structure,
         )
 
-        # if KSPACING is not provide in the incar AND kpoints is attached to this
+        # if KSPACING is not provided in the incar AND kpoints is attached to this
         # class instance, then we write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
             Kpoints.to_file(
@@ -203,22 +208,48 @@ class VaspTask(SSSTask):
         # regarless of what when wrong. In the future, I should consider writing
         # a separate method for those that loads the CONTCAR and moves on.
 
-        # grab the final structure
-        # final_structure = vasprun.structures[-1]
-
-        # grab the energy per atom
-        # final_energy = vasprun.final_energy / final_structure.num_sites
+        # write output files/plots for the user to quickly reference
+        self._write_output_summary(directory, vasprun)
 
         # confirm that the calculation converged (ionicly and electronically)
         if self.confirm_convergence:
             assert vasprun.converged
 
-        # OPTIMIZE: see my comment above on this attribute
+        # OPTIMIZE: see my comment above on the return_final_structure attribute
         if self.return_final_structure:
             return {"structure_final": vasprun.final_structure, "vasprun": vasprun}
 
         # return vasprun object
         return vasprun
+
+    def _write_output_summary(self, directory, vasprun):
+        """
+        This is an EXPERIMENTAL feature.
+
+        This prints a "simmate_summary.yaml" file with key output information.
+
+        This method should not be called directly as it used within workup().
+        """
+        # OPTIMIZE: Ideally, I could take the vasprun object and run to_json,
+        # but this output is extremely difficult to read.
+
+        results = vasprun.as_dict()["output"]
+
+        summary = {
+            "structure_final": "The final structure is located in the CONTCAR file",
+            "energy_final": float(results.get("final_energy", None)),
+            "energy_final_per_atom": float(results.get("final_energy_per_atom", None)),
+            "converged_electroinc": vasprun.converged_electronic,
+            "converged_ionic": vasprun.converged_ionic,
+            "fermi_energy": results.get("efermi", None),
+            "valence_band_maximum": results.get("vbm", None),
+            "conduction_band_minimum": results.get("vbm", None),
+        }
+
+        summary_filename = os.path.join(directory, "simmate_summary.yaml")
+        with open(summary_filename, "w") as file:
+            content = yaml.dump(summary)
+            file.write(content)
 
     @classmethod
     def get_config(cls):

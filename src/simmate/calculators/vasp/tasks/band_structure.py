@@ -2,49 +2,49 @@
 
 import os
 
-# TODO: write my own vasp.outputs classes and remove pymatgen dependency
 from pymatgen.io.vasp.inputs import Kpoints
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.bandstructure import HighSymmKpath
+from pymatgen.electronic_structure.plotter import BSPlotter
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Potcar
-from simmate.calculators.vasp.tasks.base import VaspTask
-
-# TODO: This class only exists because I don't have the core KptPath class
-# written yet. Because my labmates have a high priority on BandStructure
-# calculations, I needed to make this temporary workaround class.
+from simmate.calculators.vasp.tasks.energy.materials_project import (
+    MaterialsProjectStaticEnergy,
+)
 
 
-class BandStructureTask(VaspTask):
+class MaterialsProjectBandStructureTask(MaterialsProjectStaticEnergy):
 
     # The default settings to use for this calculation.
     # The key thing for band structures is that this follows a static energy
     # calculation. We use the CHGCAR from that previous calculation. We also
     # hold the charge density static during this calculation so this is a
     # non-selfconsistent (non-SCF) calculation.
-    incar = dict(
-        EDIFF=1.0e-07,
-        ENCUT=520,
-        ICHARG=11,  # this indicates we are using a previous CHGCAR
+    incar = MaterialsProjectStaticEnergy.incar.copy()
+    incar.update(
+        ICHARGE=11,
         ISMEAR=0,
-        LCHARG=False,
-        LWAVE=False,
-        NSW=0,
-        PREC="Accurate",
-        SIGMA=0.05,
+        SIGMA=0.01,
     )
-
-    # We will use the PBE functional with all default mappings
-    functional = "PBE"
 
     # set the KptGrid or KptPath object
     # TODO: in the future, all functionality of this class will be available
-    # by giving this class a KptPath class here.
+    # by giving a KptPath class here.
     kpoints = None
     kpoints_line_density = 20
 
-    def setup(self, structure, dir):
+    def setup(self, structure, directory):
+        """
+        Writes input files for this calculation. This differs from the normal
+        VaspTask setup because it converts the structure to the standard primative
+        first and then writes a KPOINT file with using a highsym path.
+        """
+
+        # If requested, we convert to the LLL-reduced unit cell, which aims to
+        # be as cubic as possible.
+        if self.pre_sanitize_structure:
+            structure = structure.copy(sanitize=True)
 
         # For band structures, we need to make sure the structure is in the
         # standardized primitive form. Note we assume that we are using the
@@ -57,17 +57,22 @@ class BandStructureTask(VaspTask):
         check_for_standardization_bugs(structure, structure_standardized)
 
         # write the poscar file
-        Poscar.to_file(structure_standardized, os.path.join(dir, "POSCAR"))
+        Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
 
-        # write the incar file
-        Incar(**self.incar).to_file(os.path.join(dir, "INCAR"))
+        # Combine our base incar settings with those of our parallelization settings
+        # and then write the incar file
+        incar = Incar(**self.incar) + Incar(**self.incar_parallel_settings)
+        incar.to_file(
+            filename=os.path.join(directory, "INCAR"),
+            structure=structure,
+        )
 
         ##############
-        # Now we need to find the high-symmetry Kpt path. Note that all of this
+        # we need to find the high-symmetry Kpt path. Note that all of this
         # functionality will be moved to the KptPath class and then extended to
         # vasp.inputs.kpoints class. Until those classes are ready, we just use
         # pymatgen here.
-        kpath = HighSymmKpath(structure)
+        kpath = HighSymmKpath(structure_standardized)
         frac_k_points, k_points_labels = kpath.get_kpoints(
             line_density=self.kpoints_line_density,
             coords_are_cartesian=False,
@@ -80,16 +85,30 @@ class BandStructureTask(VaspTask):
             labels=k_points_labels,
             kpts_weights=[1] * len(frac_k_points),
         )
-        kpoints.write_file(os.path.join(dir, "KPOINTS"))
+        kpoints.write_file(os.path.join(directory, "KPOINTS"))
         ##############
 
         # write the POTCAR file
         Potcar.to_file_from_type(
             structure.composition.elements,
             self.functional,
-            os.path.join(dir, "POTCAR"),
+            os.path.join(directory, "POTCAR"),
             self.potcar_mappings,
         )
+
+    def _write_output_summary(self, directory, vasprun):
+        """
+        In addition to writing the normal VASP output summary, this also plots
+        the bandstructure to "band_structure.png"
+        """
+
+        # run the normal out put
+        super()._write_output_summary(directory, vasprun)
+
+        bs_plotter = BSPlotter(vasprun.get_band_structure(line_mode=True))
+        plot = bs_plotter.get_plot()
+        plot_filename = os.path.join(directory, "band_structure.png")
+        plot.savefig(plot_filename)
 
 
 def check_for_standardization_bugs(structure_original, structure_new):
@@ -104,9 +123,10 @@ def check_for_standardization_bugs(structure_original, structure_new):
 
     if abs(vpa_old - vpa_new) / vpa_old > 0.02:
         raise ValueError(
-            f"Standardizing cell failed! Volume-per-atom changed... old: {vpa_old}, new: {vpa_new}"
+            "Standardizing failed! Volume-per-atom changed... "
+            f"old: {vpa_old}, new: {vpa_new}"
         )
 
     sm = StructureMatcher()
     if not sm.fit(structure_original, structure_new):
-        raise ValueError("Standardizing cell failed! Old structure doesn't match new.")
+        raise ValueError("Standardizing failed! Old structure doesn't match new.")

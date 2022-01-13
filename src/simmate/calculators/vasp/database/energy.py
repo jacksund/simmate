@@ -7,5 +7,9 @@ class MITStaticEnergy(StaticEnergy):
     pass
 
 
+class MaterialsProjectStaticEnergy(StaticEnergy):
+    pass
+
+
 class Quality04StaticEnergy(StaticEnergy):
     pass

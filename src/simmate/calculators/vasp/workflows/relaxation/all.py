@@ -6,6 +6,9 @@
 # using ALL of the classes below or if you are running some quick interactive test.
 
 from simmate.calculators.vasp.workflows.relaxation.mit import workflow as relaxation_mit
+from simmate.calculators.vasp.workflows.relaxation.materials_project import (
+    workflow as relaxation_matproj,
+)
 from simmate.calculators.vasp.workflows.relaxation.quality_00 import (
     workflow as relaxation_quality00,
 )

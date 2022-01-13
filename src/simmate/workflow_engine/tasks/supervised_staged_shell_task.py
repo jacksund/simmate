@@ -162,15 +162,15 @@ class SupervisedStagedShellTask(Task):
     # (in seconds) we should check the status of our job. Note this check is
     # just whether the job is done or not. This is NOT how often we check for
     # errors. See monitor_freq for that.
-    polling_timestep = 10
+    polling_timestep = 1
 
     # The frequency we should run check for errors with our monitors. This is
     # based on the polling_timestep loops. For example, if we have a
     # polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
-    # the monitor checks every other loop -- or every 2*10 = 20 seconds. The
-    # default values of polling_timestep=10 and monitor_freq=30 indicate that
-    # we run monitoring functions every 5 minutes (10*30=300s=5min).
-    monitor_freq = 30
+    # the monitor checks every other loop -- or every 2*10 = 20 seconds. Another
+    # example is values of polling_timestep=10 and monitor_freq=30. Here, we'd
+    # run monitoring functions every 5 minutes (10*30=300s=5min).
+    monitor_freq = 300
 
     def __init__(
         self,
