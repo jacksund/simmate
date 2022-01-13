@@ -32,6 +32,9 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
+                    <a class="function" href="#get_conda_env">get_conda_env</a>
+            </li>
+            <li>
                     <a class="function" href="#get_doc_from_readme">get_doc_from_readme</a>
             </li>
             <li>
@@ -90,6 +93,7 @@
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span><span class="p">,</span> <span class="n">mkdtemp</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span>
@@ -97,9 +101,31 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
 
+<span class="k">def</span> <span class="nf">get_conda_env</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Grab the name of the activate conda environment and returns it as a string.</span>
+<span class="sd">    If there is no env, then an empty string is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check the list of python paths and grab the first path that has &quot;envs&quot; in it.</span>
+    <span class="c1"># Assume we don&#39;t have a conda env until proven otherwise</span>
+    <span class="n">env_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;envs&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+            <span class="c1"># split the path into individual folder names (os.sep gives / or \\)</span>
+            <span class="n">folders</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+            <span class="c1"># the conda env name will the name immediately after the /envs.</span>
+            <span class="c1"># example path is &#39;/home/jacksund/anaconda3/envs/simmate_dev/lib/python3.9&#39;</span>
+            <span class="c1"># where we want the name simmate_dev here.</span>
+            <span class="n">env_name</span> <span class="o">=</span> <span class="n">folders</span><span class="p">[</span><span class="n">folders</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;envs&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># once we have found this, we can exit the loop</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">env_name</span>
+
+
 <span class="k">def</span> <span class="nf">get_doc_from_readme</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Loads the docstring from a README.rst file in the same directory.</span>
+<span class="sd">    Loads the docstring from a README.md file in the same directory.</span>
 
 <span class="sd">    This is commonly used in __init__.py files because we like having our</span>
 <span class="sd">    documentation isolated (so that github renders it).</span>
@@ -123,7 +149,7 @@
     <span class="c1"># We assume the file is in the same directory and named &quot;README.rst&quot;</span>
     <span class="n">file_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_directory</span><span class="p">,</span> <span class="s2">&quot;README.rst&quot;</span><span class="p">),</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_directory</span><span class="p">,</span> <span class="s2">&quot;README.md&quot;</span><span class="p">),</span>
         <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">doc_file</span><span class="p">:</span>
         <span class="n">doc</span> <span class="o">=</span> <span class="n">doc_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
@@ -403,6 +429,46 @@
         </details>
 
             </section>
+                <section id="get_conda_env">
+                            <div class="attr function"><a class="headerlink" href="#get_conda_env">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_conda_env</span><span class="signature">() -&gt; str</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_conda_env</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Grab the name of the activate conda environment and returns it as a string.</span>
+<span class="sd">    If there is no env, then an empty string is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check the list of python paths and grab the first path that has &quot;envs&quot; in it.</span>
+    <span class="c1"># Assume we don&#39;t have a conda env until proven otherwise</span>
+    <span class="n">env_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;envs&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+            <span class="c1"># split the path into individual folder names (os.sep gives / or \\)</span>
+            <span class="n">folders</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+            <span class="c1"># the conda env name will the name immediately after the /envs.</span>
+            <span class="c1"># example path is &#39;/home/jacksund/anaconda3/envs/simmate_dev/lib/python3.9&#39;</span>
+            <span class="c1"># where we want the name simmate_dev here.</span>
+            <span class="n">env_name</span> <span class="o">=</span> <span class="n">folders</span><span class="p">[</span><span class="n">folders</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;envs&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># once we have found this, we can exit the loop</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">env_name</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Grab the name of the activate conda environment and returns it as a string.
+If there is no env, then an empty string is returned.</p>
+</div>
+
+
+                </section>
                 <section id="get_doc_from_readme">
                             <div class="attr function"><a class="headerlink" href="#get_doc_from_readme">#&nbsp;&nbsp</a>
 
@@ -415,7 +481,7 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_doc_from_readme</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Loads the docstring from a README.rst file in the same directory.</span>
+<span class="sd">    Loads the docstring from a README.md file in the same directory.</span>
 
 <span class="sd">    This is commonly used in __init__.py files because we like having our</span>
 <span class="sd">    documentation isolated (so that github renders it).</span>
@@ -439,7 +505,7 @@
     <span class="c1"># We assume the file is in the same directory and named &quot;README.rst&quot;</span>
     <span class="n">file_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_directory</span><span class="p">,</span> <span class="s2">&quot;README.rst&quot;</span><span class="p">),</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_directory</span><span class="p">,</span> <span class="s2">&quot;README.md&quot;</span><span class="p">),</span>
         <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">doc_file</span><span class="p">:</span>
         <span class="n">doc</span> <span class="o">=</span> <span class="n">doc_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
@@ -448,7 +514,7 @@
 
         </details>
 
-            <div class="docstring"><p>Loads the docstring from a README.rst file in the same directory.</p>
+            <div class="docstring"><p>Loads the docstring from a README.md file in the same directory.</p>
 
 <p>This is commonly used in __init__.py files because we like having our
 documentation isolated (so that github renders it).</p>
@@ -462,9 +528,11 @@ documentation isolated (so that github renders it).</p>
 __doc__ = get_doc_from_readme(__file__)
 </code></pre>
 
-<p>This is an alternative to using "include" in rst files, which <a href="https://pdoc.dev/docs/pdoc.html#include-markdown-files">pdoc recommends</a>.
+<p>This is an alternative to using "include" in rst files, which <code>pdoc recommends</code>_.
 We prefer this utility because it allows Spyder to load the docs -- although
 it's slower in production (bc of opening/closing files).</p>
+
+<p>.. _pdoc recommends: https://pdoc.dev/docs/pdoc.html#include-markdown-files</p>
 </div>
 
 

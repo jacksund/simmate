@@ -80,7 +80,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/</p>
 <span class="kn">import</span> <span class="nn">dj_database_url</span>  <span class="c1"># needed for DigitalOcean database connection</span>
 
 <span class="kn">from</span> <span class="nn">simmate</span> <span class="kn">import</span> <span class="n">website</span>  <span class="c1"># needed to specify location of built-in apps</span>
-<span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_directory</span>
+<span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_directory</span><span class="p">,</span> <span class="n">get_conda_env</span>
 
 <span class="c1"># --------------------------------------------------------------------------------------</span>
 
@@ -97,6 +97,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/</p>
 <span class="c1"># where things like our templates or static files are located. We find this</span>
 <span class="c1"># by looking at the import path to see where python installed it.</span>
 <span class="n">DJANGO_DIRECTORY</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">website</span><span class="o">.</span><span class="vm">__file__</span><span class="p">))</span>
+
+<span class="c1"># Some settings below also depend on the conda env name. This makes switching</span>
+<span class="c1"># between different databases and settings as easy as activating different</span>
+<span class="c1"># conda environments</span>
+<span class="n">CONDA_ENV</span> <span class="o">=</span> <span class="n">get_conda_env</span><span class="p">()</span>
 
 <span class="c1"># --------------------------------------------------------------------------------------</span>
 
@@ -139,26 +144,46 @@ https://docs.djangoproject.com/en/3.0/ref/settings/</p>
 
 <span class="c1"># DATBASE CONNECTION</span>
 
-<span class="c1"># We first check if the user has a &quot;database.yaml&quot; file and we use the databases</span>
-<span class="c1"># specified there as our first priority.</span>
+<span class="c1"># There are three types of database files that we check for -- in order of priority:</span>
+<span class="c1">#   1. database.yaml</span>
+<span class="c1">#   2. my_env-database.yaml</span>
+<span class="c1">#   3. my_env-database.sqlite3 (if USE_LOCAL_DATABASE=True) &lt;-- and create this if doesn&#39;t exist</span>
+<span class="c1">#   4. use a DATABASE_URL env variable</span>
 <span class="n">DATABASE_YAML</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SIMMATE_DIRECTORY</span><span class="p">,</span> <span class="s2">&quot;database.yaml&quot;</span><span class="p">)</span>
+<span class="n">CONDA_DATABASE_YAML</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SIMMATE_DIRECTORY</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONDA_ENV</span><span class="si">}</span><span class="s2">-database.yaml&quot;</span><span class="p">)</span>
+<span class="n">CONDA_DATABASE_SQLITE3</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">SIMMATE_DIRECTORY</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONDA_ENV</span><span class="si">}</span><span class="s2">-database.sqlite3&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+<span class="c1"># if the user is in the (base) env or not using conda, then we will have a</span>
+<span class="c1"># value of &quot;-database.sqlite3&quot;. We remove the starting &quot;-&quot; here.</span>
+
+
+<span class="c1"># Our 1st priority is checking for a &quot;simmate/database.yaml&quot; file</span>
 <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">DATABASE_YAML</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">DATABASE_YAML</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
         <span class="n">DATABASES</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">full_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-<span class="c1"># If this file doesn&#39;t exist, we next check our enviornment variable to see if</span>
-<span class="c1"># we should use our local sql database. This is the default behavior!</span>
+
+<span class="c1"># Our 2nd priority is checking for a file like &quot;/simmate/my_env-database.yaml</span>
+<span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">DATABASE_YAML</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">DATABASE_YAML</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">DATABASES</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">full_load</span><span class="p">(</span><span class="n">CONDA_DATABASE_YAML</span><span class="p">)</span>
+
+<span class="c1"># This is the default behavior</span>
+<span class="c1"># Our 3rd prioirity is a local sqlite database name &quot;my_env-database.sqlite3&quot;</span>
+
 <span class="k">elif</span> <span class="n">USE_LOCAL_DATABASE</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
     <span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;ENGINE&quot;</span><span class="p">:</span> <span class="s2">&quot;django.db.backends.sqlite3&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;NAME&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SIMMATE_DIRECTORY</span><span class="p">,</span> <span class="s2">&quot;database.sqlite3&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;NAME&quot;</span><span class="p">:</span> <span class="n">CONDA_DATABASE_SQLITE3</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">}</span>
-<span class="c1"># Otherwise, we are likely using DigitalOcean and running a server.</span>
-<span class="c1"># When DigitalOcean runs the &quot;collectstatic&quot; command, we don&#39;t want to connect</span>
-<span class="c1"># any database. So we use the &quot;sys&quot; library to look at the command and ensure</span>
-<span class="c1"># it doesn&#39;t involve &quot;collectstatic&quot;. Otherwise we use the URL that is set with</span>
-<span class="c1"># our enviornment variable.</span>
+
+<span class="c1"># Lastly, if we make it to this point, we are likely using DigitalOcean and</span>
+<span class="c1"># running a server. When DigitalOcean runs the &quot;collectstatic&quot; command, we don&#39;t</span>
+<span class="c1">#  want to connect any database. So we use the &quot;sys&quot; library to look at the</span>
+<span class="c1"># command and ensure it doesn&#39;t involve &quot;collectstatic&quot;. Otherwise we use the</span>
+<span class="c1"># URL that is set with our enviornment variable.</span>
 <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;collectstatic&quot;</span><span class="p">:</span>
     <span class="c1"># ensure that we have the database URL properly configured in DigitalOcean</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DATABASE_URL&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -167,6 +192,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/</p>
     <span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="n">dj_database_url</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DATABASE_URL&quot;</span><span class="p">)),</span>
     <span class="p">}</span>
+
 <span class="c1"># Here is an example of connecting to a Postgres server normally...</span>
 <span class="c1"># DATABASES = {</span>
 <span class="c1">#     &quot;default&quot;: {</span>

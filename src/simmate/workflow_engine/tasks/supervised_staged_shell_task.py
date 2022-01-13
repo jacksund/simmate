@@ -29,12 +29,13 @@ from simmate.workflow_engine.error_handler import ErrorHandler
 # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
 
 
-class SupervisedStagedShellTask(Task):
+class S3Task(Task):
     """
-    Introduction to the "SSS Task"
-    ------------------------------
-    This class contains the core functionality to *supervise* a *staged* task
-    involving some *shell* command.
+    The Supervised-Staged-Shell Task (aka "S3Task")
+    -----------------------------------------------
+
+    This class contains the core functionality to **supervise** a **staged** task
+    involving some **shell** command.
 
     Let's breakdown what this means...
 
@@ -43,9 +44,9 @@ class SupervisedStagedShellTask(Task):
     calculation. We consider calling external programs a *staged* task made
     up of three steps:
 
-        - setup = writing any input files required for the program
-        - execution = actually calling the command and running our program
-        - workup = loading data from output files back into python
+    - setup = writing any input files required for the program
+    - execution = actually calling the command and running our program
+    - workup = loading data from output files back into python
 
     And for *supervising* the task, this means we monitor the program while the
     execution stage is running. So once a program is started, Simmate can check
@@ -53,6 +54,8 @@ class SupervisedStagedShellTask(Task):
     program, fix the issue, and then restart it. Any fixes that were made are
     written to "simmate_corrections.csv".
 
+
+    <!--
     TODO: Make a simple diagram to visualize the overall process and add it here.
     It will be similar to Custodian's, but we don't have a list of jobs here.
     https://materialsproject.github.io/custodian/index.html#usage
@@ -64,61 +67,63 @@ class SupervisedStagedShellTask(Task):
     - check for errors
     - [correct them, rerun]
     - postprocess/analysis
+    -->
 
     This entire process (the different stages and monitoring) is carried out
     using the ``run()`` method. You rarely use this class directly. Instead,
     you typically use a subclass of it. As a user, you really just need to do
     something like this:
 
-    .. code-block:: python
-
+    ``` python
        from simmate.calculator.example.tasks import ExampleTask
+
        my_task = ExampleTask()
        my_result = my_task.run()
+    ```
 
     And that's it!
 
     For experts, this class can be viewed as a combination of prefect's ShellTask,
-    a custodian Job, Custodian monitoring. When subclassing this, we can absorb
+    a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
     functionality of pymatgen.io.vasp.sets too. By merging all of these together
     into one class, we make things much easier for users and creating new Tasks.
 
+
     Inheriting from this class
     --------------------------
-    This class is commonly used to make tasks for our calculator modules. For
-    a full (and advanced) example, take a look at...
 
-    >>> simmate.calculators.vasp.tasks.base.VaspTask
+    This class is commonly used to make tasks for our calculator modules, so you
+    will likely want to subclass this. Here is a basic example of inheriting
+    and then running a task:
 
-    And here's an example of inheriting and then running a task:
+    ``` python
 
-    .. code-block:: python
-
-        from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
-            SupervisedStagedShellTask as SSSTask,
-        )
-        from example.error_handlers import PossibleError1, PossibleError2
+    from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
+        S3Task as SSSTask,
+    )
+    from example.error_handlers import PossibleError1, PossibleError2
 
 
-        class ExampleTask(SSSTask):
+    class ExampleTask(SSSTask):
 
-            command = "echo example"  # just prints out "example"
-            max_corrections = 7
-            error_handlers = [PossibleError1, PossibleError2]
-            polling_timestep = 0.1
-            monitor_freq = 10
-            some_new_setting = 123
+        command = "echo example"  # just prints out "example"
+        max_corrections = 7
+        error_handlers = [PossibleError1, PossibleError2]
+        polling_timestep = 0.1
+        monitor_freq = 10
+        some_new_setting = 123
 
-            def setup(self, structure, directory):  # <-- MUST have these two args
-                print("I'm setting things up!")
-                print(f"My new setting is {some_new_setting}")
+        def setup(self, structure, directory):  # <-- MUST have these two args
+            print("I'm setting things up!")
+            print(f"My new setting is {some_new_setting}")
 
-            def workup(self, directory):  # <-- MUST have this arg
-                print("I'm working things up!")
+        def workup(self, directory):  # <-- MUST have this arg
+            print("I'm working things up!")
 
 
-        task = ExampleTask()
-        result = task.run()
+    task = ExampleTask()
+    result = task.run()
+    ```
 
     There are a couple things to note here:
 
@@ -127,50 +132,67 @@ class SupervisedStagedShellTask(Task):
     - make sure you include the structure/directory inputs, even if you don't use them.
     - Don't add new kwargs to methods. Instead handle these options through attributes.
 
+    For a full (and advanced) example, of a subclass take a look at
+    `simmate.calculators.vasp.tasks.base.VaspTask`.
+
     """
 
-    # set a defualt command associated with this specific ShellTask
     # I set this here so that I don't have to copy/paste the init method
     # every time I inherit from this class and want to update the default
     # command to use for the child class.
     command = None
+    """
+    The defualt shell command to use.
+    """
 
-    # Indicates whether you need a structure if you want the run method to work.
     # While it's not needed for a number of cases, it's extremely common for the
     # setup method to need an input structure in matsci. I therefore include
     # this rather than having a nearly identical subclass that could cause
     # some confusion.
     requires_structure = False
+    """
+    Indicates whether a structure is needed if for the run() method.
+    """
 
-    # A list of ErrorHandler objects to use in order of priority (that is, highest
-    # priority is first).
     error_handlers = []
+    """
+    A list of ErrorHandler objects to use in order of priority (that is, highest
+    priority is first).
+    """
 
-    # maximum number of times we can apply a handler's correction and retry
-    # the shelltask
     max_corrections = 5
+    """
+    maximum number of times we can apply a correction and retry the shell command
+    """
 
-    # Monitoring settings. These are only ever relevent if there are ErrorHandlers
-    # added that have is_monitor=True. These handlers run while the shelltask
-    # itself is also running. Read more about ErrorHandlers for more info.
+    # Monitoring settings.
+    # These are only ever relevent if there are ErrorHandlers added that have
+    # is_monitor=True. These handlers run while the shelltask itself is also
+    # running. Read more about ErrorHandlers for more info.
 
-    # Whether to run monitor handlers while the shelltask runs. False means
-    # wait until the job has completed.
     monitor = True
+    """
+    Whether to run monitor handlers while the shelltask runs. False means
+    wait until the job has completed.
+    """
 
-    # If we are monitoring the job for errors while it runs, this is how often
-    # (in seconds) we should check the status of our job. Note this check is
-    # just whether the job is done or not. This is NOT how often we check for
-    # errors. See monitor_freq for that.
     polling_timestep = 1
+    """
+    If we are monitoring the job for errors while it runs, this is how often
+    (in seconds) we should check the status of our job. Note this check is
+    just whether the job is done or not. This is NOT how often we check for
+    errors. See monitor_freq for that.
+    """
 
-    # The frequency we should run check for errors with our monitors. This is
-    # based on the polling_timestep loops. For example, if we have a
-    # polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
-    # the monitor checks every other loop -- or every 2*10 = 20 seconds. Another
-    # example is values of polling_timestep=10 and monitor_freq=30. Here, we'd
-    # run monitoring functions every 5 minutes (10*30=300s=5min).
     monitor_freq = 300
+    """
+    The frequency we should run check for errors with our monitors. This is
+    based on the polling_timestep loops. For example, if we have a
+    polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
+    the monitor checks every other loop -- or every 2x10 = 20 seconds. Another
+    example is values of polling_timestep=10 and monitor_freq=30. Here, we'd
+    run monitoring functions every 5 minutes (10x30=300s=5min).
+    """
 
     def __init__(
         self,
@@ -194,51 +216,52 @@ class SupervisedStagedShellTask(Task):
 
         Parameters
         ----------
-        structure : pymatgen.core.structure.Structure (optional)
+
+        - `structure`:
             The structure to use for the task, if one is required. Typically, this
             class is ran for multiple structures, where you can pass this
             option to the task.run() method instead.
-        command : str (optional)
+        - `command`:
             The command that will be called during execution.
-        directory : str (optional)
+        - `directory`:
             The directory to run everything in. This is passed to the ulitities
             function simmate.ulitities.get_directory
-        error_handlers : List[ErrorHandler] (optional)
+        - `error_handlers`:
             The list of error handler objects to use. These should be listing in
             order of priority, where to highest priority is first. If one handler
             is triggered, the correction will be applied and none of the
             following handlers will be checked.
-        max_corrections : int (optional)
+        - `max_corrections`:
             The maximum number of times that corrections will be made before
             giving up on the calculation. Note, once this limit is exceeded, the
             error is stored without correcting or restarting the run.
-        monitor : bool (optional)
+        - `monitor`:
             Whether to run monitor handlers while the command runs. False means
             wait until the job has completed.
-        polling_timestep : float (optional)
+        - `polling_timestep`:
             If we are monitoring the job for errors while it runs, this is how often
             (in seconds) we should check the status of our job. Note this check is
             just whether the job is done or not. This is NOT how often we check for
             errors. See monitor_freq for that.
-        monitor_freq : int (optional)
+        - `monitor_freq`:
             The frequency we should run check for errors with our monitors. This is
             based on the polling_timestep loops. For example, if we have a
             polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
-            the monitor checks every other loop -- or every 2*10 = 20 seconds. The
+            the monitor checks every other loop -- or every 2x10 = 20 seconds. The
             default values of polling_timestep=10 and monitor_freq=30 indicate that
-            we run monitoring functions every 5 minutes (10*30=300s=5min).
-        save_corrections_to_file : bool (optional)
+            we run monitoring functions every 5 minutes (10x30=300s=5min).
+        - `save_corrections_to_file`:
             Whether to write a log file of the corrections made. The default is True.
-        corrections_filename : str (optional)
+        - `corrections_filename`:
             If save_corrections_to_file is True, this is the filename of where
             to write the corrections. The default is "simmate_corrections.csv".
-        compress_output : bool (optional)
+        - `compress_output`:
             Whether to compress the directory to a zip file at the end of the
             task run. After compression, it will also delete the directory.
             The default is False.
-        **kwargs : Any
-            All extra arguments supported by prefect.core.task.Task. To see all
-            the options, visit https://docs.prefect.io/api/latest/core/task.html
+        - `**kwargs`:
+            All extra arguments supported by
+            [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).
 
         """
 
@@ -287,10 +310,10 @@ class SupervisedStagedShellTask(Task):
 
         Parameters
         ----------
-        structure : pymatgen.core.structure.Structure
+        - `structure`:
             The structure to use for the task, if one is required.
-        directory : str
-            The directory to run everything in.
+        - `directory`:
+            The directory to run everything in. Must exist already.
         """
         # Be sure to include directory and structure (or **kwargs) as input arguments
         # for higher-level compatibility with the run method.
@@ -303,21 +326,21 @@ class SupervisedStagedShellTask(Task):
         handling as well as monitoring of the job.
 
         You should never call this method directly unless you are debugging. This
-        is becuase execute() is normally called within the run() method.
+        is becuase `execute` is normally called within the `run` method.
 
         Some tasks don't require a setup() method, so by default, this method
         does nothing but "pass".
 
         Parameters
         ----------
-        directory : str
+        - `directory`:
             The directory to run everything in.
-        command : str
+        - `command`:
             The command that will be called during execution.
 
         Returns
         -------
-        corrections : List
+        - `corrections`
             A list of tuples where each entry is a error identified and the
             correction applied. Ex: [("ExampleError", "ExampleCorrection")]
 
@@ -515,9 +538,9 @@ class SupervisedStagedShellTask(Task):
 
         Parameters
         ----------
-        process : subprocess.Popen
+        - `process`:
             The process object that will be terminated.
-        command : str
+        - `command`:
             the command used to launch the process. This is sometimes useful
             when searching for all running processes under this name.
         """
@@ -572,7 +595,7 @@ class SupervisedStagedShellTask(Task):
 
         Parameters
         ----------
-        directory : str
+        - `directory`:
             The directory to run everything in.
 
         """
@@ -595,27 +618,27 @@ class SupervisedStagedShellTask(Task):
         Call this method once you have your task initialized. For each run you
         can provide a new structure, directory, or command. For example,
 
-        .. code-block:: python
+        ``` python
+        from simmate.calculator.example.tasks import ExampleTask
 
-           from simmate.calculator.example.tasks import ExampleTask
-           my_task = ExampleTask()
-           my_result = my_task.run(structure=my_structure, command=my_command)
+        my_task = ExampleTask()
+        my_result = my_task.run(structure=my_structure, command=my_command)
+        ```
 
         Parameters
         ----------
-        structure : pymatgen.core.structure.Structure (optional)
+        - `structure`:
             The structure to use for the task, if one is required.
-        command : str (optional)
+        - `command`:
             The command that will be called during execution.
-        directory : str (optional)
+        - `directory`:
             The directory to run everything in. This is passed to the ulitities
             function simmate.ulitities.get_directory
 
         Returns
         -------
-        dict
-            a dictionary of the result, corrections, and working directory used
-            for this task run
+        - a dictionary of the result, corrections, and working directory used
+        for this task run
 
         """
 

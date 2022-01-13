@@ -32,49 +32,49 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
-                    <a class="class" href="#SupervisedStagedShellTask">SupervisedStagedShellTask</a>
+                    <a class="class" href="#S3Task">S3Task</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#SupervisedStagedShellTask.__init__">SupervisedStagedShellTask</a>
+                                <a class="function" href="#S3Task.__init__">S3Task</a>
                         </li>
                         <li>
-                                <a class="variable" href="#SupervisedStagedShellTask.command">command</a>
+                                <a class="variable" href="#S3Task.command">command</a>
                         </li>
                         <li>
-                                <a class="variable" href="#SupervisedStagedShellTask.requires_structure">requires_structure</a>
+                                <a class="variable" href="#S3Task.requires_structure">requires_structure</a>
                         </li>
                         <li>
-                                <a class="variable" href="#SupervisedStagedShellTask.error_handlers">error_handlers</a>
+                                <a class="variable" href="#S3Task.error_handlers">error_handlers</a>
                         </li>
                         <li>
-                                <a class="variable" href="#SupervisedStagedShellTask.max_corrections">max_corrections</a>
+                                <a class="variable" href="#S3Task.max_corrections">max_corrections</a>
                         </li>
                         <li>
-                                <a class="variable" href="#SupervisedStagedShellTask.monitor">monitor</a>
+                                <a class="variable" href="#S3Task.monitor">monitor</a>
                         </li>
                         <li>
-                                <a class="variable" href="#SupervisedStagedShellTask.polling_timestep">polling_timestep</a>
+                                <a class="variable" href="#S3Task.polling_timestep">polling_timestep</a>
                         </li>
                         <li>
-                                <a class="variable" href="#SupervisedStagedShellTask.monitor_freq">monitor_freq</a>
+                                <a class="variable" href="#S3Task.monitor_freq">monitor_freq</a>
                         </li>
                         <li>
-                                <a class="function" href="#SupervisedStagedShellTask.setup">setup</a>
+                                <a class="function" href="#S3Task.setup">setup</a>
                         </li>
                         <li>
-                                <a class="function" href="#SupervisedStagedShellTask.execute">execute</a>
+                                <a class="function" href="#S3Task.execute">execute</a>
                         </li>
                         <li>
-                                <a class="function" href="#SupervisedStagedShellTask.workup">workup</a>
+                                <a class="function" href="#S3Task.workup">workup</a>
                         </li>
                         <li>
-                                <a class="function" href="#SupervisedStagedShellTask.run">run</a>
+                                <a class="function" href="#S3Task.run">run</a>
                         </li>
                         <li>
-                                <a class="function" href="#SupervisedStagedShellTask.get_config">get_config</a>
+                                <a class="function" href="#S3Task.get_config">get_config</a>
                         </li>
                         <li>
-                                <a class="function" href="#SupervisedStagedShellTask.print_config">print_config</a>
+                                <a class="function" href="#S3Task.print_config">print_config</a>
                         </li>
                 </ul>
 
@@ -148,12 +148,13 @@
 <span class="c1"># https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec</span>
 
 
-<span class="k">class</span> <span class="nc">SupervisedStagedShellTask</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">S3Task</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Introduction to the &quot;SSS Task&quot;</span>
-<span class="sd">    ------------------------------</span>
-<span class="sd">    This class contains the core functionality to *supervise* a *staged* task</span>
-<span class="sd">    involving some *shell* command.</span>
+<span class="sd">    The Supervised-Staged-Shell Task (aka &quot;S3Task&quot;)</span>
+<span class="sd">    -----------------------------------------------</span>
+
+<span class="sd">    This class contains the core functionality to **supervise** a **staged** task</span>
+<span class="sd">    involving some **shell** command.</span>
 
 <span class="sd">    Let&#39;s breakdown what this means...</span>
 
@@ -162,9 +163,9 @@
 <span class="sd">    calculation. We consider calling external programs a *staged* task made</span>
 <span class="sd">    up of three steps:</span>
 
-<span class="sd">        - setup = writing any input files required for the program</span>
-<span class="sd">        - execution = actually calling the command and running our program</span>
-<span class="sd">        - workup = loading data from output files back into python</span>
+<span class="sd">    - setup = writing any input files required for the program</span>
+<span class="sd">    - execution = actually calling the command and running our program</span>
+<span class="sd">    - workup = loading data from output files back into python</span>
 
 <span class="sd">    And for *supervising* the task, this means we monitor the program while the</span>
 <span class="sd">    execution stage is running. So once a program is started, Simmate can check</span>
@@ -172,6 +173,8 @@
 <span class="sd">    program, fix the issue, and then restart it. Any fixes that were made are</span>
 <span class="sd">    written to &quot;simmate_corrections.csv&quot;.</span>
 
+
+<span class="sd">    &lt;!--</span>
 <span class="sd">    TODO: Make a simple diagram to visualize the overall process and add it here.</span>
 <span class="sd">    It will be similar to Custodian&#39;s, but we don&#39;t have a list of jobs here.</span>
 <span class="sd">    https://materialsproject.github.io/custodian/index.html#usage</span>
@@ -183,61 +186,63 @@
 <span class="sd">    - check for errors</span>
 <span class="sd">    - [correct them, rerun]</span>
 <span class="sd">    - postprocess/analysis</span>
+<span class="sd">    --&gt;</span>
 
 <span class="sd">    This entire process (the different stages and monitoring) is carried out</span>
 <span class="sd">    using the ``run()`` method. You rarely use this class directly. Instead,</span>
 <span class="sd">    you typically use a subclass of it. As a user, you really just need to do</span>
 <span class="sd">    something like this:</span>
 
-<span class="sd">    .. code-block:: python</span>
-
+<span class="sd">    ``` python</span>
 <span class="sd">       from simmate.calculator.example.tasks import ExampleTask</span>
+
 <span class="sd">       my_task = ExampleTask()</span>
 <span class="sd">       my_result = my_task.run()</span>
+<span class="sd">    ```</span>
 
 <span class="sd">    And that&#39;s it!</span>
 
 <span class="sd">    For experts, this class can be viewed as a combination of prefect&#39;s ShellTask,</span>
-<span class="sd">    a custodian Job, Custodian monitoring. When subclassing this, we can absorb</span>
+<span class="sd">    a custodian Job, and Custodian monitoring. When subclassing this, we can absorb</span>
 <span class="sd">    functionality of pymatgen.io.vasp.sets too. By merging all of these together</span>
 <span class="sd">    into one class, we make things much easier for users and creating new Tasks.</span>
 
+
 <span class="sd">    Inheriting from this class</span>
 <span class="sd">    --------------------------</span>
-<span class="sd">    This class is commonly used to make tasks for our calculator modules. For</span>
-<span class="sd">    a full (and advanced) example, take a look at...</span>
 
-<span class="sd">    &gt;&gt;&gt; simmate.calculators.vasp.tasks.base.VaspTask</span>
+<span class="sd">    This class is commonly used to make tasks for our calculator modules, so you</span>
+<span class="sd">    will likely want to subclass this. Here is a basic example of inheriting</span>
+<span class="sd">    and then running a task:</span>
 
-<span class="sd">    And here&#39;s an example of inheriting and then running a task:</span>
+<span class="sd">    ``` python</span>
 
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        from simmate.workflow_engine.tasks.supervised_staged_shell_task import (</span>
-<span class="sd">            SupervisedStagedShellTask as SSSTask,</span>
-<span class="sd">        )</span>
-<span class="sd">        from example.error_handlers import PossibleError1, PossibleError2</span>
+<span class="sd">    from simmate.workflow_engine.tasks.supervised_staged_shell_task import (</span>
+<span class="sd">        S3Task as SSSTask,</span>
+<span class="sd">    )</span>
+<span class="sd">    from example.error_handlers import PossibleError1, PossibleError2</span>
 
 
-<span class="sd">        class ExampleTask(SSSTask):</span>
+<span class="sd">    class ExampleTask(SSSTask):</span>
 
-<span class="sd">            command = &quot;echo example&quot;  # just prints out &quot;example&quot;</span>
-<span class="sd">            max_corrections = 7</span>
-<span class="sd">            error_handlers = [PossibleError1, PossibleError2]</span>
-<span class="sd">            polling_timestep = 0.1</span>
-<span class="sd">            monitor_freq = 10</span>
-<span class="sd">            some_new_setting = 123</span>
+<span class="sd">        command = &quot;echo example&quot;  # just prints out &quot;example&quot;</span>
+<span class="sd">        max_corrections = 7</span>
+<span class="sd">        error_handlers = [PossibleError1, PossibleError2]</span>
+<span class="sd">        polling_timestep = 0.1</span>
+<span class="sd">        monitor_freq = 10</span>
+<span class="sd">        some_new_setting = 123</span>
 
-<span class="sd">            def setup(self, structure, directory):  # &lt;-- MUST have these two args</span>
-<span class="sd">                print(&quot;I&#39;m setting things up!&quot;)</span>
-<span class="sd">                print(f&quot;My new setting is {some_new_setting}&quot;)</span>
+<span class="sd">        def setup(self, structure, directory):  # &lt;-- MUST have these two args</span>
+<span class="sd">            print(&quot;I&#39;m setting things up!&quot;)</span>
+<span class="sd">            print(f&quot;My new setting is {some_new_setting}&quot;)</span>
 
-<span class="sd">            def workup(self, directory):  # &lt;-- MUST have this arg</span>
-<span class="sd">                print(&quot;I&#39;m working things up!&quot;)</span>
+<span class="sd">        def workup(self, directory):  # &lt;-- MUST have this arg</span>
+<span class="sd">            print(&quot;I&#39;m working things up!&quot;)</span>
 
 
-<span class="sd">        task = ExampleTask()</span>
-<span class="sd">        result = task.run()</span>
+<span class="sd">    task = ExampleTask()</span>
+<span class="sd">    result = task.run()</span>
+<span class="sd">    ```</span>
 
 <span class="sd">    There are a couple things to note here:</span>
 
@@ -246,50 +251,67 @@
 <span class="sd">    - make sure you include the structure/directory inputs, even if you don&#39;t use them.</span>
 <span class="sd">    - Don&#39;t add new kwargs to methods. Instead handle these options through attributes.</span>
 
+<span class="sd">    For a full (and advanced) example, of a subclass take a look at</span>
+<span class="sd">    `simmate.calculators.vasp.tasks.base.VaspTask`.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># set a defualt command associated with this specific ShellTask</span>
     <span class="c1"># I set this here so that I don&#39;t have to copy/paste the init method</span>
     <span class="c1"># every time I inherit from this class and want to update the default</span>
     <span class="c1"># command to use for the child class.</span>
     <span class="n">command</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The defualt shell command to use.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Indicates whether you need a structure if you want the run method to work.</span>
     <span class="c1"># While it&#39;s not needed for a number of cases, it&#39;s extremely common for the</span>
     <span class="c1"># setup method to need an input structure in matsci. I therefore include</span>
     <span class="c1"># this rather than having a nearly identical subclass that could cause</span>
     <span class="c1"># some confusion.</span>
     <span class="n">requires_structure</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Indicates whether a structure is needed if for the run() method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># A list of ErrorHandler objects to use in order of priority (that is, highest</span>
-    <span class="c1"># priority is first).</span>
     <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A list of ErrorHandler objects to use in order of priority (that is, highest</span>
+<span class="sd">    priority is first).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># maximum number of times we can apply a handler&#39;s correction and retry</span>
-    <span class="c1"># the shelltask</span>
     <span class="n">max_corrections</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    maximum number of times we can apply a correction and retry the shell command</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Monitoring settings. These are only ever relevent if there are ErrorHandlers</span>
-    <span class="c1"># added that have is_monitor=True. These handlers run while the shelltask</span>
-    <span class="c1"># itself is also running. Read more about ErrorHandlers for more info.</span>
+    <span class="c1"># Monitoring settings.</span>
+    <span class="c1"># These are only ever relevent if there are ErrorHandlers added that have</span>
+    <span class="c1"># is_monitor=True. These handlers run while the shelltask itself is also</span>
+    <span class="c1"># running. Read more about ErrorHandlers for more info.</span>
 
-    <span class="c1"># Whether to run monitor handlers while the shelltask runs. False means</span>
-    <span class="c1"># wait until the job has completed.</span>
     <span class="n">monitor</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Whether to run monitor handlers while the shelltask runs. False means</span>
+<span class="sd">    wait until the job has completed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># If we are monitoring the job for errors while it runs, this is how often</span>
-    <span class="c1"># (in seconds) we should check the status of our job. Note this check is</span>
-    <span class="c1"># just whether the job is done or not. This is NOT how often we check for</span>
-    <span class="c1"># errors. See monitor_freq for that.</span>
-    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If we are monitoring the job for errors while it runs, this is how often</span>
+<span class="sd">    (in seconds) we should check the status of our job. Note this check is</span>
+<span class="sd">    just whether the job is done or not. This is NOT how often we check for</span>
+<span class="sd">    errors. See monitor_freq for that.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># The frequency we should run check for errors with our monitors. This is</span>
-    <span class="c1"># based on the polling_timestep loops. For example, if we have a</span>
-    <span class="c1"># polling_timestep of 10 seconds and a monitor_freq of 2, then we would run</span>
-    <span class="c1"># the monitor checks every other loop -- or every 2*10 = 20 seconds. The</span>
-    <span class="c1"># default values of polling_timestep=10 and monitor_freq=30 indicate that</span>
-    <span class="c1"># we run monitoring functions every 5 minutes (10*30=300s=5min).</span>
-    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">300</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The frequency we should run check for errors with our monitors. This is</span>
+<span class="sd">    based on the polling_timestep loops. For example, if we have a</span>
+<span class="sd">    polling_timestep of 10 seconds and a monitor_freq of 2, then we would run</span>
+<span class="sd">    the monitor checks every other loop -- or every 2x10 = 20 seconds. Another</span>
+<span class="sd">    example is values of polling_timestep=10 and monitor_freq=30. Here, we&#39;d</span>
+<span class="sd">    run monitoring functions every 5 minutes (10x30=300s=5min).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -313,51 +335,52 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structure : pymatgen.core.structure.Structure (optional)</span>
+
+<span class="sd">        - `structure`:</span>
 <span class="sd">            The structure to use for the task, if one is required. Typically, this</span>
 <span class="sd">            class is ran for multiple structures, where you can pass this</span>
 <span class="sd">            option to the task.run() method instead.</span>
-<span class="sd">        command : str (optional)</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            The command that will be called during execution.</span>
-<span class="sd">        directory : str (optional)</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in. This is passed to the ulitities</span>
 <span class="sd">            function simmate.ulitities.get_directory</span>
-<span class="sd">        error_handlers : List[ErrorHandler] (optional)</span>
+<span class="sd">        - `error_handlers`:</span>
 <span class="sd">            The list of error handler objects to use. These should be listing in</span>
 <span class="sd">            order of priority, where to highest priority is first. If one handler</span>
 <span class="sd">            is triggered, the correction will be applied and none of the</span>
 <span class="sd">            following handlers will be checked.</span>
-<span class="sd">        max_corrections : int (optional)</span>
+<span class="sd">        - `max_corrections`:</span>
 <span class="sd">            The maximum number of times that corrections will be made before</span>
 <span class="sd">            giving up on the calculation. Note, once this limit is exceeded, the</span>
 <span class="sd">            error is stored without correcting or restarting the run.</span>
-<span class="sd">        monitor : bool (optional)</span>
+<span class="sd">        - `monitor`:</span>
 <span class="sd">            Whether to run monitor handlers while the command runs. False means</span>
 <span class="sd">            wait until the job has completed.</span>
-<span class="sd">        polling_timestep : float (optional)</span>
+<span class="sd">        - `polling_timestep`:</span>
 <span class="sd">            If we are monitoring the job for errors while it runs, this is how often</span>
 <span class="sd">            (in seconds) we should check the status of our job. Note this check is</span>
 <span class="sd">            just whether the job is done or not. This is NOT how often we check for</span>
 <span class="sd">            errors. See monitor_freq for that.</span>
-<span class="sd">        monitor_freq : int (optional)</span>
+<span class="sd">        - `monitor_freq`:</span>
 <span class="sd">            The frequency we should run check for errors with our monitors. This is</span>
 <span class="sd">            based on the polling_timestep loops. For example, if we have a</span>
 <span class="sd">            polling_timestep of 10 seconds and a monitor_freq of 2, then we would run</span>
-<span class="sd">            the monitor checks every other loop -- or every 2*10 = 20 seconds. The</span>
+<span class="sd">            the monitor checks every other loop -- or every 2x10 = 20 seconds. The</span>
 <span class="sd">            default values of polling_timestep=10 and monitor_freq=30 indicate that</span>
-<span class="sd">            we run monitoring functions every 5 minutes (10*30=300s=5min).</span>
-<span class="sd">        save_corrections_to_file : bool (optional)</span>
+<span class="sd">            we run monitoring functions every 5 minutes (10x30=300s=5min).</span>
+<span class="sd">        - `save_corrections_to_file`:</span>
 <span class="sd">            Whether to write a log file of the corrections made. The default is True.</span>
-<span class="sd">        corrections_filename : str (optional)</span>
+<span class="sd">        - `corrections_filename`:</span>
 <span class="sd">            If save_corrections_to_file is True, this is the filename of where</span>
 <span class="sd">            to write the corrections. The default is &quot;simmate_corrections.csv&quot;.</span>
-<span class="sd">        compress_output : bool (optional)</span>
+<span class="sd">        - `compress_output`:</span>
 <span class="sd">            Whether to compress the directory to a zip file at the end of the</span>
 <span class="sd">            task run. After compression, it will also delete the directory.</span>
 <span class="sd">            The default is False.</span>
-<span class="sd">        **kwargs : Any</span>
-<span class="sd">            All extra arguments supported by prefect.core.task.Task. To see all</span>
-<span class="sd">            the options, visit https://docs.prefect.io/api/latest/core/task.html</span>
+<span class="sd">        - `**kwargs`:</span>
+<span class="sd">            All extra arguments supported by</span>
+<span class="sd">            [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -406,10 +429,10 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structure : pymatgen.core.structure.Structure</span>
+<span class="sd">        - `structure`:</span>
 <span class="sd">            The structure to use for the task, if one is required.</span>
-<span class="sd">        directory : str</span>
-<span class="sd">            The directory to run everything in.</span>
+<span class="sd">        - `directory`:</span>
+<span class="sd">            The directory to run everything in. Must exist already.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Be sure to include directory and structure (or **kwargs) as input arguments</span>
         <span class="c1"># for higher-level compatibility with the run method.</span>
@@ -422,21 +445,21 @@
 <span class="sd">        handling as well as monitoring of the job.</span>
 
 <span class="sd">        You should never call this method directly unless you are debugging. This</span>
-<span class="sd">        is becuase execute() is normally called within the run() method.</span>
+<span class="sd">        is becuase `execute` is normally called within the `run` method.</span>
 
 <span class="sd">        Some tasks don&#39;t require a setup() method, so by default, this method</span>
 <span class="sd">        does nothing but &quot;pass&quot;.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        directory : str</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in.</span>
-<span class="sd">        command : str</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            The command that will be called during execution.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        corrections : List</span>
+<span class="sd">        - `corrections`</span>
 <span class="sd">            A list of tuples where each entry is a error identified and the</span>
 <span class="sd">            correction applied. Ex: [(&quot;ExampleError&quot;, &quot;ExampleCorrection&quot;)]</span>
 
@@ -634,9 +657,9 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        process : subprocess.Popen</span>
+<span class="sd">        - `process`:</span>
 <span class="sd">            The process object that will be terminated.</span>
-<span class="sd">        command : str</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            the command used to launch the process. This is sometimes useful</span>
 <span class="sd">            when searching for all running processes under this name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -691,7 +714,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        directory : str</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -714,27 +737,27 @@
 <span class="sd">        Call this method once you have your task initialized. For each run you</span>
 <span class="sd">        can provide a new structure, directory, or command. For example,</span>
 
-<span class="sd">        .. code-block:: python</span>
+<span class="sd">        ``` python</span>
+<span class="sd">        from simmate.calculator.example.tasks import ExampleTask</span>
 
-<span class="sd">           from simmate.calculator.example.tasks import ExampleTask</span>
-<span class="sd">           my_task = ExampleTask()</span>
-<span class="sd">           my_result = my_task.run(structure=my_structure, command=my_command)</span>
+<span class="sd">        my_task = ExampleTask()</span>
+<span class="sd">        my_result = my_task.run(structure=my_structure, command=my_command)</span>
+<span class="sd">        ```</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structure : pymatgen.core.structure.Structure (optional)</span>
+<span class="sd">        - `structure`:</span>
 <span class="sd">            The structure to use for the task, if one is required.</span>
-<span class="sd">        command : str (optional)</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            The command that will be called during execution.</span>
-<span class="sd">        directory : str (optional)</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in. This is passed to the ulitities</span>
 <span class="sd">            function simmate.ulitities.get_directory</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            a dictionary of the result, corrections, and working directory used</span>
-<span class="sd">            for this task run</span>
+<span class="sd">        - a dictionary of the result, corrections, and working directory used</span>
+<span class="sd">        for this task run</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -813,23 +836,24 @@
         </details>
 
             </section>
-                <section id="SupervisedStagedShellTask">
+                <section id="S3Task">
                                 <div class="attr class">
-        <a class="headerlink" href="#SupervisedStagedShellTask">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#S3Task">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">SupervisedStagedShellTask</span><wbr>(<span class="base">prefect.core.task.Task</span>):
+        <span class="name">S3Task</span><wbr>(<span class="base">prefect.core.task.Task</span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SupervisedStagedShellTask</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">S3Task</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Introduction to the &quot;SSS Task&quot;</span>
-<span class="sd">    ------------------------------</span>
-<span class="sd">    This class contains the core functionality to *supervise* a *staged* task</span>
-<span class="sd">    involving some *shell* command.</span>
+<span class="sd">    The Supervised-Staged-Shell Task (aka &quot;S3Task&quot;)</span>
+<span class="sd">    -----------------------------------------------</span>
+
+<span class="sd">    This class contains the core functionality to **supervise** a **staged** task</span>
+<span class="sd">    involving some **shell** command.</span>
 
 <span class="sd">    Let&#39;s breakdown what this means...</span>
 
@@ -838,9 +862,9 @@
 <span class="sd">    calculation. We consider calling external programs a *staged* task made</span>
 <span class="sd">    up of three steps:</span>
 
-<span class="sd">        - setup = writing any input files required for the program</span>
-<span class="sd">        - execution = actually calling the command and running our program</span>
-<span class="sd">        - workup = loading data from output files back into python</span>
+<span class="sd">    - setup = writing any input files required for the program</span>
+<span class="sd">    - execution = actually calling the command and running our program</span>
+<span class="sd">    - workup = loading data from output files back into python</span>
 
 <span class="sd">    And for *supervising* the task, this means we monitor the program while the</span>
 <span class="sd">    execution stage is running. So once a program is started, Simmate can check</span>
@@ -848,6 +872,8 @@
 <span class="sd">    program, fix the issue, and then restart it. Any fixes that were made are</span>
 <span class="sd">    written to &quot;simmate_corrections.csv&quot;.</span>
 
+
+<span class="sd">    &lt;!--</span>
 <span class="sd">    TODO: Make a simple diagram to visualize the overall process and add it here.</span>
 <span class="sd">    It will be similar to Custodian&#39;s, but we don&#39;t have a list of jobs here.</span>
 <span class="sd">    https://materialsproject.github.io/custodian/index.html#usage</span>
@@ -859,61 +885,63 @@
 <span class="sd">    - check for errors</span>
 <span class="sd">    - [correct them, rerun]</span>
 <span class="sd">    - postprocess/analysis</span>
+<span class="sd">    --&gt;</span>
 
 <span class="sd">    This entire process (the different stages and monitoring) is carried out</span>
 <span class="sd">    using the ``run()`` method. You rarely use this class directly. Instead,</span>
 <span class="sd">    you typically use a subclass of it. As a user, you really just need to do</span>
 <span class="sd">    something like this:</span>
 
-<span class="sd">    .. code-block:: python</span>
-
+<span class="sd">    ``` python</span>
 <span class="sd">       from simmate.calculator.example.tasks import ExampleTask</span>
+
 <span class="sd">       my_task = ExampleTask()</span>
 <span class="sd">       my_result = my_task.run()</span>
+<span class="sd">    ```</span>
 
 <span class="sd">    And that&#39;s it!</span>
 
 <span class="sd">    For experts, this class can be viewed as a combination of prefect&#39;s ShellTask,</span>
-<span class="sd">    a custodian Job, Custodian monitoring. When subclassing this, we can absorb</span>
+<span class="sd">    a custodian Job, and Custodian monitoring. When subclassing this, we can absorb</span>
 <span class="sd">    functionality of pymatgen.io.vasp.sets too. By merging all of these together</span>
 <span class="sd">    into one class, we make things much easier for users and creating new Tasks.</span>
 
+
 <span class="sd">    Inheriting from this class</span>
 <span class="sd">    --------------------------</span>
-<span class="sd">    This class is commonly used to make tasks for our calculator modules. For</span>
-<span class="sd">    a full (and advanced) example, take a look at...</span>
 
-<span class="sd">    &gt;&gt;&gt; simmate.calculators.vasp.tasks.base.VaspTask</span>
+<span class="sd">    This class is commonly used to make tasks for our calculator modules, so you</span>
+<span class="sd">    will likely want to subclass this. Here is a basic example of inheriting</span>
+<span class="sd">    and then running a task:</span>
 
-<span class="sd">    And here&#39;s an example of inheriting and then running a task:</span>
+<span class="sd">    ``` python</span>
 
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        from simmate.workflow_engine.tasks.supervised_staged_shell_task import (</span>
-<span class="sd">            SupervisedStagedShellTask as SSSTask,</span>
-<span class="sd">        )</span>
-<span class="sd">        from example.error_handlers import PossibleError1, PossibleError2</span>
+<span class="sd">    from simmate.workflow_engine.tasks.supervised_staged_shell_task import (</span>
+<span class="sd">        S3Task as SSSTask,</span>
+<span class="sd">    )</span>
+<span class="sd">    from example.error_handlers import PossibleError1, PossibleError2</span>
 
 
-<span class="sd">        class ExampleTask(SSSTask):</span>
+<span class="sd">    class ExampleTask(SSSTask):</span>
 
-<span class="sd">            command = &quot;echo example&quot;  # just prints out &quot;example&quot;</span>
-<span class="sd">            max_corrections = 7</span>
-<span class="sd">            error_handlers = [PossibleError1, PossibleError2]</span>
-<span class="sd">            polling_timestep = 0.1</span>
-<span class="sd">            monitor_freq = 10</span>
-<span class="sd">            some_new_setting = 123</span>
+<span class="sd">        command = &quot;echo example&quot;  # just prints out &quot;example&quot;</span>
+<span class="sd">        max_corrections = 7</span>
+<span class="sd">        error_handlers = [PossibleError1, PossibleError2]</span>
+<span class="sd">        polling_timestep = 0.1</span>
+<span class="sd">        monitor_freq = 10</span>
+<span class="sd">        some_new_setting = 123</span>
 
-<span class="sd">            def setup(self, structure, directory):  # &lt;-- MUST have these two args</span>
-<span class="sd">                print(&quot;I&#39;m setting things up!&quot;)</span>
-<span class="sd">                print(f&quot;My new setting is {some_new_setting}&quot;)</span>
+<span class="sd">        def setup(self, structure, directory):  # &lt;-- MUST have these two args</span>
+<span class="sd">            print(&quot;I&#39;m setting things up!&quot;)</span>
+<span class="sd">            print(f&quot;My new setting is {some_new_setting}&quot;)</span>
 
-<span class="sd">            def workup(self, directory):  # &lt;-- MUST have this arg</span>
-<span class="sd">                print(&quot;I&#39;m working things up!&quot;)</span>
+<span class="sd">        def workup(self, directory):  # &lt;-- MUST have this arg</span>
+<span class="sd">            print(&quot;I&#39;m working things up!&quot;)</span>
 
 
-<span class="sd">        task = ExampleTask()</span>
-<span class="sd">        result = task.run()</span>
+<span class="sd">    task = ExampleTask()</span>
+<span class="sd">    result = task.run()</span>
+<span class="sd">    ```</span>
 
 <span class="sd">    There are a couple things to note here:</span>
 
@@ -922,50 +950,67 @@
 <span class="sd">    - make sure you include the structure/directory inputs, even if you don&#39;t use them.</span>
 <span class="sd">    - Don&#39;t add new kwargs to methods. Instead handle these options through attributes.</span>
 
+<span class="sd">    For a full (and advanced) example, of a subclass take a look at</span>
+<span class="sd">    `simmate.calculators.vasp.tasks.base.VaspTask`.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># set a defualt command associated with this specific ShellTask</span>
     <span class="c1"># I set this here so that I don&#39;t have to copy/paste the init method</span>
     <span class="c1"># every time I inherit from this class and want to update the default</span>
     <span class="c1"># command to use for the child class.</span>
     <span class="n">command</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The defualt shell command to use.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Indicates whether you need a structure if you want the run method to work.</span>
     <span class="c1"># While it&#39;s not needed for a number of cases, it&#39;s extremely common for the</span>
     <span class="c1"># setup method to need an input structure in matsci. I therefore include</span>
     <span class="c1"># this rather than having a nearly identical subclass that could cause</span>
     <span class="c1"># some confusion.</span>
     <span class="n">requires_structure</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Indicates whether a structure is needed if for the run() method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># A list of ErrorHandler objects to use in order of priority (that is, highest</span>
-    <span class="c1"># priority is first).</span>
     <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A list of ErrorHandler objects to use in order of priority (that is, highest</span>
+<span class="sd">    priority is first).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># maximum number of times we can apply a handler&#39;s correction and retry</span>
-    <span class="c1"># the shelltask</span>
     <span class="n">max_corrections</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    maximum number of times we can apply a correction and retry the shell command</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Monitoring settings. These are only ever relevent if there are ErrorHandlers</span>
-    <span class="c1"># added that have is_monitor=True. These handlers run while the shelltask</span>
-    <span class="c1"># itself is also running. Read more about ErrorHandlers for more info.</span>
+    <span class="c1"># Monitoring settings.</span>
+    <span class="c1"># These are only ever relevent if there are ErrorHandlers added that have</span>
+    <span class="c1"># is_monitor=True. These handlers run while the shelltask itself is also</span>
+    <span class="c1"># running. Read more about ErrorHandlers for more info.</span>
 
-    <span class="c1"># Whether to run monitor handlers while the shelltask runs. False means</span>
-    <span class="c1"># wait until the job has completed.</span>
     <span class="n">monitor</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Whether to run monitor handlers while the shelltask runs. False means</span>
+<span class="sd">    wait until the job has completed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># If we are monitoring the job for errors while it runs, this is how often</span>
-    <span class="c1"># (in seconds) we should check the status of our job. Note this check is</span>
-    <span class="c1"># just whether the job is done or not. This is NOT how often we check for</span>
-    <span class="c1"># errors. See monitor_freq for that.</span>
-    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If we are monitoring the job for errors while it runs, this is how often</span>
+<span class="sd">    (in seconds) we should check the status of our job. Note this check is</span>
+<span class="sd">    just whether the job is done or not. This is NOT how often we check for</span>
+<span class="sd">    errors. See monitor_freq for that.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># The frequency we should run check for errors with our monitors. This is</span>
-    <span class="c1"># based on the polling_timestep loops. For example, if we have a</span>
-    <span class="c1"># polling_timestep of 10 seconds and a monitor_freq of 2, then we would run</span>
-    <span class="c1"># the monitor checks every other loop -- or every 2*10 = 20 seconds. The</span>
-    <span class="c1"># default values of polling_timestep=10 and monitor_freq=30 indicate that</span>
-    <span class="c1"># we run monitoring functions every 5 minutes (10*30=300s=5min).</span>
-    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">300</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The frequency we should run check for errors with our monitors. This is</span>
+<span class="sd">    based on the polling_timestep loops. For example, if we have a</span>
+<span class="sd">    polling_timestep of 10 seconds and a monitor_freq of 2, then we would run</span>
+<span class="sd">    the monitor checks every other loop -- or every 2x10 = 20 seconds. Another</span>
+<span class="sd">    example is values of polling_timestep=10 and monitor_freq=30. Here, we&#39;d</span>
+<span class="sd">    run monitoring functions every 5 minutes (10x30=300s=5min).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -989,51 +1034,52 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structure : pymatgen.core.structure.Structure (optional)</span>
+
+<span class="sd">        - `structure`:</span>
 <span class="sd">            The structure to use for the task, if one is required. Typically, this</span>
 <span class="sd">            class is ran for multiple structures, where you can pass this</span>
 <span class="sd">            option to the task.run() method instead.</span>
-<span class="sd">        command : str (optional)</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            The command that will be called during execution.</span>
-<span class="sd">        directory : str (optional)</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in. This is passed to the ulitities</span>
 <span class="sd">            function simmate.ulitities.get_directory</span>
-<span class="sd">        error_handlers : List[ErrorHandler] (optional)</span>
+<span class="sd">        - `error_handlers`:</span>
 <span class="sd">            The list of error handler objects to use. These should be listing in</span>
 <span class="sd">            order of priority, where to highest priority is first. If one handler</span>
 <span class="sd">            is triggered, the correction will be applied and none of the</span>
 <span class="sd">            following handlers will be checked.</span>
-<span class="sd">        max_corrections : int (optional)</span>
+<span class="sd">        - `max_corrections`:</span>
 <span class="sd">            The maximum number of times that corrections will be made before</span>
 <span class="sd">            giving up on the calculation. Note, once this limit is exceeded, the</span>
 <span class="sd">            error is stored without correcting or restarting the run.</span>
-<span class="sd">        monitor : bool (optional)</span>
+<span class="sd">        - `monitor`:</span>
 <span class="sd">            Whether to run monitor handlers while the command runs. False means</span>
 <span class="sd">            wait until the job has completed.</span>
-<span class="sd">        polling_timestep : float (optional)</span>
+<span class="sd">        - `polling_timestep`:</span>
 <span class="sd">            If we are monitoring the job for errors while it runs, this is how often</span>
 <span class="sd">            (in seconds) we should check the status of our job. Note this check is</span>
 <span class="sd">            just whether the job is done or not. This is NOT how often we check for</span>
 <span class="sd">            errors. See monitor_freq for that.</span>
-<span class="sd">        monitor_freq : int (optional)</span>
+<span class="sd">        - `monitor_freq`:</span>
 <span class="sd">            The frequency we should run check for errors with our monitors. This is</span>
 <span class="sd">            based on the polling_timestep loops. For example, if we have a</span>
 <span class="sd">            polling_timestep of 10 seconds and a monitor_freq of 2, then we would run</span>
-<span class="sd">            the monitor checks every other loop -- or every 2*10 = 20 seconds. The</span>
+<span class="sd">            the monitor checks every other loop -- or every 2x10 = 20 seconds. The</span>
 <span class="sd">            default values of polling_timestep=10 and monitor_freq=30 indicate that</span>
-<span class="sd">            we run monitoring functions every 5 minutes (10*30=300s=5min).</span>
-<span class="sd">        save_corrections_to_file : bool (optional)</span>
+<span class="sd">            we run monitoring functions every 5 minutes (10x30=300s=5min).</span>
+<span class="sd">        - `save_corrections_to_file`:</span>
 <span class="sd">            Whether to write a log file of the corrections made. The default is True.</span>
-<span class="sd">        corrections_filename : str (optional)</span>
+<span class="sd">        - `corrections_filename`:</span>
 <span class="sd">            If save_corrections_to_file is True, this is the filename of where</span>
 <span class="sd">            to write the corrections. The default is &quot;simmate_corrections.csv&quot;.</span>
-<span class="sd">        compress_output : bool (optional)</span>
+<span class="sd">        - `compress_output`:</span>
 <span class="sd">            Whether to compress the directory to a zip file at the end of the</span>
 <span class="sd">            task run. After compression, it will also delete the directory.</span>
 <span class="sd">            The default is False.</span>
-<span class="sd">        **kwargs : Any</span>
-<span class="sd">            All extra arguments supported by prefect.core.task.Task. To see all</span>
-<span class="sd">            the options, visit https://docs.prefect.io/api/latest/core/task.html</span>
+<span class="sd">        - `**kwargs`:</span>
+<span class="sd">            All extra arguments supported by</span>
+<span class="sd">            [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1082,10 +1128,10 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structure : pymatgen.core.structure.Structure</span>
+<span class="sd">        - `structure`:</span>
 <span class="sd">            The structure to use for the task, if one is required.</span>
-<span class="sd">        directory : str</span>
-<span class="sd">            The directory to run everything in.</span>
+<span class="sd">        - `directory`:</span>
+<span class="sd">            The directory to run everything in. Must exist already.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Be sure to include directory and structure (or **kwargs) as input arguments</span>
         <span class="c1"># for higher-level compatibility with the run method.</span>
@@ -1098,21 +1144,21 @@
 <span class="sd">        handling as well as monitoring of the job.</span>
 
 <span class="sd">        You should never call this method directly unless you are debugging. This</span>
-<span class="sd">        is becuase execute() is normally called within the run() method.</span>
+<span class="sd">        is becuase `execute` is normally called within the `run` method.</span>
 
 <span class="sd">        Some tasks don&#39;t require a setup() method, so by default, this method</span>
 <span class="sd">        does nothing but &quot;pass&quot;.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        directory : str</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in.</span>
-<span class="sd">        command : str</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            The command that will be called during execution.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        corrections : List</span>
+<span class="sd">        - `corrections`</span>
 <span class="sd">            A list of tuples where each entry is a error identified and the</span>
 <span class="sd">            correction applied. Ex: [(&quot;ExampleError&quot;, &quot;ExampleCorrection&quot;)]</span>
 
@@ -1310,9 +1356,9 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        process : subprocess.Popen</span>
+<span class="sd">        - `process`:</span>
 <span class="sd">            The process object that will be terminated.</span>
-<span class="sd">        command : str</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            the command used to launch the process. This is sometimes useful</span>
 <span class="sd">            when searching for all running processes under this name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1367,7 +1413,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        directory : str</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1390,27 +1436,27 @@
 <span class="sd">        Call this method once you have your task initialized. For each run you</span>
 <span class="sd">        can provide a new structure, directory, or command. For example,</span>
 
-<span class="sd">        .. code-block:: python</span>
+<span class="sd">        ``` python</span>
+<span class="sd">        from simmate.calculator.example.tasks import ExampleTask</span>
 
-<span class="sd">           from simmate.calculator.example.tasks import ExampleTask</span>
-<span class="sd">           my_task = ExampleTask()</span>
-<span class="sd">           my_result = my_task.run(structure=my_structure, command=my_command)</span>
+<span class="sd">        my_task = ExampleTask()</span>
+<span class="sd">        my_result = my_task.run(structure=my_structure, command=my_command)</span>
+<span class="sd">        ```</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structure : pymatgen.core.structure.Structure (optional)</span>
+<span class="sd">        - `structure`:</span>
 <span class="sd">            The structure to use for the task, if one is required.</span>
-<span class="sd">        command : str (optional)</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            The command that will be called during execution.</span>
-<span class="sd">        directory : str (optional)</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in. This is passed to the ulitities</span>
 <span class="sd">            function simmate.ulitities.get_directory</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            a dictionary of the result, corrections, and working directory used</span>
-<span class="sd">            for this task run</span>
+<span class="sd">        - a dictionary of the result, corrections, and working directory used</span>
+<span class="sd">        for this task run</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1472,10 +1518,10 @@
 
         </details>
 
-            <div class="docstring"><h2 id="introduction-to-the-sss-task">Introduction to the "SSS Task"</h2>
+            <div class="docstring"><h2 id="the-supervised-staged-shell-task-aka-s3task">The Supervised-Staged-Shell Task (aka "S3Task")</h2>
 
-<p>This class contains the core functionality to <em>supervise</em> a <em>staged</em> task
-involving some <em>shell</em> command.</p>
+<p>This class contains the core functionality to <strong>supervise</strong> a <strong>staged</strong> task
+involving some <strong>shell</strong> command.</p>
 
 <p>Let's breakdown what this means...</p>
 
@@ -1484,10 +1530,11 @@ VASP requires that we call the "vasp_std &gt; vasp.out" command in order to run 
 calculation. We consider calling external programs a <em>staged</em> task made
 up of three steps:</p>
 
-<pre><code>- setup = writing any input files required for the program
-- execution = actually calling the command and running our program
-- workup = loading data from output files back into python
-</code></pre>
+<ul>
+<li>setup = writing any input files required for the program</li>
+<li>execution = actually calling the command and running our program</li>
+<li>workup = loading data from output files back into python</li>
+</ul>
 
 <p>And for <em>supervising</em> the task, this means we monitor the program while the
 execution stage is running. So once a program is started, Simmate can check
@@ -1495,76 +1542,70 @@ output files for common errors/issues. If an error is found, we stop the
 program, fix the issue, and then restart it. Any fixes that were made are
 written to "simmate_corrections.csv".</p>
 
-<p>TODO: Make a simple diagram to visualize the overall process and add it here.
+<!--
+TODO: Make a simple diagram to visualize the overall process and add it here.
 It will be similar to Custodian's, but we don't have a list of jobs here.
 https://materialsproject.github.io/custodian/index.html#usage
-The steps are...</p>
+The steps are...
 
-<ul>
-<li>Write Input Files based on custom+defualt settings</li>
-<li>Run the calculation by calling the program</li>
-<li>Load ouput files</li>
-<li>check for errors</li>
-<li>[correct them, rerun]</li>
-<li>postprocess/analysis</li>
-</ul>
+- Write Input Files based on custom+defualt settings
+- Run the calculation by calling the program
+- Load ouput files
+- check for errors
+- [correct them, rerun]
+- postprocess/analysis
+-->
 
 <p>This entire process (the different stages and monitoring) is carried out
-using the <code><a href="#SupervisedStagedShellTask.run">run()</a></code> method. You rarely use this class directly. Instead,
+using the <code><a href="#S3Task.run">run()</a></code> method. You rarely use this class directly. Instead,
 you typically use a subclass of it. As a user, you really just need to do
 something like this:</p>
 
-<p>.. code-block:: python</p>
+<div class="codehilite"><pre><span></span><code>   <span class="kn">from</span> <span class="nn"><a href="../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a></span> <span class="kn">import</span> <span class="n">ExampleTask</span>
 
-<p>from <a href="../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a> import ExampleTask
-   my_task = ExampleTask()
-   my_result = my_task.run()</p>
+   <span class="n">my_task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
+   <span class="n">my_result</span> <span class="o">=</span> <span class="n">my_task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</code></pre></div>
 
 <p>And that's it!</p>
 
 <p>For experts, this class can be viewed as a combination of prefect's ShellTask,
-a custodian Job, Custodian monitoring. When subclassing this, we can absorb
+a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
 functionality of pymatgen.io.vasp.sets too. By merging all of these together
 into one class, we make things much easier for users and creating new Tasks.</p>
 
 <h2 id="inheriting-from-this-class">Inheriting from this class</h2>
 
-<p>This class is commonly used to make tasks for our calculator modules. For
-a full (and advanced) example, take a look at...</p>
+<p>This class is commonly used to make tasks for our calculator modules, so you
+will likely want to subclass this. Here is a basic example of inheriting
+and then running a task:</p>
 
-<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">simmate</span><span class="o">.</span><span class="n">calculators</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">VaspTask</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="">simmate.workflow_engine.tasks.supervised_staged_shell_task</a></span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">S3Task</span> <span class="k">as</span> <span class="n">SSSTask</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">example.error_handlers</span> <span class="kn">import</span> <span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleTask</span><span class="p">(</span><span class="n">SSSTask</span><span class="p">):</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;echo example&quot;</span>  <span class="c1"># just prints out &quot;example&quot;</span>
+    <span class="n">max_corrections</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span><span class="p">]</span>
+    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">some_new_setting</span> <span class="o">=</span> <span class="mi">123</span>
+
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have these two args</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m setting things up!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;My new setting is </span><span class="si">{</span><span class="n">some_new_setting</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have this arg</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m working things up!&quot;</span><span class="p">)</span>
+
+
+<span class="n">task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </code></pre></div>
-
-<p>And here's an example of inheriting and then running a task:</p>
-
-<p>.. code-block:: python</p>
-
-<pre><code>from <a href="">simmate.workflow_engine.tasks.supervised_staged_shell_task</a> import (
-    SupervisedStagedShellTask as SSSTask,
-)
-from example.error_handlers import PossibleError1, PossibleError2
-
-
-class ExampleTask(SSSTask):
-
-    command = "echo example"  # just prints out "example"
-    max_corrections = 7
-    error_handlers = [PossibleError1, PossibleError2]
-    polling_timestep = 0.1
-    monitor_freq = 10
-    some_new_setting = 123
-
-    def setup(self, structure, directory):  # &lt;-- MUST have these two args
-        print("I'm setting things up!")
-        print(f"My new setting is {some_new_setting}")
-
-    def workup(self, directory):  # &lt;-- MUST have this arg
-        print("I'm working things up!")
-
-
-task = ExampleTask()
-result = task.run()
-</code></pre>
 
 <p>There are a couple things to note here:</p>
 
@@ -1574,14 +1615,17 @@ result = task.run()
 <li>make sure you include the structure/directory inputs, even if you don't use them.</li>
 <li>Don't add new kwargs to methods. Instead handle these options through attributes.</li>
 </ul>
+
+<p>For a full (and advanced) example, of a subclass take a look at
+<code><a href="../../calculators/vasp/tasks/base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></code>.</p>
 </div>
 
 
-                            <div id="SupervisedStagedShellTask.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#SupervisedStagedShellTask.__init__">#&nbsp;&nbsp</a>
+                            <div id="S3Task.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#S3Task.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">SupervisedStagedShellTask</span><span class="signature">(
+            <span class="name">S3Task</span><span class="signature">(
     structure: pymatgen.core.structure.Structure = None,
     command: str = None,
     directory: str = None,
@@ -1621,51 +1665,52 @@ result = task.run()
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structure : pymatgen.core.structure.Structure (optional)</span>
+
+<span class="sd">        - `structure`:</span>
 <span class="sd">            The structure to use for the task, if one is required. Typically, this</span>
 <span class="sd">            class is ran for multiple structures, where you can pass this</span>
 <span class="sd">            option to the task.run() method instead.</span>
-<span class="sd">        command : str (optional)</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            The command that will be called during execution.</span>
-<span class="sd">        directory : str (optional)</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in. This is passed to the ulitities</span>
 <span class="sd">            function simmate.ulitities.get_directory</span>
-<span class="sd">        error_handlers : List[ErrorHandler] (optional)</span>
+<span class="sd">        - `error_handlers`:</span>
 <span class="sd">            The list of error handler objects to use. These should be listing in</span>
 <span class="sd">            order of priority, where to highest priority is first. If one handler</span>
 <span class="sd">            is triggered, the correction will be applied and none of the</span>
 <span class="sd">            following handlers will be checked.</span>
-<span class="sd">        max_corrections : int (optional)</span>
+<span class="sd">        - `max_corrections`:</span>
 <span class="sd">            The maximum number of times that corrections will be made before</span>
 <span class="sd">            giving up on the calculation. Note, once this limit is exceeded, the</span>
 <span class="sd">            error is stored without correcting or restarting the run.</span>
-<span class="sd">        monitor : bool (optional)</span>
+<span class="sd">        - `monitor`:</span>
 <span class="sd">            Whether to run monitor handlers while the command runs. False means</span>
 <span class="sd">            wait until the job has completed.</span>
-<span class="sd">        polling_timestep : float (optional)</span>
+<span class="sd">        - `polling_timestep`:</span>
 <span class="sd">            If we are monitoring the job for errors while it runs, this is how often</span>
 <span class="sd">            (in seconds) we should check the status of our job. Note this check is</span>
 <span class="sd">            just whether the job is done or not. This is NOT how often we check for</span>
 <span class="sd">            errors. See monitor_freq for that.</span>
-<span class="sd">        monitor_freq : int (optional)</span>
+<span class="sd">        - `monitor_freq`:</span>
 <span class="sd">            The frequency we should run check for errors with our monitors. This is</span>
 <span class="sd">            based on the polling_timestep loops. For example, if we have a</span>
 <span class="sd">            polling_timestep of 10 seconds and a monitor_freq of 2, then we would run</span>
-<span class="sd">            the monitor checks every other loop -- or every 2*10 = 20 seconds. The</span>
+<span class="sd">            the monitor checks every other loop -- or every 2x10 = 20 seconds. The</span>
 <span class="sd">            default values of polling_timestep=10 and monitor_freq=30 indicate that</span>
-<span class="sd">            we run monitoring functions every 5 minutes (10*30=300s=5min).</span>
-<span class="sd">        save_corrections_to_file : bool (optional)</span>
+<span class="sd">            we run monitoring functions every 5 minutes (10x30=300s=5min).</span>
+<span class="sd">        - `save_corrections_to_file`:</span>
 <span class="sd">            Whether to write a log file of the corrections made. The default is True.</span>
-<span class="sd">        corrections_filename : str (optional)</span>
+<span class="sd">        - `corrections_filename`:</span>
 <span class="sd">            If save_corrections_to_file is True, this is the filename of where</span>
 <span class="sd">            to write the corrections. The default is &quot;simmate_corrections.csv&quot;.</span>
-<span class="sd">        compress_output : bool (optional)</span>
+<span class="sd">        - `compress_output`:</span>
 <span class="sd">            Whether to compress the directory to a zip file at the end of the</span>
 <span class="sd">            task run. After compression, it will also delete the directory.</span>
 <span class="sd">            The default is False.</span>
-<span class="sd">        **kwargs : Any</span>
-<span class="sd">            All extra arguments supported by prefect.core.task.Task. To see all</span>
-<span class="sd">            the options, visit https://docs.prefect.io/api/latest/core/task.html</span>
+<span class="sd">        - `**kwargs`:</span>
+<span class="sd">            All extra arguments supported by</span>
+<span class="sd">            [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1708,120 +1753,146 @@ same every time you call the task.run() method.</p>
 
 <h2 id="parameters">Parameters</h2>
 
-<p>structure : pymatgen.core.structure.Structure (optional)
-    The structure to use for the task, if one is required. Typically, this
-    class is ran for multiple structures, where you can pass this
-    option to the task.run() method instead.
-command : str (optional)
-    The command that will be called during execution.
-directory : str (optional)
-    The directory to run everything in. This is passed to the ulitities
-    function <a href="../../../simmate.html#ulitities.get_directory">simmate.ulitities.get_directory</a>
-error_handlers : List[ErrorHandler] (optional)
-    The list of error handler objects to use. These should be listing in
-    order of priority, where to highest priority is first. If one handler
-    is triggered, the correction will be applied and none of the
-    following handlers will be checked.
-max_corrections : int (optional)
-    The maximum number of times that corrections will be made before
-    giving up on the calculation. Note, once this limit is exceeded, the
-    error is stored without correcting or restarting the run.
-monitor : bool (optional)
-    Whether to run monitor handlers while the command runs. False means
-    wait until the job has completed.
-polling_timestep : float (optional)
-    If we are monitoring the job for errors while it runs, this is how often
-    (in seconds) we should check the status of our job. Note this check is
-    just whether the job is done or not. This is NOT how often we check for
-    errors. See monitor_freq for that.
-monitor_freq : int (optional)
-    The frequency we should run check for errors with our monitors. This is
-    based on the polling_timestep loops. For example, if we have a
-    polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
-    the monitor checks every other loop -- or every 2<em>10 = 20 seconds. The
-    default values of polling_timestep=10 and monitor_freq=30 indicate that
-    we run monitoring functions every 5 minutes (10</em>30=300s=5min).
-save_corrections_to_file : bool (optional)
-    Whether to write a log file of the corrections made. The default is True.
-corrections_filename : str (optional)
-    If save_corrections_to_file is True, this is the filename of where
-    to write the corrections. The default is "simmate_corrections.csv".
-compress_output : bool (optional)
-    Whether to compress the directory to a zip file at the end of the
-    task run. After compression, it will also delete the directory.
-    The default is False.
-**kwargs : Any
-    All extra arguments supported by prefect.core.task.Task. To see all
-    the options, visit https://docs.prefect.io/api/latest/core/task.html</p>
+<ul>
+<li><code>structure</code>:
+The structure to use for the task, if one is required. Typically, this
+class is ran for multiple structures, where you can pass this
+option to the task.run() method instead.</li>
+<li><code><a href="#S3Task.command">command</a></code>:
+The command that will be called during execution.</li>
+<li><code>directory</code>:
+The directory to run everything in. This is passed to the ulitities
+function <a href="../../../simmate.html#ulitities.get_directory">simmate.ulitities.get_directory</a></li>
+<li><code><a href="#S3Task.error_handlers">error_handlers</a></code>:
+The list of error handler objects to use. These should be listing in
+order of priority, where to highest priority is first. If one handler
+is triggered, the correction will be applied and none of the
+following handlers will be checked.</li>
+<li><code><a href="#S3Task.max_corrections">max_corrections</a></code>:
+The maximum number of times that corrections will be made before
+giving up on the calculation. Note, once this limit is exceeded, the
+error is stored without correcting or restarting the run.</li>
+<li><code><a href="#S3Task.monitor">monitor</a></code>:
+Whether to run monitor handlers while the command runs. False means
+wait until the job has completed.</li>
+<li><code><a href="#S3Task.polling_timestep">polling_timestep</a></code>:
+If we are monitoring the job for errors while it runs, this is how often
+(in seconds) we should check the status of our job. Note this check is
+just whether the job is done or not. This is NOT how often we check for
+errors. See monitor_freq for that.</li>
+<li><code><a href="#S3Task.monitor_freq">monitor_freq</a></code>:
+The frequency we should run check for errors with our monitors. This is
+based on the polling_timestep loops. For example, if we have a
+polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
+the monitor checks every other loop -- or every 2x10 = 20 seconds. The
+default values of polling_timestep=10 and monitor_freq=30 indicate that
+we run monitoring functions every 5 minutes (10x30=300s=5min).</li>
+<li><code>save_corrections_to_file</code>:
+Whether to write a log file of the corrections made. The default is True.</li>
+<li><code>corrections_filename</code>:
+If save_corrections_to_file is True, this is the filename of where
+to write the corrections. The default is "simmate_corrections.csv".</li>
+<li><code>compress_output</code>:
+Whether to compress the directory to a zip file at the end of the
+task run. After compression, it will also delete the directory.
+The default is False.</li>
+<li><code>**kwargs</code>:
+All extra arguments supported by
+<a href="https://docs.prefect.io/api/latest/core/task.html">prefect.core.task.Task</a>.</li>
+</ul>
 </div>
 
 
                             </div>
-                            <div id="SupervisedStagedShellTask.command" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#SupervisedStagedShellTask.command">#&nbsp;&nbsp</a>
+                            <div id="S3Task.command" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#S3Task.command">#&nbsp;&nbsp</a>
 
         <span class="name">command</span><span class="default_value"> = None</span>
     </div>
 
-    
+            <div class="docstring"><p>The defualt shell command to use.</p>
+</div>
+
 
                             </div>
-                            <div id="SupervisedStagedShellTask.requires_structure" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#SupervisedStagedShellTask.requires_structure">#&nbsp;&nbsp</a>
+                            <div id="S3Task.requires_structure" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#S3Task.requires_structure">#&nbsp;&nbsp</a>
 
         <span class="name">requires_structure</span><span class="default_value"> = False</span>
     </div>
 
-    
+            <div class="docstring"><p>Indicates whether a structure is needed if for the run() method.</p>
+</div>
+
 
                             </div>
-                            <div id="SupervisedStagedShellTask.error_handlers" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#SupervisedStagedShellTask.error_handlers">#&nbsp;&nbsp</a>
+                            <div id="S3Task.error_handlers" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#S3Task.error_handlers">#&nbsp;&nbsp</a>
 
         <span class="name">error_handlers</span><span class="default_value"> = []</span>
     </div>
 
-    
+            <div class="docstring"><p>A list of ErrorHandler objects to use in order of priority (that is, highest
+priority is first).</p>
+</div>
+
 
                             </div>
-                            <div id="SupervisedStagedShellTask.max_corrections" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#SupervisedStagedShellTask.max_corrections">#&nbsp;&nbsp</a>
+                            <div id="S3Task.max_corrections" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#S3Task.max_corrections">#&nbsp;&nbsp</a>
 
         <span class="name">max_corrections</span><span class="default_value"> = 5</span>
     </div>
 
-    
+            <div class="docstring"><p>maximum number of times we can apply a correction and retry the shell command</p>
+</div>
+
 
                             </div>
-                            <div id="SupervisedStagedShellTask.monitor" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#SupervisedStagedShellTask.monitor">#&nbsp;&nbsp</a>
+                            <div id="S3Task.monitor" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#S3Task.monitor">#&nbsp;&nbsp</a>
 
         <span class="name">monitor</span><span class="default_value"> = True</span>
     </div>
 
-    
+            <div class="docstring"><p>Whether to run monitor handlers while the shelltask runs. False means
+wait until the job has completed.</p>
+</div>
+
 
                             </div>
-                            <div id="SupervisedStagedShellTask.polling_timestep" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#SupervisedStagedShellTask.polling_timestep">#&nbsp;&nbsp</a>
+                            <div id="S3Task.polling_timestep" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#S3Task.polling_timestep">#&nbsp;&nbsp</a>
 
-        <span class="name">polling_timestep</span><span class="default_value"> = 10</span>
+        <span class="name">polling_timestep</span><span class="default_value"> = 1</span>
     </div>
 
-    
+            <div class="docstring"><p>If we are monitoring the job for errors while it runs, this is how often
+(in seconds) we should check the status of our job. Note this check is
+just whether the job is done or not. This is NOT how often we check for
+errors. See monitor_freq for that.</p>
+</div>
+
 
                             </div>
-                            <div id="SupervisedStagedShellTask.monitor_freq" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#SupervisedStagedShellTask.monitor_freq">#&nbsp;&nbsp</a>
+                            <div id="S3Task.monitor_freq" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#S3Task.monitor_freq">#&nbsp;&nbsp</a>
 
-        <span class="name">monitor_freq</span><span class="default_value"> = 30</span>
+        <span class="name">monitor_freq</span><span class="default_value"> = 300</span>
     </div>
 
-    
+            <div class="docstring"><p>The frequency we should run check for errors with our monitors. This is
+based on the polling_timestep loops. For example, if we have a
+polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
+the monitor checks every other loop -- or every 2x10 = 20 seconds. Another
+example is values of polling_timestep=10 and monitor_freq=30. Here, we'd
+run monitoring functions every 5 minutes (10x30=300s=5min).</p>
+</div>
+
 
                             </div>
-                            <div id="SupervisedStagedShellTask.setup" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#SupervisedStagedShellTask.setup">#&nbsp;&nbsp</a>
+                            <div id="S3Task.setup" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#S3Task.setup">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
@@ -1844,10 +1915,10 @@ compress_output : bool (optional)
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structure : pymatgen.core.structure.Structure</span>
+<span class="sd">        - `structure`:</span>
 <span class="sd">            The structure to use for the task, if one is required.</span>
-<span class="sd">        directory : str</span>
-<span class="sd">            The directory to run everything in.</span>
+<span class="sd">        - `directory`:</span>
+<span class="sd">            The directory to run everything in. Must exist already.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Be sure to include directory and structure (or **kwargs) as input arguments</span>
         <span class="c1"># for higher-level compatibility with the run method.</span>
@@ -1869,16 +1940,18 @@ doesn't nothing but "pass".</p>
 
 <h2 id="parameters">Parameters</h2>
 
-<p>structure : pymatgen.core.structure.Structure
-    The structure to use for the task, if one is required.
-directory : str
-    The directory to run everything in.</p>
+<ul>
+<li><code>structure</code>:
+The structure to use for the task, if one is required.</li>
+<li><code>directory</code>:
+The directory to run everything in. Must exist already.</li>
+</ul>
 </div>
 
 
                             </div>
-                            <div id="SupervisedStagedShellTask.execute" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#SupervisedStagedShellTask.execute">#&nbsp;&nbsp</a>
+                            <div id="S3Task.execute" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#S3Task.execute">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
@@ -1893,21 +1966,21 @@ directory : str
 <span class="sd">        handling as well as monitoring of the job.</span>
 
 <span class="sd">        You should never call this method directly unless you are debugging. This</span>
-<span class="sd">        is becuase execute() is normally called within the run() method.</span>
+<span class="sd">        is becuase `execute` is normally called within the `run` method.</span>
 
 <span class="sd">        Some tasks don&#39;t require a setup() method, so by default, this method</span>
 <span class="sd">        does nothing but &quot;pass&quot;.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        directory : str</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in.</span>
-<span class="sd">        command : str</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            The command that will be called during execution.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        corrections : List</span>
+<span class="sd">        - `corrections`</span>
 <span class="sd">            A list of tuples where each entry is a error identified and the</span>
 <span class="sd">            correction applied. Ex: [(&quot;ExampleError&quot;, &quot;ExampleCorrection&quot;)]</span>
 
@@ -2096,29 +2169,33 @@ directory : str
 handling as well as monitoring of the job.</p>
 
 <p>You should never call this method directly unless you are debugging. This
-is becuase execute() is normally called within the run() method.</p>
+is becuase <code><a href="#S3Task.execute">execute</a></code> is normally called within the <code><a href="#S3Task.run">run</a></code> method.</p>
 
 <p>Some tasks don't require a setup() method, so by default, this method
 does nothing but "pass".</p>
 
 <h2 id="parameters">Parameters</h2>
 
-<p>directory : str
-    The directory to run everything in.
-command : str
-    The command that will be called during execution.</p>
+<ul>
+<li><code>directory</code>:
+The directory to run everything in.</li>
+<li><code><a href="#S3Task.command">command</a></code>:
+The command that will be called during execution.</li>
+</ul>
 
 <h2 id="returns">Returns</h2>
 
-<p>corrections : List
-    A list of tuples where each entry is a error identified and the
-    correction applied. Ex: [("ExampleError", "ExampleCorrection")]</p>
+<ul>
+<li><code>corrections</code>
+A list of tuples where each entry is a error identified and the
+correction applied. Ex: [("ExampleError", "ExampleCorrection")]</li>
+</ul>
 </div>
 
 
                             </div>
-                            <div id="SupervisedStagedShellTask.workup" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#SupervisedStagedShellTask.workup">#&nbsp;&nbsp</a>
+                            <div id="S3Task.workup" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#S3Task.workup">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
@@ -2142,7 +2219,7 @@ command : str
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        directory : str</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2167,14 +2244,16 @@ does nothing but "pass".</p>
 
 <h2 id="parameters">Parameters</h2>
 
-<p>directory : str
-    The directory to run everything in.</p>
+<ul>
+<li><code>directory</code>:
+The directory to run everything in.</li>
+</ul>
 </div>
 
 
                             </div>
-                            <div id="SupervisedStagedShellTask.run" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#SupervisedStagedShellTask.run">#&nbsp;&nbsp</a>
+                            <div id="S3Task.run" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#S3Task.run">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@defaults_from_attrs(&#39;structure&#39;, &#39;directory&#39;, &#39;command&#39;)</div>
 
@@ -2203,27 +2282,27 @@ does nothing but "pass".</p>
 <span class="sd">        Call this method once you have your task initialized. For each run you</span>
 <span class="sd">        can provide a new structure, directory, or command. For example,</span>
 
-<span class="sd">        .. code-block:: python</span>
+<span class="sd">        ``` python</span>
+<span class="sd">        from simmate.calculator.example.tasks import ExampleTask</span>
 
-<span class="sd">           from simmate.calculator.example.tasks import ExampleTask</span>
-<span class="sd">           my_task = ExampleTask()</span>
-<span class="sd">           my_result = my_task.run(structure=my_structure, command=my_command)</span>
+<span class="sd">        my_task = ExampleTask()</span>
+<span class="sd">        my_result = my_task.run(structure=my_structure, command=my_command)</span>
+<span class="sd">        ```</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structure : pymatgen.core.structure.Structure (optional)</span>
+<span class="sd">        - `structure`:</span>
 <span class="sd">            The structure to use for the task, if one is required.</span>
-<span class="sd">        command : str (optional)</span>
+<span class="sd">        - `command`:</span>
 <span class="sd">            The command that will be called during execution.</span>
-<span class="sd">        directory : str (optional)</span>
+<span class="sd">        - `directory`:</span>
 <span class="sd">            The directory to run everything in. This is passed to the ulitities</span>
 <span class="sd">            function simmate.ulitities.get_directory</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            a dictionary of the result, corrections, and working directory used</span>
-<span class="sd">            for this task run</span>
+<span class="sd">        - a dictionary of the result, corrections, and working directory used</span>
+<span class="sd">        for this task run</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2272,33 +2351,36 @@ supervising during execution.</p>
 <p>Call this method once you have your task initialized. For each run you
 can provide a new structure, directory, or command. For example,</p>
 
-<p>.. code-block:: python</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a></span> <span class="kn">import</span> <span class="n">ExampleTask</span>
 
-<p>from <a href="../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a> import ExampleTask
-   my_task = ExampleTask()
-   my_result = my_task.run(structure=my_structure, command=my_command)</p>
+<span class="n">my_task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
+<span class="n">my_result</span> <span class="o">=</span> <span class="n">my_task</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">my_structure</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">my_command</span><span class="p">)</span>
+</code></pre></div>
 
 <h2 id="parameters">Parameters</h2>
 
-<p>structure : pymatgen.core.structure.Structure (optional)
-    The structure to use for the task, if one is required.
-command : str (optional)
-    The command that will be called during execution.
-directory : str (optional)
-    The directory to run everything in. This is passed to the ulitities
-    function <a href="../../../simmate.html#ulitities.get_directory">simmate.ulitities.get_directory</a></p>
+<ul>
+<li><code>structure</code>:
+The structure to use for the task, if one is required.</li>
+<li><code><a href="#S3Task.command">command</a></code>:
+The command that will be called during execution.</li>
+<li><code>directory</code>:
+The directory to run everything in. This is passed to the ulitities
+function <a href="../../../simmate.html#ulitities.get_directory">simmate.ulitities.get_directory</a></li>
+</ul>
 
 <h2 id="returns">Returns</h2>
 
-<p>dict
-    a dictionary of the result, corrections, and working directory used
-    for this task run</p>
+<ul>
+<li>a dictionary of the result, corrections, and working directory used
+for this task run</li>
+</ul>
 </div>
 
 
                             </div>
-                            <div id="SupervisedStagedShellTask.get_config" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#SupervisedStagedShellTask.get_config">#&nbsp;&nbsp</a>
+                            <div id="S3Task.get_config" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#S3Task.get_config">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@classmethod</div>
 
@@ -2329,8 +2411,8 @@ can be overwritten to show only relevent information.</p>
 
 
                             </div>
-                            <div id="SupervisedStagedShellTask.print_config" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#SupervisedStagedShellTask.print_config">#&nbsp;&nbsp</a>
+                            <div id="S3Task.print_config" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#S3Task.print_config">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@classmethod</div>
 
@@ -2362,19 +2444,19 @@ easier to read.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt>prefect.core.task.Task</dt>
-                                <dd id="SupervisedStagedShellTask.copy" class="function">copy</dd>
-                <dd id="SupervisedStagedShellTask.bind" class="function">bind</dd>
-                <dd id="SupervisedStagedShellTask.map" class="function">map</dd>
-                <dd id="SupervisedStagedShellTask.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="SupervisedStagedShellTask.set_upstream" class="function">set_upstream</dd>
-                <dd id="SupervisedStagedShellTask.set_downstream" class="function">set_downstream</dd>
-                <dd id="SupervisedStagedShellTask.inputs" class="function">inputs</dd>
-                <dd id="SupervisedStagedShellTask.outputs" class="function">outputs</dd>
-                <dd id="SupervisedStagedShellTask.serialize" class="function">serialize</dd>
-                <dd id="SupervisedStagedShellTask.is_equal" class="function">is_equal</dd>
-                <dd id="SupervisedStagedShellTask.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="SupervisedStagedShellTask.not_" class="function">not_</dd>
-                <dd id="SupervisedStagedShellTask.or_" class="function">or_</dd>
+                                <dd id="S3Task.copy" class="function">copy</dd>
+                <dd id="S3Task.bind" class="function">bind</dd>
+                <dd id="S3Task.map" class="function">map</dd>
+                <dd id="S3Task.set_dependencies" class="function">set_dependencies</dd>
+                <dd id="S3Task.set_upstream" class="function">set_upstream</dd>
+                <dd id="S3Task.set_downstream" class="function">set_downstream</dd>
+                <dd id="S3Task.inputs" class="function">inputs</dd>
+                <dd id="S3Task.outputs" class="function">outputs</dd>
+                <dd id="S3Task.serialize" class="function">serialize</dd>
+                <dd id="S3Task.is_equal" class="function">is_equal</dd>
+                <dd id="S3Task.is_not_equal" class="function">is_not_equal</dd>
+                <dd id="S3Task.not_" class="function">not_</dd>
+                <dd id="S3Task.or_" class="function">or_</dd>
 
             </div>
                                 </dl>

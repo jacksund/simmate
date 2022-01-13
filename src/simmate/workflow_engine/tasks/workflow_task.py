@@ -42,19 +42,20 @@ class WorkflowTask(Task):
     The easiest way to make your Workflow into a WorkflowTask is actually NOT
     calling this class. But instead using the to_workflow_task method:
 
-    .. code-block:: python
+    ``` python
+    from simmate.workflows import example_workflow
 
-       from simmate.workflows import example_workflow
-       my_task = example_workflow.to_workflow_task()
-
-    DEV NOTE:
-    Prefect has a module prefect.tasks.prefect.flow_run which is close to this
-    idea -- but this module requires you to be using Prefect Cloud and have all
-    of the flows registered. We need to account for running flows locally too!
-    Therefore, we had to make this custom task here -- where it decided whether
-    we call the workflow.run_cloud or workflow.run method.
-    Consider moving this functionality to Prefect down the line.
+    my_task = example_workflow.to_workflow_task()
+    ```
     """
+
+    # DEV NOTE:
+    # Prefect has a module prefect.tasks.prefect.flow_run which is close to this
+    # idea -- but this module requires you to be using Prefect Cloud and have all
+    # of the flows registered. We need to account for running flows locally too!
+    # Therefore, we had to make this custom task here -- where it decided whether
+    # we call the workflow.run_cloud or workflow.run method.
+    # Consider moving this functionality to Prefect down the line.
 
     def __init__(
         self,
@@ -72,26 +73,26 @@ class WorkflowTask(Task):
 
         Parameters
         ----------
-        workflow : Workflow
+        - `workflow`:
             The full workflow to run.
-        return_result : bool
+        - `return_result`:
             If True, the task run will return the result of the task set as the
             worfklow.result_task attribute. If False, the workflow State is returned.
             The default is True.
-        executor_type : str (optional)
+        - `executor_type`:
             How the workflow should be scheduled and ran. The options are either
             local or prefect (i.e. prefect cloud). The default is "local".
-        wait_for_run : bool (optional)
+        - `wait_for_run`:
             If Prefect is used to schedule the workflow, then this indicates
             whether we should wait for the flow to finish or not.
-        labels : List[str] (optional)
+        - `labels`:
             If Prefect is used to schedule the workflow, then this indicates
             what labels should be attached to the flow
-        log_stdout : bool (optional)
+        - `log_stdout`:
             Whether to log anything printed by the workflow. The default is True.
-        **kwargs : TYPE
-            All extra arguments supported by prefect.core.task.Task.
-
+        - `**kwargs`:
+            All extra arguments supported by
+            [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).
         """
 
         # If Prefect is used to schedule the workflow, we also may want to
@@ -150,20 +151,20 @@ class WorkflowTask(Task):
 
         Parameters
         ----------
-        executor_type : str (optional)
+        - `executor_type`:
             How the workflow should be scheduled and ran. The options are either
             local or prefect (i.e. prefect cloud).
-        return_result : bool
+        - `return_result`:
             If True, the task run will return the result of the task set as the
             worfklow.result_task attribute. If False, the workflow State is returned.
             The default is True.
-        wait_for_run : bool (optional)
+        - `wait_for_run`:
             If Prefect is used to schedule the workflow, then this indicates
             whether we should wait for the flow to finish or not.
-        labels : List[str] (optional)
+        - `labels`:
             If Prefect is used to schedule the workflow, then this indicates
             what labels should be attached to the flow
-        **parameters : TYPE
+        - `**parameters`:
             All options to pass the workflow.run() method.
 
         Returns

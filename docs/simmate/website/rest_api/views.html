@@ -32,19 +32,19 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
-                    <a class="class" href="#MaterialsProjectSerializer">MaterialsProjectSerializer</a>
+                    <a class="class" href="#MatProjSerializer">MatProjSerializer</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="class" href="#MaterialsProjectSerializer.Meta">MaterialsProjectSerializer.Meta</a>
+                                <a class="class" href="#MatProjSerializer.Meta">MatProjSerializer.Meta</a>
                                         <ul class="memberlist">
                                     <li>
-                                            <a class="function" href="#MaterialsProjectSerializer.Meta.__init__">Meta</a>
+                                            <a class="function" href="#MatProjSerializer.Meta.__init__">Meta</a>
                                     </li>
                                     <li>
-                                            <a class="class" href="#MaterialsProjectSerializer.Meta.model">MaterialsProjectSerializer.Meta.model</a>
+                                            <a class="class" href="#MatProjSerializer.Meta.model">MatProjSerializer.Meta.model</a>
                                     </li>
                                     <li>
-                                            <a class="variable" href="#MaterialsProjectSerializer.Meta.fields">fields</a>
+                                            <a class="variable" href="#MatProjSerializer.Meta.fields">fields</a>
                                     </li>
                             </ul>
 
@@ -53,31 +53,31 @@
 
             </li>
             <li>
-                    <a class="class" href="#MaterialsProjectViewSet">MaterialsProjectViewSet</a>
+                    <a class="class" href="#MatProjViewSet">MatProjViewSet</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#MaterialsProjectViewSet.queryset">queryset</a>
+                                <a class="variable" href="#MatProjViewSet.queryset">queryset</a>
                         </li>
                         <li>
-                                <a class="class" href="#MaterialsProjectViewSet.serializer_class">MaterialsProjectViewSet.serializer_class</a>
+                                <a class="class" href="#MatProjViewSet.serializer_class">MatProjViewSet.serializer_class</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MaterialsProjectViewSet.filterset_fields">filterset_fields</a>
+                                <a class="variable" href="#MatProjViewSet.filterset_fields">filterset_fields</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MaterialsProjectViewSet.name">name</a>
+                                <a class="variable" href="#MatProjViewSet.name">name</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MaterialsProjectViewSet.description">description</a>
+                                <a class="variable" href="#MatProjViewSet.description">description</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MaterialsProjectViewSet.suffix">suffix</a>
+                                <a class="variable" href="#MatProjViewSet.suffix">suffix</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MaterialsProjectViewSet.detail">detail</a>
+                                <a class="variable" href="#MatProjViewSet.detail">detail</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MaterialsProjectViewSet.basename">basename</a>
+                                <a class="variable" href="#MatProjViewSet.basename">basename</a>
                         </li>
                 </ul>
 
@@ -312,7 +312,7 @@
 <span class="kn">from</span> <span class="nn">rest_framework.viewsets</span> <span class="kn">import</span> <span class="n">ReadOnlyModelViewSet</span>
 
 <span class="kn">from</span> <span class="nn">simmate.database.third_parties.all</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">MaterialsProjectStructure</span><span class="p">,</span>
+    <span class="n">MatProjStructure</span><span class="p">,</span>
     <span class="n">JarvisStructure</span><span class="p">,</span>
     <span class="n">AflowStructure</span><span class="p">,</span>
     <span class="n">OqmdStructure</span><span class="p">,</span>
@@ -344,15 +344,15 @@
 <span class="c1"># --------------------------------------------------------------------------------------</span>
 
 
-<span class="k">class</span> <span class="nc">MaterialsProjectSerializer</span><span class="p">(</span><span class="n">HyperlinkedModelSerializer</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MatProjSerializer</span><span class="p">(</span><span class="n">HyperlinkedModelSerializer</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">MaterialsProjectStructure</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">MatProjStructure</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="s2">&quot;__all__&quot;</span>
 
 
-<span class="k">class</span> <span class="nc">MaterialsProjectViewSet</span><span class="p">(</span><span class="n">ReadOnlyModelViewSet</span><span class="p">):</span>
-    <span class="n">queryset</span> <span class="o">=</span> <span class="n">MaterialsProjectStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">MaterialsProjectSerializer</span>
+<span class="k">class</span> <span class="nc">MatProjViewSet</span><span class="p">(</span><span class="n">ReadOnlyModelViewSet</span><span class="p">):</span>
+    <span class="n">queryset</span> <span class="o">=</span> <span class="n">MatProjStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">MatProjSerializer</span>
     <span class="n">filterset_fields</span> <span class="o">=</span> <span class="s2">&quot;__all__&quot;</span>
 
 
@@ -422,20 +422,20 @@
         </details>
 
             </section>
-                <section id="MaterialsProjectSerializer">
+                <section id="MatProjSerializer">
                                 <div class="attr class">
-        <a class="headerlink" href="#MaterialsProjectSerializer">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MatProjSerializer">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MaterialsProjectSerializer</span><wbr>(<span class="base">rest_framework.serializers.HyperlinkedModelSerializer</span>):
+        <span class="name">MatProjSerializer</span><wbr>(<span class="base">rest_framework.serializers.HyperlinkedModelSerializer</span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MaterialsProjectSerializer</span><span class="p">(</span><span class="n">HyperlinkedModelSerializer</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MatProjSerializer</span><span class="p">(</span><span class="n">HyperlinkedModelSerializer</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">MaterialsProjectStructure</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">MatProjStructure</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="s2">&quot;__all__&quot;</span>
 </pre></div>
 
@@ -455,87 +455,87 @@ of primary key relationships. Specifically:</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt>rest_framework.serializers.BaseSerializer</dt>
-                                <dd id="MaterialsProjectSerializer.__init__" class="function">BaseSerializer</dd>
-                <dd id="MaterialsProjectSerializer.many_init" class="function">many_init</dd>
-                <dd id="MaterialsProjectSerializer.save" class="function">save</dd>
-                <dd id="MaterialsProjectSerializer.is_valid" class="function">is_valid</dd>
-                <dd id="MaterialsProjectSerializer.validated_data" class="variable">validated_data</dd>
+                                <dd id="MatProjSerializer.__init__" class="function">BaseSerializer</dd>
+                <dd id="MatProjSerializer.many_init" class="function">many_init</dd>
+                <dd id="MatProjSerializer.save" class="function">save</dd>
+                <dd id="MatProjSerializer.is_valid" class="function">is_valid</dd>
+                <dd id="MatProjSerializer.validated_data" class="variable">validated_data</dd>
 
             </div>
             <div><dt>rest_framework.serializers.HyperlinkedModelSerializer</dt>
-                                <dd id="MaterialsProjectSerializer.serializer_related_field" class="class">serializer_related_field</dd>
-                <dd id="MaterialsProjectSerializer.get_default_field_names" class="function">get_default_field_names</dd>
-                <dd id="MaterialsProjectSerializer.build_nested_field" class="function">build_nested_field</dd>
+                                <dd id="MatProjSerializer.serializer_related_field" class="class">serializer_related_field</dd>
+                <dd id="MatProjSerializer.get_default_field_names" class="function">get_default_field_names</dd>
+                <dd id="MatProjSerializer.build_nested_field" class="function">build_nested_field</dd>
 
             </div>
             <div><dt>rest_framework.serializers.ModelSerializer</dt>
-                                <dd id="MaterialsProjectSerializer.serializer_field_mapping" class="variable">serializer_field_mapping</dd>
-                <dd id="MaterialsProjectSerializer.serializer_related_to_field" class="class">serializer_related_to_field</dd>
-                <dd id="MaterialsProjectSerializer.serializer_url_field" class="class">serializer_url_field</dd>
-                <dd id="MaterialsProjectSerializer.serializer_choice_field" class="class">serializer_choice_field</dd>
-                <dd id="MaterialsProjectSerializer.url_field_name" class="variable">url_field_name</dd>
-                <dd id="MaterialsProjectSerializer.create" class="function">create</dd>
-                <dd id="MaterialsProjectSerializer.update" class="function">update</dd>
-                <dd id="MaterialsProjectSerializer.get_fields" class="function">get_fields</dd>
-                <dd id="MaterialsProjectSerializer.get_field_names" class="function">get_field_names</dd>
-                <dd id="MaterialsProjectSerializer.build_field" class="function">build_field</dd>
-                <dd id="MaterialsProjectSerializer.build_standard_field" class="function">build_standard_field</dd>
-                <dd id="MaterialsProjectSerializer.build_relational_field" class="function">build_relational_field</dd>
-                <dd id="MaterialsProjectSerializer.build_property_field" class="function">build_property_field</dd>
-                <dd id="MaterialsProjectSerializer.build_url_field" class="function">build_url_field</dd>
-                <dd id="MaterialsProjectSerializer.build_unknown_field" class="function">build_unknown_field</dd>
-                <dd id="MaterialsProjectSerializer.include_extra_kwargs" class="function">include_extra_kwargs</dd>
-                <dd id="MaterialsProjectSerializer.get_extra_kwargs" class="function">get_extra_kwargs</dd>
-                <dd id="MaterialsProjectSerializer.get_uniqueness_extra_kwargs" class="function">get_uniqueness_extra_kwargs</dd>
-                <dd id="MaterialsProjectSerializer.get_validators" class="function">get_validators</dd>
-                <dd id="MaterialsProjectSerializer.get_unique_together_validators" class="function">get_unique_together_validators</dd>
-                <dd id="MaterialsProjectSerializer.get_unique_for_date_validators" class="function">get_unique_for_date_validators</dd>
+                                <dd id="MatProjSerializer.serializer_field_mapping" class="variable">serializer_field_mapping</dd>
+                <dd id="MatProjSerializer.serializer_related_to_field" class="class">serializer_related_to_field</dd>
+                <dd id="MatProjSerializer.serializer_url_field" class="class">serializer_url_field</dd>
+                <dd id="MatProjSerializer.serializer_choice_field" class="class">serializer_choice_field</dd>
+                <dd id="MatProjSerializer.url_field_name" class="variable">url_field_name</dd>
+                <dd id="MatProjSerializer.create" class="function">create</dd>
+                <dd id="MatProjSerializer.update" class="function">update</dd>
+                <dd id="MatProjSerializer.get_fields" class="function">get_fields</dd>
+                <dd id="MatProjSerializer.get_field_names" class="function">get_field_names</dd>
+                <dd id="MatProjSerializer.build_field" class="function">build_field</dd>
+                <dd id="MatProjSerializer.build_standard_field" class="function">build_standard_field</dd>
+                <dd id="MatProjSerializer.build_relational_field" class="function">build_relational_field</dd>
+                <dd id="MatProjSerializer.build_property_field" class="function">build_property_field</dd>
+                <dd id="MatProjSerializer.build_url_field" class="function">build_url_field</dd>
+                <dd id="MatProjSerializer.build_unknown_field" class="function">build_unknown_field</dd>
+                <dd id="MatProjSerializer.include_extra_kwargs" class="function">include_extra_kwargs</dd>
+                <dd id="MatProjSerializer.get_extra_kwargs" class="function">get_extra_kwargs</dd>
+                <dd id="MatProjSerializer.get_uniqueness_extra_kwargs" class="function">get_uniqueness_extra_kwargs</dd>
+                <dd id="MatProjSerializer.get_validators" class="function">get_validators</dd>
+                <dd id="MatProjSerializer.get_unique_together_validators" class="function">get_unique_together_validators</dd>
+                <dd id="MatProjSerializer.get_unique_for_date_validators" class="function">get_unique_for_date_validators</dd>
 
             </div>
             <div><dt>rest_framework.serializers.Serializer</dt>
-                                <dd id="MaterialsProjectSerializer.default_error_messages" class="variable">default_error_messages</dd>
-                <dd id="MaterialsProjectSerializer.fields" class="function">fields</dd>
-                <dd id="MaterialsProjectSerializer.get_initial" class="function">get_initial</dd>
-                <dd id="MaterialsProjectSerializer.get_value" class="function">get_value</dd>
-                <dd id="MaterialsProjectSerializer.run_validation" class="function">run_validation</dd>
-                <dd id="MaterialsProjectSerializer.run_validators" class="function">run_validators</dd>
-                <dd id="MaterialsProjectSerializer.to_internal_value" class="function">to_internal_value</dd>
-                <dd id="MaterialsProjectSerializer.to_representation" class="function">to_representation</dd>
-                <dd id="MaterialsProjectSerializer.validate" class="function">validate</dd>
-                <dd id="MaterialsProjectSerializer.data" class="variable">data</dd>
-                <dd id="MaterialsProjectSerializer.errors" class="variable">errors</dd>
+                                <dd id="MatProjSerializer.default_error_messages" class="variable">default_error_messages</dd>
+                <dd id="MatProjSerializer.fields" class="function">fields</dd>
+                <dd id="MatProjSerializer.get_initial" class="function">get_initial</dd>
+                <dd id="MatProjSerializer.get_value" class="function">get_value</dd>
+                <dd id="MatProjSerializer.run_validation" class="function">run_validation</dd>
+                <dd id="MatProjSerializer.run_validators" class="function">run_validators</dd>
+                <dd id="MatProjSerializer.to_internal_value" class="function">to_internal_value</dd>
+                <dd id="MatProjSerializer.to_representation" class="function">to_representation</dd>
+                <dd id="MatProjSerializer.validate" class="function">validate</dd>
+                <dd id="MatProjSerializer.data" class="variable">data</dd>
+                <dd id="MatProjSerializer.errors" class="variable">errors</dd>
 
             </div>
             <div><dt>rest_framework.fields.Field</dt>
-                                <dd id="MaterialsProjectSerializer.default_validators" class="variable">default_validators</dd>
-                <dd id="MaterialsProjectSerializer.default_empty_html" class="class">default_empty_html</dd>
-                <dd id="MaterialsProjectSerializer.initial" class="variable">initial</dd>
-                <dd id="MaterialsProjectSerializer.bind" class="function">bind</dd>
-                <dd id="MaterialsProjectSerializer.validators" class="variable">validators</dd>
-                <dd id="MaterialsProjectSerializer.get_attribute" class="function">get_attribute</dd>
-                <dd id="MaterialsProjectSerializer.get_default" class="function">get_default</dd>
-                <dd id="MaterialsProjectSerializer.validate_empty_values" class="function">validate_empty_values</dd>
-                <dd id="MaterialsProjectSerializer.fail" class="function">fail</dd>
-                <dd id="MaterialsProjectSerializer.root" class="variable">root</dd>
-                <dd id="MaterialsProjectSerializer.context" class="variable">context</dd>
+                                <dd id="MatProjSerializer.default_validators" class="variable">default_validators</dd>
+                <dd id="MatProjSerializer.default_empty_html" class="class">default_empty_html</dd>
+                <dd id="MatProjSerializer.initial" class="variable">initial</dd>
+                <dd id="MatProjSerializer.bind" class="function">bind</dd>
+                <dd id="MatProjSerializer.validators" class="variable">validators</dd>
+                <dd id="MatProjSerializer.get_attribute" class="function">get_attribute</dd>
+                <dd id="MatProjSerializer.get_default" class="function">get_default</dd>
+                <dd id="MatProjSerializer.validate_empty_values" class="function">validate_empty_values</dd>
+                <dd id="MatProjSerializer.fail" class="function">fail</dd>
+                <dd id="MatProjSerializer.root" class="variable">root</dd>
+                <dd id="MatProjSerializer.context" class="variable">context</dd>
 
             </div>
                                 </dl>
                             </div>
                 </section>
-                <section id="MaterialsProjectSerializer.Meta">
+                <section id="MatProjSerializer.Meta">
                                 <div class="attr class">
-        <a class="headerlink" href="#MaterialsProjectSerializer.Meta">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MatProjSerializer.Meta">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MaterialsProjectSerializer.Meta</span>:
+        <span class="name">MatProjSerializer.Meta</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">MaterialsProjectStructure</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">MatProjStructure</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="s2">&quot;__all__&quot;</span>
 </pre></div>
 
@@ -543,19 +543,19 @@ of primary key relationships. Specifically:</p>
 
     
 
-                            <div id="MaterialsProjectSerializer.Meta.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MaterialsProjectSerializer.Meta.__init__">#&nbsp;&nbsp</a>
+                            <div id="MatProjSerializer.Meta.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MatProjSerializer.Meta.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">MaterialsProjectSerializer.Meta</span><span class="signature">()</span>
+            <span class="name">MatProjSerializer.Meta</span><span class="signature">()</span>
     </div>
 
         
     
 
                             </div>
-                            <div id="MaterialsProjectSerializer.Meta.fields" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectSerializer.Meta.fields">#&nbsp;&nbsp</a>
+                            <div id="MatProjSerializer.Meta.fields" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjSerializer.Meta.fields">#&nbsp;&nbsp</a>
 
         <span class="name">fields</span><span class="default_value"> = &#39;__all__&#39;</span>
     </div>
@@ -564,18 +564,18 @@ of primary key relationships. Specifically:</p>
 
                             </div>
                 </section>
-                <section id="MaterialsProjectSerializer.Meta.model">
+                <section id="MatProjSerializer.Meta.model">
                                 <div class="attr class">
-        <a class="headerlink" href="#MaterialsProjectSerializer.Meta.model">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MatProjSerializer.Meta.model">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MaterialsProjectSerializer.Meta.model</span><wbr>(<span class="base"><a href="../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></span>, <span class="base"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></span>):
+        <span class="name">MatProjSerializer.Meta.model</span><wbr>(<span class="base"><a href="../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></span>, <span class="base"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MaterialsProjectStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MatProjStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
 
     <span class="c1"># The id used to symbolize the structure (ex: &quot;mp-12345&quot;)</span>
     <span class="nb">id</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -626,7 +626,7 @@ of primary key relationships. Specifically:</p>
 
         </details>
 
-            <div class="docstring"><p>MaterialsProjectStructure(structure_string, nsites, nelements, elements, chemical_system, density, density_atomic, volume, volume_molar, formula_full, formula_reduced, formula_anonymous, spacegroup, energy, energy_per_atom, energy_above_hull, is_stable, decomposes_to, formation_energy, formation_energy_per_atom, id)</p>
+            <div class="docstring"><p>MatProjStructure(structure_string, nsites, nelements, elements, chemical_system, density, density_atomic, volume, volume_molar, formula_full, formula_reduced, formula_anonymous, spacegroup, energy, energy_per_atom, energy_above_hull, is_stable, decomposes_to, formation_energy, formation_energy_per_atom, id)</p>
 </div>
 
 
@@ -634,100 +634,100 @@ of primary key relationships. Specifically:</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt>django.db.models.base.Model</dt>
-                                <dd id="MaterialsProjectSerializer.Meta.model.__init__" class="function">Model</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.from_db" class="function">from_db</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.pk" class="variable">pk</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.get_deferred_fields" class="function">get_deferred_fields</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.refresh_from_db" class="function">refresh_from_db</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.serializable_value" class="function">serializable_value</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.save" class="function">save</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.save_base" class="function">save_base</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.delete" class="function">delete</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.prepare_database_save" class="function">prepare_database_save</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.clean" class="function">clean</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.validate_unique" class="function">validate_unique</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.date_error_message" class="function">date_error_message</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.unique_error_message" class="function">unique_error_message</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.full_clean" class="function">full_clean</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.clean_fields" class="function">clean_fields</dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.check" class="function">check</dd>
+                                <dd id="MatProjSerializer.Meta.model.__init__" class="function">Model</dd>
+                <dd id="MatProjSerializer.Meta.model.from_db" class="function">from_db</dd>
+                <dd id="MatProjSerializer.Meta.model.pk" class="variable">pk</dd>
+                <dd id="MatProjSerializer.Meta.model.get_deferred_fields" class="function">get_deferred_fields</dd>
+                <dd id="MatProjSerializer.Meta.model.refresh_from_db" class="function">refresh_from_db</dd>
+                <dd id="MatProjSerializer.Meta.model.serializable_value" class="function">serializable_value</dd>
+                <dd id="MatProjSerializer.Meta.model.save" class="function">save</dd>
+                <dd id="MatProjSerializer.Meta.model.save_base" class="function">save_base</dd>
+                <dd id="MatProjSerializer.Meta.model.delete" class="function">delete</dd>
+                <dd id="MatProjSerializer.Meta.model.prepare_database_save" class="function">prepare_database_save</dd>
+                <dd id="MatProjSerializer.Meta.model.clean" class="function">clean</dd>
+                <dd id="MatProjSerializer.Meta.model.validate_unique" class="function">validate_unique</dd>
+                <dd id="MatProjSerializer.Meta.model.date_error_message" class="function">date_error_message</dd>
+                <dd id="MatProjSerializer.Meta.model.unique_error_message" class="function">unique_error_message</dd>
+                <dd id="MatProjSerializer.Meta.model.full_clean" class="function">full_clean</dd>
+                <dd id="MatProjSerializer.Meta.model.clean_fields" class="function">clean_fields</dd>
+                <dd id="MatProjSerializer.Meta.model.check" class="function">check</dd>
 
             </div>
-            <div><dt><a href="../../database/third_parties/materials_project.html#MaterialsProjectStructure">simmate.database.third_parties.materials_project.MaterialsProjectStructure</a></dt>
-                                <dd id="MaterialsProjectSerializer.Meta.model.id" class="function"><a href="../../database/third_parties/materials_project.html#MaterialsProjectStructure.id">id</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.source" class="variable"><a href="../../database/third_parties/materials_project.html#MaterialsProjectStructure.source">source</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.external_link" class="variable"><a href="../../database/third_parties/materials_project.html#MaterialsProjectStructure.external_link">external_link</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.from_pymatgen" class="function"><a href="../../database/third_parties/materials_project.html#MaterialsProjectStructure.from_pymatgen">from_pymatgen</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.spacegroup" class="variable"><a href="../../database/third_parties/materials_project.html#MaterialsProjectStructure.spacegroup">spacegroup</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.DoesNotExist" class="class"><a href="../../database/third_parties/materials_project.html#MaterialsProjectStructure.DoesNotExist">DoesNotExist</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.MultipleObjectsReturned" class="class"><a href="../../database/third_parties/materials_project.html#MaterialsProjectStructure.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
+            <div><dt><a href="../../database/third_parties/materials_project.html#MatProjStructure">simmate.database.third_parties.materials_project.MatProjStructure</a></dt>
+                                <dd id="MatProjSerializer.Meta.model.id" class="function"><a href="../../database/third_parties/materials_project.html#MatProjStructure.id">id</a></dd>
+                <dd id="MatProjSerializer.Meta.model.source" class="variable"><a href="../../database/third_parties/materials_project.html#MatProjStructure.source">source</a></dd>
+                <dd id="MatProjSerializer.Meta.model.external_link" class="variable"><a href="../../database/third_parties/materials_project.html#MatProjStructure.external_link">external_link</a></dd>
+                <dd id="MatProjSerializer.Meta.model.from_pymatgen" class="function"><a href="../../database/third_parties/materials_project.html#MatProjStructure.from_pymatgen">from_pymatgen</a></dd>
+                <dd id="MatProjSerializer.Meta.model.spacegroup" class="variable"><a href="../../database/third_parties/materials_project.html#MatProjStructure.spacegroup">spacegroup</a></dd>
+                <dd id="MatProjSerializer.Meta.model.DoesNotExist" class="class"><a href="../../database/third_parties/materials_project.html#MatProjStructure.DoesNotExist">DoesNotExist</a></dd>
+                <dd id="MatProjSerializer.Meta.model.MultipleObjectsReturned" class="class"><a href="../../database/third_parties/materials_project.html#MatProjStructure.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
 
             </div>
             <div><dt><a href="../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
-                                <dd id="MaterialsProjectSerializer.Meta.model.Meta" class="class"><a href="../../database/base_data_types/structure.html#Structure.Meta">Meta</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.structure_string" class="function"><a href="../../database/base_data_types/structure.html#Structure.structure_string">structure_string</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.nsites" class="function"><a href="../../database/base_data_types/structure.html#Structure.nsites">nsites</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.nelements" class="function"><a href="../../database/base_data_types/structure.html#Structure.nelements">nelements</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.elements" class="function"><a href="../../database/base_data_types/structure.html#Structure.elements">elements</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.chemical_system" class="function"><a href="../../database/base_data_types/structure.html#Structure.chemical_system">chemical_system</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.density" class="function"><a href="../../database/base_data_types/structure.html#Structure.density">density</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.density_atomic" class="function"><a href="../../database/base_data_types/structure.html#Structure.density_atomic">density_atomic</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.volume" class="function"><a href="../../database/base_data_types/structure.html#Structure.volume">volume</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.volume_molar" class="function"><a href="../../database/base_data_types/structure.html#Structure.volume_molar">volume_molar</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.formula_full" class="function"><a href="../../database/base_data_types/structure.html#Structure.formula_full">formula_full</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.formula_reduced" class="function"><a href="../../database/base_data_types/structure.html#Structure.formula_reduced">formula_reduced</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.formula_anonymous" class="function"><a href="../../database/base_data_types/structure.html#Structure.formula_anonymous">formula_anonymous</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.to_pymatgen" class="function"><a href="../../database/base_data_types/structure.html#Structure.to_pymatgen">to_pymatgen</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.spacegroup_id" class="variable"><a href="../../database/base_data_types/structure.html#Structure.spacegroup_id">spacegroup_id</a></dd>
+                                <dd id="MatProjSerializer.Meta.model.Meta" class="class"><a href="../../database/base_data_types/structure.html#Structure.Meta">Meta</a></dd>
+                <dd id="MatProjSerializer.Meta.model.structure_string" class="function"><a href="../../database/base_data_types/structure.html#Structure.structure_string">structure_string</a></dd>
+                <dd id="MatProjSerializer.Meta.model.nsites" class="function"><a href="../../database/base_data_types/structure.html#Structure.nsites">nsites</a></dd>
+                <dd id="MatProjSerializer.Meta.model.nelements" class="function"><a href="../../database/base_data_types/structure.html#Structure.nelements">nelements</a></dd>
+                <dd id="MatProjSerializer.Meta.model.elements" class="function"><a href="../../database/base_data_types/structure.html#Structure.elements">elements</a></dd>
+                <dd id="MatProjSerializer.Meta.model.chemical_system" class="function"><a href="../../database/base_data_types/structure.html#Structure.chemical_system">chemical_system</a></dd>
+                <dd id="MatProjSerializer.Meta.model.density" class="function"><a href="../../database/base_data_types/structure.html#Structure.density">density</a></dd>
+                <dd id="MatProjSerializer.Meta.model.density_atomic" class="function"><a href="../../database/base_data_types/structure.html#Structure.density_atomic">density_atomic</a></dd>
+                <dd id="MatProjSerializer.Meta.model.volume" class="function"><a href="../../database/base_data_types/structure.html#Structure.volume">volume</a></dd>
+                <dd id="MatProjSerializer.Meta.model.volume_molar" class="function"><a href="../../database/base_data_types/structure.html#Structure.volume_molar">volume_molar</a></dd>
+                <dd id="MatProjSerializer.Meta.model.formula_full" class="function"><a href="../../database/base_data_types/structure.html#Structure.formula_full">formula_full</a></dd>
+                <dd id="MatProjSerializer.Meta.model.formula_reduced" class="function"><a href="../../database/base_data_types/structure.html#Structure.formula_reduced">formula_reduced</a></dd>
+                <dd id="MatProjSerializer.Meta.model.formula_anonymous" class="function"><a href="../../database/base_data_types/structure.html#Structure.formula_anonymous">formula_anonymous</a></dd>
+                <dd id="MatProjSerializer.Meta.model.to_pymatgen" class="function"><a href="../../database/base_data_types/structure.html#Structure.to_pymatgen">to_pymatgen</a></dd>
+                <dd id="MatProjSerializer.Meta.model.spacegroup_id" class="variable"><a href="../../database/base_data_types/structure.html#Structure.spacegroup_id">spacegroup_id</a></dd>
 
             </div>
             <div><dt><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></dt>
-                                <dd id="MaterialsProjectSerializer.Meta.model.energy" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.energy">energy</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.energy_per_atom" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.energy_per_atom">energy_per_atom</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.energy_above_hull" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.energy_above_hull">energy_above_hull</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.is_stable" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.is_stable">is_stable</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.decomposes_to" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.decomposes_to">decomposes_to</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.formation_energy" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.formation_energy">formation_energy</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.formation_energy_per_atom" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.formation_energy_per_atom">formation_energy_per_atom</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.from_base_data" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.from_base_data">from_base_data</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.update_chemical_system_stabilities" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.update_all_stabilities" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
+                                <dd id="MatProjSerializer.Meta.model.energy" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.energy">energy</a></dd>
+                <dd id="MatProjSerializer.Meta.model.energy_per_atom" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.energy_per_atom">energy_per_atom</a></dd>
+                <dd id="MatProjSerializer.Meta.model.energy_above_hull" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.energy_above_hull">energy_above_hull</a></dd>
+                <dd id="MatProjSerializer.Meta.model.is_stable" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.is_stable">is_stable</a></dd>
+                <dd id="MatProjSerializer.Meta.model.decomposes_to" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.decomposes_to">decomposes_to</a></dd>
+                <dd id="MatProjSerializer.Meta.model.formation_energy" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.formation_energy">formation_energy</a></dd>
+                <dd id="MatProjSerializer.Meta.model.formation_energy_per_atom" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.formation_energy_per_atom">formation_energy_per_atom</a></dd>
+                <dd id="MatProjSerializer.Meta.model.from_base_data" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.from_base_data">from_base_data</a></dd>
+                <dd id="MatProjSerializer.Meta.model.update_chemical_system_stabilities" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
+                <dd id="MatProjSerializer.Meta.model.update_all_stabilities" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
 
             </div>
             <div><dt><a href="../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
-                                <dd id="MaterialsProjectSerializer.Meta.model.objects" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.show_columns" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
-                <dd id="MaterialsProjectSerializer.Meta.model.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
+                                <dd id="MatProjSerializer.Meta.model.objects" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                <dd id="MatProjSerializer.Meta.model.show_columns" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="MatProjSerializer.Meta.model.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
 
             </div>
                                 </dl>
                             </div>
                 </section>
-                <section id="MaterialsProjectViewSet">
+                <section id="MatProjViewSet">
                                 <div class="attr class">
-        <a class="headerlink" href="#MaterialsProjectViewSet">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MatProjViewSet">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MaterialsProjectViewSet</span><wbr>(<span class="base">rest_framework.viewsets.ReadOnlyModelViewSet</span>):
+        <span class="name">MatProjViewSet</span><wbr>(<span class="base">rest_framework.viewsets.ReadOnlyModelViewSet</span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MaterialsProjectViewSet</span><span class="p">(</span><span class="n">ReadOnlyModelViewSet</span><span class="p">):</span>
-    <span class="n">queryset</span> <span class="o">=</span> <span class="n">MaterialsProjectStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">MaterialsProjectSerializer</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MatProjViewSet</span><span class="p">(</span><span class="n">ReadOnlyModelViewSet</span><span class="p">):</span>
+    <span class="n">queryset</span> <span class="o">=</span> <span class="n">MatProjStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">MatProjSerializer</span>
     <span class="n">filterset_fields</span> <span class="o">=</span> <span class="s2">&quot;__all__&quot;</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>A viewset that provides default <code><a href="#MaterialsProjectViewSet.list">list()</a></code> and <code><a href="#MaterialsProjectViewSet.retrieve">retrieve()</a></code> actions.</p>
+            <div class="docstring"><p>A viewset that provides default <code><a href="#MatProjViewSet.list">list()</a></code> and <code><a href="#MatProjViewSet.retrieve">retrieve()</a></code> actions.</p>
 </div>
 
 
-                            <div id="MaterialsProjectViewSet.queryset" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectViewSet.queryset">#&nbsp;&nbsp</a>
+                            <div id="MatProjViewSet.queryset" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjViewSet.queryset">#&nbsp;&nbsp</a>
 
         <span class="name">queryset</span><span class="default_value"> = &lt;SearchResults []&gt;</span>
     </div>
@@ -735,8 +735,8 @@ of primary key relationships. Specifically:</p>
     
 
                             </div>
-                            <div id="MaterialsProjectViewSet.filterset_fields" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectViewSet.filterset_fields">#&nbsp;&nbsp</a>
+                            <div id="MatProjViewSet.filterset_fields" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjViewSet.filterset_fields">#&nbsp;&nbsp</a>
 
         <span class="name">filterset_fields</span><span class="default_value"> = &#39;__all__&#39;</span>
     </div>
@@ -744,8 +744,8 @@ of primary key relationships. Specifically:</p>
     
 
                             </div>
-                            <div id="MaterialsProjectViewSet.name" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectViewSet.name">#&nbsp;&nbsp</a>
+                            <div id="MatProjViewSet.name" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjViewSet.name">#&nbsp;&nbsp</a>
 
         <span class="name">name</span><span class="default_value"> = None</span>
     </div>
@@ -753,8 +753,8 @@ of primary key relationships. Specifically:</p>
     
 
                             </div>
-                            <div id="MaterialsProjectViewSet.description" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectViewSet.description">#&nbsp;&nbsp</a>
+                            <div id="MatProjViewSet.description" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjViewSet.description">#&nbsp;&nbsp</a>
 
         <span class="name">description</span><span class="default_value"> = None</span>
     </div>
@@ -762,8 +762,8 @@ of primary key relationships. Specifically:</p>
     
 
                             </div>
-                            <div id="MaterialsProjectViewSet.suffix" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectViewSet.suffix">#&nbsp;&nbsp</a>
+                            <div id="MatProjViewSet.suffix" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjViewSet.suffix">#&nbsp;&nbsp</a>
 
         <span class="name">suffix</span><span class="default_value"> = None</span>
     </div>
@@ -771,8 +771,8 @@ of primary key relationships. Specifically:</p>
     
 
                             </div>
-                            <div id="MaterialsProjectViewSet.detail" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectViewSet.detail">#&nbsp;&nbsp</a>
+                            <div id="MatProjViewSet.detail" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjViewSet.detail">#&nbsp;&nbsp</a>
 
         <span class="name">detail</span><span class="default_value"> = None</span>
     </div>
@@ -780,8 +780,8 @@ of primary key relationships. Specifically:</p>
     
 
                             </div>
-                            <div id="MaterialsProjectViewSet.basename" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectViewSet.basename">#&nbsp;&nbsp</a>
+                            <div id="MatProjViewSet.basename" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjViewSet.basename">#&nbsp;&nbsp</a>
 
         <span class="name">basename</span><span class="default_value"> = None</span>
     </div>
@@ -793,104 +793,104 @@ of primary key relationships. Specifically:</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt>django.views.generic.base.View</dt>
-                                <dd id="MaterialsProjectViewSet.__init__" class="function">View</dd>
-                <dd id="MaterialsProjectViewSet.http_method_names" class="variable">http_method_names</dd>
-                <dd id="MaterialsProjectViewSet.setup" class="function">setup</dd>
+                                <dd id="MatProjViewSet.__init__" class="function">View</dd>
+                <dd id="MatProjViewSet.http_method_names" class="variable">http_method_names</dd>
+                <dd id="MatProjViewSet.setup" class="function">setup</dd>
 
             </div>
             <div><dt>rest_framework.mixins.RetrieveModelMixin</dt>
-                                <dd id="MaterialsProjectViewSet.retrieve" class="function">retrieve</dd>
+                                <dd id="MatProjViewSet.retrieve" class="function">retrieve</dd>
 
             </div>
             <div><dt>rest_framework.mixins.ListModelMixin</dt>
-                                <dd id="MaterialsProjectViewSet.list" class="function">list</dd>
+                                <dd id="MatProjViewSet.list" class="function">list</dd>
 
             </div>
             <div><dt>rest_framework.viewsets.ViewSetMixin</dt>
-                                <dd id="MaterialsProjectViewSet.as_view" class="function">as_view</dd>
-                <dd id="MaterialsProjectViewSet.initialize_request" class="function">initialize_request</dd>
-                <dd id="MaterialsProjectViewSet.reverse_action" class="function">reverse_action</dd>
-                <dd id="MaterialsProjectViewSet.get_extra_actions" class="function">get_extra_actions</dd>
-                <dd id="MaterialsProjectViewSet.get_extra_action_url_map" class="function">get_extra_action_url_map</dd>
+                                <dd id="MatProjViewSet.as_view" class="function">as_view</dd>
+                <dd id="MatProjViewSet.initialize_request" class="function">initialize_request</dd>
+                <dd id="MatProjViewSet.reverse_action" class="function">reverse_action</dd>
+                <dd id="MatProjViewSet.get_extra_actions" class="function">get_extra_actions</dd>
+                <dd id="MatProjViewSet.get_extra_action_url_map" class="function">get_extra_action_url_map</dd>
 
             </div>
             <div><dt>rest_framework.generics.GenericAPIView</dt>
-                                <dd id="MaterialsProjectViewSet.lookup_field" class="variable">lookup_field</dd>
-                <dd id="MaterialsProjectViewSet.lookup_url_kwarg" class="variable">lookup_url_kwarg</dd>
-                <dd id="MaterialsProjectViewSet.filter_backends" class="variable">filter_backends</dd>
-                <dd id="MaterialsProjectViewSet.pagination_class" class="class">pagination_class</dd>
-                <dd id="MaterialsProjectViewSet.get_queryset" class="function">get_queryset</dd>
-                <dd id="MaterialsProjectViewSet.get_object" class="function">get_object</dd>
-                <dd id="MaterialsProjectViewSet.get_serializer" class="function">get_serializer</dd>
-                <dd id="MaterialsProjectViewSet.get_serializer_class" class="function">get_serializer_class</dd>
-                <dd id="MaterialsProjectViewSet.get_serializer_context" class="function">get_serializer_context</dd>
-                <dd id="MaterialsProjectViewSet.filter_queryset" class="function">filter_queryset</dd>
-                <dd id="MaterialsProjectViewSet.paginator" class="variable">paginator</dd>
-                <dd id="MaterialsProjectViewSet.paginate_queryset" class="function">paginate_queryset</dd>
-                <dd id="MaterialsProjectViewSet.get_paginated_response" class="function">get_paginated_response</dd>
+                                <dd id="MatProjViewSet.lookup_field" class="variable">lookup_field</dd>
+                <dd id="MatProjViewSet.lookup_url_kwarg" class="variable">lookup_url_kwarg</dd>
+                <dd id="MatProjViewSet.filter_backends" class="variable">filter_backends</dd>
+                <dd id="MatProjViewSet.pagination_class" class="class">pagination_class</dd>
+                <dd id="MatProjViewSet.get_queryset" class="function">get_queryset</dd>
+                <dd id="MatProjViewSet.get_object" class="function">get_object</dd>
+                <dd id="MatProjViewSet.get_serializer" class="function">get_serializer</dd>
+                <dd id="MatProjViewSet.get_serializer_class" class="function">get_serializer_class</dd>
+                <dd id="MatProjViewSet.get_serializer_context" class="function">get_serializer_context</dd>
+                <dd id="MatProjViewSet.filter_queryset" class="function">filter_queryset</dd>
+                <dd id="MatProjViewSet.paginator" class="variable">paginator</dd>
+                <dd id="MatProjViewSet.paginate_queryset" class="function">paginate_queryset</dd>
+                <dd id="MatProjViewSet.get_paginated_response" class="function">get_paginated_response</dd>
 
             </div>
             <div><dt>rest_framework.views.APIView</dt>
-                                <dd id="MaterialsProjectViewSet.renderer_classes" class="variable">renderer_classes</dd>
-                <dd id="MaterialsProjectViewSet.parser_classes" class="variable">parser_classes</dd>
-                <dd id="MaterialsProjectViewSet.authentication_classes" class="variable">authentication_classes</dd>
-                <dd id="MaterialsProjectViewSet.throttle_classes" class="variable">throttle_classes</dd>
-                <dd id="MaterialsProjectViewSet.permission_classes" class="variable">permission_classes</dd>
-                <dd id="MaterialsProjectViewSet.content_negotiation_class" class="class">content_negotiation_class</dd>
-                <dd id="MaterialsProjectViewSet.metadata_class" class="class">metadata_class</dd>
-                <dd id="MaterialsProjectViewSet.versioning_class" class="variable">versioning_class</dd>
-                <dd id="MaterialsProjectViewSet.settings" class="variable">settings</dd>
-                <dd id="MaterialsProjectViewSet.schema" class="variable">schema</dd>
-                <dd id="MaterialsProjectViewSet.allowed_methods" class="variable">allowed_methods</dd>
-                <dd id="MaterialsProjectViewSet.default_response_headers" class="variable">default_response_headers</dd>
-                <dd id="MaterialsProjectViewSet.http_method_not_allowed" class="function">http_method_not_allowed</dd>
-                <dd id="MaterialsProjectViewSet.permission_denied" class="function">permission_denied</dd>
-                <dd id="MaterialsProjectViewSet.throttled" class="function">throttled</dd>
-                <dd id="MaterialsProjectViewSet.get_authenticate_header" class="function">get_authenticate_header</dd>
-                <dd id="MaterialsProjectViewSet.get_parser_context" class="function">get_parser_context</dd>
-                <dd id="MaterialsProjectViewSet.get_renderer_context" class="function">get_renderer_context</dd>
-                <dd id="MaterialsProjectViewSet.get_exception_handler_context" class="function">get_exception_handler_context</dd>
-                <dd id="MaterialsProjectViewSet.get_view_name" class="function">get_view_name</dd>
-                <dd id="MaterialsProjectViewSet.get_view_description" class="function">get_view_description</dd>
-                <dd id="MaterialsProjectViewSet.get_format_suffix" class="function">get_format_suffix</dd>
-                <dd id="MaterialsProjectViewSet.get_renderers" class="function">get_renderers</dd>
-                <dd id="MaterialsProjectViewSet.get_parsers" class="function">get_parsers</dd>
-                <dd id="MaterialsProjectViewSet.get_authenticators" class="function">get_authenticators</dd>
-                <dd id="MaterialsProjectViewSet.get_permissions" class="function">get_permissions</dd>
-                <dd id="MaterialsProjectViewSet.get_throttles" class="function">get_throttles</dd>
-                <dd id="MaterialsProjectViewSet.get_content_negotiator" class="function">get_content_negotiator</dd>
-                <dd id="MaterialsProjectViewSet.get_exception_handler" class="function">get_exception_handler</dd>
-                <dd id="MaterialsProjectViewSet.perform_content_negotiation" class="function">perform_content_negotiation</dd>
-                <dd id="MaterialsProjectViewSet.perform_authentication" class="function">perform_authentication</dd>
-                <dd id="MaterialsProjectViewSet.check_permissions" class="function">check_permissions</dd>
-                <dd id="MaterialsProjectViewSet.check_object_permissions" class="function">check_object_permissions</dd>
-                <dd id="MaterialsProjectViewSet.check_throttles" class="function">check_throttles</dd>
-                <dd id="MaterialsProjectViewSet.determine_version" class="function">determine_version</dd>
-                <dd id="MaterialsProjectViewSet.initial" class="function">initial</dd>
-                <dd id="MaterialsProjectViewSet.finalize_response" class="function">finalize_response</dd>
-                <dd id="MaterialsProjectViewSet.handle_exception" class="function">handle_exception</dd>
-                <dd id="MaterialsProjectViewSet.raise_uncaught_exception" class="function">raise_uncaught_exception</dd>
-                <dd id="MaterialsProjectViewSet.dispatch" class="function">dispatch</dd>
-                <dd id="MaterialsProjectViewSet.options" class="function">options</dd>
+                                <dd id="MatProjViewSet.renderer_classes" class="variable">renderer_classes</dd>
+                <dd id="MatProjViewSet.parser_classes" class="variable">parser_classes</dd>
+                <dd id="MatProjViewSet.authentication_classes" class="variable">authentication_classes</dd>
+                <dd id="MatProjViewSet.throttle_classes" class="variable">throttle_classes</dd>
+                <dd id="MatProjViewSet.permission_classes" class="variable">permission_classes</dd>
+                <dd id="MatProjViewSet.content_negotiation_class" class="class">content_negotiation_class</dd>
+                <dd id="MatProjViewSet.metadata_class" class="class">metadata_class</dd>
+                <dd id="MatProjViewSet.versioning_class" class="variable">versioning_class</dd>
+                <dd id="MatProjViewSet.settings" class="variable">settings</dd>
+                <dd id="MatProjViewSet.schema" class="variable">schema</dd>
+                <dd id="MatProjViewSet.allowed_methods" class="variable">allowed_methods</dd>
+                <dd id="MatProjViewSet.default_response_headers" class="variable">default_response_headers</dd>
+                <dd id="MatProjViewSet.http_method_not_allowed" class="function">http_method_not_allowed</dd>
+                <dd id="MatProjViewSet.permission_denied" class="function">permission_denied</dd>
+                <dd id="MatProjViewSet.throttled" class="function">throttled</dd>
+                <dd id="MatProjViewSet.get_authenticate_header" class="function">get_authenticate_header</dd>
+                <dd id="MatProjViewSet.get_parser_context" class="function">get_parser_context</dd>
+                <dd id="MatProjViewSet.get_renderer_context" class="function">get_renderer_context</dd>
+                <dd id="MatProjViewSet.get_exception_handler_context" class="function">get_exception_handler_context</dd>
+                <dd id="MatProjViewSet.get_view_name" class="function">get_view_name</dd>
+                <dd id="MatProjViewSet.get_view_description" class="function">get_view_description</dd>
+                <dd id="MatProjViewSet.get_format_suffix" class="function">get_format_suffix</dd>
+                <dd id="MatProjViewSet.get_renderers" class="function">get_renderers</dd>
+                <dd id="MatProjViewSet.get_parsers" class="function">get_parsers</dd>
+                <dd id="MatProjViewSet.get_authenticators" class="function">get_authenticators</dd>
+                <dd id="MatProjViewSet.get_permissions" class="function">get_permissions</dd>
+                <dd id="MatProjViewSet.get_throttles" class="function">get_throttles</dd>
+                <dd id="MatProjViewSet.get_content_negotiator" class="function">get_content_negotiator</dd>
+                <dd id="MatProjViewSet.get_exception_handler" class="function">get_exception_handler</dd>
+                <dd id="MatProjViewSet.perform_content_negotiation" class="function">perform_content_negotiation</dd>
+                <dd id="MatProjViewSet.perform_authentication" class="function">perform_authentication</dd>
+                <dd id="MatProjViewSet.check_permissions" class="function">check_permissions</dd>
+                <dd id="MatProjViewSet.check_object_permissions" class="function">check_object_permissions</dd>
+                <dd id="MatProjViewSet.check_throttles" class="function">check_throttles</dd>
+                <dd id="MatProjViewSet.determine_version" class="function">determine_version</dd>
+                <dd id="MatProjViewSet.initial" class="function">initial</dd>
+                <dd id="MatProjViewSet.finalize_response" class="function">finalize_response</dd>
+                <dd id="MatProjViewSet.handle_exception" class="function">handle_exception</dd>
+                <dd id="MatProjViewSet.raise_uncaught_exception" class="function">raise_uncaught_exception</dd>
+                <dd id="MatProjViewSet.dispatch" class="function">dispatch</dd>
+                <dd id="MatProjViewSet.options" class="function">options</dd>
 
             </div>
                                 </dl>
                             </div>
                 </section>
-                <section id="MaterialsProjectViewSet.serializer_class">
+                <section id="MatProjViewSet.serializer_class">
                                 <div class="attr class">
-        <a class="headerlink" href="#MaterialsProjectViewSet.serializer_class">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MatProjViewSet.serializer_class">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MaterialsProjectViewSet.serializer_class</span><wbr>(<span class="base">rest_framework.serializers.HyperlinkedModelSerializer</span>):
+        <span class="name">MatProjViewSet.serializer_class</span><wbr>(<span class="base">rest_framework.serializers.HyperlinkedModelSerializer</span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MaterialsProjectSerializer</span><span class="p">(</span><span class="n">HyperlinkedModelSerializer</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MatProjSerializer</span><span class="p">(</span><span class="n">HyperlinkedModelSerializer</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">MaterialsProjectStructure</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">MatProjStructure</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="s2">&quot;__all__&quot;</span>
 </pre></div>
 
@@ -910,73 +910,73 @@ of primary key relationships. Specifically:</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt>rest_framework.serializers.BaseSerializer</dt>
-                                <dd id="MaterialsProjectViewSet.serializer_class.__init__" class="function">BaseSerializer</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.many_init" class="function">many_init</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.save" class="function">save</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.is_valid" class="function">is_valid</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.validated_data" class="variable">validated_data</dd>
+                                <dd id="MatProjViewSet.serializer_class.__init__" class="function">BaseSerializer</dd>
+                <dd id="MatProjViewSet.serializer_class.many_init" class="function">many_init</dd>
+                <dd id="MatProjViewSet.serializer_class.save" class="function">save</dd>
+                <dd id="MatProjViewSet.serializer_class.is_valid" class="function">is_valid</dd>
+                <dd id="MatProjViewSet.serializer_class.validated_data" class="variable">validated_data</dd>
 
             </div>
-            <div><dt><a href="#MaterialsProjectSerializer">MaterialsProjectSerializer</a></dt>
-                                <dd id="MaterialsProjectViewSet.serializer_class.Meta" class="class"><a href="#MaterialsProjectSerializer.Meta">Meta</a></dd>
+            <div><dt><a href="#MatProjSerializer">MatProjSerializer</a></dt>
+                                <dd id="MatProjViewSet.serializer_class.Meta" class="class"><a href="#MatProjSerializer.Meta">Meta</a></dd>
 
             </div>
             <div><dt>rest_framework.serializers.HyperlinkedModelSerializer</dt>
-                                <dd id="MaterialsProjectViewSet.serializer_class.serializer_related_field" class="class">serializer_related_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_default_field_names" class="function">get_default_field_names</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.build_nested_field" class="function">build_nested_field</dd>
+                                <dd id="MatProjViewSet.serializer_class.serializer_related_field" class="class">serializer_related_field</dd>
+                <dd id="MatProjViewSet.serializer_class.get_default_field_names" class="function">get_default_field_names</dd>
+                <dd id="MatProjViewSet.serializer_class.build_nested_field" class="function">build_nested_field</dd>
 
             </div>
             <div><dt>rest_framework.serializers.ModelSerializer</dt>
-                                <dd id="MaterialsProjectViewSet.serializer_class.serializer_field_mapping" class="variable">serializer_field_mapping</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.serializer_related_to_field" class="class">serializer_related_to_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.serializer_url_field" class="class">serializer_url_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.serializer_choice_field" class="class">serializer_choice_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.url_field_name" class="variable">url_field_name</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.create" class="function">create</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.update" class="function">update</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_fields" class="function">get_fields</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_field_names" class="function">get_field_names</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.build_field" class="function">build_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.build_standard_field" class="function">build_standard_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.build_relational_field" class="function">build_relational_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.build_property_field" class="function">build_property_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.build_url_field" class="function">build_url_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.build_unknown_field" class="function">build_unknown_field</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.include_extra_kwargs" class="function">include_extra_kwargs</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_extra_kwargs" class="function">get_extra_kwargs</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_uniqueness_extra_kwargs" class="function">get_uniqueness_extra_kwargs</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_validators" class="function">get_validators</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_unique_together_validators" class="function">get_unique_together_validators</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_unique_for_date_validators" class="function">get_unique_for_date_validators</dd>
+                                <dd id="MatProjViewSet.serializer_class.serializer_field_mapping" class="variable">serializer_field_mapping</dd>
+                <dd id="MatProjViewSet.serializer_class.serializer_related_to_field" class="class">serializer_related_to_field</dd>
+                <dd id="MatProjViewSet.serializer_class.serializer_url_field" class="class">serializer_url_field</dd>
+                <dd id="MatProjViewSet.serializer_class.serializer_choice_field" class="class">serializer_choice_field</dd>
+                <dd id="MatProjViewSet.serializer_class.url_field_name" class="variable">url_field_name</dd>
+                <dd id="MatProjViewSet.serializer_class.create" class="function">create</dd>
+                <dd id="MatProjViewSet.serializer_class.update" class="function">update</dd>
+                <dd id="MatProjViewSet.serializer_class.get_fields" class="function">get_fields</dd>
+                <dd id="MatProjViewSet.serializer_class.get_field_names" class="function">get_field_names</dd>
+                <dd id="MatProjViewSet.serializer_class.build_field" class="function">build_field</dd>
+                <dd id="MatProjViewSet.serializer_class.build_standard_field" class="function">build_standard_field</dd>
+                <dd id="MatProjViewSet.serializer_class.build_relational_field" class="function">build_relational_field</dd>
+                <dd id="MatProjViewSet.serializer_class.build_property_field" class="function">build_property_field</dd>
+                <dd id="MatProjViewSet.serializer_class.build_url_field" class="function">build_url_field</dd>
+                <dd id="MatProjViewSet.serializer_class.build_unknown_field" class="function">build_unknown_field</dd>
+                <dd id="MatProjViewSet.serializer_class.include_extra_kwargs" class="function">include_extra_kwargs</dd>
+                <dd id="MatProjViewSet.serializer_class.get_extra_kwargs" class="function">get_extra_kwargs</dd>
+                <dd id="MatProjViewSet.serializer_class.get_uniqueness_extra_kwargs" class="function">get_uniqueness_extra_kwargs</dd>
+                <dd id="MatProjViewSet.serializer_class.get_validators" class="function">get_validators</dd>
+                <dd id="MatProjViewSet.serializer_class.get_unique_together_validators" class="function">get_unique_together_validators</dd>
+                <dd id="MatProjViewSet.serializer_class.get_unique_for_date_validators" class="function">get_unique_for_date_validators</dd>
 
             </div>
             <div><dt>rest_framework.serializers.Serializer</dt>
-                                <dd id="MaterialsProjectViewSet.serializer_class.default_error_messages" class="variable">default_error_messages</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.fields" class="function">fields</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_initial" class="function">get_initial</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_value" class="function">get_value</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.run_validation" class="function">run_validation</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.run_validators" class="function">run_validators</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.to_internal_value" class="function">to_internal_value</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.to_representation" class="function">to_representation</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.validate" class="function">validate</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.data" class="variable">data</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.errors" class="variable">errors</dd>
+                                <dd id="MatProjViewSet.serializer_class.default_error_messages" class="variable">default_error_messages</dd>
+                <dd id="MatProjViewSet.serializer_class.fields" class="function">fields</dd>
+                <dd id="MatProjViewSet.serializer_class.get_initial" class="function">get_initial</dd>
+                <dd id="MatProjViewSet.serializer_class.get_value" class="function">get_value</dd>
+                <dd id="MatProjViewSet.serializer_class.run_validation" class="function">run_validation</dd>
+                <dd id="MatProjViewSet.serializer_class.run_validators" class="function">run_validators</dd>
+                <dd id="MatProjViewSet.serializer_class.to_internal_value" class="function">to_internal_value</dd>
+                <dd id="MatProjViewSet.serializer_class.to_representation" class="function">to_representation</dd>
+                <dd id="MatProjViewSet.serializer_class.validate" class="function">validate</dd>
+                <dd id="MatProjViewSet.serializer_class.data" class="variable">data</dd>
+                <dd id="MatProjViewSet.serializer_class.errors" class="variable">errors</dd>
 
             </div>
             <div><dt>rest_framework.fields.Field</dt>
-                                <dd id="MaterialsProjectViewSet.serializer_class.default_validators" class="variable">default_validators</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.default_empty_html" class="class">default_empty_html</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.initial" class="variable">initial</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.bind" class="function">bind</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.validators" class="variable">validators</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_attribute" class="function">get_attribute</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.get_default" class="function">get_default</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.validate_empty_values" class="function">validate_empty_values</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.fail" class="function">fail</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.root" class="variable">root</dd>
-                <dd id="MaterialsProjectViewSet.serializer_class.context" class="variable">context</dd>
+                                <dd id="MatProjViewSet.serializer_class.default_validators" class="variable">default_validators</dd>
+                <dd id="MatProjViewSet.serializer_class.default_empty_html" class="class">default_empty_html</dd>
+                <dd id="MatProjViewSet.serializer_class.initial" class="variable">initial</dd>
+                <dd id="MatProjViewSet.serializer_class.bind" class="function">bind</dd>
+                <dd id="MatProjViewSet.serializer_class.validators" class="variable">validators</dd>
+                <dd id="MatProjViewSet.serializer_class.get_attribute" class="function">get_attribute</dd>
+                <dd id="MatProjViewSet.serializer_class.get_default" class="function">get_default</dd>
+                <dd id="MatProjViewSet.serializer_class.validate_empty_values" class="function">validate_empty_values</dd>
+                <dd id="MatProjViewSet.serializer_class.fail" class="function">fail</dd>
+                <dd id="MatProjViewSet.serializer_class.root" class="variable">root</dd>
+                <dd id="MatProjViewSet.serializer_class.context" class="variable">context</dd>
 
             </div>
                                 </dl>

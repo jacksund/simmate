@@ -88,37 +88,49 @@
 <span class="k">class</span> <span class="nc">ErrorHandler</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class for an ErrorHandler. These handlers should be used in</span>
-<span class="sd">    combination with SupervisedStagedShellTasks.</span>
+<span class="sd">    combination with S3Tasks.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This class property indicates whether the error handler is a monitor,</span>
-    <span class="c1"># i.e., a handler that monitors a job as it is running. If a</span>
-    <span class="c1"># monitor-type handler notices an error, the job will be sent a</span>
-    <span class="c1"># termination signal, the error is then corrected,</span>
-    <span class="c1"># and then the job is restarted. This is useful for catching errors</span>
-    <span class="c1"># that occur early in the run but do not cause immediate failure.</span>
-    <span class="c1"># Also, is_monitor=True and is_terminating=False is a special case. See the</span>
-    <span class="c1"># is_terminating description below for why!</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class property indicates whether the error handler is a monitor,</span>
+<span class="sd">    i.e., a handler that monitors a job as it is running. If a</span>
+<span class="sd">    monitor-type handler notices an error, the job will be sent a</span>
+<span class="sd">    termination signal, the error is then corrected,</span>
+<span class="sd">    and then the job is restarted. This is useful for catching errors</span>
+<span class="sd">    that occur early in the run but do not cause immediate failure.</span>
+<span class="sd">    Also, is_monitor=True and is_terminating=False is a special case. See the</span>
+<span class="sd">    is_terminating description below for why!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Whether this handler terminates a job upon error detection. By</span>
-    <span class="c1"># default, this is True, which means that the current Job will be</span>
-    <span class="c1"># stopped when an error is found, then the corrections are applied,</span>
-    <span class="c1"># and job restarted. In some instances, some errors may not need the job to be</span>
-    <span class="c1"># terminated or may need to wait for some other event to terminate a job.</span>
-    <span class="c1"># For example, a particular error may require a flag to be set to request</span>
-    <span class="c1"># a job to terminate gracefully once it finishes its current task. The</span>
-    <span class="c1"># handler to set the flag should be classified as is_terminating = False to</span>
-    <span class="c1"># not terminate the job.</span>
     <span class="n">is_terminating</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Whether this handler terminates a job upon error detection. By</span>
+<span class="sd">    default, this is True, which means that the current Job will be</span>
+<span class="sd">    stopped when an error is found, then the corrections are applied,</span>
+<span class="sd">    and job restarted. In some instances, some errors may not need the job to be</span>
+<span class="sd">    terminated or may need to wait for some other event to terminate a job.</span>
+<span class="sd">    For example, a particular error may require a flag to be set to request</span>
+<span class="sd">    a job to terminate gracefully once it finishes its current task. The</span>
+<span class="sd">    handler to set the flag should be classified as is_terminating = False to</span>
+<span class="sd">    not terminate the job.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># NOTE: if you are using the default check() method (shown below), then you&#39;ll</span>
     <span class="c1"># need two extra attributes: filename_to_check and possible_error_messages.</span>
-    <span class="c1"># This should be a string of the filename (relative path to main directory)</span>
     <span class="n">filename_to_check</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># And then give a list of messages to find in the file. As soon as one is</span>
-    <span class="c1"># found, an error is raised</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If you are using the default check() method, this is the file to check for</span>
+<span class="sd">    errors (using `possible_error_messages`). This should be a string of the </span>
+<span class="sd">    filename relative path to main directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">possible_error_messages</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If you are using the default check() method, then this is the list of messages</span>
+<span class="sd">    to find in the file (filename_to_check). As soon as one of these messages is</span>
+<span class="sd">    found, the `check` will return True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -129,14 +141,15 @@
 <span class="sd">        you should read through the files directly rather than use</span>
 <span class="sd">        calculators.example.outputs which in many cases assumes a completed file.</span>
 
-<span class="sd">        As some example, ErrorHandler&#39;s can have .check() functions that do one</span>
+<span class="sd">        As some example, ErrorHandler&#39;s can have `check` functions that do one</span>
 <span class="sd">        of the following:</span>
-<span class="sd">            (1) returns True when the error is there and False otherwise</span>
-<span class="sd">            (2) the ErrorHandler includes variations of a particular error, where</span>
-<span class="sd">                it returns a label such as &quot;Scenario 2&quot; that .correct() can use.</span>
-<span class="sd">                And in cases where there&#39;s no error, either False or None is returned.</span>
 
-<span class="sd">        This method can be overwritten, but we have a &quot;default&quot; function below that</span>
+<span class="sd">        1. returns True when the error is there and False otherwise</span>
+<span class="sd">        2. the ErrorHandler includes variations of a particular error, where</span>
+<span class="sd">            it returns a label such as &quot;Scenario 2&quot; that .correct() can use.</span>
+<span class="sd">            And in cases where there&#39;s no error, either False or None is returned.</span>
+
+<span class="sd">        This method can be overwritten, but we have a &quot;default&quot; function that</span>
 <span class="sd">        addresses the most common use-case. Here, we have a series of error messages</span>
 <span class="sd">        and a specific file that they need to be checked in. This default method uses</span>
 <span class="sd">        self.filename_to_check and self.possible_error_messages to check for an</span>
@@ -210,37 +223,49 @@
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ErrorHandler</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class for an ErrorHandler. These handlers should be used in</span>
-<span class="sd">    combination with SupervisedStagedShellTasks.</span>
+<span class="sd">    combination with S3Tasks.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This class property indicates whether the error handler is a monitor,</span>
-    <span class="c1"># i.e., a handler that monitors a job as it is running. If a</span>
-    <span class="c1"># monitor-type handler notices an error, the job will be sent a</span>
-    <span class="c1"># termination signal, the error is then corrected,</span>
-    <span class="c1"># and then the job is restarted. This is useful for catching errors</span>
-    <span class="c1"># that occur early in the run but do not cause immediate failure.</span>
-    <span class="c1"># Also, is_monitor=True and is_terminating=False is a special case. See the</span>
-    <span class="c1"># is_terminating description below for why!</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class property indicates whether the error handler is a monitor,</span>
+<span class="sd">    i.e., a handler that monitors a job as it is running. If a</span>
+<span class="sd">    monitor-type handler notices an error, the job will be sent a</span>
+<span class="sd">    termination signal, the error is then corrected,</span>
+<span class="sd">    and then the job is restarted. This is useful for catching errors</span>
+<span class="sd">    that occur early in the run but do not cause immediate failure.</span>
+<span class="sd">    Also, is_monitor=True and is_terminating=False is a special case. See the</span>
+<span class="sd">    is_terminating description below for why!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Whether this handler terminates a job upon error detection. By</span>
-    <span class="c1"># default, this is True, which means that the current Job will be</span>
-    <span class="c1"># stopped when an error is found, then the corrections are applied,</span>
-    <span class="c1"># and job restarted. In some instances, some errors may not need the job to be</span>
-    <span class="c1"># terminated or may need to wait for some other event to terminate a job.</span>
-    <span class="c1"># For example, a particular error may require a flag to be set to request</span>
-    <span class="c1"># a job to terminate gracefully once it finishes its current task. The</span>
-    <span class="c1"># handler to set the flag should be classified as is_terminating = False to</span>
-    <span class="c1"># not terminate the job.</span>
     <span class="n">is_terminating</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Whether this handler terminates a job upon error detection. By</span>
+<span class="sd">    default, this is True, which means that the current Job will be</span>
+<span class="sd">    stopped when an error is found, then the corrections are applied,</span>
+<span class="sd">    and job restarted. In some instances, some errors may not need the job to be</span>
+<span class="sd">    terminated or may need to wait for some other event to terminate a job.</span>
+<span class="sd">    For example, a particular error may require a flag to be set to request</span>
+<span class="sd">    a job to terminate gracefully once it finishes its current task. The</span>
+<span class="sd">    handler to set the flag should be classified as is_terminating = False to</span>
+<span class="sd">    not terminate the job.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># NOTE: if you are using the default check() method (shown below), then you&#39;ll</span>
     <span class="c1"># need two extra attributes: filename_to_check and possible_error_messages.</span>
-    <span class="c1"># This should be a string of the filename (relative path to main directory)</span>
     <span class="n">filename_to_check</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># And then give a list of messages to find in the file. As soon as one is</span>
-    <span class="c1"># found, an error is raised</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If you are using the default check() method, this is the file to check for</span>
+<span class="sd">    errors (using `possible_error_messages`). This should be a string of the </span>
+<span class="sd">    filename relative path to main directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">possible_error_messages</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If you are using the default check() method, then this is the list of messages</span>
+<span class="sd">    to find in the file (filename_to_check). As soon as one of these messages is</span>
+<span class="sd">    found, the `check` will return True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -251,14 +276,15 @@
 <span class="sd">        you should read through the files directly rather than use</span>
 <span class="sd">        calculators.example.outputs which in many cases assumes a completed file.</span>
 
-<span class="sd">        As some example, ErrorHandler&#39;s can have .check() functions that do one</span>
+<span class="sd">        As some example, ErrorHandler&#39;s can have `check` functions that do one</span>
 <span class="sd">        of the following:</span>
-<span class="sd">            (1) returns True when the error is there and False otherwise</span>
-<span class="sd">            (2) the ErrorHandler includes variations of a particular error, where</span>
-<span class="sd">                it returns a label such as &quot;Scenario 2&quot; that .correct() can use.</span>
-<span class="sd">                And in cases where there&#39;s no error, either False or None is returned.</span>
 
-<span class="sd">        This method can be overwritten, but we have a &quot;default&quot; function below that</span>
+<span class="sd">        1. returns True when the error is there and False otherwise</span>
+<span class="sd">        2. the ErrorHandler includes variations of a particular error, where</span>
+<span class="sd">            it returns a label such as &quot;Scenario 2&quot; that .correct() can use.</span>
+<span class="sd">            And in cases where there&#39;s no error, either False or None is returned.</span>
+
+<span class="sd">        This method can be overwritten, but we have a &quot;default&quot; function that</span>
 <span class="sd">        addresses the most common use-case. Here, we have a series of error messages</span>
 <span class="sd">        and a specific file that they need to be checked in. This default method uses</span>
 <span class="sd">        self.filename_to_check and self.possible_error_messages to check for an</span>
@@ -318,7 +344,7 @@
         </details>
 
             <div class="docstring"><p>Abstract base class for an ErrorHandler. These handlers should be used in
-combination with SupervisedStagedShellTasks.</p>
+combination with S3Tasks.</p>
 </div>
 
 
@@ -328,7 +354,16 @@ combination with SupervisedStagedShellTasks.</p>
         <span class="name">is_monitor</span><span class="default_value"> = False</span>
     </div>
 
-    
+            <div class="docstring"><p>This class property indicates whether the error handler is a monitor,
+i.e., a handler that monitors a job as it is running. If a
+monitor-type handler notices an error, the job will be sent a
+termination signal, the error is then corrected,
+and then the job is restarted. This is useful for catching errors
+that occur early in the run but do not cause immediate failure.
+Also, is_monitor=True and is_terminating=False is a special case. See the
+is_terminating description below for why!</p>
+</div>
+
 
                             </div>
                             <div id="ErrorHandler.is_terminating" class="classattr">
@@ -337,7 +372,17 @@ combination with SupervisedStagedShellTasks.</p>
         <span class="name">is_terminating</span><span class="default_value"> = True</span>
     </div>
 
-    
+            <div class="docstring"><p>Whether this handler terminates a job upon error detection. By
+default, this is True, which means that the current Job will be
+stopped when an error is found, then the corrections are applied,
+and job restarted. In some instances, some errors may not need the job to be
+terminated or may need to wait for some other event to terminate a job.
+For example, a particular error may require a flag to be set to request
+a job to terminate gracefully once it finishes its current task. The
+handler to set the flag should be classified as is_terminating = False to
+not terminate the job.</p>
+</div>
+
 
                             </div>
                             <div id="ErrorHandler.filename_to_check" class="classattr">
@@ -346,7 +391,11 @@ combination with SupervisedStagedShellTasks.</p>
         <span class="name">filename_to_check</span><span class="default_value"> = None</span>
     </div>
 
-    
+            <div class="docstring"><p>If you are using the default check() method, this is the file to check for
+errors (using <code><a href="#ErrorHandler.possible_error_messages">possible_error_messages</a></code>). This should be a string of the 
+filename relative path to main directory.</p>
+</div>
+
 
                             </div>
                             <div id="ErrorHandler.possible_error_messages" class="classattr">
@@ -355,7 +404,11 @@ combination with SupervisedStagedShellTasks.</p>
         <span class="name">possible_error_messages</span><span class="default_value"> = None</span>
     </div>
 
-    
+            <div class="docstring"><p>If you are using the default check() method, then this is the list of messages
+to find in the file (filename_to_check). As soon as one of these messages is
+found, the <code><a href="#ErrorHandler.check">check</a></code> will return True.</p>
+</div>
+
 
                             </div>
                             <div id="ErrorHandler.check" class="classattr">
@@ -377,14 +430,15 @@ combination with SupervisedStagedShellTasks.</p>
 <span class="sd">        you should read through the files directly rather than use</span>
 <span class="sd">        calculators.example.outputs which in many cases assumes a completed file.</span>
 
-<span class="sd">        As some example, ErrorHandler&#39;s can have .check() functions that do one</span>
+<span class="sd">        As some example, ErrorHandler&#39;s can have `check` functions that do one</span>
 <span class="sd">        of the following:</span>
-<span class="sd">            (1) returns True when the error is there and False otherwise</span>
-<span class="sd">            (2) the ErrorHandler includes variations of a particular error, where</span>
-<span class="sd">                it returns a label such as &quot;Scenario 2&quot; that .correct() can use.</span>
-<span class="sd">                And in cases where there&#39;s no error, either False or None is returned.</span>
 
-<span class="sd">        This method can be overwritten, but we have a &quot;default&quot; function below that</span>
+<span class="sd">        1. returns True when the error is there and False otherwise</span>
+<span class="sd">        2. the ErrorHandler includes variations of a particular error, where</span>
+<span class="sd">            it returns a label such as &quot;Scenario 2&quot; that .correct() can use.</span>
+<span class="sd">            And in cases where there&#39;s no error, either False or None is returned.</span>
+
+<span class="sd">        This method can be overwritten, but we have a &quot;default&quot; function that</span>
 <span class="sd">        addresses the most common use-case. Here, we have a series of error messages</span>
 <span class="sd">        and a specific file that they need to be checked in. This default method uses</span>
 <span class="sd">        self.filename_to_check and self.possible_error_messages to check for an</span>
@@ -429,14 +483,17 @@ errors, then None (or an empty list) will be returned. In many cases,
 you should read through the files directly rather than use
 calculators.example.outputs which in many cases assumes a completed file.</p>
 
-<p>As some example, ErrorHandler's can have .check() functions that do one
-of the following:
-    (1) returns True when the error is there and False otherwise
-    (2) the ErrorHandler includes variations of a particular error, where
-        it returns a label such as "Scenario 2" that .correct() can use.
-        And in cases where there's no error, either False or None is returned.</p>
+<p>As some example, ErrorHandler's can have <code><a href="#ErrorHandler.check">check</a></code> functions that do one
+of the following:</p>
 
-<p>This method can be overwritten, but we have a "default" function below that
+<ol>
+<li>returns True when the error is there and False otherwise</li>
+<li>the ErrorHandler includes variations of a particular error, where
+it returns a label such as "Scenario 2" that .correct() can use.
+And in cases where there's no error, either False or None is returned.</li>
+</ol>
+
+<p>This method can be overwritten, but we have a "default" function that
 addresses the most common use-case. Here, we have a series of error messages
 and a specific file that they need to be checked in. This default method uses
 self.filename_to_check and self.possible_error_messages to check for an

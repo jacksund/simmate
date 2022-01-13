@@ -40,7 +40,7 @@ def get_conda_env() -> str:
 
 def get_doc_from_readme(file: str) -> str:
     """
-    Loads the docstring from a README.rst file in the same directory.
+    Loads the docstring from a README.md file in the same directory.
 
     This is commonly used in __init__.py files because we like having our
     documentation isolated (so that github renders it).
@@ -64,7 +64,7 @@ def get_doc_from_readme(file: str) -> str:
     # We assume the file is in the same directory and named "README.rst"
     file_directory = os.path.dirname(os.path.abspath(file))
     with open(
-        os.path.join(file_directory, "README.rst"),
+        os.path.join(file_directory, "README.md"),
         encoding="utf-8",
     ) as doc_file:
         doc = doc_file.read()

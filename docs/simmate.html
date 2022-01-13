@@ -66,30 +66,29 @@
                     <h1 class="modulename">
 simmate    </h1>
 
-                        <div class="docstring"><h2 id="welcome">Welcome!</h2>
+                        <div class="docstring"><h1 id="welcome">Welcome!</h1>
 
-<p><code><a href="">simmate</a></code> is the base module and contains all of the code that Simmate runs on.
-To get started, make sure you have either completed our <a href="https://github.com/jacksund/simmate/tree/main/tutorials">introduction tutorials</a>
+<p>To get started, make sure you have either completed our <a href="https://github.com/jacksund/simmate/tree/main/tutorials">introduction tutorials</a>
 or are comfortable with python.</p>
 
-<p>Within each subfolder (aka each python “module”), you’ll find more details on what it contains.</p>
+<p><code><a href="">simmate</a></code> is the base module and contains all of the code that our package runs on. Within each subfolder (aka each python “module”), you’ll find more details on what it contains.</p>
 
 <p><strong>But as a brief summary…</strong></p>
 
 <ul>
 <li><code>calculators</code> = third-party programs that run analyses for us (e.g. VASP which runs DFT calculations)</li>
-<li><code>command_line</code> = makes some common functions available as commands in the terminal (for advanced users) </li>
+<li><code>command_line</code> = makes some common functions available as commands in the terminal</li>
 <li><code>configuration</code> = the defualt Simmate settings and how to update them </li>
-<li><code>database</code> = defines how all Simmate data is organized into tables (aka “models”) and let’s you access it </li>
+<li><code>database</code> = defines how all Simmate data is organized into tables and let’s you access it </li>
 <li><code>file_converters</code> = reformat to/from file types (e.g. POSCAR –&gt; CIF) </li>
-<li><code>toolkit</code> = “core” functions for Simmate, ranging from pulling out symmetry to transforming a crystal lattice</li>
+<li><code>toolkit</code> = the fundamental functions and classes for Simmate (e.g. the <code>Structure</code> class)</li>
 <li><code>visualization</code> = visualizing structures, 3D data, and simple plots</li>
 <li><code>website</code> = runs the <a href="#org">simmate.org</a> website </li>
 <li><code>workflow_engine</code> = tools and utilities that help submit calculations as well as handle errors</li>
 <li><code>workflows</code> = common analyses used in materials chemistry</li>
 </ul>
 
-<p><strong>There are also two extra files…</strong> </p>
+<p>There are also two extra files…</p>
 
 <ul>
 <li><code>shortcuts</code> = let’s you import common functions with ease </li>

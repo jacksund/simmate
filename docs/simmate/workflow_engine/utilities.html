@@ -67,16 +67,14 @@
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
-<span class="kn">from</span> <span class="nn">simmate.workflow_engine.tasks.supervised_staged_shell_task</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">SupervisedStagedShellTask</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine.tasks.supervised_staged_shell_task</span> <span class="kn">import</span> <span class="n">S3Task</span>
 
 
 <span class="k">def</span> <span class="nf">s3task_to_workflow</span><span class="p">(</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">project_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">s3task</span><span class="p">:</span> <span class="n">SupervisedStagedShellTask</span><span class="p">,</span>
+    <span class="n">s3task</span><span class="p">:</span> <span class="n">S3Task</span><span class="p">,</span>
     <span class="n">calculation_table</span><span class="p">,</span>  <span class="c1"># simmate.database.base_data_types.calculation.Calculation</span>
     <span class="n">register_kwargs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
 <span class="p">):</span>
@@ -85,9 +83,11 @@
 
 <span class="sd">    Very often with Simmate&#39;s S3Tasks, the workflow for a single S3Task is</span>
 <span class="sd">    the same. The workflow is typically made of three tasks:</span>
-<span class="sd">        (1) loading the input parameters and registering the calculation</span>
-<span class="sd">        (2) running the calculation (what this S3Task does on its own)</span>
-<span class="sd">        (3) saving the calculation results</span>
+
+<span class="sd">    1. loading the input parameters and registering the calculation</span>
+<span class="sd">    2. running the calculation (what this S3Task does on its own)</span>
+<span class="sd">    3. saving the calculation results</span>
+
 <span class="sd">    Task 1 and 3 always use the same functions, where we just need to tell</span>
 <span class="sd">    it which database table we are registering/saving to.</span>
 
@@ -142,7 +142,7 @@
     name: str,
     module: str,
     project_name: str,
-    s3task: <a href="tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask">simmate.workflow_engine.tasks.supervised_staged_shell_task.SupervisedStagedShellTask</a>,
+    s3task: <a href="tasks/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.tasks.supervised_staged_shell_task.S3Task</a>,
     calculation_table,
     register_kwargs: List[str]
 )</span>:
@@ -154,7 +154,7 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">project_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">s3task</span><span class="p">:</span> <span class="n">SupervisedStagedShellTask</span><span class="p">,</span>
+    <span class="n">s3task</span><span class="p">:</span> <span class="n">S3Task</span><span class="p">,</span>
     <span class="n">calculation_table</span><span class="p">,</span>  <span class="c1"># simmate.database.base_data_types.calculation.Calculation</span>
     <span class="n">register_kwargs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
 <span class="p">):</span>
@@ -163,9 +163,11 @@
 
 <span class="sd">    Very often with Simmate&#39;s S3Tasks, the workflow for a single S3Task is</span>
 <span class="sd">    the same. The workflow is typically made of three tasks:</span>
-<span class="sd">        (1) loading the input parameters and registering the calculation</span>
-<span class="sd">        (2) running the calculation (what this S3Task does on its own)</span>
-<span class="sd">        (3) saving the calculation results</span>
+
+<span class="sd">    1. loading the input parameters and registering the calculation</span>
+<span class="sd">    2. running the calculation (what this S3Task does on its own)</span>
+<span class="sd">    3. saving the calculation results</span>
+
 <span class="sd">    Task 1 and 3 always use the same functions, where we just need to tell</span>
 <span class="sd">    it which database table we are registering/saving to.</span>
 
@@ -213,11 +215,15 @@
             <div class="docstring"><p>Builds a workflow from a S3Task and it's corresponding database table.</p>
 
 <p>Very often with Simmate's S3Tasks, the workflow for a single S3Task is
-the same. The workflow is typically made of three tasks:
-    (1) loading the input parameters and registering the calculation
-    (2) running the calculation (what this S3Task does on its own)
-    (3) saving the calculation results
-Task 1 and 3 always use the same functions, where we just need to tell
+the same. The workflow is typically made of three tasks:</p>
+
+<ol>
+<li>loading the input parameters and registering the calculation</li>
+<li>running the calculation (what this S3Task does on its own)</li>
+<li>saving the calculation results</li>
+</ol>
+
+<p>Task 1 and 3 always use the same functions, where we just need to tell
 it which database table we are registering/saving to.</p>
 
 <p>Because of this common recipe for workflows, we use this method to make

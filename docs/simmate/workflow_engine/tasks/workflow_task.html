@@ -107,19 +107,20 @@
 <span class="sd">    The easiest way to make your Workflow into a WorkflowTask is actually NOT</span>
 <span class="sd">    calling this class. But instead using the to_workflow_task method:</span>
 
-<span class="sd">    .. code-block:: python</span>
+<span class="sd">    ``` python</span>
+<span class="sd">    from simmate.workflows import example_workflow</span>
 
-<span class="sd">       from simmate.workflows.all import example_workflow</span>
-<span class="sd">       my_task = example_workflow.to_workflow_task()</span>
-
-<span class="sd">    DEV NOTE:</span>
-<span class="sd">    Prefect has a module prefect.tasks.prefect.flow_run which is close to this</span>
-<span class="sd">    idea -- but this module requires you to be using Prefect Cloud and have all</span>
-<span class="sd">    of the flows registered. We need to account for running flows locally too!</span>
-<span class="sd">    Therefore, we had to make this custom task here -- where it decided whether</span>
-<span class="sd">    we call the workflow.run_cloud or workflow.run method.</span>
-<span class="sd">    Consider moving this functionality to Prefect down the line.</span>
+<span class="sd">    my_task = example_workflow.to_workflow_task()</span>
+<span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># DEV NOTE:</span>
+    <span class="c1"># Prefect has a module prefect.tasks.prefect.flow_run which is close to this</span>
+    <span class="c1"># idea -- but this module requires you to be using Prefect Cloud and have all</span>
+    <span class="c1"># of the flows registered. We need to account for running flows locally too!</span>
+    <span class="c1"># Therefore, we had to make this custom task here -- where it decided whether</span>
+    <span class="c1"># we call the workflow.run_cloud or workflow.run method.</span>
+    <span class="c1"># Consider moving this functionality to Prefect down the line.</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -137,26 +138,26 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        workflow : Workflow</span>
+<span class="sd">        - `workflow`:</span>
 <span class="sd">            The full workflow to run.</span>
-<span class="sd">        return_result : bool</span>
+<span class="sd">        - `return_result`:</span>
 <span class="sd">            If True, the task run will return the result of the task set as the</span>
 <span class="sd">            worfklow.result_task attribute. If False, the workflow State is returned.</span>
 <span class="sd">            The default is True.</span>
-<span class="sd">        executor_type : str (optional)</span>
+<span class="sd">        - `executor_type`:</span>
 <span class="sd">            How the workflow should be scheduled and ran. The options are either</span>
 <span class="sd">            local or prefect (i.e. prefect cloud). The default is &quot;local&quot;.</span>
-<span class="sd">        wait_for_run : bool (optional)</span>
+<span class="sd">        - `wait_for_run`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            whether we should wait for the flow to finish or not.</span>
-<span class="sd">        labels : List[str] (optional)</span>
+<span class="sd">        - `labels`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            what labels should be attached to the flow</span>
-<span class="sd">        log_stdout : bool (optional)</span>
+<span class="sd">        - `log_stdout`:</span>
 <span class="sd">            Whether to log anything printed by the workflow. The default is True.</span>
-<span class="sd">        **kwargs : TYPE</span>
-<span class="sd">            All extra arguments supported by prefect.core.task.Task.</span>
-
+<span class="sd">        - `**kwargs`:</span>
+<span class="sd">            All extra arguments supported by </span>
+<span class="sd">            [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># If Prefect is used to schedule the workflow, we also may want to</span>
@@ -215,20 +216,20 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        executor_type : str (optional)</span>
+<span class="sd">        - `executor_type`:</span>
 <span class="sd">            How the workflow should be scheduled and ran. The options are either</span>
 <span class="sd">            local or prefect (i.e. prefect cloud).</span>
-<span class="sd">        return_result : bool</span>
+<span class="sd">        - `return_result`:</span>
 <span class="sd">            If True, the task run will return the result of the task set as the</span>
 <span class="sd">            worfklow.result_task attribute. If False, the workflow State is returned.</span>
 <span class="sd">            The default is True.</span>
-<span class="sd">        wait_for_run : bool (optional)</span>
+<span class="sd">        - `wait_for_run`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            whether we should wait for the flow to finish or not.</span>
-<span class="sd">        labels : List[str] (optional)</span>
+<span class="sd">        - `labels`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            what labels should be attached to the flow</span>
-<span class="sd">        **parameters : TYPE</span>
+<span class="sd">        - `**parameters`:</span>
 <span class="sd">            All options to pass the workflow.run() method.</span>
 
 <span class="sd">        Returns</span>
@@ -327,19 +328,20 @@
 <span class="sd">    The easiest way to make your Workflow into a WorkflowTask is actually NOT</span>
 <span class="sd">    calling this class. But instead using the to_workflow_task method:</span>
 
-<span class="sd">    .. code-block:: python</span>
+<span class="sd">    ``` python</span>
+<span class="sd">    from simmate.workflows import example_workflow</span>
 
-<span class="sd">       from simmate.workflows.all import example_workflow</span>
-<span class="sd">       my_task = example_workflow.to_workflow_task()</span>
-
-<span class="sd">    DEV NOTE:</span>
-<span class="sd">    Prefect has a module prefect.tasks.prefect.flow_run which is close to this</span>
-<span class="sd">    idea -- but this module requires you to be using Prefect Cloud and have all</span>
-<span class="sd">    of the flows registered. We need to account for running flows locally too!</span>
-<span class="sd">    Therefore, we had to make this custom task here -- where it decided whether</span>
-<span class="sd">    we call the workflow.run_cloud or workflow.run method.</span>
-<span class="sd">    Consider moving this functionality to Prefect down the line.</span>
+<span class="sd">    my_task = example_workflow.to_workflow_task()</span>
+<span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># DEV NOTE:</span>
+    <span class="c1"># Prefect has a module prefect.tasks.prefect.flow_run which is close to this</span>
+    <span class="c1"># idea -- but this module requires you to be using Prefect Cloud and have all</span>
+    <span class="c1"># of the flows registered. We need to account for running flows locally too!</span>
+    <span class="c1"># Therefore, we had to make this custom task here -- where it decided whether</span>
+    <span class="c1"># we call the workflow.run_cloud or workflow.run method.</span>
+    <span class="c1"># Consider moving this functionality to Prefect down the line.</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -357,26 +359,26 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        workflow : Workflow</span>
+<span class="sd">        - `workflow`:</span>
 <span class="sd">            The full workflow to run.</span>
-<span class="sd">        return_result : bool</span>
+<span class="sd">        - `return_result`:</span>
 <span class="sd">            If True, the task run will return the result of the task set as the</span>
 <span class="sd">            worfklow.result_task attribute. If False, the workflow State is returned.</span>
 <span class="sd">            The default is True.</span>
-<span class="sd">        executor_type : str (optional)</span>
+<span class="sd">        - `executor_type`:</span>
 <span class="sd">            How the workflow should be scheduled and ran. The options are either</span>
 <span class="sd">            local or prefect (i.e. prefect cloud). The default is &quot;local&quot;.</span>
-<span class="sd">        wait_for_run : bool (optional)</span>
+<span class="sd">        - `wait_for_run`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            whether we should wait for the flow to finish or not.</span>
-<span class="sd">        labels : List[str] (optional)</span>
+<span class="sd">        - `labels`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            what labels should be attached to the flow</span>
-<span class="sd">        log_stdout : bool (optional)</span>
+<span class="sd">        - `log_stdout`:</span>
 <span class="sd">            Whether to log anything printed by the workflow. The default is True.</span>
-<span class="sd">        **kwargs : TYPE</span>
-<span class="sd">            All extra arguments supported by prefect.core.task.Task.</span>
-
+<span class="sd">        - `**kwargs`:</span>
+<span class="sd">            All extra arguments supported by </span>
+<span class="sd">            [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># If Prefect is used to schedule the workflow, we also may want to</span>
@@ -435,20 +437,20 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        executor_type : str (optional)</span>
+<span class="sd">        - `executor_type`:</span>
 <span class="sd">            How the workflow should be scheduled and ran. The options are either</span>
 <span class="sd">            local or prefect (i.e. prefect cloud).</span>
-<span class="sd">        return_result : bool</span>
+<span class="sd">        - `return_result`:</span>
 <span class="sd">            If True, the task run will return the result of the task set as the</span>
 <span class="sd">            worfklow.result_task attribute. If False, the workflow State is returned.</span>
 <span class="sd">            The default is True.</span>
-<span class="sd">        wait_for_run : bool (optional)</span>
+<span class="sd">        - `wait_for_run`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            whether we should wait for the flow to finish or not.</span>
-<span class="sd">        labels : List[str] (optional)</span>
+<span class="sd">        - `labels`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            what labels should be attached to the flow</span>
-<span class="sd">        **parameters : TYPE</span>
+<span class="sd">        - `**parameters`:</span>
 <span class="sd">            All options to pass the workflow.run() method.</span>
 
 <span class="sd">        Returns</span>
@@ -533,18 +535,10 @@ calculated.</p>
 <p>The easiest way to make your Workflow into a WorkflowTask is actually NOT
 calling this class. But instead using the to_workflow_task method:</p>
 
-<p>.. code-block:: python</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../workflows.html">simmate.workflows</a></span> <span class="kn">import</span> <span class="n">example_workflow</span>
 
-<p>from <a href="../../workflows/all.html">simmate.workflows.all</a> import example_workflow
-   my_task = example_workflow.to_workflow_task()</p>
-
-<p>DEV NOTE:
-Prefect has a module prefect.tasks.prefect.flow_run which is close to this
-idea -- but this module requires you to be using Prefect Cloud and have all
-of the flows registered. We need to account for running flows locally too!
-Therefore, we had to make this custom task here -- where it decided whether
-we call the workflow.run_cloud or workflow.run method.
-Consider moving this functionality to Prefect down the line.</p>
+<span class="n">my_task</span> <span class="o">=</span> <span class="n">example_workflow</span><span class="o">.</span><span class="n">to_workflow_task</span><span class="p">()</span>
+</code></pre></div>
 </div>
 
 
@@ -581,26 +575,26 @@ Consider moving this functionality to Prefect down the line.</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        workflow : Workflow</span>
+<span class="sd">        - `workflow`:</span>
 <span class="sd">            The full workflow to run.</span>
-<span class="sd">        return_result : bool</span>
+<span class="sd">        - `return_result`:</span>
 <span class="sd">            If True, the task run will return the result of the task set as the</span>
 <span class="sd">            worfklow.result_task attribute. If False, the workflow State is returned.</span>
 <span class="sd">            The default is True.</span>
-<span class="sd">        executor_type : str (optional)</span>
+<span class="sd">        - `executor_type`:</span>
 <span class="sd">            How the workflow should be scheduled and ran. The options are either</span>
 <span class="sd">            local or prefect (i.e. prefect cloud). The default is &quot;local&quot;.</span>
-<span class="sd">        wait_for_run : bool (optional)</span>
+<span class="sd">        - `wait_for_run`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            whether we should wait for the flow to finish or not.</span>
-<span class="sd">        labels : List[str] (optional)</span>
+<span class="sd">        - `labels`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            what labels should be attached to the flow</span>
-<span class="sd">        log_stdout : bool (optional)</span>
+<span class="sd">        - `log_stdout`:</span>
 <span class="sd">            Whether to log anything printed by the workflow. The default is True.</span>
-<span class="sd">        **kwargs : TYPE</span>
-<span class="sd">            All extra arguments supported by prefect.core.task.Task.</span>
-
+<span class="sd">        - `**kwargs`:</span>
+<span class="sd">            All extra arguments supported by </span>
+<span class="sd">            [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># If Prefect is used to schedule the workflow, we also may want to</span>
@@ -648,25 +642,28 @@ should be ran when task.run() is called.</p>
 
 <h2 id="parameters">Parameters</h2>
 
-<p>workflow : Workflow
-    The full workflow to run.
-return_result : bool
-    If True, the task run will return the result of the task set as the
-    worfklow.result_task attribute. If False, the workflow State is returned.
-    The default is True.
-executor_type : str (optional)
-    How the workflow should be scheduled and ran. The options are either
-    local or prefect (i.e. prefect cloud). The default is "local".
-wait_for_run : bool (optional)
-    If Prefect is used to schedule the workflow, then this indicates
-    whether we should wait for the flow to finish or not.
-labels : List[str] (optional)
-    If Prefect is used to schedule the workflow, then this indicates
-    what labels should be attached to the flow
-log_stdout : bool (optional)
-    Whether to log anything printed by the workflow. The default is True.
-**kwargs : TYPE
-    All extra arguments supported by prefect.core.task.Task.</p>
+<ul>
+<li><code>workflow</code>:
+The full workflow to run.</li>
+<li><code>return_result</code>:
+If True, the task run will return the result of the task set as the
+worfklow.result_task attribute. If False, the workflow State is returned.
+The default is True.</li>
+<li><code>executor_type</code>:
+How the workflow should be scheduled and ran. The options are either
+local or prefect (i.e. prefect cloud). The default is "local".</li>
+<li><code>wait_for_run</code>:
+If Prefect is used to schedule the workflow, then this indicates
+whether we should wait for the flow to finish or not.</li>
+<li><code>labels</code>:
+If Prefect is used to schedule the workflow, then this indicates
+what labels should be attached to the flow</li>
+<li><code>log_stdout</code>:
+Whether to log anything printed by the workflow. The default is True.</li>
+<li><code>**kwargs</code>:
+All extra arguments supported by 
+<a href="https://docs.prefect.io/api/latest/core/task.html">prefect.core.task.Task</a>.</li>
+</ul>
 </div>
 
 
@@ -708,20 +705,20 @@ log_stdout : bool (optional)
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        executor_type : str (optional)</span>
+<span class="sd">        - `executor_type`:</span>
 <span class="sd">            How the workflow should be scheduled and ran. The options are either</span>
 <span class="sd">            local or prefect (i.e. prefect cloud).</span>
-<span class="sd">        return_result : bool</span>
+<span class="sd">        - `return_result`:</span>
 <span class="sd">            If True, the task run will return the result of the task set as the</span>
 <span class="sd">            worfklow.result_task attribute. If False, the workflow State is returned.</span>
 <span class="sd">            The default is True.</span>
-<span class="sd">        wait_for_run : bool (optional)</span>
+<span class="sd">        - `wait_for_run`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            whether we should wait for the flow to finish or not.</span>
-<span class="sd">        labels : List[str] (optional)</span>
+<span class="sd">        - `labels`:</span>
 <span class="sd">            If Prefect is used to schedule the workflow, then this indicates</span>
 <span class="sd">            what labels should be attached to the flow</span>
-<span class="sd">        **parameters : TYPE</span>
+<span class="sd">        - `**parameters`:</span>
 <span class="sd">            All options to pass the workflow.run() method.</span>
 
 <span class="sd">        Returns</span>
@@ -798,21 +795,23 @@ log_stdout : bool (optional)
 
             <div class="docstring"><h2 id="parameters">Parameters</h2>
 
-<p>executor_type : str (optional)
-    How the workflow should be scheduled and ran. The options are either
-    local or prefect (i.e. prefect cloud).
-return_result : bool
-    If True, the task run will return the result of the task set as the
-    worfklow.result_task attribute. If False, the workflow State is returned.
-    The default is True.
-wait_for_run : bool (optional)
-    If Prefect is used to schedule the workflow, then this indicates
-    whether we should wait for the flow to finish or not.
-labels : List[str] (optional)
-    If Prefect is used to schedule the workflow, then this indicates
-    what labels should be attached to the flow
-**parameters : TYPE
-    All options to pass the workflow.run() method.</p>
+<ul>
+<li><code>executor_type</code>:
+How the workflow should be scheduled and ran. The options are either
+local or prefect (i.e. prefect cloud).</li>
+<li><code>return_result</code>:
+If True, the task run will return the result of the task set as the
+worfklow.result_task attribute. If False, the workflow State is returned.
+The default is True.</li>
+<li><code>wait_for_run</code>:
+If Prefect is used to schedule the workflow, then this indicates
+whether we should wait for the flow to finish or not.</li>
+<li><code>labels</code>:
+If Prefect is used to schedule the workflow, then this indicates
+what labels should be attached to the flow</li>
+<li><code>**parameters</code>:
+All options to pass the workflow.run() method.</li>
+</ul>
 
 <h2 id="returns">Returns</h2>
 

@@ -32,31 +32,31 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
-                    <a class="class" href="#MaterialsProjectStructure">MaterialsProjectStructure</a>
+                    <a class="class" href="#MatProjStructure">MatProjStructure</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#MaterialsProjectStructure.id">id</a>
+                                <a class="function" href="#MatProjStructure.id">id</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MaterialsProjectStructure.source">source</a>
+                                <a class="variable" href="#MatProjStructure.source">source</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MaterialsProjectStructure.external_link">external_link</a>
+                                <a class="variable" href="#MatProjStructure.external_link">external_link</a>
                         </li>
                         <li>
-                                <a class="function" href="#MaterialsProjectStructure.from_pymatgen">from_pymatgen</a>
+                                <a class="function" href="#MatProjStructure.from_pymatgen">from_pymatgen</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MaterialsProjectStructure.spacegroup">spacegroup</a>
+                                <a class="variable" href="#MatProjStructure.spacegroup">spacegroup</a>
                         </li>
                         <li>
-                                <a class="class" href="#MaterialsProjectStructure.DoesNotExist">MaterialsProjectStructure.DoesNotExist</a>
+                                <a class="class" href="#MatProjStructure.DoesNotExist">MatProjStructure.DoesNotExist</a>
                                         <ul class="memberlist">
                             </ul>
 
                         </li>
                         <li>
-                                <a class="class" href="#MaterialsProjectStructure.MultipleObjectsReturned">MaterialsProjectStructure.MultipleObjectsReturned</a>
+                                <a class="class" href="#MatProjStructure.MultipleObjectsReturned">MatProjStructure.MultipleObjectsReturned</a>
                                         <ul class="memberlist">
                             </ul>
 
@@ -89,7 +89,7 @@
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">table_column</span><span class="p">,</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span>
 
 
-<span class="k">class</span> <span class="nc">MaterialsProjectStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MatProjStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
 
     <span class="c1"># The id used to symbolize the structure (ex: &quot;mp-12345&quot;)</span>
     <span class="nb">id</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -141,18 +141,18 @@
         </details>
 
             </section>
-                <section id="MaterialsProjectStructure">
+                <section id="MatProjStructure">
                                 <div class="attr class">
-        <a class="headerlink" href="#MaterialsProjectStructure">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MatProjStructure">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MaterialsProjectStructure</span><wbr>(<span class="base"><a href="../base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></span>, <span class="base"><a href="../base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></span>):
+        <span class="name">MatProjStructure</span><wbr>(<span class="base"><a href="../base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></span>, <span class="base"><a href="../base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MaterialsProjectStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MatProjStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
 
     <span class="c1"># The id used to symbolize the structure (ex: &quot;mp-12345&quot;)</span>
     <span class="nb">id</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -203,12 +203,12 @@
 
         </details>
 
-            <div class="docstring"><p>MaterialsProjectStructure(structure_string, nsites, nelements, elements, chemical_system, density, density_atomic, volume, volume_molar, formula_full, formula_reduced, formula_anonymous, spacegroup, energy, energy_per_atom, energy_above_hull, is_stable, decomposes_to, formation_energy, formation_energy_per_atom, id)</p>
+            <div class="docstring"><p>MatProjStructure(structure_string, nsites, nelements, elements, chemical_system, density, density_atomic, volume, volume_molar, formula_full, formula_reduced, formula_anonymous, spacegroup, energy, energy_per_atom, energy_above_hull, is_stable, decomposes_to, formation_energy, formation_energy_per_atom, id)</p>
 </div>
 
 
-                            <div id="MaterialsProjectStructure.id" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MaterialsProjectStructure.id">#&nbsp;&nbsp</a>
+                            <div id="MatProjStructure.id" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MatProjStructure.id">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
@@ -222,8 +222,8 @@ object the first time, the query is executed.</p>
 
 
                             </div>
-                            <div id="MaterialsProjectStructure.source" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectStructure.source">#&nbsp;&nbsp</a>
+                            <div id="MatProjStructure.source" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjStructure.source">#&nbsp;&nbsp</a>
 
         <span class="name">source</span><span class="default_value"> = &#39;Materials Project&#39;</span>
     </div>
@@ -233,8 +233,8 @@ object the first time, the query is executed.</p>
 
 
                             </div>
-                            <div id="MaterialsProjectStructure.external_link" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectStructure.external_link">#&nbsp;&nbsp</a>
+                            <div id="MatProjStructure.external_link" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjStructure.external_link">#&nbsp;&nbsp</a>
 
         <span class="name">external_link</span>
     </div>
@@ -242,8 +242,8 @@ object the first time, the query is executed.</p>
     
 
                             </div>
-                            <div id="MaterialsProjectStructure.from_pymatgen" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MaterialsProjectStructure.from_pymatgen">#&nbsp;&nbsp</a>
+                            <div id="MatProjStructure.from_pymatgen" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MatProjStructure.from_pymatgen">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@classmethod</div>
 
@@ -289,8 +289,8 @@ object the first time, the query is executed.</p>
     
 
                             </div>
-                            <div id="MaterialsProjectStructure.spacegroup" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MaterialsProjectStructure.spacegroup">#&nbsp;&nbsp</a>
+                            <div id="MatProjStructure.spacegroup" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjStructure.spacegroup">#&nbsp;&nbsp</a>
 
         <span class="name">spacegroup</span>
     </div>
@@ -304,72 +304,72 @@ object the first time, the query is executed.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt>django.db.models.base.Model</dt>
-                                <dd id="MaterialsProjectStructure.__init__" class="function">Model</dd>
-                <dd id="MaterialsProjectStructure.from_db" class="function">from_db</dd>
-                <dd id="MaterialsProjectStructure.pk" class="variable">pk</dd>
-                <dd id="MaterialsProjectStructure.get_deferred_fields" class="function">get_deferred_fields</dd>
-                <dd id="MaterialsProjectStructure.refresh_from_db" class="function">refresh_from_db</dd>
-                <dd id="MaterialsProjectStructure.serializable_value" class="function">serializable_value</dd>
-                <dd id="MaterialsProjectStructure.save" class="function">save</dd>
-                <dd id="MaterialsProjectStructure.save_base" class="function">save_base</dd>
-                <dd id="MaterialsProjectStructure.delete" class="function">delete</dd>
-                <dd id="MaterialsProjectStructure.prepare_database_save" class="function">prepare_database_save</dd>
-                <dd id="MaterialsProjectStructure.clean" class="function">clean</dd>
-                <dd id="MaterialsProjectStructure.validate_unique" class="function">validate_unique</dd>
-                <dd id="MaterialsProjectStructure.date_error_message" class="function">date_error_message</dd>
-                <dd id="MaterialsProjectStructure.unique_error_message" class="function">unique_error_message</dd>
-                <dd id="MaterialsProjectStructure.full_clean" class="function">full_clean</dd>
-                <dd id="MaterialsProjectStructure.clean_fields" class="function">clean_fields</dd>
-                <dd id="MaterialsProjectStructure.check" class="function">check</dd>
+                                <dd id="MatProjStructure.__init__" class="function">Model</dd>
+                <dd id="MatProjStructure.from_db" class="function">from_db</dd>
+                <dd id="MatProjStructure.pk" class="variable">pk</dd>
+                <dd id="MatProjStructure.get_deferred_fields" class="function">get_deferred_fields</dd>
+                <dd id="MatProjStructure.refresh_from_db" class="function">refresh_from_db</dd>
+                <dd id="MatProjStructure.serializable_value" class="function">serializable_value</dd>
+                <dd id="MatProjStructure.save" class="function">save</dd>
+                <dd id="MatProjStructure.save_base" class="function">save_base</dd>
+                <dd id="MatProjStructure.delete" class="function">delete</dd>
+                <dd id="MatProjStructure.prepare_database_save" class="function">prepare_database_save</dd>
+                <dd id="MatProjStructure.clean" class="function">clean</dd>
+                <dd id="MatProjStructure.validate_unique" class="function">validate_unique</dd>
+                <dd id="MatProjStructure.date_error_message" class="function">date_error_message</dd>
+                <dd id="MatProjStructure.unique_error_message" class="function">unique_error_message</dd>
+                <dd id="MatProjStructure.full_clean" class="function">full_clean</dd>
+                <dd id="MatProjStructure.clean_fields" class="function">clean_fields</dd>
+                <dd id="MatProjStructure.check" class="function">check</dd>
 
             </div>
             <div><dt><a href="../base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
-                                <dd id="MaterialsProjectStructure.Meta" class="class"><a href="../base_data_types/structure.html#Structure.Meta">Meta</a></dd>
-                <dd id="MaterialsProjectStructure.structure_string" class="function"><a href="../base_data_types/structure.html#Structure.structure_string">structure_string</a></dd>
-                <dd id="MaterialsProjectStructure.nsites" class="function"><a href="../base_data_types/structure.html#Structure.nsites">nsites</a></dd>
-                <dd id="MaterialsProjectStructure.nelements" class="function"><a href="../base_data_types/structure.html#Structure.nelements">nelements</a></dd>
-                <dd id="MaterialsProjectStructure.elements" class="function"><a href="../base_data_types/structure.html#Structure.elements">elements</a></dd>
-                <dd id="MaterialsProjectStructure.chemical_system" class="function"><a href="../base_data_types/structure.html#Structure.chemical_system">chemical_system</a></dd>
-                <dd id="MaterialsProjectStructure.density" class="function"><a href="../base_data_types/structure.html#Structure.density">density</a></dd>
-                <dd id="MaterialsProjectStructure.density_atomic" class="function"><a href="../base_data_types/structure.html#Structure.density_atomic">density_atomic</a></dd>
-                <dd id="MaterialsProjectStructure.volume" class="function"><a href="../base_data_types/structure.html#Structure.volume">volume</a></dd>
-                <dd id="MaterialsProjectStructure.volume_molar" class="function"><a href="../base_data_types/structure.html#Structure.volume_molar">volume_molar</a></dd>
-                <dd id="MaterialsProjectStructure.formula_full" class="function"><a href="../base_data_types/structure.html#Structure.formula_full">formula_full</a></dd>
-                <dd id="MaterialsProjectStructure.formula_reduced" class="function"><a href="../base_data_types/structure.html#Structure.formula_reduced">formula_reduced</a></dd>
-                <dd id="MaterialsProjectStructure.formula_anonymous" class="function"><a href="../base_data_types/structure.html#Structure.formula_anonymous">formula_anonymous</a></dd>
-                <dd id="MaterialsProjectStructure.to_pymatgen" class="function"><a href="../base_data_types/structure.html#Structure.to_pymatgen">to_pymatgen</a></dd>
-                <dd id="MaterialsProjectStructure.spacegroup_id" class="variable"><a href="../base_data_types/structure.html#Structure.spacegroup_id">spacegroup_id</a></dd>
+                                <dd id="MatProjStructure.Meta" class="class"><a href="../base_data_types/structure.html#Structure.Meta">Meta</a></dd>
+                <dd id="MatProjStructure.structure_string" class="function"><a href="../base_data_types/structure.html#Structure.structure_string">structure_string</a></dd>
+                <dd id="MatProjStructure.nsites" class="function"><a href="../base_data_types/structure.html#Structure.nsites">nsites</a></dd>
+                <dd id="MatProjStructure.nelements" class="function"><a href="../base_data_types/structure.html#Structure.nelements">nelements</a></dd>
+                <dd id="MatProjStructure.elements" class="function"><a href="../base_data_types/structure.html#Structure.elements">elements</a></dd>
+                <dd id="MatProjStructure.chemical_system" class="function"><a href="../base_data_types/structure.html#Structure.chemical_system">chemical_system</a></dd>
+                <dd id="MatProjStructure.density" class="function"><a href="../base_data_types/structure.html#Structure.density">density</a></dd>
+                <dd id="MatProjStructure.density_atomic" class="function"><a href="../base_data_types/structure.html#Structure.density_atomic">density_atomic</a></dd>
+                <dd id="MatProjStructure.volume" class="function"><a href="../base_data_types/structure.html#Structure.volume">volume</a></dd>
+                <dd id="MatProjStructure.volume_molar" class="function"><a href="../base_data_types/structure.html#Structure.volume_molar">volume_molar</a></dd>
+                <dd id="MatProjStructure.formula_full" class="function"><a href="../base_data_types/structure.html#Structure.formula_full">formula_full</a></dd>
+                <dd id="MatProjStructure.formula_reduced" class="function"><a href="../base_data_types/structure.html#Structure.formula_reduced">formula_reduced</a></dd>
+                <dd id="MatProjStructure.formula_anonymous" class="function"><a href="../base_data_types/structure.html#Structure.formula_anonymous">formula_anonymous</a></dd>
+                <dd id="MatProjStructure.to_pymatgen" class="function"><a href="../base_data_types/structure.html#Structure.to_pymatgen">to_pymatgen</a></dd>
+                <dd id="MatProjStructure.spacegroup_id" class="variable"><a href="../base_data_types/structure.html#Structure.spacegroup_id">spacegroup_id</a></dd>
 
             </div>
             <div><dt><a href="../base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></dt>
-                                <dd id="MaterialsProjectStructure.energy" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.energy">energy</a></dd>
-                <dd id="MaterialsProjectStructure.energy_per_atom" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.energy_per_atom">energy_per_atom</a></dd>
-                <dd id="MaterialsProjectStructure.energy_above_hull" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.energy_above_hull">energy_above_hull</a></dd>
-                <dd id="MaterialsProjectStructure.is_stable" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.is_stable">is_stable</a></dd>
-                <dd id="MaterialsProjectStructure.decomposes_to" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.decomposes_to">decomposes_to</a></dd>
-                <dd id="MaterialsProjectStructure.formation_energy" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.formation_energy">formation_energy</a></dd>
-                <dd id="MaterialsProjectStructure.formation_energy_per_atom" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.formation_energy_per_atom">formation_energy_per_atom</a></dd>
-                <dd id="MaterialsProjectStructure.from_base_data" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.from_base_data">from_base_data</a></dd>
-                <dd id="MaterialsProjectStructure.update_chemical_system_stabilities" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
-                <dd id="MaterialsProjectStructure.update_all_stabilities" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
+                                <dd id="MatProjStructure.energy" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.energy">energy</a></dd>
+                <dd id="MatProjStructure.energy_per_atom" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.energy_per_atom">energy_per_atom</a></dd>
+                <dd id="MatProjStructure.energy_above_hull" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.energy_above_hull">energy_above_hull</a></dd>
+                <dd id="MatProjStructure.is_stable" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.is_stable">is_stable</a></dd>
+                <dd id="MatProjStructure.decomposes_to" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.decomposes_to">decomposes_to</a></dd>
+                <dd id="MatProjStructure.formation_energy" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.formation_energy">formation_energy</a></dd>
+                <dd id="MatProjStructure.formation_energy_per_atom" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.formation_energy_per_atom">formation_energy_per_atom</a></dd>
+                <dd id="MatProjStructure.from_base_data" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.from_base_data">from_base_data</a></dd>
+                <dd id="MatProjStructure.update_chemical_system_stabilities" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
+                <dd id="MatProjStructure.update_all_stabilities" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
 
             </div>
             <div><dt><a href="../base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
-                                <dd id="MaterialsProjectStructure.objects" class="function"><a href="../base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
-                <dd id="MaterialsProjectStructure.show_columns" class="function"><a href="../base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
-                <dd id="MaterialsProjectStructure.create_subclass" class="function"><a href="../base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
+                                <dd id="MatProjStructure.objects" class="function"><a href="../base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                <dd id="MatProjStructure.show_columns" class="function"><a href="../base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="MatProjStructure.create_subclass" class="function"><a href="../base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
 
             </div>
                                 </dl>
                             </div>
                 </section>
-                <section id="MaterialsProjectStructure.DoesNotExist">
+                <section id="MatProjStructure.DoesNotExist">
                                 <div class="attr class">
-        <a class="headerlink" href="#MaterialsProjectStructure.DoesNotExist">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MatProjStructure.DoesNotExist">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MaterialsProjectStructure.DoesNotExist</span><wbr>(<span class="base">django.core.exceptions.ObjectDoesNotExist</span>):
+        <span class="name">MatProjStructure.DoesNotExist</span><wbr>(<span class="base">django.core.exceptions.ObjectDoesNotExist</span>):
     </div>
 
         
@@ -381,28 +381,28 @@ object the first time, the query is executed.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt>builtins.Exception</dt>
-                                <dd id="MaterialsProjectStructure.DoesNotExist.__init__" class="function">Exception</dd>
+                                <dd id="MatProjStructure.DoesNotExist.__init__" class="function">Exception</dd>
 
             </div>
             <div><dt>django.core.exceptions.ObjectDoesNotExist</dt>
-                                <dd id="MaterialsProjectStructure.DoesNotExist.silent_variable_failure" class="variable">silent_variable_failure</dd>
+                                <dd id="MatProjStructure.DoesNotExist.silent_variable_failure" class="variable">silent_variable_failure</dd>
 
             </div>
             <div><dt>builtins.BaseException</dt>
-                                <dd id="MaterialsProjectStructure.DoesNotExist.with_traceback" class="function">with_traceback</dd>
-                <dd id="MaterialsProjectStructure.DoesNotExist.args" class="variable">args</dd>
+                                <dd id="MatProjStructure.DoesNotExist.with_traceback" class="function">with_traceback</dd>
+                <dd id="MatProjStructure.DoesNotExist.args" class="variable">args</dd>
 
             </div>
                                 </dl>
                             </div>
                 </section>
-                <section id="MaterialsProjectStructure.MultipleObjectsReturned">
+                <section id="MatProjStructure.MultipleObjectsReturned">
                                 <div class="attr class">
-        <a class="headerlink" href="#MaterialsProjectStructure.MultipleObjectsReturned">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MatProjStructure.MultipleObjectsReturned">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MaterialsProjectStructure.MultipleObjectsReturned</span><wbr>(<span class="base">django.core.exceptions.MultipleObjectsReturned</span>):
+        <span class="name">MatProjStructure.MultipleObjectsReturned</span><wbr>(<span class="base">django.core.exceptions.MultipleObjectsReturned</span>):
     </div>
 
         
@@ -414,12 +414,12 @@ object the first time, the query is executed.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt>builtins.Exception</dt>
-                                <dd id="MaterialsProjectStructure.MultipleObjectsReturned.__init__" class="function">Exception</dd>
+                                <dd id="MatProjStructure.MultipleObjectsReturned.__init__" class="function">Exception</dd>
 
             </div>
             <div><dt>builtins.BaseException</dt>
-                                <dd id="MaterialsProjectStructure.MultipleObjectsReturned.with_traceback" class="function">with_traceback</dd>
-                <dd id="MaterialsProjectStructure.MultipleObjectsReturned.args" class="variable">args</dd>
+                                <dd id="MatProjStructure.MultipleObjectsReturned.with_traceback" class="function">with_traceback</dd>
+                <dd id="MatProjStructure.MultipleObjectsReturned.args" class="variable">args</dd>
 
             </div>
                                 </dl>

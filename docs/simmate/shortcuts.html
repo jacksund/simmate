@@ -58,12 +58,12 @@ testing things via Spyder; and (2) the shortcut loads slower (typically 1 second
 than the full import. This is because the shortcut module (this file) loads other
 convient modules too. So you're actually loading extra things!</p>
 
-<pre><code>    # the convenient shortcut
-    from <a href="">simmate.shortcuts</a> import setup
+<div class="codehilite"><pre><span></span><code><span class="c1"># the convenient shortcut</span>
+<span class="kn">from</span> <span class="nn"><a href="">simmate.shortcuts</a></span> <span class="kn">import</span> <span class="n">setup</span>
 
-    # the faster import that does the same thing
-    from <a href="configuration/django.html">simmate.configuration.django</a> import setup_full
-</code></pre>
+<span class="c1"># the faster import that does the same thing</span>
+<span class="kn">from</span> <span class="nn"><a href="configuration/django.html">simmate.configuration.django</a></span> <span class="kn">import</span> <span class="n">setup_full</span>
+</code></pre></div>
 </div>
 
                         <details>
@@ -84,12 +84,14 @@ convient modules too. So you're actually loading extra things!</p>
 <span class="sd">testing things via Spyder; and (2) the shortcut loads slower (typically 1 second)</span>
 <span class="sd">than the full import. This is because the shortcut module (this file) loads other</span>
 <span class="sd">convient modules too. So you&#39;re actually loading extra things!</span>
-<span class="sd">        </span>
-<span class="sd">        # the convenient shortcut</span>
-<span class="sd">        from simmate.shortcuts import setup</span>
-<span class="sd">        </span>
-<span class="sd">        # the faster import that does the same thing</span>
-<span class="sd">        from simmate.configuration.django import setup_full</span>
+
+<span class="sd">``` python    </span>
+<span class="sd"># the convenient shortcut</span>
+<span class="sd">from simmate.shortcuts import setup</span>
+
+<span class="sd"># the faster import that does the same thing</span>
+<span class="sd">from simmate.configuration.django import setup_full</span>
+<span class="sd">```</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 

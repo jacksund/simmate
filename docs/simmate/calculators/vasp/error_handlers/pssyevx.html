@@ -177,7 +177,16 @@
         <span class="name">is_monitor</span><span class="default_value"> = True</span>
     </div>
 
-    
+            <div class="docstring"><p>This class property indicates whether the error handler is a monitor,
+i.e., a handler that monitors a job as it is running. If a
+monitor-type handler notices an error, the job will be sent a
+termination signal, the error is then corrected,
+and then the job is restarted. This is useful for catching errors
+that occur early in the run but do not cause immediate failure.
+Also, is_monitor=True and is_terminating=False is a special case. See the
+is_terminating description below for why!</p>
+</div>
+
 
                             </div>
                             <div id="Pssyevx.filename_to_check" class="classattr">
@@ -186,7 +195,11 @@
         <span class="name">filename_to_check</span><span class="default_value"> = &#39;vasp.out&#39;</span>
     </div>
 
-    
+            <div class="docstring"><p>If you are using the default check() method, this is the file to check for
+errors (using <code><a href="#Pssyevx.possible_error_messages">possible_error_messages</a></code>). This should be a string of the 
+filename relative path to main directory.</p>
+</div>
+
 
                             </div>
                             <div id="Pssyevx.possible_error_messages" class="classattr">
@@ -195,7 +208,11 @@
         <span class="name">possible_error_messages</span><span class="default_value"> = [&#39;ERROR in subspace rotation PSSYEVX&#39;]</span>
     </div>
 
-    
+            <div class="docstring"><p>If you are using the default check() method, then this is the list of messages
+to find in the file (filename_to_check). As soon as one of these messages is
+found, the <code><a href="#Pssyevx.check">check</a></code> will return True.</p>
+</div>
+
 
                             </div>
                             <div id="Pssyevx.correct" class="classattr">

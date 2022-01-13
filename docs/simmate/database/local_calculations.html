@@ -28,12 +28,6 @@
                                pattern=".+" required>
 
 
-                    <h2>Submodules</h2>
-                    <ul>
-                            <li><a href="local_calculations/energy.html">simmate.database.local_calculations.energy</a></li>
-                            <li><a href="local_calculations/evolution.html">simmate.database.local_calculations.evolution</a></li>
-                            <li><a href="local_calculations/relaxation.html">simmate.database.local_calculations.relaxation</a></li>
-                    </ul>
 
 
 
@@ -51,7 +45,42 @@
 <a href="./../../simmate.html">simmate</a><wbr>.<a href="./../database.html">database</a><wbr>.local_calculations    </h1>
 
                 
-                
+                        <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.database.relaxation</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MatProjRelaxation</span><span class="p">,</span>
+    <span class="n">MatProjIonicStep</span><span class="p">,</span>
+    <span class="n">MITRelaxation</span><span class="p">,</span>
+    <span class="n">MITIonicStep</span><span class="p">,</span>
+    <span class="n">Quality00Relaxation</span><span class="p">,</span>
+    <span class="n">Quality00IonicStep</span><span class="p">,</span>
+    <span class="n">Quality01Relaxation</span><span class="p">,</span>
+    <span class="n">Quality01IonicStep</span><span class="p">,</span>
+    <span class="n">Quality02Relaxation</span><span class="p">,</span>
+    <span class="n">Quality02IonicStep</span><span class="p">,</span>
+    <span class="n">Quality03Relaxation</span><span class="p">,</span>
+    <span class="n">Quality03IonicStep</span><span class="p">,</span>
+    <span class="n">Quality04Relaxation</span><span class="p">,</span>
+    <span class="n">Quality04IonicStep</span><span class="p">,</span>
+    <span class="n">StagedRelaxation</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.database.energy</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MatProjStaticEnergy</span><span class="p">,</span>
+    <span class="n">MITStaticEnergy</span><span class="p">,</span>
+    <span class="n">Quality04StaticEnergy</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">simmate.toolkit.structure_prediction.evolution.database</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EvolutionarySearch</span><span class="p">,</span>
+    <span class="n">StructureSource</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+        </details>
+
             </section>
     </main>
 <script>

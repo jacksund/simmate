@@ -2,7 +2,7 @@
 File Converters
 ---------------
 
-:warning: This module is at the planning stage so no code exists here yet.
+> :warning: This module is at the planning stage so no code exists here yet.
 
 I think this will be a good module to have io features that can't be added to a specific calculator or toolkit module. For example, cif/xyz files are universal standards, and not linked directly to a specific calculator. There are also third-party classes (e.g. pymatgen/ase/jarvis structures) which users may want to switch between.
 
