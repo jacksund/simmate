@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from simmate.calculators.vasp.database.relaxation import (
+    MatProjRelaxation,
+    MatProjIonicStep,
     MITRelaxation,
     MITIonicStep,
     Quality00Relaxation,
@@ -17,6 +19,7 @@ from simmate.calculators.vasp.database.relaxation import (
 )
 
 from simmate.calculators.vasp.database.energy import (
+    MatProjStaticEnergy,
     MITStaticEnergy,
     Quality04StaticEnergy,
 )
