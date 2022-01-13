@@ -26,9 +26,10 @@ from simmate.calculators.vasp.workflows.relaxation.all import (
 
 # These are tasks that are in early development and don't have databases tables.
 # Therefore, they are s3tasks only - not workflows.
-from simmate.calculators.vasp.tasks.band_structure import (
-    MatProjBandStructure as band_structure_matproj,
-)
-from simmate.calculators.vasp.tasks.density_of_states import (
-    MatProjDensityOfStates as density_of_states_matproj,
-)
+from simmate.calculators.vasp.tasks.band_structure import MatProjBandStructure
+
+band_structure_matproj = MatProjBandStructure()
+
+from simmate.calculators.vasp.tasks.density_of_states import MatProjDensityOfStates
+
+density_of_states_matproj = MatProjDensityOfStates()
