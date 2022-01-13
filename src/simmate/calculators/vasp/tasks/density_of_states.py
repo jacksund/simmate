@@ -30,13 +30,13 @@ class MatProjDensityOfStates(MatProjStaticEnergy):
         super()._write_output_summary(directory, vasprun)
 
         plotter = DosPlotter()
-        
+
         # Add the total density of States
         plotter.add_dos("Total DOS", vasprun.complete_dos)
-        
+
         # add element-projected density of states
         plotter.add_dos_dict(vasprun.complete_dos.get_element_dos())
-        
+
         # If I want plots for individual orbitals
         # for site in vasprun.final_structure:
         #     spd_dos = vasprun.complete_dos.get_site_spd_dos(site)
