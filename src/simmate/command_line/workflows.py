@@ -48,7 +48,9 @@ def list_all():
     click.echo("These are the workflows that have been registerd:")
     all_workflows = get_list_of_all_workflows()
     for i, workflow in enumerate(all_workflows):
-        click.echo(f"\t({i+1}) {workflow}")  # gives "(1) example_flow"
+        # Replace underscores with dashes for consistency with click
+        workflow_dash = workflow.replace("_", "-")
+        click.echo(f"\t({i+1}) {workflow_dash}")  # gives "(1) example-flow"
 
 
 @workflows.command()
@@ -59,6 +61,9 @@ def show_config(workflow_name):
     are displayed. For example, a VASP workflow will show a dictionary that
     details how INCAR settings are selected.
     """
+
+    # user gives a workflow like energy-mit and we convert to energy_mit for python
+    workflow_name = workflow_name.replace("-", "_")
 
     click.echo("LOADING WORKFLOW...")
     workflow = get_workflow(workflow_name)
@@ -91,6 +96,9 @@ def setup_only(workflow_name, filename, directory):
     If the workflow is a single task, the calculation is set up but not ran. This
     is useful when you just want the input files to view/edit.
     """
+
+    # user gives a workflow like energy-mit and we convert to energy_mit for python
+    workflow_name = workflow_name.replace("-", "_")
 
     click.echo("LOADING STRUCTURE AND WORKFLOW...")
     from pymatgen.core.structure import Structure
@@ -137,6 +145,9 @@ def setup_only(workflow_name, filename, directory):
 )
 def run(workflow_name, filename, command, directory):
     """Runs a workflow using an input structure file"""
+
+    # user gives a workflow like energy-mit and we convert to energy_mit for python
+    workflow_name = workflow_name.replace("-", "_")
 
     click.echo("LOADING STRUCTURE AND WORKFLOW...")
     from pymatgen.core.structure import Structure
