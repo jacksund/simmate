@@ -58,9 +58,9 @@ from simmate.database.base_data_types.relaxation import Relaxation
 MITRelaxation, MITIonicStep = Relaxation.create_all_subclasses("MIT", module=__name__)
 
 (
-    MaterialsProjectRelaxation,
-    MaterialsProjectIonicStep,
-) = Relaxation.create_all_subclasses("MaterialsProject", module=__name__)
+    MatProjRelaxation,
+    MatProjIonicStep,
+) = Relaxation.create_all_subclasses("MatProj", module=__name__)
 
 Quality00Relaxation, Quality00IonicStep = Relaxation.create_all_subclasses(
     "Quality00",

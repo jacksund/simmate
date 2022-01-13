@@ -44,7 +44,7 @@ class WorkflowTask(Task):
 
     .. code-block:: python
 
-       from simmate.workflows.all import example_workflow
+       from simmate.workflows import example_workflow
        my_task = example_workflow.to_workflow_task()
 
     DEV NOTE:

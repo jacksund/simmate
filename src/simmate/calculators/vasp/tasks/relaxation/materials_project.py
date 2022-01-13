@@ -18,7 +18,7 @@ from simmate.calculators.vasp.error_handlers.all import (
 )
 
 
-class MaterialsProjectRelaxation(VaspTask):
+class MatProjRelaxation(VaspTask):
 
     # returns structure separately from vasprun object
     return_final_structure = True

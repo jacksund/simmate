@@ -199,7 +199,7 @@ For example, we can use it to run a workflow. We did this with the command-line 
 
 ```
 # Using the command-line (from our previous tutorial)
-simmate workflows run energy_mit POSCAR
+simmate workflows run energy-mit POSCAR
 ```
 
 ```python

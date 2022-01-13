@@ -4,7 +4,7 @@ from rest_framework.serializers import HyperlinkedModelSerializer
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from simmate.database.third_parties.all import (
-    MaterialsProjectStructure,
+    MatProjStructure,
     JarvisStructure,
     AflowStructure,
     OqmdStructure,
@@ -36,15 +36,15 @@ class MyExampleViewSet(ReadOnlyModelViewSet):
 # --------------------------------------------------------------------------------------
 
 
-class MaterialsProjectSerializer(HyperlinkedModelSerializer):
+class MatProjSerializer(HyperlinkedModelSerializer):
     class Meta:
-        model = MaterialsProjectStructure
+        model = MatProjStructure
         fields = "__all__"
 
 
-class MaterialsProjectViewSet(ReadOnlyModelViewSet):
-    queryset = MaterialsProjectStructure.objects.all()
-    serializer_class = MaterialsProjectSerializer
+class MatProjViewSet(ReadOnlyModelViewSet):
+    queryset = MatProjStructure.objects.all()
+    serializer_class = MatProjSerializer
     filterset_fields = "__all__"
 
 

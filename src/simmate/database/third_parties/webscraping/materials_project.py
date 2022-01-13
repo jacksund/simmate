@@ -20,7 +20,7 @@ from pymatgen.ext.matproj import MPRester
 
 from simmate.configuration.django import setup_full  # sets up database
 
-from simmate.database.third_parties.materials_project import MaterialsProjectStructure
+from simmate.database.third_parties.materials_project import MatProjStructure
 
 
 @transaction.atomic
@@ -84,7 +84,7 @@ def load_all_structures(
         # TODO:
         # bs = mpr.get_bandstructure_by_material_id("mp-323")
 
-        structure_db = MaterialsProjectStructure.from_pymatgen(
+        structure_db = MatProjStructure.from_pymatgen(
             id=entry["material_id"],
             structure=entry["structure"],
             energy=entry["final_energy"],

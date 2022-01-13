@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from simmate.calculators.vasp.tasks.energy.materials_project import (
-    MaterialsProjectStaticEnergy,
+    MatProjStaticEnergy,
 )
 
 
-class MaterialsProjectDensityOfStatesTask(MaterialsProjectStaticEnergy):
+class MatProjDensityOfStates(MatProjStaticEnergy):
 
     # Settings are based off of pymatgen's NonSCFSet in uniform mode
-    incar = MaterialsProjectStaticEnergy.incar.copy()
+    incar = MatProjStaticEnergy.incar.copy()
     incar.update(
         ICHARGE=11,
         ISYM=2,

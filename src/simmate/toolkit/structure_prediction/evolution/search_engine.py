@@ -218,7 +218,7 @@ class SearchEngine:
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.
         if workflow == "StagedRelaxation":
-            from simmate.workflows.all import relaxation_staged
+            from simmate.workflows import relaxation_staged
 
             self.workflow = relaxation_staged
         else:

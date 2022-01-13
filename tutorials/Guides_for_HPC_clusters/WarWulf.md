@@ -96,7 +96,7 @@ And paste in the example content...
 #SBATCH --mail-type=ALL 
 #SBATCH --mail-user=my_username@live.unc.edu
 
-simmate workflows run energy_mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
+simmate workflows run energy-mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
 ```
 
 <br/>

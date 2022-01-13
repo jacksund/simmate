@@ -130,7 +130,7 @@ All of our datatables start from these classes and build up. Up next, we'll look
 
 In Tutorial 2, we ran a calculation and then added results to our database table. Here, we will now go through the results. 
 
-We know our workflow's name was `energy_mit`, so let's start by grabbing that workflow again. The results table (the class for it) is always attached to the workflow as the `result_table` attribute. You can load it like this:
+We know our workflow's name was `energy-mit`, so let's start by grabbing that workflow again. The results table (the class for it) is always attached to the workflow as the `result_table` attribute. You can load it like this:
 
 ```python
 from simmate.workflows.all import energy_mit

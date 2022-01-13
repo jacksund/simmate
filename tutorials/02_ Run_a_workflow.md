@@ -34,7 +34,7 @@ direct
 0.500000 0.500000 0.500000 Cl
 ```
 3. View a list of all workflows available with `simmate workflows list-all`
-4. View the settings used for the `energy_mit` workflow with `simmate workflows show-config energy_mit`
+4. View the settings used for the `energy-mit` workflow with `simmate workflows show-config energy-mit`
 5. Copy and paste VASP POTCAR files to the folder `~/simmate/vasp/Potentials`. Be sure to unpack the `tar.gz` files. This folder will have the potentials that came with VASP -- and with their original folder+file names:
 ```
 # Located at /home/my_username (~)
@@ -54,8 +54,8 @@ simmate/
             ├── potpaw_GGA
             └── potUSPP_GGA
 ```
-6. View the input files with `simmate workflows setup-only energy_mit POSCAR`
-7. Run a workflow with `simmate workflows run energy_mit POSCAR` (run = configure + schedule + execute + save). This command should be submitted via a SLURM/PBS job script on HPC clusters.
+6. View the input files with `simmate workflows setup-only energy-mit POSCAR`
+7. Run a workflow with `simmate workflows run energy-mit POSCAR` (run = configure + schedule + execute + save). This command should be submitted via a SLURM/PBS job script on HPC clusters.
 8. For now, you can manually go through the files to see the results. We will cover how to access your database in a later tutorial (05).
 
 <br/><br/>
@@ -250,19 +250,19 @@ The output will be similar to...
 ```
 Gathering all available workflows...
 These are all workflows you can use:
-    (1) energy_mit
-    (2) energy_quality04
-    (3) relaxation_mit
-    (4) relaxation_quality00
-    (5) relaxation_quality01
-    (6) relaxation_quality02
-    (7) relaxation_quality03
-    (8) relaxation_quality04
-    (9) relaxation_staged
+    (1) energy-mit
+    (2) energy-quality04
+    (3) relaxation-mit
+    (4) relaxation-quality00
+    (5) relaxation-quality01
+    (6) relaxation-quality02
+    (7) relaxation-quality03
+    (8) relaxation-quality04
+    (9) relaxation-staged
   ... << plus others that are cut-off for clarity >>
 ```
 
-In this tutorial, we will be using `energy_mit` which runs a simple static energy calculation using MIT Project settings (these settings are based on pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)).
+In this tutorial, we will be using `energy-mit` which runs a simple static energy calculation using MIT Project settings (these settings are based on pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)).
 
 <br/> <!-- add empty line -->
 
@@ -273,7 +273,7 @@ Take a look back at the 4 key steps of a workflow above (`configure`, `schedule`
 To view a workflow's configuration before using it, we type the command `simmate workflows show-config`. Try this out by running:
 
 ```
-simmate workflows show-config relaxation_quality00
+simmate workflows show-config relaxation-quality00
 ```
 
 VASP users will recognize that this specifies the contents of a VASP INCAR file.  The `relaxation_quality00` is the most basic workflow configuration because the INCAR will not depend on the structure or composition of your crystal.
@@ -281,15 +281,15 @@ VASP users will recognize that this specifies the contents of a VASP INCAR file.
 Next, look at a more advanced calculation. Run the command:
 
 ```
-simmate workflows show-config energy_mit
+simmate workflows show-config energy-mit
 ```
 
 Here, you'll see that some INCAR settings rely on composition and that we have a list of error handlers to help ensure that the calculation finishes successfully.
 
-Now, let's go one step further and provide a specific structure (the POSCAR we just made) into a specific workflow (energy_mit). To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can type `cd Desktop` to change your active folder to your Desktop. Then run the command:
+Now, let's go one step further and provide a specific structure (the POSCAR we just made) into a specific workflow (energy-mit). To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can type `cd Desktop` to change your active folder to your Desktop. Then run the command:
 
 ```
-simmate workflows setup-only energy_mit POSCAR
+simmate workflows setup-only energy-mit POSCAR
 ```
 
 You'll see a new folder created named `MIT_Static_Energy_inputs`. When you open it, you'll see all the files that Simmate made for VASP to use. This is useful when you're an advanced user who wants to alter these files before running VASP manually -- this could happen when you want to test new workflows or unique systems.
@@ -304,10 +304,10 @@ For absolute beginners, you don't immediately need to understand these files, bu
 
 The default Simmate settings will run everything immediately and locally on your desktop. When running the workflow, it will create a new folder, write the inputs in it, run the calculation, and save the results to your database.
 
-The command to do this with our POSCAR and energy_mit workflow is: 
+The command to do this with our POSCAR and energy-mit workflow is: 
 
 ```
-simmate workflows run energy_mit POSCAR
+simmate workflows run energy-mit POSCAR
 ```
 
 By default, Simmate uses the command `vasp_std > vasp.out` and creates a new `simmate-task` folder with a unique identifier (ex: `simmate-task-j8djk3mn8`).
@@ -320,7 +320,7 @@ simmate workflows run --help
 Using this help info, we can change our folder name (`--directory`, `-d`) as well as the command used to run VASP (`--command`, `-c`). For example, we can update our command to this:
 
 ```
-simmate workflows run energy_mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out" -d my_custom_folder
+simmate workflows run energy-mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out" -d my_custom_folder
 ```
 
 
@@ -429,7 +429,7 @@ nano submit.sh
 #SBATCH --mail-type=ALL 
 #SBATCH --mail-user=my_username@live.unc.edu
 
-simmate workflows run energy_mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
+simmate workflows run energy-mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
 ```
 
 Each of these `SBATCH` parameters set how we would like to sumbit a job and how many resources we expect to use. These are explained in [SLURM's documnetation for sbatch](https://slurm.schedmd.com/sbatch.html), but you may need help from your IT team to update them. But to break down these example parameters...

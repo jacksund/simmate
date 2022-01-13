@@ -10,18 +10,18 @@ from pymatgen.electronic_structure.plotter import BSPlotter
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Potcar
 from simmate.calculators.vasp.tasks.energy.materials_project import (
-    MaterialsProjectStaticEnergy,
+    MatProjStaticEnergy,
 )
 
 
-class MaterialsProjectBandStructureTask(MaterialsProjectStaticEnergy):
+class MatProjBandStructure(MatProjStaticEnergy):
 
     # The default settings to use for this calculation.
     # The key thing for band structures is that this follows a static energy
     # calculation. We use the CHGCAR from that previous calculation. We also
     # hold the charge density static during this calculation so this is a
     # non-selfconsistent (non-SCF) calculation.
-    incar = MaterialsProjectStaticEnergy.incar.copy()
+    incar = MatProjStaticEnergy.incar.copy()
     incar.update(
         ICHARGE=11,
         ISMEAR=0,
