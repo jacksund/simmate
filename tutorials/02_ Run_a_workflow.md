@@ -12,6 +12,7 @@ In this tutorial, you will use the command line to view all available workflows 
     - [Viewing a workflow's settings and inputs](#viewing-a-workflows-settings-and-inputs)
     - [Finally running your workflow!](#finally-running-our-workflow)
     - [Switching to a remote cluster](#switching-to-a-remote-cluster)
+    - [Viewing the workflow's results](#viewing-the-workflows-results)
 
 <br/><br/>
 
@@ -56,7 +57,8 @@ simmate/
 ```
 6. View the input files with `simmate workflows setup-only energy-mit POSCAR`
 7. Run a workflow with `simmate workflows run energy-mit POSCAR` (run = configure + schedule + execute + save). This command should be submitted via a SLURM/PBS job script on HPC clusters.
-8. For now, you can manually go through the files to see the results. We will cover how to access your database in a later tutorial (05).
+8. You will see a file named `simmate_summary.yaml` which contains some quick information for you. Other workflows (such as `band-structure` calculations) will also write out plots for you.
+9. While the plots and summary files are nice for quick testing, much more useful information is stored in our database. We will cover how to access your database in a later tutorial (05).
 
 <br/><br/>
 
@@ -462,6 +464,18 @@ squeue -u my_username
 
 You've now submitted a Simmate workflow to a remote cluster :partying_face: :partying_face: :partying_face: !!! 
 
-Be sure to go back through this tutorial a few times before moving on. Submitting remote jobs can be tedious but it's important to understand. Advanced features of Simmate will let you skip a lot of this work down the road, but that won't happen until tutorial 07.
+Be sure to go back through this section a few times before moving on. Submitting remote jobs can be tedious but it's important to understand. Advanced features of Simmate will let you skip a lot of this work down the road, but that won't happen until tutorial 07.
+
+<br/> <!-- add empty line -->
+
+## Viewing the workflow's results
+
+Once your job completes, you may notice a few extra files in your output. One of them is `simmate_summary.yaml`, which contains some quick information for you.
+
+Simmate can also catch errors, correct them, and retry a calculation. If this occurred during your workflow run, you'll see a file named `simmate_corrections.csv` with all the errors that were incountered and how they were fixed. Note, for our NaCl structure's simple static energy calculation, you likely didn't need any fixes, so this file won't be present.
+
+Other workflows will also write out plots for you. For example, `band-structure-matproj` will calculate a band structure using Materials Project settings, and write an image of your final band structure to `band_structure.png`. These extra files and plots vary for each workflow, but they make checking your results nice and quick.
+
+While the plots and summary files are nice for testing, what if we want much more information than what these summary files include -- like density, hull energy, convergence information, etc.? Further, what if we want to adjust our plots or even interact with them? To do this we can analyze our final structure and the full results with Simmate's toolkit and database. Accessing Simmate's toolkit and database require using python, so our next tutorial will introduce you to python by directly interacting with the toolkit. We will then work our way up to accessing our database in tutorial 5.
 
 When you're ready, you can advance to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/03_Analyze_and_modify_structures.md), which can be completed on your local computer.
