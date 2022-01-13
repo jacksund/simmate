@@ -9,7 +9,7 @@ from simmate.calculators.vasp.error_handlers.all import (
 )
 
 
-class MaterialsProjectStaticEnergy(MITRelaxation):
+class MatProjStaticEnergy(MITRelaxation):
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.

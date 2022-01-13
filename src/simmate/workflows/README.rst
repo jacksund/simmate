@@ -11,7 +11,7 @@ Usage
 
 .. code-block:: python
 
-    from simmate.workflows.all import energy_mit
+    from simmate.workflows import energy_mit
     
     # runs the workflow and returns a status
     status = energy_mit.run(structure=...)
@@ -29,7 +29,7 @@ The code that defines these workflows and configures their settings are located 
 
 .. code-block:: python
 
-    from simmate.workflows.relaxation.all import relaxation_mit
+    from simmate.workflows import relaxation_mit
 
 Alternatively, this same workflow could have been imported with...
 

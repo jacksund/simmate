@@ -12,7 +12,7 @@ def build():
     #   client.login_to_tenant(tenant_slug='a-tenant-slug')
 
     # grab all of the workflows that need to be registered
-    from simmate.workflows.all import (
+    from simmate.workflows import (
         energy_mit,
         energy_quality04,
         relaxation_mit,

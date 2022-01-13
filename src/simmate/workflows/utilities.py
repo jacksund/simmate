@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflows import all as all_workflows
+from simmate import workflows as all_workflows
 
 
 def get_list_of_all_workflows():

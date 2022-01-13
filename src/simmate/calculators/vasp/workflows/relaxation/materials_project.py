@@ -2,10 +2,10 @@
 
 from simmate.workflow_engine.utilities import s3task_to_workflow
 from simmate.calculators.vasp.tasks.relaxation.materials_project import (
-    MaterialsProjectRelaxation as MPRelaxationTask,
+    MatProjRelaxation as MPRelaxationTask,
 )
 from simmate.calculators.vasp.database.relaxation import (
-    MaterialsProjectRelaxation as MPRelaxationResults,
+    MatProjRelaxation as MPRelaxationResults,
 )
 
 workflow = s3task_to_workflow(

@@ -13,7 +13,7 @@ def test_database():
     assert result.exit_code == 0
 
     # list the config for one workflow
-    result = runner.invoke(workflows, ["show-config", "energy_mit"])
+    result = runner.invoke(workflows, ["show-config", "energy-mit"])
     assert result.exit_code == 0
 
 

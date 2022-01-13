@@ -7,12 +7,9 @@
 # Consider moving base_data_types to a separate app
 from simmate.database.base_data_types.symmetry import Spacegroup
 
-from simmate.database.local_calculations.energy import (
+from simmate.database.local_calculations import (
     MITStaticEnergy,
     Quality04StaticEnergy,
-)
-
-from simmate.database.local_calculations.relaxation import (
     MITRelaxation,
     MITIonicStep,
     Quality00Relaxation,
@@ -26,9 +23,6 @@ from simmate.database.local_calculations.relaxation import (
     Quality04Relaxation,
     Quality04IonicStep,
     StagedRelaxation,
-)
-
-from simmate.database.local_calculations.evolution import (
     EvolutionarySearch,
     StructureSource,
 )

@@ -235,7 +235,7 @@ EXAMPLES...
 
 # from a thirdparty database
 source = {
-    "table": "MaterialsProjectStructure",
+    "table": "MatProjStructure",
     "id": "mp-123",
 }
 
@@ -250,14 +250,14 @@ source = {
 }
 source = {
     "method": "SubstituitionStructure",
-    "table": "MaterialsProjectStructure",
+    "table": "MatProjStructure",
     "id": "mp-123",
 }
 
 # from a transformation
 source = {
     "method": "MirrorMutation",
-    "table": "MaterialsProjectStructure",
+    "table": "MatProjStructure",
     "id": "mp-123",
 }
 

@@ -2,10 +2,10 @@
 
 from simmate.workflow_engine.utilities import s3task_to_workflow
 from simmate.calculators.vasp.tasks.energy.materials_project import (
-    MaterialsProjectStaticEnergy as MPStaticEnergyTask,
+    MatProjStaticEnergy as MPStaticEnergyTask,
 )
 from simmate.calculators.vasp.database.energy import (
-    MaterialsProjectStaticEnergy as MPStaticEnergyResults,
+    MatProjStaticEnergy as MPStaticEnergyResults,
 )
 
 workflow = s3task_to_workflow(

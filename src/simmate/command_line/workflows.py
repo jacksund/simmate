@@ -19,7 +19,7 @@ def get_workflow(workflow_name: str):
     workflow_name : str
         Name of the workflow to grab
     """
-    from simmate.workflows import all as all_workflows
+    from simmate import workflows
     from simmate.workflows.utilities import get_list_of_all_workflows
 
     allowed_workflows = get_list_of_all_workflows()
@@ -31,7 +31,7 @@ def get_workflow(workflow_name: str):
             "typos! If you want a list of all available workflows, use the command "
             " 'simmate workflows list-all'"
         )
-    workflow = getattr(all_workflows, workflow_name)
+    workflow = getattr(workflows, workflow_name)
     return workflow
 
 

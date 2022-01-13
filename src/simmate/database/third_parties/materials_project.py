@@ -3,7 +3,7 @@
 from simmate.database.base_data_types import table_column, Structure, Thermodynamics
 
 
-class MaterialsProjectStructure(Structure, Thermodynamics):
+class MatProjStructure(Structure, Thermodynamics):
 
     # The id used to symbolize the structure (ex: "mp-12345")
     id = table_column.CharField(max_length=25, primary_key=True)

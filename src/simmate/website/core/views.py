@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from simmate.website.third_parties.forms import ChemicalSystemForm
 
 from simmate.database.third_parties.all import (
-    MaterialsProjectStructure,
+    MatProjStructure,
     CodStructure,
     JarvisStructure,
     AflowStructure,
@@ -39,7 +39,7 @@ def home(request):
                 ("aflow", AflowStructure),
                 ("cod", CodStructure),
                 ("jarvis", JarvisStructure),
-                ("materials_project", MaterialsProjectStructure),
+                ("materials_project", MatProjStructure),
                 ("oqmd", OqmdStructure),
             ):
                 # if the user requested this database, the value will be true
