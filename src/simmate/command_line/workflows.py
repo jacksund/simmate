@@ -50,7 +50,8 @@ def list_all():
     for i, workflow in enumerate(all_workflows):
         # Replace underscores with dashes for consistency with click
         workflow_dash = workflow.replace("_", "-")
-        click.echo(f"\t({i+1}) {workflow_dash}")  # gives "(1) example-flow"
+        workflow_number = str(i + 1).zfill(2)
+        click.echo(f"\t({workflow_number}) {workflow_dash}")  # gives "(1) example-flow"
 
 
 @workflows.command()
