@@ -14,12 +14,14 @@ obiously easier to remember and write -- so it's best for when you're quickly
 testing things via Spyder; and (2) the shortcut loads slower (typically 1 second)
 than the full import. This is because the shortcut module (this file) loads other
 convient modules too. So you're actually loading extra things!
-        
-        # the convenient shortcut
-        from simmate.shortcuts import setup
-        
-        # the faster import that does the same thing
-        from simmate.configuration.django import setup_full
+
+``` python    
+# the convenient shortcut
+from simmate.shortcuts import setup
+
+# the faster import that does the same thing
+from simmate.configuration.django import setup_full
+```
 
 """
 

@@ -64,12 +64,10 @@
 
 <p>Note, nearly all of the commands in this module wrap a lower-level function, so little code is located here. For example, the <code>simmate database reset</code> command is just a wrapper for the following python code:</p>
 
-<p>.. code-block:: python</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="configuration/django/database.html">simmate.configuration.django.database</a></span> <span class="kn">import</span> <span class="n">reset_database</span>
 
-<pre><code>from <a href="configuration/django/database.html">simmate.configuration.django.database</a> import reset_database
-
-reset_database()
-</code></pre>
+<span class="n">reset_database</span><span class="p">()</span>
+</code></pre></div>
 
 <p>Our command-line is build using <a href="https://click.palletsprojects.com/en/8.0.x/">Click</a> instead of Argparse. Be sure to read their documentation before contributing to this module.</p>
 </div>

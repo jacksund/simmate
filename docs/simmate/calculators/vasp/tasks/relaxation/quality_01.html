@@ -189,10 +189,10 @@
 
         </details>
 
-            <div class="docstring"><h2 id="introduction-to-the-sss-task">Introduction to the "SSS Task"</h2>
+            <div class="docstring"><h2 id="the-supervised-staged-shell-task-aka-s3task">The Supervised-Staged-Shell Task (aka "S3Task")</h2>
 
-<p>This class contains the core functionality to <em>supervise</em> a <em>staged</em> task
-involving some <em>shell</em> command.</p>
+<p>This class contains the core functionality to <strong>supervise</strong> a <strong>staged</strong> task
+involving some <strong>shell</strong> command.</p>
 
 <p>Let's breakdown what this means...</p>
 
@@ -201,10 +201,11 @@ VASP requires that we call the "vasp_std &gt; vasp.out" command in order to run 
 calculation. We consider calling external programs a <em>staged</em> task made
 up of three steps:</p>
 
-<pre><code>- setup = writing any input files required for the program
-- execution = actually calling the command and running our program
-- workup = loading data from output files back into python
-</code></pre>
+<ul>
+<li>setup = writing any input files required for the program</li>
+<li>execution = actually calling the command and running our program</li>
+<li>workup = loading data from output files back into python</li>
+</ul>
 
 <p>And for <em>supervising</em> the task, this means we monitor the program while the
 execution stage is running. So once a program is started, Simmate can check
@@ -212,76 +213,70 @@ output files for common errors/issues. If an error is found, we stop the
 program, fix the issue, and then restart it. Any fixes that were made are
 written to "simmate_corrections.csv".</p>
 
-<p>TODO: Make a simple diagram to visualize the overall process and add it here.
+<!--
+TODO: Make a simple diagram to visualize the overall process and add it here.
 It will be similar to Custodian's, but we don't have a list of jobs here.
 https://materialsproject.github.io/custodian/index.html#usage
-The steps are...</p>
+The steps are...
 
-<ul>
-<li>Write Input Files based on custom+defualt settings</li>
-<li>Run the calculation by calling the program</li>
-<li>Load ouput files</li>
-<li>check for errors</li>
-<li>[correct them, rerun]</li>
-<li>postprocess/analysis</li>
-</ul>
+- Write Input Files based on custom+defualt settings
+- Run the calculation by calling the program
+- Load ouput files
+- check for errors
+- [correct them, rerun]
+- postprocess/analysis
+-->
 
 <p>This entire process (the different stages and monitoring) is carried out
 using the <code><a href="#Quality01Relaxation.run">run()</a></code> method. You rarely use this class directly. Instead,
 you typically use a subclass of it. As a user, you really just need to do
 something like this:</p>
 
-<p>.. code-block:: python</p>
+<div class="codehilite"><pre><span></span><code>   <span class="kn">from</span> <span class="nn"><a href="../../../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a></span> <span class="kn">import</span> <span class="n">ExampleTask</span>
 
-<p>from <a href="../../../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a> import ExampleTask
-   my_task = ExampleTask()
-   my_result = my_task.run()</p>
+   <span class="n">my_task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
+   <span class="n">my_result</span> <span class="o">=</span> <span class="n">my_task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</code></pre></div>
 
 <p>And that's it!</p>
 
 <p>For experts, this class can be viewed as a combination of prefect's ShellTask,
-a custodian Job, Custodian monitoring. When subclassing this, we can absorb
+a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
 functionality of pymatgen.io.vasp.sets too. By merging all of these together
 into one class, we make things much easier for users and creating new Tasks.</p>
 
 <h2 id="inheriting-from-this-class">Inheriting from this class</h2>
 
-<p>This class is commonly used to make tasks for our calculator modules. For
-a full (and advanced) example, take a look at...</p>
+<p>This class is commonly used to make tasks for our calculator modules, so you
+will likely want to subclass this. Here is a basic example of inheriting
+and then running a task:</p>
 
-<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">simmate</span><span class="o">.</span><span class="n">calculators</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">VaspTask</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html">simmate.workflow_engine.tasks.supervised_staged_shell_task</a></span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">S3Task</span> <span class="k">as</span> <span class="n">SSSTask</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">example.error_handlers</span> <span class="kn">import</span> <span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleTask</span><span class="p">(</span><span class="n">SSSTask</span><span class="p">):</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;echo example&quot;</span>  <span class="c1"># just prints out &quot;example&quot;</span>
+    <span class="n">max_corrections</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span><span class="p">]</span>
+    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">some_new_setting</span> <span class="o">=</span> <span class="mi">123</span>
+
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have these two args</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m setting things up!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;My new setting is </span><span class="si">{</span><span class="n">some_new_setting</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have this arg</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m working things up!&quot;</span><span class="p">)</span>
+
+
+<span class="n">task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </code></pre></div>
-
-<p>And here's an example of inheriting and then running a task:</p>
-
-<p>.. code-block:: python</p>
-
-<pre><code>from <a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html">simmate.workflow_engine.tasks.supervised_staged_shell_task</a> import (
-    SupervisedStagedShellTask as SSSTask,
-)
-from example.error_handlers import PossibleError1, PossibleError2
-
-
-class ExampleTask(SSSTask):
-
-    command = "echo example"  # just prints out "example"
-    max_corrections = 7
-    error_handlers = [PossibleError1, PossibleError2]
-    polling_timestep = 0.1
-    monitor_freq = 10
-    some_new_setting = 123
-
-    def setup(self, structure, directory):  # &lt;-- MUST have these two args
-        print("I'm setting things up!")
-        print(f"My new setting is {some_new_setting}")
-
-    def workup(self, directory):  # &lt;-- MUST have this arg
-        print("I'm working things up!")
-
-
-task = ExampleTask()
-result = task.run()
-</code></pre>
 
 <p>There are a couple things to note here:</p>
 
@@ -291,6 +286,9 @@ result = task.run()
 <li>make sure you include the structure/directory inputs, even if you don't use them.</li>
 <li>Don't add new kwargs to methods. Instead handle these options through attributes.</li>
 </ul>
+
+<p>For a full (and advanced) example, of a subclass take a look at
+<code><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></code>.</p>
 </div>
 
 
@@ -357,20 +355,21 @@ result = task.run()
                 <dd id="Quality01Relaxation.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
                 <dd id="Quality01Relaxation.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
                 <dd id="Quality01Relaxation.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="Quality01Relaxation.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
                 <dd id="Quality01Relaxation.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
                 <dd id="Quality01Relaxation.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
                 <dd id="Quality01Relaxation.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask">simmate.workflow_engine.tasks.supervised_staged_shell_task.SupervisedStagedShellTask</a></dt>
-                                <dd id="Quality01Relaxation.error_handlers" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.error_handlers">error_handlers</a></dd>
-                <dd id="Quality01Relaxation.max_corrections" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.max_corrections">max_corrections</a></dd>
-                <dd id="Quality01Relaxation.monitor" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.monitor">monitor</a></dd>
-                <dd id="Quality01Relaxation.polling_timestep" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.polling_timestep">polling_timestep</a></dd>
-                <dd id="Quality01Relaxation.monitor_freq" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.monitor_freq">monitor_freq</a></dd>
-                <dd id="Quality01Relaxation.execute" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.execute">execute</a></dd>
-                <dd id="Quality01Relaxation.run" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.run">run</a></dd>
-                <dd id="Quality01Relaxation.print_config" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.print_config">print_config</a></dd>
+            <div><dt><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.tasks.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="Quality01Relaxation.error_handlers" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                <dd id="Quality01Relaxation.max_corrections" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="Quality01Relaxation.monitor" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="Quality01Relaxation.polling_timestep" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="Quality01Relaxation.monitor_freq" class="variable"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="Quality01Relaxation.execute" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="Quality01Relaxation.run" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="Quality01Relaxation.print_config" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
             <div><dt>prefect.core.task.Task</dt>

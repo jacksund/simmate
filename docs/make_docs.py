@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     # Set our default settings for the pdoc command
     pdoc.render.configure(
-        docformat="restructuredtext",
+        docformat=None,  # uses markdown (the default)
         edit_url_map={
             "simmate": "https://github.com/jacksund/simmate/tree/main/src/simmate/"
         },
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     # Now generate all documentation
     all_docs = pdoc.pdoc(
-        "src/simmate",
-        output_directory=Path("docs"),
+        "../src/simmate",
+        output_directory=Path("."),
         format="html",
     )

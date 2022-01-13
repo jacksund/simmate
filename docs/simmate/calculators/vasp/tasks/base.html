@@ -71,6 +71,9 @@
                                 <a class="variable" href="#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a>
                         </li>
                         <li>
+                                <a class="variable" href="#VaspTask.pre_standardize_structure">pre_standardize_structure</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#VaspTask.setup">setup</a>
                         </li>
                         <li>
@@ -107,12 +110,12 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
+<span class="kn">import</span> <span class="nn">yaml</span>
+
 <span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">Vasprun</span>
 
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs.all</span> <span class="kn">import</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">Kpoints</span><span class="p">,</span> <span class="n">Potcar</span>
-<span class="kn">from</span> <span class="nn">simmate.workflow_engine.tasks.supervised_staged_shell_task</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">SupervisedStagedShellTask</span> <span class="k">as</span> <span class="n">SSSTask</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine.tasks.supervised_staged_shell_task</span> <span class="kn">import</span> <span class="n">S3Task</span>
 
 
 <span class="k">def</span> <span class="nf">get_default_parallel_settings</span><span class="p">():</span>
@@ -127,7 +130,7 @@
         <span class="k">return</span> <span class="p">{}</span>
 
 
-<span class="k">class</span> <span class="nc">VaspTask</span><span class="p">(</span><span class="n">SSSTask</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">VaspTask</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
 
     <span class="c1"># Vasp calculations always need an input structure</span>
     <span class="n">requires_structure</span> <span class="o">=</span> <span class="kc">True</span>
@@ -208,6 +211,9 @@
     <span class="c1"># In some cases, we may want to sanitize the structure during our setup().</span>
     <span class="c1"># This means converting to the LLL-reduced primitive cell.</span>
     <span class="n">pre_sanitize_structure</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># The same might be true for converting the structure to the standard primitive</span>
+    <span class="c1"># of a structure. For example, this is required when calculating band structures.</span>
+    <span class="n">pre_standardize_structure</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># TODO: not implemented yet</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -261,7 +267,7 @@
             <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># if KSPACING is not provide in the incar AND kpoints is attached to this</span>
+        <span class="c1"># if KSPACING is not provided in the incar AND kpoints is attached to this</span>
         <span class="c1"># class instance, then we write the KPOINTS file</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;KSPACING&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">incar</span><span class="p">):</span>
             <span class="n">Kpoints</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
@@ -307,22 +313,48 @@
         <span class="c1"># regarless of what when wrong. In the future, I should consider writing</span>
         <span class="c1"># a separate method for those that loads the CONTCAR and moves on.</span>
 
-        <span class="c1"># grab the final structure</span>
-        <span class="c1"># final_structure = vasprun.structures[-1]</span>
-
-        <span class="c1"># grab the energy per atom</span>
-        <span class="c1"># final_energy = vasprun.final_energy / final_structure.num_sites</span>
+        <span class="c1"># write output files/plots for the user to quickly reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
 
         <span class="c1"># confirm that the calculation converged (ionicly and electronically)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">confirm_convergence</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">converged</span>
 
-        <span class="c1"># OPTIMIZE: see my comment above on this attribute</span>
+        <span class="c1"># OPTIMIZE: see my comment above on the return_final_structure attribute</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_final_structure</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;structure_final&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">final_structure</span><span class="p">,</span> <span class="s2">&quot;vasprun&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="p">}</span>
 
         <span class="c1"># return vasprun object</span>
         <span class="k">return</span> <span class="n">vasprun</span>
+
+    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is an EXPERIMENTAL feature.</span>
+
+<span class="sd">        This prints a &quot;simmate_summary.yaml&quot; file with key output information.</span>
+
+<span class="sd">        This method should not be called directly as it used within workup().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># OPTIMIZE: Ideally, I could take the vasprun object and run to_json,</span>
+        <span class="c1"># but this output is extremely difficult to read.</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;structure_final&quot;</span><span class="p">:</span> <span class="s2">&quot;The final structure is located in the CONTCAR file&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;energy_final&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;final_energy&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+            <span class="s2">&quot;energy_final_per_atom&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;final_energy_per_atom&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+            <span class="s2">&quot;converged_electroinc&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">converged_electronic</span><span class="p">,</span>
+            <span class="s2">&quot;converged_ionic&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">converged_ionic</span><span class="p">,</span>
+            <span class="s2">&quot;fermi_energy&quot;</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;efermi&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;valence_band_maximum&quot;</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;conduction_band_minimum&quot;</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="n">summary_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary.yaml&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -380,12 +412,12 @@
 
         
         <span class="def">class</span>
-        <span class="name">VaspTask</span><wbr>(<span class="base"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask">simmate.workflow_engine.tasks.supervised_staged_shell_task.SupervisedStagedShellTask</a></span>):
+        <span class="name">VaspTask</span><wbr>(<span class="base"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.tasks.supervised_staged_shell_task.S3Task</a></span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">VaspTask</span><span class="p">(</span><span class="n">SSSTask</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">VaspTask</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
 
     <span class="c1"># Vasp calculations always need an input structure</span>
     <span class="n">requires_structure</span> <span class="o">=</span> <span class="kc">True</span>
@@ -466,6 +498,9 @@
     <span class="c1"># In some cases, we may want to sanitize the structure during our setup().</span>
     <span class="c1"># This means converting to the LLL-reduced primitive cell.</span>
     <span class="n">pre_sanitize_structure</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># The same might be true for converting the structure to the standard primitive</span>
+    <span class="c1"># of a structure. For example, this is required when calculating band structures.</span>
+    <span class="n">pre_standardize_structure</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># TODO: not implemented yet</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -519,7 +554,7 @@
             <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># if KSPACING is not provide in the incar AND kpoints is attached to this</span>
+        <span class="c1"># if KSPACING is not provided in the incar AND kpoints is attached to this</span>
         <span class="c1"># class instance, then we write the KPOINTS file</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;KSPACING&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">incar</span><span class="p">):</span>
             <span class="n">Kpoints</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
@@ -565,22 +600,48 @@
         <span class="c1"># regarless of what when wrong. In the future, I should consider writing</span>
         <span class="c1"># a separate method for those that loads the CONTCAR and moves on.</span>
 
-        <span class="c1"># grab the final structure</span>
-        <span class="c1"># final_structure = vasprun.structures[-1]</span>
-
-        <span class="c1"># grab the energy per atom</span>
-        <span class="c1"># final_energy = vasprun.final_energy / final_structure.num_sites</span>
+        <span class="c1"># write output files/plots for the user to quickly reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
 
         <span class="c1"># confirm that the calculation converged (ionicly and electronically)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">confirm_convergence</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">converged</span>
 
-        <span class="c1"># OPTIMIZE: see my comment above on this attribute</span>
+        <span class="c1"># OPTIMIZE: see my comment above on the return_final_structure attribute</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_final_structure</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;structure_final&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">final_structure</span><span class="p">,</span> <span class="s2">&quot;vasprun&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="p">}</span>
 
         <span class="c1"># return vasprun object</span>
         <span class="k">return</span> <span class="n">vasprun</span>
+
+    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is an EXPERIMENTAL feature.</span>
+
+<span class="sd">        This prints a &quot;simmate_summary.yaml&quot; file with key output information.</span>
+
+<span class="sd">        This method should not be called directly as it used within workup().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># OPTIMIZE: Ideally, I could take the vasprun object and run to_json,</span>
+        <span class="c1"># but this output is extremely difficult to read.</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;structure_final&quot;</span><span class="p">:</span> <span class="s2">&quot;The final structure is located in the CONTCAR file&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;energy_final&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;final_energy&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+            <span class="s2">&quot;energy_final_per_atom&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;final_energy_per_atom&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+            <span class="s2">&quot;converged_electroinc&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">converged_electronic</span><span class="p">,</span>
+            <span class="s2">&quot;converged_ionic&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">converged_ionic</span><span class="p">,</span>
+            <span class="s2">&quot;fermi_energy&quot;</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;efermi&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;valence_band_maximum&quot;</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s2">&quot;conduction_band_minimum&quot;</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="n">summary_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary.yaml&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -604,10 +665,10 @@
 
         </details>
 
-            <div class="docstring"><h2 id="introduction-to-the-sss-task">Introduction to the "SSS Task"</h2>
+            <div class="docstring"><h2 id="the-supervised-staged-shell-task-aka-s3task">The Supervised-Staged-Shell Task (aka "S3Task")</h2>
 
-<p>This class contains the core functionality to <em>supervise</em> a <em>staged</em> task
-involving some <em>shell</em> command.</p>
+<p>This class contains the core functionality to <strong>supervise</strong> a <strong>staged</strong> task
+involving some <strong>shell</strong> command.</p>
 
 <p>Let's breakdown what this means...</p>
 
@@ -616,10 +677,11 @@ VASP requires that we call the "vasp_std &gt; vasp.out" command in order to run 
 calculation. We consider calling external programs a <em>staged</em> task made
 up of three steps:</p>
 
-<pre><code>- setup = writing any input files required for the program
-- execution = actually calling the command and running our program
-- workup = loading data from output files back into python
-</code></pre>
+<ul>
+<li>setup = writing any input files required for the program</li>
+<li>execution = actually calling the command and running our program</li>
+<li>workup = loading data from output files back into python</li>
+</ul>
 
 <p>And for <em>supervising</em> the task, this means we monitor the program while the
 execution stage is running. So once a program is started, Simmate can check
@@ -627,76 +689,70 @@ output files for common errors/issues. If an error is found, we stop the
 program, fix the issue, and then restart it. Any fixes that were made are
 written to "simmate_corrections.csv".</p>
 
-<p>TODO: Make a simple diagram to visualize the overall process and add it here.
+<!--
+TODO: Make a simple diagram to visualize the overall process and add it here.
 It will be similar to Custodian's, but we don't have a list of jobs here.
 https://materialsproject.github.io/custodian/index.html#usage
-The steps are...</p>
+The steps are...
 
-<ul>
-<li>Write Input Files based on custom+defualt settings</li>
-<li>Run the calculation by calling the program</li>
-<li>Load ouput files</li>
-<li>check for errors</li>
-<li>[correct them, rerun]</li>
-<li>postprocess/analysis</li>
-</ul>
+- Write Input Files based on custom+defualt settings
+- Run the calculation by calling the program
+- Load ouput files
+- check for errors
+- [correct them, rerun]
+- postprocess/analysis
+-->
 
 <p>This entire process (the different stages and monitoring) is carried out
 using the <code><a href="#VaspTask.run">run()</a></code> method. You rarely use this class directly. Instead,
 you typically use a subclass of it. As a user, you really just need to do
 something like this:</p>
 
-<p>.. code-block:: python</p>
+<div class="codehilite"><pre><span></span><code>   <span class="kn">from</span> <span class="nn"><a href="../../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a></span> <span class="kn">import</span> <span class="n">ExampleTask</span>
 
-<p>from <a href="../../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a> import ExampleTask
-   my_task = ExampleTask()
-   my_result = my_task.run()</p>
+   <span class="n">my_task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
+   <span class="n">my_result</span> <span class="o">=</span> <span class="n">my_task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</code></pre></div>
 
 <p>And that's it!</p>
 
 <p>For experts, this class can be viewed as a combination of prefect's ShellTask,
-a custodian Job, Custodian monitoring. When subclassing this, we can absorb
+a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
 functionality of pymatgen.io.vasp.sets too. By merging all of these together
 into one class, we make things much easier for users and creating new Tasks.</p>
 
 <h2 id="inheriting-from-this-class">Inheriting from this class</h2>
 
-<p>This class is commonly used to make tasks for our calculator modules. For
-a full (and advanced) example, take a look at...</p>
+<p>This class is commonly used to make tasks for our calculator modules, so you
+will likely want to subclass this. Here is a basic example of inheriting
+and then running a task:</p>
 
-<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">simmate</span><span class="o">.</span><span class="n">calculators</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">VaspTask</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html">simmate.workflow_engine.tasks.supervised_staged_shell_task</a></span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">S3Task</span> <span class="k">as</span> <span class="n">SSSTask</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">example.error_handlers</span> <span class="kn">import</span> <span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleTask</span><span class="p">(</span><span class="n">SSSTask</span><span class="p">):</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;echo example&quot;</span>  <span class="c1"># just prints out &quot;example&quot;</span>
+    <span class="n">max_corrections</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span><span class="p">]</span>
+    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">some_new_setting</span> <span class="o">=</span> <span class="mi">123</span>
+
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have these two args</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m setting things up!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;My new setting is </span><span class="si">{</span><span class="n">some_new_setting</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have this arg</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m working things up!&quot;</span><span class="p">)</span>
+
+
+<span class="n">task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </code></pre></div>
-
-<p>And here's an example of inheriting and then running a task:</p>
-
-<p>.. code-block:: python</p>
-
-<pre><code>from <a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html">simmate.workflow_engine.tasks.supervised_staged_shell_task</a> import (
-    SupervisedStagedShellTask as SSSTask,
-)
-from example.error_handlers import PossibleError1, PossibleError2
-
-
-class ExampleTask(SSSTask):
-
-    command = "echo example"  # just prints out "example"
-    max_corrections = 7
-    error_handlers = [PossibleError1, PossibleError2]
-    polling_timestep = 0.1
-    monitor_freq = 10
-    some_new_setting = 123
-
-    def setup(self, structure, directory):  # &lt;-- MUST have these two args
-        print("I'm setting things up!")
-        print(f"My new setting is {some_new_setting}")
-
-    def workup(self, directory):  # &lt;-- MUST have this arg
-        print("I'm working things up!")
-
-
-task = ExampleTask()
-result = task.run()
-</code></pre>
 
 <p>There are a couple things to note here:</p>
 
@@ -706,6 +762,9 @@ result = task.run()
 <li>make sure you include the structure/directory inputs, even if you don't use them.</li>
 <li>Don't add new kwargs to methods. Instead handle these options through attributes.</li>
 </ul>
+
+<p>For a full (and advanced) example, of a subclass take a look at
+<code><a href="#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></code>.</p>
 </div>
 
 
@@ -768,51 +827,53 @@ same every time you call the task.run() method.</p>
 
 <h2 id="parameters">Parameters</h2>
 
-<p>structure : pymatgen.core.structure.Structure (optional)
-    The structure to use for the task, if one is required. Typically, this
-    class is ran for multiple structures, where you can pass this
-    option to the task.run() method instead.
-command : str (optional)
-    The command that will be called during execution.
-directory : str (optional)
-    The directory to run everything in. This is passed to the ulitities
-    function <a href="../../../../simmate.html#ulitities.get_directory">simmate.ulitities.get_directory</a>
-error_handlers : List[ErrorHandler] (optional)
-    The list of error handler objects to use. These should be listing in
-    order of priority, where to highest priority is first. If one handler
-    is triggered, the correction will be applied and none of the
-    following handlers will be checked.
-max_corrections : int (optional)
-    The maximum number of times that corrections will be made before
-    giving up on the calculation. Note, once this limit is exceeded, the
-    error is stored without correcting or restarting the run.
-monitor : bool (optional)
-    Whether to run monitor handlers while the command runs. False means
-    wait until the job has completed.
-polling_timestep : float (optional)
-    If we are monitoring the job for errors while it runs, this is how often
-    (in seconds) we should check the status of our job. Note this check is
-    just whether the job is done or not. This is NOT how often we check for
-    errors. See monitor_freq for that.
-monitor_freq : int (optional)
-    The frequency we should run check for errors with our monitors. This is
-    based on the polling_timestep loops. For example, if we have a
-    polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
-    the monitor checks every other loop -- or every 2<em>10 = 20 seconds. The
-    default values of polling_timestep=10 and monitor_freq=30 indicate that
-    we run monitoring functions every 5 minutes (10</em>30=300s=5min).
-save_corrections_to_file : bool (optional)
-    Whether to write a log file of the corrections made. The default is True.
-corrections_filename : str (optional)
-    If save_corrections_to_file is True, this is the filename of where
-    to write the corrections. The default is "simmate_corrections.csv".
-compress_output : bool (optional)
-    Whether to compress the directory to a zip file at the end of the
-    task run. After compression, it will also delete the directory.
-    The default is False.
-**kwargs : Any
-    All extra arguments supported by prefect.core.task.Task. To see all
-    the options, visit https://docs.prefect.io/api/latest/core/task.html</p>
+<ul>
+<li><code>structure</code>:
+The structure to use for the task, if one is required. Typically, this
+class is ran for multiple structures, where you can pass this
+option to the task.run() method instead.</li>
+<li><code><a href="#VaspTask.command">command</a></code>:
+The command that will be called during execution.</li>
+<li><code>directory</code>:
+The directory to run everything in. This is passed to the ulitities
+function <a href="../../../../simmate.html#ulitities.get_directory">simmate.ulitities.get_directory</a></li>
+<li><code><a href="#VaspTask.error_handlers">error_handlers</a></code>:
+The list of error handler objects to use. These should be listing in
+order of priority, where to highest priority is first. If one handler
+is triggered, the correction will be applied and none of the
+following handlers will be checked.</li>
+<li><code><a href="#VaspTask.max_corrections">max_corrections</a></code>:
+The maximum number of times that corrections will be made before
+giving up on the calculation. Note, once this limit is exceeded, the
+error is stored without correcting or restarting the run.</li>
+<li><code><a href="#VaspTask.monitor">monitor</a></code>:
+Whether to run monitor handlers while the command runs. False means
+wait until the job has completed.</li>
+<li><code><a href="#VaspTask.polling_timestep">polling_timestep</a></code>:
+If we are monitoring the job for errors while it runs, this is how often
+(in seconds) we should check the status of our job. Note this check is
+just whether the job is done or not. This is NOT how often we check for
+errors. See monitor_freq for that.</li>
+<li><code><a href="#VaspTask.monitor_freq">monitor_freq</a></code>:
+The frequency we should run check for errors with our monitors. This is
+based on the polling_timestep loops. For example, if we have a
+polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
+the monitor checks every other loop -- or every 2x10 = 20 seconds. The
+default values of polling_timestep=10 and monitor_freq=30 indicate that
+we run monitoring functions every 5 minutes (10x30=300s=5min).</li>
+<li><code>save_corrections_to_file</code>:
+Whether to write a log file of the corrections made. The default is True.</li>
+<li><code>corrections_filename</code>:
+If save_corrections_to_file is True, this is the filename of where
+to write the corrections. The default is "simmate_corrections.csv".</li>
+<li><code>compress_output</code>:
+Whether to compress the directory to a zip file at the end of the
+task run. After compression, it will also delete the directory.
+The default is False.</li>
+<li><code>**kwargs</code>:
+All extra arguments supported by
+<a href="https://docs.prefect.io/api/latest/core/task.html">prefect.core.task.Task</a>.</li>
+</ul>
 </div>
 
 
@@ -823,7 +884,9 @@ compress_output : bool (optional)
         <span class="name">requires_structure</span><span class="default_value"> = True</span>
     </div>
 
-    
+            <div class="docstring"><p>Indicates whether a structure is needed if for the run() method.</p>
+</div>
+
 
                             </div>
                             <div id="VaspTask.return_final_structure" class="classattr">
@@ -841,7 +904,9 @@ compress_output : bool (optional)
         <span class="name">command</span><span class="default_value"> = &#39;vasp_std &gt; vasp.out&#39;</span>
     </div>
 
-    
+            <div class="docstring"><p>The defualt shell command to use.</p>
+</div>
+
 
                             </div>
                             <div id="VaspTask.incar" class="classattr">
@@ -907,6 +972,15 @@ compress_output : bool (optional)
     
 
                             </div>
+                            <div id="VaspTask.pre_standardize_structure" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#VaspTask.pre_standardize_structure">#&nbsp;&nbsp</a>
+
+        <span class="name">pre_standardize_structure</span><span class="default_value"> = False</span>
+    </div>
+
+    
+
+                            </div>
                             <div id="VaspTask.setup" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#VaspTask.setup">#&nbsp;&nbsp</a>
 
@@ -935,7 +1009,7 @@ compress_output : bool (optional)
             <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># if KSPACING is not provide in the incar AND kpoints is attached to this</span>
+        <span class="c1"># if KSPACING is not provided in the incar AND kpoints is attached to this</span>
         <span class="c1"># class instance, then we write the KPOINTS file</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;KSPACING&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">incar</span><span class="p">):</span>
             <span class="n">Kpoints</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
@@ -967,10 +1041,12 @@ doesn't nothing but "pass".</p>
 
 <h2 id="parameters">Parameters</h2>
 
-<p>structure : pymatgen.core.structure.Structure
-    The structure to use for the task, if one is required.
-directory : str
-    The directory to run everything in.</p>
+<ul>
+<li><code>structure</code>:
+The structure to use for the task, if one is required.</li>
+<li><code>directory</code>:
+The directory to run everything in. Must exist already.</li>
+</ul>
 </div>
 
 
@@ -1014,17 +1090,14 @@ directory : str
         <span class="c1"># regarless of what when wrong. In the future, I should consider writing</span>
         <span class="c1"># a separate method for those that loads the CONTCAR and moves on.</span>
 
-        <span class="c1"># grab the final structure</span>
-        <span class="c1"># final_structure = vasprun.structures[-1]</span>
-
-        <span class="c1"># grab the energy per atom</span>
-        <span class="c1"># final_energy = vasprun.final_energy / final_structure.num_sites</span>
+        <span class="c1"># write output files/plots for the user to quickly reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
 
         <span class="c1"># confirm that the calculation converged (ionicly and electronically)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">confirm_convergence</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">converged</span>
 
-        <span class="c1"># OPTIMIZE: see my comment above on this attribute</span>
+        <span class="c1"># OPTIMIZE: see my comment above on the return_final_structure attribute</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_final_structure</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;structure_final&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">final_structure</span><span class="p">,</span> <span class="s2">&quot;vasprun&quot;</span><span class="p">:</span> <span class="n">vasprun</span><span class="p">}</span>
 
@@ -1083,15 +1156,15 @@ settings for users to inspect.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask">simmate.workflow_engine.tasks.supervised_staged_shell_task.SupervisedStagedShellTask</a></dt>
-                                <dd id="VaspTask.error_handlers" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.error_handlers">error_handlers</a></dd>
-                <dd id="VaspTask.max_corrections" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.max_corrections">max_corrections</a></dd>
-                <dd id="VaspTask.monitor" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.monitor">monitor</a></dd>
-                <dd id="VaspTask.polling_timestep" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.polling_timestep">polling_timestep</a></dd>
-                <dd id="VaspTask.monitor_freq" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.monitor_freq">monitor_freq</a></dd>
-                <dd id="VaspTask.execute" class="function"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.execute">execute</a></dd>
-                <dd id="VaspTask.run" class="function"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.run">run</a></dd>
-                <dd id="VaspTask.print_config" class="function"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#SupervisedStagedShellTask.print_config">print_config</a></dd>
+                                    <div><dt><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.tasks.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="VaspTask.error_handlers" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                <dd id="VaspTask.max_corrections" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="VaspTask.monitor" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="VaspTask.polling_timestep" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="VaspTask.monitor_freq" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="VaspTask.execute" class="function"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="VaspTask.run" class="function"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="VaspTask.print_config" class="function"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
             <div><dt>prefect.core.task.Task</dt>

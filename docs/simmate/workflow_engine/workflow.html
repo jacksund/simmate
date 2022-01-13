@@ -90,15 +90,22 @@
 
 
 <span class="k">class</span> <span class="nc">Workflow</span><span class="p">(</span><span class="n">PrefectFlow</span><span class="p">):</span>
-    <span class="c1"># This behaves exactly like a normal Prefect workflow, where I add some</span>
-    <span class="c1"># common utilities and pre-submit tasks. This allows me to register a</span>
-    <span class="c1"># calculation along with submitting a workflow to the cloud</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class behaves exactly like a normal Prefect workflow, where we add some</span>
+<span class="sd">    common utilities and pre-submit tasks. For example, there is the `run_cloud`</span>
+<span class="sd">    methods, which us to register a calculation along with submitting a workflow</span>
+<span class="sd">    to the cloud.</span>
 
-    <span class="c1"># In many ETL workflows, we may also want the result of the some terminating</span>
-    <span class="c1"># task directly. This would save us from having to go find the result in</span>
-    <span class="c1"># the database. So by setting this, we are able get access a specific task&#39;s</span>
-    <span class="c1"># result -- directly as a python object(s). This is optional though.</span>
+<span class="sd">    To learn how to use this class, see [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">result_task</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In many ETL workflows, we may also want the result of the some terminating</span>
+<span class="sd">    task directly. This would save us from having to go find the result in</span>
+<span class="sd">    the database. So by setting `result_task`, we are able get access a specific task&#39;s</span>
+<span class="sd">    result -- directly as a python object(s). This is optional.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">run_cloud</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -107,32 +114,38 @@
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This schedules the workflow to run remotely.</span>
-
-<span class="sd">        Make sure you have Prefect properly configured and have registered your</span>
-<span class="sd">        workflow with the backend.</span>
-
-<span class="sd">        Note that this method can be viewed as a fork of...</span>
-<span class="sd">            from prefect.tasks.prefect.flow_run import create_flow_run</span>
-<span class="sd">        It can also be viewed as a more convenient way to call to client.create_flow_run.</span>
-<span class="sd">        I don&#39;t accept any other client.create_flow_run() inputs besides &#39;labels&#39;.</span>
-<span class="sd">        This may change in the future if I need to set flow run names or schedules.</span>
+<span class="sd">        This schedules the workflow to run remotely on Prefect Cloud.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 
-<span class="sd">        labels: List[str]</span>
+<span class="sd">        - `labels`:</span>
 <span class="sd">            a list of labels to schedule the workflow with</span>
-<span class="sd">        wait_for_run: bool</span>
+
+<span class="sd">        - `wait_for_run`:</span>
 <span class="sd">            whether to wait for the workflow to finish. If False, the workflow</span>
 <span class="sd">            will simply be submitted and then exit. The default is True.</span>
-<span class="sd">        **kwargs:</span>
-<span class="sd">            all options that are normally passed to the run() method</span>
+
+<span class="sd">        - `**kwargs`:</span>
+<span class="sd">            all options that are normally passed to the workflow.run() method</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        str:</span>
-<span class="sd">            The flow run id that was used in prefect cloud.</span>
+
+<span class="sd">        - The flow run id that was used in prefect cloud.</span>
+
+
+<span class="sd">        Usage</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        Make sure you have Prefect properly configured and have registered your</span>
+<span class="sd">        workflow with the backend.</span>
+
+<span class="sd">        Note that this method can be viewed as a fork of:</span>
+<span class="sd">            - from prefect.tasks.prefect.flow_run import create_flow_run</span>
+<span class="sd">        It can also be viewed as a more convenient way to call to client.create_flow_run.</span>
+<span class="sd">        I don&#39;t accept any other client.create_flow_run() inputs besides &#39;labels&#39;.</span>
+<span class="sd">        This may change in the future if I need to set flow run names or schedules.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Grab the logger as we will print useful information below</span>
@@ -327,15 +340,22 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Workflow</span><span class="p">(</span><span class="n">PrefectFlow</span><span class="p">):</span>
-    <span class="c1"># This behaves exactly like a normal Prefect workflow, where I add some</span>
-    <span class="c1"># common utilities and pre-submit tasks. This allows me to register a</span>
-    <span class="c1"># calculation along with submitting a workflow to the cloud</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class behaves exactly like a normal Prefect workflow, where we add some</span>
+<span class="sd">    common utilities and pre-submit tasks. For example, there is the `run_cloud`</span>
+<span class="sd">    methods, which us to register a calculation along with submitting a workflow</span>
+<span class="sd">    to the cloud.</span>
 
-    <span class="c1"># In many ETL workflows, we may also want the result of the some terminating</span>
-    <span class="c1"># task directly. This would save us from having to go find the result in</span>
-    <span class="c1"># the database. So by setting this, we are able get access a specific task&#39;s</span>
-    <span class="c1"># result -- directly as a python object(s). This is optional though.</span>
+<span class="sd">    To learn how to use this class, see [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">result_task</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In many ETL workflows, we may also want the result of the some terminating</span>
+<span class="sd">    task directly. This would save us from having to go find the result in</span>
+<span class="sd">    the database. So by setting `result_task`, we are able get access a specific task&#39;s</span>
+<span class="sd">    result -- directly as a python object(s). This is optional.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">run_cloud</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -344,32 +364,38 @@
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This schedules the workflow to run remotely.</span>
-
-<span class="sd">        Make sure you have Prefect properly configured and have registered your</span>
-<span class="sd">        workflow with the backend.</span>
-
-<span class="sd">        Note that this method can be viewed as a fork of...</span>
-<span class="sd">            from prefect.tasks.prefect.flow_run import create_flow_run</span>
-<span class="sd">        It can also be viewed as a more convenient way to call to client.create_flow_run.</span>
-<span class="sd">        I don&#39;t accept any other client.create_flow_run() inputs besides &#39;labels&#39;.</span>
-<span class="sd">        This may change in the future if I need to set flow run names or schedules.</span>
+<span class="sd">        This schedules the workflow to run remotely on Prefect Cloud.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 
-<span class="sd">        labels: List[str]</span>
+<span class="sd">        - `labels`:</span>
 <span class="sd">            a list of labels to schedule the workflow with</span>
-<span class="sd">        wait_for_run: bool</span>
+
+<span class="sd">        - `wait_for_run`:</span>
 <span class="sd">            whether to wait for the workflow to finish. If False, the workflow</span>
 <span class="sd">            will simply be submitted and then exit. The default is True.</span>
-<span class="sd">        **kwargs:</span>
-<span class="sd">            all options that are normally passed to the run() method</span>
+
+<span class="sd">        - `**kwargs`:</span>
+<span class="sd">            all options that are normally passed to the workflow.run() method</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        str:</span>
-<span class="sd">            The flow run id that was used in prefect cloud.</span>
+
+<span class="sd">        - The flow run id that was used in prefect cloud.</span>
+
+
+<span class="sd">        Usage</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        Make sure you have Prefect properly configured and have registered your</span>
+<span class="sd">        workflow with the backend.</span>
+
+<span class="sd">        Note that this method can be viewed as a fork of:</span>
+<span class="sd">            - from prefect.tasks.prefect.flow_run import create_flow_run</span>
+<span class="sd">        It can also be viewed as a more convenient way to call to client.create_flow_run.</span>
+<span class="sd">        I don&#39;t accept any other client.create_flow_run() inputs besides &#39;labels&#39;.</span>
+<span class="sd">        This may change in the future if I need to set flow run names or schedules.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Grab the logger as we will print useful information below</span>
@@ -534,73 +560,12 @@
 
         </details>
 
-            <div class="docstring"><p>The Flow class is used as the representation of a collection of dependent Tasks.  Flows
-track Task dependencies, parameters and provide the main API for constructing and managing
-workflows.</p>
+            <div class="docstring"><p>This class behaves exactly like a normal Prefect workflow, where we add some
+common utilities and pre-submit tasks. For example, there is the <code><a href="#Workflow.run_cloud">run_cloud</a></code>
+methods, which us to register a calculation along with submitting a workflow
+to the cloud.</p>
 
-<p>Initializing Flow example:</p>
-
-<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">MyTask</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;hello&quot;</span>
-
-<span class="n">task_1</span> <span class="o">=</span> <span class="n">MyTask</span><span class="p">()</span>
-<span class="n">flow</span> <span class="o">=</span> <span class="n">Flow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_flow&quot;</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="p">[</span><span class="n">task_1</span><span class="p">])</span>
-
-<span class="n">flow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-
-<p>Initializing Flow as context manager example:</p>
-
-<div class="codehilite"><pre><span></span><code><span class="nd">@task</span>
-<span class="k">def</span> <span class="nf">my_task</span><span class="p">():</span>
-    <span class="k">return</span> <span class="s2">&quot;hello&quot;</span>
-
-<span class="k">with</span> <span class="n">Flow</span><span class="p">(</span><span class="s2">&quot;my_flow&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">flow</span><span class="p">:</span>
-    <span class="n">task_1</span> <span class="o">=</span> <span class="n">my_task</span><span class="p">()</span>
-
-<span class="n">flow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-
-<p>Args:
-    - name (str): The name of the flow. Cannot be <code>None</code> or an empty string
-    - schedule (prefect.schedules.Schedule, optional): A default schedule for the flow
-    - executor (prefect.executors.Executor, optional): The executor that the flow
-       should use. If <code>None</code>, the default executor configured in the runtime environment
-       will be used.
-    - environment (prefect.environments.Environment, optional, DEPRECATED): The environment
-       that the flow should be run in.
-    - run_config (prefect.run_configs.RunConfig, optional): The runtime
-       configuration to use when deploying this flow.
-    - storage (prefect.storage.Storage, optional): The unit of storage
-        that the flow will be written into.
-    - tasks ([Task], optional): If provided, a list of tasks that will initialize the flow
-    - edges ([Edge], optional): A list of edges between tasks
-    - reference_tasks ([Task], optional): A list of tasks that determine the final
-        state of a flow
-    - result (Result, optional): the result instance used to retrieve and store
-        task results during execution
-    - state_handlers (Iterable[Callable], optional): A list of state change handlers
-        that will be called whenever the flow changes state, providing an
-        opportunity to inspect or modify the new state. The handler
-        will be passed the flow instance, the old (prior) state, and the new
-        (current) state, with the following signature:
-            <code>state_handler(flow: Flow, old_state: State, new_state: State) -&gt; Optional[State]</code>
-        If multiple functions are passed, then the <code>new_state</code> argument will be the
-        result of the previous handler.
-    - on_failure (Callable, optional): A function with signature <code>fn(flow: Flow, state:
-        State) -&gt; None</code> which will be called anytime this Flow enters a failure state
-    - validate (bool, optional): Whether or not to check the validity of
-        the flow (e.g., presence of cycles and illegal keys) after adding the edges passed
-        in the <code>edges</code> argument. Defaults to the value of <code>eager_edge_validation</code> in
-        your prefect configuration file.
-    -  terminal_state_handler (Callable, optional): A state handler that can be used to
-        inspect or modify the final state of the flow run. Expects a callable with signature
-        <code>handler(flow: Flow, state: State, reference_task_states: Set[State]) -&gt; Optional[State]</code>,
-        where <code>flow</code> is the current Flow, <code>state</code> is the current state of the Flow run, and
-        <code>reference_task_states</code> is set of states for all reference tasks in the flow. It should
-        return either a new state for the flow run, or <code>None</code> (in which case the existing
-        state will be used).</p>
+<p>To learn how to use this class, see <a href="https://docs.prefect.io/api/latest/core/flow.html#flow-2">prefect.core.flow.Flow</a></p>
 </div>
 
 
@@ -610,7 +575,12 @@ workflows.</p>
         <span class="name">result_task</span><span class="default_value"> = None</span>
     </div>
 
-    
+            <div class="docstring"><p>In many ETL workflows, we may also want the result of the some terminating
+task directly. This would save us from having to go find the result in
+the database. So by setting <code><a href="#Workflow.result_task">result_task</a></code>, we are able get access a specific task's
+result -- directly as a python object(s). This is optional.</p>
+</div>
+
 
                             </div>
                             <div id="Workflow.run_cloud" class="classattr">
@@ -635,32 +605,38 @@ workflows.</p>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This schedules the workflow to run remotely.</span>
-
-<span class="sd">        Make sure you have Prefect properly configured and have registered your</span>
-<span class="sd">        workflow with the backend.</span>
-
-<span class="sd">        Note that this method can be viewed as a fork of...</span>
-<span class="sd">            from prefect.tasks.prefect.flow_run import create_flow_run</span>
-<span class="sd">        It can also be viewed as a more convenient way to call to client.create_flow_run.</span>
-<span class="sd">        I don&#39;t accept any other client.create_flow_run() inputs besides &#39;labels&#39;.</span>
-<span class="sd">        This may change in the future if I need to set flow run names or schedules.</span>
+<span class="sd">        This schedules the workflow to run remotely on Prefect Cloud.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 
-<span class="sd">        labels: List[str]</span>
+<span class="sd">        - `labels`:</span>
 <span class="sd">            a list of labels to schedule the workflow with</span>
-<span class="sd">        wait_for_run: bool</span>
+
+<span class="sd">        - `wait_for_run`:</span>
 <span class="sd">            whether to wait for the workflow to finish. If False, the workflow</span>
 <span class="sd">            will simply be submitted and then exit. The default is True.</span>
-<span class="sd">        **kwargs:</span>
-<span class="sd">            all options that are normally passed to the run() method</span>
+
+<span class="sd">        - `**kwargs`:</span>
+<span class="sd">            all options that are normally passed to the workflow.run() method</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        str:</span>
-<span class="sd">            The flow run id that was used in prefect cloud.</span>
+
+<span class="sd">        - The flow run id that was used in prefect cloud.</span>
+
+
+<span class="sd">        Usage</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        Make sure you have Prefect properly configured and have registered your</span>
+<span class="sd">        workflow with the backend.</span>
+
+<span class="sd">        Note that this method can be viewed as a fork of:</span>
+<span class="sd">            - from prefect.tasks.prefect.flow_run import create_flow_run</span>
+<span class="sd">        It can also be viewed as a more convenient way to call to client.create_flow_run.</span>
+<span class="sd">        I don&#39;t accept any other client.create_flow_run() inputs besides &#39;labels&#39;.</span>
+<span class="sd">        This may change in the future if I need to set flow run names or schedules.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Grab the logger as we will print useful information below</span>
@@ -717,31 +693,36 @@ workflows.</p>
 
         </details>
 
-            <div class="docstring"><p>This schedules the workflow to run remotely.</p>
+            <div class="docstring"><p>This schedules the workflow to run remotely on Prefect Cloud.</p>
+
+<h2 id="parameters">Parameters</h2>
+
+<ul>
+<li><p><code>labels</code>:
+a list of labels to schedule the workflow with</p></li>
+<li><p><code>wait_for_run</code>:
+whether to wait for the workflow to finish. If False, the workflow
+will simply be submitted and then exit. The default is True.</p></li>
+<li><p><code>**kwargs</code>:
+all options that are normally passed to the workflow.run() method</p></li>
+</ul>
+
+<h2 id="returns">Returns</h2>
+
+<ul>
+<li>The flow run id that was used in prefect cloud.</li>
+</ul>
+
+<h2 id="usage">Usage</h2>
 
 <p>Make sure you have Prefect properly configured and have registered your
 workflow with the backend.</p>
 
-<p>Note that this method can be viewed as a fork of...
-    from prefect.tasks.prefect.flow_run import create_flow_run
+<p>Note that this method can be viewed as a fork of:
+    - from prefect.tasks.prefect.flow_run import create_flow_run
 It can also be viewed as a more convenient way to call to client.create_flow_run.
 I don't accept any other client.create_flow_run() inputs besides 'labels'.
 This may change in the future if I need to set flow run names or schedules.</p>
-
-<h2 id="parameters">Parameters</h2>
-
-<p>labels: List[str]
-    a list of labels to schedule the workflow with
-wait_for_run: bool
-    whether to wait for the workflow to finish. If False, the workflow
-    will simply be submitted and then exit. The default is True.
-**kwargs:
-    all options that are normally passed to the run() method</p>
-
-<h2 id="returns">Returns</h2>
-
-<p>str:
-    The flow run id that was used in prefect cloud.</p>
 </div>
 
 

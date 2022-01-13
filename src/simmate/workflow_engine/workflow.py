@@ -16,15 +16,22 @@ from typing import List
 
 
 class Workflow(PrefectFlow):
-    # This behaves exactly like a normal Prefect workflow, where I add some
-    # common utilities and pre-submit tasks. This allows me to register a
-    # calculation along with submitting a workflow to the cloud
+    """
+    This class behaves exactly like a normal Prefect workflow, where we add some
+    common utilities and pre-submit tasks. For example, there is the `run_cloud`
+    methods, which us to register a calculation along with submitting a workflow
+    to the cloud.
 
-    # In many ETL workflows, we may also want the result of the some terminating
-    # task directly. This would save us from having to go find the result in
-    # the database. So by setting this, we are able get access a specific task's
-    # result -- directly as a python object(s). This is optional though.
+    To learn how to use this class, see [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)
+    """
+
     result_task = None
+    """
+    In many ETL workflows, we may also want the result of the some terminating
+    task directly. This would save us from having to go find the result in
+    the database. So by setting `result_task`, we are able get access a specific task's
+    result -- directly as a python object(s). This is optional.
+    """
 
     def run_cloud(
         self,
@@ -33,32 +40,38 @@ class Workflow(PrefectFlow):
         **kwargs,
     ) -> str:
         """
-        This schedules the workflow to run remotely.
-
-        Make sure you have Prefect properly configured and have registered your
-        workflow with the backend.
-
-        Note that this method can be viewed as a fork of...
-            from prefect.tasks.prefect.flow_run import create_flow_run
-        It can also be viewed as a more convenient way to call to client.create_flow_run.
-        I don't accept any other client.create_flow_run() inputs besides 'labels'.
-        This may change in the future if I need to set flow run names or schedules.
+        This schedules the workflow to run remotely on Prefect Cloud.
 
         Parameters
         ----------
 
-        labels: List[str]
+        - `labels`:
             a list of labels to schedule the workflow with
-        wait_for_run: bool
+
+        - `wait_for_run`:
             whether to wait for the workflow to finish. If False, the workflow
             will simply be submitted and then exit. The default is True.
-        **kwargs:
-            all options that are normally passed to the run() method
+
+        - `**kwargs`:
+            all options that are normally passed to the workflow.run() method
 
         Returns
         -------
-        str:
-            The flow run id that was used in prefect cloud.
+
+        - The flow run id that was used in prefect cloud.
+
+
+        Usage
+        -----
+
+        Make sure you have Prefect properly configured and have registered your
+        workflow with the backend.
+
+        Note that this method can be viewed as a fork of:
+            - from prefect.tasks.prefect.flow_run import create_flow_run
+        It can also be viewed as a more convenient way to call to client.create_flow_run.
+        I don't accept any other client.create_flow_run() inputs besides 'labels'.
+        This may change in the future if I need to set flow run names or schedules.
         """
 
         # Grab the logger as we will print useful information below

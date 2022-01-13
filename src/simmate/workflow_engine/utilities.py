@@ -11,16 +11,14 @@ from simmate.workflows.common_tasks.all import (
 )
 
 from typing import List
-from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
-    SupervisedStagedShellTask,
-)
+from simmate.workflow_engine.tasks.supervised_staged_shell_task import S3Task
 
 
 def s3task_to_workflow(
     name: str,
     module: str,
     project_name: str,
-    s3task: SupervisedStagedShellTask,
+    s3task: S3Task,
     calculation_table,  # simmate.database.base_data_types.calculation.Calculation
     register_kwargs: List[str],
 ):
@@ -29,9 +27,11 @@ def s3task_to_workflow(
 
     Very often with Simmate's S3Tasks, the workflow for a single S3Task is
     the same. The workflow is typically made of three tasks:
-        (1) loading the input parameters and registering the calculation
-        (2) running the calculation (what this S3Task does on its own)
-        (3) saving the calculation results
+
+    1. loading the input parameters and registering the calculation
+    2. running the calculation (what this S3Task does on its own)
+    3. saving the calculation results
+
     Task 1 and 3 always use the same functions, where we just need to tell
     it which database table we are registering/saving to.
 

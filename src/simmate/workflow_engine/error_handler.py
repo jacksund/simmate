@@ -8,37 +8,49 @@ import os
 class ErrorHandler(ABC):
     """
     Abstract base class for an ErrorHandler. These handlers should be used in
-    combination with SupervisedStagedShellTasks.
+    combination with S3Tasks.
     """
 
-    # This class property indicates whether the error handler is a monitor,
-    # i.e., a handler that monitors a job as it is running. If a
-    # monitor-type handler notices an error, the job will be sent a
-    # termination signal, the error is then corrected,
-    # and then the job is restarted. This is useful for catching errors
-    # that occur early in the run but do not cause immediate failure.
-    # Also, is_monitor=True and is_terminating=False is a special case. See the
-    # is_terminating description below for why!
     is_monitor = False
+    """
+    This class property indicates whether the error handler is a monitor,
+    i.e., a handler that monitors a job as it is running. If a
+    monitor-type handler notices an error, the job will be sent a
+    termination signal, the error is then corrected,
+    and then the job is restarted. This is useful for catching errors
+    that occur early in the run but do not cause immediate failure.
+    Also, is_monitor=True and is_terminating=False is a special case. See the
+    is_terminating description below for why!
+    """
 
-    # Whether this handler terminates a job upon error detection. By
-    # default, this is True, which means that the current Job will be
-    # stopped when an error is found, then the corrections are applied,
-    # and job restarted. In some instances, some errors may not need the job to be
-    # terminated or may need to wait for some other event to terminate a job.
-    # For example, a particular error may require a flag to be set to request
-    # a job to terminate gracefully once it finishes its current task. The
-    # handler to set the flag should be classified as is_terminating = False to
-    # not terminate the job.
     is_terminating = True
+    """
+    Whether this handler terminates a job upon error detection. By
+    default, this is True, which means that the current Job will be
+    stopped when an error is found, then the corrections are applied,
+    and job restarted. In some instances, some errors may not need the job to be
+    terminated or may need to wait for some other event to terminate a job.
+    For example, a particular error may require a flag to be set to request
+    a job to terminate gracefully once it finishes its current task. The
+    handler to set the flag should be classified as is_terminating = False to
+    not terminate the job.
+    """
 
     # NOTE: if you are using the default check() method (shown below), then you'll
     # need two extra attributes: filename_to_check and possible_error_messages.
-    # This should be a string of the filename (relative path to main directory)
     filename_to_check = None
-    # And then give a list of messages to find in the file. As soon as one is
-    # found, an error is raised
+    """
+    If you are using the default check() method, this is the file to check for
+    errors (using `possible_error_messages`). This should be a string of the 
+    filename relative path to main directory.
+    """
+
     possible_error_messages = None
+    """
+    If you are using the default check() method, then this is the list of messages
+    to find in the file (filename_to_check). As soon as one of these messages is
+    found, the `check` will return True.
+    """
 
     def check(self, directory: str) -> bool:
         """
@@ -49,14 +61,15 @@ class ErrorHandler(ABC):
         you should read through the files directly rather than use
         calculators.example.outputs which in many cases assumes a completed file.
 
-        As some example, ErrorHandler's can have .check() functions that do one
+        As some example, ErrorHandler's can have `check` functions that do one
         of the following:
-            (1) returns True when the error is there and False otherwise
-            (2) the ErrorHandler includes variations of a particular error, where
-                it returns a label such as "Scenario 2" that .correct() can use.
-                And in cases where there's no error, either False or None is returned.
 
-        This method can be overwritten, but we have a "default" function below that
+        1. returns True when the error is there and False otherwise
+        2. the ErrorHandler includes variations of a particular error, where
+            it returns a label such as "Scenario 2" that .correct() can use.
+            And in cases where there's no error, either False or None is returned.
+
+        This method can be overwritten, but we have a "default" function that
         addresses the most common use-case. Here, we have a series of error messages
         and a specific file that they need to be checked in. This default method uses
         self.filename_to_check and self.possible_error_messages to check for an

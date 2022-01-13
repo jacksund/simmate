@@ -54,7 +54,7 @@
 <span class="kn">from</span> <span class="nn">rest_framework</span> <span class="kn">import</span> <span class="n">routers</span>
 
 <span class="kn">from</span> <span class="nn">simmate.website.rest_api.views</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">MaterialsProjectViewSet</span><span class="p">,</span>
+    <span class="n">MatProjViewSet</span><span class="p">,</span>
     <span class="n">JarvisViewSet</span><span class="p">,</span>
     <span class="n">AflowViewSet</span><span class="p">,</span>
     <span class="n">OqmdViewSet</span><span class="p">,</span>
@@ -63,7 +63,7 @@
 
 
 <span class="n">router</span> <span class="o">=</span> <span class="n">routers</span><span class="o">.</span><span class="n">DefaultRouter</span><span class="p">()</span>
-<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;materials-project&quot;</span><span class="p">,</span> <span class="n">MaterialsProjectViewSet</span><span class="p">)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;materials-project&quot;</span><span class="p">,</span> <span class="n">MatProjViewSet</span><span class="p">)</span>
 <span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;jarvis&quot;</span><span class="p">,</span> <span class="n">JarvisViewSet</span><span class="p">)</span>
 <span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;aflow&quot;</span><span class="p">,</span> <span class="n">AflowViewSet</span><span class="p">)</span>
 <span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;oqmd&quot;</span><span class="p">,</span> <span class="n">OqmdViewSet</span><span class="p">)</span>

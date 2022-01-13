@@ -8,9 +8,7 @@ import yaml
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
-from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
-    SupervisedStagedShellTask as SSSTask,
-)
+from simmate.workflow_engine.tasks.supervised_staged_shell_task import S3Task
 
 
 def get_default_parallel_settings():
@@ -25,7 +23,7 @@ def get_default_parallel_settings():
         return {}
 
 
-class VaspTask(SSSTask):
+class VaspTask(S3Task):
 
     # Vasp calculations always need an input structure
     requires_structure = True

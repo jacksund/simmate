@@ -317,7 +317,16 @@ automatic k-mesh has been used.</p>
         <span class="name">is_monitor</span><span class="default_value"> = False</span>
     </div>
 
-    
+            <div class="docstring"><p>This class property indicates whether the error handler is a monitor,
+i.e., a handler that monitors a job as it is running. If a
+monitor-type handler notices an error, the job will be sent a
+termination signal, the error is then corrected,
+and then the job is restarted. This is useful for catching errors
+that occur early in the run but do not cause immediate failure.
+Also, is_monitor=True and is_terminating=False is a special case. See the
+is_terminating description below for why!</p>
+</div>
+
 
                             </div>
                             <div id="MeshSymmetryErrorHandler.filename_to_check" class="classattr">
@@ -326,7 +335,11 @@ automatic k-mesh has been used.</p>
         <span class="name">filename_to_check</span><span class="default_value"> = &#39;vasp.out&#39;</span>
     </div>
 
-    
+            <div class="docstring"><p>If you are using the default check() method, this is the file to check for
+errors (using <code><a href="#MeshSymmetryErrorHandler.possible_error_messages">possible_error_messages</a></code>). This should be a string of the 
+filename relative path to main directory.</p>
+</div>
+
 
                             </div>
                             <div id="MeshSymmetryErrorHandler.possible_error_messages" class="classattr">
@@ -335,7 +348,11 @@ automatic k-mesh has been used.</p>
         <span class="name">possible_error_messages</span><span class="default_value"> = [&#39;Reciprocal lattice and k-lattice belong to different class of&#39;]</span>
     </div>
 
-    
+            <div class="docstring"><p>If you are using the default check() method, then this is the list of messages
+to find in the file (filename_to_check). As soon as one of these messages is
+found, the <code><a href="#MeshSymmetryErrorHandler.check">check</a></code> will return True.</p>
+</div>
+
 
                             </div>
                             <div id="MeshSymmetryErrorHandler.check" class="classattr">
@@ -405,14 +422,17 @@ errors, then None (or an empty list) will be returned. In many cases,
 you should read through the files directly rather than use
 calculators.example.outputs which in many cases assumes a completed file.</p>
 
-<p>As some example, ErrorHandler's can have .check() functions that do one
-of the following:
-    (1) returns True when the error is there and False otherwise
-    (2) the ErrorHandler includes variations of a particular error, where
-        it returns a label such as "Scenario 2" that .correct() can use.
-        And in cases where there's no error, either False or None is returned.</p>
+<p>As some example, ErrorHandler's can have <code><a href="#MeshSymmetryErrorHandler.check">check</a></code> functions that do one
+of the following:</p>
 
-<p>This method can be overwritten, but we have a "default" function below that
+<ol>
+<li>returns True when the error is there and False otherwise</li>
+<li>the ErrorHandler includes variations of a particular error, where
+it returns a label such as "Scenario 2" that .correct() can use.
+And in cases where there's no error, either False or None is returned.</li>
+</ol>
+
+<p>This method can be overwritten, but we have a "default" function that
 addresses the most common use-case. Here, we have a series of error messages
 and a specific file that they need to be checked in. This default method uses
 self.filename_to_check and self.possible_error_messages to check for an

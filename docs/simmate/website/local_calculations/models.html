@@ -56,31 +56,8 @@
 <span class="c1"># Consider moving base_data_types to a separate app</span>
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types.symmetry</span> <span class="kn">import</span> <span class="n">Spacegroup</span>
 
-<span class="kn">from</span> <span class="nn">simmate.database.local_calculations.energy</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">MITStaticEnergy</span><span class="p">,</span>
-    <span class="n">Quality04StaticEnergy</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="kn">from</span> <span class="nn">simmate.database.local_calculations.relaxation</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">MITRelaxation</span><span class="p">,</span>
-    <span class="n">MITIonicStep</span><span class="p">,</span>
-    <span class="n">Quality00Relaxation</span><span class="p">,</span>
-    <span class="n">Quality00IonicStep</span><span class="p">,</span>
-    <span class="n">Quality01Relaxation</span><span class="p">,</span>
-    <span class="n">Quality01IonicStep</span><span class="p">,</span>
-    <span class="n">Quality02Relaxation</span><span class="p">,</span>
-    <span class="n">Quality02IonicStep</span><span class="p">,</span>
-    <span class="n">Quality03Relaxation</span><span class="p">,</span>
-    <span class="n">Quality03IonicStep</span><span class="p">,</span>
-    <span class="n">Quality04Relaxation</span><span class="p">,</span>
-    <span class="n">Quality04IonicStep</span><span class="p">,</span>
-    <span class="n">StagedRelaxation</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="kn">from</span> <span class="nn">simmate.database.local_calculations.evolution</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">EvolutionarySearch</span><span class="p">,</span>
-    <span class="n">StructureSource</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="c1"># Rather than retyping all of the logic from this file, I use the copy method here.</span>
+<span class="kn">from</span> <span class="nn">simmate.database.local_calculations</span> <span class="kn">import</span> <span class="o">*</span>
 </pre></div>
 
         </details>

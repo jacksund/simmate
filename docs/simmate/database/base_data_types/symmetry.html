@@ -62,7 +62,7 @@
 
                         </li>
                         <li>
-                                <a class="variable" href="#Spacegroup.materialsprojectstructure_set">materialsprojectstructure_set</a>
+                                <a class="variable" href="#Spacegroup.matprojstructure_set">matprojstructure_set</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Spacegroup.jarvisstructure_set">jarvisstructure_set</a>
@@ -77,16 +77,16 @@
                                 <a class="variable" href="#Spacegroup.codstructure_set">codstructure_set</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Spacegroup.mitstaticenergy_set">mitstaticenergy_set</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Spacegroup.quality04staticenergy_set">quality04staticenergy_set</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#Spacegroup.mitrelaxation_set">mitrelaxation_set</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Spacegroup.mitionicstep_set">mitionicstep_set</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Spacegroup.matprojrelaxation_set">matprojrelaxation_set</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Spacegroup.matprojionicstep_set">matprojionicstep_set</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Spacegroup.quality00relaxation_set">quality00relaxation_set</a>
@@ -117,6 +117,15 @@
                         </li>
                         <li>
                                 <a class="variable" href="#Spacegroup.quality04ionicstep_set">quality04ionicstep_set</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Spacegroup.mitstaticenergy_set">mitstaticenergy_set</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Spacegroup.matprojstaticenergy_set">matprojstaticenergy_set</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Spacegroup.quality04staticenergy_set">quality04staticenergy_set</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Spacegroup.aflowprototype_set">aflowprototype_set</a>
@@ -372,10 +381,10 @@ object the first time, the query is executed.</p>
     
 
                             </div>
-                            <div id="Spacegroup.materialsprojectstructure_set" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.materialsprojectstructure_set">#&nbsp;&nbsp</a>
+                            <div id="Spacegroup.matprojstructure_set" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.matprojstructure_set">#&nbsp;&nbsp</a>
 
-        <span class="name">materialsprojectstructure_set</span>
+        <span class="name">matprojstructure_set</span>
     </div>
 
             <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
@@ -487,52 +496,6 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
 
 
                             </div>
-                            <div id="Spacegroup.mitstaticenergy_set" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.mitstaticenergy_set">#&nbsp;&nbsp</a>
-
-        <span class="name">mitstaticenergy_set</span>
-    </div>
-
-            <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
-many-to-one relation.</p>
-
-<p>In the example::</p>
-
-<pre><code>class Child(Model):
-    parent = ForeignKey(Parent, related_name='children')
-</code></pre>
-
-<p><code>Parent.children</code> is a <code>ReverseManyToOneDescriptor</code> instance.</p>
-
-<p>Most of the implementation is delegated to a dynamically defined manager
-class built by <code>create_forward_many_to_many_manager()</code> defined below.</p>
-</div>
-
-
-                            </div>
-                            <div id="Spacegroup.quality04staticenergy_set" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.quality04staticenergy_set">#&nbsp;&nbsp</a>
-
-        <span class="name">quality04staticenergy_set</span>
-    </div>
-
-            <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
-many-to-one relation.</p>
-
-<p>In the example::</p>
-
-<pre><code>class Child(Model):
-    parent = ForeignKey(Parent, related_name='children')
-</code></pre>
-
-<p><code>Parent.children</code> is a <code>ReverseManyToOneDescriptor</code> instance.</p>
-
-<p>Most of the implementation is delegated to a dynamically defined manager
-class built by <code>create_forward_many_to_many_manager()</code> defined below.</p>
-</div>
-
-
-                            </div>
                             <div id="Spacegroup.mitrelaxation_set" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Spacegroup.mitrelaxation_set">#&nbsp;&nbsp</a>
 
@@ -560,6 +523,52 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
                                             <div class="attr variable"><a class="headerlink" href="#Spacegroup.mitionicstep_set">#&nbsp;&nbsp</a>
 
         <span class="name">mitionicstep_set</span>
+    </div>
+
+            <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
+many-to-one relation.</p>
+
+<p>In the example::</p>
+
+<pre><code>class Child(Model):
+    parent = ForeignKey(Parent, related_name='children')
+</code></pre>
+
+<p><code>Parent.children</code> is a <code>ReverseManyToOneDescriptor</code> instance.</p>
+
+<p>Most of the implementation is delegated to a dynamically defined manager
+class built by <code>create_forward_many_to_many_manager()</code> defined below.</p>
+</div>
+
+
+                            </div>
+                            <div id="Spacegroup.matprojrelaxation_set" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.matprojrelaxation_set">#&nbsp;&nbsp</a>
+
+        <span class="name">matprojrelaxation_set</span>
+    </div>
+
+            <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
+many-to-one relation.</p>
+
+<p>In the example::</p>
+
+<pre><code>class Child(Model):
+    parent = ForeignKey(Parent, related_name='children')
+</code></pre>
+
+<p><code>Parent.children</code> is a <code>ReverseManyToOneDescriptor</code> instance.</p>
+
+<p>Most of the implementation is delegated to a dynamically defined manager
+class built by <code>create_forward_many_to_many_manager()</code> defined below.</p>
+</div>
+
+
+                            </div>
+                            <div id="Spacegroup.matprojionicstep_set" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.matprojionicstep_set">#&nbsp;&nbsp</a>
+
+        <span class="name">matprojionicstep_set</span>
     </div>
 
             <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
@@ -790,6 +799,75 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
                                             <div class="attr variable"><a class="headerlink" href="#Spacegroup.quality04ionicstep_set">#&nbsp;&nbsp</a>
 
         <span class="name">quality04ionicstep_set</span>
+    </div>
+
+            <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
+many-to-one relation.</p>
+
+<p>In the example::</p>
+
+<pre><code>class Child(Model):
+    parent = ForeignKey(Parent, related_name='children')
+</code></pre>
+
+<p><code>Parent.children</code> is a <code>ReverseManyToOneDescriptor</code> instance.</p>
+
+<p>Most of the implementation is delegated to a dynamically defined manager
+class built by <code>create_forward_many_to_many_manager()</code> defined below.</p>
+</div>
+
+
+                            </div>
+                            <div id="Spacegroup.mitstaticenergy_set" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.mitstaticenergy_set">#&nbsp;&nbsp</a>
+
+        <span class="name">mitstaticenergy_set</span>
+    </div>
+
+            <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
+many-to-one relation.</p>
+
+<p>In the example::</p>
+
+<pre><code>class Child(Model):
+    parent = ForeignKey(Parent, related_name='children')
+</code></pre>
+
+<p><code>Parent.children</code> is a <code>ReverseManyToOneDescriptor</code> instance.</p>
+
+<p>Most of the implementation is delegated to a dynamically defined manager
+class built by <code>create_forward_many_to_many_manager()</code> defined below.</p>
+</div>
+
+
+                            </div>
+                            <div id="Spacegroup.matprojstaticenergy_set" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.matprojstaticenergy_set">#&nbsp;&nbsp</a>
+
+        <span class="name">matprojstaticenergy_set</span>
+    </div>
+
+            <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
+many-to-one relation.</p>
+
+<p>In the example::</p>
+
+<pre><code>class Child(Model):
+    parent = ForeignKey(Parent, related_name='children')
+</code></pre>
+
+<p><code>Parent.children</code> is a <code>ReverseManyToOneDescriptor</code> instance.</p>
+
+<p>Most of the implementation is delegated to a dynamically defined manager
+class built by <code>create_forward_many_to_many_manager()</code> defined below.</p>
+</div>
+
+
+                            </div>
+                            <div id="Spacegroup.quality04staticenergy_set" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.quality04staticenergy_set">#&nbsp;&nbsp</a>
+
+        <span class="name">quality04staticenergy_set</span>
     </div>
 
             <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a

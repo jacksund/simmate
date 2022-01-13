@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="pdoc 8.2.0" />
-    <title>simmate.website.core.views API documentation</title>
+    <title>simmate.calculators.vasp.tasks.density_of_states API documentation</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%2244.5%202.5%2015%2015%22%3E%3Cpath%20d%3D%22M49.351%2021.041c-.233-.721-.546-2.408-.772-4.076-.042-.09-.067-.187-.046-.288-.166-1.347-.277-2.625-.241-3.351-1.378-1.008-2.271-2.586-2.271-4.362%200-.976.272-1.935.788-2.774.057-.094.122-.18.184-.268-.033-.167-.052-.339-.052-.516%200-1.477%201.202-2.679%202.679-2.679.791%200%201.496.352%201.987.9a6.3%206.3%200%200%201%201.001.029c.492-.564%201.207-.929%202.012-.929%201.477%200%202.679%201.202%202.679%202.679a2.65%202.65%200%200%201-.269%201.148c.383.747.595%201.572.595%202.41%200%202.311-1.507%204.29-3.635%205.107.037.699.147%202.27.423%203.294l.137.461c.156%202.136-4.612%205.166-5.199%203.215zm.127-4.919a4.78%204.78%200%200%200%20.775-.584c-.172-.115-.505-.254-.88-.378zm.331%202.302l.828-.502c-.202-.143-.576-.328-.984-.49zm.45%202.157l.701-.403c-.214-.115-.536-.249-.891-.376l.19.779zM49.13%204.141c0%20.152.123.276.276.276s.275-.124.275-.276-.123-.276-.276-.276-.275.124-.275.276zm.735-.389a1.15%201.15%200%200%201%20.314.783%201.16%201.16%200%200%201-1.162%201.162c-.457%200-.842-.27-1.032-.653-.026.117-.042.238-.042.362a1.68%201.68%200%200%200%201.679%201.679%201.68%201.68%200%200%200%201.679-1.679c0-.843-.626-1.535-1.436-1.654zm3.076%201.654a1.68%201.68%200%200%200%201.679%201.679%201.68%201.68%200%200%200%201.679-1.679c0-.037-.009-.072-.011-.109-.21.3-.541.508-.935.508a1.16%201.16%200%200%201-1.162-1.162%201.14%201.14%200%200%201%20.474-.912c-.015%200-.03-.005-.045-.005-.926.001-1.679.754-1.679%201.68zm1.861-1.265c0%20.152.123.276.276.276s.275-.124.275-.276-.123-.276-.276-.276-.275.124-.275.276zm1.823%204.823c0-.52-.103-1.035-.288-1.52-.466.394-1.06.64-1.717.64-1.144%200-2.116-.725-2.499-1.738-.383%201.012-1.355%201.738-2.499%201.738-.867%200-1.631-.421-2.121-1.062-.307.605-.478%201.267-.478%201.942%200%202.486%202.153%204.51%204.801%204.51s4.801-2.023%204.801-4.51zm-3.032%209.156l-.146-.492c-.276-1.02-.395-2.457-.444-3.268a6.11%206.11%200%200%201-1.18.115%206.01%206.01%200%200%201-2.536-.562l.006.175c.802.215%201.848.612%202.021%201.25.079.295-.021.601-.274.837l-.598.501c.667.304%201.243.698%201.311%201.179.02.144.022.507-.393.787l-.564.365c1.285.521%201.361.96%201.381%201.126.018.142.011.496-.427.746l-.854.489c.064-1.19%201.985-2.585%202.697-3.248zM49.34%209.925c0-.667%201-.667%201%200%200%20.653.818%201.205%201.787%201.205s1.787-.552%201.787-1.205c0-.667%201-.667%201%200%200%201.216-1.25%202.205-2.787%202.205s-2.787-.989-2.787-2.205zm-.887-7.633c-.093.077-.205.114-.317.114a.5.5%200%200%201-.318-.886L49.183.397a.5.5%200%200%201%20.703.068.5.5%200%200%201-.069.703zm7.661-.065c-.086%200-.173-.022-.253-.068l-1.523-.893c-.575-.337-.069-1.2.506-.863l1.523.892a.5.5%200%200%201%20.179.685c-.094.158-.261.247-.432.247z%22%20fill%3D%22%233bb300%22/%3E%3C/svg%3E"/>
 
 
@@ -16,11 +16,11 @@
             <label id="navtoggle" for="togglestate" class="pdoc-button"><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke-linecap='round' stroke="currentColor" stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg></label>
             <input id="togglestate" type="checkbox">
             <div>
-                        <a class="pdoc-button module-list-button" href="../core.html">
+                        <a class="pdoc-button module-list-button" href="../tasks.html">
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-left" viewBox="0 0 16 16">
   <path fill-rule="evenodd" d="M10 3.5a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 1 1 0v2A1.5 1.5 0 0 1 9.5 14h-8A1.5 1.5 0 0 1 0 12.5v-9A1.5 1.5 0 0 1 1.5 2h8A1.5 1.5 0 0 1 11 3.5v2a.5.5 0 0 1-1 0v-2z"/>
   <path fill-rule="evenodd" d="M4.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H14.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/>
-</svg>                            &nbsp;simmate.website.core</a>
+</svg>                            &nbsp;simmate.calculators.vasp.tasks</a>
 
 <a href="https://github.com/jacksund/simmate">                        <img src="https://github.com/jacksund/simmate/blob/main/logo/simmate.svg?raw=true" class="logo" alt="project logo"/>
 </a>
@@ -32,10 +32,13 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
-                    <a class="function" href="#home">home</a>
-            </li>
-            <li>
-                    <a class="function" href="#extras">extras</a>
+                    <a class="class" href="#MatProjDensityOfStates">MatProjDensityOfStates</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#MatProjDensityOfStates.incar">incar</a>
+                        </li>
+                </ul>
+
             </li>
     </ul>
 
@@ -50,243 +53,227 @@
         </nav>
     <main class="pdoc">
             <section>
-                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/website/core/views.py">Edit on GitHub</a>
+                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/calculators/vasp/tasks/density_of_states.py">Edit on GitHub</a>
                     <h1 class="modulename">
-<a href="./../../../simmate.html">simmate</a><wbr>.<a href="./../../website.html">website</a><wbr>.<a href="./../core.html">core</a><wbr>.views    </h1>
+<a href="./../../../../simmate.html">simmate</a><wbr>.<a href="./../../../calculators.html">calculators</a><wbr>.<a href="./../../vasp.html">vasp</a><wbr>.<a href="./../tasks.html">tasks</a><wbr>.density_of_states    </h1>
 
                 
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
-<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">F</span>
-<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
-
-<span class="kn">from</span> <span class="nn">simmate.website.third_parties.forms</span> <span class="kn">import</span> <span class="n">ChemicalSystemForm</span>
-
-<span class="kn">from</span> <span class="nn">simmate.database.third_parties.all</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">MatProjStructure</span><span class="p">,</span>
-    <span class="n">CodStructure</span><span class="p">,</span>
-    <span class="n">JarvisStructure</span><span class="p">,</span>
-    <span class="n">AflowStructure</span><span class="p">,</span>
-    <span class="n">OqmdStructure</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MatProjStaticEnergy</span><span class="p">,</span>
 <span class="p">)</span>
 
 
-<span class="nd">@login_required</span>
-<span class="k">def</span> <span class="nf">home</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MatProjDensityOfStates</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
 
-    <span class="c1"># The home page is also an html &quot;form&quot; because users submit queries from</span>
-    <span class="c1"># here. So we need to handle form submissions properly.</span>
-
-    <span class="c1"># first check if the webpage is accessed via a POST method</span>
-    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
-        <span class="c1"># if it is, that means a user is trying to submit a query</span>
-        <span class="c1"># let&#39;s grab the data and validate it before running the query</span>
-        <span class="n">form</span> <span class="o">=</span> <span class="n">ChemicalSystemForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
-        <span class="c1"># see if all of the data is valid</span>
-        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
-
-            <span class="c1"># grab the cleaned data from the form</span>
-            <span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span>
-
-            <span class="c1"># check which databases the user wants to search and collect the</span>
-            <span class="c1"># proper models into a list that we query with below</span>
-            <span class="n">databases_to_search</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">database</span><span class="p">,</span> <span class="n">database_model</span> <span class="ow">in</span> <span class="p">(</span>
-                <span class="p">(</span><span class="s2">&quot;aflow&quot;</span><span class="p">,</span> <span class="n">AflowStructure</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;cod&quot;</span><span class="p">,</span> <span class="n">CodStructure</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;jarvis&quot;</span><span class="p">,</span> <span class="n">JarvisStructure</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;materials_project&quot;</span><span class="p">,</span> <span class="n">MatProjStructure</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;oqmd&quot;</span><span class="p">,</span> <span class="n">OqmdStructure</span><span class="p">),</span>
-            <span class="p">):</span>
-                <span class="c1"># if the user requested this database, the value will be true</span>
-                <span class="k">if</span> <span class="n">cleaned_data</span><span class="p">[</span><span class="n">database</span><span class="p">]:</span>
-                    <span class="n">databases_to_search</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">database_model</span><span class="p">)</span>
-
-            <span class="c1"># Note, this value is converted to a list of systems once cleaned.</span>
-            <span class="n">chemical_systems</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;chemical_system&quot;</span><span class="p">]</span>
-
-            <span class="c1"># now go through each database, search for the requested system</span>
-            <span class="c1"># and then pool them all together. We limit each database to 50</span>
-            <span class="c1"># results. Note the += below means we compile into a single list</span>
-            <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">nstructures_possible</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">database_model</span> <span class="ow">in</span> <span class="n">databases_to_search</span><span class="p">:</span>
-                <span class="c1"># Now we can make the query! We also dont want to load the</span>
-                <span class="c1"># structure json -- so that everything runs faster.</span>
-                <span class="n">search_results</span> <span class="o">=</span> <span class="n">database_model</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-                    <span class="n">chemical_system__in</span><span class="o">=</span><span class="n">chemical_systems</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">defer</span><span class="p">(</span><span class="s2">&quot;structure_string&quot;</span><span class="p">)</span>
-
-                <span class="c1"># if the database provides the hull energy, we want to sort</span>
-                <span class="c1"># the structures by that (putting highest priority on stable ones)</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">database_model</span><span class="p">,</span> <span class="s2">&quot;energy_above_hull&quot;</span><span class="p">):</span>
-                    <span class="c1"># if there isn&#39;t a hull energy value, place these last</span>
-                    <span class="n">search_results</span> <span class="o">=</span> <span class="n">search_results</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
-                        <span class="n">F</span><span class="p">(</span><span class="s2">&quot;energy_above_hull&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">asc</span><span class="p">(</span><span class="n">nulls_last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="p">)</span>
-
-                <span class="c1"># now add the search results to the output</span>
-                <span class="c1"># for performance, we limit each database to 50 structures</span>
-                <span class="n">structures</span> <span class="o">+=</span> <span class="n">search_results</span><span class="o">.</span><span class="n">all</span><span class="p">()[:</span><span class="mi">50</span><span class="p">]</span>
-
-                <span class="c1"># We also tell the user how many results are possible if there</span>
-                <span class="c1"># wasn&#39;t any limit on the structures returned</span>
-                <span class="n">nstructures_possible</span> <span class="o">+=</span> <span class="n">database_model</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-                    <span class="n">chemical_system__in</span><span class="o">=</span><span class="n">chemical_systems</span><span class="p">,</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-
-    <span class="c1"># if the page is grabbed via a &#39;GET&#39; method, send an empty form</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># otherwise we are giving an empty form and no result structures</span>
-        <span class="n">form</span> <span class="o">=</span> <span class="n">ChemicalSystemForm</span><span class="p">()</span>
-        <span class="n">structures</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">nstructures_possible</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="c1"># now let&#39;s put the data and template together to send the user</span>
-    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;active_tab_id&quot;</span><span class="p">:</span> <span class="s2">&quot;home&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;chemical_system_form&quot;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
-        <span class="s2">&quot;structures&quot;</span><span class="p">:</span> <span class="n">structures</span><span class="p">,</span>
-        <span class="s2">&quot;nstructures_possible&quot;</span><span class="p">:</span> <span class="n">nstructures_possible</span><span class="p">,</span>
-    <span class="p">}</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;core/home.html&quot;</span>
-    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">extras</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-
-    <span class="c1"># now let&#39;s put the data and template together to send the user</span>
-    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;active_tab_id&quot;</span><span class="p">:</span> <span class="s2">&quot;extras&quot;</span><span class="p">}</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;core/extras.html&quot;</span>
-    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="c1"># Settings are based off of pymatgen&#39;s NonSCFSet in uniform mode</span>
+    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">ICHARGE</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+        <span class="n">ISYM</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">NEDOS</span><span class="o">=</span><span class="mi">2001</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">incar</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;MAGMOM__smart_magmom&quot;</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
             </section>
-                <section id="home">
-                            <div class="attr function"><a class="headerlink" href="#home">#&nbsp;&nbsp</a>
-
-                <div class="decorator">@login_required</div>
-
-            <span class="def">def</span>
-            <span class="name">home</span><span class="signature">(request)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="nd">@login_required</span>
-<span class="k">def</span> <span class="nf">home</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-
-    <span class="c1"># The home page is also an html &quot;form&quot; because users submit queries from</span>
-    <span class="c1"># here. So we need to handle form submissions properly.</span>
-
-    <span class="c1"># first check if the webpage is accessed via a POST method</span>
-    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
-        <span class="c1"># if it is, that means a user is trying to submit a query</span>
-        <span class="c1"># let&#39;s grab the data and validate it before running the query</span>
-        <span class="n">form</span> <span class="o">=</span> <span class="n">ChemicalSystemForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
-        <span class="c1"># see if all of the data is valid</span>
-        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
-
-            <span class="c1"># grab the cleaned data from the form</span>
-            <span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span>
-
-            <span class="c1"># check which databases the user wants to search and collect the</span>
-            <span class="c1"># proper models into a list that we query with below</span>
-            <span class="n">databases_to_search</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">database</span><span class="p">,</span> <span class="n">database_model</span> <span class="ow">in</span> <span class="p">(</span>
-                <span class="p">(</span><span class="s2">&quot;aflow&quot;</span><span class="p">,</span> <span class="n">AflowStructure</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;cod&quot;</span><span class="p">,</span> <span class="n">CodStructure</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;jarvis&quot;</span><span class="p">,</span> <span class="n">JarvisStructure</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;materials_project&quot;</span><span class="p">,</span> <span class="n">MatProjStructure</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;oqmd&quot;</span><span class="p">,</span> <span class="n">OqmdStructure</span><span class="p">),</span>
-            <span class="p">):</span>
-                <span class="c1"># if the user requested this database, the value will be true</span>
-                <span class="k">if</span> <span class="n">cleaned_data</span><span class="p">[</span><span class="n">database</span><span class="p">]:</span>
-                    <span class="n">databases_to_search</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">database_model</span><span class="p">)</span>
-
-            <span class="c1"># Note, this value is converted to a list of systems once cleaned.</span>
-            <span class="n">chemical_systems</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;chemical_system&quot;</span><span class="p">]</span>
-
-            <span class="c1"># now go through each database, search for the requested system</span>
-            <span class="c1"># and then pool them all together. We limit each database to 50</span>
-            <span class="c1"># results. Note the += below means we compile into a single list</span>
-            <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">nstructures_possible</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">database_model</span> <span class="ow">in</span> <span class="n">databases_to_search</span><span class="p">:</span>
-                <span class="c1"># Now we can make the query! We also dont want to load the</span>
-                <span class="c1"># structure json -- so that everything runs faster.</span>
-                <span class="n">search_results</span> <span class="o">=</span> <span class="n">database_model</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-                    <span class="n">chemical_system__in</span><span class="o">=</span><span class="n">chemical_systems</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">defer</span><span class="p">(</span><span class="s2">&quot;structure_string&quot;</span><span class="p">)</span>
-
-                <span class="c1"># if the database provides the hull energy, we want to sort</span>
-                <span class="c1"># the structures by that (putting highest priority on stable ones)</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">database_model</span><span class="p">,</span> <span class="s2">&quot;energy_above_hull&quot;</span><span class="p">):</span>
-                    <span class="c1"># if there isn&#39;t a hull energy value, place these last</span>
-                    <span class="n">search_results</span> <span class="o">=</span> <span class="n">search_results</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
-                        <span class="n">F</span><span class="p">(</span><span class="s2">&quot;energy_above_hull&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">asc</span><span class="p">(</span><span class="n">nulls_last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="p">)</span>
-
-                <span class="c1"># now add the search results to the output</span>
-                <span class="c1"># for performance, we limit each database to 50 structures</span>
-                <span class="n">structures</span> <span class="o">+=</span> <span class="n">search_results</span><span class="o">.</span><span class="n">all</span><span class="p">()[:</span><span class="mi">50</span><span class="p">]</span>
-
-                <span class="c1"># We also tell the user how many results are possible if there</span>
-                <span class="c1"># wasn&#39;t any limit on the structures returned</span>
-                <span class="n">nstructures_possible</span> <span class="o">+=</span> <span class="n">database_model</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-                    <span class="n">chemical_system__in</span><span class="o">=</span><span class="n">chemical_systems</span><span class="p">,</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-
-    <span class="c1"># if the page is grabbed via a &#39;GET&#39; method, send an empty form</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># otherwise we are giving an empty form and no result structures</span>
-        <span class="n">form</span> <span class="o">=</span> <span class="n">ChemicalSystemForm</span><span class="p">()</span>
-        <span class="n">structures</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">nstructures_possible</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="c1"># now let&#39;s put the data and template together to send the user</span>
-    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;active_tab_id&quot;</span><span class="p">:</span> <span class="s2">&quot;home&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;chemical_system_form&quot;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
-        <span class="s2">&quot;structures&quot;</span><span class="p">:</span> <span class="n">structures</span><span class="p">,</span>
-        <span class="s2">&quot;nstructures_possible&quot;</span><span class="p">:</span> <span class="n">nstructures_possible</span><span class="p">,</span>
-    <span class="p">}</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;core/home.html&quot;</span>
-    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-    
-
-                </section>
-                <section id="extras">
-                            <div class="attr function"><a class="headerlink" href="#extras">#&nbsp;&nbsp</a>
+                <section id="MatProjDensityOfStates">
+                                <div class="attr class">
+        <a class="headerlink" href="#MatProjDensityOfStates">#&nbsp;&nbsp</a>
 
         
-            <span class="def">def</span>
-            <span class="name">extras</span><span class="signature">(request)</span>:
+        <span class="def">class</span>
+        <span class="name">MatProjDensityOfStates</span><wbr>(<span class="base"><a href="energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.energy.materials_project.MatProjStaticEnergy</a></span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extras</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MatProjDensityOfStates</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
 
-    <span class="c1"># now let&#39;s put the data and template together to send the user</span>
-    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;active_tab_id&quot;</span><span class="p">:</span> <span class="s2">&quot;extras&quot;</span><span class="p">}</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;core/extras.html&quot;</span>
-    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="c1"># Settings are based off of pymatgen&#39;s NonSCFSet in uniform mode</span>
+    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">ICHARGE</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+        <span class="n">ISYM</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">NEDOS</span><span class="o">=</span><span class="mi">2001</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">incar</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;MAGMOM__smart_magmom&quot;</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
+            <div class="docstring"><h2 id="the-supervised-staged-shell-task-aka-s3task">The Supervised-Staged-Shell Task (aka "S3Task")</h2>
+
+<p>This class contains the core functionality to <strong>supervise</strong> a <strong>staged</strong> task
+involving some <strong>shell</strong> command.</p>
+
+<p>Let's breakdown what this means...</p>
+
+<p>A <em>shell</em> command is a single call to some external program. For example,
+VASP requires that we call the "vasp_std &gt; vasp.out" command in order to run a
+calculation. We consider calling external programs a <em>staged</em> task made
+up of three steps:</p>
+
+<ul>
+<li>setup = writing any input files required for the program</li>
+<li>execution = actually calling the command and running our program</li>
+<li>workup = loading data from output files back into python</li>
+</ul>
+
+<p>And for <em>supervising</em> the task, this means we monitor the program while the
+execution stage is running. So once a program is started, Simmate can check
+output files for common errors/issues. If an error is found, we stop the
+program, fix the issue, and then restart it. Any fixes that were made are
+written to "simmate_corrections.csv".</p>
+
+<!--
+TODO: Make a simple diagram to visualize the overall process and add it here.
+It will be similar to Custodian's, but we don't have a list of jobs here.
+https://materialsproject.github.io/custodian/index.html#usage
+The steps are...
+
+- Write Input Files based on custom+defualt settings
+- Run the calculation by calling the program
+- Load ouput files
+- check for errors
+- [correct them, rerun]
+- postprocess/analysis
+-->
+
+<p>This entire process (the different stages and monitoring) is carried out
+using the <code><a href="#MatProjDensityOfStates.run">run()</a></code> method. You rarely use this class directly. Instead,
+you typically use a subclass of it. As a user, you really just need to do
+something like this:</p>
+
+<div class="codehilite"><pre><span></span><code>   <span class="kn">from</span> <span class="nn"><a href="../../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a></span> <span class="kn">import</span> <span class="n">ExampleTask</span>
+
+   <span class="n">my_task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
+   <span class="n">my_result</span> <span class="o">=</span> <span class="n">my_task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</code></pre></div>
+
+<p>And that's it!</p>
+
+<p>For experts, this class can be viewed as a combination of prefect's ShellTask,
+a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
+functionality of pymatgen.io.vasp.sets too. By merging all of these together
+into one class, we make things much easier for users and creating new Tasks.</p>
+
+<h2 id="inheriting-from-this-class">Inheriting from this class</h2>
+
+<p>This class is commonly used to make tasks for our calculator modules, so you
+will likely want to subclass this. Here is a basic example of inheriting
+and then running a task:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html">simmate.workflow_engine.tasks.supervised_staged_shell_task</a></span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">S3Task</span> <span class="k">as</span> <span class="n">SSSTask</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">example.error_handlers</span> <span class="kn">import</span> <span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleTask</span><span class="p">(</span><span class="n">SSSTask</span><span class="p">):</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;echo example&quot;</span>  <span class="c1"># just prints out &quot;example&quot;</span>
+    <span class="n">max_corrections</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span><span class="p">]</span>
+    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">some_new_setting</span> <span class="o">=</span> <span class="mi">123</span>
+
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have these two args</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m setting things up!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;My new setting is </span><span class="si">{</span><span class="n">some_new_setting</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have this arg</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m working things up!&quot;</span><span class="p">)</span>
+
+
+<span class="n">task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</code></pre></div>
+
+<p>There are a couple things to note here:</p>
+
+<ul>
+<li>It's optional to set/overwrite attributes. You can also add new ones too.</li>
+<li>It's optional to write a new __init__, setup, or workup methods</li>
+<li>make sure you include the structure/directory inputs, even if you don't use them.</li>
+<li>Don't add new kwargs to methods. Instead handle these options through attributes.</li>
+</ul>
+
+<p>For a full (and advanced) example, of a subclass take a look at
+<code><a href="base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></code>.</p>
+</div>
+
+
+                            <div id="MatProjDensityOfStates.incar" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MatProjDensityOfStates.incar">#&nbsp;&nbsp</a>
+
+        <span class="name">incar</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;EDIFF&#39;: 1e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ICHARG&#39;: 1, &#39;ISIF&#39;: 3, &#39;ISPIN&#39;: 2, &#39;ISYM&#39;: 2, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 200, &#39;NELMIN&#39;: 6, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;KSPACING&#39;: 0.5, &#39;multiple_keywords__smart_ismear&#39;: {&#39;metal&#39;: {&#39;ISMEAR&#39;: 2, &#39;SIGMA&#39;: 0.2}, &#39;non-metal&#39;: {&#39;ISMEAR&#39;: -5, &#39;SIGMA&#39;: 0.05}}, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LMAXMIX__auto&#39;: True, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Ag&#39;: 2, &#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Cu&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Nb&#39;: 2, &#39;Ni&#39;: 2, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Ag&#39;: 2, &#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Cu&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Nb&#39;: 2, &#39;Ni&#39;: 2, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;S&#39;: {&#39;Fe&#39;: 2, &#39;Mn&#39;: 2.5}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Ag&#39;: 1.5, &#39;Co&#39;: 3.4, &#39;Cr&#39;: 3.5, &#39;Cu&#39;: 4, &#39;Fe&#39;: 4.0, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Nb&#39;: 1.5, &#39;Ni&#39;: 6, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 3.1, &#39;W&#39;: 4.0}, &#39;O&#39;: {&#39;Ag&#39;: 1.5, &#39;Co&#39;: 3.4, &#39;Cr&#39;: 3.5, &#39;Cu&#39;: 4, &#39;Fe&#39;: 4.0, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Nb&#39;: 1.5, &#39;Ni&#39;: 6, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 3.1, &#39;W&#39;: 4.0}, &#39;S&#39;: {&#39;Fe&#39;: 1.9, &#39;Mn&#39;: 2.5}}}, &#39;ICHARGE&#39;: 11, &#39;NEDOS&#39;: 2001}</span>
+    </div>
+
     
 
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
+                                <dd id="MatProjDensityOfStates.__init__" class="function"><a href="base.html#VaspTask.__init__">VaspTask</a></dd>
+                <dd id="MatProjDensityOfStates.requires_structure" class="variable"><a href="base.html#VaspTask.requires_structure">requires_structure</a></dd>
+                <dd id="MatProjDensityOfStates.command" class="variable"><a href="base.html#VaspTask.command">command</a></dd>
+                <dd id="MatProjDensityOfStates.incar_parallel_settings" class="variable"><a href="base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="MatProjDensityOfStates.kpoints" class="variable"><a href="base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="MatProjDensityOfStates.confirm_convergence" class="variable"><a href="base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="MatProjDensityOfStates.pre_sanitize_structure" class="variable"><a href="base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="MatProjDensityOfStates.pre_standardize_structure" class="variable"><a href="base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="MatProjDensityOfStates.setup" class="function"><a href="base.html#VaspTask.setup">setup</a></dd>
+                <dd id="MatProjDensityOfStates.workup" class="function"><a href="base.html#VaspTask.workup">workup</a></dd>
+                <dd id="MatProjDensityOfStates.get_config" class="function"><a href="base.html#VaspTask.get_config">get_config</a></dd>
+
+            </div>
+            <div><dt><a href="energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.energy.materials_project.MatProjStaticEnergy</a></dt>
+                                <dd id="MatProjDensityOfStates.error_handlers" class="variable"><a href="energy/materials_project.html#MatProjStaticEnergy.error_handlers">error_handlers</a></dd>
+
+            </div>
+            <div><dt><a href="relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></dt>
+                                <dd id="MatProjDensityOfStates.return_final_structure" class="variable"><a href="relaxation/mit.html#MITRelaxation.return_final_structure">return_final_structure</a></dd>
+                <dd id="MatProjDensityOfStates.functional" class="variable"><a href="relaxation/mit.html#MITRelaxation.functional">functional</a></dd>
+                <dd id="MatProjDensityOfStates.potcar_mappings" class="variable"><a href="relaxation/mit.html#MITRelaxation.potcar_mappings">potcar_mappings</a></dd>
+
+            </div>
+            <div><dt><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.tasks.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatProjDensityOfStates.max_corrections" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatProjDensityOfStates.monitor" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatProjDensityOfStates.polling_timestep" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatProjDensityOfStates.monitor_freq" class="variable"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatProjDensityOfStates.execute" class="function"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatProjDensityOfStates.run" class="function"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatProjDensityOfStates.print_config" class="function"><a href="../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+
+            </div>
+            <div><dt>prefect.core.task.Task</dt>
+                                <dd id="MatProjDensityOfStates.copy" class="function">copy</dd>
+                <dd id="MatProjDensityOfStates.bind" class="function">bind</dd>
+                <dd id="MatProjDensityOfStates.map" class="function">map</dd>
+                <dd id="MatProjDensityOfStates.set_dependencies" class="function">set_dependencies</dd>
+                <dd id="MatProjDensityOfStates.set_upstream" class="function">set_upstream</dd>
+                <dd id="MatProjDensityOfStates.set_downstream" class="function">set_downstream</dd>
+                <dd id="MatProjDensityOfStates.inputs" class="function">inputs</dd>
+                <dd id="MatProjDensityOfStates.outputs" class="function">outputs</dd>
+                <dd id="MatProjDensityOfStates.serialize" class="function">serialize</dd>
+                <dd id="MatProjDensityOfStates.is_equal" class="function">is_equal</dd>
+                <dd id="MatProjDensityOfStates.is_not_equal" class="function">is_not_equal</dd>
+                <dd id="MatProjDensityOfStates.not_" class="function">not_</dd>
+                <dd id="MatProjDensityOfStates.or_" class="function">or_</dd>
+
+            </div>
+                                </dl>
+                            </div>
                 </section>
     </main>
 <script>
@@ -341,7 +328,7 @@
                 script.async = true;
                 script.onload = () => resolve(window.pdocSearch);
                 script.onerror = (e) => reject(e);
-                script.src = "../../../search.js";
+                script.src = "../../../../search.js";
                 document.getElementsByTagName("head")[0].appendChild(script);
             });
         } catch (e) {
@@ -383,7 +370,7 @@
             }
             for (let result of results.slice(0, 10)) {
                 let doc = result.doc;
-                let url = `../../../${doc.modulename.replaceAll(".", "/")}.html`;
+                let url = `../../../../${doc.modulename.replaceAll(".", "/")}.html`;
                 if (doc.qualname) {
                     url += `#${doc.qualname}`;
                 }

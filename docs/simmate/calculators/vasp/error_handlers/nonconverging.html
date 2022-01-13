@@ -392,7 +392,16 @@ and in error. To try fixing this, we switch the ALGO to Normal.</p>
         <span class="name">is_monitor</span><span class="default_value"> = True</span>
     </div>
 
-    
+            <div class="docstring"><p>This class property indicates whether the error handler is a monitor,
+i.e., a handler that monitors a job as it is running. If a
+monitor-type handler notices an error, the job will be sent a
+termination signal, the error is then corrected,
+and then the job is restarted. This is useful for catching errors
+that occur early in the run but do not cause immediate failure.
+Also, is_monitor=True and is_terminating=False is a special case. See the
+is_terminating description below for why!</p>
+</div>
+
 
                             </div>
                             <div id="NonConvergingErrorHandler.check" class="classattr">
