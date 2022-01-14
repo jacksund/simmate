@@ -59,7 +59,7 @@ pytest
 
 # Creating and submitting changes
 
-1. Make sure you have contacted our team on the changes you wish to make. This let's everyone know what is being working on and allows other contributors to give feedback/advice. You can request features, report bugs, etc. in our [Issues page](https://github.com/jacksund/simmate/issues). General ideas and questions are better suited for our [Discussions page](https://github.com/jacksund/simmate/discussions).
+1. Make sure you have contacted our team on the changes you wish to make. This lets everyone know what is being working on and allows other contributors to give feedback/advice. You can request features, report bugs, etc. in our [Issues page](https://github.com/jacksund/simmate/issues). General ideas and questions are better suited for our [Discussions page](https://github.com/jacksund/simmate/discussions).
 
 2. [Make sure your fork is up to date](https://support.gitkraken.com/working-with-repositories/pushing-and-pulling/) with our main code at `jacksund/simmate`. This is only important if it's been more than a couple days since your last update. So if you just completed the previous section, you should be good to go here.
 
