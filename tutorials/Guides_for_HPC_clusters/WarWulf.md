@@ -106,7 +106,7 @@ Checklist before submitting:
 1. loaded the VASP module
 2. activated your conda environment
 3. in the temporary working directory (/media/synology/user/your_name)
-4. created `submit.sh` and editted contents as needed
+4. created `submit.sh` and edited contents as needed
 5. structure file (e.g. `POSCAR`) is present in working directory
 
 Once all of these are met, you can submit with...
