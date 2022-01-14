@@ -9,15 +9,7 @@ If anything is unclear, don't hesitate to [post a question on our forum](https:/
 </br>
 
 ## Expected duration
+
 If you are comfortable with python, tutorials 01-05 should take under **1 hour in total**. Tutorials 06-09 will take **2-3 hours in total** but are optional.
 
 If you are new to coding, we recommend you complete **one tutorial per day (1-2 hrs each)** to fully understand each. This includes exploring extra resources in each tutorial. Keep in mind that tutorials 06-09 are advanced topics but also completely optional.
-
-</br>
-
-## Contributors and Expert Users
-
-If you would like to contribute to Simmate, we highly recommend learning about our core dependencies. This includes...
-- [Django](https://docs.djangoproject.com/en/4.0/) for our database and website
-- [Prefect core](https://docs.prefect.io/core/) for our workflows and scheduler
-- [Dask](https://docs.dask.org/en/stable/futures.html) for clusters and execution
