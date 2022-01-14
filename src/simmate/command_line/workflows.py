@@ -170,8 +170,10 @@ def run(workflow_name, filename, command, directory):
     )
 
     # Let the user know everything succeeded
-    if result.is_successful():
-        click.echo("Success! All results are also stored in your database.")
+    # if result.is_successful():
+    #     click.echo("Success! All results are also stored in your database.")
+    # BUG: we remove this temporarily because we have s3tasks ran through this
+    # module. When we add their database components, this will be removed.
 
 
 @workflows.command()
