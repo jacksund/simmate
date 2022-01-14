@@ -46,7 +46,8 @@ module vasp/5.4.4
 
 ## Call VASP with... 
 ```
-mpirun vasp_std
+# Note, we use 20 cores here but update this to match your submit script
+mpirun -n 20 vasp_std > vasp.out
 ```
 
 <br/>
