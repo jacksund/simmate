@@ -1,6 +1,6 @@
-# Longleaf
+# LongLeaf
 
-Longleaf is a Linux-based computing system available for free to researchers across UNC Chapel Hill's campus. Workloads where each job requires a single compute host are best suited for this cluster.
+LongLeaf is a Linux-based computing system available for free to researchers across UNC Chapel Hill's campus. Workloads where each job requires a single compute host are best suited for this cluster.
 
 > :bulb: This guide should be used alongside tutorial 02 ([here](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md#switching-to-a-remote-cluster)).
 <br/>
