@@ -18,7 +18,7 @@ From the posted requirements:
 
 For the uncompleted requirements:
 
-2. you must create a profile on longleaf with your onyen. Contact UNC ITS to enquire about making a profile.
+2. you must create a profile on LongLeaf with your UNC onyen. Directions for this are located [here](https://its.unc.edu/research-computing/longleaf-cluster/).
 5. make your personal environment named `yourname_env` (e.g. `jacks_env`)
 6. follow tutorial 02 ([here](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md#configuring-potentials-for-vasp-users)) to set up VASP potentials
 
