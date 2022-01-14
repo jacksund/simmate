@@ -81,17 +81,17 @@ And paste in the example content...
 ```
 #! /bin/sh
 
-#SBATCH -J holder
-#SBATCH -n 20
-#SBATCH -N 1
-#SBATCH --mem=96g
-#SBATCH -p general
-#SBATCH -o slurm.out
+#SBATCH --job-name=my_example_job
+#SBATCH --nodes=20
+#SBATCH --ntasks=1
+#SBATCH --mem=40g
+#SBATCH --partition=general
+#SBATCH --output=slurm.out
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=youronyen@live.unc.edu
-#SBATCH -t 11-00:00
+#SBATCH --time=11-00:00
 
-simmate workflows run energy-mit POSCAR -c "mpirun vasp_std > vasp.out"
+simmate workflows run energy-mit POSCAR -c "mpirun -n 20 vasp_std > vasp.out"
 ```
 
 <br/>
