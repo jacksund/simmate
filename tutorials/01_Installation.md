@@ -22,7 +22,7 @@ In this tutorial, you will learn how to install Simmate with Anaconda. Beginners
 1. Install [anaconda](https://www.anaconda.com/products/individual-d)
 2. Create a conda environment, install Simmate in it, and activate it. *(note: Spyder is our recommended IDE but optional)*
 ```
-conda create -n my_env -c conda-forge python=3.8 simmate spyder
+conda create -n my_env -c conda-forge python=3.9 simmate spyder
 conda activate my_env
 ```
 3. Run the `simmate` command to make sure it's installed correctly
@@ -55,7 +55,7 @@ Also, don't confuse two types of programming language we will use:
 
 Ideally, you could download Simmate like any desktop app and then be good to go. But have you ever updated your operating system and then everything else on your computer goes haywire? With python, the chances of that happening are extremely high, so we want to be careful. For example, say I wanted two packages installed:
 
-1. Simmate version 1.0, which requires python version 3.8 or greater
+1. Simmate version 1.0, which requires python version 3.9 or greater
 2. Numpy version 1.15, which requires python version 2.7
 
 The conflicting versions of python creates a problem. To solve this, we use [Anaconda](https://www.anaconda.com/products/individual-d). Anaconda installs python and all of our extra packages, including Simmate. To make sure nothing ever breaks, it separates each of our installations into folders known as "environments". So using our example programs, we could have two environments: one named "simmate_env" and another named "numpy_env" (these can be named anything). The two different python versions and codes would be installed into separate folders so that they don't interact.
@@ -147,7 +147,7 @@ This help message also tells us there are other "subcommands" available. One is 
 For now, let's create a new environment that uses the [conda-forge](https://conda-forge.org/) channel. A channel is where anaconda downloads packages from -- and to keep things simple, we will ALWAYS use conda-forge (this is the standard in the python community). Now let's run this command below. Note you can switch out the name "my_env" for whatever you want here, just make sure you use underscores instead of spaces ("my_env" will work while "my env" will give an error).
 
 ```
-conda create -c conda-forge -n my_env python=3.8
+conda create -c conda-forge -n my_env python=3.9
 ```
 
 Say yes when the installation asks for confirmation. Next, switch to this new environment. To do that we use...
