@@ -56,15 +56,25 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">simmate</span> <span class="kn">import</span> <span class="n">workflows</span> <span class="k">as</span> <span class="n">all_workflows</span>
+<span class="kn">from</span> <span class="nn">simmate</span> <span class="kn">import</span> <span class="n">workflows</span>
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine.workflow</span> <span class="kn">import</span> <span class="n">Workflow</span>
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine.tasks.supervised_staged_shell_task</span> <span class="kn">import</span> <span class="n">S3Task</span>
 
 
 <span class="k">def</span> <span class="nf">get_list_of_all_workflows</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a list of all the workflows located in the workflows.all module</span>
+<span class="sd">    Returns a list of all the workflows located in the workflows module</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">all_workflows</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;__&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">n</span><span class="p">]</span>
+    <span class="c1"># This loop goes through all attributes (as strings) of the workflow module</span>
+    <span class="c1"># and select only those that are workflow or s3tasks.</span>
+    <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">workflows</span><span class="p">):</span>
+        <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflows</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">S3Task</span><span class="p">):</span>
+            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span>
+    <span class="c1"># OPTIMIZE: is there a more efficient way to do this?</span>
+
     <span class="k">return</span> <span class="n">workflow_names</span>
 </pre></div>
 
@@ -83,16 +93,24 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_list_of_all_workflows</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a list of all the workflows located in the workflows.all module</span>
+<span class="sd">    Returns a list of all the workflows located in the workflows module</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">all_workflows</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;__&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">n</span><span class="p">]</span>
+    <span class="c1"># This loop goes through all attributes (as strings) of the workflow module</span>
+    <span class="c1"># and select only those that are workflow or s3tasks.</span>
+    <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">workflows</span><span class="p">):</span>
+        <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflows</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">S3Task</span><span class="p">):</span>
+            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span>
+    <span class="c1"># OPTIMIZE: is there a more efficient way to do this?</span>
+
     <span class="k">return</span> <span class="n">workflow_names</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Returns a list of all the workflows located in the workflows.all module</p>
+            <div class="docstring"><p>Returns a list of all the workflows located in the workflows module</p>
 </div>
 
 

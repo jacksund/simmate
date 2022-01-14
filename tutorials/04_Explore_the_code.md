@@ -1,5 +1,7 @@
 # Explore the code
 
+> :warning: If you are familiar with how to explore python documentation, you can skip this tutorial.
+
 Even though you can run workflows without understanding what happens behind the scenes, you should avoid using Simmate like a [black box](https://en.wikipedia.org/wiki/Black_box). In this tutorial, you will learn how to explore Simmate's code and features, rather than just copying/pasting code from other tutorials.
 
 1. [The quick tutorial](#the-quick-tutorial)
@@ -7,14 +9,15 @@ Even though you can run workflows without understanding what happens behind the 
     - [Getting help through Spyder](#getting-help-through-spyder)
     - [Introduction to Python Modules](#introduction-to-python-modules)
     - [Exploring Simmate's Modules](#exploring-simmates-modules)
-
-> :warning: we have not added a documentation server yet, but will have either [sphinx](https://www.sphinx-doc.org/en/master/examples.html) or [pdoc](https://pdoc.dev/) implemented shortly
+    - [Using the web docs](#using-the-web-docs)
 
 <br/><br/>
 
 # The quick tutorial
 
-For advanced users, we have README.rst files in each of our python modules -- so you can explore our source code on github just how you would explore documentation produced by sphinx. We do this because we are a high-level code and want to avoid researchers using it as a [black box](https://en.wikipedia.org/wiki/Black_box). Start by jumping to our [src/simmate directory](https://github.com/jacksund/simmate/tree/main/src/simmate) and scrolling down to read the page description.
+1. Our API documentation is located [here](https://jacksund.github.io/simmate/simmate.html).
+2. You can explore our source code on github in the same way as the online API docs. For example, note that the [scr/simmate folder](https://github.com/jacksund/simmate/tree/main/src/simmate) has the same README as [our API documentation](https://jacksund.github.io/simmate/simmate.html).
+3. We do this because we are a high-level code and want to avoid researchers using it as a [black box](https://en.wikipedia.org/wiki/Black_box). We accomplish this by using [pdoc](https://pdoc.dev/) for our documentation, rather than [Sphinx](https://www.sphinx-doc.org/en/master/examples.html).
 
 <br/><br/>
 
@@ -107,4 +110,8 @@ Once you're done exploring, you can move on to [the next tutorial](https://githu
 
 ## Using the web docs
 
-> :warning: we don't have our web server set up yet.
+Now that we understand how code is organized, we can explore online documntation more easily. The overall organization of our code (and how to use it) is known as our API (the application programming interface). You will find the same exact documentation above - but on a nicely formatted website. 
+
+You can find our API documentation [here](https://jacksund.github.io/simmate/simmate.html).
+
+When you're ready, you can advance to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md), which can be completed on your local computer.
