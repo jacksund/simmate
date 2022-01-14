@@ -18,7 +18,7 @@ From the posted requirements:
 
 For the uncompleted requirements:
 
-2. you must create a profile on dogwood with your onyen. Contact UNC ITS to enquire about making a profile.
+2. you must create a profile on dogwood with your onyen. Directions for this are located [here](https://its.unc.edu/research-computing/longleaf-cluster/).
 5. make your personal environment named `yourname_env` (e.g. `jacks_env`)
 6. follow tutorial 02 ([here](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md#configuring-potentials-for-vasp-users)) to set up VASP potentials
 
@@ -45,15 +45,16 @@ module vasp/5.4.4
 <br/>
 
 ## Call VASP with... 
+Note, we use 704 cores here but update this to match your submit script
 ```
-mpirun vasp_std
+mpirun -n 704 vasp_std > vasp.out
 ```
 
 <br/>
 
 ## Create your conda env with...
 ```
-conda create -n my_env -c conda-forge python=3.8 simmate
+conda create -n my_env -c conda-forge python=3.9 simmate
 conda activate my_env
 # and initialize your database for the first time
 simmate database reset
@@ -62,6 +63,7 @@ simmate database reset
 <br/>
 
 ## Access scratch directory with...
+Note, the /y/o/ is decided by the first two letters of your onyen
 ```
 cd /21dayscratch/scr/y/o/youronyen
 ```
@@ -79,16 +81,16 @@ Paste in the example content. This example is for the 2112_queue partition, but 
 ```
 #!/bin/sh
 
-#SBATCH -n 704
-#SBATCH -N 16
-#SBATCH -t 2-00:00
+#SBATCH --job-name=NEB
+#SBATCH --ntasks=704
+#SBATCH --nodes=16
+#SBATCH --time=2-00:00
 #SBATCH --mem=300g
-#SBATCH -p 2112_queue
+#SBATCH --partition=2112_queue
 #SBATCH --mail-type=ALL
-#SBATCH -J NEB
 #SBATCH --mail-user=lamcrae@live.unc.edu
 
-simmate workflows run energy-mit POSCAR -c "mpirun vasp_std > vasp.out"
+simmate workflows run energy-mit POSCAR -c "mpirun -n 704 vasp_std > vasp.out"
 ```
 
 <br/>
@@ -97,7 +99,7 @@ simmate workflows run energy-mit POSCAR -c "mpirun vasp_std > vasp.out"
 Checklist before submitting:
 1. loaded the VASP module
 2. activated your conda environment
-3. in the temporary working directory (/pine/scr/y/o/youronyen)
+3. in the temporary working directory (/21dayscratch/scr/y/o/youronyen)
 4. created `submit.sh` and edited contents as needed
 5. structure file (e.g. `POSCAR`) is present in working directory
 
