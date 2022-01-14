@@ -64,6 +64,7 @@ simmate database reset
 
 ## Access scratch directory with...
 ```
+# Note, the /y/o/ is decided by the first two letters of your onyen
 cd /pine/scr/y/o/youronyen
 ```
 
