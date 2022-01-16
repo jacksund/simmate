@@ -94,7 +94,7 @@ def load_all_structures(
         progress_bar.update(1)
 
         # convert the data to a Simmate database object
-        structure_db = MatProjStructure.from_pymatgen(
+        structure_db = MatProjStructure.from_toolkit(
             id=entry["material_id"],
             structure=entry["structure"],
             energy=entry["final_energy"],

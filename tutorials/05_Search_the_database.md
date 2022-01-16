@@ -33,7 +33,7 @@ filtered_results = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites
 7. Convert the final structure from a database object (aka `DatabaseStructure`) to a structure object (aka `ToolkitStructure`).
 ```python
 single_relaxation = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites__lte=2).first()
-nacl_structure = single_relaxation.to_pymatgen()
+nacl_structure = single_relaxation.to_toolkit()
 ```
 8. For third-party data (like [Material Project](https://materialsproject.org/), [AFLOW](http://aflowlib.org/), [COD](http://www.crystallography.net/cod/), etc.) load the database table and then request to download all the available data:
 ```python
@@ -218,7 +218,7 @@ print(search_results)
 data = search_results.to_dataframe()
 
 # Or we can convert to a list of structure objects (ToolkitStructure)
-structures = search_results.to_pymatgen()
+structures = search_results.to_toolkit()
 ```
 
 This isn't very exciting now because we just have one row/structure in our table :cry:, but we'll do some more exciting filtering in the next section.

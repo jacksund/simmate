@@ -53,6 +53,6 @@ class AflowStructure(Structure):
         # initialize this model object using the data. I pass to super() method to
         # handle the "structure". The reason I even have this method is because
         # there's a bunch of extra kwargs I'm passing in along with "structure".
-        structure_db = super().from_pymatgen(**data_dict)
+        structure_db = super().from_toolkit(**data_dict)
 
         return structure_db

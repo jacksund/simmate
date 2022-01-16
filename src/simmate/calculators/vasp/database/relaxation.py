@@ -47,7 +47,7 @@ Do exactly the same thing as all of these lines...
 
 """
 
-from simmate.database.base_data_types.calculation import NestedCalculation
+from simmate.database.base_data_types.calculation_nested import NestedCalculation
 from simmate.database.base_data_types.relaxation import Relaxation
 
 # Between all of the different relaxations that simmate runs, there's no

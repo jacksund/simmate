@@ -58,7 +58,7 @@ class Thermodynamics(DatabaseTable):
 
     # !!! Maybe make this from_energy and structure input optional...?
     @classmethod
-    def from_base_data(cls, structure, energy=None, as_dict=False):
+    def from_toolkit(cls, structure, energy=None, as_dict=False):
         # Given energy, this function builds the rest of the required fields
         # for this class as an object (or as a dictionary).
         data = (

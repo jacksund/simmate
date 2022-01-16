@@ -13,7 +13,7 @@ from typing import Tuple
 
 # OPTIMIZE:
 # Find a better place for this code. Maybe attach it the core structure class
-# and have from_pymatgen, from_dict, from_database methods. And then a
+# and have from_toolkit, from_dict, from_database methods. And then a
 # from_dynamic method that handles this input.
 
 # Also consider splitting into load_structure, load_directory, and register_calc
@@ -128,10 +128,10 @@ class LoadInputAndRegister(Task):
             # the table.structure_final attribute
             structure_field = structure.get("structure_field")
             if structure_field:
-                structure_cleaned = getattr(calculation, structure_field).to_pymatgen()
+                structure_cleaned = getattr(calculation, structure_field).to_toolkit()
             # if there's no structure field, that means we already have the correct entry
             else:
-                structure_cleaned = calculation.to_pymatgen()
+                structure_cleaned = calculation.to_toolkit()
 
         # Otherwise an incorrect format was given
         else:

@@ -32,7 +32,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     """ Model Methods """
 
     @classmethod
-    def from_pymatgen(
+    def from_toolkit(
         cls,
         structure=None,
         energy=None,
@@ -49,12 +49,12 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
         # first grab the full dictionaries for each parent model
         structure_data = (
-            Structure.from_pymatgen(structure, as_dict=True) if structure else {}
+            Structure.from_toolkit(structure, as_dict=True) if structure else {}
         )
 
         # This data is optional (bc the calculation might not be complete yet!)
         thermo_data = (
-            Thermodynamics.from_base_data(
+            Thermodynamics.from_toolkit(
                 structure,
                 energy,
                 as_dict=True,
@@ -63,7 +63,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
             else {}
         )
         forces_data = (
-            Forces.from_base_data(
+            Forces.from_toolkit(
                 structure,
                 site_forces,
                 lattice_stress,
@@ -100,7 +100,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         # fields for this datatable
         # OPTIMIZE: this overwrites structure data, which should already be there.
         # Is there a faster way to grab this data and update attributes?
-        new_kwargs = self.from_pymatgen(
+        new_kwargs = self.from_toolkit(
             structure=vasprun.final_structure,
             energy=ionic_step["e_wo_entrp"],
             site_forces=ionic_step["forces"],

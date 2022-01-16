@@ -4,45 +4,62 @@ from simmate.database.base_data_types import DatabaseTable, table_column
 
 
 class Calculation(DatabaseTable):
-
-    # A calculation is synonmyous with a "Flow-Run". This entire table together
-    # can be viewed as the "Flow" which may have extra metadata. This could
-    # include values such as...
-    #   workflow_name
-    #   simmate_version
-    #   [[thirdparty]]_version (i.e. vasp_version="5.4.4")
+    """
+    A calculation is synonmyous with a Prefect "Flow-Run". This entire table together
+    can be viewed as the "Flow" which may have extra metadata. This could
+    include values such as...
+        - workflow_name
+        - simmate_version
+        - [[thirdparty]]_version (i.e. vasp_version="5.4.4")
+    """
+    class Meta:
+        abstract = True
+        app_label = "local_calculations"
 
     """Base info"""
 
-    # This is the folder that the workflow was ran in. It will be something
-    # like... "/path/to/simmate-task-abc123"
+
     directory = table_column.CharField(
         max_length=250,
         blank=True,
         null=True,
     )
+    """
+    This is the folder that the workflow was ran in. It will be something
+    like... "/path/to/simmate-task-abc123"
+    """
     # TODO: maybe add host computer name too? (via platform.node())
 
-    # If this was submitted through Prefect, there is a lot more metadata available
-    # for this calculation. Simmate does not store this data directly, but instead
-    # we store the flow-run-id so that the user may look this up in the Prefect
-    # database if they wish.
-    # An example id is... d8a785e1-e344-463a-bede-0e7b3da7bab6
     prefect_flow_run_id = table_column.CharField(
         max_length=50,
         blank=True,
         null=True,
         unique=True,
     )
+    """
+    If this was submitted through Prefect, there is a lot more metadata available
+    for this calculation. Simmate does not store this data directly, but instead
+    we store the flow-run-id so that the user may look this up in the Prefect
+    database if they wish.
+    An example id is... d8a785e1-e344-463a-bede-0e7b3da7bab6
+    """
 
-    # timestamping for when this was added to the database
     created_at = table_column.DateTimeField(auto_now_add=True)
+    """
+    timestamping for when this was added to the database
+    """
+    
     updated_at = table_column.DateTimeField(auto_now=True)
+    """
+    timestamping for when this was last updated
+    """
 
-    # Simmate workflows often have ErrorHandlers that fix any issues while the
-    # calaculation ran. This often involves changing settings, so we store
-    # any of those changes here.
     corrections = table_column.JSONField(blank=True, null=True)
+    """
+    Simmate workflows often have ErrorHandlers that fix any issues while the
+    calaculation ran. This often involves changing settings, so we store
+    any of those changes here.
+    """
 
     """Archived Data"""
     # I may want to add these fields because Prefect doesn't store run stats
@@ -90,13 +107,24 @@ class Calculation(DatabaseTable):
     """ Properties """
 
     @property
-    def prefect_cloud_link(self):
+    def prefect_cloud_link(self) -> str:
+        """
+        URL to this calculation (flow-run) in the Prefect Cloud webstite.
+        """
         return f"https://cloud.prefect.io/simmate/flow-run/{self.prefect_flow_run_id}"
 
     """ Model Methods """
 
     @classmethod
-    def from_prefect_id(cls, id, **kwargs):
+    def from_prefect_id(cls, id: str, **kwargs):
+        """
+        Given a prefect id, this will either...
+        
+        1. if it exists, load the database object with matching prefect_id 
+        2. if it doesn't exist, create a new database object using this ID and extra kwargs
+
+        """
+        
         # Depending on how a workflow was submitted, there may be a calculation
         # extry existing already -- which we need to grab and then update. If it's
         # not there, we create a new one!
@@ -107,99 +135,12 @@ class Calculation(DatabaseTable):
             return cls.objects.get(prefect_flow_run_id=id)
         # Otherwise we need to create a new one and return that.
 
-        # See if the calculation table has a from_pymatgen method (most simmate calcs do)
+        # See if the calculation table has a from_toolkit method (most simmate calcs do)
         # and if so, we should call that instead and pass all of our kwargs to it.
-        if hasattr(cls, "from_pymatgen"):
-
-            calculation = cls.from_pymatgen(prefect_flow_run_id=id, **kwargs)
+        if hasattr(cls, "from_toolkit"):
+            calculation = cls.from_toolkit(prefect_flow_run_id=id, **kwargs)
         else:
             calculation = cls(prefect_flow_run_id=id, **kwargs)
         calculation.save()
 
         return calculation
-
-    """ Restrictions """
-    # none
-
-    """ For website compatibility """
-    """ Set as Abstract Model """
-    # I have other models inherit from this one, while this model doesn't need its own
-    # table. Therefore, I set this as an abstract model. Should that change in the
-    # future, look here:
-    # https://docs.djangoproject.com/en/3.1/topics/db/models/#model-inheritance
-    class Meta:
-        abstract = True
-        app_label = "local_calculations"
-
-
-# EXPERIMENTAL
-class NestedCalculation(Calculation):
-    """
-    A nested calculation is a calculation made up of other calculations. For example,
-    we may want to run a workflow that runs a series of relaxations. Or maybe
-    a relaxation, then energy, then bandstrucuture calculation. This table
-    is for keeping track of workflows ran in series like this.
-    """
-
-    class Meta:
-        abstract = True
-        app_label = "local_calculations"
-
-    # @abstractproperty
-    # child_calculation_tables = [...]
-
-    # TODO:
-    # corrections
-    # should this be a list of all modifications? It could maybe be used to
-    # carry fixes (such as smearing) accross different calcs.
-    # Or maybe a method that just lists the corrections of each subcalc?
-    # For now I don't use this though. This line removes the field.
-    corrections = None
-
-    @classmethod
-    def create_subclass_from_calcs(
-        cls, name, child_calculation_tables, module, **extra_columns
-    ):
-
-        # BUG: I assume a workflow won't point to the save calculation table
-        # more than once... What's a scenario where this isn't true?
-        # I can only think of mult-structure workflows (like EvolutionarySearch)
-        # which I don't give their own table for now.
-        new_columns = {}
-        for child_calc in child_calculation_tables:
-            new_column = table_column.OneToOneField(
-                child_calc,
-                on_delete=table_column.CASCADE,
-                # related_name=...,
-                blank=True,
-                null=True,
-            )
-            new_columns[f"{child_calc._meta.model_name}"] = new_column
-
-        # Now put all the fields together to make the new class
-        NewClass = cls.create_subclass(
-            name,
-            **new_columns,
-            **extra_columns,
-            # also have child calcs list as an attribute
-            child_calculation_tables=child_calculation_tables,
-            module=module,
-        )
-
-        # we now have a new child class and avoided writing some boilerplate code!
-        return NewClass
-
-    def update_calculation(self):
-
-        raise Exception(
-            "NestedCalculation datatable is experimental so this method doesn't "
-            "work yet."
-        )
-
-        # BUG: This assumes we ran all calculations within the same directory,
-        # which isn't true in all cases.
-        for child_calc_table in self.child_calculation_tables:
-            if child_calc_table.objects.filter(directory=self.directory).exists():
-                child_calc = child_calc_table.objects.get(directory=self.directory)
-                setattr(self, child_calc._meta.model_name, child_calc)
-        self.save()

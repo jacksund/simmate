@@ -139,7 +139,7 @@ def load_all_structures(base_directory="cod/cif/"):
                         }
 
                         # now convert the entry to a database object
-                        structure_db = CodStructure.from_pymatgen(**entry_dict)
+                        structure_db = CodStructure.from_toolkit(**entry_dict)
 
                         # and save it to our database!
                         structure_db.save()

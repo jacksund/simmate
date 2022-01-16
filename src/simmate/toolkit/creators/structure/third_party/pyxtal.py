@@ -99,7 +99,7 @@ class PyXtalStructure(StructureCreator):
         # so we will check that
         if self.pyxtal.valid:
             # if it is valid, we want the PyMatGen structure object, which is at *.struct
-            return self.pyxtal.to_pymatgen()
+            return self.pyxtal.to_toolkit()
         else:
             # if it is not valid, the structure creation failed
             return False

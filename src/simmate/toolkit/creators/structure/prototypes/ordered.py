@@ -77,5 +77,5 @@ class AflowPrototypeStructures:
         # Now that we have the prototype entries, let's convert them to
         # structure objects for us to use below.
         self.prototype_structures = [
-            prototype.to_pymatgen() for prototype in prototype_entries
+            prototype.to_toolkit() for prototype in prototype_entries
         ]

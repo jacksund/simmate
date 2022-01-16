@@ -112,7 +112,7 @@ def load_all_structures():
         }
 
         # now convert the entry to a database object
-        structure_db = OqmdStructure.from_pymatgen(**entry_dict)
+        structure_db = OqmdStructure.from_toolkit(**entry_dict)
 
         # and save it to our database!
         structure_db.save()

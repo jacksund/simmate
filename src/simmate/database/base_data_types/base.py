@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import inspect
+
 import yaml
 
 from django.db import models
@@ -15,18 +17,19 @@ class SearchResults(models.QuerySet):
     these to a pandas dataframe or even a list of pymatgen structures, you can
     now do...
 
-    .. code-block:: python
+    ``` python
+    # for a list of database objects (django models)
+    search_results = Structures.objects.all()
 
-        # for a list of database objects (django models)
-        search_results = Structures.objects.all()
+    # for a pandas dataframe (which is like an Excel table)
+    dataframe = search_results.to_dataframe()
 
-        # for a pandas dataframe (which is like an Excel table)
-        dataframe = search_results.to_dataframe()
-
-        # for a list of pymatgen structure objects
-        structures = search_results.to_pymatgen()
-
-    For django users, we simply renamed QuerySet to SearchResults to help new users.
+    # for a list of pymatgen structure objects
+    structures = search_results.to_toolkit()
+    ```
+    
+    All other functionality is inherited from 
+    [Django QuerySets](https://docs.djangoproject.com/en/4.0/ref/models/querysets/).
     """
 
     def to_dataframe(
@@ -38,29 +41,29 @@ class SearchResults(models.QuerySet):
         datetime_index: str = False,
     ):
         """
-        Returns a DataFrame from the queryset
+        Returns a Pandas DataFrame of the search results
 
-        This method is coppied from...
-        https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py
+        This method is coppied from django_pandas' 
+        [manager.py](https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py)
 
         Paramaters
         -----------
-        fieldnames:  List[str]
+        - `fieldnames`:
             The model field names(columns) to utilise in creating the DataFrame.
             You can span a relationships in the usual Django ORM way by using
             the foreign key field name separated by double underscores and refer
             to a field in a related model.
-        index: str
+        - `index`:
             specify the field to use  for the index. If the index field is not
             in fieldnames it will be appended. This is mandatory for timeseries.
-        verbose: bool
-            If  this is ``True`` then populate the DataFrame with the human
+        - `verbose`:
+            If  this is `True` then populate the DataFrame with the human
             readable versions for foreign key fields else use the actual values
             set in the model
-        coerce_float: bool
+        - `coerce_float`:
             Attempt to convert values to non-string, non-numeric objects (like
             decimal.Decimal) to floating point.
-        datetime_index: bool
+        - `datetime_index`: bool
             specify whether index should be converted to a DateTimeIndex.
         """
 
@@ -76,21 +79,21 @@ class SearchResults(models.QuerySet):
             datetime_index=datetime_index,
         )
 
-    def to_pymatgen(self):
+    def to_toolkit(self):
         """
-        Converts your SearchResults/QuerySet to a list of pymatgen objects
+        Converts your SearchResults to a list of pymatgen objects
         """
 
         # This method will only be for structures and other classes that
         # support this method. So we make sure the model has supports it first.
-        if not hasattr(self.model, "to_pymatgen"):
+        if not hasattr(self.model, "to_toolkit"):
             raise Exception(
-                "This database table does not have a to_pymatgen method implemented"
+                "This database table does not have a to_toolkit method implemented"
             )
 
         # now we can iterate through the queryset and return the converted
         # pymatgen objects as a list
-        return [obj.to_pymatgen() for obj in self]
+        return [obj.to_toolkit() for obj in self]
 
     # EXPERIMENTAL
     # from prefect import Client
@@ -134,6 +137,9 @@ class DatabaseTable(models.Model):
     # I override the default manager with the one we define above, which has
     # extra methods useful for our querysets.
     objects = DatabaseTableManager()
+    """
+    Accesses all of the rows in this datatable and initiates SearchResults
+    """
 
     @classmethod
     def show_columns(cls):
@@ -162,25 +168,25 @@ class DatabaseTable(models.Model):
         Let's take an example where we inherit from a Structure table. The two
         ways we create a NewTable below are exactly the same:
 
-        .. code-block:: python
+        ``` python
+        # Normal way to create a child class
+        NewTable(Structure):
+            new_field1 = table_column.FloatField()
+            new_field2 = table_column.FloatField()
 
-            # Normal way to create a child class
-            NewTable(Structure):
-                new_field1 = table_column.FloatField()
-                new_field2 = table_column.FloatField()
-
-            # How this method makes the same child class
-            NewTable = Structure.create_subclass(
-                name="NewTable",
-                module=__name__, # required for serialization
-                new_field1 = table_column.FloatField()
-                new_field2 = table_column.FloatField()
-            )
+        # How this method makes the same child class
+        NewTable = Structure.create_subclass(
+            name="NewTable",
+            module=__name__, # required for serialization
+            new_field1 = table_column.FloatField()
+            new_field2 = table_column.FloatField()
+        )
+        ```
 
         While this might seem silly, it helps us avoid a bunch of boilerplate
         code when we need to redefine a bunch of relationships in every single
         child class (and always in the same way). A great example of it's utility
-        is in local_calculations.relaxations.
+        is in `simmate.calculators.vasp.database.relaxation`.
         """
 
         # because we update values below, we make sure we are editting a
@@ -210,6 +216,27 @@ class DatabaseTable(models.Model):
 
         return NewClass
 
+    # EXPERIMENTAL
+    @classmethod
+    def from_toolkit_test(cls):
+        
+        print("\n\n\n\n")
+        
+        parents = inspect.getmro(cls)
+        
+        print(parents)
+        
+        for parent in parents:
+            
+            if not hasattr(parent, "from_toolkit"):
+                continue
+            
+            print(parent.__name__)
+            
+            spec = inspect.getfullargspec(parent.from_toolkit)
+            
+            print(spec.args)
+        
 
 # This line does NOTHING but rename a module. I have this because I want to use
 # "table_column.CharField(...)" instead of models.CharField(...) in my Models.

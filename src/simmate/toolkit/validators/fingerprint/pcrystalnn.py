@@ -133,7 +133,7 @@ class PartialCrystalNNFingerprint:
         new_structures = (
             self.structure_pool_queryset.filter(created_at__gte=last_update_safe)
             .only("structure_string")
-            .to_pymatgen()
+            .to_toolkit()
         )
 
         # If there aren't any new structures, just exit without printing the

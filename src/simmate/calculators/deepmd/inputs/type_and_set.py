@@ -93,7 +93,7 @@ class DeepmdDataset:
         # pymatgen structures objects and add a column to the dataframe for these
         #
         #   structures_dataframe["structure"] = [
-        #       structure.to_pymatgen() for structure in ionic_step_structures
+        #       structure.to_toolkit() for structure in ionic_step_structures
         #   ]
         #
         # BUG: the read_frame query creates a new query, so it may be a different

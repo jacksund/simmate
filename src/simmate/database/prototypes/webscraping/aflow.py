@@ -43,7 +43,7 @@ def load_all_prototypes():
         ).get_symmetrized_structure()
 
         # Organize the data into our database format
-        prototype = AflowPrototype.from_pymatgen(
+        prototype = AflowPrototype.from_toolkit(
             structure=structure_sanitized,
             mineral_name=prototype_data["tags"]["mineral"],
             aflow_id=prototype_data["tags"]["aflow"],
