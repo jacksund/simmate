@@ -105,7 +105,6 @@ setup(
         "dask-jobqueue>=0.7.3",  # for submitting on clusters
         "dj-database-url>=0.5.0",  # for DigitalOcean URL conversion
         "djangorestframework>=3.13.1",  # for our REST API
-        "django-filter>=21.1",  # sets up automatic filters for our REST API
         "django-extensions>=3.1.5",  # simple tools to help with django development
         "pyyaml>=6.0",  # for yaml configuration files
         "plotly>=5.4.0",  # for interactive plots and visualization
@@ -133,6 +132,7 @@ setup(
         # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
         # "scikit-learn>=1.0.1",  # for machine-learning
         # "fabric>=2.6.0",  # for remote ssh connections
+        # "django-filter>=21.1",  # sets up automatic filters for our REST API
     ],
     # Register command line interface
     entry_points={

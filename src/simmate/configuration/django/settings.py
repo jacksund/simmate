@@ -188,7 +188,6 @@ INSTALLED_APPS = [
     # These are apps created by third-parties that give us extra features
     "crispy_forms",  # django-crispy-forms
     "rest_framework",  # djangorestframework
-    "django_filters",  # django-filter
     "django_extensions",  # for development tools
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
@@ -353,8 +352,6 @@ REST_FRAMEWORK = {
     # way we don't have to set a page limit for every individual endpoint
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
-    # We use django-filter to automatically handle filtering from a REST url
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     # To prevent users from querying too much and bringing down our servers,
     # we set a throttle rate on each user. Here, "anon" represents an anonymous
     # user (not signed-in) while signed-in users have access to higher download

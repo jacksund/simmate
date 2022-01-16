@@ -5,6 +5,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from simmate.website.rest_api.views import (
+    SpacegroupViewSet,
     MatProjViewSet,
     JarvisViewSet,
     AflowViewSet,
@@ -14,6 +15,7 @@ from simmate.website.rest_api.views import (
 
 
 router = routers.DefaultRouter()
+router.register("space-groups", SpacegroupViewSet)
 router.register("materials-project", MatProjViewSet)
 router.register("jarvis", JarvisViewSet)
 router.register("aflow", AflowViewSet)

@@ -67,7 +67,7 @@ class DeepmdDataset:
     # provide like so:
     #
     # from simmate.configuration.django import setup_full  # sets database connection
-    # from simmate.database.local_calculations.relaxation.mit import MITRelaxationStructure
+    # from simmate.database.local_calculations import MITRelaxationStructure
     # ionic_step_structures = MITRelaxationStructure.objects.filter(
     #     energy__isnull=False, site_forces__isnull=False
     # ).all()

@@ -34,7 +34,10 @@ class MatProjStructure(Structure, Thermodynamics):
             energy,
             as_dict=True,
         )
-        structure_data = Structure.from_pymatgen(structure, as_dict=True)
+        structure_data = Structure.from_pymatgen(
+            structure,
+            as_dict=True,
+        )
 
         # Now feed all of this dictionarying into one larger one.
         all_data = dict(

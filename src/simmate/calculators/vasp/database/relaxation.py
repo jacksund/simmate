@@ -8,7 +8,7 @@ behind the scenes, so here's an example:
     
 These two lines...
     
-    from simmate.database.local_calculations.relaxation.base import Relaxation
+    from simmate.database.local_calculations.base_data_types.relaxation import Relaxation
 
     ExampleRelaxation, ExampleIonicStep = Relaxation.create_all_subclasses("Example", module=__name__)
 
@@ -17,7 +17,7 @@ These two lines...
 Do exactly the same thing as all of these lines...
 
     from simmate.database.base_data_types import table_column
-    from simmate.database.local_calculations.relaxation.base import (
+    from simmate.database.local_calculations.base_data_types.relaxation import (
         IonicStep,
         Relaxation,
     )
