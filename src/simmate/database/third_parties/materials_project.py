@@ -36,7 +36,7 @@ class MatProjStructure(Structure, Thermodynamics):
     @property
     def external_link(self) -> str:
         """
-        URL to this structure in the Materials Project webstite.
+        URL to this structure in the Materials Project website.
         """
         # All Materials Project structures have their data mapped to a URL in
         # the same way. For example...

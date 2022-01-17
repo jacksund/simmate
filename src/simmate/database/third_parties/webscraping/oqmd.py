@@ -2,6 +2,9 @@
 
 """
 
+> :warning: This file is only for use by the Simmate team. Users should instead
+access data via the load_remote_archive method.
+
 This file is for pulling OQMD data into the Simmate database. 
 
 There are many ways to pull from this database, but it looks like the easiest
@@ -17,18 +20,27 @@ from django.db import transaction
 
 from tqdm import tqdm
 from pymatgen.core.structure import Structure
-import qmpy_rester
-
-from simmate.configuration.django import setup_full  # sets up database
 
 from simmate.database.third_parties.oqmd import OqmdStructure
-from simmate.utilities import get_sanitized_structure
 
-# --------------------------------------------------------------------------------------
+# Jarvis is not a dependency of simmate, so make sure you install it before using
+# this module
+try:
+    import qmpy_rester
+except:
+    raise ModuleNotFoundError(
+        "You must install qmpy-rester with `pip install qmpy_rester`"
+    )
 
 
 @transaction.atomic
 def load_all_structures():
+    """
+    Only use this function if you are part of the Simmate dev team!
+
+    Loads all structures directly for the OQMD database into the local
+    Simmate database.
+    """
 
     # The documentation indicates that we handle a query via a context manager
     # for qmpy_rester. Each query is returned as a page of data, where we need
@@ -42,11 +54,8 @@ def load_all_structures():
     # otherwise. And loop until we know its the last page.
     current_page = 0
     is_last_page = False
+    results_per_page = 100  # based on OQMD recommendations
     while not is_last_page:
-
-        # results per page is set based on OQMD recommendations and is constant (2000)
-        # !!! for testing, try a smaller number like 100
-        results_per_page = 100
 
         with qmpy_rester.QMPYRester() as query:
 
@@ -58,8 +67,8 @@ def load_all_structures():
                 #
                 # Note delta_e is the formation energy and then stability is the
                 # energy above hull.
-                fields="entry_id,unit_cell,sites,delta_e,stability,band_gap",
-                element_set="Al,C",  # !!! for testing
+                fields="entry_id,unit_cell,sites,delta_e",
+                element_set="Al,C",  # Useful for testing
             )
             # grab the data for the next slice of structures
             query_slice = result["data"]
@@ -86,7 +95,7 @@ def load_all_structures():
 
         # Parse the data into a pymatgen object
         # Also before converting into a pymatgen object, we need to parse the sites,
-        # which are given as a list of "Element @ X Y Z" (for example "Na @ 0.5 0.5 0.5")
+        # which are given as a list of "Element @ X Y Z" (ex: "Na @ 0.5 0.5 0.5")
         # Changing this format is why we have this complex lists below
         structure = Structure(
             lattice=entry["unit_cell"],
@@ -98,24 +107,12 @@ def load_all_structures():
             coords_are_cartesian=False,
         )
 
-        # Run symmetry analysis and sanitization on the pymatgen structure
-        structure_sanitized = get_sanitized_structure(structure)
-
-        # Compile all of our data into a dictionary
-        entry_dict = {
-            "structure": structure_sanitized,
-            "id": "oqmd-" + str(entry["entry_id"]),
-            # the *1000 converts to meV
-            "energy_above_hull": entry["stability"] * 1000,
-            "final_energy": entry["delta_e"],
-            "band_gap": entry["band_gap"],
-        }
-
         # now convert the entry to a database object
-        structure_db = OqmdStructure.from_toolkit(**entry_dict)
+        structure_db = OqmdStructure.from_toolkit(
+            id="oqmd-" + str(entry["entry_id"]),
+            structure=structure,
+            energy=entry["delta_e"],
+            )
 
         # and save it to our database!
         structure_db.save()
-
-
-# --------------------------------------------------------------------------------------

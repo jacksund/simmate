@@ -7,7 +7,7 @@ import shutil
 import yaml
 
 import pandas
-from django.db import models
+from django.db import models, transaction
 from django_pandas.io import read_frame
 
 from typing import List
@@ -328,6 +328,7 @@ class DatabaseTable(models.Model):
         return all_data if as_dict else cls(**all_data)
 
     @classmethod
+    @transaction.atomic
     def load_archive(cls, filename: str = None):
         """
         Reads a compressed zip file made by `objects.to_mini_dump` and loads the data
@@ -344,11 +345,10 @@ class DatabaseTable(models.Model):
             The filename to write the zip file to. By defualt, None will try to
             find a file named MyExampleTableName.zip.
         """
-        
+
         from tqdm import tqdm
         from pymatgen.core.structure import Structure as Structure_PMG
-        
-        
+
         # generate the file name if one wasn't given
         if not filename:
             filename = cls.__name__ + ".zip"
@@ -370,7 +370,7 @@ class DatabaseTable(models.Model):
         # base_data_type methods (e.g. a from_base_info method for each)
         if "structure_string" in df.columns:
 
-            for entry in entries:
+            for entry in tqdm(entries):
                 structure_str = entry.pop("structure_string")
                 # !!! This code is a copy of base_data_types.Structure.to_toolkit
                 # This should instead be a method attached to ToolkitStructure

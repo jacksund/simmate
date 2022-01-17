@@ -3,7 +3,7 @@
 """
 
 > :warning: This file is only for use by the Simmate team. Users should instead
-access Material's Project data via the load_remote_archive method.
+access data via the load_remote_archive method.
 
 This file is for pulling Materials Project data into the Simmate database. 
 PyMatGen offers an easy way to do this in python -- the MPRester class. All you
@@ -17,8 +17,6 @@ from django.db import transaction
 from tqdm import tqdm
 from pymatgen.ext.matproj import MPRester
 
-from simmate.configuration.django import setup_full  # sets up database
-
 from simmate.database.third_parties.materials_project import MatProjStructure
 
 
@@ -26,6 +24,7 @@ from simmate.database.third_parties.materials_project import MatProjStructure
 def load_all_structures(
     api_key: str,
     criteria: dict = {"task_id": {"$exists": True}},
+    update_stabilities: bool = True,
 ):
     """
     Only use this function if you are part of the Simmate dev team!
@@ -35,12 +34,15 @@ def load_all_structures(
 
     Parameters
     ----------
-    - `api_key` :
+    - `api_key`:
         Your Materials Project API key.
     - `criteria`:
         Filtering criteria for which structures to load. The default is all
         existing structures (137,885 as of 2022-01-16), which will take rouhghly
-        2 hours to complete.
+        15 min to complete (not including stabilities).
+    - `update_stabilities`:
+        Whether to run update_all_stabilities on the database table. Note this
+        will add over an hour to this process. Default is True.
     """
 
     # Notes on filtering criteria for structures in the Materials Project:
@@ -104,4 +106,5 @@ def load_all_structures(
         structure_db.save()
 
     # once all structures are saved, let's update the Thermodynamic columns
-    MatProjStructure.update_all_stabilities()
+    if update_stabilities:
+        MatProjStructure.update_all_stabilities()
