@@ -11,7 +11,22 @@ from simmate.database.base_data_types import (
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
-    """Base Info"""
+    base_info = (
+        [
+            "valence_band_maximum",
+            "conduction_band_minimum",
+            "energy_fermi",
+            "is_gap_direct",
+        ]
+        + Structure.base_info
+        + Thermodynamics.base_info
+        + Forces.base_info
+        + Calculation.base_info
+    )
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
     # Note: we assume that only converged data is being stored! So there is no
     # "converged_electronic" section here. ErrorHandlers and workups should

@@ -17,7 +17,17 @@ class Calculation(DatabaseTable):
         abstract = True
         app_label = "local_calculations"
 
-    """Base info"""
+    base_info = [
+        "directory",
+        "prefect_flow_run_id",
+        "created_at",
+        "updated_at",
+        "corrections",
+    ]
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
     directory = table_column.CharField(
         max_length=250,

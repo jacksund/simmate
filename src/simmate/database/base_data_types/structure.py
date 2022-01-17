@@ -18,7 +18,11 @@ class Structure(DatabaseTable):
     class Meta:
         abstract = True
 
-    """Base Info"""
+    base_info = ["structure_string", "source"]
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
     structure_string = table_column.TextField()
     """

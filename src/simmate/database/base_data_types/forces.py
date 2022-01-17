@@ -9,7 +9,14 @@ class Forces(DatabaseTable):
     class Meta:
         abstract = True
 
-    """Base Info"""
+    base_info = [
+        "site_forces",
+        "lattice_stress",
+    ]
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
     site_forces = table_column.JSONField(blank=True, null=True)
     """

@@ -4,9 +4,24 @@ from simmate.database.base_data_types import table_column, Structure, Thermodyna
 
 
 class MatProjStructure(Structure, Thermodynamics):
+    """
+    Crystal structures from the [Materials Project](https://materialsproject.org/)
+    database.
+    
+    Currently, this table only stores strucure and thermodynamic information,
+    but the Materials Project has much more data available via their 
+    [REST API](https://github.com/materialsproject/api) and website.
+    """
+
+    # Make sure Django knows which app this is associated with
     class Meta:
-        # Make sure Django knows which app this is associated with
         app_label = "third_parties"
+
+    base_info = ["id", "structure_string", "energy"]
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """
@@ -15,7 +30,7 @@ class MatProjStructure(Structure, Thermodynamics):
 
     source = "Materials Project"
     """
-    Where this structure and data came from
+    Where this structure and data came from.
     """
 
     @property

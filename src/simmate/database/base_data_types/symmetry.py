@@ -16,8 +16,6 @@ class Spacegroup(DatabaseTable):
     class Meta:
         app_label = "local_calculations"  # TODO: move to a separate app
 
-    """Base Info"""
-
     # NOTE: International spacegroup info is also known as Hermann-Mauguin
 
     number = table_column.IntegerField(primary_key=True)
@@ -39,8 +37,6 @@ class Spacegroup(DatabaseTable):
     """
     Point group symbol
     """
-
-    """ Model Methods """
 
     @staticmethod
     def _load_database_from_toolkit():

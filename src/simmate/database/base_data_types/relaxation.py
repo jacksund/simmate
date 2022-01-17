@@ -25,7 +25,16 @@ class IonicStep(Structure, Thermodynamics, Forces):
     # structure. However, all ionic steps are useful in the case of machine
     # learning where tons of data are needed. We therefore store these here.
 
-    """Base Info"""
+    base_info = (
+        ["ionic_step_number"]
+        + Structure.base_info
+        + Thermodynamics.base_info
+        + Forces.base_info
+    )
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
     # Note: we assume that only converged data is being stored! So there is no
     # "converged_electronic" section here. ErrorHandlers and workups should

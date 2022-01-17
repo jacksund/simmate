@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import os
 import inspect
+import shutil
 
 import yaml
 
+import pandas
 from django.db import models
 from django_pandas.io import read_frame
 
@@ -94,6 +97,58 @@ class SearchResults(models.QuerySet):
         # now we can iterate through the queryset and return the converted
         # pymatgen objects as a list
         return [obj.to_toolkit() for obj in self]
+
+    def to_archive(self, filename_base: str = None):
+        """
+        Writes a compressed zip file using the table's base_info attribute.
+        Underneath, the file is written in a csv format.
+
+        This is useful for small making archive files and reloading fixtures
+        to a separate database.
+
+        This method is attached to the table manager for scenarios to allow
+        queryset filtering before dumping data.
+
+        To load this database dump into a new database, use the class's
+        `from_mini_dump` method.
+
+        Parameters
+        -----------
+
+        - `filename_base`:
+            The filename to write the zip file to. By defualt, None will make
+            a filename named MyExampleTableName.zip. Do not include the file extension
+            (.zip) in this parameter.
+
+        """
+
+        # generate the file name if one wasn't given
+        if not filename_base:
+            filename_base = self.model.__name__
+
+        # We want to load the entire table, but only grab the fields that
+        # are in base_info.
+        base_objs = self.only(*self.model.base_info)
+
+        # now convert these objects to a pandas dataframe, again using just
+        # the base_info columns
+        df = base_objs.to_dataframe(fieldnames=self.model.base_info)
+
+        # Write the data to a csv file
+        # OPTIMIZE: is there a better format that pandas can write to?
+        csv_filename = filename_base + ".csv"
+        df.to_csv(csv_filename, index=False)
+
+        # now convert the dump file to a compressed zip
+        shutil.make_archive(
+            filename_base,
+            "zip",
+            ".",  # says file is in the current working directory
+            csv_filename,
+        )
+
+        # we can now delete the csv file
+        os.remove(csv_filename)
 
     # EXPERIMENTAL
     # from prefect import Client
@@ -271,6 +326,66 @@ class DatabaseTable(models.Model):
         # If as_dict is false, we build this into an Object. Otherwise, just
         # return the dictionary
         return all_data if as_dict else cls(**all_data)
+
+    @classmethod
+    def load_archive(cls, filename: str = None):
+        """
+        Reads a compressed zip file made by `objects.to_mini_dump` and loads the data
+        back into the Simmate database.
+
+        Typically, users won't call this method directly, but instead use the
+        `load_remote_archive` method, which handles downloading the archive
+        file from the Simmate website for you.
+
+        Parameters
+        -----------
+
+        - `filename`:
+            The filename to write the zip file to. By defualt, None will try to
+            find a file named MyExampleTableName.zip.
+        """
+        
+        from tqdm import tqdm
+        from pymatgen.core.structure import Structure as Structure_PMG
+        
+        
+        # generate the file name if one wasn't given
+        if not filename:
+            filename = cls.__name__ + ".zip"
+
+        # uncompress the zip file
+        shutil.unpack_archive(filename)
+
+        # We will now have a csv file of the same name, which we load into
+        # a pandas dataframe
+        df = pandas.read_csv(filename.replace(".zip", ".csv"))
+
+        # convert the dataframe to a list of dictionaries that we will iterate
+        # through.
+        entries = df.to_dict(orient="records")
+
+        # For all entries, convert the structure_string to a toolkit structure
+        # OPTIMIZE: is there a better way to do decide which entries need to be
+        # converted to toolkit structures? This code may be better placed in
+        # base_data_type methods (e.g. a from_base_info method for each)
+        if "structure_string" in df.columns:
+
+            for entry in entries:
+                structure_str = entry.pop("structure_string")
+                # !!! This code is a copy of base_data_types.Structure.to_toolkit
+                # This should instead be a method attached to ToolkitStructure
+                storage_format = "CIF" if (structure_str[0] == "#") else "POSCAR"
+                structure = Structure_PMG.from_str(
+                    structure_str,
+                    fmt=storage_format,
+                )
+                # !!!
+                entry["structure"] = structure
+
+        # now iterate through all entries to save them to the database
+        for entry in tqdm(entries):
+            entry_db = cls.from_toolkit(**entry)
+            entry_db.save()
 
 
 # This line does NOTHING but rename a module. I have this because I want to use

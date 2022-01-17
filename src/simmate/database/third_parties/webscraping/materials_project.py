@@ -3,7 +3,7 @@
 """
 
 > :warning: This file is only for use by the Simmate team. Users should instead
-access Material's Project data via the load_data_archive tutorial.
+access Material's Project data via the load_remote_archive method.
 
 This file is for pulling Materials Project data into the Simmate database. 
 PyMatGen offers an easy way to do this in python -- the MPRester class. All you
