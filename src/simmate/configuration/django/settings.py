@@ -302,11 +302,6 @@ DATETIME_INPUT_FORMATS = [
 # !!! Consider removing in the future.
 USE_I18N = True
 
-# !!! I changed this setting to get my datetime-local widgets working, but I don't
-# !!! understand active locals -- I need to read more
-# !!! https://docs.djangoproject.com/en/3.0/ref/forms/fields/#datetimefield
-USE_L10N = False
-
 USE_TZ = True
 
 
