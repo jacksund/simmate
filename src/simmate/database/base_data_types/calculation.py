@@ -12,12 +12,12 @@ class Calculation(DatabaseTable):
         - simmate_version
         - [[thirdparty]]_version (i.e. vasp_version="5.4.4")
     """
+
     class Meta:
         abstract = True
         app_label = "local_calculations"
 
     """Base info"""
-
 
     directory = table_column.CharField(
         max_length=250,
@@ -48,7 +48,7 @@ class Calculation(DatabaseTable):
     """
     timestamping for when this was added to the database
     """
-    
+
     updated_at = table_column.DateTimeField(auto_now=True)
     """
     timestamping for when this was last updated
@@ -119,12 +119,12 @@ class Calculation(DatabaseTable):
     def from_prefect_id(cls, id: str, **kwargs):
         """
         Given a prefect id, this will either...
-        
-        1. if it exists, load the database object with matching prefect_id 
+
+        1. if it exists, load the database object with matching prefect_id
         2. if it doesn't exist, create a new database object using this ID and extra kwargs
 
         """
-        
+
         # Depending on how a workflow was submitted, there may be a calculation
         # extry existing already -- which we need to grab and then update. If it's
         # not there, we create a new one!

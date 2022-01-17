@@ -27,8 +27,8 @@ class SearchResults(models.QuerySet):
     # for a list of pymatgen structure objects
     structures = search_results.to_toolkit()
     ```
-    
-    All other functionality is inherited from 
+
+    All other functionality is inherited from
     [Django QuerySets](https://docs.djangoproject.com/en/4.0/ref/models/querysets/).
     """
 
@@ -43,7 +43,7 @@ class SearchResults(models.QuerySet):
         """
         Returns a Pandas DataFrame of the search results
 
-        This method is coppied from django_pandas' 
+        This method is coppied from django_pandas'
         [manager.py](https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py)
 
         Paramaters
@@ -218,25 +218,60 @@ class DatabaseTable(models.Model):
 
     # EXPERIMENTAL
     @classmethod
-    def from_toolkit_test(cls):
-        
-        print("\n\n\n\n")
-        
+    def from_toolkit(cls, as_dict=False, **kwargs):
+
+        # Grab a list of all parent classes
         parents = inspect.getmro(cls)
-        
-        print(parents)
-        
+
+        # As we go through the parent classes below, we will identify the mixins
+        # and populate data using those classes. All of this is fed in to our
+        # main class at the end of the function. We keep this running dictionary
+        # as we go.
+        # TODO: How should I best handle passing extra kwargs to the final class
+        # initialization? For example, I would want to pass `energy` but I wouldn't
+        # want to pass the toolkit structure object. I may update this line in
+        # the future to remove python objects. For now, I only remove structure
+        # becauase I know that it is a toolkit object -- not a database column
+        all_data = kwargs.copy()
+        all_data.pop("structure")
+
         for parent in parents:
-            
-            if not hasattr(parent, "from_toolkit"):
+
+            # Skip the parent class if it doesn't directly inherit from the
+            # DatabaseTable class. We do this because we want the fundamental
+            # mixins that come with Simmate (such as Structure, Forces, Thermodynamics).
+            # We also skip the classes that don't have a _from_toolkit method defined.
+            # Right now, this is just the Calculation class that's skipped with this
+            # condition.
+            if parent.__base__ != DatabaseTable or not hasattr(parent, "_from_toolkit"):
                 continue
-            
-            print(parent.__name__)
-            
-            spec = inspect.getfullargspec(parent.from_toolkit)
-            
-            print(spec.args)
-        
+
+            # Grab the input arguments for the _from_toolkit method. This will
+            # give a list back like... ['cls', 'structure', 'as_dict']. We
+            # don't consider as_dict or cls, so we remove those too
+            inputs = inspect.getfullargspec(parent._from_toolkit).args
+            inputs.remove("as_dict")
+            inputs.remove("cls")
+
+            # Now inputs is current of list of keys that we need. Next, we go
+            # through our kwargs and see if we have any of these keys, and if so,
+            # grab them.
+            matching_inputs = {
+                key: kwargs[key] for key in inputs if key in kwargs.keys()
+            }
+
+            # We now pass these inputs to the _from_toolkit. If we're missing
+            # a required input, this will raise an error here. We only
+            # want the expanded input, so we request a dictionary, not object.
+            data = parent._from_toolkit(**matching_inputs, as_dict=True)
+
+            # Now add this mixin's data to our collective dictionary
+            all_data.update(data)
+
+        # If as_dict is false, we build this into an Object. Otherwise, just
+        # return the dictionary
+        return all_data if as_dict else cls(**all_data)
+
 
 # This line does NOTHING but rename a module. I have this because I want to use
 # "table_column.CharField(...)" instead of models.CharField(...) in my Models.

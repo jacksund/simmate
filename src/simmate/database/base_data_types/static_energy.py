@@ -29,62 +29,6 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     conduction_band_minimum = table_column.FloatField(blank=True, null=True)
     valence_band_maximum = table_column.FloatField(blank=True, null=True)
 
-    """ Model Methods """
-
-    @classmethod
-    def from_toolkit(
-        cls,
-        structure=None,
-        energy=None,
-        site_forces=None,
-        lattice_stress=None,
-        as_dict=False,
-        **kwargs,
-    ):
-        # because this is a combination of tables, I need to build the data for
-        # each and then feed all the results into this class
-
-        # Note prefect_flow_run_id should be given as a kwarg or this class will
-        # fail to initialize with the Calculation mixin
-
-        # first grab the full dictionaries for each parent model
-        structure_data = (
-            Structure.from_toolkit(structure, as_dict=True) if structure else {}
-        )
-
-        # This data is optional (bc the calculation might not be complete yet!)
-        thermo_data = (
-            Thermodynamics.from_toolkit(
-                structure,
-                energy,
-                as_dict=True,
-            )
-            if energy and structure
-            else {}
-        )
-        forces_data = (
-            Forces.from_toolkit(
-                structure,
-                site_forces,
-                lattice_stress,
-                as_dict=True,
-            )
-            if (site_forces or lattice_stress) and structure
-            else {}
-        )
-
-        # Now feed all of this dictionarying into one larger one.
-        all_data = dict(
-            **structure_data,
-            **thermo_data,
-            **forces_data,
-            **kwargs,
-        )
-
-        # If as_dict is false, we build this into an Object. Otherwise, just
-        # return the dictionary
-        return all_data if as_dict else cls(**all_data)
-
     def update_from_vasp_run(self, vasprun, corrections, directory):
         # Takes a pymatgen VaspRun object, which is what's typically returned
         # from a simmate VaspTask.run() call.

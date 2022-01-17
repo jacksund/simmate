@@ -15,7 +15,7 @@ from pymatgen.symmetry.groups import SpaceGroup as SpaceGroup_PMG
 class Spacegroup(DatabaseTable):
     class Meta:
         app_label = "local_calculations"  # TODO: move to a separate app
-    
+
     """Base Info"""
 
     # NOTE: International spacegroup info is also known as Hermann-Mauguin
@@ -46,11 +46,11 @@ class Spacegroup(DatabaseTable):
     def _load_database_from_toolkit():
         """
         Loads spacegroup data into the database table.
-        
-        This should never be called by the user. This method is automatically 
-        called when you first set up your database and should never be called 
+
+        This should never be called by the user. This method is automatically
+        called when you first set up your database and should never be called
         after that.
-        
+
         See simmate.configuration.django.database.reset_database
         """
 

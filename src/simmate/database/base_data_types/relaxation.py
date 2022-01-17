@@ -43,50 +43,6 @@ class IonicStep(Structure, Thermodynamics, Forces):
     #   relaxations_as_start
     #   relaxations_as_final
 
-    """ Model Methods """
-    # TODO: add a from_ionic_step method in the future when I have this class.
-
-    @classmethod
-    def from_toolkit(
-        cls,
-        ionic_step_number,
-        structure,
-        energy,
-        site_forces,
-        lattice_stress,
-        relaxation,  # gives the related object for the foreign key
-        as_dict=False,
-    ):
-        # because this is a combination of tables, I need to build the data for
-        # each and then feed all the results into this class
-
-        # first grab the full dictionaries for each parent model
-        thermo_data = Thermodynamics.from_toolkit(
-            structure,
-            energy,
-            as_dict=True,
-        )
-        forces_data = Forces.from_toolkit(
-            structure,
-            site_forces,
-            lattice_stress,
-            as_dict=True,
-        )
-        structure_data = Structure.from_toolkit(structure, as_dict=True)
-
-        # Now feed all of this dictionarying into one larger one.
-        all_data = dict(
-            ionic_step_number=ionic_step_number,
-            relaxation=relaxation,
-            **structure_data,
-            **thermo_data,
-            **forces_data,
-        )
-
-        # If as_dict is false, we build this into an Object. Otherwise, just
-        # return the dictionary
-        return all_data if as_dict else cls(**all_data)
-
     @classmethod
     def create_subclass_from_relaxation(cls, name, relaxation, module, **extra_columns):
 

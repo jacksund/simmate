@@ -40,7 +40,7 @@ class Forces(DatabaseTable):
 
     See numpy.linalg.norm for how this is calculated.
     """
-    
+
     site_forces_norm_per_atom = table_column.FloatField(blank=True, null=True)
     """
     site_forces_norm divided by nsites
@@ -52,7 +52,7 @@ class Forces(DatabaseTable):
 
     See numpy.linalg.norm for how this is calculated.
     """
-    
+
     lattice_stress_norm_per_atom = table_column.FloatField(blank=True, null=True)
     """
     lattice_stress_norm divided by nsites
@@ -61,8 +61,12 @@ class Forces(DatabaseTable):
     """ Model Methods """
 
     @classmethod
-    def from_toolkit(
-        cls, structure, site_forces=None, lattice_stress=None, as_dict=False,
+    def _from_toolkit(
+        cls,
+        structure,
+        site_forces=None,
+        lattice_stress=None,
+        as_dict=False,
     ):
         """
         Given site forces and lattice stress, this function builds the rest of
@@ -83,11 +87,15 @@ class Forces(DatabaseTable):
             else {}
         )
 
-        lattice_data = dict(
-            lattice_stress=lattice_stress,
-            lattice_stress_norm=numpy.linalg.norm(lattice_stress),
-            lattice_stress_norm_per_atom=numpy.linalg.norm(lattice_stress)
-            / structure.num_sites,
+        lattice_data = (
+            dict(
+                lattice_stress=lattice_stress,
+                lattice_stress_norm=numpy.linalg.norm(lattice_stress),
+                lattice_stress_norm_per_atom=numpy.linalg.norm(lattice_stress)
+                / structure.num_sites,
+            )
+            if site_forces
+            else {}
         )
 
         all_data = dict(**site_data, **lattice_data)

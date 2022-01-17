@@ -62,7 +62,7 @@ class Structure(DatabaseTable):
     """
     total number of sites in the unitcell
     """
-    
+
     nelements = table_column.IntegerField()
     """
     total number of unique elements
@@ -72,7 +72,7 @@ class Structure(DatabaseTable):
     """
     List of elements in the structure (ex: ["Y", "C", "F"])
     """
-    
+
     chemical_system = table_column.CharField(max_length=25)
     """
     the base chemical system (ex: "Y-C-F")
@@ -116,12 +116,12 @@ class Structure(DatabaseTable):
     """
     The chemical formula with elements sorted by electronegativity (ex: Li4 Fe4 P4 O16)
     """
-    
+
     formula_reduced = table_column.CharField(max_length=50)
     """
     The reduced chemical formula. (ex: Li4Fe4P4O16 --> LiFePO4)
     """
-    
+
     formula_anonymous = table_column.CharField(max_length=50)
     """
     An anonymized formula. Unique species are arranged in ordering of 
@@ -148,7 +148,7 @@ class Structure(DatabaseTable):
     """
     Spacegroup information. Points to simmate.database.base_data_types.symmetry.Spacegroup
     """
-    
+
     # The AFLOW prototype that this structure maps to.
     # TODO: this will be a relationship in the future
     # prototype = table_column.CharField(max_length=50, blank=True, null=True)
@@ -156,7 +156,7 @@ class Structure(DatabaseTable):
     """ Model Methods """
 
     @classmethod
-    def from_toolkit(cls, structure, as_dict=False, **kwargs):
+    def _from_toolkit(cls, structure, as_dict=False, **kwargs):
 
         # --------------------------------------
         # FIND A BETTER SPOT FOR THIS CODE. See _from_dynamic method below for more.
