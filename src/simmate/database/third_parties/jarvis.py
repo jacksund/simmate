@@ -30,7 +30,7 @@ class JarvisStructure(Structure):
     """
     Where this structure and data came from.
     """
-    
+
     # TODO: contact their team to ask about reporting energy instead. That way
     # we can use the Thermodynamics mixin instead of manually listing this.
     energy_above_hull = table_column.FloatField(blank=True, null=True)

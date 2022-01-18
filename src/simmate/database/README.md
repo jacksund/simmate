@@ -82,3 +82,16 @@ MITStaticEnergy.objects.filter(
     elements__contains="Ca",  # the structure includes the element Ca
 ).all()
 ```
+
+# Converting data to desired format
+
+By default, Django returns your query results as a `queryset` (or `SearchResults` in simmate). This is a list of database objects. It is more useful to convert them to a pandas dataframe or to toolkit objects.
+``` python
+# Gives a pandas dataframe
+df = MITStaticEnergy.objects.filter(...).to_dataframe()
+
+# Gives a list of toolkit Structure objects
+df = MITStaticEnergy.objects.filter(...).to_toolkit()
+```
+
+To modify each of these, see the [pandas](https://pandas.pydata.org/docs/) and `simmate.toolkit` documentation for more info.

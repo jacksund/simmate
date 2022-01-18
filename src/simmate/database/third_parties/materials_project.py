@@ -7,9 +7,9 @@ class MatProjStructure(Structure, Thermodynamics):
     """
     Crystal structures from the [Materials Project](https://materialsproject.org/)
     database.
-    
+
     Currently, this table only stores strucure and thermodynamic information,
-    but the Materials Project has much more data available via their 
+    but the Materials Project has much more data available via their
     [REST API](https://github.com/materialsproject/api) and website.
     """
 

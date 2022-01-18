@@ -43,10 +43,10 @@ def load_all_structures(base_directory="cod/cif/"):
     """
     Only use this function if you are part of the Simmate dev team!
 
-    Loads all structures directly for the COD database into the local 
+    Loads all structures directly for the COD database into the local
     Simmate database.
-    
-    Make sure you have downloaded the 
+
+    Make sure you have downloaded the
     [COD archive]([here](http://www.crystallography.net/archives/))
     and have it upacked to match your base_directory input.
     """

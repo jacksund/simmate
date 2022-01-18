@@ -112,7 +112,7 @@ def load_all_structures():
             id="oqmd-" + str(entry["entry_id"]),
             structure=structure,
             energy=entry["delta_e"],
-            )
+        )
 
         # and save it to our database!
         structure_db.save()

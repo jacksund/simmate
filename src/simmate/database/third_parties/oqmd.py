@@ -6,9 +6,9 @@ from simmate.database.base_data_types import table_column, Structure, Thermodyna
 class OqmdStructure(Structure, Thermodynamics):
     """
     Crystal structures from the [OQMD](http://oqmd.org/) database.
-    
+
     Currently, this table only stores strucure and thermodynamic information,
-    but OQDMD has much more data available via their 
+    but OQDMD has much more data available via their
     [REST API](http://oqmd.org/static/docs/restful.html) and website.
     """
 

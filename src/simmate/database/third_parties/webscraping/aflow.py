@@ -39,7 +39,7 @@ def load_all_structures():
     """
     Only use this function if you are part of the Simmate dev team!
 
-    Loads all structures directly for the AFLOW database into the local 
+    Loads all structures directly for the AFLOW database into the local
     Simmate database.
     """
 
