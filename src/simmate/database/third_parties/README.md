@@ -1,6 +1,6 @@
 
 Overview
---------
+========
 
 This module downloads data from third-parties and stores it to your local database.
 
@@ -14,8 +14,9 @@ Currently, we support the following providers:
 
 _**WARNING:**_ This data is NOT from the Simmate team. These providers are independent groups, and you should cite them appropriately. All data from these providers remain under their source's terms and conditions.
 
+
 Usage
-------
+======
 
 Make sure you have completed [our introductory tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md) for downloading data from these providers.
 
@@ -43,11 +44,11 @@ See `simmate.database` docs for a guide on filtering results and converting to t
 
 
 Alternatives
-------------
+============
 
 This module can be viewed as an alternative to the following codes:
 
-- `[matminer.data_retrieval](https://matminer.readthedocs.io/en/latest/matminer.data_retrieval.html)`
-- `[pymatgen.ext](https://pymatgen.org/pymatgen.ext.html)`
+- [matminer.data_retrieval](https://matminer.readthedocs.io/en/latest/matminer.data_retrieval.html)
+- [pymatgen.ext](https://pymatgen.org/pymatgen.ext.html)
 
 This module stores data locally and then allows rapidly loading data to memory, whereas alternatives only load data into memory and involve querying external APIs.

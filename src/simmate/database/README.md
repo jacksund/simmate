@@ -1,5 +1,5 @@
 The Simmate Database
---------------------
+=====================
 
 This module hosts everything for defining and interacting with your database.
 
@@ -14,7 +14,7 @@ Submodules include...
 
 
 Usage Notes
-------------
+============
 
 Accessing and analyzing data typically involves the following steps:
 
@@ -38,7 +38,9 @@ from simmate.database.local_calculations import MITStaticEnergy
 If this is not done, you will recieve the following error:
 
 ``` python
-ImproperlyConfigured: Requested setting INSTALLED_APPS, but settings are not configured. You must either define the environment variable DJANGO_SETTINGS_MODULE or call settings.configure() before accessing settings.
+ImproperlyConfigured: Requested setting INSTALLED_APPS, but settings are not
+configured. You must either define the environment variable DJANGO_SETTINGS_MODULE 
+or call settings.configure() before accessing settings.
 ```
 
 ## Querying data
@@ -66,12 +68,7 @@ MITStaticEnergy.objects.filter(
 
 To filter rows based on conditions, chain the column name with two underscores. Conditions supported are listed [here](https://docs.djangoproject.com/en/4.0/ref/models/querysets/#field-lookups), but the most commonly used ones are:
 
-- contains
-- in
-- gt + gte (gt = "greater than"; gte = "greater than or equal to")
-- lt + lte (gt = "less than"; gte = "less than or equal to")
-- range
-- isnull (checks if column has a value)
+- `contains`, `in`, `gt`, `gte`, `lt`, `lte`, `range`, `isnull`
 
 An example query with conditional filters:
 ``` python
@@ -83,7 +80,7 @@ MITStaticEnergy.objects.filter(
 ).all()
 ```
 
-# Converting data to desired format
+## Converting data to desired format
 
 By default, Django returns your query results as a `queryset` (or `SearchResults` in simmate). This is a list of database objects. It is more useful to convert them to a pandas dataframe or to toolkit objects.
 ``` python

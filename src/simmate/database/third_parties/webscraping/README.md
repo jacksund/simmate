@@ -3,7 +3,7 @@ _**WARNING:**_ This module is only for the Simmate dev team or third-party contr
 
 
 Overview
---------
+=========
 
 This module is for pulling data from various databases into Simmate using third-party codes. 
 
@@ -13,7 +13,7 @@ Because we are using external clients, you will likely have to download a new py
 
 
 Adding a new provider
----------------------
+=====================
 
 Many of the providers Simmate pulls data from have a preferred way to access their data and some even have multiple options. When deciding how we pull data from each, we prefer to ask providers directly and then we rank Simmate's preferred method on this list:
 
