@@ -6,11 +6,11 @@ from django.contrib.auth.decorators import login_required
 
 from simmate.website.third_parties.forms import ChemicalSystemForm
 
-from simmate.database.third_parties.all import (
-    MatProjStructure,
+from simmate.database.third_parties import (
+    AflowStructure,
     CodStructure,
     JarvisStructure,
-    AflowStructure,
+    MatProjStructure,
     OqmdStructure,
 )
 

@@ -17,7 +17,7 @@ from django.db import transaction
 from tqdm import tqdm
 from pymatgen.ext.matproj import MPRester
 
-from simmate.database.third_parties.materials_project import MatProjStructure
+from simmate.database.third_parties import MatProjStructure
 
 
 @transaction.atomic

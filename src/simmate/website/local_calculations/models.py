@@ -5,7 +5,7 @@
 # https://docs.djangoproject.com/en/3.1/topics/db/models/#organizing-models-in-a-package
 
 # Consider moving base_data_types to a separate app
-from simmate.database.base_data_types.symmetry import Spacegroup
+from simmate.database.base_data_types import Spacegroup
 
 # Rather than retyping all of the logic from this file, I use the copy method here.
 from simmate.database.local_calculations import *

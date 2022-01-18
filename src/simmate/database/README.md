@@ -3,93 +3,82 @@ The Simmate Database
 
 This module hosts everything for defining and interacting with your database.
 
+For beginners, make sure you have completed [our database tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md).
 
-Various database actions
-------------------------
+Submodules include...
 
-Viewing the raw SQL commands that are ran:
-```python
-# https://docs.djangoproject.com/en/3.1/faq/models/#how-can-i-see-the-raw-sql-queries-django-is-running
+- `base_data_types` : fundamental mixins for creating new tables
+- `local_calculations` : collection of result tables for `simmate.workflows`
+- `prototypes` : tables of prototype structures
+- `third_parties` : loads data from external providers (such as Materials Project)
 
-from django.db import connection
-queries = connection.queries
 
-# if you have a queryset (output from a django query) you can do this instead:
-query = users.query.__str__()
+Usage Notes
+------------
+
+Accessing and analyzing data typically involves the following steps:
+
+1. Connecting to your database
+2. Loading your database table class
+3. Querying and filtering data
+4. Converting data to desired format
+5. Modifying data via `simmate.toolkit` or [pandas.Dataframe](https://pandas.pydata.org/)
+
+## Configuring settings
+
+For interactive use, Django settings must be configured before any of these submodules can be imported. This can be done with...
+
+``` python
+from simmate.shortcuts import setup  # configures Django
+
+# and now you can import tables in this module
+from simmate.database.local_calculations import MITStaticEnergy
 ```
 
+If this is not done, you will recieve the following error:
 
-Running raw SQL commands directly against a file (not recommended!):
-```python
-# Using raw SQL for SQLite3 file
-# For testing with sqlite3: https://docs.python.org/3/library/sqlite3.html
-
-# connect to database
-import sqlite3
-conn = sqlite3.connect('db.sqlite3')
-cursor = conn.cursor()
-
-# write out your command in raw SQL
-query = 'SELECT * FROM exam_question LIMIT 2'
-
-# make the query against the database
-cursor.execute(query)
-output = cursor.fetchall()
-conn.commit() # if changes made
-
-# close connections
-cursor.close()
-conn.close()
+``` python
+ImproperlyConfigured: Requested setting INSTALLED_APPS, but settings are not configured. You must either define the environment variable DJANGO_SETTINGS_MODULE or call settings.configure() before accessing settings.
 ```
 
+## Querying data
 
-Using Prefect to run raw SQL query against a file:
-```python
-# Using Prefect Tasks
-# For methods sqlite3 and many other db types, it's useful to start with Prefect Tasks
-# https://docs.prefect.io/api/latest/tasks/sqlite.html
+Simmate uses Django ORM under the hood, so it follows [the same API for making queries](https://docs.djangoproject.com/en/4.0/topics/db/queries/). Below we reiterate the most basic functionality, but full features are discussed in the [Django's Model-layer documentation](https://docs.djangoproject.com/en/4.0/#the-model-layer).
 
-from prefect.tasks.database.sqlite import SQLiteQuery
-
-task = SQLiteQuery(
-    db='db.sqlite3',
-    query = 'SELECT * FROM exam_question LIMIT 2',
-    )
-
-output = task.run()
+All rows of the database table are available via the `objects` attribute:
+``` python
+MITStaticEnergy.objects.all()
 ```
 
-
-Example of making a user profile that properly uses hashing for storage:
-```python
-from django.contrib.auth.models import User
-
-# alternatively I can use User.objects.create_user which will also hanlde making the password
-user = User(username = 'jacksund',
-                email = 'jacksund' + '@live.unc.edu')
-# we can't give the password above because it needs to pass through the hash
-user.set_password('yeet123') 
-user.save()
+All columns of the database table can be printed via the `show_columns` methods:
+``` python
+MITStaticEnergy.show_columns()
 ```
 
+To filter rows with exact-value matches in a column:
+``` python
+MITStaticEnergy.objects.filter(
+    nsites=3,
+    is_gap_direct=False,
+    spacegroup=166,
+).all()
+```
 
-Example of making an object with time-specific information:
-```python
-from example import Exam
-import datetime
-import pytz
+To filter rows based on conditions, chain the column name with two underscores. Conditions supported are listed [here](https://docs.djangoproject.com/en/4.0/ref/models/querysets/#field-lookups), but the most commonly used ones are:
 
-exam = Exam(
-    name="Chem 102: 2020 Spring Final",
-    date=datetime.datetime(
-        year=2020,
-        month=5,
-        day=5,
-        hour=13,
-        minute=30,
-        tzinfo=pytz.utc,
-    ),
-    time_limit=datetime.timedelta(hours=2),
-)
-exam.save()
+- contains
+- in
+- gt + gte (gt = "greater than"; gte = "greater than or equal to")
+- lt + lte (gt = "less than"; gte = "less than or equal to")
+- range
+- isnull (checks if column has a value)
+
+An example query with conditional filters:
+``` python
+MITStaticEnergy.objects.filter(
+    nsites__gte=3,  # greater or equal to 3 sites
+    energy__isnull=False,  # the structure DOES have a energy
+    density__range=(1,5),  # density is between 1 and 5
+    elements__contains="Ca",  # the structure includes the element Ca
+).all()
 ```

@@ -1,17 +1,21 @@
 
-This module is analogous to `matminer.data_retrieval` and `pymatgen.ext` modules, where we are pulling data from third-party databases.
+_**WARNING:**_ This module is only for the Simmate dev team or third-party contributors that want to add their own data! Users should instead use the `load_remote_archive` method to access data. See the [tutorial on accessing the database](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md).
 
 
-Note, that the structures we pull into our database may not be exact matches to
-what's shown in their database. This is beacuse we run symmetry analysis on the
-structure and convert to a LLL reduced cell.
+Overview
+--------
+
+This module is for pulling data from various databases into Simmate using third-party codes. 
+
+For example, data we use `jarvis-tools` in order to load JARVIS structures into the `simmate.database.third_parties.JarvisStructure` table. Once loaded, our team can use the `to_mini_archive` method and distribute that archive on our website for users.
+
+Because we are using external clients, you will likely have to download a new python package when make new archive releases.
 
 
-_**WARNING:**_ If you are trying to use Simmate to pull various data from Materials Project, OQMD, AFLOW, and others *into your own project/script/analysis*, you should jump over to the `simmate.database` module! This module is for pulling data from various databases *into the Simmate database*. Therefore, you should only be using this module if you are on Simmate development team or an expert user.
-
+Adding a new provider
+---------------------
 
 Many of the providers Simmate pulls data from have a preferred way to access their data and some even have multiple options. When deciding how we pull data from each, we prefer to ask providers directly and then we rank Simmate's preferred method on this list:
-
 
 1. **Custom python package.** Other teams have put a lot of work into efficiently using their data. If their package is well managed and makes our lives easier, then we should use it! A great example of this is the MPRester class in pymatgen, which we use to pull Material Project data. The caveat here is that we have to install the extra package. We therefore list
 these as optional dependencies in the Simmate code -- as they aren't used anywhere else in our code.

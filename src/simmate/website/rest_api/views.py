@@ -3,13 +3,13 @@
 from rest_framework.serializers import HyperlinkedModelSerializer
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from simmate.database.base_data_types.symmetry import Spacegroup
-from simmate.database.third_parties.all import (
-    MatProjStructure,
-    JarvisStructure,
+from simmate.database.base_data_types import Spacegroup
+from simmate.database.third_parties import (
     AflowStructure,
-    OqmdStructure,
     CodStructure,
+    JarvisStructure,
+    MatProjStructure,
+    OqmdStructure,
 )
 
 

@@ -299,7 +299,8 @@ class Structure(DatabaseTable):
             calculation = datatable.objects.get(directory=directory_old)
 
         # In some cases, the structure we want is not within the calculation table.
-        # For example, in relaxations the final structure is attached via table.structure_final
+        # For example, in relaxations the final structure is attached via 
+        # the table.structure_final attribute.
         structure_field = structure.get("structure_field")
         if structure_field:
             structure = getattr(calculation, structure_field).to_toolkit()

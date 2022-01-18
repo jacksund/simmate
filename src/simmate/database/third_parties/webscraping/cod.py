@@ -33,7 +33,7 @@ import os
 from tqdm import tqdm
 from pymatgen.io.cif import CifParser
 
-from simmate.database.third_parties.cod import CodStructure
+from simmate.database.third_parties import CodStructure
 from simmate.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------

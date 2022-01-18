@@ -21,7 +21,7 @@ from django.db import transaction
 from tqdm import tqdm
 from pymatgen.core.structure import Structure
 
-from simmate.database.third_parties.oqmd import OqmdStructure
+from simmate.database.third_parties import OqmdStructure
 
 # Jarvis is not a dependency of simmate, so make sure you install it before using
 # this module

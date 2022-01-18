@@ -12,6 +12,7 @@ from simmate.workflows.common_tasks.all import (
 
 from typing import List
 from simmate.workflow_engine.tasks.supervised_staged_shell_task import S3Task
+from simmate.database.base_data_types import Calculation
 
 
 def s3task_to_workflow(
@@ -19,7 +20,7 @@ def s3task_to_workflow(
     module: str,
     project_name: str,
     s3task: S3Task,
-    calculation_table,  # simmate.database.base_data_types.calculation.Calculation
+    calculation_table: Calculation,
     register_kwargs: List[str],
 ):
     """
