@@ -598,7 +598,7 @@ class SearchEngine:
         parent_structures = [
             self.individuals_datatable.objects.only("structure_string")
             .get(id=parent_id)
-            .to_pymatgen()
+            .to_toolkit()
             for parent_id in parent_ids
         ]
 

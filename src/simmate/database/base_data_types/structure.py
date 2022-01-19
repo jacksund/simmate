@@ -12,65 +12,45 @@ from simmate.database.base_data_types import (
     Spacegroup,
 )
 
-# TODO:
-# Explore polymorphic relations instead of a JSON dictionary.
-# Making relationships to different tables makes things difficult to use, so
-# these columns are just standalone.
-#
-# This is will be very important for "source" and "parent_nested_calculations"
-# fields because I have no way to efficiently convert these fields to the objects
-# that they refer to. There's also no good way to access a structure's "children"
-# (i.e. structure where they are the source).
-#
-# I should investigate generic relations in django though:
-# https://docs.djangoproject.com/en/3.2/ref/contrib/contenttypes/#generic-relations
-#
-# Another option is using django-polymorphic.
-# https://django-polymorphic.readthedocs.io/en/latest/
-# This thread is really helpful on the subject:
-# https://stackoverflow.com/questions/30343212/
-
-# TODO:
-# Consider adding some methods to track the history of a structure. This
-# would be useful for things like evolutionary algorithms.
-# get_source_parent:
-#   this would iterate through sources until we find one in the same table
-#   as this one. Parent sources are often the most recent transformation
-#   or mutation applied to a structure, such as a MirrorMutation.
-# get_source_seed:
-#   this would iterate through sources until we hit a dead-end. So the seed
-#   source would be something like a third-party database, a method that
-#   randomly create structures, or a prototype.
-# Both of these get more complex when we consider transformation that have
-# multiple parents (and therefore multiple seeds too). An example of this
-# is the HereditaryMutation.
-
 
 class Structure(DatabaseTable):
+    # This is an abstract class meant for inheritance
+    class Meta:
+        abstract = True
 
-    """Base Info"""
+    base_info = ["structure_string", "source"]
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
-    # The structure which is written to a string and in a compressed format
-    # using the .from_pymatgen() method. To get back to our pymatgen structure
-    # object, use the .to_pymatgen() method!
     structure_string = table_column.TextField()
+    """
+    The core structure information, which is written to a string and in a 
+    compressed format using the `from_toolkit` method. To get back to our toolkit
+    structure object, use the `to_toolkit` method.
+    """
 
     # EXPERIMENTAL
-    # Where the structure came from. This could be a number of things, including
-    # a third party id, a transformation of another structure, a creation method,
-    # or just a custom submission by the user.
-    #
-    # Source can be the name of another table or a python transformation.
-    # Source id can be thought of as the "parent structure id", which can be a
-    # string (mp-123), an integer (123 of same table), a list of these ([123,321]),
-    # or even be nothing. We make it a JSON field to account for all scenarios.
-    # EXAMPLES: (source --> source_id)
-    # MaterialsProject --> mp-123
-    # PyXtalStructure --> null
-    # AtomicPurmutation --> 123
-    # HereditaryMutation --> [123,124]
-    # user_submission --> null
     source = table_column.JSONField(blank=True, null=True)
+    """
+    Where the structure came from. This could be a number of things, including
+    a third party id, a transformation of another structure, a creation method,
+    or just a custom submission by the user.
+    
+    Source can be the name of another table or a python transformation.
+    Source id can be thought of as the "parent structure id", which can be a
+    string (mp-123), an integer (123 of same table), a list of these ([123,321]),
+    or even be nothing. We make it a JSON field to account for all scenarios.
+    
+    EXAMPLES: (source --> source_id)
+    
+    - MaterialsProject --> mp-123
+    - PyXtalStructure --> null
+    - AtomicPurmutation --> 123
+    - HereditaryMutation --> [123,124]
+    - user_submission --> null
+    """
 
     # EXPERIMENTAL
     # Where this calculation plays a role within a "nested" workflow calculation.
@@ -82,43 +62,76 @@ class Structure(DatabaseTable):
 
     """ Query-helper Info """
 
-    # total number of sites in the unitcell
     nsites = table_column.IntegerField()
+    """
+    total number of sites in the unitcell
+    """
 
-    # total number of unique elements
     nelements = table_column.IntegerField()
+    """
+    total number of unique elements
+    """
 
-    # List of elements in the structure (ex: ["Y", "C", "F"])
     elements = table_column.JSONField()
-    # the base chemical system (ex: "Y-C-F")
+    """
+    List of elements in the structure (ex: ["Y", "C", "F"])
+    """
+
     chemical_system = table_column.CharField(max_length=25)
-    # Note: be careful when searching for elements! Running chemical_system__includes="C"
-    # on this field won't do what you expect -- because it will return structures
-    # containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-    # that contain a specific element, use elements__contains="C" instead.
+    """
+    the base chemical system (ex: "Y-C-F")
+    
+    Note: be careful when searching for elements! Running chemical_system__includes="C"
+    on this field won't do what you expect -- because it will return structures
+    containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
+    that contain a specific element, use elements__contains="C" instead.
+    """
 
-    # Density of the crystal (g/cm^3)
     density = table_column.FloatField()
+    """
+    Density of the crystal (g/cm^3)
+    """
 
-    # Density of atoms in the crystal (atoms/Angstom^3)
     density_atomic = table_column.FloatField()
+    """
+    Density of atoms in the crystal (atoms/Angstom^3)
+    """
 
-    # Volume of the unitcell.
-    # Note: in most cases, volume_molar should be used instead!
     volume = table_column.FloatField()
+    """
+    Volume of the unitcell.
+    
+    Note: in most cases, `volume_molar` should be used instead! This is because
+    volumne is highly dependent on the symmetry and the arbitray unitcell. If 
+    you are truly after small volumes of the unitcell, it is likely you really 
+    just want to search by spacegroup.
+    """
 
-    # Molar volume of the crystal (cm^3/mol)
-    # Note we prefer this over a "volume" field because volume is highly dependent
-    # on the symmetry and the arbitray unitcell. If you are truly after small volumes
-    # of the unitcell, it is likely you really just want to search by spacegroup.
     volume_molar = table_column.FloatField()
+    """
+    Molar volume of the crystal (cm^3/mol)
+    """
 
     # The composition of the structure formatted in various ways
     # BUG: The max length here is overkill because there are many structures
     # with 8+ elements and disordered formula (e.g. "Ca2.103 N0.98")
-    formula_full = table_column.CharField(max_length=50)  # more
+
+    formula_full = table_column.CharField(max_length=50)
+    """
+    The chemical formula with elements sorted by electronegativity (ex: Li4 Fe4 P4 O16)
+    """
+
     formula_reduced = table_column.CharField(max_length=50)
+    """
+    The reduced chemical formula. (ex: Li4Fe4P4O16 --> LiFePO4)
+    """
+
     formula_anonymous = table_column.CharField(max_length=50)
+    """
+    An anonymized formula. Unique species are arranged in ordering of 
+    amounts and assigned ascending alphabets. Useful for prototyping formulas. 
+    For example, all stoichiometric perovskites have anonymized_formula ABC3.
+    """
 
     # NOTE: extra fields for the Lattice and Sites are intentionally left out
     # in order to save on overall database size. Things such as...
@@ -135,22 +148,19 @@ class Structure(DatabaseTable):
     # Structure table or even a Calculation. In another case, the entire Structure
     # table may have the same exact source, in which case you'd make a property!
 
-    # Each structure can have many Calculation(s)
-
-    # symmetry info
     spacegroup = table_column.ForeignKey(Spacegroup, on_delete=table_column.PROTECT)
+    """
+    Spacegroup information. Points to simmate.database.base_data_types.symmetry.Spacegroup
+    """
 
     # The AFLOW prototype that this structure maps to.
     # TODO: this will be a relationship in the future
     # prototype = table_column.CharField(max_length=50, blank=True, null=True)
 
-    """ Properties """
-    # none
-
     """ Model Methods """
 
     @classmethod
-    def from_pymatgen(cls, structure, as_dict=False, **kwargs):
+    def _from_toolkit(cls, structure, as_dict=False, **kwargs):
 
         # --------------------------------------
         # FIND A BETTER SPOT FOR THIS CODE. See _from_dynamic method below for more.
@@ -202,8 +212,10 @@ class Structure(DatabaseTable):
         # return the dictionary
         return structure_dict if as_dict else cls(**structure_dict)
 
-    def to_pymatgen(self):
-        # Converts the database object to pymatgen structure object
+    def to_toolkit(self):
+        """
+        Converts the database object to pymatgen structure object
+        """
 
         # NOTE: if you know this is what you're going to do from a query, then
         # it is more efficient to only grab the structure_string column because
@@ -212,7 +224,7 @@ class Structure(DatabaseTable):
         # This grabs the proper Structure entry and only the structure column.
 
         # convert the stored string to python dictionary.
-        # OPTIMIZE: see my comment on storing strings in the from_pymatgen method above.
+        # OPTIMIZE: see my comment on storing strings in the from_toolkit method above.
         # For now, I need to figure out if I used "CIF" or "POSCAR" and read the structure
         # accordingly. In the future, I can just assume my new format.
         # If the string starts with "#", then I know that I stored it as a "CIF".
@@ -287,21 +299,48 @@ class Structure(DatabaseTable):
             calculation = datatable.objects.get(directory=directory_old)
 
         # In some cases, the structure we want is not within the calculation table.
-        # For example, in relaxations the final structure is attached via table.structure_final
+        # For example, in relaxations the final structure is attached via
+        # the table.structure_final attribute.
         structure_field = structure.get("structure_field")
         if structure_field:
-            structure = getattr(calculation, structure_field).to_pymatgen()
+            structure = getattr(calculation, structure_field).to_toolkit()
         # if there's no structure field, that means we already have the correct entry
         else:
-            structure = calculation.to_pymatgen()
+            structure = calculation.to_toolkit()
 
         # structure should now be a pymatgen structure object
         return structure
 
-    """ For website compatibility """
 
-    class Meta:
-        abstract = True
-        # Any time you inherit from this class, you'll need to indicate which
-        # django app it is associated with. For example...
-        #   app_label = "third_parties"
+# TODO:
+# Explore polymorphic relations instead of a JSON dictionary.
+# Making relationships to different tables makes things difficult to use, so
+# these columns are just standalone.
+#
+# This is will be very important for "source" and "parent_nested_calculations"
+# fields because I have no way to efficiently convert these fields to the objects
+# that they refer to. There's also no good way to access a structure's "children"
+# (i.e. structure where they are the source).
+#
+# I should investigate generic relations in django though:
+# https://docs.djangoproject.com/en/3.2/ref/contrib/contenttypes/#generic-relations
+#
+# Another option is using django-polymorphic.
+# https://django-polymorphic.readthedocs.io/en/latest/
+# This thread is really helpful on the subject:
+# https://stackoverflow.com/questions/30343212/
+
+# TODO:
+# Consider adding some methods to track the history of a structure. This
+# would be useful for things like evolutionary algorithms.
+# get_source_parent:
+#   this would iterate through sources until we find one in the same table
+#   as this one. Parent sources are often the most recent transformation
+#   or mutation applied to a structure, such as a MirrorMutation.
+# get_source_seed:
+#   this would iterate through sources until we hit a dead-end. So the seed
+#   source would be something like a third-party database, a method that
+#   randomly create structures, or a prototype.
+# Both of these get more complex when we consider transformation that have
+# multiple parents (and therefore multiple seeds too). An example of this
+# is the HereditaryMutation.

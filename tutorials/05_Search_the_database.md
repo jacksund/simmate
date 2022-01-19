@@ -33,7 +33,7 @@ filtered_results = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites
 7. Convert the final structure from a database object (aka `DatabaseStructure`) to a structure object (aka `ToolkitStructure`).
 ```python
 single_relaxation = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites__lte=2).first()
-nacl_structure = single_relaxation.to_pymatgen()
+nacl_structure = single_relaxation.to_toolkit()
 ```
 8. For third-party data (like [Material Project](https://materialsproject.org/), [AFLOW](http://aflowlib.org/), [COD](http://www.crystallography.net/cod/), etc.) load the database table and then request to download all the available data:
 ```python
@@ -41,13 +41,13 @@ from simmate.shortcuts import setup  # this connects to our database
 from simmate.database.third_parties.jarvis import JarvisStructure
 
 # This only needs to ran once -- then data is stored locally.
-JarvisStructure.load_data_archive()
+JarvisStructure.load_remote_archive()
 
 # now explore the data (only the first 150 structures here)
 first_150_rows = JarvisStructure.objects.all()[:150]
 dataframe = first_150_rows.to_dataframe()
 ```
-> :warning: To protect our servers, you can only call `load_data_archive()` a few times per month. Don't overuse this feature.
+> :warning: To protect our servers, you can only call `load_remote_archive()` a few times per month. Don't overuse this feature.
 
 <br/><br/>
 
@@ -218,7 +218,7 @@ print(search_results)
 data = search_results.to_dataframe()
 
 # Or we can convert to a list of structure objects (ToolkitStructure)
-structures = search_results.to_pymatgen()
+structures = search_results.to_toolkit()
 ```
 
 This isn't very exciting now because we just have one row/structure in our table :cry:, but we'll do some more exciting filtering in the next section.
@@ -250,23 +250,23 @@ from simmate.database.third_parties.jarvis import JarvisStructure
 
 `result_table` above and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.shortcuts import setup`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! So don't forget to include `from simmate.shortcuts import setup`!
 
-Now that we have our datatable class (`JarvisStructure`) loaded, you'll notice it's empty to when you first access it. We can quickly load all of the data using the `load_data_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database.
+Now that we have our datatable class (`JarvisStructure`) loaded, you'll notice it's empty to when you first access it. We can quickly load all of the data using the `load_remote_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database.
 
 ``` python
 # when you first run this, you'll see this table is empty
 data = JarvisStructure.objects.to_dataframe()
 
 # load all of the data from Simmate's website
-JarvisStructure.load_data_archive()
+JarvisStructure.load_remote_archive()
 
 # you'll now see that the database is filled!
 # We use [:150] to just show the first 150 rows
 data = JarvisStructure.objects.to_dataframe()[:150]
 ```
 
-> :warning: It is very important that you read the warnings printed by `load_data_archive`. This data was NOT made by Simmate. We are just helping to distribute it on behalf of these other teams. Be sure to cite them for their work!
+> :warning: It is very important that you read the warnings printed by `load_remote_archive`. This data was NOT made by Simmate. We are just helping to distribute it on behalf of these other teams. Be sure to cite them for their work!
 
-Calling `load_data_archive` loads ALL data to your computer and saves it. This data will not be updated unless you call `load_data_archive` again. This should only be done every time we release a new archive version (typically once per year). To protect our servers from misuse, you can only call `load_data_archive()` a few times per month -- no matter what. **Don't overuse this feature.**
+Calling `load_remote_archive` loads ALL data to your computer and saves it. This data will not be updated unless you call `load_remote_archive` again. This should only be done every time we release a new archive version (typically once per year). To protect our servers from misuse, you can only call `load_remote_archive()` a few times per month -- no matter what. **Don't overuse this feature.**
 
 Now let's really test out our filtering ability with this new data:
 ```python

@@ -13,35 +13,42 @@ from pymatgen.symmetry.groups import SpaceGroup as SpaceGroup_PMG
 
 
 class Spacegroup(DatabaseTable):
-
-    """Base Info"""
-
-    # NOTE: International spacegroup info is also known as Hermann-Mauguin
-
-    # International space group number
-    number = table_column.IntegerField(primary_key=True)
-
-    # Full international symbol
-    symbol = table_column.CharField(max_length=15)
-
-    # The crystal system (don't confused with crystal family or lattice family)
-    crystal_system = table_column.CharField(max_length=15)
-
-    # Point group symbol
-    point_group = table_column.CharField(max_length=15)
-
-    """ Django App Association """
-
     class Meta:
         app_label = "local_calculations"  # TODO: move to a separate app
 
-    """ Model Methods """
+    # NOTE: International spacegroup info is also known as Hermann-Mauguin
+
+    number = table_column.IntegerField(primary_key=True)
+    """
+    International space group number
+    """
+
+    symbol = table_column.CharField(max_length=15)
+    """
+    Full international symbol
+    """
+
+    crystal_system = table_column.CharField(max_length=15)
+    """
+    The crystal system (don't confused with crystal family or lattice family)
+    """
+
+    point_group = table_column.CharField(max_length=15)
+    """
+    Point group symbol
+    """
 
     @staticmethod
-    def load_database_from_pymatgen():
+    def _load_database_from_toolkit():
+        """
+        Loads spacegroup data into the database table.
 
-        # This method is automatically called when you first set up your
-        # Simmate database and should never be called by the user after that.
+        This should never be called by the user. This method is automatically
+        called when you first set up your database and should never be called
+        after that.
+
+        See simmate.configuration.django.database.reset_database
+        """
 
         for number in range(1, 231):
 

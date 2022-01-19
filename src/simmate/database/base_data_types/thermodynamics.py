@@ -11,15 +11,23 @@ from pymatgen.analysis.phase_diagram import PhaseDiagram
 
 class Thermodynamics(DatabaseTable):
 
-    """Base Info"""
+    base_info = ["energy"]
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
-    # The calculated energy (eV)
     energy = table_column.FloatField(blank=True, null=True)
+    """
+    The calculated energy (eV)
+    """
 
     """ Query-helper Info """
 
-    # If a structure is available, the energy per atom is also stored
     energy_per_atom = table_column.FloatField(blank=True, null=True)
+    """
+    (if a structure is available) this is energy divided by nsites
+    """
 
     # TODO: These three should be updated on a schedule. I'd run a prefect flow
     # every night that makes sure all values are up to date. I could initialize
@@ -35,11 +43,6 @@ class Thermodynamics(DatabaseTable):
     # energy_uncertainy_per_atom
     # energy_per_atom_uncorrected
     # decompose_amount (to each decomp type)
-
-    """ Relationships """
-    # The thermodynamic data should link directly to a specific structure
-    # structure = table_column.ForeignKey(Structure, on_delete=table_column.PROTECT)
-    # OR should this inherit from the Structure class too...?
 
     """ Properties """
     # These are some extra fields to consider adding
@@ -58,7 +61,7 @@ class Thermodynamics(DatabaseTable):
 
     # !!! Maybe make this from_energy and structure input optional...?
     @classmethod
-    def from_base_data(cls, structure, energy=None, as_dict=False):
+    def _from_toolkit(cls, structure, energy=None, as_dict=False):
         # Given energy, this function builds the rest of the required fields
         # for this class as an object (or as a dictionary).
         data = (

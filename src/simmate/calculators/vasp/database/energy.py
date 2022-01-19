@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types.static_energy import StaticEnergy
+from simmate.database.base_data_types import StaticEnergy
 
 
 class MITStaticEnergy(StaticEnergy):

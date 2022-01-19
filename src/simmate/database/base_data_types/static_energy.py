@@ -11,7 +11,22 @@ from simmate.database.base_data_types import (
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
-    """Base Info"""
+    base_info = (
+        [
+            "valence_band_maximum",
+            "conduction_band_minimum",
+            "energy_fermi",
+            "is_gap_direct",
+        ]
+        + Structure.base_info
+        + Thermodynamics.base_info
+        + Forces.base_info
+        + Calculation.base_info
+    )
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
     # Note: we assume that only converged data is being stored! So there is no
     # "converged_electronic" section here. ErrorHandlers and workups should
@@ -29,62 +44,6 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     conduction_band_minimum = table_column.FloatField(blank=True, null=True)
     valence_band_maximum = table_column.FloatField(blank=True, null=True)
 
-    """ Model Methods """
-
-    @classmethod
-    def from_pymatgen(
-        cls,
-        structure=None,
-        energy=None,
-        site_forces=None,
-        lattice_stress=None,
-        as_dict=False,
-        **kwargs,
-    ):
-        # because this is a combination of tables, I need to build the data for
-        # each and then feed all the results into this class
-
-        # Note prefect_flow_run_id should be given as a kwarg or this class will
-        # fail to initialize with the Calculation mixin
-
-        # first grab the full dictionaries for each parent model
-        structure_data = (
-            Structure.from_pymatgen(structure, as_dict=True) if structure else {}
-        )
-
-        # This data is optional (bc the calculation might not be complete yet!)
-        thermo_data = (
-            Thermodynamics.from_base_data(
-                structure,
-                energy,
-                as_dict=True,
-            )
-            if energy and structure
-            else {}
-        )
-        forces_data = (
-            Forces.from_base_data(
-                structure,
-                site_forces,
-                lattice_stress,
-                as_dict=True,
-            )
-            if (site_forces or lattice_stress) and structure
-            else {}
-        )
-
-        # Now feed all of this dictionarying into one larger one.
-        all_data = dict(
-            **structure_data,
-            **thermo_data,
-            **forces_data,
-            **kwargs,
-        )
-
-        # If as_dict is false, we build this into an Object. Otherwise, just
-        # return the dictionary
-        return all_data if as_dict else cls(**all_data)
-
     def update_from_vasp_run(self, vasprun, corrections, directory):
         # Takes a pymatgen VaspRun object, which is what's typically returned
         # from a simmate VaspTask.run() call.
@@ -100,7 +59,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         # fields for this datatable
         # OPTIMIZE: this overwrites structure data, which should already be there.
         # Is there a faster way to grab this data and update attributes?
-        new_kwargs = self.from_pymatgen(
+        new_kwargs = self.from_toolkit(
             structure=vasprun.final_structure,
             energy=ionic_step["e_wo_entrp"],
             site_forces=ionic_step["forces"],

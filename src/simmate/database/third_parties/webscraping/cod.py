@@ -3,18 +3,22 @@
 
 """
 
+> :warning: This file is only for use by the Simmate team. Users should instead
+access data via the load_remote_archive method.
+
 This file is for pulling COD data into the Simmate database. 
 
-The COD let's you download all of their data as a zip file. While they do have a
+The COD let's you download all of their data as a zip file 
+[here](http://www.crystallography.net/archives/). While they do have a
 REST API, it looks like they prefer you to use the zip file if you want all structures
-and metadata. This is a big download even when compressed (17GB), so it's a slow
+and metadata. This is a big download even when compressed (18GB), so it's a slow
 process -- but more importantly a stable one. For future reference though, the REST
-API is outlined here: https://wiki.crystallography.net/RESTful_API/
+API is outlined [here](https://wiki.crystallography.net/RESTful_API/).
 
 Once downloaded, all of the cif files are organized into folders based on their first
 few numbers -- for example, the cif 1234567 would be in folder /cif/1/23/45/1234567.cif
-It's an odd way of storing the files, but we just need to script opening all of the folders
-open. Note that some folders also don't have any cifs in them! There is also extra data
+It's an odd way of storing the files, but we just need to script open all of the folders.
+Note that some folders also don't have any cifs in them! There is also extra data
 in each cif file -- such as the doi of the paper it came from.
 
 There looks to be a lot of problematic cif files in the COD, but it's not worth parsing
@@ -29,15 +33,23 @@ import os
 from tqdm import tqdm
 from pymatgen.io.cif import CifParser
 
-from simmate.configuration.django import setup_full  # sets up database
-
-from simmate.database.third_parties.cod import CodStructure
+from simmate.database.third_parties import CodStructure
 from simmate.utilities import get_sanitized_structure
 
 # --------------------------------------------------------------------------------------
 
 
 def load_all_structures(base_directory="cod/cif/"):
+    """
+    Only use this function if you are part of the Simmate dev team!
+
+    Loads all structures directly for the COD database into the local
+    Simmate database.
+
+    Make sure you have downloaded the
+    [COD archive]([here](http://www.crystallography.net/archives/))
+    and have it upacked to match your base_directory input.
+    """
 
     # For debuging and development, I keep track of all cif files that fail, and I
     # also keep track of all possible data in the cif files.
@@ -139,7 +151,7 @@ def load_all_structures(base_directory="cod/cif/"):
                         }
 
                         # now convert the entry to a database object
-                        structure_db = CodStructure.from_pymatgen(**entry_dict)
+                        structure_db = CodStructure.from_toolkit(**entry_dict)
 
                         # and save it to our database!
                         structure_db.save()

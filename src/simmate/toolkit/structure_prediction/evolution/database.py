@@ -46,7 +46,7 @@ class EvolutionarySearch(DatabaseTable):
     .. code-block:: python
 
         # loads the best structure and converts it to a pymatgen structure object
-        structure = search_results.best_individual.to_pymatgen()
+        structure = search_results.best_individual.to_toolkit()
 
         # writes it to a cif file
         structure.to("cif", "best_structure.cif")
@@ -193,7 +193,7 @@ class EvolutionarySearch(DatabaseTable):
         # pymatgen structures objects and add a column to the dataframe for these
         #
         #   structures_dataframe["structure"] = [
-        #       structure.to_pymatgen() for structure in ionic_step_structures
+        #       structure.to_toolkit() for structure in ionic_step_structures
         #   ]
         #
         # BUG: the read_frame query creates a new query, so it may be a different

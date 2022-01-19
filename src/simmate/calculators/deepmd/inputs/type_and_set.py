@@ -67,7 +67,7 @@ class DeepmdDataset:
     # provide like so:
     #
     # from simmate.configuration.django import setup_full  # sets database connection
-    # from simmate.database.local_calculations.relaxation.mit import MITRelaxationStructure
+    # from simmate.database.local_calculations import MITRelaxationStructure
     # ionic_step_structures = MITRelaxationStructure.objects.filter(
     #     energy__isnull=False, site_forces__isnull=False
     # ).all()
@@ -93,7 +93,7 @@ class DeepmdDataset:
         # pymatgen structures objects and add a column to the dataframe for these
         #
         #   structures_dataframe["structure"] = [
-        #       structure.to_pymatgen() for structure in ionic_step_structures
+        #       structure.to_toolkit() for structure in ionic_step_structures
         #   ]
         #
         # BUG: the read_frame query creates a new query, so it may be a different

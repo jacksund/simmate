@@ -52,7 +52,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE):
 
     # because this is our first time building the database, we also want to
     # load the Spacegroup metadata for us to query Structures by.
-    Spacegroup.load_database_from_pymatgen()
+    Spacegroup._load_database_from_toolkit()
 
 
 def dump_database_to_json(filename="database_dump.json", exclude=[]):

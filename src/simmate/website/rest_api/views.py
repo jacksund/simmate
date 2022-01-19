@@ -3,12 +3,13 @@
 from rest_framework.serializers import HyperlinkedModelSerializer
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from simmate.database.third_parties.all import (
-    MatProjStructure,
-    JarvisStructure,
+from simmate.database.base_data_types import Spacegroup
+from simmate.database.third_parties import (
     AflowStructure,
-    OqmdStructure,
     CodStructure,
+    JarvisStructure,
+    MatProjStructure,
+    OqmdStructure,
 )
 
 
@@ -32,6 +33,21 @@ class MyExampleViewSet(ReadOnlyModelViewSet):
     filterset_fields = "__all__"
 
 """
+
+# --------------------------------------------------------------------------------------
+
+
+class SpacegroupSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = Spacegroup
+        fields = "__all__"
+
+
+class SpacegroupViewSet(ReadOnlyModelViewSet):
+    queryset = Spacegroup.objects.order_by("number").all()
+    serializer_class = SpacegroupSerializer
+    filterset_fields = "__all__"
+
 
 # --------------------------------------------------------------------------------------
 

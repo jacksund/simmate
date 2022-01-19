@@ -25,7 +25,16 @@ class IonicStep(Structure, Thermodynamics, Forces):
     # structure. However, all ionic steps are useful in the case of machine
     # learning where tons of data are needed. We therefore store these here.
 
-    """Base Info"""
+    base_info = (
+        ["ionic_step_number"]
+        + Structure.base_info
+        + Thermodynamics.base_info
+        + Forces.base_info
+    )
+    """
+    The base information for this database table. All other columns can be calculated
+    using the columns in this list.
+    """
 
     # Note: we assume that only converged data is being stored! So there is no
     # "converged_electronic" section here. ErrorHandlers and workups should
@@ -42,50 +51,6 @@ class IonicStep(Structure, Thermodynamics, Forces):
     #   relaxations
     #   relaxations_as_start
     #   relaxations_as_final
-
-    """ Model Methods """
-    # TODO: add a from_ionic_step method in the future when I have this class.
-
-    @classmethod
-    def from_pymatgen(
-        cls,
-        ionic_step_number,
-        structure,
-        energy,
-        site_forces,
-        lattice_stress,
-        relaxation,  # gives the related object for the foreign key
-        as_dict=False,
-    ):
-        # because this is a combination of tables, I need to build the data for
-        # each and then feed all the results into this class
-
-        # first grab the full dictionaries for each parent model
-        thermo_data = Thermodynamics.from_base_data(
-            structure,
-            energy,
-            as_dict=True,
-        )
-        forces_data = Forces.from_base_data(
-            structure,
-            site_forces,
-            lattice_stress,
-            as_dict=True,
-        )
-        structure_data = Structure.from_pymatgen(structure, as_dict=True)
-
-        # Now feed all of this dictionarying into one larger one.
-        all_data = dict(
-            ionic_step_number=ionic_step_number,
-            relaxation=relaxation,
-            **structure_data,
-            **thermo_data,
-            **forces_data,
-        )
-
-        # If as_dict is false, we build this into an Object. Otherwise, just
-        # return the dictionary
-        return all_data if as_dict else cls(**all_data)
 
     @classmethod
     def create_subclass_from_relaxation(cls, name, relaxation, module, **extra_columns):
@@ -209,7 +174,7 @@ class Relaxation(Structure, Calculation):
             # first pull all the data together and save it to the database. We
             # are saving this to an IonicStepStructure datatable. To access this
             # model, we look need to use "structures.model".
-            structure = self.structures.model.from_pymatgen(
+            structure = self.structures.model.from_toolkit(
                 number,
                 structure,
                 energy=ionic_step["e_wo_entrp"],

@@ -2,6 +2,9 @@
 
 """
 
+> :warning: This file is only for use by the Simmate team. Users should instead
+access data via the load_remote_archive method.
+
 This file is for pulling AFLOW data into the Simmate database. 
 
 AFLOW's supported REST API can be accessed via "AFLUX API". This is a separate
@@ -17,19 +20,28 @@ from django.db import transaction
 
 from tqdm import tqdm
 from pymatgen.io.ase import AseAtomsAdaptor
-from aflow import K as AflowKeywords
-from aflow.control import Query as AflowQuery
-
-from simmate.configuration.django import setup_full  # sets up database
 
 from simmate.database.third_parties.aflow import AflowStructure
-from simmate.utilities import get_sanitized_structure
 
-# --------------------------------------------------------------------------------------
+# AFLOW is not a dependency of simmate, so make sure you install it before using
+# this module
+try:
+    from aflow import K as AflowKeywords
+    from aflow.control import Query as AflowQuery
+except:
+    raise ModuleNotFoundError(
+        "You must install aflow client with `conda install -c conda-forge aflow`"
+    )
 
 
 @transaction.atomic
 def load_all_structures():
+    """
+    Only use this function if you are part of the Simmate dev team!
+
+    Loads all structures directly for the AFLOW database into the local
+    Simmate database.
+    """
 
     # The way we build a query looks similar to the Django API, where we start
     # with a Query object (similar to Table.objects manager) and build filters
@@ -64,12 +76,11 @@ def load_all_structures():
             # The date that the entry was added
             # AflowKeywords.aflowlib_date,
             # Band gap
-            AflowKeywords.Egap,
+            # AflowKeywords.Egap,
             # The calculated energy of the unit cell
-            # BUG: how do we know energies are compatible?
-            AflowKeywords.enthalpy_atom,
             AflowKeywords.enthalpy_cell,
-            AflowKeywords.enthalpy_formation_atom,
+            # BUG: or should we use energy_cell? Aren't these the same in
+            # groundstate DFT?
         )
     )
 
@@ -83,24 +94,12 @@ def load_all_structures():
         # convert the structure to pymatgen
         structure_pmg = AseAtomsAdaptor.get_structure(structure_ase)
 
-        # Run symmetry analysis and sanitization on the pymatgen structure
-        structure_sanitized = get_sanitized_structure(structure_pmg)
-
-        # Compile all of our data into a dictionary
-        entry_dict = {
-            "structure": structure_sanitized,
-            "id": entry.auid.replace(":", "-"),
-            "final_energy": entry.enthalpy_cell,  # or is it energy_cell?
-            "final_energy_per_atom": entry.enthalpy_atom,
-            "formation_energy_per_atom": entry.enthalpy_formation_atom,
-            "band_gap": entry.Egap,
-        }
-
         # now convert the entry to a database object
-        structure_db = AflowStructure.from_pymatgen(**entry_dict)
+        structure_db = AflowStructure.from_toolkit(
+            id=entry.auid.replace(":", "-"),
+            structure=structure_pmg,
+            energy=entry.enthalpy_cell,
+        )
 
         # and save it to our database!
         structure_db.save()
-
-
-# --------------------------------------------------------------------------------------

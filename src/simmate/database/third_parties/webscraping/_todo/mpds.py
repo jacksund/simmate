@@ -23,10 +23,7 @@ from mpds_client import MPDSDataRetrieval, MPDSDataTypes
 
 from simmate.configuration.django import setup_full  # sets up database
 
-# from simmate.database.third_parties.aflow import MpdsStructure
-from simmate.utilities import get_sanitized_structure
-
-# --------------------------------------------------------------------------------------
+from simmate.database.third_parties.mpds import MpdsStructure
 
 
 @transaction.atomic

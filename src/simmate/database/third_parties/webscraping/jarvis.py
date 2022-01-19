@@ -2,18 +2,17 @@
 
 """
 
+> :warning: This file is only for use by the Simmate team. Users should instead
+access data via the load_remote_archive method.
+
 This file is for pulling JARVIS data into the Simmate database. 
 
 JARVIS has a python package "jarvis-tools" that let's us pull some of their
-database dumps. For instructions on how to do this, they provided this link:
-    https://colab.research.google.com/github/knc6/jarvis-tools-notebooks/blob/master/jarvis-tools-notebooks/Get_JARVIS_DFT_final_structures_in_ASE_or_Pymatgen_format.ipynb
-    
-Alternatively, we could manually download their database json files from here:
-    https://jarvis-materials-design.github.io/dbdocs/thedownloads/
-    >> looking at the "3D-materials curated data"
+database dumps. For instructions on how to do this, they provided 
+[this link](https://colab.research.google.com/github/knc6/jarvis-tools-notebooks/blob/master/jarvis-tools-notebooks/Get_JARVIS_DFT_final_structures_in_ASE_or_Pymatgen_format.ipynb)
 
-Currently we use the jarvis-tools package below. This is slow to download, but
-at least saves us from manually finding the files.
+Alternatively, we could manually download 
+[their database json files](https://jarvis-materials-design.github.io/dbdocs/thedownloads/). We specifically look at the "3D-materials curated data".
 
 """
 
@@ -22,22 +21,27 @@ from django.db import transaction
 from tqdm import tqdm
 from pymatgen.core.structure import Structure
 
-from jarvis.db.figshare import data as jarvis_helper
+from simmate.database.third_parties import JarvisStructure
 
-from simmate.configuration.django import setup_full  # sets up database
 
-from simmate.database.third_parties.jarvis import JarvisStructure
-from simmate.utilities import get_sanitized_structure
-
-# --------------------------------------------------------------------------------------
+# Jarvis is not a dependency of simmate, so make sure you install it before using
+# this module
+try:
+    from jarvis.db.figshare import data as jarvis_helper
+except:
+    raise ModuleNotFoundError(
+        "You must install jarvis with `conda install -c conda-forge jarvis-tools`"
+    )
 
 
 @transaction.atomic
-def load_all_structures(filename="jarvis.json"):
+def load_all_structures():
+    """
+    Only use this function if you are part of the Simmate dev team!
 
-    # !!! Make sure you download the file, unzip it, and have it in your working
-    # directory before loading this. Simply pick the most update file from here:
-    # https://figshare.com/articles/dataset/jdft_3d-7-7-2018_json/6815699
+    Loads all structures directly for the JARVIS database into the local
+    Simmate database.
+    """
 
     # Load all of the 3D data from JARVIS. This gives us a list of dictionaries
     # TODO: In the future, we can include other datasets like their 2D dataset.
@@ -57,29 +61,12 @@ def load_all_structures(filename="jarvis.json"):
             coords_are_cartesian=entry["atoms"]["cartesian"],
         )
 
-        # Run symmetry analysis and sanitization on the pymatgen structure
-        structure_sanitized = get_sanitized_structure(structure)
-
-        # Compile all of our data into a dictionary. If a value doesn't exist
-        # for a given entry, JARVIS just uses "na" instead. We need to replace
-        # these with None.
-        entry_dict = {
-            "structure": structure_sanitized,
-            "id": entry["jid"].lower(),
-            # the *1000 converts to meV
-            "energy_above_hull": entry["ehull"] * 1000
-            if entry["ehull"] != "na"
-            else None,
-            "formation_energy_per_atom": entry["formation_energy_peratom"]
-            if entry["formation_energy_peratom"] != "na"
-            else None,
-        }
-
         # now convert the entry to a database object
-        structure_db = JarvisStructure.from_pymatgen(**entry_dict)
+        structure_db = JarvisStructure.from_toolkit(
+            id=entry["jid"].lower(),
+            structure=structure,
+            energy_above_hull=entry["ehull"] if entry["ehull"] != "na" else None,
+        )
 
         # and save it to our database!
         structure_db.save()
-
-
-# --------------------------------------------------------------------------------------
