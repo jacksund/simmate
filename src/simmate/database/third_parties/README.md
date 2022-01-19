@@ -46,9 +46,10 @@ See `simmate.database` docs for a guide on filtering results and converting to t
 Alternatives
 ============
 
-This module can be viewed as an alternative to the following codes:
+This module can be viewed as an alternative to / extension of the following codes:
 
 - [matminer.data_retrieval](https://matminer.readthedocs.io/en/latest/matminer.data_retrieval.html)
 - [pymatgen.ext](https://pymatgen.org/pymatgen.ext.html)
+- [OPTIMADE APIs](http://www.optimade.org/)
 
 This module stores data locally and then allows rapidly loading data to memory, whereas alternatives only load data into memory and involve querying external APIs.
