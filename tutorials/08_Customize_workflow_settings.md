@@ -22,7 +22,7 @@ In this tutorial, you will learn how to run a workflow with customized settings.
 1. We intentionally avoid the use of `workflow.run(custom_settings=...)`. **This will NOT work.** This is because we do not want to store results from customized settings in the same table as default settings -- it complicates analysis of many structuers/systems and makes navigating results extremely difficult for beginners. Instead, Simmate encourages the creation of new workflows and result tables when you want to customize settings.
 3. To run a workflow with custom settings, we use the `run_custom` method instead of `run`.
 ```python
-from simmate.workflows.all import energy_mit
+from simmate.workflows import energy_mit
 
 # This is how we ran workflows before
 status = energy_mit.run(structure=nacl_structure)

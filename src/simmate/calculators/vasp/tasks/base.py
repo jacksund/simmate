@@ -7,8 +7,8 @@ import yaml
 
 from pymatgen.io.vasp.outputs import Vasprun
 
-from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
-from simmate.workflow_engine.tasks.supervised_staged_shell_task import S3Task
+from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
+from simmate.workflow_engine import S3Task
 
 
 def get_default_parallel_settings():

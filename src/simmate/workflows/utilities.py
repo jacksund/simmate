@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate import workflows
-from simmate.workflow_engine.workflow import Workflow
-from simmate.workflow_engine.tasks.supervised_staged_shell_task import S3Task
+from simmate.workflow_engine import Workflow, S3Task
 
 
 def get_list_of_all_workflows():

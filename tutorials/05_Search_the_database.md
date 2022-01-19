@@ -21,7 +21,7 @@ from simmate.shortcuts import setup  # this connects to our database
 from simmate.database.local_calculations.energy import MITStaticEnergy
 
 # OPTION 2 (slower but recommended for convenience)
-from simmate.workflows.all import energy_mit
+from simmate.workflows import energy_mit
 results = energy_mit.result_table  # results here is the same thing as MITStaticEnergy above
 ```
 4. View all the possible table columns with `MITStaticEnergy.show_columns()`
@@ -133,7 +133,7 @@ In Tutorial 2, we ran a calculation and then added results to our database table
 We know our workflow's name was `energy-mit`, so let's start by grabbing that workflow again. The results table (the class for it) is always attached to the workflow as the `result_table` attribute. You can load it like this:
 
 ```python
-from simmate.workflows.all import energy_mit
+from simmate.workflows import energy_mit
 result_table = energy_mit.result_table
 ```
 

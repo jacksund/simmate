@@ -2,7 +2,7 @@
 
 from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 
-from simmate.calculators.vasp.error_handlers.all import (
+from simmate.calculators.vasp.error_handlers import (
     TetrahedronMesh,
     Eddrmm,
     NonConvergingErrorHandler,

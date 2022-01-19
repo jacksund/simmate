@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine.workflow import (
-    Workflow,
-    Parameter,
-    ModuleStorage,
-)
+from simmate.workflow_engine import Workflow, Parameter, ModuleStorage
 
-from simmate.workflows.common_tasks.all import (
+from simmate.workflows.common_tasks import (
     LoadNestedCalculationTask,
     SaveNestedCalculationTask,
 )

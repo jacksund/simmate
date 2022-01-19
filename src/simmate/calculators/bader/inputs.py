@@ -5,4 +5,4 @@
 # some of those are here:
 
 # TODO these files don't exist yet
-from simmate.calculators.vasp.io.outputs import CHGCAR, AECCAR0, AECCAR2
+# from simmate.calculators.vasp.outputs import CHGCAR, AECCAR0, AECCAR2

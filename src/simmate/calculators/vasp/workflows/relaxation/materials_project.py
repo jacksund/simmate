@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.workflow_engine.utilities import s3task_to_workflow
-from simmate.calculators.vasp.tasks.relaxation.materials_project import (
+from simmate.calculators.vasp.tasks.relaxation import (
     MatProjRelaxation as MPRelaxationTask,
 )
 from simmate.calculators.vasp.database.relaxation import (

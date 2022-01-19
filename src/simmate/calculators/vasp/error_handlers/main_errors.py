@@ -7,9 +7,9 @@ import shutil
 from pymatgen.io.vasp.outputs import Outcar
 from pymatgen.core.structure import Structure
 
-from simmate.workflow_engine.error_handler import ErrorHandler
-from simmate.calculators.vasp.inputs.incar import Incar
-from simmate.calculators.vasp.outputs.oszicar import Oszicar
+from simmate.workflow_engine import ErrorHandler
+from simmate.calculators.vasp.inputs import Incar
+from simmate.calculators.vasp.outputs import Oszicar
 
 # !!! I really don't like how all of these errors are amassed into one class because
 # it makes the logic difficult to follow and it raises questions about how to handle

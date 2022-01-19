@@ -7,43 +7,43 @@ now does all the work for us. It may be tricky to understand what's happening
 behind the scenes, so here's an example:
     
 These two lines...
-    
-    from simmate.database.local_calculations.base_data_types.relaxation import Relaxation
 
-    ExampleRelaxation, ExampleIonicStep = Relaxation.create_all_subclasses("Example", module=__name__)
+``` python 
+from simmate.database.base_data_types import Relaxation
 
+ExampleRelaxation, ExampleIonicStep = Relaxation.create_all_subclasses("Example", module=__name__)
+```
 
 
 Do exactly the same thing as all of these lines...
 
-    from simmate.database.base_data_types import table_column
-    from simmate.database.local_calculations.base_data_types.relaxation import (
-        IonicStep,
-        Relaxation,
+``` python
+from simmate.database.base_data_types import table_column
+from simmate.database.base_data_types import IonicStep, Relaxation
+
+class ExampleIonicStep(IonicStep):
+    relaxation = table_column.ForeignKey(
+        "ExampleRelaxation",  # in quotes becuase this is defined below
+        on_delete=table_column.CASCADE,
+        related_name="structures",
     )
-    
-    class ExampleIonicStep(IonicStep):
-        relaxation = table_column.ForeignKey(
-            "ExampleRelaxation",  # in quotes becuase this is defined below
-            on_delete=table_column.CASCADE,
-            related_name="structures",
-        )
-    
-    class ExampleRelaxation(Relaxation):
-        structure_start = table_column.OneToOneField(
-            ExampleIonicStep,
-            on_delete=table_column.CASCADE,
-            related_name="relaxations_as_start",
-            blank=True,
-            null=True,
-        )
-        structure_final = table_column.OneToOneField(
-            ExampleIonicStep,
-            on_delete=table_column.CASCADE,
-            related_name="relaxations_as_final",
-            blank=True,
-            null=True,
-        )
+
+class ExampleRelaxation(Relaxation):
+    structure_start = table_column.OneToOneField(
+        ExampleIonicStep,
+        on_delete=table_column.CASCADE,
+        related_name="relaxations_as_start",
+        blank=True,
+        null=True,
+    )
+    structure_final = table_column.OneToOneField(
+        ExampleIonicStep,
+        on_delete=table_column.CASCADE,
+        related_name="relaxations_as_final",
+        blank=True,
+        null=True,
+    )
+```
 
 """
 

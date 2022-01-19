@@ -5,8 +5,8 @@ import os
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.io.vasp.inputs import Kpoints
 
-from simmate.workflow_engine.error_handler import ErrorHandler
-from simmate.calculators.vasp.inputs.incar import Incar
+from simmate.workflow_engine import ErrorHandler
+from simmate.calculators.vasp.inputs import Incar
 
 
 class MeshSymmetryErrorHandler(ErrorHandler):

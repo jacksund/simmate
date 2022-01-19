@@ -10,14 +10,14 @@ from simmate.database.local_calculations.evolution import (
     StructureSource as SourceDatatable,
 )
 
-import simmate.toolkit.creators.structure.all as creation_module
-import simmate.toolkit.transformations.all as transform_module
+import simmate.toolkit.creators as creation_module
+import simmate.toolkit.transformations as transform_module
 from simmate.toolkit.validators.fingerprint.pcrystalnn import (
     PartialCrystalNNFingerprint,
 )
 
 from typing import List, Union, Tuple
-from simmate.workflow_engine.workflow import Workflow
+from simmate.workflow_engine import Workflow
 
 # TODO:
 #
@@ -202,7 +202,7 @@ class SearchEngine:
 
         # Initialize the selector
         if selector == "TruncatedSelection":
-            from simmate.toolkit.structure_prediction.evolution.selectors.all import (
+            from simmate.toolkit.structure_prediction.evolution.selectors import (
                 TruncatedSelection,
             )
 

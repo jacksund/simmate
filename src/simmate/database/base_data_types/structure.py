@@ -242,7 +242,7 @@ class Structure(DatabaseTable):
     def _from_dynamic(structure):
         # FIND A BETTER SPOT FOR THIS CODE (likely attached to base Structure class)
         # For an almost indentical implementatin see...
-        # from simmate.workflows.common_tasks.all import load_input
+        # from simmate.workflows.common_tasks import load_input
         # I should comibine/condense these.
 
         # I allow the structure input to be a number of inputs
