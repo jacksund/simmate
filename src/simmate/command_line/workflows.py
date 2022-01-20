@@ -2,6 +2,8 @@
 
 import click
 
+from typing import List
+
 
 @click.group()
 def workflows():
@@ -17,10 +19,13 @@ def get_workflow(workflow_name: str):
     Parameters
     ----------
     workflow_name : str
-        Name of the workflow to grab
+        Name of the workflow to grab (e.g. relaxation-matproj)
     """
-    from simmate import workflows
-    from simmate.workflows.utilities import get_list_of_all_workflows
+
+    from simmate.workflows.utilities import (
+        get_list_of_all_workflows,
+        ALL_WORKFLOW_TYPES,
+    )
 
     allowed_workflows = get_list_of_all_workflows()
 
@@ -29,10 +34,106 @@ def get_workflow(workflow_name: str):
         raise click.ClickException(
             "The workflow you provided isn't known. Make sure you don't have any "
             "typos! If you want a list of all available workflows, use the command "
-            " 'simmate workflows list-all'"
+            "`simmate workflows list-all`. You can also interactively explore "
+            "workflows with `simmate workflows explore`"
         )
-    workflow = getattr(workflows, workflow_name)
+
+    from importlib import import_module
+
+    # parse the workflow name. (e.g. static-energy/mit --> static-energy + mit)
+    type_name, preset_name = workflow_name.split("/")
+    type_name = type_name.replace("-", "_")
+
+    # The naming convention matches the import path, so we can load the workflow
+    workflow_module = import_module(f"simmate.workflows.{type_name}")
+    workflow = getattr(workflow_module, f"{preset_name}_workflow")
+
     return workflow
+
+
+def list_options(options: List) -> int:
+    """
+    This is a utility for click (cli) that prints of list of items as a numbered
+    list. It prompts users to select an option from the list.
+
+    For example, `["item1", "item2", "item3"]` would print...
+    ```
+        (01) item1
+        (02) item2
+        (03) item3
+    ```
+
+    Parameters
+    ----------
+    - `options`:
+        a list of strings to choose from
+
+    Returns
+    --------
+    - `selected_index`:
+        The integer value of the choice selected. This will follw python indexing
+        so the index of the options list. (e.g. if item1 was selected, 0 would be
+        returned)
+
+    """
+
+    for i, item in enumerate(options):
+        number = str(i + 1).zfill(2)
+        click.echo(f"\t({number}) {item}")
+
+    # Have the user select an option. We use -1 because indexing count is from 0, not 1.
+    selected_index = click.prompt("\n\nPlease choose a number:", type=int) - 1
+
+    if selected_index >= len(options) or selected_index < 0:
+        raise click.ClickException(
+            "Number does not match any the options provided. Exiting."
+        )
+
+    click.echo(f"You have selectd {options[selected_index]}")
+
+    return selected_index
+
+
+@workflows.command()
+def explore():
+    """
+    Let's you interactively view all available workflows and see the documentation
+    on the one you select.
+    """
+
+    click.echo("\nGathering all available workflows...")
+    from simmate.workflows.utilities import (
+        ALL_WORKFLOW_TYPES,
+        get_list_of_workflows_by_type,
+    )
+
+    click.echo("\n\nWhat type of analysis are you interested in?")
+    types_cleaned = [t.replace("_", " ") for t in ALL_WORKFLOW_TYPES]
+    type_index = list_options(types_cleaned)
+    selected_type = ALL_WORKFLOW_TYPES[type_index]
+
+    # TODO: have the user select a calculator for this analysis. For now,
+    # we are assuming VASP because those are our only workflows
+
+    click.echo("\n\nWhat settings preset do you want to see the description for?")
+    presets = [t for t in get_list_of_workflows_by_type(selected_type)]
+    present_index = list_options(presets)
+    selected_preset = presets[present_index]
+
+    final_workflow_name = selected_type.replace("_", "-") + "/" + selected_preset
+    click.echo(
+        f"\n\n================== {final_workflow_name} =================="
+    )
+
+    # now we load this workflow and print the docstring.
+    workflow = get_workflow(final_workflow_name)
+    
+    click.echo(workflow.__doc__)
+    
+    click.echo(
+        "\n\n To run this workflow, you'd use something like..."
+        f"\n\t simmate workflows run {final_workflow_name} example.cif\n\n"
+    )
 
 
 @workflows.command()
