@@ -30,7 +30,6 @@
 
                     <h2>Submodules</h2>
                     <ul>
-                            <li><a href="relaxation/all.html">simmate.calculators.vasp.workflows.relaxation.all</a></li>
                             <li><a href="relaxation/materials_project.html">simmate.calculators.vasp.workflows.relaxation.materials_project</a></li>
                             <li><a href="relaxation/mit.html">simmate.calculators.vasp.workflows.relaxation.mit</a></li>
                             <li><a href="relaxation/quality_00.html">simmate.calculators.vasp.workflows.relaxation.quality_00</a></li>
@@ -39,7 +38,6 @@
                             <li><a href="relaxation/quality_03.html">simmate.calculators.vasp.workflows.relaxation.quality_03</a></li>
                             <li><a href="relaxation/quality_04.html">simmate.calculators.vasp.workflows.relaxation.quality_04</a></li>
                             <li><a href="relaxation/staged.html">simmate.calculators.vasp.workflows.relaxation.staged</a></li>
-                            <li><a href="relaxation/staged_use_same_dir.html">simmate.calculators.vasp.workflows.relaxation.staged_use_same_dir</a></li>
                     </ul>
 
 
@@ -58,7 +56,22 @@
 <a href="./../../../../simmate.html">simmate</a><wbr>.<a href="./../../../calculators.html">calculators</a><wbr>.<a href="./../../vasp.html">vasp</a><wbr>.<a href="./../workflows.html">workflows</a><wbr>.relaxation    </h1>
 
                 
-                
+                        <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">.mit</span> <span class="kn">import</span> <span class="n">workflow</span> <span class="k">as</span> <span class="n">mit_workflow</span>
+<span class="kn">from</span> <span class="nn">.materials_project</span> <span class="kn">import</span> <span class="n">workflow</span> <span class="k">as</span> <span class="n">matproj_workflow</span>
+<span class="kn">from</span> <span class="nn">.quality_00</span> <span class="kn">import</span> <span class="n">workflow</span> <span class="k">as</span> <span class="n">quality00_workflow</span>
+<span class="kn">from</span> <span class="nn">.quality_01</span> <span class="kn">import</span> <span class="n">workflow</span> <span class="k">as</span> <span class="n">quality01_workflow</span>
+<span class="kn">from</span> <span class="nn">.quality_02</span> <span class="kn">import</span> <span class="n">workflow</span> <span class="k">as</span> <span class="n">quality02_workflow</span>
+<span class="kn">from</span> <span class="nn">.quality_03</span> <span class="kn">import</span> <span class="n">workflow</span> <span class="k">as</span> <span class="n">quality03_workflow</span>
+<span class="kn">from</span> <span class="nn">.quality_04</span> <span class="kn">import</span> <span class="n">workflow</span> <span class="k">as</span> <span class="n">quality04_workflow</span>
+<span class="kn">from</span> <span class="nn">.staged</span> <span class="kn">import</span> <span class="n">workflow</span> <span class="k">as</span> <span class="n">staged_workflow</span>
+</pre></div>
+
+        </details>
+
             </section>
     </main>
 <script>

@@ -19,6 +19,17 @@ from simmate.calculators.vasp.error_handlers import (
 
 
 class MatProjRelaxation(VaspTask):
+    """
+    Runs a VASP geometry optimization using Materials Project settings.
+
+    This is currently the highest-quality preset of all of Simmate's relaxations.
+
+    Materials Project settings are often considered the minimum-required
+    quality for publication and is sufficient for most applications. If you are
+    looking at one structure in detail (for electronic, vibrational, and other
+    properties), you should still test for convergence using higher-quality
+    settings.
+    """
 
     # returns structure separately from vasprun object
     return_final_structure = True

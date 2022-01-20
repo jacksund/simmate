@@ -19,6 +19,21 @@ from simmate.calculators.vasp.error_handlers import (
 
 
 class MITRelaxation(VaspTask):
+    """
+    Runs a VASP geometry optimization using MIT Project settings.
+
+    The MIT Project is the precursor to the Materials Project.
+
+    From their documention in pymatgen:
+
+        "Default VASP settings for calculations in the pre-cursor MIT project to
+        the Materials Project. Reasonably robust, but selected PSP are generally the
+        ones with fewer electrons and convergence criteria is less tight. This was
+        used in an era whether computational power is more limited.
+        Nevertheless, this is still a good starting point for extremely expensive
+        methods."
+
+    """
 
     # returns structure separately from vasprun object
     return_final_structure = True

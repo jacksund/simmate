@@ -28,10 +28,58 @@
                                pattern=".+" required>
 
 
-                    <h2>Submodules</h2>
-                    <ul>
-                            <li><a href="lattice/all.html">simmate.toolkit.creators.lattice.all</a></li>
-                    </ul>
+
+                    <h2>API Documentation</h2>
+                        <ul class="memberlist">
+            <li>
+                    <a class="class" href="#RandomLattice">RandomLattice</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#RandomLattice.__init__">RandomLattice</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#RandomLattice.new_lattice">new_lattice</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#RandomSymLattice">RandomSymLattice</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#RandomSymLattice.__init__">RandomSymLattice</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#RandomSymLattice.new_lattice">new_lattice</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#RSLFixedVolume">RSLFixedVolume</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#RSLFixedVolume.__init__">RSLFixedVolume</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#RSLFixedVolume.new_lattice">new_lattice</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#RSLSmartVolume">RSLSmartVolume</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#RSLSmartVolume.__init__">RSLSmartVolume</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#RSLSmartVolume.new_lattice">new_lattice</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
 
 
 
@@ -44,13 +92,1054 @@
         </nav>
     <main class="pdoc">
             <section>
-                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit/creators/lattice/__init__.py">Edit on GitHub</a>
+                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit/creators/lattice.py">Edit on GitHub</a>
                     <h1 class="modulename">
 <a href="./../../../simmate.html">simmate</a><wbr>.<a href="./../../toolkit.html">toolkit</a><wbr>.<a href="./../creators.html">creators</a><wbr>.lattice    </h1>
 
                 
-                
+                        <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="c1">##############################################################################</span>
+
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">choice</span>
+
+<span class="kn">from</span> <span class="nn">pymatgen.core.lattice</span> <span class="kn">import</span> <span class="n">Lattice</span>
+
+<span class="kn">from</span> <span class="nn">simmate.toolkit.creators.vector</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+    <span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">##############################################################################</span>
+
+<span class="c1"># Generates a random lattice without symmetry</span>
+<span class="c1"># this is the same as RandomSymLattice when spacegroup is assumed to be 1</span>
+<span class="k">class</span> <span class="nc">RandomLattice</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vector_generation_method</span><span class="o">=</span><span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+        <span class="n">vector_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">angle_generation_method</span><span class="o">=</span><span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+        <span class="n">angle_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">),</span>
+    <span class="p">):</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span> <span class="o">=</span> <span class="n">vector_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">vector_gen_options</span><span class="p">)</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span> <span class="o">=</span> <span class="n">angle_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">angle_gen_options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># generate an (a,b,c) vector to pull lattice vectors from</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># generate an (alpha,beta,gamme) vector to pull lattice angles from</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># take the inputs of vectors=(a,b,c) and angles=(alpha,beta,gamma) and create a pymatgen lattice object</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lattice</span>
+
+
+<span class="c1">##############################################################################</span>
+
+<span class="c1"># Generates a random lattice with symmetry</span>
+<span class="k">class</span> <span class="nc">RandomSymLattice</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spacegroup_include</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">),</span>
+        <span class="n">spacegroup_exclude</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">vector_generation_method</span><span class="o">=</span><span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+        <span class="n">vector_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">angle_generation_method</span><span class="o">=</span><span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+        <span class="n">angle_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">),</span>
+    <span class="p">):</span>
+
+        <span class="c1"># sg_include = list of spacegroups that we are interested in. Default is all 230 spacegroups</span>
+        <span class="c1"># sg_exclude = list of spacegroups that we should explicitly ignore</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span> <span class="o">=</span> <span class="n">vector_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">vector_gen_options</span><span class="p">)</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span> <span class="o">=</span> <span class="n">angle_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">angle_gen_options</span><span class="p">)</span>
+
+        <span class="c1"># make a list of spacegroups that we are allowed to choose from</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sg</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="n">spacegroup_include</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spacegroup_exclude</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># if a spacegroup is not specified, grab a random one from our options</span>
+        <span class="c1"># no check is done to see if the spacegroup specified is compatible with the vector_generator built</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spacegroup</span><span class="p">:</span>
+            <span class="c1"># randomly select a symmetry system</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">)</span>
+
+        <span class="c1"># generate an (a,b,c) vector to pull lattice vectors from</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># generate an (alpha,beta,gamme) vector to pull lattice angles from</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># Now generate the lattice using the spacegroup indicidated</span>
+        <span class="k">if</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># triclinic</span>
+            <span class="c1"># SPECIAL CASE b/c pymatgen does not have this function</span>
+            <span class="c1"># but because (a != b != c) and (alpha != beta != gamma)</span>
+            <span class="c1"># take the inputs of vectors=(a,b,c) and angles=(alpha,beta,gamma) and create a pymatgen lattice object</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>  <span class="c1"># monoclinic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">monoclinic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">74</span><span class="p">:</span>  <span class="c1"># orthorhombic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">orthorhombic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">142</span><span class="p">:</span>  <span class="c1"># tetragonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">tetragonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">167</span><span class="p">:</span>  <span class="c1"># trigonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+            <span class="c1"># Note: I have all lattices in range(143,168) to be hexagonal</span>
+            <span class="c1"># the spacegroups 146,148,155,160,161,166,167 can optionally be rhombohedral though</span>
+            <span class="c1"># lattice = Lattice.rhombohedral(a,alpha)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">194</span><span class="p">:</span>  <span class="c1"># hexagonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">230</span><span class="p">:</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">cubic</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c1"># we need to know which spacegroup was used in addition to the result lattice</span>
+        <span class="c1"># maybe I can add an option to &#39;returnlatticeonly=True&#39; if I don&#39;t want this as a dict</span>
+        <span class="k">return</span> <span class="n">lattice</span>
+
+
+<span class="c1">##############################################################################</span>
+
+
+<span class="k">class</span> <span class="nc">RSLFixedVolume</span><span class="p">(</span><span class="n">RandomSymLattice</span><span class="p">):</span>
+
+    <span class="c1"># identical to RandomSymLattice, except the lattice is scaled to a fixed volume at the end</span>
+
+    <span class="c1">#!!! currently, this takes roughly 3x as long as the RandomSymLattice to run (180us vs 55.3us averages for new_lattice)</span>
+    <span class="c1">#!!! this time increase is primarily in the .scale() function (when I comment out the check loop - I get a 154us average)</span>
+
+    <span class="c1">#!!! this is fixed volume of the conventional cells! So some spacegroups may run into issues with this.</span>
+    <span class="c1">#!!! I need a &#39;smart&#39; FixedVolume that scales based on...</span>
+    <span class="c1"># composition (total atoms and their type)</span>
+    <span class="c1"># spacegroup (conventional vs primitive size)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># run the same parent init</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># now do the extra code</span>
+        <span class="c1"># which is just save the volume here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span>
+
+    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># run the same parent new_lattice, which returns a lattice</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">new_lattice</span><span class="p">(</span><span class="n">spacegroup</span><span class="p">)</span>
+
+        <span class="c1"># now scale the lattice to the specified volume</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
+
+        <span class="c1"># in scaling, we might have broken the conditions of min/max_vectors</span>
+        <span class="c1"># I check this and if it fails, I scrap the lattice and try making a new one via recursion</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># assume valid until proven otherwise</span>
+        <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="p">[</span><span class="n">lattice</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">c</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">min_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">vector</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">max_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+            <span class="c1"># this is a recursion call that will be hit repeatedly until a valid lattice is found</span>
+            <span class="c1">#!!! this will throw a recursion error if the volume and min/max_vectors are unreasonable</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_lattice</span><span class="p">(</span><span class="n">spacegroup</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lattice</span>
+
+
+<span class="c1">##############################################################################</span>
+
+<span class="kn">from</span> <span class="nn">simmate.toolkit.symmetry.wyckoff</span> <span class="kn">import</span> <span class="n">loadWyckoffData</span>
+<span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">estimate_volume</span><span class="p">,</span> <span class="n">estimate_radii</span>
+
+<span class="c1">#!!! EASY SPEED/MEMORY IMPROVEMENTS CAN BE MADE HERE (ON INIT)</span>
+<span class="k">class</span> <span class="nc">RSLSmartVolume</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">composition</span><span class="p">,</span>
+        <span class="n">volume</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spacegroup_include</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">),</span>
+        <span class="n">spacegroup_exclude</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">vector_generation_method</span><span class="o">=</span><span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+        <span class="n">vector_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">angle_generation_method</span><span class="o">=</span><span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+        <span class="n">angle_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">),</span>
+    <span class="p">):</span>
+
+        <span class="c1"># make a list of spacegroups that we are allowed to choose from</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sg</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="n">spacegroup_include</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spacegroup_exclude</span>
+        <span class="p">]</span>
+
+        <span class="c1"># if the user didn&#39;t specify a volume, we should predict our own</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">volume</span><span class="p">:</span>
+            <span class="c1"># grab the base predicted volume which is based on the composition</span>
+            <span class="c1"># note this represents the volume of the primitive cell!!! Conventional cells may be larger</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="n">estimate_volume</span><span class="p">(</span>
+                <span class="n">composition</span>
+            <span class="p">)</span>  <span class="c1">#!!! this assumes user wants ionic radius estimation</span>
+
+        <span class="c1"># find the respective volume for each spacegroup&#39;s conventional unit cell</span>
+        <span class="c1"># to do this, we need to know the ratio between MultiplicityPrimitive and MultiplicityConventiional for a spacegroup</span>
+        <span class="c1">#!!! currently this is stored in wyckoffdata.csv, but I should consider putting it in a separate file for speed</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">loadWyckoffData</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volumes</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># keys are spacegroup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_generators</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># keys are spacegroup</span>
+        <span class="k">for</span> <span class="n">spacegroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">:</span>
+            <span class="c1"># grab the portion of the table for spacegroup and make it into a numpy array</span>
+            <span class="n">sg_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;SpaceGroup == @spacegroup&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+            <span class="c1"># final the ratio between the primitive and conventional unitcells for this structure</span>
+            <span class="c1"># this is the ratio between the 2nd and 3rd columns (indicies 1 and 2), which are MultiplicityConventional &amp; MultiplicityPrimitive</span>
+            <span class="c1"># I grab the first row, which is the first wyckoff site -- it makes no difference which one I grab</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sg_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="c1"># the volume of the conventional cell for this spacegroup is the primitive times this ratio</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">volumes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">spacegroup</span><span class="p">:</span> <span class="n">volume</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">})</span>
+
+            <span class="c1"># now we want to make the vector_generator for this spacegroup</span>
+            <span class="c1">#!!! I&#39;m not sure users can pass custom parameters this deep and if they will work. I need to test for this</span>
+            <span class="c1">#!!! I assume NormallyDistributedVectors is used here... will give errors if that&#39;s not the case</span>
+            <span class="n">vgen</span> <span class="o">=</span> <span class="n">vector_generation_method</span><span class="p">(</span>
+                <span class="n">min_value</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span>
+                    <span class="n">estimate_radii</span><span class="p">(</span><span class="n">composition</span><span class="p">)</span>
+                <span class="p">),</span>  <span class="c1"># smallest radius of any ion #!!! move outside for loop for speed! #!!! this assumes user wants ionic radius estimation</span>
+                <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">),</span>  <span class="c1"># shoot for cubic vectors</span>
+                <span class="n">max_value</span><span class="o">=</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span>
+                <span class="o">**</span> <span class="mf">0.8</span><span class="p">,</span>  <span class="c1"># don&#39;t allow for vectors too be crazy different #!!! need to test if 0.8 is a good value here</span>
+                <span class="n">standdev</span><span class="o">=</span><span class="p">((</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+                <span class="o">*</span> <span class="mf">0.15</span><span class="p">,</span>  <span class="c1"># larger volumes have more flexibility in their vector lengths</span>
+            <span class="p">)</span>  <span class="c1">#!!! **vector_gen_options not used... need to fix</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vector_generators</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">spacegroup</span><span class="p">:</span> <span class="n">vgen</span><span class="p">})</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="c1"># Unlike the vector_generators, we can use the same generator here for all spacegroups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span> <span class="o">=</span> <span class="n">angle_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">angle_gen_options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># if a spacegroup is not specified, grab a random one from our options</span>
+        <span class="c1"># no check is done to see if the spacegroup specified is compatible with the vector_generator built</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spacegroup</span><span class="p">:</span>
+            <span class="c1"># randomly select a symmetry system</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">)</span>
+
+        <span class="c1"># For our target spacegroup, grab the target volume and vector_generator</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">volumes</span><span class="p">[</span><span class="n">spacegroup</span><span class="p">]</span>
+        <span class="n">vector_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generators</span><span class="p">[</span><span class="n">spacegroup</span><span class="p">]</span>
+
+        <span class="c1"># run the same parent new_lattice, which returns a lattice</span>
+        <span class="c1"># if a spacegroup is not specified, grab a random one from our options</span>
+        <span class="c1"># no check is done to see if the spacegroup specified is compatible with the vector_generator built</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spacegroup</span><span class="p">:</span>
+            <span class="c1"># randomly select a symmetry system</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">)</span>
+
+        <span class="c1"># generate an (a,b,c) vector to pull lattice vectors from</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">vector_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># generate an (alpha,beta,gamma) vector to pull lattice angles from</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># Now generate the lattice using the spacegroup indicidated</span>
+        <span class="k">if</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># triclinic</span>
+            <span class="c1"># SPECIAL CASE b/c pymatgen does not have this function</span>
+            <span class="c1"># but because (a != b != c) and (alpha != beta != gamma)</span>
+            <span class="c1"># take the inputs of vectors=(a,b,c) and angles=(alpha,beta,gamma) and create a pymatgen lattice object</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>  <span class="c1"># monoclinic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">monoclinic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">74</span><span class="p">:</span>  <span class="c1"># orthorhombic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">orthorhombic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">142</span><span class="p">:</span>  <span class="c1"># tetragonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">tetragonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">167</span><span class="p">:</span>  <span class="c1"># trigonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+            <span class="c1"># Note: I have all lattices in range(143,168) to be hexagonal</span>
+            <span class="c1"># the spacegroups 146,148,155,160,161,166,167 can optionally be rhombohedral though</span>
+            <span class="c1"># lattice = Lattice.rhombohedral(a,alpha)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">194</span><span class="p">:</span>  <span class="c1"># hexagonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">230</span><span class="p">:</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">cubic</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c1">#!!! This section makes the code take more than 3x longer to run. Should</span>
+        <span class="c1">#!!! I allow a more flexible volume? More flexible volume could also slow structure creation (bc smaller volumes are allowed)</span>
+        <span class="c1"># now scale the lattice to the specified volume</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+        <span class="c1"># in scaling, we might have broken the conditions of min/max_vectors</span>
+        <span class="c1"># I check this and if it fails, I scrap the lattice and try making a new one via recursion</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># assume valid until proven otherwise</span>
+        <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="p">[</span><span class="n">lattice</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">c</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector_generator</span><span class="o">.</span><span class="n">min_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">vector</span> <span class="o">&gt;</span> <span class="n">vector_generator</span><span class="o">.</span><span class="n">max_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+            <span class="c1"># this is a recursion call that will be hit repeatedly until a valid lattice is found</span>
+            <span class="c1">#!!! this will throw a recursion error if the volume and min/max_vectors are unreasonable</span>
+            <span class="c1">#!!! I need to rewrite this function where it&#39;s a while loop instead of a recursion call</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_lattice</span><span class="p">(</span><span class="n">spacegroup</span><span class="p">)</span>
+
+        <span class="c1"># we need to know which spacegroup was used in addition to the result lattice</span>
+        <span class="c1"># maybe I can add an option to &#39;returnlatticeonly=True&#39; if I don&#39;t want this as a dict</span>
+        <span class="k">return</span> <span class="n">lattice</span>
+</pre></div>
+
+        </details>
+
             </section>
+                <section id="RandomLattice">
+                                <div class="attr class">
+        <a class="headerlink" href="#RandomLattice">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">RandomLattice</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">RandomLattice</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vector_generation_method</span><span class="o">=</span><span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+        <span class="n">vector_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">angle_generation_method</span><span class="o">=</span><span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+        <span class="n">angle_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">),</span>
+    <span class="p">):</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span> <span class="o">=</span> <span class="n">vector_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">vector_gen_options</span><span class="p">)</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span> <span class="o">=</span> <span class="n">angle_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">angle_gen_options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># generate an (a,b,c) vector to pull lattice vectors from</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># generate an (alpha,beta,gamme) vector to pull lattice angles from</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># take the inputs of vectors=(a,b,c) and angles=(alpha,beta,gamma) and create a pymatgen lattice object</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lattice</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="RandomLattice.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#RandomLattice.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">RandomLattice</span><span class="signature">(
+    vector_generation_method=&lt;class &#39;<a href="vector/normal_distribution.html#NormallyDistributedVectors">simmate.toolkit.creators.vector.normal_distribution.NormallyDistributedVectors</a>&#39;&gt;,
+    vector_gen_options={},
+    angle_generation_method=&lt;class &#39;<a href="vector/uniform_distribution.html#UniformlyDistributedVectors">simmate.toolkit.creators.vector.uniform_distribution.UniformlyDistributedVectors</a>&#39;&gt;,
+    angle_gen_options={&#39;min_value&#39;: 60, &#39;max_value&#39;: 120}
+)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vector_generation_method</span><span class="o">=</span><span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+        <span class="n">vector_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">angle_generation_method</span><span class="o">=</span><span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+        <span class="n">angle_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">),</span>
+    <span class="p">):</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span> <span class="o">=</span> <span class="n">vector_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">vector_gen_options</span><span class="p">)</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span> <span class="o">=</span> <span class="n">angle_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">angle_gen_options</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="RandomLattice.new_lattice" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#RandomLattice.new_lattice">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">new_lattice</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># generate an (a,b,c) vector to pull lattice vectors from</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># generate an (alpha,beta,gamme) vector to pull lattice angles from</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># take the inputs of vectors=(a,b,c) and angles=(alpha,beta,gamma) and create a pymatgen lattice object</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lattice</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
+                <section id="RandomSymLattice">
+                                <div class="attr class">
+        <a class="headerlink" href="#RandomSymLattice">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">RandomSymLattice</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">RandomSymLattice</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spacegroup_include</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">),</span>
+        <span class="n">spacegroup_exclude</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">vector_generation_method</span><span class="o">=</span><span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+        <span class="n">vector_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">angle_generation_method</span><span class="o">=</span><span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+        <span class="n">angle_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">),</span>
+    <span class="p">):</span>
+
+        <span class="c1"># sg_include = list of spacegroups that we are interested in. Default is all 230 spacegroups</span>
+        <span class="c1"># sg_exclude = list of spacegroups that we should explicitly ignore</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span> <span class="o">=</span> <span class="n">vector_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">vector_gen_options</span><span class="p">)</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span> <span class="o">=</span> <span class="n">angle_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">angle_gen_options</span><span class="p">)</span>
+
+        <span class="c1"># make a list of spacegroups that we are allowed to choose from</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sg</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="n">spacegroup_include</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spacegroup_exclude</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># if a spacegroup is not specified, grab a random one from our options</span>
+        <span class="c1"># no check is done to see if the spacegroup specified is compatible with the vector_generator built</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spacegroup</span><span class="p">:</span>
+            <span class="c1"># randomly select a symmetry system</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">)</span>
+
+        <span class="c1"># generate an (a,b,c) vector to pull lattice vectors from</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># generate an (alpha,beta,gamme) vector to pull lattice angles from</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># Now generate the lattice using the spacegroup indicidated</span>
+        <span class="k">if</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># triclinic</span>
+            <span class="c1"># SPECIAL CASE b/c pymatgen does not have this function</span>
+            <span class="c1"># but because (a != b != c) and (alpha != beta != gamma)</span>
+            <span class="c1"># take the inputs of vectors=(a,b,c) and angles=(alpha,beta,gamma) and create a pymatgen lattice object</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>  <span class="c1"># monoclinic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">monoclinic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">74</span><span class="p">:</span>  <span class="c1"># orthorhombic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">orthorhombic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">142</span><span class="p">:</span>  <span class="c1"># tetragonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">tetragonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">167</span><span class="p">:</span>  <span class="c1"># trigonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+            <span class="c1"># Note: I have all lattices in range(143,168) to be hexagonal</span>
+            <span class="c1"># the spacegroups 146,148,155,160,161,166,167 can optionally be rhombohedral though</span>
+            <span class="c1"># lattice = Lattice.rhombohedral(a,alpha)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">194</span><span class="p">:</span>  <span class="c1"># hexagonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">230</span><span class="p">:</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">cubic</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c1"># we need to know which spacegroup was used in addition to the result lattice</span>
+        <span class="c1"># maybe I can add an option to &#39;returnlatticeonly=True&#39; if I don&#39;t want this as a dict</span>
+        <span class="k">return</span> <span class="n">lattice</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="RandomSymLattice.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#RandomSymLattice.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">RandomSymLattice</span><span class="signature">(
+    spacegroup_include=range(1, 231),
+    spacegroup_exclude=[],
+    vector_generation_method=&lt;class &#39;<a href="vector/normal_distribution.html#NormallyDistributedVectors">simmate.toolkit.creators.vector.normal_distribution.NormallyDistributedVectors</a>&#39;&gt;,
+    vector_gen_options={},
+    angle_generation_method=&lt;class &#39;<a href="vector/uniform_distribution.html#UniformlyDistributedVectors">simmate.toolkit.creators.vector.uniform_distribution.UniformlyDistributedVectors</a>&#39;&gt;,
+    angle_gen_options={&#39;min_value&#39;: 60, &#39;max_value&#39;: 120}
+)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spacegroup_include</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">),</span>
+        <span class="n">spacegroup_exclude</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">vector_generation_method</span><span class="o">=</span><span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+        <span class="n">vector_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">angle_generation_method</span><span class="o">=</span><span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+        <span class="n">angle_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">),</span>
+    <span class="p">):</span>
+
+        <span class="c1"># sg_include = list of spacegroups that we are interested in. Default is all 230 spacegroups</span>
+        <span class="c1"># sg_exclude = list of spacegroups that we should explicitly ignore</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span> <span class="o">=</span> <span class="n">vector_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">vector_gen_options</span><span class="p">)</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span> <span class="o">=</span> <span class="n">angle_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">angle_gen_options</span><span class="p">)</span>
+
+        <span class="c1"># make a list of spacegroups that we are allowed to choose from</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sg</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="n">spacegroup_include</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spacegroup_exclude</span>
+        <span class="p">]</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="RandomSymLattice.new_lattice" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#RandomSymLattice.new_lattice">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">new_lattice</span><span class="signature">(self, spacegroup=None)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># if a spacegroup is not specified, grab a random one from our options</span>
+        <span class="c1"># no check is done to see if the spacegroup specified is compatible with the vector_generator built</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spacegroup</span><span class="p">:</span>
+            <span class="c1"># randomly select a symmetry system</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">)</span>
+
+        <span class="c1"># generate an (a,b,c) vector to pull lattice vectors from</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># generate an (alpha,beta,gamme) vector to pull lattice angles from</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># Now generate the lattice using the spacegroup indicidated</span>
+        <span class="k">if</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># triclinic</span>
+            <span class="c1"># SPECIAL CASE b/c pymatgen does not have this function</span>
+            <span class="c1"># but because (a != b != c) and (alpha != beta != gamma)</span>
+            <span class="c1"># take the inputs of vectors=(a,b,c) and angles=(alpha,beta,gamma) and create a pymatgen lattice object</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>  <span class="c1"># monoclinic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">monoclinic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">74</span><span class="p">:</span>  <span class="c1"># orthorhombic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">orthorhombic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">142</span><span class="p">:</span>  <span class="c1"># tetragonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">tetragonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">167</span><span class="p">:</span>  <span class="c1"># trigonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+            <span class="c1"># Note: I have all lattices in range(143,168) to be hexagonal</span>
+            <span class="c1"># the spacegroups 146,148,155,160,161,166,167 can optionally be rhombohedral though</span>
+            <span class="c1"># lattice = Lattice.rhombohedral(a,alpha)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">194</span><span class="p">:</span>  <span class="c1"># hexagonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">230</span><span class="p">:</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">cubic</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c1"># we need to know which spacegroup was used in addition to the result lattice</span>
+        <span class="c1"># maybe I can add an option to &#39;returnlatticeonly=True&#39; if I don&#39;t want this as a dict</span>
+        <span class="k">return</span> <span class="n">lattice</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
+                <section id="RSLFixedVolume">
+                                <div class="attr class">
+        <a class="headerlink" href="#RSLFixedVolume">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">RSLFixedVolume</span><wbr>(<span class="base"><a href="#RandomSymLattice">RandomSymLattice</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">RSLFixedVolume</span><span class="p">(</span><span class="n">RandomSymLattice</span><span class="p">):</span>
+
+    <span class="c1"># identical to RandomSymLattice, except the lattice is scaled to a fixed volume at the end</span>
+
+    <span class="c1">#!!! currently, this takes roughly 3x as long as the RandomSymLattice to run (180us vs 55.3us averages for new_lattice)</span>
+    <span class="c1">#!!! this time increase is primarily in the .scale() function (when I comment out the check loop - I get a 154us average)</span>
+
+    <span class="c1">#!!! this is fixed volume of the conventional cells! So some spacegroups may run into issues with this.</span>
+    <span class="c1">#!!! I need a &#39;smart&#39; FixedVolume that scales based on...</span>
+    <span class="c1"># composition (total atoms and their type)</span>
+    <span class="c1"># spacegroup (conventional vs primitive size)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># run the same parent init</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># now do the extra code</span>
+        <span class="c1"># which is just save the volume here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span>
+
+    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># run the same parent new_lattice, which returns a lattice</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">new_lattice</span><span class="p">(</span><span class="n">spacegroup</span><span class="p">)</span>
+
+        <span class="c1"># now scale the lattice to the specified volume</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
+
+        <span class="c1"># in scaling, we might have broken the conditions of min/max_vectors</span>
+        <span class="c1"># I check this and if it fails, I scrap the lattice and try making a new one via recursion</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># assume valid until proven otherwise</span>
+        <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="p">[</span><span class="n">lattice</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">c</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">min_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">vector</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">max_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+            <span class="c1"># this is a recursion call that will be hit repeatedly until a valid lattice is found</span>
+            <span class="c1">#!!! this will throw a recursion error if the volume and min/max_vectors are unreasonable</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_lattice</span><span class="p">(</span><span class="n">spacegroup</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lattice</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="RSLFixedVolume.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#RSLFixedVolume.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">RSLFixedVolume</span><span class="signature">(volume, **kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># run the same parent init</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># now do the extra code</span>
+        <span class="c1"># which is just save the volume here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="RSLFixedVolume.new_lattice" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#RSLFixedVolume.new_lattice">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">new_lattice</span><span class="signature">(self, spacegroup=None)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># run the same parent new_lattice, which returns a lattice</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">new_lattice</span><span class="p">(</span><span class="n">spacegroup</span><span class="p">)</span>
+
+        <span class="c1"># now scale the lattice to the specified volume</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
+
+        <span class="c1"># in scaling, we might have broken the conditions of min/max_vectors</span>
+        <span class="c1"># I check this and if it fails, I scrap the lattice and try making a new one via recursion</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># assume valid until proven otherwise</span>
+        <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="p">[</span><span class="n">lattice</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">c</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">min_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">vector</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generator</span><span class="o">.</span><span class="n">max_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+            <span class="c1"># this is a recursion call that will be hit repeatedly until a valid lattice is found</span>
+            <span class="c1">#!!! this will throw a recursion error if the volume and min/max_vectors are unreasonable</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_lattice</span><span class="p">(</span><span class="n">spacegroup</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lattice</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
+                <section id="RSLSmartVolume">
+                                <div class="attr class">
+        <a class="headerlink" href="#RSLSmartVolume">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">RSLSmartVolume</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">RSLSmartVolume</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">composition</span><span class="p">,</span>
+        <span class="n">volume</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spacegroup_include</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">),</span>
+        <span class="n">spacegroup_exclude</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">vector_generation_method</span><span class="o">=</span><span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+        <span class="n">vector_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">angle_generation_method</span><span class="o">=</span><span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+        <span class="n">angle_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">),</span>
+    <span class="p">):</span>
+
+        <span class="c1"># make a list of spacegroups that we are allowed to choose from</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sg</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="n">spacegroup_include</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spacegroup_exclude</span>
+        <span class="p">]</span>
+
+        <span class="c1"># if the user didn&#39;t specify a volume, we should predict our own</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">volume</span><span class="p">:</span>
+            <span class="c1"># grab the base predicted volume which is based on the composition</span>
+            <span class="c1"># note this represents the volume of the primitive cell!!! Conventional cells may be larger</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="n">estimate_volume</span><span class="p">(</span>
+                <span class="n">composition</span>
+            <span class="p">)</span>  <span class="c1">#!!! this assumes user wants ionic radius estimation</span>
+
+        <span class="c1"># find the respective volume for each spacegroup&#39;s conventional unit cell</span>
+        <span class="c1"># to do this, we need to know the ratio between MultiplicityPrimitive and MultiplicityConventiional for a spacegroup</span>
+        <span class="c1">#!!! currently this is stored in wyckoffdata.csv, but I should consider putting it in a separate file for speed</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">loadWyckoffData</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volumes</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># keys are spacegroup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_generators</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># keys are spacegroup</span>
+        <span class="k">for</span> <span class="n">spacegroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">:</span>
+            <span class="c1"># grab the portion of the table for spacegroup and make it into a numpy array</span>
+            <span class="n">sg_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;SpaceGroup == @spacegroup&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+            <span class="c1"># final the ratio between the primitive and conventional unitcells for this structure</span>
+            <span class="c1"># this is the ratio between the 2nd and 3rd columns (indicies 1 and 2), which are MultiplicityConventional &amp; MultiplicityPrimitive</span>
+            <span class="c1"># I grab the first row, which is the first wyckoff site -- it makes no difference which one I grab</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sg_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="c1"># the volume of the conventional cell for this spacegroup is the primitive times this ratio</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">volumes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">spacegroup</span><span class="p">:</span> <span class="n">volume</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">})</span>
+
+            <span class="c1"># now we want to make the vector_generator for this spacegroup</span>
+            <span class="c1">#!!! I&#39;m not sure users can pass custom parameters this deep and if they will work. I need to test for this</span>
+            <span class="c1">#!!! I assume NormallyDistributedVectors is used here... will give errors if that&#39;s not the case</span>
+            <span class="n">vgen</span> <span class="o">=</span> <span class="n">vector_generation_method</span><span class="p">(</span>
+                <span class="n">min_value</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span>
+                    <span class="n">estimate_radii</span><span class="p">(</span><span class="n">composition</span><span class="p">)</span>
+                <span class="p">),</span>  <span class="c1"># smallest radius of any ion #!!! move outside for loop for speed! #!!! this assumes user wants ionic radius estimation</span>
+                <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">),</span>  <span class="c1"># shoot for cubic vectors</span>
+                <span class="n">max_value</span><span class="o">=</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span>
+                <span class="o">**</span> <span class="mf">0.8</span><span class="p">,</span>  <span class="c1"># don&#39;t allow for vectors too be crazy different #!!! need to test if 0.8 is a good value here</span>
+                <span class="n">standdev</span><span class="o">=</span><span class="p">((</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+                <span class="o">*</span> <span class="mf">0.15</span><span class="p">,</span>  <span class="c1"># larger volumes have more flexibility in their vector lengths</span>
+            <span class="p">)</span>  <span class="c1">#!!! **vector_gen_options not used... need to fix</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vector_generators</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">spacegroup</span><span class="p">:</span> <span class="n">vgen</span><span class="p">})</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="c1"># Unlike the vector_generators, we can use the same generator here for all spacegroups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span> <span class="o">=</span> <span class="n">angle_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">angle_gen_options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># if a spacegroup is not specified, grab a random one from our options</span>
+        <span class="c1"># no check is done to see if the spacegroup specified is compatible with the vector_generator built</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spacegroup</span><span class="p">:</span>
+            <span class="c1"># randomly select a symmetry system</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">)</span>
+
+        <span class="c1"># For our target spacegroup, grab the target volume and vector_generator</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">volumes</span><span class="p">[</span><span class="n">spacegroup</span><span class="p">]</span>
+        <span class="n">vector_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generators</span><span class="p">[</span><span class="n">spacegroup</span><span class="p">]</span>
+
+        <span class="c1"># run the same parent new_lattice, which returns a lattice</span>
+        <span class="c1"># if a spacegroup is not specified, grab a random one from our options</span>
+        <span class="c1"># no check is done to see if the spacegroup specified is compatible with the vector_generator built</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spacegroup</span><span class="p">:</span>
+            <span class="c1"># randomly select a symmetry system</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">)</span>
+
+        <span class="c1"># generate an (a,b,c) vector to pull lattice vectors from</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">vector_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># generate an (alpha,beta,gamma) vector to pull lattice angles from</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># Now generate the lattice using the spacegroup indicidated</span>
+        <span class="k">if</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># triclinic</span>
+            <span class="c1"># SPECIAL CASE b/c pymatgen does not have this function</span>
+            <span class="c1"># but because (a != b != c) and (alpha != beta != gamma)</span>
+            <span class="c1"># take the inputs of vectors=(a,b,c) and angles=(alpha,beta,gamma) and create a pymatgen lattice object</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>  <span class="c1"># monoclinic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">monoclinic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">74</span><span class="p">:</span>  <span class="c1"># orthorhombic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">orthorhombic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">142</span><span class="p">:</span>  <span class="c1"># tetragonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">tetragonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">167</span><span class="p">:</span>  <span class="c1"># trigonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+            <span class="c1"># Note: I have all lattices in range(143,168) to be hexagonal</span>
+            <span class="c1"># the spacegroups 146,148,155,160,161,166,167 can optionally be rhombohedral though</span>
+            <span class="c1"># lattice = Lattice.rhombohedral(a,alpha)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">194</span><span class="p">:</span>  <span class="c1"># hexagonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">230</span><span class="p">:</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">cubic</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c1">#!!! This section makes the code take more than 3x longer to run. Should</span>
+        <span class="c1">#!!! I allow a more flexible volume? More flexible volume could also slow structure creation (bc smaller volumes are allowed)</span>
+        <span class="c1"># now scale the lattice to the specified volume</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+        <span class="c1"># in scaling, we might have broken the conditions of min/max_vectors</span>
+        <span class="c1"># I check this and if it fails, I scrap the lattice and try making a new one via recursion</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># assume valid until proven otherwise</span>
+        <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="p">[</span><span class="n">lattice</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">c</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector_generator</span><span class="o">.</span><span class="n">min_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">vector</span> <span class="o">&gt;</span> <span class="n">vector_generator</span><span class="o">.</span><span class="n">max_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+            <span class="c1"># this is a recursion call that will be hit repeatedly until a valid lattice is found</span>
+            <span class="c1">#!!! this will throw a recursion error if the volume and min/max_vectors are unreasonable</span>
+            <span class="c1">#!!! I need to rewrite this function where it&#39;s a while loop instead of a recursion call</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_lattice</span><span class="p">(</span><span class="n">spacegroup</span><span class="p">)</span>
+
+        <span class="c1"># we need to know which spacegroup was used in addition to the result lattice</span>
+        <span class="c1"># maybe I can add an option to &#39;returnlatticeonly=True&#39; if I don&#39;t want this as a dict</span>
+        <span class="k">return</span> <span class="n">lattice</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="RSLSmartVolume.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#RSLSmartVolume.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">RSLSmartVolume</span><span class="signature">(
+    composition,
+    volume=None,
+    spacegroup_include=range(1, 231),
+    spacegroup_exclude=[],
+    vector_generation_method=&lt;class &#39;<a href="vector/normal_distribution.html#NormallyDistributedVectors">simmate.toolkit.creators.vector.normal_distribution.NormallyDistributedVectors</a>&#39;&gt;,
+    vector_gen_options={},
+    angle_generation_method=&lt;class &#39;<a href="vector/uniform_distribution.html#UniformlyDistributedVectors">simmate.toolkit.creators.vector.uniform_distribution.UniformlyDistributedVectors</a>&#39;&gt;,
+    angle_gen_options={&#39;min_value&#39;: 60, &#39;max_value&#39;: 120}
+)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">composition</span><span class="p">,</span>
+        <span class="n">volume</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spacegroup_include</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">),</span>
+        <span class="n">spacegroup_exclude</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">vector_generation_method</span><span class="o">=</span><span class="n">NormallyDistributedVectors</span><span class="p">,</span>
+        <span class="n">vector_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">angle_generation_method</span><span class="o">=</span><span class="n">UniformlyDistributedVectors</span><span class="p">,</span>
+        <span class="n">angle_gen_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">),</span>
+    <span class="p">):</span>
+
+        <span class="c1"># make a list of spacegroups that we are allowed to choose from</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sg</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="n">spacegroup_include</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spacegroup_exclude</span>
+        <span class="p">]</span>
+
+        <span class="c1"># if the user didn&#39;t specify a volume, we should predict our own</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">volume</span><span class="p">:</span>
+            <span class="c1"># grab the base predicted volume which is based on the composition</span>
+            <span class="c1"># note this represents the volume of the primitive cell!!! Conventional cells may be larger</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="n">estimate_volume</span><span class="p">(</span>
+                <span class="n">composition</span>
+            <span class="p">)</span>  <span class="c1">#!!! this assumes user wants ionic radius estimation</span>
+
+        <span class="c1"># find the respective volume for each spacegroup&#39;s conventional unit cell</span>
+        <span class="c1"># to do this, we need to know the ratio between MultiplicityPrimitive and MultiplicityConventiional for a spacegroup</span>
+        <span class="c1">#!!! currently this is stored in wyckoffdata.csv, but I should consider putting it in a separate file for speed</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">loadWyckoffData</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volumes</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># keys are spacegroup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_generators</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># keys are spacegroup</span>
+        <span class="k">for</span> <span class="n">spacegroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">:</span>
+            <span class="c1"># grab the portion of the table for spacegroup and make it into a numpy array</span>
+            <span class="n">sg_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;SpaceGroup == @spacegroup&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+            <span class="c1"># final the ratio between the primitive and conventional unitcells for this structure</span>
+            <span class="c1"># this is the ratio between the 2nd and 3rd columns (indicies 1 and 2), which are MultiplicityConventional &amp; MultiplicityPrimitive</span>
+            <span class="c1"># I grab the first row, which is the first wyckoff site -- it makes no difference which one I grab</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">sg_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sg_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="c1"># the volume of the conventional cell for this spacegroup is the primitive times this ratio</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">volumes</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">spacegroup</span><span class="p">:</span> <span class="n">volume</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">})</span>
+
+            <span class="c1"># now we want to make the vector_generator for this spacegroup</span>
+            <span class="c1">#!!! I&#39;m not sure users can pass custom parameters this deep and if they will work. I need to test for this</span>
+            <span class="c1">#!!! I assume NormallyDistributedVectors is used here... will give errors if that&#39;s not the case</span>
+            <span class="n">vgen</span> <span class="o">=</span> <span class="n">vector_generation_method</span><span class="p">(</span>
+                <span class="n">min_value</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span>
+                    <span class="n">estimate_radii</span><span class="p">(</span><span class="n">composition</span><span class="p">)</span>
+                <span class="p">),</span>  <span class="c1"># smallest radius of any ion #!!! move outside for loop for speed! #!!! this assumes user wants ionic radius estimation</span>
+                <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">),</span>  <span class="c1"># shoot for cubic vectors</span>
+                <span class="n">max_value</span><span class="o">=</span><span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span>
+                <span class="o">**</span> <span class="mf">0.8</span><span class="p">,</span>  <span class="c1"># don&#39;t allow for vectors too be crazy different #!!! need to test if 0.8 is a good value here</span>
+                <span class="n">standdev</span><span class="o">=</span><span class="p">((</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+                <span class="o">*</span> <span class="mf">0.15</span><span class="p">,</span>  <span class="c1"># larger volumes have more flexibility in their vector lengths</span>
+            <span class="p">)</span>  <span class="c1">#!!! **vector_gen_options not used... need to fix</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vector_generators</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">spacegroup</span><span class="p">:</span> <span class="n">vgen</span><span class="p">})</span>
+
+        <span class="c1"># establish the vector generation method and use the specified options</span>
+        <span class="c1"># Unlike the vector_generators, we can use the same generator here for all spacegroups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span> <span class="o">=</span> <span class="n">angle_generation_method</span><span class="p">(</span><span class="o">**</span><span class="n">angle_gen_options</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="RSLSmartVolume.new_lattice" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#RSLSmartVolume.new_lattice">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">new_lattice</span><span class="signature">(self, spacegroup=None)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">new_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># if a spacegroup is not specified, grab a random one from our options</span>
+        <span class="c1"># no check is done to see if the spacegroup specified is compatible with the vector_generator built</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spacegroup</span><span class="p">:</span>
+            <span class="c1"># randomly select a symmetry system</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">)</span>
+
+        <span class="c1"># For our target spacegroup, grab the target volume and vector_generator</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">volumes</span><span class="p">[</span><span class="n">spacegroup</span><span class="p">]</span>
+        <span class="n">vector_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_generators</span><span class="p">[</span><span class="n">spacegroup</span><span class="p">]</span>
+
+        <span class="c1"># run the same parent new_lattice, which returns a lattice</span>
+        <span class="c1"># if a spacegroup is not specified, grab a random one from our options</span>
+        <span class="c1"># no check is done to see if the spacegroup specified is compatible with the vector_generator built</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spacegroup</span><span class="p">:</span>
+            <span class="c1"># randomly select a symmetry system</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup_options</span><span class="p">)</span>
+
+        <span class="c1"># generate an (a,b,c) vector to pull lattice vectors from</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">vector_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># generate an (alpha,beta,gamma) vector to pull lattice angles from</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_generator</span><span class="o">.</span><span class="n">new_vector</span><span class="p">()</span>
+
+        <span class="c1"># Now generate the lattice using the spacegroup indicidated</span>
+        <span class="k">if</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># triclinic</span>
+            <span class="c1"># SPECIAL CASE b/c pymatgen does not have this function</span>
+            <span class="c1"># but because (a != b != c) and (alpha != beta != gamma)</span>
+            <span class="c1"># take the inputs of vectors=(a,b,c) and angles=(alpha,beta,gamma) and create a pymatgen lattice object</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>  <span class="c1"># monoclinic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">monoclinic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">74</span><span class="p">:</span>  <span class="c1"># orthorhombic</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">orthorhombic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">142</span><span class="p">:</span>  <span class="c1"># tetragonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">tetragonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">167</span><span class="p">:</span>  <span class="c1"># trigonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+            <span class="c1"># Note: I have all lattices in range(143,168) to be hexagonal</span>
+            <span class="c1"># the spacegroups 146,148,155,160,161,166,167 can optionally be rhombohedral though</span>
+            <span class="c1"># lattice = Lattice.rhombohedral(a,alpha)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">194</span><span class="p">:</span>  <span class="c1"># hexagonal</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">hexagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">spacegroup</span> <span class="o">&lt;=</span> <span class="mi">230</span><span class="p">:</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="n">Lattice</span><span class="o">.</span><span class="n">cubic</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c1">#!!! This section makes the code take more than 3x longer to run. Should</span>
+        <span class="c1">#!!! I allow a more flexible volume? More flexible volume could also slow structure creation (bc smaller volumes are allowed)</span>
+        <span class="c1"># now scale the lattice to the specified volume</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+        <span class="c1"># in scaling, we might have broken the conditions of min/max_vectors</span>
+        <span class="c1"># I check this and if it fails, I scrap the lattice and try making a new one via recursion</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># assume valid until proven otherwise</span>
+        <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="p">[</span><span class="n">lattice</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">lattice</span><span class="o">.</span><span class="n">c</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">vector</span> <span class="o">&lt;</span> <span class="n">vector_generator</span><span class="o">.</span><span class="n">min_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">vector</span> <span class="o">&gt;</span> <span class="n">vector_generator</span><span class="o">.</span><span class="n">max_value</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+            <span class="c1"># this is a recursion call that will be hit repeatedly until a valid lattice is found</span>
+            <span class="c1">#!!! this will throw a recursion error if the volume and min/max_vectors are unreasonable</span>
+            <span class="c1">#!!! I need to rewrite this function where it&#39;s a while loop instead of a recursion call</span>
+            <span class="n">lattice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_lattice</span><span class="p">(</span><span class="n">spacegroup</span><span class="p">)</span>
+
+        <span class="c1"># we need to know which spacegroup was used in addition to the result lattice</span>
+        <span class="c1"># maybe I can add an option to &#39;returnlatticeonly=True&#39; if I don&#39;t want this as a dict</span>
+        <span class="k">return</span> <span class="n">lattice</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

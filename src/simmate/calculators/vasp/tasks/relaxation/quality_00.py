@@ -7,6 +7,17 @@ from simmate.calculators.vasp.inputs.potcar_mappings import (
 
 
 class Quality00Relaxation(VaspTask):
+    """
+    Runs a very rough VASP geometry optimization with fixed lattice volume.
+    `Quality 00` indicates these are absolute lowest quality settings used in
+    our available presets.
+
+    Typically, you'd only want to run this relaxation on structures that were
+    randomly created (and thus likely very unreasonable). More precise relaxations
+    should be done afterwards. Therefore, instead of using this calculation,
+    we recommend only using the relaxation/staged workflow, which uses this
+    calculation as a first step.
+    """
 
     # returns structure separately from vasprun object
     return_final_structure = True

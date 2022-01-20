@@ -28,13 +28,58 @@
                                pattern=".+" required>
 
 
-                    <h2>Submodules</h2>
-                    <ul>
-                            <li><a href="triggered_actions/add_from_third_parties.html">simmate.toolkit.structure_prediction.evolution.triggered_actions.add_from_third_parties</a></li>
-                            <li><a href="triggered_actions/add_prototypes.html">simmate.toolkit.structure_prediction.evolution.triggered_actions.add_prototypes</a></li>
-                            <li><a href="triggered_actions/add_structures.html">simmate.toolkit.structure_prediction.evolution.triggered_actions.add_structures</a></li>
-                            <li><a href="triggered_actions/base.html">simmate.toolkit.structure_prediction.evolution.triggered_actions.base</a></li>
-                    </ul>
+
+                    <h2>API Documentation</h2>
+                        <ul class="memberlist">
+            <li>
+                    <a class="class" href="#TriggeredAction">TriggeredAction</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#TriggeredAction.__init__">TriggeredAction</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TriggeredAction.check">check</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TriggeredAction.action">action</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TriggeredAction.from_composition">from_composition</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#InitStructures">InitStructures</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#InitStructures.__init__">InitStructures</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#InitStructures.check">check</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#InitStructures.action">action</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#AddStructures">AddStructures</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#AddStructures.__init__">AddStructures</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#AddStructures.check">check</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#AddStructures.action">action</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
 
 
 
@@ -47,13 +92,555 @@
         </nav>
     <main class="pdoc">
             <section>
-                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit/structure_prediction/evolution/triggered_actions/__init__.py">Edit on GitHub</a>
+                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit/structure_prediction/evolution/triggered_actions.py">Edit on GitHub</a>
                     <h1 class="modulename">
 <a href="./../../../../simmate.html">simmate</a><wbr>.<a href="./../../../toolkit.html">toolkit</a><wbr>.<a href="./../../structure_prediction.html">structure_prediction</a><wbr>.<a href="./../evolution.html">evolution</a><wbr>.triggered_actions    </h1>
 
                 
-                
+                        <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">signature</span>
+
+
+<span class="k">class</span> <span class="nc">TriggeredAction</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># add any unchanging variables or settings here</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+        <span class="c1"># This method should take in one argument:</span>
+        <span class="c1"># search = this is the main Search object seen in search.py</span>
+        <span class="c1"># The Trigger can run any analysis on the Search object WITHOUT</span>
+        <span class="c1"># making any changes to it. Then you should return True if the</span>
+        <span class="c1"># trigger condition(s) has been met and False if the calculation should</span>
+        <span class="c1"># continue without setting off the trigger</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+        <span class="c1"># This method should take in one argument:</span>
+        <span class="c1"># search = this is the main Search object seen in search.py</span>
+        <span class="c1"># This is where to apply some change to the search. It can be whatever you&#39;d like!</span>
+        <span class="c1"># The most common actions (such as search.new_sample) will be accessed via</span>
+        <span class="c1"># the search class and not custom code here.</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_composition</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">composition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1"># note that trigger_options is a dict of custom inputs to use on the class trigger_class</span>
+
+        <span class="kn">import</span> <span class="nn">pymatdisc.engine.triggers</span> <span class="k">as</span> <span class="nn">trigger_module</span>
+
+        <span class="c1"># if the trigger class is a string, then assume we want to import from the trigger_module</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">trigger_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">trigger_module</span><span class="p">,</span> <span class="n">trigger_class</span><span class="p">)</span>
+        <span class="c1"># otherwise, the user is trying to use their own module/class and we already have that set</span>
+
+        <span class="c1"># now that we have the class, we want to initiate it with the settings provided</span>
+        <span class="c1"># we also need to see if composition is a required input, which we don&#39;t require the user to specify for convenience</span>
+        <span class="n">trigger_class_parameters</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">trigger_class</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+
+        <span class="c1">#!!! in the future, should I just require that all mutators take composition (or **kwargs) as an input even if they don&#39;t need it?</span>
+        <span class="c1"># now we can init with the dictionary of options depending on if composition is needed or not</span>
+        <span class="k">if</span> <span class="s2">&quot;composition&quot;</span> <span class="ow">in</span> <span class="n">trigger_class_parameters</span><span class="p">:</span>
+            <span class="n">trigger_object</span> <span class="o">=</span> <span class="n">trigger_class</span><span class="p">(</span><span class="n">composition</span><span class="p">,</span> <span class="o">**</span><span class="n">trigger_options</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trigger_object</span> <span class="o">=</span> <span class="n">trigger_class</span><span class="p">(</span><span class="o">**</span><span class="n">trigger_options</span><span class="p">)</span>
+
+        <span class="c1"># we now have the final trigger object instance and can return it</span>
+        <span class="k">return</span> <span class="n">trigger_object</span>
+
+
+<span class="c1">#!!! In the future, should I reduce triggers down to lower order objects?</span>
+<span class="c1">#!!! One example of this would be reducing a Trigger to a Check/Validation and an Action</span>
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+
+
+<span class="k">class</span> <span class="nc">InitStructures</span><span class="p">:</span>
+
+    <span class="c1"># Super simple check that passes True if no structures have been created yet.</span>
+    <span class="c1"># If that is the case, then it creates new structures using the input probilities for each generator.</span>
+    <span class="c1"># This is used to start the entire search.</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_initial_structures</span><span class="p">):</span>
+
+        <span class="c1"># Number of initial structures to create</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_initial_structures</span> <span class="o">=</span> <span class="n">n_initial_structures</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>  <span class="c1">#!!! can I move &#39;search&#39; to the init?</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">search</span><span class="o">.</span><span class="n">structures</span><span class="p">:</span>  <span class="c1"># same as len(structures) == 0</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Making new structures...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># we want n total structures so we are going to loop this number of times</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_initial_structures</span><span class="p">):</span>
+            <span class="c1"># make a new sample</span>
+            <span class="n">search</span><span class="o">.</span><span class="n">new_sample</span><span class="p">(</span><span class="n">creators_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+
+
+<span class="k">class</span> <span class="nc">AddStructures</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_pending_limit</span><span class="p">,</span> <span class="n">n_add_structures</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_pending_limit</span> <span class="o">=</span> <span class="n">n_pending_limit</span>
+
+        <span class="c1"># Number of structures to create if the pending_limit is hit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_add_structures</span> <span class="o">=</span> <span class="n">n_add_structures</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>  <span class="c1">#!!! can I move &#39;search&#39; to the init?</span>
+
+        <span class="c1"># if no structures have completed yet, we don&#39;t want to add any new structure with this trigger</span>
+        <span class="k">if</span> <span class="n">search</span><span class="o">.</span><span class="n">njobs_completed</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># See if the number of jobs pending has dropped below the limit</span>
+        <span class="k">if</span> <span class="n">search</span><span class="o">.</span><span class="n">njobs_pending</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pending_limit</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Making new structures...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># we want n total structures so we are going to loop this number of times</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_add_structures</span><span class="p">):</span>
+            <span class="c1"># make a new sample</span>
+            <span class="n">search</span><span class="o">.</span><span class="n">new_sample</span><span class="p">()</span>
+
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+</pre></div>
+
+        </details>
+
             </section>
+                <section id="TriggeredAction">
+                                <div class="attr class">
+        <a class="headerlink" href="#TriggeredAction">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">TriggeredAction</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">TriggeredAction</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># add any unchanging variables or settings here</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+        <span class="c1"># This method should take in one argument:</span>
+        <span class="c1"># search = this is the main Search object seen in search.py</span>
+        <span class="c1"># The Trigger can run any analysis on the Search object WITHOUT</span>
+        <span class="c1"># making any changes to it. Then you should return True if the</span>
+        <span class="c1"># trigger condition(s) has been met and False if the calculation should</span>
+        <span class="c1"># continue without setting off the trigger</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+        <span class="c1"># This method should take in one argument:</span>
+        <span class="c1"># search = this is the main Search object seen in search.py</span>
+        <span class="c1"># This is where to apply some change to the search. It can be whatever you&#39;d like!</span>
+        <span class="c1"># The most common actions (such as search.new_sample) will be accessed via</span>
+        <span class="c1"># the search class and not custom code here.</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_composition</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">composition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1"># note that trigger_options is a dict of custom inputs to use on the class trigger_class</span>
+
+        <span class="kn">import</span> <span class="nn">pymatdisc.engine.triggers</span> <span class="k">as</span> <span class="nn">trigger_module</span>
+
+        <span class="c1"># if the trigger class is a string, then assume we want to import from the trigger_module</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">trigger_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">trigger_module</span><span class="p">,</span> <span class="n">trigger_class</span><span class="p">)</span>
+        <span class="c1"># otherwise, the user is trying to use their own module/class and we already have that set</span>
+
+        <span class="c1"># now that we have the class, we want to initiate it with the settings provided</span>
+        <span class="c1"># we also need to see if composition is a required input, which we don&#39;t require the user to specify for convenience</span>
+        <span class="n">trigger_class_parameters</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">trigger_class</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+
+        <span class="c1">#!!! in the future, should I just require that all mutators take composition (or **kwargs) as an input even if they don&#39;t need it?</span>
+        <span class="c1"># now we can init with the dictionary of options depending on if composition is needed or not</span>
+        <span class="k">if</span> <span class="s2">&quot;composition&quot;</span> <span class="ow">in</span> <span class="n">trigger_class_parameters</span><span class="p">:</span>
+            <span class="n">trigger_object</span> <span class="o">=</span> <span class="n">trigger_class</span><span class="p">(</span><span class="n">composition</span><span class="p">,</span> <span class="o">**</span><span class="n">trigger_options</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trigger_object</span> <span class="o">=</span> <span class="n">trigger_class</span><span class="p">(</span><span class="o">**</span><span class="n">trigger_options</span><span class="p">)</span>
+
+        <span class="c1"># we now have the final trigger object instance and can return it</span>
+        <span class="k">return</span> <span class="n">trigger_object</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="TriggeredAction.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TriggeredAction.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">TriggeredAction</span><span class="signature">()</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># add any unchanging variables or settings here</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="TriggeredAction.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TriggeredAction.check">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">check</span><span class="signature">(self, search)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+        <span class="c1"># This method should take in one argument:</span>
+        <span class="c1"># search = this is the main Search object seen in search.py</span>
+        <span class="c1"># The Trigger can run any analysis on the Search object WITHOUT</span>
+        <span class="c1"># making any changes to it. Then you should return True if the</span>
+        <span class="c1"># trigger condition(s) has been met and False if the calculation should</span>
+        <span class="c1"># continue without setting off the trigger</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="TriggeredAction.action" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TriggeredAction.action">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">action</span><span class="signature">(self, search)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+        <span class="c1"># This method should take in one argument:</span>
+        <span class="c1"># search = this is the main Search object seen in search.py</span>
+        <span class="c1"># This is where to apply some change to the search. It can be whatever you&#39;d like!</span>
+        <span class="c1"># The most common actions (such as search.new_sample) will be accessed via</span>
+        <span class="c1"># the search class and not custom code here.</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="TriggeredAction.from_composition" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TriggeredAction.from_composition">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">from_composition</span><span class="signature">(cls, composition=None, **kwargs)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_composition</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">composition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1"># note that trigger_options is a dict of custom inputs to use on the class trigger_class</span>
+
+        <span class="kn">import</span> <span class="nn">pymatdisc.engine.triggers</span> <span class="k">as</span> <span class="nn">trigger_module</span>
+
+        <span class="c1"># if the trigger class is a string, then assume we want to import from the trigger_module</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">trigger_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">trigger_module</span><span class="p">,</span> <span class="n">trigger_class</span><span class="p">)</span>
+        <span class="c1"># otherwise, the user is trying to use their own module/class and we already have that set</span>
+
+        <span class="c1"># now that we have the class, we want to initiate it with the settings provided</span>
+        <span class="c1"># we also need to see if composition is a required input, which we don&#39;t require the user to specify for convenience</span>
+        <span class="n">trigger_class_parameters</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">trigger_class</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+
+        <span class="c1">#!!! in the future, should I just require that all mutators take composition (or **kwargs) as an input even if they don&#39;t need it?</span>
+        <span class="c1"># now we can init with the dictionary of options depending on if composition is needed or not</span>
+        <span class="k">if</span> <span class="s2">&quot;composition&quot;</span> <span class="ow">in</span> <span class="n">trigger_class_parameters</span><span class="p">:</span>
+            <span class="n">trigger_object</span> <span class="o">=</span> <span class="n">trigger_class</span><span class="p">(</span><span class="n">composition</span><span class="p">,</span> <span class="o">**</span><span class="n">trigger_options</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trigger_object</span> <span class="o">=</span> <span class="n">trigger_class</span><span class="p">(</span><span class="o">**</span><span class="n">trigger_options</span><span class="p">)</span>
+
+        <span class="c1"># we now have the final trigger object instance and can return it</span>
+        <span class="k">return</span> <span class="n">trigger_object</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
+                <section id="InitStructures">
+                                <div class="attr class">
+        <a class="headerlink" href="#InitStructures">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">InitStructures</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">InitStructures</span><span class="p">:</span>
+
+    <span class="c1"># Super simple check that passes True if no structures have been created yet.</span>
+    <span class="c1"># If that is the case, then it creates new structures using the input probilities for each generator.</span>
+    <span class="c1"># This is used to start the entire search.</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_initial_structures</span><span class="p">):</span>
+
+        <span class="c1"># Number of initial structures to create</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_initial_structures</span> <span class="o">=</span> <span class="n">n_initial_structures</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>  <span class="c1">#!!! can I move &#39;search&#39; to the init?</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">search</span><span class="o">.</span><span class="n">structures</span><span class="p">:</span>  <span class="c1"># same as len(structures) == 0</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Making new structures...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># we want n total structures so we are going to loop this number of times</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_initial_structures</span><span class="p">):</span>
+            <span class="c1"># make a new sample</span>
+            <span class="n">search</span><span class="o">.</span><span class="n">new_sample</span><span class="p">(</span><span class="n">creators_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="InitStructures.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#InitStructures.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">InitStructures</span><span class="signature">(n_initial_structures)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_initial_structures</span><span class="p">):</span>
+
+        <span class="c1"># Number of initial structures to create</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_initial_structures</span> <span class="o">=</span> <span class="n">n_initial_structures</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="InitStructures.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#InitStructures.check">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">check</span><span class="signature">(self, search)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>  <span class="c1">#!!! can I move &#39;search&#39; to the init?</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">search</span><span class="o">.</span><span class="n">structures</span><span class="p">:</span>  <span class="c1"># same as len(structures) == 0</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="InitStructures.action" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#InitStructures.action">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">action</span><span class="signature">(self, search)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Making new structures...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># we want n total structures so we are going to loop this number of times</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_initial_structures</span><span class="p">):</span>
+            <span class="c1"># make a new sample</span>
+            <span class="n">search</span><span class="o">.</span><span class="n">new_sample</span><span class="p">(</span><span class="n">creators_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
+                <section id="AddStructures">
+                                <div class="attr class">
+        <a class="headerlink" href="#AddStructures">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">AddStructures</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">AddStructures</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_pending_limit</span><span class="p">,</span> <span class="n">n_add_structures</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_pending_limit</span> <span class="o">=</span> <span class="n">n_pending_limit</span>
+
+        <span class="c1"># Number of structures to create if the pending_limit is hit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_add_structures</span> <span class="o">=</span> <span class="n">n_add_structures</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>  <span class="c1">#!!! can I move &#39;search&#39; to the init?</span>
+
+        <span class="c1"># if no structures have completed yet, we don&#39;t want to add any new structure with this trigger</span>
+        <span class="k">if</span> <span class="n">search</span><span class="o">.</span><span class="n">njobs_completed</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># See if the number of jobs pending has dropped below the limit</span>
+        <span class="k">if</span> <span class="n">search</span><span class="o">.</span><span class="n">njobs_pending</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pending_limit</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Making new structures...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># we want n total structures so we are going to loop this number of times</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_add_structures</span><span class="p">):</span>
+            <span class="c1"># make a new sample</span>
+            <span class="n">search</span><span class="o">.</span><span class="n">new_sample</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="AddStructures.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#AddStructures.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">AddStructures</span><span class="signature">(n_pending_limit, n_add_structures)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_pending_limit</span><span class="p">,</span> <span class="n">n_add_structures</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_pending_limit</span> <span class="o">=</span> <span class="n">n_pending_limit</span>
+
+        <span class="c1"># Number of structures to create if the pending_limit is hit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_add_structures</span> <span class="o">=</span> <span class="n">n_add_structures</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="AddStructures.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#AddStructures.check">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">check</span><span class="signature">(self, search)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>  <span class="c1">#!!! can I move &#39;search&#39; to the init?</span>
+
+        <span class="c1"># if no structures have completed yet, we don&#39;t want to add any new structure with this trigger</span>
+        <span class="k">if</span> <span class="n">search</span><span class="o">.</span><span class="n">njobs_completed</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># See if the number of jobs pending has dropped below the limit</span>
+        <span class="k">if</span> <span class="n">search</span><span class="o">.</span><span class="n">njobs_pending</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pending_limit</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="AddStructures.action" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#AddStructures.action">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">action</span><span class="signature">(self, search)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Making new structures...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># we want n total structures so we are going to loop this number of times</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_add_structures</span><span class="p">):</span>
+            <span class="c1"># make a new sample</span>
+            <span class="n">search</span><span class="o">.</span><span class="n">new_sample</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

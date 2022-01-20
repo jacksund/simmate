@@ -7,6 +7,18 @@ from simmate.calculators.vasp.inputs.potcar_mappings import (
 
 
 class Quality02Relaxation(VaspTask):
+    """
+    Runs a rough VASP geometry optimization.
+
+    `Quality 02` indicates that on a scale from 00 to 04, these are ranked 02 in
+    quality (with 04 being the highest quality).
+
+    Typically, you'd only want to run this relaxation on structures that were
+    randomly created (and thus likely very unreasonable). More precise relaxations
+    should be done afterwards. Therefore, instead of using this calculation,
+    we recommend only using the relaxation/staged workflow, which uses this
+    calculation as a third step.
+    """
 
     # returns structure separately from vasprun object
     return_final_structure = True

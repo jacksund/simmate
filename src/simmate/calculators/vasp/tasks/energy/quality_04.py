@@ -4,6 +4,21 @@ from simmate.calculators.vasp.tasks.relaxation.quality_04 import Quality04Relaxa
 
 
 class Quality04Energy(Quality04Relaxation):
+    """
+    Runs a rough VASP static energy calculation.
+
+    `Quality 04` relates to our ranking of relaxation qualities, where this
+    calculation uses the same settings as the Quality04Relaxation.
+
+    Note, even though this is currently our highest quality preset, these
+    settings are still only suitable for high-throughput calculations or massive
+    supercells. Settings are still below MIT and Materials Project quality.
+
+    Most commonly, this is used in evolutionary searches (for structure
+    prediction). We recommend instead using the relaxation/staged workflow,
+    which uses this calculation as the sixth and final step -- after a series
+    of rough relaxations are done.
+    """
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.

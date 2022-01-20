@@ -10,6 +10,11 @@ from simmate.calculators.vasp.error_handlers import (
 
 
 class MITStaticEnergy(MITRelaxation):
+    """
+    Runs a VASP static energy calculation using MIT Project settings.
+
+    This is identical to relaxation/mit, but just a single ionic step.
+    """
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.

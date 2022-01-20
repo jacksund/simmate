@@ -34,6 +34,9 @@
             <li>
                     <a class="function" href="#get_workflow">get_workflow</a>
             </li>
+            <li>
+                    <a class="function" href="#list_options">list_options</a>
+            </li>
     </ul>
 
 
@@ -58,6 +61,8 @@
 
 <span class="kn">import</span> <span class="nn">click</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
 
 <span class="nd">@click</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">workflows</span><span class="p">():</span>
@@ -73,10 +78,13 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    workflow_name : str</span>
-<span class="sd">        Name of the workflow to grab</span>
+<span class="sd">        Name of the workflow to grab (e.g. relaxation-matproj)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">simmate</span> <span class="kn">import</span> <span class="n">workflows</span>
-    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_list_of_all_workflows</span>
+
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">get_list_of_all_workflows</span><span class="p">,</span>
+        <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">allowed_workflows</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
 
@@ -85,10 +93,106 @@
         <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
             <span class="s2">&quot;The workflow you provided isn&#39;t known. Make sure you don&#39;t have any &quot;</span>
             <span class="s2">&quot;typos! If you want a list of all available workflows, use the command &quot;</span>
-            <span class="s2">&quot; &#39;simmate workflows list-all&#39;&quot;</span>
+            <span class="s2">&quot;`simmate workflows list-all`. You can also interactively explore &quot;</span>
+            <span class="s2">&quot;workflows with `simmate workflows explore`&quot;</span>
         <span class="p">)</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflows</span><span class="p">,</span> <span class="n">workflow_name</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+
+    <span class="c1"># parse the workflow name. (e.g. static-energy/mit --&gt; static-energy + mit)</span>
+    <span class="n">type_name</span><span class="p">,</span> <span class="n">preset_name</span> <span class="o">=</span> <span class="n">workflow_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+    <span class="c1"># The naming convention matches the import path, so we can load the workflow</span>
+    <span class="n">workflow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflow_module</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">workflow</span>
+
+
+<span class="k">def</span> <span class="nf">list_options</span><span class="p">(</span><span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a utility for click (cli) that prints of list of items as a numbered</span>
+<span class="sd">    list. It prompts users to select an option from the list.</span>
+
+<span class="sd">    For example, `[&quot;item1&quot;, &quot;item2&quot;, &quot;item3&quot;]` would print...</span>
+<span class="sd">    ```</span>
+<span class="sd">        (01) item1</span>
+<span class="sd">        (02) item2</span>
+<span class="sd">        (03) item3</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - `options`:</span>
+<span class="sd">        a list of strings to choose from</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    - `selected_index`:</span>
+<span class="sd">        The integer value of the choice selected. This will follw python indexing</span>
+<span class="sd">        so the index of the options list. (e.g. if item1 was selected, 0 would be</span>
+<span class="sd">        returned)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">(</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">) </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Have the user select an option. We use -1 because indexing count is from 0, not 1.</span>
+    <span class="n">selected_index</span> <span class="o">=</span> <span class="n">click</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Please choose a number:&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">selected_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> <span class="ow">or</span> <span class="n">selected_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
+            <span class="s2">&quot;Number does not match any the options provided. Exiting.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;You have selectd `</span><span class="si">{</span><span class="n">options</span><span class="p">[</span><span class="n">selected_index</span><span class="p">]</span><span class="si">}</span><span class="s2">`.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">selected_index</span>
+
+
+<span class="nd">@workflows</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">explore</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Let&#39;s you interactively view all available workflows and see the documentation</span>
+<span class="sd">    on the one you select.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Gathering all available workflows...&quot;</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">,</span>
+        <span class="n">get_list_of_workflows_by_type</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">What type of analysis are you interested in?&quot;</span><span class="p">)</span>
+    <span class="n">types_cleaned</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">]</span>
+    <span class="n">type_index</span> <span class="o">=</span> <span class="n">list_options</span><span class="p">(</span><span class="n">types_cleaned</span><span class="p">)</span>
+    <span class="n">selected_type</span> <span class="o">=</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">[</span><span class="n">type_index</span><span class="p">]</span>
+
+    <span class="c1"># TODO: have the user select a calculator for this analysis. For now,</span>
+    <span class="c1"># we are assuming VASP because those are our only workflows</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">What settings preset do you want to see the description for?&quot;</span><span class="p">)</span>
+    <span class="n">presets</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">selected_type</span><span class="p">)]</span>
+    <span class="n">present_index</span> <span class="o">=</span> <span class="n">list_options</span><span class="p">(</span><span class="n">presets</span><span class="p">)</span>
+    <span class="n">selected_preset</span> <span class="o">=</span> <span class="n">presets</span><span class="p">[</span><span class="n">present_index</span><span class="p">]</span>
+
+    <span class="n">final_workflow_name</span> <span class="o">=</span> <span class="n">selected_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">selected_preset</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">===================== </span><span class="si">{</span><span class="n">final_workflow_name</span><span class="si">}</span><span class="s2"> =====================&quot;</span><span class="p">)</span>
+
+    <span class="c1"># now we load this workflow and print the docstring.</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">final_workflow_name</span><span class="p">)</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">workflow</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;==================================================================&quot;</span><span class="p">)</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span>
+        <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2"> To run this workflow, use the command...&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2"> simmate workflows run </span><span class="si">{</span><span class="n">final_workflow_name</span><span class="si">}</span><span class="s2"> example.cif</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
 
 
 <span class="nd">@workflows</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
@@ -118,9 +222,6 @@
 <span class="sd">    are displayed. For example, a VASP workflow will show a dictionary that</span>
 <span class="sd">    details how INCAR settings are selected.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># user gives a workflow like energy-mit and we convert to energy_mit for python</span>
-    <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">workflow_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;LOADING WORKFLOW...&quot;</span><span class="p">)</span>
     <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span>
@@ -153,9 +254,6 @@
 <span class="sd">    If the workflow is a single task, the calculation is set up but not ran. This</span>
 <span class="sd">    is useful when you just want the input files to view/edit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># user gives a workflow like energy-mit and we convert to energy_mit for python</span>
-    <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">workflow_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;LOADING STRUCTURE AND WORKFLOW...&quot;</span><span class="p">)</span>
     <span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span>
@@ -202,9 +300,6 @@
 <span class="p">)</span>
 <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Runs a workflow using an input structure file&quot;&quot;&quot;</span>
-
-    <span class="c1"># user gives a workflow like energy-mit and we convert to energy_mit for python</span>
-    <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">workflow_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;LOADING STRUCTURE AND WORKFLOW...&quot;</span><span class="p">)</span>
     <span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span>
@@ -295,10 +390,13 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    workflow_name : str</span>
-<span class="sd">        Name of the workflow to grab</span>
+<span class="sd">        Name of the workflow to grab (e.g. relaxation-matproj)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">simmate</span> <span class="kn">import</span> <span class="n">workflows</span>
-    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_list_of_all_workflows</span>
+
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">get_list_of_all_workflows</span><span class="p">,</span>
+        <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">allowed_workflows</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
 
@@ -307,9 +405,20 @@
         <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
             <span class="s2">&quot;The workflow you provided isn&#39;t known. Make sure you don&#39;t have any &quot;</span>
             <span class="s2">&quot;typos! If you want a list of all available workflows, use the command &quot;</span>
-            <span class="s2">&quot; &#39;simmate workflows list-all&#39;&quot;</span>
+            <span class="s2">&quot;`simmate workflows list-all`. You can also interactively explore &quot;</span>
+            <span class="s2">&quot;workflows with `simmate workflows explore`&quot;</span>
         <span class="p">)</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflows</span><span class="p">,</span> <span class="n">workflow_name</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+
+    <span class="c1"># parse the workflow name. (e.g. static-energy/mit --&gt; static-energy + mit)</span>
+    <span class="n">type_name</span><span class="p">,</span> <span class="n">preset_name</span> <span class="o">=</span> <span class="n">workflow_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+    <span class="c1"># The naming convention matches the import path, so we can load the workflow</span>
+    <span class="n">workflow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflow_module</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">workflow</span>
 </pre></div>
 
@@ -321,7 +430,91 @@ workflows. If the workflow can't be found, it raises a ClickException.</p>
 <h2 id="parameters">Parameters</h2>
 
 <p>workflow_name : str
-    Name of the workflow to grab</p>
+    Name of the workflow to grab (e.g. relaxation-matproj)</p>
+</div>
+
+
+                </section>
+                <section id="list_options">
+                            <div class="attr function"><a class="headerlink" href="#list_options">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">list_options</span><span class="signature">(options: List) -&gt; int</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">list_options</span><span class="p">(</span><span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a utility for click (cli) that prints of list of items as a numbered</span>
+<span class="sd">    list. It prompts users to select an option from the list.</span>
+
+<span class="sd">    For example, `[&quot;item1&quot;, &quot;item2&quot;, &quot;item3&quot;]` would print...</span>
+<span class="sd">    ```</span>
+<span class="sd">        (01) item1</span>
+<span class="sd">        (02) item2</span>
+<span class="sd">        (03) item3</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - `options`:</span>
+<span class="sd">        a list of strings to choose from</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    - `selected_index`:</span>
+<span class="sd">        The integer value of the choice selected. This will follw python indexing</span>
+<span class="sd">        so the index of the options list. (e.g. if item1 was selected, 0 would be</span>
+<span class="sd">        returned)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">(</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">) </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Have the user select an option. We use -1 because indexing count is from 0, not 1.</span>
+    <span class="n">selected_index</span> <span class="o">=</span> <span class="n">click</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Please choose a number:&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">selected_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> <span class="ow">or</span> <span class="n">selected_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
+            <span class="s2">&quot;Number does not match any the options provided. Exiting.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;You have selectd `</span><span class="si">{</span><span class="n">options</span><span class="p">[</span><span class="n">selected_index</span><span class="p">]</span><span class="si">}</span><span class="s2">`.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">selected_index</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is a utility for click (cli) that prints of list of items as a numbered
+list. It prompts users to select an option from the list.</p>
+
+<p>For example, <code>["item1", "item2", "item3"]</code> would print...</p>
+
+<pre><code>    (01) item1
+    (02) item2
+    (03) item3
+</code></pre>
+
+<h2 id="parameters">Parameters</h2>
+
+<ul>
+<li><code>options</code>:
+a list of strings to choose from</li>
+</ul>
+
+<h2 id="returns">Returns</h2>
+
+<ul>
+<li><code>selected_index</code>:
+The integer value of the choice selected. This will follw python indexing
+so the index of the options list. (e.g. if item1 was selected, 0 would be
+returned)</li>
+</ul>
 </div>
 
 
