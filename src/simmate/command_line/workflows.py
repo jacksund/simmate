@@ -121,15 +121,13 @@ def explore():
     selected_preset = presets[present_index]
 
     final_workflow_name = selected_type.replace("_", "-") + "/" + selected_preset
-    click.echo(
-        f"\n\n================== {final_workflow_name} =================="
-    )
+    click.echo(f"\n\n================== {final_workflow_name} ==================")
 
     # now we load this workflow and print the docstring.
     workflow = get_workflow(final_workflow_name)
-    
+
     click.echo(workflow.__doc__)
-    
+
     click.echo(
         "\n\n To run this workflow, you'd use something like..."
         f"\n\t simmate workflows run {final_workflow_name} example.cif\n\n"
@@ -164,9 +162,6 @@ def show_config(workflow_name):
     details how INCAR settings are selected.
     """
 
-    # user gives a workflow like energy-mit and we convert to energy_mit for python
-    workflow_name = workflow_name.replace("-", "_")
-
     click.echo("LOADING WORKFLOW...")
     workflow = get_workflow(workflow_name)
 
@@ -198,9 +193,6 @@ def setup_only(workflow_name, filename, directory):
     If the workflow is a single task, the calculation is set up but not ran. This
     is useful when you just want the input files to view/edit.
     """
-
-    # user gives a workflow like energy-mit and we convert to energy_mit for python
-    workflow_name = workflow_name.replace("-", "_")
 
     click.echo("LOADING STRUCTURE AND WORKFLOW...")
     from pymatgen.core.structure import Structure
@@ -247,9 +239,6 @@ def setup_only(workflow_name, filename, directory):
 )
 def run(workflow_name, filename, command, directory):
     """Runs a workflow using an input structure file"""
-
-    # user gives a workflow like energy-mit and we convert to energy_mit for python
-    workflow_name = workflow_name.replace("-", "_")
 
     click.echo("LOADING STRUCTURE AND WORKFLOW...")
     from pymatgen.core.structure import Structure
