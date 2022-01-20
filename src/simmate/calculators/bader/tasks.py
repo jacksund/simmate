@@ -4,10 +4,9 @@ import os
 
 from prefect.utilities.tasks import defaults_from_attrs
 
-from simmate.workflow_engine.tasks.shelltask import ShellTask
-from simmate.workflow_engine.tasks.stagedshelltask import StagedShellTask
+from simmate.workflow_engine import S3Task
 
-from simmate.calculators.bader.io.outputs.acf import parse_ACF
+from simmate.calculators.bader.outputs import ACF
 from pymatgen.io.vasp.outputs import Chgcar
 from pymatgen.io.vasp import Potcar
 
@@ -16,11 +15,11 @@ from pymatgen.io.vasp import Potcar
 # executable file from having to be in the user's path.
 
 
-class CombineCHGCARsTask(ShellTask):
+class CombineCHGCARsTask(S3Task):
     command = "./chgsum.pl AECCAR0 AECCAR2 > chgsum.out"
 
 
-class BaderAnalysisTask(StagedShellTask):
+class BaderAnalysisTask(S3Task):
     command = "./bader CHGCAR -ref CHGCAR_sum -b weight > bader.out"
 
     @defaults_from_attrs("dir")
@@ -39,7 +38,7 @@ class BaderAnalysisTask(StagedShellTask):
 
         # load the ACF.dat file
         acf_filename = os.path.join(dir, "ACF.dat")
-        dataframe, extra_data = parse_ACF(filename=acf_filename)
+        dataframe, extra_data = ACF(filename=acf_filename)
 
         # load the electron counts used by VASP from the POTCAR files
         # OPTIMIZE this can be much faster if I have a reference file
@@ -66,6 +65,7 @@ class BaderAnalysisTask(StagedShellTask):
             elements.append(element_str)
             oxi_state = nelectron_data[element_str] - site_charge
             oxi_state_data.append(oxi_state)
+
         # add the new column to the dataframe
         # !!! There are multiple ways to do this, but I don't know which is best
         # dataframe["oxidation_state"] = pandas.Series(

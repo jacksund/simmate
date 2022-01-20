@@ -229,7 +229,7 @@ class Workflow(PrefectFlow):
 
         See the documentation in workflow_engine.tasks.workflow_task for more.
         """
-        from simmate.workflow_engine.tasks.workflow_task import WorkflowTask
+        from simmate.workflow_engine import WorkflowTask
 
         return WorkflowTask(workflow=self)
 

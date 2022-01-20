@@ -4,7 +4,7 @@ from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.inputs.potcar_mappings import (
     PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
 )
-from simmate.calculators.vasp.error_handlers.all import (
+from simmate.calculators.vasp.error_handlers import (
     TetrahedronMesh,
     Eddrmm,
     IncorrectSmearingHandler,

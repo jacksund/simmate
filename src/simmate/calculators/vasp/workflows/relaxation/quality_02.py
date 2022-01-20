@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.workflow_engine.utilities import s3task_to_workflow
-from simmate.calculators.vasp.tasks.relaxation.quality_02 import (
+from simmate.calculators.vasp.tasks.relaxation import (
     Quality02Relaxation as Quality02RelaxationTask,
 )
 from simmate.calculators.vasp.database.relaxation import (

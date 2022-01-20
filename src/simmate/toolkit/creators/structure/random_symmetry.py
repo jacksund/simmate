@@ -9,7 +9,7 @@ from pymatgen.core.structure import Structure
 # from pymatgen.analysis.structure_prediction.volume_predictor import DLSVolumePredictor #, RLSVolumePredictor
 
 from simmate.toolkit.creators.structure.base import StructureCreator
-from simmate.toolkit.creators.lattice.all import RSLSmartVolume  # RandomSymLattice
+from simmate.toolkit.creators.lattice import RSLSmartVolume  # RandomSymLattice
 from simmate.toolkit.creators.sites.random_wyckoff import RandomWySites
 from simmate.toolkit.creators.utils import NestedFixes
 

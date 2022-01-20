@@ -1,6 +1,4 @@
-from simmate.toolkit.creators.vector.uniform_distribution import (
-    UniformlyDistributedVectors,
-)
-from simmate.toolkit.creators.vector.normal_distribution import (
-    NormallyDistributedVectors,
-)
+# -*- coding: utf-8 -*-
+
+from .uniform_distribution import UniformlyDistributedVectors
+from .normal_distribution import NormallyDistributedVectors

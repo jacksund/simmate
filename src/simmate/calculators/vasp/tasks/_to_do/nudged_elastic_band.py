@@ -4,7 +4,7 @@ import os
 
 from pymatgen.analysis.transition_state import NEBAnalysis
 
-from simmate.calculators.vasp.inputs.all import Incar, Poscar, Kpoints, Potcar
+from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
 from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.error_handlers.tetrahedron_mesh import TetrahedronMesh
 from simmate.calculators.vasp.error_handlers.eddrmm import Eddrmm

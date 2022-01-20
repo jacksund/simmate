@@ -10,7 +10,7 @@ from simmate.database.local_calculations import (
     # MITIonicStep,
 )
 from simmate.website.local_calculations.forms import MITRelaxationForm
-from simmate.workflow_engine.tasks.workflow_task import WorkflowTask
+from simmate.workflow_engine import WorkflowTask
 
 
 @login_required

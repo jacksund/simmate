@@ -4,8 +4,8 @@ import os
 
 from pymatgen.core.structure import Structure
 
-from simmate.workflow_engine.error_handler import ErrorHandler
-from simmate.calculators.vasp.inputs.incar import Incar
+from simmate.workflow_engine import ErrorHandler
+from simmate.calculators.vasp.inputs import Incar
 
 
 class TripleProduct(ErrorHandler):

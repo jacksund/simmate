@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.workflow_engine.utilities import s3task_to_workflow
-from simmate.calculators.vasp.tasks.energy.materials_project import (
+from simmate.calculators.vasp.tasks.energy import (
     MatProjStaticEnergy as MPStaticEnergyTask,
 )
 from simmate.calculators.vasp.database.energy import (

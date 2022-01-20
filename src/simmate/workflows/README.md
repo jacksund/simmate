@@ -35,4 +35,4 @@ Alternatively, this same workflow could have been imported with...
 
 .. code-block:: python
 
-    from simmate.calculators.vasp.workflows.relaxation.all import relaxation_mit
+    from simmate.calculators.vasp.workflows.relaxation import relaxation_mit

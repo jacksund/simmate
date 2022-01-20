@@ -28,9 +28,9 @@ structure = Structure.from_file("POSCAR")
 structure.to("cif", "NaCl.cif")
 ```
 
-The `Structure` class (aka a `ToolkitStructure`) provides many extra properties and methods, so nearly all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial. All available workflows can be loaded from the `simmate.workflows.all` module:
+The `Structure` class (aka a `ToolkitStructure`) provides many extra properties and methods, so nearly all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial. All available workflows can be loaded from the `simmate.workflows` module:
 ```python
-from simmate.workflows.all import relaxation_mit
+from simmate.workflows import relaxation_mit
 result = relaxation_mit.run(structure=structure)
 ```
 
@@ -67,7 +67,7 @@ What about advanced features? Simmate is slowly adding these to our toolkit modu
 # creating a random structure from a spacegroup and composition
 
 from simmate.toolkit import Composition
-from simmate.toolkit.creators.structure.all import RandomSymStructure
+from simmate.toolkit.creators import RandomSymStructure
 
 composition = Composition("Ca2N")
 creator = RandomSymStructure(composition)
@@ -208,7 +208,7 @@ simmate workflows run energy-mit POSCAR
 # This code does the exact same thing as the command above
 
 from simmate.toolkit import Structure
-from simmate.workflows.all import relaxation_mit
+from simmate.workflows import relaxation_mit
 
 nacl_structure = Structure.from_file("POSCAR")
 result = relaxation_mit.run(structure=nacl_structure)
@@ -331,7 +331,7 @@ We only need to give these "creator" classes a composition object:
 
 ```python
 from simmate.toolkit import Composition
-from simmate.toolkit.creators.structure.all import RandomSymStructure
+from simmate.toolkit.creators import RandomSymStructure
 
 composition = Composition("Ca2N")
 creator = RandomSymStructure(composition)

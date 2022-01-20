@@ -3,7 +3,7 @@
 import pandas
 
 
-def parse_ACF(filename="ACF.dat"):
+def ACF(filename="ACF.dat"):
 
     # open the file, grab the lines, and then close it
     with open(filename) as file:
