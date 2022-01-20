@@ -71,6 +71,13 @@
 <span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_doc_from_readme</span>
 
 <span class="vm">__doc__</span> <span class="o">=</span> <span class="n">get_doc_from_readme</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.tasks.supervised_staged_shell_task</span> <span class="kn">import</span> <span class="n">S3Task</span>
+<span class="kn">from</span> <span class="nn">.tasks.workflow_task</span> <span class="kn">import</span> <span class="n">WorkflowTask</span>
+<span class="kn">from</span> <span class="nn">.workflow</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ModuleStorage</span>
+<span class="kn">from</span> <span class="nn">.error_handler</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
+
+<span class="c1"># from .utilities import s3task_to_workflow  # NOT MODULAR - REQUIRES DB CONNECTION</span>
 </pre></div>
 
         </details>

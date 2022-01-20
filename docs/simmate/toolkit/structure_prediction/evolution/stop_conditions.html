@@ -28,10 +28,34 @@
                                pattern=".+" required>
 
 
-                    <h2>Submodules</h2>
-                    <ul>
-                            <li><a href="stop_conditions/base.html">simmate.toolkit.structure_prediction.evolution.stop_conditions.base</a></li>
-                    </ul>
+
+                    <h2>API Documentation</h2>
+                        <ul class="memberlist">
+            <li>
+                    <a class="class" href="#StopCondition">StopCondition</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#StopCondition.__init__">StopCondition</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#StopCondition.check">check</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#BasicStopConditions">BasicStopConditions</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#BasicStopConditions.__init__">BasicStopConditions</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#BasicStopConditions.check">check</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
 
 
 
@@ -44,13 +68,286 @@
         </nav>
     <main class="pdoc">
             <section>
-                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit/structure_prediction/evolution/stop_conditions/__init__.py">Edit on GitHub</a>
+                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit/structure_prediction/evolution/stop_conditions.py">Edit on GitHub</a>
                     <h1 class="modulename">
 <a href="./../../../../simmate.html">simmate</a><wbr>.<a href="./../../../toolkit.html">toolkit</a><wbr>.<a href="./../../structure_prediction.html">structure_prediction</a><wbr>.<a href="./../evolution.html">evolution</a><wbr>.stop_conditions    </h1>
 
-                
-                
+                        <div class="docstring"><p>Feel free to write your own StopCondition! It should follow the format shown here.</p>
+
+<p>-Jack</p>
+</div>
+
+                        <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Feel free to write your own StopCondition! It should follow the format shown here.</span>
+
+<span class="sd">-Jack</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">StopCondition</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># add any unchanging variables or settings here</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+        <span class="c1"># The select method should take in one argument:</span>
+        <span class="c1"># search = this is the main Search object seen in search.py</span>
+        <span class="c1"># The StopCondition can run any analysis on the Search object WITHOUT</span>
+        <span class="c1"># making any changes to it. Then you should return True if the</span>
+        <span class="c1"># stopping condition(s) has been met and False if the calculation should</span>
+        <span class="c1"># continue.</span>
+        <span class="k">pass</span>
+
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+
+
+<span class="k">class</span> <span class="nc">BasicStopConditions</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_structures</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">energy_limit</span><span class="o">=-</span><span class="mi">999</span><span class="p">,</span> <span class="n">same_min_structures</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_structures</span> <span class="o">=</span> <span class="n">max_structures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_limit</span> <span class="o">=</span> <span class="n">energy_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">same_min_structures</span> <span class="o">=</span> <span class="n">same_min_structures</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+
+        <span class="c1"># Note, a single condition met is enough to stop the search (returns True)</span>
+
+        <span class="c1"># start by looking at the total number of structures that completed their analysis</span>
+        <span class="k">if</span> <span class="n">search</span><span class="o">.</span><span class="n">njobs_completed</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_structures</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Max structures hit. Stopping Search&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># grab the completed energies and the lowest energy for reference</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">search</span><span class="o">.</span><span class="n">fitnesses</span> <span class="k">if</span> <span class="n">e</span><span class="p">]</span>  <span class="c1"># remove None types</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">energies</span><span class="p">:</span>  <span class="c1"># this will happen if the no structures have completed yet</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">min_energy</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">energies</span><span class="p">)</span>
+
+        <span class="c1"># look at the structure energies and see what the lowest is</span>
+        <span class="k">if</span> <span class="n">min_energy</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_limit</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Energy limit hit. Stopping Search&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># look how long the minimum structure has been there #!!! ERROR IN LOGIC</span>
+        <span class="c1"># min_index = energies.index(min_energy)</span>
+        <span class="c1"># if len(energies) - min_index &gt;= self.same_min_structures:</span>
+        <span class="c1">#     print(&#39;\nMin-structure reign limit hit. Stopping Search&#39;)</span>
+        <span class="c1">#     return True</span>
+
+        <span class="c1"># If no conditions above are met, return False to continue the search</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+</pre></div>
+
+        </details>
+
             </section>
+                <section id="StopCondition">
+                                <div class="attr class">
+        <a class="headerlink" href="#StopCondition">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">StopCondition</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">StopCondition</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># add any unchanging variables or settings here</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+        <span class="c1"># The select method should take in one argument:</span>
+        <span class="c1"># search = this is the main Search object seen in search.py</span>
+        <span class="c1"># The StopCondition can run any analysis on the Search object WITHOUT</span>
+        <span class="c1"># making any changes to it. Then you should return True if the</span>
+        <span class="c1"># stopping condition(s) has been met and False if the calculation should</span>
+        <span class="c1"># continue.</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="StopCondition.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#StopCondition.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">StopCondition</span><span class="signature">()</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># add any unchanging variables or settings here</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="StopCondition.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#StopCondition.check">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">check</span><span class="signature">(self, search)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+        <span class="c1"># The select method should take in one argument:</span>
+        <span class="c1"># search = this is the main Search object seen in search.py</span>
+        <span class="c1"># The StopCondition can run any analysis on the Search object WITHOUT</span>
+        <span class="c1"># making any changes to it. Then you should return True if the</span>
+        <span class="c1"># stopping condition(s) has been met and False if the calculation should</span>
+        <span class="c1"># continue.</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
+                <section id="BasicStopConditions">
+                                <div class="attr class">
+        <a class="headerlink" href="#BasicStopConditions">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">BasicStopConditions</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">BasicStopConditions</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_structures</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">energy_limit</span><span class="o">=-</span><span class="mi">999</span><span class="p">,</span> <span class="n">same_min_structures</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_structures</span> <span class="o">=</span> <span class="n">max_structures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_limit</span> <span class="o">=</span> <span class="n">energy_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">same_min_structures</span> <span class="o">=</span> <span class="n">same_min_structures</span>
+
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+
+        <span class="c1"># Note, a single condition met is enough to stop the search (returns True)</span>
+
+        <span class="c1"># start by looking at the total number of structures that completed their analysis</span>
+        <span class="k">if</span> <span class="n">search</span><span class="o">.</span><span class="n">njobs_completed</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_structures</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Max structures hit. Stopping Search&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># grab the completed energies and the lowest energy for reference</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">search</span><span class="o">.</span><span class="n">fitnesses</span> <span class="k">if</span> <span class="n">e</span><span class="p">]</span>  <span class="c1"># remove None types</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">energies</span><span class="p">:</span>  <span class="c1"># this will happen if the no structures have completed yet</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">min_energy</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">energies</span><span class="p">)</span>
+
+        <span class="c1"># look at the structure energies and see what the lowest is</span>
+        <span class="k">if</span> <span class="n">min_energy</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_limit</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Energy limit hit. Stopping Search&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># look how long the minimum structure has been there #!!! ERROR IN LOGIC</span>
+        <span class="c1"># min_index = energies.index(min_energy)</span>
+        <span class="c1"># if len(energies) - min_index &gt;= self.same_min_structures:</span>
+        <span class="c1">#     print(&#39;\nMin-structure reign limit hit. Stopping Search&#39;)</span>
+        <span class="c1">#     return True</span>
+
+        <span class="c1"># If no conditions above are met, return False to continue the search</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="BasicStopConditions.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BasicStopConditions.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">BasicStopConditions</span><span class="signature">(max_structures=300, energy_limit=-999, same_min_structures=50)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_structures</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">energy_limit</span><span class="o">=-</span><span class="mi">999</span><span class="p">,</span> <span class="n">same_min_structures</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_structures</span> <span class="o">=</span> <span class="n">max_structures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_limit</span> <span class="o">=</span> <span class="n">energy_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">same_min_structures</span> <span class="o">=</span> <span class="n">same_min_structures</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="BasicStopConditions.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BasicStopConditions.check">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">check</span><span class="signature">(self, search)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+
+        <span class="c1"># Note, a single condition met is enough to stop the search (returns True)</span>
+
+        <span class="c1"># start by looking at the total number of structures that completed their analysis</span>
+        <span class="k">if</span> <span class="n">search</span><span class="o">.</span><span class="n">njobs_completed</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_structures</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Max structures hit. Stopping Search&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># grab the completed energies and the lowest energy for reference</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">search</span><span class="o">.</span><span class="n">fitnesses</span> <span class="k">if</span> <span class="n">e</span><span class="p">]</span>  <span class="c1"># remove None types</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">energies</span><span class="p">:</span>  <span class="c1"># this will happen if the no structures have completed yet</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">min_energy</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">energies</span><span class="p">)</span>
+
+        <span class="c1"># look at the structure energies and see what the lowest is</span>
+        <span class="k">if</span> <span class="n">min_energy</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_limit</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Energy limit hit. Stopping Search&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># look how long the minimum structure has been there #!!! ERROR IN LOGIC</span>
+        <span class="c1"># min_index = energies.index(min_energy)</span>
+        <span class="c1"># if len(energies) - min_index &gt;= self.same_min_structures:</span>
+        <span class="c1">#     print(&#39;\nMin-structure reign limit hit. Stopping Search&#39;)</span>
+        <span class="c1">#     return True</span>
+
+        <span class="c1"># If no conditions above are met, return False to continue the search</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

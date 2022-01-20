@@ -56,12 +56,8 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">simmate.workflow_engine.workflow</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Workflow</span><span class="p">,</span>
-    <span class="n">Parameter</span><span class="p">,</span>
-    <span class="n">ModuleStorage</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">simmate.workflows.common_tasks.all</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ModuleStorage</span>
+<span class="kn">from</span> <span class="nn">simmate.workflows.common_tasks</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">LoadInputAndRegister</span><span class="p">,</span>
     <span class="n">SaveOutputTask</span><span class="p">,</span>
 <span class="p">)</span>
@@ -127,6 +123,9 @@
     <span class="n">workflow</span><span class="o">.</span><span class="n">register_kwargs</span> <span class="o">=</span> <span class="n">register_kwargs</span>
     <span class="n">workflow</span><span class="o">.</span><span class="n">result_task</span> <span class="o">=</span> <span class="n">output</span>
     <span class="n">workflow</span><span class="o">.</span><span class="n">s3task</span> <span class="o">=</span> <span class="n">s3task</span>
+
+    <span class="c1"># by default we just copy the docstring of the S3task to the workflow</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">s3task</span><span class="o">.</span><span class="vm">__doc__</span>
 
     <span class="k">return</span> <span class="n">workflow</span>
 </pre></div>
@@ -207,6 +206,9 @@
     <span class="n">workflow</span><span class="o">.</span><span class="n">register_kwargs</span> <span class="o">=</span> <span class="n">register_kwargs</span>
     <span class="n">workflow</span><span class="o">.</span><span class="n">result_task</span> <span class="o">=</span> <span class="n">output</span>
     <span class="n">workflow</span><span class="o">.</span><span class="n">s3task</span> <span class="o">=</span> <span class="n">s3task</span>
+
+    <span class="c1"># by default we just copy the docstring of the S3task to the workflow</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">s3task</span><span class="o">.</span><span class="vm">__doc__</span>
 
     <span class="k">return</span> <span class="n">workflow</span>
 </pre></div>

@@ -142,7 +142,7 @@
         <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="c1"># Static Energy (MIT)</span>
+    <span class="c1"># Static Energy (same quality as 04 relaxation)</span>
     <span class="n">run_id_05</span> <span class="o">=</span> <span class="n">static_task_04</span><span class="p">(</span>
         <span class="n">structure</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;calculation_table&quot;</span><span class="p">:</span> <span class="s2">&quot;Quality04Relaxation&quot;</span><span class="p">,</span>
@@ -169,6 +169,24 @@
         <span class="n">energy_quality04</span><span class="p">,</span>
     <span class="p">]</span>
 <span class="p">]</span>
+
+<span class="n">workflow</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Runs a series of increasing-quality relaxations and then finishes with a single</span>
+<span class="s2">    static energy calculation.</span>
+<span class="s2">    </span>
+<span class="s2">    This is therefore a &quot;Nested Workflow&quot; made of the following smaller workflows:</span>
+
+<span class="s2">        - relaxation/quality00</span>
+<span class="s2">        - relaxation/quality01</span>
+<span class="s2">        - relaxation/quality02</span>
+<span class="s2">        - relaxation/quality03</span>
+<span class="s2">        - relaxation/quality04</span>
+<span class="s2">        - static-energy/quality04</span>
+<span class="s2">    </span>
+<span class="s2">    This workflow is most useful for randomly-created structures or extremely </span>
+<span class="s2">    large supercells. More precise relaxations+energy calcs should be done </span>
+<span class="s2">    afterwards because ettings are still below MIT and Materials Project quality.</span>
+<span class="s2">&quot;&quot;&quot;</span>
 </pre></div>
 
         </details>

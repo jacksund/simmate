@@ -28,10 +28,34 @@
                                pattern=".+" required>
 
 
-                    <h2>Submodules</h2>
-                    <ul>
-                            <li><a href="selectors/all.html">simmate.toolkit.structure_prediction.evolution.selectors.all</a></li>
-                    </ul>
+
+                    <h2>API Documentation</h2>
+                        <ul class="memberlist">
+            <li>
+                    <a class="class" href="#Selector">Selector</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#Selector.__init__">Selector</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Selector.select">select</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#TruncatedSelection">TruncatedSelection</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#TruncatedSelection.__init__">TruncatedSelection</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TruncatedSelection.select">select</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
 
 
 
@@ -44,13 +68,275 @@
         </nav>
     <main class="pdoc">
             <section>
-                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit/structure_prediction/evolution/selectors/__init__.py">Edit on GitHub</a>
+                        <a class="pdoc-button git-button" href="https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit/structure_prediction/evolution/selectors.py">Edit on GitHub</a>
                     <h1 class="modulename">
 <a href="./../../../../simmate.html">simmate</a><wbr>.<a href="./../../../toolkit.html">toolkit</a><wbr>.<a href="./../../structure_prediction.html">structure_prediction</a><wbr>.<a href="./../evolution.html">evolution</a><wbr>.selectors    </h1>
 
                 
-                
+                        <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="c1"># For adding new selection methods, DEAP is a good reference:</span>
+<span class="c1">#   https://github.com/DEAP/deap/blob/master/deap/tools/selection.py</span>
+<span class="c1">#   https://deap.readthedocs.io/en/master/api/tools.html</span>
+<span class="c1">#</span>
+<span class="c1"># Their selection methods take a list of individuals that each have a .fitness</span>
+<span class="c1"># attribute. Instead, I pass individuals here as a pandas dataframe and have</span>
+<span class="c1"># them specify a &quot;fitness_column&quot;</span>
+<span class="c1">#</span>
+<span class="c1"># Another good reference is Wikipedia</span>
+<span class="c1">#   https://en.wikipedia.org/wiki/Selection_(genetic_algorithm)</span>
+
+<span class="c1"># NOTE: I assume lower fitness is better! This may change in the future because</span>
+<span class="c1"># other selection methods throw issues with lower=better and even more issues</span>
+<span class="c1"># when we have negative values</span>
+
+
+<span class="k">class</span> <span class="nc">Selector</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># add any unchanging variables or settings here</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nselect</span><span class="p">,</span> <span class="n">individuals</span><span class="p">,</span> <span class="n">fitness_column</span><span class="p">):</span>
+        <span class="c1"># The select method should take in two arguments:</span>
+        <span class="c1"># individuals = a pandas dataframe with columns &quot;id&quot; and &quot;fitness&quot;</span>
+        <span class="c1"># n = the number of individuals that we want to choose from those fitnesses</span>
+        <span class="c1"># The select method should then return a list/tuple of the indicies</span>
+        <span class="c1"># of the fitnesses that were selected</span>
+        <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">TruncatedSelection</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Truncated selection limits the parent selection to the top X% of individuals,</span>
+<span class="sd">    and then within this top section, every individual has an equal chance of</span>
+<span class="sd">    being selected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">ntruncate_min</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="c1"># aim to grab this percent of individuals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">percentile</span> <span class="o">=</span> <span class="n">percentile</span>
+
+        <span class="c1"># at minimum, make sure we can select from this number of best individuals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ntruncate_min</span> <span class="o">=</span> <span class="n">ntruncate_min</span>
+
+        <span class="c1"># whether we can select the same individual more than once</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_duplicate</span> <span class="o">=</span> <span class="n">allow_duplicate</span>
+
+    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nselect</span><span class="p">,</span> <span class="n">individuals</span><span class="p">,</span> <span class="n">fitness_column</span><span class="p">):</span>
+
+        <span class="c1"># truncate the population to those with energies in the lowest X%. This</span>
+        <span class="c1"># value should be greater or equal to our minimum set above</span>
+        <span class="n">ntruncate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">individuals</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">percentile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ntruncate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntruncate_min</span><span class="p">:</span>
+            <span class="n">ntruncate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntruncate_min</span>
+
+        <span class="c1"># limit our potential selection to the top X% and then randomly select</span>
+        <span class="c1"># the correct number of parents</span>
+        <span class="n">df_truncated</span> <span class="o">=</span> <span class="n">individuals</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="n">ntruncate</span><span class="p">,</span> <span class="n">fitness_column</span><span class="p">)</span>
+        <span class="n">df_parents</span> <span class="o">=</span> <span class="n">df_truncated</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">nselect</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">allow_duplicate</span><span class="p">)</span>
+
+        <span class="c1"># return the list of indexes to be selected</span>
+        <span class="k">return</span> <span class="n">df_parents</span>
+</pre></div>
+
+        </details>
+
             </section>
+                <section id="Selector">
+                                <div class="attr class">
+        <a class="headerlink" href="#Selector">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">Selector</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Selector</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># add any unchanging variables or settings here</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nselect</span><span class="p">,</span> <span class="n">individuals</span><span class="p">,</span> <span class="n">fitness_column</span><span class="p">):</span>
+        <span class="c1"># The select method should take in two arguments:</span>
+        <span class="c1"># individuals = a pandas dataframe with columns &quot;id&quot; and &quot;fitness&quot;</span>
+        <span class="c1"># n = the number of individuals that we want to choose from those fitnesses</span>
+        <span class="c1"># The select method should then return a list/tuple of the indicies</span>
+        <span class="c1"># of the fitnesses that were selected</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            <div id="Selector.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Selector.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">Selector</span><span class="signature">()</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># add any unchanging variables or settings here</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="Selector.select" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Selector.select">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">select</span><span class="signature">(self, nselect, individuals, fitness_column)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nselect</span><span class="p">,</span> <span class="n">individuals</span><span class="p">,</span> <span class="n">fitness_column</span><span class="p">):</span>
+        <span class="c1"># The select method should take in two arguments:</span>
+        <span class="c1"># individuals = a pandas dataframe with columns &quot;id&quot; and &quot;fitness&quot;</span>
+        <span class="c1"># n = the number of individuals that we want to choose from those fitnesses</span>
+        <span class="c1"># The select method should then return a list/tuple of the indicies</span>
+        <span class="c1"># of the fitnesses that were selected</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
+                <section id="TruncatedSelection">
+                                <div class="attr class">
+        <a class="headerlink" href="#TruncatedSelection">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">TruncatedSelection</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">TruncatedSelection</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Truncated selection limits the parent selection to the top X% of individuals,</span>
+<span class="sd">    and then within this top section, every individual has an equal chance of</span>
+<span class="sd">    being selected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">ntruncate_min</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="c1"># aim to grab this percent of individuals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">percentile</span> <span class="o">=</span> <span class="n">percentile</span>
+
+        <span class="c1"># at minimum, make sure we can select from this number of best individuals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ntruncate_min</span> <span class="o">=</span> <span class="n">ntruncate_min</span>
+
+        <span class="c1"># whether we can select the same individual more than once</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_duplicate</span> <span class="o">=</span> <span class="n">allow_duplicate</span>
+
+    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nselect</span><span class="p">,</span> <span class="n">individuals</span><span class="p">,</span> <span class="n">fitness_column</span><span class="p">):</span>
+
+        <span class="c1"># truncate the population to those with energies in the lowest X%. This</span>
+        <span class="c1"># value should be greater or equal to our minimum set above</span>
+        <span class="n">ntruncate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">individuals</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">percentile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ntruncate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntruncate_min</span><span class="p">:</span>
+            <span class="n">ntruncate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntruncate_min</span>
+
+        <span class="c1"># limit our potential selection to the top X% and then randomly select</span>
+        <span class="c1"># the correct number of parents</span>
+        <span class="n">df_truncated</span> <span class="o">=</span> <span class="n">individuals</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="n">ntruncate</span><span class="p">,</span> <span class="n">fitness_column</span><span class="p">)</span>
+        <span class="n">df_parents</span> <span class="o">=</span> <span class="n">df_truncated</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">nselect</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">allow_duplicate</span><span class="p">)</span>
+
+        <span class="c1"># return the list of indexes to be selected</span>
+        <span class="k">return</span> <span class="n">df_parents</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Truncated selection limits the parent selection to the top X% of individuals,
+and then within this top section, every individual has an equal chance of
+being selected.</p>
+</div>
+
+
+                            <div id="TruncatedSelection.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TruncatedSelection.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">TruncatedSelection</span><span class="signature">(percentile=0.05, ntruncate_min=5, allow_duplicate=True)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">ntruncate_min</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="c1"># aim to grab this percent of individuals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">percentile</span> <span class="o">=</span> <span class="n">percentile</span>
+
+        <span class="c1"># at minimum, make sure we can select from this number of best individuals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ntruncate_min</span> <span class="o">=</span> <span class="n">ntruncate_min</span>
+
+        <span class="c1"># whether we can select the same individual more than once</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_duplicate</span> <span class="o">=</span> <span class="n">allow_duplicate</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="TruncatedSelection.select" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#TruncatedSelection.select">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">select</span><span class="signature">(self, nselect, individuals, fitness_column)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nselect</span><span class="p">,</span> <span class="n">individuals</span><span class="p">,</span> <span class="n">fitness_column</span><span class="p">):</span>
+
+        <span class="c1"># truncate the population to those with energies in the lowest X%. This</span>
+        <span class="c1"># value should be greater or equal to our minimum set above</span>
+        <span class="n">ntruncate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">individuals</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">percentile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ntruncate</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntruncate_min</span><span class="p">:</span>
+            <span class="n">ntruncate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntruncate_min</span>
+
+        <span class="c1"># limit our potential selection to the top X% and then randomly select</span>
+        <span class="c1"># the correct number of parents</span>
+        <span class="n">df_truncated</span> <span class="o">=</span> <span class="n">individuals</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="n">ntruncate</span><span class="p">,</span> <span class="n">fitness_column</span><span class="p">)</span>
+        <span class="n">df_parents</span> <span class="o">=</span> <span class="n">df_truncated</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">nselect</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">allow_duplicate</span><span class="p">)</span>
+
+        <span class="c1"># return the list of indexes to be selected</span>
+        <span class="k">return</span> <span class="n">df_parents</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

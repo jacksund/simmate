@@ -37,7 +37,13 @@
 
                     <h2>Submodules</h2>
                     <ul>
+                            <li><a href="workflows/band_structure.html">simmate.workflows.band_structure</a></li>
                             <li><a href="workflows/common_tasks.html">simmate.workflows.common_tasks</a></li>
+                            <li><a href="workflows/density_of_states.html">simmate.workflows.density_of_states</a></li>
+                            <li><a href="workflows/molecular_dynamics.html">simmate.workflows.molecular_dynamics</a></li>
+                            <li><a href="workflows/population_analysis.html">simmate.workflows.population_analysis</a></li>
+                            <li><a href="workflows/relaxation.html">simmate.workflows.relaxation</a></li>
+                            <li><a href="workflows/static_energy.html">simmate.workflows.static_energy</a></li>
                             <li><a href="workflows/utilities.html">simmate.workflows.utilities</a></li>
                     </ul>
 
@@ -56,42 +62,34 @@
                     <h1 class="modulename">
 <a href="./../simmate.html">simmate</a><wbr>.workflows    </h1>
 
-                        <div class="docstring"><h2 id="simmate-workflows">Simmate Workflows</h2>
+                        <div class="docstring"><h1 id="simmate-workflows">Simmate Workflows</h1>
 
 <p>This module brings together all predefined workflows and organizes them by application for convenience.</p>
 
-<h2 id="usage">Usage</h2>
+<h1 id="usage">Usage</h1>
 
-<p><code>Tutorials 01-05</code>_ will teach you how to run workflows and access their results. But as a review:</p>
+<p><a href="https://github.com/jacksund/simmate/tree/main/tutorials">Tutorials 01-05</a> will teach you how to run workflows and access their results. But as a review:</p>
 
-<p>.. code-block:: python</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="workflows/static_energy.html">simmate.workflows.static_energy</a></span> <span class="kn">import</span> <span class="n">mit_workflow</span>
 
-<pre><code>from <a href="">simmate.workflows</a> import energy_mit
+<span class="c1"># runs the workflow and returns a status</span>
+<span class="n">status</span> <span class="o">=</span> <span class="n">mit_workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">structure</span><span class="o">=...</span><span class="p">)</span>
 
-# runs the workflow and returns a status
-status = energy_mit.run(structure=...)
+<span class="c1"># gives the DatabaseTable where ALL results are stored</span>
+<span class="n">energy_mit</span><span class="o">.</span><span class="n">result_table</span>
+</code></pre></div>
 
-# gives the DatabaseTable where ALL results are stored
-energy_mit.result_table
-</code></pre>
-
-<p>.. _Tutorials 01-05: https://github.com/jacksund/simmate/tree/main/tutorials</p>
-
-<h2 id="location-of-each-workflows-source-code">Location of Each Workflow's Source-code</h2>
+<h1 id="location-of-each-workflows-source-code">Location of Each Workflow's Source-code</h1>
 
 <p>The code that defines these workflows and configures their settings are located in the corresponding <code><a href="calculators.html">simmate.calculators</a></code> module. We make workflows accessible here because users often want to search for workflows by application -- not by their calculator name. For example, a structure relaxation that uses VASP under MIT project settings can be imported with...</p>
 
-<p>.. code-block:: python</p>
-
-<pre><code>from <a href="">simmate.workflows</a> import relaxation_mit
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="">simmate.workflows</a></span> <span class="kn">import</span> <span class="n">relaxation_mit</span>
+</code></pre></div>
 
 <p>Alternatively, this same workflow could have been imported with...</p>
 
-<p>.. code-block:: python</p>
-
-<pre><code>from <a href="calculators/vasp/workflows/relaxation/all.html">simmate.calculators.vasp.workflows.relaxation.all</a> import relaxation_mit
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="calculators/vasp/workflows/relaxation.html">simmate.calculators.vasp.workflows.relaxation</a></span> <span class="kn">import</span> <span class="n">relaxation_mit</span>
+</code></pre></div>
 </div>
 
                         <details>
@@ -103,36 +101,6 @@ energy_mit.result_table
 <span class="vm">__doc__</span> <span class="o">=</span> <span class="n">get_doc_from_readme</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># sets database connection</span>
-
-<span class="c1"># TODO: when I add more calculators, I can do something like this...</span>
-<span class="c1"># if &quot;simmate.calculators.vasp&quot; in installed_apps:</span>
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.workflows.energy.all</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">energy_mit</span><span class="p">,</span>
-    <span class="n">energy_quality04</span><span class="p">,</span>
-    <span class="n">energy_matproj</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.workflows.relaxation.all</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">relaxation_mit</span><span class="p">,</span>
-    <span class="n">relaxation_matproj</span><span class="p">,</span>
-    <span class="n">relaxation_quality00</span><span class="p">,</span>
-    <span class="n">relaxation_quality01</span><span class="p">,</span>
-    <span class="n">relaxation_quality02</span><span class="p">,</span>
-    <span class="n">relaxation_quality03</span><span class="p">,</span>
-    <span class="n">relaxation_quality04</span><span class="p">,</span>
-    <span class="n">relaxation_staged</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="c1"># These are tasks that are in early development and don&#39;t have databases tables.</span>
-<span class="c1"># Therefore, they are s3tasks only - not workflows.</span>
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.band_structure</span> <span class="kn">import</span> <span class="n">MatProjBandStructure</span>
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.density_of_states</span> <span class="kn">import</span> <span class="n">MatProjDensityOfStates</span>
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.dynamics</span> <span class="kn">import</span> <span class="n">MITDynamicsTask</span>
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.pre_bader</span> <span class="kn">import</span> <span class="n">MatProjPreBaderTask</span>
-
-<span class="n">band_structure_matproj</span> <span class="o">=</span> <span class="n">MatProjBandStructure</span><span class="p">()</span>
-<span class="n">density_of_states_matproj</span> <span class="o">=</span> <span class="n">MatProjDensityOfStates</span><span class="p">()</span>
-<span class="n">dynamics_mit</span> <span class="o">=</span> <span class="n">MITDynamicsTask</span><span class="p">()</span>
-<span class="n">pre_bader_matproj</span> <span class="o">=</span> <span class="n">MatProjPreBaderTask</span><span class="p">()</span>
 </pre></div>
 
         </details>

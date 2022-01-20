@@ -78,7 +78,7 @@
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs.potcar_mappings</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">PBE_ELEMENT_MAPPINGS_LOW_QUALITY</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.error_handlers.all</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.error_handlers</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">TetrahedronMesh</span><span class="p">,</span>
     <span class="n">Eddrmm</span><span class="p">,</span>
     <span class="n">IncorrectSmearingHandler</span><span class="p">,</span>
@@ -93,6 +93,21 @@
 
 
 <span class="k">class</span> <span class="nc">MITRelaxation</span><span class="p">(</span><span class="n">VaspTask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runs a VASP geometry optimization using MIT Project settings.</span>
+
+<span class="sd">    The MIT Project is the precursor to the Materials Project.</span>
+
+<span class="sd">    From their documention in pymatgen:</span>
+
+<span class="sd">        &quot;Default VASP settings for calculations in the pre-cursor MIT project to</span>
+<span class="sd">        the Materials Project. Reasonably robust, but selected PSP are generally the</span>
+<span class="sd">        ones with fewer electrons and convergence criteria is less tight. This was</span>
+<span class="sd">        used in an era whether computational power is more limited.</span>
+<span class="sd">        Nevertheless, this is still a good starting point for extremely expensive</span>
+<span class="sd">        methods.&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># returns structure separately from vasprun object</span>
     <span class="n">return_final_structure</span> <span class="o">=</span> <span class="kc">True</span>
@@ -285,6 +300,21 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MITRelaxation</span><span class="p">(</span><span class="n">VaspTask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runs a VASP geometry optimization using MIT Project settings.</span>
+
+<span class="sd">    The MIT Project is the precursor to the Materials Project.</span>
+
+<span class="sd">    From their documention in pymatgen:</span>
+
+<span class="sd">        &quot;Default VASP settings for calculations in the pre-cursor MIT project to</span>
+<span class="sd">        the Materials Project. Reasonably robust, but selected PSP are generally the</span>
+<span class="sd">        ones with fewer electrons and convergence criteria is less tight. This was</span>
+<span class="sd">        used in an era whether computational power is more limited.</span>
+<span class="sd">        Nevertheless, this is still a good starting point for extremely expensive</span>
+<span class="sd">        methods.&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># returns structure separately from vasprun object</span>
     <span class="n">return_final_structure</span> <span class="o">=</span> <span class="kc">True</span>
@@ -464,106 +494,19 @@
 
         </details>
 
-            <div class="docstring"><h2 id="the-supervised-staged-shell-task-aka-s3task">The Supervised-Staged-Shell Task (aka "S3Task")</h2>
+            <div class="docstring"><p>Runs a VASP geometry optimization using MIT Project settings.</p>
 
-<p>This class contains the core functionality to <strong>supervise</strong> a <strong>staged</strong> task
-involving some <strong>shell</strong> command.</p>
+<p>The MIT Project is the precursor to the Materials Project.</p>
 
-<p>Let's breakdown what this means...</p>
+<p>From their documention in pymatgen:</p>
 
-<p>A <em>shell</em> command is a single call to some external program. For example,
-VASP requires that we call the "vasp_std &gt; vasp.out" command in order to run a
-calculation. We consider calling external programs a <em>staged</em> task made
-up of three steps:</p>
-
-<ul>
-<li>setup = writing any input files required for the program</li>
-<li>execution = actually calling the command and running our program</li>
-<li>workup = loading data from output files back into python</li>
-</ul>
-
-<p>And for <em>supervising</em> the task, this means we monitor the program while the
-execution stage is running. So once a program is started, Simmate can check
-output files for common errors/issues. If an error is found, we stop the
-program, fix the issue, and then restart it. Any fixes that were made are
-written to "simmate_corrections.csv".</p>
-
-<!--
-TODO: Make a simple diagram to visualize the overall process and add it here.
-It will be similar to Custodian's, but we don't have a list of jobs here.
-https://materialsproject.github.io/custodian/index.html#usage
-The steps are...
-
-- Write Input Files based on custom+defualt settings
-- Run the calculation by calling the program
-- Load ouput files
-- check for errors
-- [correct them, rerun]
-- postprocess/analysis
--->
-
-<p>This entire process (the different stages and monitoring) is carried out
-using the <code><a href="#MITRelaxation.run">run()</a></code> method. You rarely use this class directly. Instead,
-you typically use a subclass of it. As a user, you really just need to do
-something like this:</p>
-
-<div class="codehilite"><pre><span></span><code>   <span class="kn">from</span> <span class="nn"><a href="../../../../../simmate.html#calculator.example.tasks">simmate.calculator.example.tasks</a></span> <span class="kn">import</span> <span class="n">ExampleTask</span>
-
-   <span class="n">my_task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
-   <span class="n">my_result</span> <span class="o">=</span> <span class="n">my_task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-
-<p>And that's it!</p>
-
-<p>For experts, this class can be viewed as a combination of prefect's ShellTask,
-a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
-functionality of pymatgen.io.vasp.sets too. By merging all of these together
-into one class, we make things much easier for users and creating new Tasks.</p>
-
-<h2 id="inheriting-from-this-class">Inheriting from this class</h2>
-
-<p>This class is commonly used to make tasks for our calculator modules, so you
-will likely want to subclass this. Here is a basic example of inheriting
-and then running a task:</p>
-
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html">simmate.workflow_engine.tasks.supervised_staged_shell_task</a></span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">S3Task</span> <span class="k">as</span> <span class="n">SSSTask</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">example.error_handlers</span> <span class="kn">import</span> <span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span>
-
-
-<span class="k">class</span> <span class="nc">ExampleTask</span><span class="p">(</span><span class="n">SSSTask</span><span class="p">):</span>
-
-    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;echo example&quot;</span>  <span class="c1"># just prints out &quot;example&quot;</span>
-    <span class="n">max_corrections</span> <span class="o">=</span> <span class="mi">7</span>
-    <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span><span class="p">]</span>
-    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mf">0.1</span>
-    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">10</span>
-    <span class="n">some_new_setting</span> <span class="o">=</span> <span class="mi">123</span>
-
-    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have these two args</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m setting things up!&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;My new setting is </span><span class="si">{</span><span class="n">some_new_setting</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have this arg</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m working things up!&quot;</span><span class="p">)</span>
-
-
-<span class="n">task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-
-<p>There are a couple things to note here:</p>
-
-<ul>
-<li>It's optional to set/overwrite attributes. You can also add new ones too.</li>
-<li>It's optional to write a new __init__, setup, or workup methods</li>
-<li>make sure you include the structure/directory inputs, even if you don't use them.</li>
-<li>Don't add new kwargs to methods. Instead handle these options through attributes.</li>
-</ul>
-
-<p>For a full (and advanced) example, of a subclass take a look at
-<code><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></code>.</p>
+<pre><code>"Default VASP settings for calculations in the pre-cursor MIT project to
+the Materials Project. Reasonably robust, but selected PSP are generally the
+ones with fewer electrons and convergence criteria is less tight. This was
+used in an era whether computational power is more limited.
+Nevertheless, this is still a good starting point for extremely expensive
+methods."
+</code></pre>
 </div>
 
 
@@ -606,7 +549,7 @@ and then running a task:</p>
                             <div id="MITRelaxation.error_handlers" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MITRelaxation.error_handlers">#&nbsp;&nbsp</a>
 
-        <span class="name">error_handlers</span><span class="default_value"> = [&lt;<a href="../../error_handlers/tetrahedron_mesh.html#TetrahedronMesh">simmate.calculators.vasp.error_handlers.tetrahedron_mesh.TetrahedronMesh</a> object at 0x7fb569a43e80&gt;, &lt;<a href="../../error_handlers/eddrmm.html#Eddrmm">simmate.calculators.vasp.error_handlers.eddrmm.Eddrmm</a> object at 0x7fb5699f7160&gt;, &lt;<a href="../../error_handlers/incorrect_smearing.html#IncorrectSmearingHandler">simmate.calculators.vasp.error_handlers.incorrect_smearing.IncorrectSmearingHandler</a> object at 0x7fb5699f7070&gt;, &lt;<a href="../../error_handlers/mesh_symmetry.html#MeshSymmetryErrorHandler">simmate.calculators.vasp.error_handlers.mesh_symmetry.MeshSymmetryErrorHandler</a> object at 0x7fb5699f70d0&gt;, &lt;<a href="../../error_handlers/unconverged.html#UnconvergedErrorHandler">simmate.calculators.vasp.error_handlers.unconverged.UnconvergedErrorHandler</a> object at 0x7fb5699f71c0&gt;, &lt;<a href="../../error_handlers/nonconverging.html#NonConvergingErrorHandler">simmate.calculators.vasp.error_handlers.nonconverging.NonConvergingErrorHandler</a> object at 0x7fb5699f7400&gt;, &lt;<a href="../../error_handlers/potim.html#PotimErrorHandler">simmate.calculators.vasp.error_handlers.potim.PotimErrorHandler</a> object at 0x7fb5699f75b0&gt;, &lt;<a href="../../error_handlers/positive_energy.html#PositiveEnergyErrorHandler">simmate.calculators.vasp.error_handlers.positive_energy.PositiveEnergyErrorHandler</a> object at 0x7fb568cb65b0&gt;, &lt;<a href="../../error_handlers/frozen.html#FrozenErrorHandler">simmate.calculators.vasp.error_handlers.frozen.FrozenErrorHandler</a> object at 0x7fb568cc4790&gt;, &lt;<a href="../../error_handlers/large_sigma.html#LargeSigmaErrorHandler">simmate.calculators.vasp.error_handlers.large_sigma.LargeSigmaErrorHandler</a> object at 0x7fb568cc47f0&gt;]</span>
+        <span class="name">error_handlers</span><span class="default_value"> = [&lt;<a href="../../error_handlers/tetrahedron_mesh.html#TetrahedronMesh">simmate.calculators.vasp.error_handlers.tetrahedron_mesh.TetrahedronMesh</a> object at 0x7f6c26818670&gt;, &lt;<a href="../../error_handlers/eddrmm.html#Eddrmm">simmate.calculators.vasp.error_handlers.eddrmm.Eddrmm</a> object at 0x7f6c268186a0&gt;, &lt;<a href="../../error_handlers/incorrect_smearing.html#IncorrectSmearingHandler">simmate.calculators.vasp.error_handlers.incorrect_smearing.IncorrectSmearingHandler</a> object at 0x7f6c26818640&gt;, &lt;<a href="../../error_handlers/mesh_symmetry.html#MeshSymmetryErrorHandler">simmate.calculators.vasp.error_handlers.mesh_symmetry.MeshSymmetryErrorHandler</a> object at 0x7f6c26818700&gt;, &lt;<a href="../../error_handlers/unconverged.html#UnconvergedErrorHandler">simmate.calculators.vasp.error_handlers.unconverged.UnconvergedErrorHandler</a> object at 0x7f6c26818940&gt;, &lt;<a href="../../error_handlers/nonconverging.html#NonConvergingErrorHandler">simmate.calculators.vasp.error_handlers.nonconverging.NonConvergingErrorHandler</a> object at 0x7f6c26822070&gt;, &lt;<a href="../../error_handlers/potim.html#PotimErrorHandler">simmate.calculators.vasp.error_handlers.potim.PotimErrorHandler</a> object at 0x7f6c268220d0&gt;, &lt;<a href="../../error_handlers/positive_energy.html#PositiveEnergyErrorHandler">simmate.calculators.vasp.error_handlers.positive_energy.PositiveEnergyErrorHandler</a> object at 0x7f6c26822130&gt;, &lt;<a href="../../error_handlers/frozen.html#FrozenErrorHandler">simmate.calculators.vasp.error_handlers.frozen.FrozenErrorHandler</a> object at 0x7f6c26822160&gt;, &lt;<a href="../../error_handlers/large_sigma.html#LargeSigmaErrorHandler">simmate.calculators.vasp.error_handlers.large_sigma.LargeSigmaErrorHandler</a> object at 0x7f6c268221c0&gt;]</span>
     </div>
 
             <div class="docstring"><p>A list of ErrorHandler objects to use in order of priority (that is, highest

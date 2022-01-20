@@ -74,7 +74,7 @@
 <span class="c1"># from pymatgen.analysis.structure_prediction.volume_predictor import DLSVolumePredictor #, RLSVolumePredictor</span>
 
 <span class="kn">from</span> <span class="nn">simmate.toolkit.creators.structure.base</span> <span class="kn">import</span> <span class="n">StructureCreator</span>
-<span class="kn">from</span> <span class="nn">simmate.toolkit.creators.lattice.all</span> <span class="kn">import</span> <span class="n">RSLSmartVolume</span>  <span class="c1"># RandomSymLattice</span>
+<span class="kn">from</span> <span class="nn">simmate.toolkit.creators.lattice</span> <span class="kn">import</span> <span class="n">RSLSmartVolume</span>  <span class="c1"># RandomSymLattice</span>
 <span class="kn">from</span> <span class="nn">simmate.toolkit.creators.sites.random_wyckoff</span> <span class="kn">import</span> <span class="n">RandomWySites</span>
 <span class="kn">from</span> <span class="nn">simmate.toolkit.creators.utils</span> <span class="kn">import</span> <span class="n">NestedFixes</span>
 
@@ -609,7 +609,7 @@ inheritance.</p>
     composition,
     spacegroup_include=range(1, 231),
     spacegroup_exclude=[],
-    lattice_generation_method=&lt;class &#39;<a href="../lattice/all.html#RSLSmartVolume">simmate.toolkit.creators.lattice.all.RSLSmartVolume</a>&#39;&gt;,
+    lattice_generation_method=&lt;class &#39;<a href="../lattice.html#RSLSmartVolume">simmate.toolkit.creators.lattice.RSLSmartVolume</a>&#39;&gt;,
     lattice_gen_options={},
     site_generation_method=&lt;class &#39;<a href="../sites/random_wyckoff.html#RandomWySites">simmate.toolkit.creators.sites.random_wyckoff.RandomWySites</a>&#39;&gt;,
     site_gen_options={},

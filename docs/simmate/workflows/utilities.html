@@ -32,6 +32,9 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
+                    <a class="function" href="#get_list_of_workflows_by_type">get_list_of_workflows_by_type</a>
+            </li>
+            <li>
                     <a class="function" href="#get_list_of_all_workflows">get_list_of_all_workflows</a>
             </li>
     </ul>
@@ -56,24 +59,69 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">simmate</span> <span class="kn">import</span> <span class="n">workflows</span>
-<span class="kn">from</span> <span class="nn">simmate.workflow_engine.workflow</span> <span class="kn">import</span> <span class="n">Workflow</span>
-<span class="kn">from</span> <span class="nn">simmate.workflow_engine.tasks.supervised_staged_shell_task</span> <span class="kn">import</span> <span class="n">S3Task</span>
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">S3Task</span>
 
 
-<span class="k">def</span> <span class="nf">get_list_of_all_workflows</span><span class="p">():</span>
+<span class="n">ALL_WORKFLOW_TYPES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;static_energy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;relaxation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;population_analysis&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;band_structure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;density_of_states&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;molecular_dynamics&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a list of all the workflows located in the workflows module</span>
+<span class="sd">    Returns a list of all the workflows located in the given module</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Make sure the type is supported</span>
+    <span class="k">if</span> <span class="n">flow_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">flow_type</span><span class="si">}</span><span class="s2"> is not allowed. Please use a workflow type from this&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; list: </span><span class="si">{</span><span class="n">ALL_WORKFLOW_TYPES</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># grab the relevent module</span>
+    <span class="n">flow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">flow_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># This loop goes through all attributes (as strings) of the workflow module</span>
     <span class="c1"># and select only those that are workflow or s3tasks.</span>
     <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">workflows</span><span class="p">):</span>
-        <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflows</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">flow_module</span><span class="p">):</span>
+        <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">flow_module</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">S3Task</span><span class="p">):</span>
-            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span>
+            <span class="c1"># We remove the _workflow ending for each because it&#39;s repetitve.</span>
+            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr_name</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_workflow&quot;</span><span class="p">))</span>
     <span class="c1"># OPTIMIZE: is there a more efficient way to do this?</span>
+
+    <span class="k">return</span> <span class="n">workflow_names</span>
+
+
+<span class="k">def</span> <span class="nf">get_list_of_all_workflows</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of all the workflows of all types.</span>
+
+<span class="sd">    This utility was make specifically for the CLI where we print out all</span>
+<span class="sd">    workflow names for the user.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">flow_type</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">:</span>
+
+        <span class="n">workflow_type_names</span> <span class="o">=</span> <span class="n">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">)</span>
+
+        <span class="c1"># we add the type to the start of each workflow name and switch underscores</span>
+        <span class="c1"># to dashes bc they are more reader-friendly</span>
+        <span class="n">workflow_type_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">flow_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workflow_type_names</span>
+        <span class="p">]</span>
+
+        <span class="n">workflow_names</span> <span class="o">+=</span> <span class="n">workflow_type_names</span>
 
     <span class="k">return</span> <span class="n">workflow_names</span>
 </pre></div>
@@ -81,6 +129,51 @@
         </details>
 
             </section>
+                <section id="get_list_of_workflows_by_type">
+                            <div class="attr function"><a class="headerlink" href="#get_list_of_workflows_by_type">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_list_of_workflows_by_type</span><span class="signature">(flow_type: str)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of all the workflows located in the given module</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Make sure the type is supported</span>
+    <span class="k">if</span> <span class="n">flow_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">flow_type</span><span class="si">}</span><span class="s2"> is not allowed. Please use a workflow type from this&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; list: </span><span class="si">{</span><span class="n">ALL_WORKFLOW_TYPES</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># grab the relevent module</span>
+    <span class="n">flow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">flow_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># This loop goes through all attributes (as strings) of the workflow module</span>
+    <span class="c1"># and select only those that are workflow or s3tasks.</span>
+    <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">flow_module</span><span class="p">):</span>
+        <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">flow_module</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">S3Task</span><span class="p">):</span>
+            <span class="c1"># We remove the _workflow ending for each because it&#39;s repetitve.</span>
+            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr_name</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_workflow&quot;</span><span class="p">))</span>
+    <span class="c1"># OPTIMIZE: is there a more efficient way to do this?</span>
+
+    <span class="k">return</span> <span class="n">workflow_names</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Returns a list of all the workflows located in the given module</p>
+</div>
+
+
+                </section>
                 <section id="get_list_of_all_workflows">
                             <div class="attr function"><a class="headerlink" href="#get_list_of_all_workflows">#&nbsp;&nbsp</a>
 
@@ -93,24 +186,34 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_list_of_all_workflows</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a list of all the workflows located in the workflows module</span>
+<span class="sd">    Returns a list of all the workflows of all types.</span>
+
+<span class="sd">    This utility was make specifically for the CLI where we print out all</span>
+<span class="sd">    workflow names for the user.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This loop goes through all attributes (as strings) of the workflow module</span>
-    <span class="c1"># and select only those that are workflow or s3tasks.</span>
     <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">workflows</span><span class="p">):</span>
-        <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflows</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">S3Task</span><span class="p">):</span>
-            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span>
-    <span class="c1"># OPTIMIZE: is there a more efficient way to do this?</span>
+    <span class="k">for</span> <span class="n">flow_type</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">:</span>
+
+        <span class="n">workflow_type_names</span> <span class="o">=</span> <span class="n">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">)</span>
+
+        <span class="c1"># we add the type to the start of each workflow name and switch underscores</span>
+        <span class="c1"># to dashes bc they are more reader-friendly</span>
+        <span class="n">workflow_type_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">flow_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workflow_type_names</span>
+        <span class="p">]</span>
+
+        <span class="n">workflow_names</span> <span class="o">+=</span> <span class="n">workflow_type_names</span>
 
     <span class="k">return</span> <span class="n">workflow_names</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Returns a list of all the workflows located in the workflows module</p>
+            <div class="docstring"><p>Returns a list of all the workflows of all types.</p>
+
+<p>This utility was make specifically for the CLI where we print out all
+workflow names for the user.</p>
 </div>
 
 
