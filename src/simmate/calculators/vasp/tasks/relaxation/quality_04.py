@@ -7,6 +7,21 @@ from simmate.calculators.vasp.inputs.potcar_mappings import (
 
 
 class Quality04Relaxation(VaspTask):
+    """
+    Runs a rough VASP geometry optimization.
+
+    `Quality 04` indicates that on a scale from 00 to 04, these are ranked 04 in
+    quality (with 04 being the highest quality).
+
+    Note, even though this is currently our highest quality preset, these
+    settings are still only suitable for high-throughput calculations or massive
+    supercells. Settings are still below MIT and Materials Project quality.
+
+    Typically, you'd only want to run this relaxation on structures that were
+    randomly created (and thus likely very unreasonable). Therefore, instead of
+    using this calculation, we recommend only using the relaxation/staged
+    workflow, which uses this calculation as a fifth step (and final relaxation).
+    """
 
     # returns structure separately from vasprun object
     return_final_structure = True

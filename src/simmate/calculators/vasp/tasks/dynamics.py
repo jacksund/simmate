@@ -6,6 +6,15 @@ from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 
 
 class MITDynamicsTask(MITRelaxation):
+    """
+    Runs a molecular dynamics simulation using MIT Project settings.
+
+    This will run from 300-1200 Kelvin over 10,000 steps of 2 femtoseconds, and
+    it will keep the lattice+volume fixed.
+
+    Provide your structure as the desired supercell, as the setup of this
+    calculation does not modify your input structure.
+    """
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.

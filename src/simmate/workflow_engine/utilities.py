@@ -68,4 +68,7 @@ def s3task_to_workflow(
     workflow.result_task = output
     workflow.s3task = s3task
 
+    # by default we just copy the docstring of the S3task to the workflow
+    workflow.__doc__ = s3task.__doc__
+
     return workflow

@@ -5,6 +5,6 @@
 
 # These are tasks that are in early development and don't have databases tables.
 # Therefore, they are s3tasks only - not workflows.
-from simmate.calculators.vasp.tasks.density_of_states import MatProjDensityOfStates
+from simmate.calculators.vasp.tasks.band_structure import MatProjBandStructure
 
-matproj_workflow = MatProjDensityOfStates()
+matproj_workflow = MatProjBandStructure()

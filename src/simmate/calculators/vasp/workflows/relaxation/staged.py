@@ -93,7 +93,7 @@ with Workflow("Staged Relaxation") as workflow:
         command=command,
     )
 
-    # Static Energy (MIT)
+    # Static Energy (same quality as 04 relaxation)
     run_id_05 = static_task_04(
         structure={
             "calculation_table": "Quality04Relaxation",
@@ -120,3 +120,21 @@ workflow.s3tasks = [
         energy_quality04,
     ]
 ]
+
+workflow.__doc__ = """
+    Runs a series of increasing-quality relaxations and then finishes with a single
+    static energy calculation.
+    
+    This is therefore a "Nested Workflow" made of the following smaller workflows:
+
+        - relaxation/quality00
+        - relaxation/quality01
+        - relaxation/quality02
+        - relaxation/quality03
+        - relaxation/quality04
+        - static-energy/quality04
+    
+    This workflow is most useful for randomly-created structures or extremely 
+    large supercells. More precise relaxations+energy calcs should be done 
+    afterwards because ettings are still below MIT and Materials Project quality.
+"""

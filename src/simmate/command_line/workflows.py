@@ -89,7 +89,7 @@ def list_options(options: List) -> int:
             "Number does not match any the options provided. Exiting."
         )
 
-    click.echo(f"You have selectd {options[selected_index]}")
+    click.echo(f"You have selectd `{options[selected_index]}`.")
 
     return selected_index
 
@@ -121,16 +121,18 @@ def explore():
     selected_preset = presets[present_index]
 
     final_workflow_name = selected_type.replace("_", "-") + "/" + selected_preset
-    click.echo(f"\n\n================== {final_workflow_name} ==================")
+    click.echo(f"\n\n===================== {final_workflow_name} =====================")
 
     # now we load this workflow and print the docstring.
     workflow = get_workflow(final_workflow_name)
 
     click.echo(workflow.__doc__)
 
+    click.echo("==================================================================")
+
     click.echo(
-        "\n\n To run this workflow, you'd use something like..."
-        f"\n\t simmate workflows run {final_workflow_name} example.cif\n\n"
+        "\n\n To run this workflow, use the command..."
+        f"\n\n simmate workflows run {final_workflow_name} example.cif\n\n"
     )
 
 

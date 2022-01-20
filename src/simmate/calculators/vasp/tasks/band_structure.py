@@ -15,6 +15,21 @@ from simmate.calculators.vasp.tasks.energy.materials_project import (
 
 
 class MatProjBandStructure(MatProjStaticEnergy):
+    """
+    Calculates the band structure using Materials Project settings.
+
+    Your stucture will be converted to the standardized-primitive unitcell so
+    that the high-symmetry K-point path can be used.
+
+    This is also a non self-consistent field (non-SCF) calculation and thus uses
+    the a fixed charge density from a previous static energy calculation.
+
+    We do NOT recommend running this calculation on its own. Instead, you should
+    use the full workflow, which handles the preliminary relaxation and SCF
+    energy calculation for you. This S3Task is only the final step of that workflow.
+
+    See `vasp.workflows.band_structure`.
+    """
 
     # The default settings to use for this calculation.
     # The key thing for band structures is that this follows a static energy
