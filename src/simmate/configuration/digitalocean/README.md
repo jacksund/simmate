@@ -143,13 +143,13 @@ DJANGO_ALLOWED_HOSTS=${APP_DOMAIN}
 DATABASE_URL=${db-postgresql-nyc3-09114.DATABASE_URL}
 DEBUG=False
 DJANGO_SECRET_KEY=randomly-generated-passord-12345
-DEVELOPMENT_MODE=False
+USE_LOCAL_DATABASE=False
 ```
 > note to simmate devs: [consider switching to setting all database variables directly](https://docs.digitalocean.com/products/app-platform/how-to/use-environment-variables/)
 
 6. Change our "Build Command" to... (`pip install .` is ran automatically)
 ```
-pip install gunicorn
+pip install gunicorn psycopg2
 ```
 7. Change our "Run Command" to...
 ```
@@ -167,7 +167,7 @@ Everything for our website should work except for the static files. This is beca
 
 1. On our current app, go to "Settings" and then select "+Add Component" button on the top right. We want to add a "Static Site"
 2. Select the same github repo as before and make sure python is detected
-3. On this page, change "HTTP Request Routes" to **/static** and  the "Output Directory" to **/src/simmate/website/static**
+3. On this page, change "HTTP Request Routes" to `/static` and  the "Output Directory" to `/src/simmate/website/static`
 4. That's it! Start the server when you're ready!
 
 
