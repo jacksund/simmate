@@ -26,11 +26,11 @@ Location of Each Workflow's Source-code
 The code that defines these workflows and configures their settings are located in the corresponding `simmate.calculators` module. We make workflows accessible here because users often want to search for workflows by application -- not by their calculator name. For example, a structure relaxation that uses VASP under MIT project settings can be imported with...
 
 ``` python
-from simmate.workflows import relaxation_mit
+from simmate.workflows.relaxation import mit_workflow
 ```
 
 Alternatively, this same workflow could have been imported with...
 
 ``` python
-from simmate.calculators.vasp.workflows.relaxation import relaxation_mit
+from simmate.calculators.vasp.workflows.relaxation import mit_workflow
 ```

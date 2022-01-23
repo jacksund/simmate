@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""
+This module defines the lowest-level classes for database tables and their
+search results.
+"""
+
+
 import os
 import inspect
 import shutil
@@ -186,6 +192,15 @@ DatabaseTableManager = models.Manager.from_queryset(SearchResults)
 
 
 class DatabaseTable(models.Model):
+    """
+    The base class for defining a table in the Simmate database. All tables and
+    mixins inherit from this class.
+
+    Usage is identical to
+    [Models in Django](https://docs.djangoproject.com/en/4.0/#the-model-layer)
+    where this class only adds extra methods for convenience.
+    """
+
     class Meta:
         abstract = True
 
@@ -271,9 +286,31 @@ class DatabaseTable(models.Model):
 
         return NewClass
 
-    # EXPERIMENTAL
     @classmethod
     def from_toolkit(cls, as_dict=False, **kwargs):
+        """
+        Given fundamental "base_info" and toolkit objects, this method will populate
+        all relevant columns.
+
+        If the table is made up of multiple mix-ins, this method iterates through
+        each of the `_from_toolkit` methods of those mixins and combines the results.
+        Therefore, you must view this method for each mix-ins to determine which
+        kwargs must be passed.
+
+        Parameters
+        ----------
+        - `as_dict` :
+            Whether to return the populated data as a dictionary or to initialize
+            it as a database object. Defaults to False.
+        - `**kwargs` :
+            All fields required in order to initialize the database entry. For
+            example, a Structure table would require a toolkit structure, while
+            a Thermodynamics table would require an energy.
+
+        Returns
+        -------
+        a dictionary if as_dict is True; and a database object if as_dict is False
+        """
 
         # Grab a list of all parent classes
         parents = inspect.getmro(cls)
@@ -288,7 +325,7 @@ class DatabaseTable(models.Model):
         # the future to remove python objects. For now, I only remove structure
         # becauase I know that it is a toolkit object -- not a database column
         all_data = kwargs.copy()
-        all_data.pop("structure")
+        all_data.pop("structure", None)  # None ignores error if structure not present
 
         for parent in parents:
 

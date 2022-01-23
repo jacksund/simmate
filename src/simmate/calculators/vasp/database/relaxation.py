@@ -1,50 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """
+This module creates all database tables for vasp relaxation workflows.
 
-We got rid of the boilerplate code! The create_all_subclasses() function below
-now does all the work for us. It may be tricky to understand what's happening
-behind the scenes, so here's an example:
-    
-These two lines...
+With the exception of StagedRelaxation, the data stored in each table is exactly 
+the same -- so they all inherit from the `Relaxation` class without adding any
+features. See `simmate.database.base_data_types.relaxation` for details.
 
-``` python 
-from simmate.database.base_data_types import Relaxation
-
-ExampleRelaxation, ExampleIonicStep = Relaxation.create_all_subclasses("Example", module=__name__)
-```
-
-
-Do exactly the same thing as all of these lines...
-
-``` python
-from simmate.database.base_data_types import table_column
-from simmate.database.base_data_types import IonicStep, Relaxation
-
-class ExampleIonicStep(IonicStep):
-    relaxation = table_column.ForeignKey(
-        "ExampleRelaxation",  # in quotes becuase this is defined below
-        on_delete=table_column.CASCADE,
-        related_name="structures",
-    )
-
-class ExampleRelaxation(Relaxation):
-    structure_start = table_column.OneToOneField(
-        ExampleIonicStep,
-        on_delete=table_column.CASCADE,
-        related_name="relaxations_as_start",
-        blank=True,
-        null=True,
-    )
-    structure_final = table_column.OneToOneField(
-        ExampleIonicStep,
-        on_delete=table_column.CASCADE,
-        related_name="relaxations_as_final",
-        blank=True,
-        null=True,
-    )
-```
-
+StagedRelaxation on the other hand is a NestedCalculation -- in that it connects
+a series of relaxation. See `simmate.database.base_data_types.calculation_nested`
+for details.
 """
 
 from simmate.database.base_data_types import Relaxation, NestedCalculation
