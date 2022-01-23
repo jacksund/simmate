@@ -1884,45 +1884,15 @@
                     <h1 class="modulename">
 <a href="./../../../../simmate.html">simmate</a><wbr>.<a href="./../../../calculators.html">calculators</a><wbr>.<a href="./../../vasp.html">vasp</a><wbr>.<a href="./../database.html">database</a><wbr>.relaxation    </h1>
 
-                        <div class="docstring"><p>We got rid of the boilerplate code! The create_all_subclasses() function below
-now does all the work for us. It may be tricky to understand what's happening
-behind the scenes, so here's an example:</p>
+                        <div class="docstring"><p>This module creates all database tables for vasp relaxation workflows.</p>
 
-<p>These two lines...</p>
+<p>With the exception of StagedRelaxation, the data stored in each table is exactly 
+the same -- so they all inherit from the <code>Relaxation</code> class without adding any
+features. See <code><a href="../../../database/base_data_types/relaxation.html">simmate.database.base_data_types.relaxation</a></code> for details.</p>
 
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../../database/base_data_types.html">simmate.database.base_data_types</a></span> <span class="kn">import</span> <span class="n">Relaxation</span>
-
-<span class="n">ExampleRelaxation</span><span class="p">,</span> <span class="n">ExampleIonicStep</span> <span class="o">=</span> <span class="n">Relaxation</span><span class="o">.</span><span class="n">create_all_subclasses</span><span class="p">(</span><span class="s2">&quot;Example&quot;</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
-</code></pre></div>
-
-<p>Do exactly the same thing as all of these lines...</p>
-
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../../database/base_data_types.html">simmate.database.base_data_types</a></span> <span class="kn">import</span> <span class="n">table_column</span>
-<span class="kn">from</span> <span class="nn"><a href="../../../database/base_data_types.html">simmate.database.base_data_types</a></span> <span class="kn">import</span> <span class="n">IonicStep</span><span class="p">,</span> <span class="n">Relaxation</span>
-
-<span class="k">class</span> <span class="nc">ExampleIonicStep</span><span class="p">(</span><span class="n">IonicStep</span><span class="p">):</span>
-    <span class="n">relaxation</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
-        <span class="s2">&quot;ExampleRelaxation&quot;</span><span class="p">,</span>  <span class="c1"># in quotes becuase this is defined below</span>
-        <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span>
-        <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;structures&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-
-<span class="k">class</span> <span class="nc">ExampleRelaxation</span><span class="p">(</span><span class="n">Relaxation</span><span class="p">):</span>
-    <span class="n">structure_start</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span>
-        <span class="n">ExampleIonicStep</span><span class="p">,</span>
-        <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span>
-        <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;relaxations_as_start&quot;</span><span class="p">,</span>
-        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">structure_final</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span>
-        <span class="n">ExampleIonicStep</span><span class="p">,</span>
-        <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span>
-        <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;relaxations_as_final&quot;</span><span class="p">,</span>
-        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
-</code></pre></div>
+<p>StagedRelaxation on the other hand is a NestedCalculation -- in that it connects
+a series of relaxation. See <code><a href="../../../database/base_data_types/calculation_nested.html">simmate.database.base_data_types.calculation_nested</a></code>
+for details.</p>
 </div>
 
                         <details>
@@ -1930,50 +1900,15 @@ behind the scenes, so here's an example:</p>
             <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module creates all database tables for vasp relaxation workflows.</span>
 
-<span class="sd">We got rid of the boilerplate code! The create_all_subclasses() function below</span>
-<span class="sd">now does all the work for us. It may be tricky to understand what&#39;s happening</span>
-<span class="sd">behind the scenes, so here&#39;s an example:</span>
-<span class="sd">    </span>
-<span class="sd">These two lines...</span>
+<span class="sd">With the exception of StagedRelaxation, the data stored in each table is exactly </span>
+<span class="sd">the same -- so they all inherit from the `Relaxation` class without adding any</span>
+<span class="sd">features. See `simmate.database.base_data_types.relaxation` for details.</span>
 
-<span class="sd">``` python </span>
-<span class="sd">from simmate.database.base_data_types import Relaxation</span>
-
-<span class="sd">ExampleRelaxation, ExampleIonicStep = Relaxation.create_all_subclasses(&quot;Example&quot;, module=__name__)</span>
-<span class="sd">```</span>
-
-
-<span class="sd">Do exactly the same thing as all of these lines...</span>
-
-<span class="sd">``` python</span>
-<span class="sd">from simmate.database.base_data_types import table_column</span>
-<span class="sd">from simmate.database.base_data_types import IonicStep, Relaxation</span>
-
-<span class="sd">class ExampleIonicStep(IonicStep):</span>
-<span class="sd">    relaxation = table_column.ForeignKey(</span>
-<span class="sd">        &quot;ExampleRelaxation&quot;,  # in quotes becuase this is defined below</span>
-<span class="sd">        on_delete=table_column.CASCADE,</span>
-<span class="sd">        related_name=&quot;structures&quot;,</span>
-<span class="sd">    )</span>
-
-<span class="sd">class ExampleRelaxation(Relaxation):</span>
-<span class="sd">    structure_start = table_column.OneToOneField(</span>
-<span class="sd">        ExampleIonicStep,</span>
-<span class="sd">        on_delete=table_column.CASCADE,</span>
-<span class="sd">        related_name=&quot;relaxations_as_start&quot;,</span>
-<span class="sd">        blank=True,</span>
-<span class="sd">        null=True,</span>
-<span class="sd">    )</span>
-<span class="sd">    structure_final = table_column.OneToOneField(</span>
-<span class="sd">        ExampleIonicStep,</span>
-<span class="sd">        on_delete=table_column.CASCADE,</span>
-<span class="sd">        related_name=&quot;relaxations_as_final&quot;,</span>
-<span class="sd">        blank=True,</span>
-<span class="sd">        null=True,</span>
-<span class="sd">    )</span>
-<span class="sd">```</span>
-
+<span class="sd">StagedRelaxation on the other hand is a NestedCalculation -- in that it connects</span>
+<span class="sd">a series of relaxation. See `simmate.database.base_data_types.calculation_nested`</span>
+<span class="sd">for details.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">Relaxation</span><span class="p">,</span> <span class="n">NestedCalculation</span>
@@ -3053,11 +2988,11 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
-                                <dd id="MITRelaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
+                                <dd id="MITRelaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
+                <dd id="MITRelaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
                 <dd id="MITRelaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="MITRelaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="MITRelaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
-                <dd id="MITRelaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -3722,9 +3657,9 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#IonicStep">simmate.database.base_data_types.relaxation.IonicStep</a></dt>
-                                <dd id="MITIonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
+                                <dd id="MITIonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
+                <dd id="MITIonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
                 <dd id="MITIonicStep.create_subclass_from_relaxation" class="function"><a href="../../../database/base_data_types/relaxation.html#IonicStep.create_subclass_from_relaxation">create_subclass_from_relaxation</a></dd>
-                <dd id="MITIonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -4411,11 +4346,11 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
-                                <dd id="MatProjRelaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
+                                <dd id="MatProjRelaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
+                <dd id="MatProjRelaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
                 <dd id="MatProjRelaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="MatProjRelaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="MatProjRelaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
-                <dd id="MatProjRelaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -5080,9 +5015,9 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#IonicStep">simmate.database.base_data_types.relaxation.IonicStep</a></dt>
-                                <dd id="MatProjIonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
+                                <dd id="MatProjIonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
+                <dd id="MatProjIonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
                 <dd id="MatProjIonicStep.create_subclass_from_relaxation" class="function"><a href="../../../database/base_data_types/relaxation.html#IonicStep.create_subclass_from_relaxation">create_subclass_from_relaxation</a></dd>
-                <dd id="MatProjIonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -5789,11 +5724,11 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
-                                <dd id="Quality00Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
+                                <dd id="Quality00Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
+                <dd id="Quality00Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
                 <dd id="Quality00Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality00Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality00Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
-                <dd id="Quality00Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -6458,9 +6393,9 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#IonicStep">simmate.database.base_data_types.relaxation.IonicStep</a></dt>
-                                <dd id="Quality00IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
+                                <dd id="Quality00IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
+                <dd id="Quality00IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
                 <dd id="Quality00IonicStep.create_subclass_from_relaxation" class="function"><a href="../../../database/base_data_types/relaxation.html#IonicStep.create_subclass_from_relaxation">create_subclass_from_relaxation</a></dd>
-                <dd id="Quality00IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -7167,11 +7102,11 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
-                                <dd id="Quality01Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
+                                <dd id="Quality01Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
+                <dd id="Quality01Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
                 <dd id="Quality01Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality01Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality01Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
-                <dd id="Quality01Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -7836,9 +7771,9 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#IonicStep">simmate.database.base_data_types.relaxation.IonicStep</a></dt>
-                                <dd id="Quality01IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
+                                <dd id="Quality01IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
+                <dd id="Quality01IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
                 <dd id="Quality01IonicStep.create_subclass_from_relaxation" class="function"><a href="../../../database/base_data_types/relaxation.html#IonicStep.create_subclass_from_relaxation">create_subclass_from_relaxation</a></dd>
-                <dd id="Quality01IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -8545,11 +8480,11 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
-                                <dd id="Quality02Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
+                                <dd id="Quality02Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
+                <dd id="Quality02Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
                 <dd id="Quality02Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality02Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality02Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
-                <dd id="Quality02Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -9214,9 +9149,9 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#IonicStep">simmate.database.base_data_types.relaxation.IonicStep</a></dt>
-                                <dd id="Quality02IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
+                                <dd id="Quality02IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
+                <dd id="Quality02IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
                 <dd id="Quality02IonicStep.create_subclass_from_relaxation" class="function"><a href="../../../database/base_data_types/relaxation.html#IonicStep.create_subclass_from_relaxation">create_subclass_from_relaxation</a></dd>
-                <dd id="Quality02IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -9923,11 +9858,11 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
-                                <dd id="Quality03Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
+                                <dd id="Quality03Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
+                <dd id="Quality03Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
                 <dd id="Quality03Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality03Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality03Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
-                <dd id="Quality03Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -10592,9 +10527,9 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#IonicStep">simmate.database.base_data_types.relaxation.IonicStep</a></dt>
-                                <dd id="Quality03IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
+                                <dd id="Quality03IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
+                <dd id="Quality03IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
                 <dd id="Quality03IonicStep.create_subclass_from_relaxation" class="function"><a href="../../../database/base_data_types/relaxation.html#IonicStep.create_subclass_from_relaxation">create_subclass_from_relaxation</a></dd>
-                <dd id="Quality03IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -11301,11 +11236,11 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
-                                <dd id="Quality04Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
+                                <dd id="Quality04Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
+                <dd id="Quality04Relaxation.create_all_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_all_subclasses">create_all_subclasses</a></dd>
                 <dd id="Quality04Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality04Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality04Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
-                <dd id="Quality04Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
@@ -11970,9 +11905,9 @@ relation.</p>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#IonicStep">simmate.database.base_data_types.relaxation.IonicStep</a></dt>
-                                <dd id="Quality04IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
+                                <dd id="Quality04IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
+                <dd id="Quality04IonicStep.base_info" class="variable"><a href="../../../database/base_data_types/relaxation.html#IonicStep.base_info">base_info</a></dd>
                 <dd id="Quality04IonicStep.create_subclass_from_relaxation" class="function"><a href="../../../database/base_data_types/relaxation.html#IonicStep.create_subclass_from_relaxation">create_subclass_from_relaxation</a></dd>
-                <dd id="Quality04IonicStep.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#IonicStep.Meta">Meta</a></dd>
 
             </div>
             <div><dt><a href="../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>

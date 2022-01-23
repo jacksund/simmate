@@ -109,14 +109,18 @@
 
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">table_column</span><span class="p">,</span> <span class="n">Calculation</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
-<span class="c1"># EXPERIMENTAL</span>
+
 <span class="k">class</span> <span class="nc">NestedCalculation</span><span class="p">(</span><span class="n">Calculation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A nested calculation is a calculation made up of other calculations. For example,</span>
+<span class="sd">    A nested calculation is a workflow made up of other workflows. For example,</span>
 <span class="sd">    we may want to run a workflow that runs a series of relaxations. Or maybe</span>
 <span class="sd">    a relaxation, then energy, then bandstrucuture calculation. This table</span>
 <span class="sd">    is for keeping track of workflows ran in series like this.</span>
+
+<span class="sd">    Typically, you&#39;ll use the `create_subclass_from_calcs` method to create a</span>
+<span class="sd">    subclass of this table.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
@@ -136,8 +140,65 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_subclass_from_calcs</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">child_calculation_tables</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_columns</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">child_calculation_tables</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Calculation</span><span class="p">],</span>
+        <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra_columns</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dynamically creates a subclass of NestedCalculation -- and handles linking</span>
+<span class="sd">        together all child calculation tables.</span>
+
+<span class="sd">        `simmate.calculators.vasp.database.relaxation` shows an example of creating</span>
+<span class="sd">        a table from this class:</span>
+
+<span class="sd">        ``` python</span>
+<span class="sd">        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(</span>
+<span class="sd">            &quot;StagedRelaxation&quot;,</span>
+<span class="sd">            [</span>
+<span class="sd">                Quality00Relaxation,</span>
+<span class="sd">                Quality01Relaxation,</span>
+<span class="sd">                Quality02Relaxation,</span>
+<span class="sd">                Quality03Relaxation,</span>
+<span class="sd">                Quality04Relaxation,</span>
+<span class="sd">            ],</span>
+<span class="sd">            module=__name__,</span>
+<span class="sd">        )</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        To add custom columns, you can do the following:</span>
+
+<span class="sd">        ``` python</span>
+<span class="sd">        from simmate.database.base_data_types import table_column</span>
+
+<span class="sd">        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(</span>
+<span class="sd">            ... # everything is the same as above</span>
+<span class="sd">            custom_column_01=table_column.FloatField()</span>
+<span class="sd">        )</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        - `name` :</span>
+<span class="sd">            Name of the subclass that is output.</span>
+<span class="sd">        - `child_calculation_tables` :</span>
+<span class="sd">            list of database tables for the nested workflows. This table links</span>
+<span class="sd">            these sub-tables together so results can be viewed from each step.</span>
+<span class="sd">        - `module` :</span>
+<span class="sd">            name of the module this subclass should be associated with. Typically,</span>
+<span class="sd">            you should pass __name__ to this.</span>
+<span class="sd">        **extra_columns : TYPE</span>
+<span class="sd">            Additional columns to add to the table. The keyword will be the</span>
+<span class="sd">            column name and the value should match django options</span>
+<span class="sd">            (e.g. table_column.FloatField())</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NewClass :</span>
+<span class="sd">            A subclass of NestedCalculation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># BUG: I assume a workflow won&#39;t point to the save calculation table</span>
         <span class="c1"># more than once... What&#39;s a scenario where this isn&#39;t true?</span>
@@ -199,10 +260,13 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">NestedCalculation</span><span class="p">(</span><span class="n">Calculation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A nested calculation is a calculation made up of other calculations. For example,</span>
+<span class="sd">    A nested calculation is a workflow made up of other workflows. For example,</span>
 <span class="sd">    we may want to run a workflow that runs a series of relaxations. Or maybe</span>
 <span class="sd">    a relaxation, then energy, then bandstrucuture calculation. This table</span>
 <span class="sd">    is for keeping track of workflows ran in series like this.</span>
+
+<span class="sd">    Typically, you&#39;ll use the `create_subclass_from_calcs` method to create a</span>
+<span class="sd">    subclass of this table.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
@@ -222,8 +286,65 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_subclass_from_calcs</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">child_calculation_tables</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_columns</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">child_calculation_tables</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Calculation</span><span class="p">],</span>
+        <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra_columns</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dynamically creates a subclass of NestedCalculation -- and handles linking</span>
+<span class="sd">        together all child calculation tables.</span>
+
+<span class="sd">        `simmate.calculators.vasp.database.relaxation` shows an example of creating</span>
+<span class="sd">        a table from this class:</span>
+
+<span class="sd">        ``` python</span>
+<span class="sd">        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(</span>
+<span class="sd">            &quot;StagedRelaxation&quot;,</span>
+<span class="sd">            [</span>
+<span class="sd">                Quality00Relaxation,</span>
+<span class="sd">                Quality01Relaxation,</span>
+<span class="sd">                Quality02Relaxation,</span>
+<span class="sd">                Quality03Relaxation,</span>
+<span class="sd">                Quality04Relaxation,</span>
+<span class="sd">            ],</span>
+<span class="sd">            module=__name__,</span>
+<span class="sd">        )</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        To add custom columns, you can do the following:</span>
+
+<span class="sd">        ``` python</span>
+<span class="sd">        from simmate.database.base_data_types import table_column</span>
+
+<span class="sd">        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(</span>
+<span class="sd">            ... # everything is the same as above</span>
+<span class="sd">            custom_column_01=table_column.FloatField()</span>
+<span class="sd">        )</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        - `name` :</span>
+<span class="sd">            Name of the subclass that is output.</span>
+<span class="sd">        - `child_calculation_tables` :</span>
+<span class="sd">            list of database tables for the nested workflows. This table links</span>
+<span class="sd">            these sub-tables together so results can be viewed from each step.</span>
+<span class="sd">        - `module` :</span>
+<span class="sd">            name of the module this subclass should be associated with. Typically,</span>
+<span class="sd">            you should pass __name__ to this.</span>
+<span class="sd">        **extra_columns : TYPE</span>
+<span class="sd">            Additional columns to add to the table. The keyword will be the</span>
+<span class="sd">            column name and the value should match django options</span>
+<span class="sd">            (e.g. table_column.FloatField())</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NewClass :</span>
+<span class="sd">            A subclass of NestedCalculation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># BUG: I assume a workflow won&#39;t point to the save calculation table</span>
         <span class="c1"># more than once... What&#39;s a scenario where this isn&#39;t true?</span>
@@ -271,10 +392,13 @@
 
         </details>
 
-            <div class="docstring"><p>A nested calculation is a calculation made up of other calculations. For example,
+            <div class="docstring"><p>A nested calculation is a workflow made up of other workflows. For example,
 we may want to run a workflow that runs a series of relaxations. Or maybe
 a relaxation, then energy, then bandstrucuture calculation. This table
 is for keeping track of workflows ran in series like this.</p>
+
+<p>Typically, you'll use the <code><a href="#NestedCalculation.create_subclass_from_calcs">create_subclass_from_calcs</a></code> method to create a
+subclass of this table.</p>
 </div>
 
 
@@ -297,15 +421,78 @@ any of those changes here.</p>
                 <div class="decorator">@classmethod</div>
 
             <span class="def">def</span>
-            <span class="name">create_subclass_from_calcs</span><span class="signature">(cls, name, child_calculation_tables, module, **extra_columns)</span>:
+            <span class="name">create_subclass_from_calcs</span><span class="signature">(
+    cls,
+    name: str,
+    child_calculation_tables: List[<a href="calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a>],
+    module: str,
+    **extra_columns
+)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_subclass_from_calcs</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">child_calculation_tables</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_columns</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">child_calculation_tables</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Calculation</span><span class="p">],</span>
+        <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra_columns</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dynamically creates a subclass of NestedCalculation -- and handles linking</span>
+<span class="sd">        together all child calculation tables.</span>
+
+<span class="sd">        `simmate.calculators.vasp.database.relaxation` shows an example of creating</span>
+<span class="sd">        a table from this class:</span>
+
+<span class="sd">        ``` python</span>
+<span class="sd">        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(</span>
+<span class="sd">            &quot;StagedRelaxation&quot;,</span>
+<span class="sd">            [</span>
+<span class="sd">                Quality00Relaxation,</span>
+<span class="sd">                Quality01Relaxation,</span>
+<span class="sd">                Quality02Relaxation,</span>
+<span class="sd">                Quality03Relaxation,</span>
+<span class="sd">                Quality04Relaxation,</span>
+<span class="sd">            ],</span>
+<span class="sd">            module=__name__,</span>
+<span class="sd">        )</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        To add custom columns, you can do the following:</span>
+
+<span class="sd">        ``` python</span>
+<span class="sd">        from simmate.database.base_data_types import table_column</span>
+
+<span class="sd">        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(</span>
+<span class="sd">            ... # everything is the same as above</span>
+<span class="sd">            custom_column_01=table_column.FloatField()</span>
+<span class="sd">        )</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        - `name` :</span>
+<span class="sd">            Name of the subclass that is output.</span>
+<span class="sd">        - `child_calculation_tables` :</span>
+<span class="sd">            list of database tables for the nested workflows. This table links</span>
+<span class="sd">            these sub-tables together so results can be viewed from each step.</span>
+<span class="sd">        - `module` :</span>
+<span class="sd">            name of the module this subclass should be associated with. Typically,</span>
+<span class="sd">            you should pass __name__ to this.</span>
+<span class="sd">        **extra_columns : TYPE</span>
+<span class="sd">            Additional columns to add to the table. The keyword will be the</span>
+<span class="sd">            column name and the value should match django options</span>
+<span class="sd">            (e.g. table_column.FloatField())</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NewClass :</span>
+<span class="sd">            A subclass of NestedCalculation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># BUG: I assume a workflow won&#39;t point to the save calculation table</span>
         <span class="c1"># more than once... What&#39;s a scenario where this isn&#39;t true?</span>
@@ -338,7 +525,58 @@ any of those changes here.</p>
 
         </details>
 
-    
+            <div class="docstring"><p>Dynamically creates a subclass of NestedCalculation -- and handles linking
+together all child calculation tables.</p>
+
+<p><code><a href="../../calculators/vasp/database/relaxation.html">simmate.calculators.vasp.database.relaxation</a></code> shows an example of creating
+a table from this class:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">StagedRelaxation</span> <span class="o">=</span> <span class="n">NestedCalculation</span><span class="o">.</span><span class="n">create_subclass_from_calcs</span><span class="p">(</span>
+    <span class="s2">&quot;StagedRelaxation&quot;</span><span class="p">,</span>
+    <span class="p">[</span>
+        <span class="n">Quality00Relaxation</span><span class="p">,</span>
+        <span class="n">Quality01Relaxation</span><span class="p">,</span>
+        <span class="n">Quality02Relaxation</span><span class="p">,</span>
+        <span class="n">Quality03Relaxation</span><span class="p">,</span>
+        <span class="n">Quality04Relaxation</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">module</span><span class="o">=</span><span class="vm">__name__</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p>To add custom columns, you can do the following:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../base_data_types.html">simmate.database.base_data_types</a></span> <span class="kn">import</span> <span class="n">table_column</span>
+
+<span class="n">StagedRelaxation</span> <span class="o">=</span> <span class="n">NestedCalculation</span><span class="o">.</span><span class="n">create_subclass_from_calcs</span><span class="p">(</span>
+    <span class="o">...</span> <span class="c1"># everything is the same as above</span>
+    <span class="n">custom_column_01</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<h2 id="parameters">Parameters</h2>
+
+<ul>
+<li><code>name</code> :
+Name of the subclass that is output.</li>
+<li><code>child_calculation_tables</code> :
+list of database tables for the nested workflows. This table links
+these sub-tables together so results can be viewed from each step.</li>
+<li><code>module</code> :
+name of the module this subclass should be associated with. Typically,
+you should pass __name__ to this.
+**extra_columns : TYPE
+Additional columns to add to the table. The keyword will be the
+column name and the value should match django options
+(e.g. table_column.FloatField())</li>
+</ul>
+
+<h2 id="returns">Returns</h2>
+
+<p>NewClass :
+    A subclass of NestedCalculation.</p>
+</div>
+
 
                             </div>
                             <div id="NestedCalculation.update_calculation" class="classattr">
