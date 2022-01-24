@@ -33,5 +33,6 @@ dependencies:
     - python >=3.9
     - pyyaml >=6.0
     - tqdm >=4.62.3
-    # Recommended IDE for development
-    - spyder
+    # Recommended IDE for development -- We leave this as a separate install
+    # because it's up to you and Spyder is a large package with many dependencies.
+    # - spyder >=5.1.5

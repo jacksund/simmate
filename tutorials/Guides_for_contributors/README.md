@@ -33,9 +33,10 @@ When you first join our community, you may only be comfortable fixing typos and 
 cd ~/Documents/github/simmate
 ```
 
-4. Create your conda env using our conda file. Note, this will install Spyder for you and name your new environment `simmate_dev`.
+4. Create your conda env using our conda file. Note, this will install Spyder for you and name your new environment `simmate_dev`. We highly recommend you use Spyder as your IDE so that you have the same overall setup as the rest of the team.
 ``` shell
 conda env update -f tutorials/Guides_for_contributors/environment.yaml
+conda install -n simmate_dev -c conda-forge spyder
 conda activate simmate_dev
 ```
 
