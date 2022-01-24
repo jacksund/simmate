@@ -27,6 +27,14 @@
                         <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                                pattern=".+" required>
 
+                    <h2>Contents</h2>
+                    <ul>
+  <li><a href="#the-base-data-types">The Base Data Types</a></li>
+  <li><a href="#hierarchy-of-types">Hierarchy of Types</a></li>
+  <li><a href="#usage-guide">Usage Guide</a></li>
+  <li><a href="#dev-notes">Dev Notes</a></li>
+</ul>
+
 
                     <h2>Submodules</h2>
                     <ul>
@@ -56,10 +64,164 @@
                     <h1 class="modulename">
 <a href="./../../simmate.html">simmate</a><wbr>.<a href="./../database.html">database</a><wbr>.base_data_types    </h1>
 
-                
+                        <div class="docstring"><h1 id="the-base-data-types">The Base Data Types</h1>
+
+<p>This module defines the fundamental building blocks for storing data. When building new and custom tables, you should inherit from one or more of these classes.</p>
+
+<h1 id="hierarchy-of-types">Hierarchy of Types</h1>
+
+<p>There are different "levels" of data types define here -- as some types inherit functionality from others.</p>
+
+<p>At the lowest level...</p>
+
+<ul>
+<li><code>base.DatabaseTable</code> : all tables inherit from this one and it is where common functionality (like the <code>show_columns</code> method) is defined</li>
+</ul>
+
+<p>Next are a series of mixins defined in each of these modules...</p>
+
+<ul>
+<li><code>calculation</code> : holds information about a flow run (corrections, timestamps, etc.)</li>
+<li><code>calculation_nested</code> : a special type of calculation that involves running a workflow made of smaller workflows</li>
+<li><code>structure</code> : holds a periodic crystal structure</li>
+<li><code>symmetry</code> : NOT a mixin. Defines symmetry info for <code>structure</code> to reference</li>
+<li><code>forces</code> : holds site forces and lattice stress information</li>
+<li><code>thermodynamics</code> : holds energy and stability information</li>
+</ul>
+
+<p>These mixins are frequently combined in for types of calculations. We define some of those common classes here too:</p>
+
+<ul>
+<li><code>static_energy</code> : holds a single point energy calculations on a structure</li>
+<li><code>relaxation</code> : holds all steps of a structure geometry optimization</li>
+</ul>
+
+<h1 id="usage-guide">Usage Guide</h1>
+
+<p>Creating a custom table involves the following steps:</p>
+
+<ol>
+<li>defining your new table's inheritance and custom columns</li>
+<li>making sure your table is registerd to your database</li>
+<li>saving data to your new table</li>
+</ol>
+
+<p>All classes in this module are abstract and largely ment to be used as mix-ins. Each class will contain details on it's specific use, but when combining multiple types, you can do the following:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="">simmate.database.base_data_types</a></span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">table_column</span><span class="p">,</span>
+    <span class="n">Structure</span><span class="p">,</span>
+    <span class="n">Thermodynamics</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Inherit from all the types you&#39;d like to store data on. All of the columns</span>
+<span class="c1"># define in each of these types will be incorporated into your table.</span>
+<span class="k">class</span> <span class="nc">MyCustomTable</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
+
+    <span class="c1"># Define the &quot;raw data&quot; for your table. This is required if you&#39;d like to</span>
+    <span class="c1"># use the to_archive method.</span>
+    <span class="n">base_info</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s2">&quot;custom_column_01&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;custom_column_02&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="o">+</span> <span class="n">Structure</span><span class="o">.</span><span class="n">base_info</span>
+        <span class="o">+</span> <span class="n">Thermodynamics</span><span class="o">.</span><span class="n">base_info</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add any custom columns you&#39;d like</span>
+    <span class="c1"># These follow the types supported by Django.</span>
+
+    <span class="c1"># This field is required and must be supplied at creation</span>
+    <span class="n">custom_column_01</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+
+    <span class="c1"># This column we say is allowed to be empty. This is often needed if you</span>
+    <span class="c1"># create an entry to start a calculation and then fill in data after a</span>
+    <span class="c1"># it completes.</span>
+    <span class="n">custom_column_02</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>NOTE:</strong> Unless you are contributing to Simmate's source code, defining a new table does <em>NOT</em> automatically register it to your database. To do this, you must follow along with <a href="https://github.com/jacksund/simmate/blob/main/tutorials/09_Add_custom_workflows.md">our tutorial on adding custom workflows</a>.</p>
+
+<p>Once your table is created and registered, you can use the <code>from_toolkit</code> method to create and save your data to the database. Note, the information you pass to this method is entirely dependent on what you inherit from and define above.</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">my.example.project</span> <span class="kn">import</span> <span class="n">MyCustomTable</span>
+
+<span class="n">new_row</span> <span class="o">=</span> <span class="n">MyCustomTable</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+    <span class="c1"># Because we inherited from Structure, we must provide structure</span>
+    <span class="n">structure</span><span class="o">=</span><span class="n">new_structure</span><span class="p">,</span>  <span class="c1"># provide a ToolkitStructure here</span>
+    <span class="c1"># </span>
+    <span class="c1"># Structures can optionally include a source too.</span>
+    <span class="n">source</span><span class="o">=</span><span class="s2">&quot;made by jacksund&quot;</span><span class="p">,</span>
+    <span class="c1">#</span>
+    <span class="c1"># Because we inherited from Thermodynamics, we must provide energy</span>
+    <span class="n">energy</span><span class="o">=-</span><span class="mf">5.432</span><span class="p">,</span>
+    <span class="c1">#</span>
+    <span class="c1"># Our custom fields can also be added</span>
+    <span class="n">custom_column_01</span><span class="o">=</span><span class="mi">1234</span><span class="p">,</span>
+    <span class="n">custom_column_02</span><span class="o">=</span><span class="mf">3.14159</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">new_row</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</code></pre></div>
+
+<p>To modify a row, you can load it from your database, update the column, and then resave. Note, there are may more ways to do this, so consult the Django documentation for advanced usage.</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">my.example.project</span> <span class="kn">import</span> <span class="n">MyCustomTable</span>
+
+<span class="n">my_row</span> <span class="o">=</span> <span class="n">MyCustomTable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">my_row</span><span class="o">.</span><span class="n">custom_column_01</span> <span class="o">=</span> <span class="mi">4321</span>
+
+<span class="n">my_row</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</code></pre></div>
+
+<h1 id="dev-notes">Dev Notes</h1>
+
+<p>Every base model class has its attributes and methods separated (separated only by comments) into sections. These are simply to organize the code and make it easier to read:</p>
+
+<ul>
+<li><p><code>Base Info</code> :
+These fields are the absolute minimum required for the object and can be
+considered the object's raw data.</p></li>
+<li><p><code>Query-helper Info</code> :
+These fields aren't required but exist simply to help with common query
+functions. For example, a structure's volume can be calculated using the
+base info fields, but it helps to have this data in a separate column to
+improve common query efficiencies at the cost of a larger database.</p></li>
+<li><p><code>Relationships</code> :
+These fields point to other models that contain related data. For example,
+a single structure may be linked to calculations in several other tables.
+The relationship between a structure and it's calculations can be described
+in this section. Note that the code establishing the relationship only exists
+in one of the models -- so we simply add a comment in the other's section.
+TYPES OF RELATIONSHIPS:
+    ManyToMany - place field in either but not both
+    ManyToOne (ForeignKey) - place field in the many
+    OneToOne - place field in the one that has extra features</p></li>
+<li><p><code>Properties</code> :
+In a few cases, you may want to add a convience attribute to a model. However,
+in the majority of cases, you'll want to convert the model to some other
+class first which has all of the properties you need. We separate classes
+in this way for performance and clarity. This also allows our core and
+database to be separate and thus modular.</p></li>
+<li><p><code>Model Methods</code> :
+These are convience functions added onto the model. For example, it's useful
+to have a method to quickly convert a model Structure (so an object representing
+a row in a database) to a pymatgen Structure (a really powerful python object)</p></li>
+<li><p><code>For website compatibility</code> :
+This contains the extra metadata and code needed to get the class to work
+with Django and other models properly.</p></li>
+</ul>
+</div>
+
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_doc_from_readme</span>
+
+<span class="vm">__doc__</span> <span class="o">=</span> <span class="n">get_doc_from_readme</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">DatabaseTable</span><span class="p">,</span> <span class="n">table_column</span>
 

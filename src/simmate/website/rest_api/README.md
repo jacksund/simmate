@@ -1,14 +1,19 @@
 
 # The REST API for Simmate
 
-**This page is only for experts! If you are trying to pull data from Simmate, then you should instead  use our [python client](). Grabbing data directly from our REST API is really only for teams that can't use python or Simmate codes but still want to pull our data. Also note that grabbing data via our REST API is heavily throttled, so this is not a good way to grab large amounts of data.**
+**This page is only for experts! If you are trying to pull data from Simmate, then you should instead  use our [python introduced in the database tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md). Grabbing data directly from our REST API is really only for teams that can't use python or Simmate codes but still want to pull data. Also note that grabbing data via our REST API is heavily throttled, so this is not a good way to grab large amounts of data.**
 
 
-REST APIs are "**Re**presentational **s**tate **t**ransfer (REST) methods a **A**pplication **P**rogramming **I**nterfaces (API)".
+## Intro to REST APIs
 
-
-In simple terms, this is how we can access databases from a website url. For example, if I were to go to [www.simmate.org/rest-api/simmate/sm-1](http://127.0.0.1:8000/rest-api/jarvis/jvasp-90856/), then that link would send me back the data relating to the sm-1 structure. REST APIs typically send the data back as a JSON file. Try clicking the link above to see what you get! It should look like this:
+REST APIs are "**Re**presentational **s**tate **t**ransfer (REST) methods a **A**pplication **P**rogramming **I**nterfaces (API)". In simple terms, this is how we can access databases from a website url. For example, if I were to go to...
 ```
+http://simmate.org/rest-api/jarvis/jvasp-90856/
+```
+
+... then that link would send me back the data relating to the `jvasp-90856` structure from the [JARVIS](https://jarvis.nist.gov/) database. REST APIs typically send the data back as a JSON file. Try clicking the link above to see what you get! It should look like this:
+
+``` json
 {
     "url": "http://127.0.0.1:8000/rest-api/jarvis/jvasp-90856/",
     "structure_string": "Ti2 Cu2 Si2 As2....(truncated for clarity)",
@@ -25,7 +30,6 @@ In simple terms, this is how we can access databases from a website url. For exa
     "energy_above_hull": 2103.442283333333
 }
 ```
-
 
 This is super useful because we can grab data from any programming language we'd like -- python, javascript, c++, fortran, or even the command-line. The only requirement to use someone's REST API is that you have access to the internet! Once you load some data,
 what you do with the JSON output is up to you.

@@ -27,6 +27,13 @@
                         <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                                pattern=".+" required>
 
+                    <h2>Contents</h2>
+                    <ul>
+  <li><a href="#local-calculations">Local Calculations</a></li>
+  <li><a href="#usage">Usage</a></li>
+  <li><a href="#location-of-each-tables-source-code">Location of Each Table's Source-code</a></li>
+</ul>
+
 
 
 
@@ -44,10 +51,54 @@
                     <h1 class="modulename">
 <a href="./../../simmate.html">simmate</a><wbr>.<a href="./../database.html">database</a><wbr>.local_calculations    </h1>
 
-                
+                        <div class="docstring"><h1 id="local-calculations">Local Calculations</h1>
+
+<p>Much like the <code><a href="../workflows.html">simmate.workflows</a></code> module, this module brings together all database tables that are linked to workflows and organizes them by application for convenience.</p>
+
+<h1 id="usage">Usage</h1>
+
+<p><a href="https://github.com/jacksund/simmate/tree/main/tutorials">Tutorials 01-05</a> will teach you how to run workflows and access their results. But as a review:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../workflows/static_energy.html">simmate.workflows.static_energy</a></span> <span class="kn">import</span> <span class="n">mit_workflow</span>
+
+<span class="c1"># runs the workflow and returns a status</span>
+<span class="n">status</span> <span class="o">=</span> <span class="n">mit_workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">structure</span><span class="o">=...</span><span class="p">)</span>
+
+<span class="c1"># gives the DatabaseTable where ALL results are stored</span>
+<span class="n">energy_mit</span><span class="o">.</span><span class="n">result_table</span>
+</code></pre></div>
+
+<p>You can also access a table directly with...</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../shortcuts.html">simmate.shortcuts</a></span> <span class="kn">import</span> <span class="n">setup</span>  <span class="c1"># connects to database</span>
+
+<span class="kn">from</span> <span class="nn"><a href="">simmate.database.local_calculations</a></span> <span class="kn">import</span> <span class="n">MITStaticEnergy</span>
+
+<span class="c1"># NOTE: MITStaticEnergy here is the exact same as result_table in the codeblock</span>
+<span class="c1"># above this one. These are just two different ways of accessing it.</span>
+<span class="n">MITStaticEnergy</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre></div>
+
+<h1 id="location-of-each-tables-source-code">Location of Each Table's Source-code</h1>
+
+<p>The code that defines these tables are located in the corresponding <code><a href="../calculators.html">simmate.calculators</a></code> module. We make tables accessible here because users often want to search for results by application -- not by their calculator name. For example, the results from all static energy calculations that use VASP under MIT project settings can be imported with...</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="">simmate.database.local_calculations</a></span> <span class="kn">import</span> <span class="n">MITStaticEnergy</span>
+</code></pre></div>
+
+<p>Alternatively, this same results could have been imported with...</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../calculators/vasp/database/energy.html">simmate.calculators.vasp.database.energy</a></span> <span class="kn">import</span> <span class="n">MITStaticEnergy</span>
+</code></pre></div>
+</div>
+
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_doc_from_readme</span>
+
+<span class="vm">__doc__</span> <span class="o">=</span> <span class="n">get_doc_from_readme</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.database.relaxation</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MatProjRelaxation</span><span class="p">,</span>

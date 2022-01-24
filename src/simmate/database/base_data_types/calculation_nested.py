@@ -2,14 +2,18 @@
 
 from simmate.database.base_data_types import table_column, Calculation
 
+from typing import List
 
-# EXPERIMENTAL
+
 class NestedCalculation(Calculation):
     """
-    A nested calculation is a calculation made up of other calculations. For example,
+    A nested calculation is a workflow made up of other workflows. For example,
     we may want to run a workflow that runs a series of relaxations. Or maybe
     a relaxation, then energy, then bandstrucuture calculation. This table
     is for keeping track of workflows ran in series like this.
+
+    Typically, you'll use the `create_subclass_from_calcs` method to create a
+    subclass of this table.
     """
 
     class Meta:
@@ -29,8 +33,65 @@ class NestedCalculation(Calculation):
 
     @classmethod
     def create_subclass_from_calcs(
-        cls, name, child_calculation_tables, module, **extra_columns
+        cls,
+        name: str,
+        child_calculation_tables: List[Calculation],
+        module: str,
+        **extra_columns,
     ):
+        """
+        Dynamically creates a subclass of NestedCalculation -- and handles linking
+        together all child calculation tables.
+
+        `simmate.calculators.vasp.database.relaxation` shows an example of creating
+        a table from this class:
+
+        ``` python
+        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(
+            "StagedRelaxation",
+            [
+                Quality00Relaxation,
+                Quality01Relaxation,
+                Quality02Relaxation,
+                Quality03Relaxation,
+                Quality04Relaxation,
+            ],
+            module=__name__,
+        )
+        ```
+
+        To add custom columns, you can do the following:
+
+        ``` python
+        from simmate.database.base_data_types import table_column
+
+        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(
+            ... # everything is the same as above
+            custom_column_01=table_column.FloatField()
+        )
+        ```
+
+        Parameters
+        ----------
+        - `name` :
+            Name of the subclass that is output.
+        - `child_calculation_tables` :
+            list of database tables for the nested workflows. This table links
+            these sub-tables together so results can be viewed from each step.
+        - `module` :
+            name of the module this subclass should be associated with. Typically,
+            you should pass __name__ to this.
+        **extra_columns : TYPE
+            Additional columns to add to the table. The keyword will be the
+            column name and the value should match django options
+            (e.g. table_column.FloatField())
+
+        Returns
+        -------
+        NewClass :
+            A subclass of NestedCalculation.
+
+        """
 
         # BUG: I assume a workflow won't point to the save calculation table
         # more than once... What's a scenario where this isn't true?

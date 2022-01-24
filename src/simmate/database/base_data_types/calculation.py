@@ -128,7 +128,7 @@ class Calculation(DatabaseTable):
     @classmethod
     def from_prefect_id(cls, id: str, **kwargs):
         """
-        Given a prefect id, this will either...
+        Given a prefect id, this method will do one of the following...
 
         1. if it exists, load the database object with matching prefect_id
         2. if it doesn't exist, create a new database object using this ID and extra kwargs
