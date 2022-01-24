@@ -12,6 +12,8 @@ Currently, we support the following providers:
 - [Materials Project](https://materialsproject.org/)
 - [OQDM (Open Quantum Materials Database)](http://oqmd.org/)
 
+If your team hosts a database and would like to make it available via Simmate, please see the `simmate.database.third_parties.for_providers` module. Even if your database is a single table, don't hesistate to make a contribution!
+
 _**WARNING:**_ This data is NOT from the Simmate team. These providers are independent groups, and you should cite them appropriately. All data from these providers remain under their source's terms and conditions.
 
 
