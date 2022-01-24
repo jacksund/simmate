@@ -24,7 +24,7 @@ from simmate.database.third_parties import MatProjStructure
 def load_all_structures(
     api_key: str,
     criteria: dict = {"task_id": {"$exists": True}},
-    update_stabilities: bool = True,
+    update_stabilities: bool = False,
 ):
     """
     Only use this function if you are part of the Simmate dev team!
