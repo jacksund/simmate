@@ -1,45 +1,8 @@
 
-> :warning: This module is entirely experimental and should not be used at the moment. Instead, users should use the `pymatgen.core` module.
+Base Class Types for MatSci
+============================
 
-This is intended to be a fork and refactor of the `pymatgen.core` module. We are still at the outlining stage for it.
+This module is currently an extension of the `pymatgen.core` module that add only
+a few extra methods. You should consult [the pymatgen documentation](https://pymatgen.org/) for use and additional features.
 
-## notes on types on classes
-
-element (string + mapped data)
-lattice (3x3 matrix)
-
-specie/ion (element+charge/oxidation_state)
-    + dummyspecie
-site (element+coords)
-
-periodic site (site+lattice)
-
-molecule (many sites)
-structure (many periodic sites)
-
-molecular crystal (many molecules + coords + lattice)
-
-compositon (many elements)
-
-
-transformations
-buidlers (or generators)
-
-symmetry (via spglib)
-    symmetry_analyzer
-    operation
-    symmstructure
-
-
-Others...
-    molecular orbital
-    bond
-    spectrum
-    neighbor (reduced version of site class for speed)
-    slab/surface (+ its generator)
-    Tensor (TensorCollection, SquareTensor, TensorMapping)
-    Trajectory (for MD)
-    iStructure, iMolecule, SiteCollection
-    Units (float + string + mappings)
-    XvFunc (XC correlation functional)
-
+In the future, we intend for this module to be a fork and refactor of `pymatgen.core`, but this milestone is hit, our developmental code will be hosted in the `_to_do` folder of this module.

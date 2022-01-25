@@ -54,11 +54,8 @@ class ASEStructure:
         )
         #'a': [3, 50], 'b': [3, 50], 'c': [3, 50]})
 
-        # I estimate the volume using some code I wrote
-        #!!! this code will likely move in the future!
-        from pymatdisc.core.estimate import estimate_volume
-
-        volume_guess = estimate_volume(composition)
+        # predict volume
+        volume_guess = composition.volume_estimate()
 
         self.ase = StartGenerator(
             slab=slab,

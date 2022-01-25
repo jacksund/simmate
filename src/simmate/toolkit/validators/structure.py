@@ -31,8 +31,6 @@ class SiteDistance(Validator):
 
 ##############################################################################
 
-from simmate.utilities import distance_matrix
-
 
 class SiteDistanceMatrix(Validator):
     def __init__(
@@ -48,8 +46,9 @@ class SiteDistanceMatrix(Validator):
         self.packing_factor = packing_factor
 
         # using our base predictor, make the distance matrix
-        self.element_distance_matrix = distance_matrix(
-            composition, radius_method, packing_factor
+        self.element_distance_matrix = composition.distance_matrix_estimate(
+            radius_method,
+            packing_factor,
         )
 
         #!!! BUG - If I use the ionic radius method, I should convert compositions and structures to the oxidation-state-decorated structures!

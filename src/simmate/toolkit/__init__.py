@@ -4,4 +4,4 @@ from simmate.utilities import get_doc_from_readme
 
 __doc__ = get_doc_from_readme(__file__)
 
-from pymatgen.core import Structure, Composition
+from .base_data_types import Structure, Composition
