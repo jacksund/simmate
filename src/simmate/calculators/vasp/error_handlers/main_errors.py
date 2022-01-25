@@ -5,8 +5,8 @@ import json
 import shutil
 
 from pymatgen.io.vasp.outputs import Outcar
-from pymatgen.core.structure import Structure
 
+from simmate.toolkit import Structure
 from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.outputs import Oszicar

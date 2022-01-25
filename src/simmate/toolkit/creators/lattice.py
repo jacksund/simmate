@@ -164,7 +164,6 @@ class RSLFixedVolume(RandomSymLattice):
 ##############################################################################
 
 from simmate.toolkit.symmetry.wyckoff import loadWyckoffData
-from simmate.utilities import estimate_volume, estimate_radii
 
 #!!! EASY SPEED/MEMORY IMPROVEMENTS CAN BE MADE HERE (ON INIT)
 class RSLSmartVolume:
@@ -189,9 +188,8 @@ class RSLSmartVolume:
         if not volume:
             # grab the base predicted volume which is based on the composition
             # note this represents the volume of the primitive cell!!! Conventional cells may be larger
-            volume = estimate_volume(
-                composition
-            )  #!!! this assumes user wants ionic radius estimation
+            #!!! this assumes user wants ionic radius estimation
+            volume = composition.volume_estimate()
 
         # find the respective volume for each spacegroup's conventional unit cell
         # to do this, we need to know the ratio between MultiplicityPrimitive and MultiplicityConventiional for a spacegroup
@@ -214,7 +212,7 @@ class RSLSmartVolume:
             #!!! I assume NormallyDistributedVectors is used here... will give errors if that's not the case
             vgen = vector_generation_method(
                 min_value=min(
-                    estimate_radii(composition)
+                    composition.radii_estimate()
                 ),  # smallest radius of any ion #!!! move outside for loop for speed! #!!! this assumes user wants ionic radius estimation
                 center=(ratio * volume) ** (1 / 3),  # shoot for cubic vectors
                 max_value=(ratio * volume)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 
 # TODO: Maybe make an AIRSS calculator
 
@@ -44,13 +44,8 @@ class AIRSSStructure:
         # create the file
         file = open(self.cell_filename, "w")
 
-        # first write the VARVOL line
-        # I estimate the volume using some code I wrote
-        #!!! this code will likely move in the future!
-        from pymatdisc.core.estimate import estimate_volume
-
-        volume = estimate_volume(composition)
-        # write the line
+        # first write the VARVOL line using predicted volume
+        volume = composition.volume_estimate()
         file.write("#VARVOL={}".format(volume) + "\n")
 
         # write the SPECIES line

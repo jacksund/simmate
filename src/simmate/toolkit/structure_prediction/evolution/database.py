@@ -65,7 +65,7 @@ class EvolutionarySearch(DatabaseTable):
 
     .. code-block:: python
 
-        from pymatgen.core import Structure
+        from simmate.toolkit import Structure
 
         structure = Structure.from_file("example123.cif")
 
@@ -170,7 +170,7 @@ class EvolutionarySearch(DatabaseTable):
         # OPTIMIZE: There should be a convience method to make this featurizer
         # since I use it so much
         import numpy
-        from pymatgen.core.composition import Composition
+        from simmate.toolkit import Composition
         from matminer.featurizers.site import CrystalNNFingerprint
         from simmate.toolkit.featurizers.fingerprint import PartialsSiteStatsFingerprint
 
@@ -201,7 +201,7 @@ class EvolutionarySearch(DatabaseTable):
         # through the queryset like in the commented out code above. Instead,
         # we need to iterate through the dataframe rows.
         # See https://github.com/chrisdev/django-pandas/issues/138 for issue
-        from pymatgen.core.structure import Structure
+        from simmate.toolkit import Structure
 
         structures_dataframe["structure"] = [
             Structure.from_str(s.structure_string, fmt="POSCAR")

@@ -4,7 +4,7 @@
 
 from numpy.random import choice
 
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 
 # from pymatgen.analysis.structure_prediction.volume_predictor import DLSVolumePredictor #, RLSVolumePredictor
 

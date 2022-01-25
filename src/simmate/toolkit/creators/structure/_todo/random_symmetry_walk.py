@@ -4,8 +4,7 @@ import pandas as pd
 from numpy.random import choice, shuffle
 import itertools
 
-from pymatgen.core.composition import Composition
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure, Composition
 
 from pymatdisc.core.symmetry.wyckoff import loadWyckoffData
 from pymatdisc.core.creators.vector import UniformlyDistributedVectors

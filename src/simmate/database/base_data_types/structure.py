@@ -2,7 +2,7 @@
 
 from scipy.constants import Avogadro
 
-from pymatgen.core.structure import Structure as Structure_PMG
+from simmate.toolkit import Structure as ToolkitStructure
 
 # from pymatgen.analysis.prototypes import AflowPrototypeMatcher
 
@@ -231,7 +231,7 @@ class Structure(DatabaseTable):
         storage_format = "CIF" if (self.structure_string[0] == "#") else "POSCAR"
 
         # convert the string to pymatgen Structure object
-        structure = Structure_PMG.from_str(
+        structure = ToolkitStructure.from_str(
             self.structure_string,
             fmt=storage_format,
         )
@@ -249,8 +249,8 @@ class Structure(DatabaseTable):
         # (see workflows.common_tasks.load_input and workflow_engine.workflow for why)
         # I therefore convert to pymatgen structure object here first.
 
-        # if the input is already a pymatgen structure, just return it back
-        if isinstance(structure, Structure_PMG):
+        # if the input is already a toolkit structure, just return it back
+        if isinstance(structure, ToolkitStructure):
             return structure
 
         # otherwise we have a dictionary object

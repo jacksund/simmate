@@ -32,7 +32,7 @@ class StructureCreator(ABC):
         methodand not shown.
 
         # import module (do this outside the class functions)
-        from pymatgen.core.structure import Structure
+        from simmate.toolkit import Structure
 
         # run your method that makes the lattice/species/coords or uses the
         # inputs from above.

@@ -2,7 +2,7 @@
 
 from numpy.random import choice
 
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 
 #!!! NOT TESTED
 class XtalOptStructure:
@@ -42,14 +42,13 @@ class XtalOptStructure:
         # first establish the min/max values for the lattice vectors and angles
         #!!! change these to user inputs in the future
         # There's no fixed volume setting for XtalOpt so I need to set a minVol, maxVol, and vector limits
-        from pymatdisc.core.estimate import estimate_volume, estimate_radii
 
-        volume = estimate_volume(composition)
+        volume = composition.volume_estimate()
         # set the limits on volume (should I do this?)
         self.min_volume = volume * 0.5
         self.max_volume = volume * 1.5
         # let's set the minimum to the smallest radii
-        min_vector = min(estimate_radii(composition))
+        min_vector = min(composition.radii_estimate())
         # let's set the maximum to volume**0.8 #!!! This is a huge range and I should test this in the future
         max_vector = volume ** 0.8
         self.lattice_min = LatticeStruct(

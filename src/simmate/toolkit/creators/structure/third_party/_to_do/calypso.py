@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 
 # TODO: Maybe make a CALYPSO calculator
 
@@ -54,16 +54,13 @@ class CALYPSOStructure:
         #!!! CALYPSO's auto volume prediction doesn't look to work very well.
         #!!! It's either that, or the distance checks are too strict.
         # Therefore, let's predict volume on our own and input it.
-        from pymatdisc.core.estimate import estimate_volume
-
-        volume = estimate_volume(composition, packing_factor=2)
+        volume = composition.volume_estimate(packing_factor=2)
         calypso_options.update({"Volume": volume})
 
-        # CALYPSO says they have a default value for distances, but it doesn't look like they work.
-        # So I am going to end up making a distance matrix here.
-        from pymatdisc.core.estimate import distance_matrix
-
-        dm = distance_matrix(composition)
+        # CALYPSO says they have a default value for distances, but it doesn't
+        # look like they work. So I am going to end up making a distance
+        # matrix here.
+        dm = composition.distance_matrix_estimate()
         dm_str = ""
         for row in dm:
             for val in row:

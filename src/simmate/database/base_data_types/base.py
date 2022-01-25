@@ -384,7 +384,7 @@ class DatabaseTable(models.Model):
         """
 
         from tqdm import tqdm
-        from pymatgen.core.structure import Structure as Structure_PMG
+        from simmate.toolkit import Structure as ToolkitStructure
 
         # generate the file name if one wasn't given
         if not filename:
@@ -412,7 +412,7 @@ class DatabaseTable(models.Model):
                 # !!! This code is a copy of base_data_types.Structure.to_toolkit
                 # This should instead be a method attached to ToolkitStructure
                 storage_format = "CIF" if (structure_str[0] == "#") else "POSCAR"
-                structure = Structure_PMG.from_str(
+                structure = ToolkitStructure.from_str(
                     structure_str,
                     fmt=storage_format,
                 )

@@ -16,7 +16,7 @@ from prefect.utilities.tasks import defaults_from_attrs
 from simmate.utilities import get_directory, make_archive
 
 from typing import List, Any
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 from simmate.workflow_engine.error_handler import ErrorHandler
 
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can

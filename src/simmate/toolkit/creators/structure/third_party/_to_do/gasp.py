@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 
 
 class GASPStructure:
