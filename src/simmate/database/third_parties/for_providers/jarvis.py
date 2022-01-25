@@ -19,7 +19,7 @@ Alternatively, we could manually download
 from django.db import transaction
 
 from tqdm import tqdm
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 
 from simmate.database.third_parties import JarvisStructure
 

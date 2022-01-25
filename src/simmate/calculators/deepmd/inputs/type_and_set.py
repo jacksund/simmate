@@ -7,8 +7,7 @@ import numpy
 from sklearn.model_selection import train_test_split
 from django_pandas.io import read_frame
 
-from pymatgen.core.structure import Structure
-from pymatgen.core.composition import Composition
+from simmate.toolkit import Structure, Composition
 from simmate.utilities import get_directory
 
 

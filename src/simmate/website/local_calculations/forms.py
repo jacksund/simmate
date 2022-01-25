@@ -2,7 +2,7 @@
 
 from django import forms
 
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 
 
 class MITRelaxationForm(forms.Form):

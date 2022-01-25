@@ -197,7 +197,7 @@ def setup_only(workflow_name, filename, directory):
     """
 
     click.echo("LOADING STRUCTURE AND WORKFLOW...")
-    from pymatgen.core.structure import Structure
+    from simmate.toolkit import Structure
 
     workflow = get_workflow(workflow_name)
     structure = Structure.from_file(filename)
@@ -243,7 +243,7 @@ def run(workflow_name, filename, command, directory):
     """Runs a workflow using an input structure file"""
 
     click.echo("LOADING STRUCTURE AND WORKFLOW...")
-    from pymatgen.core.structure import Structure
+    from simmate.toolkit import Structure
 
     workflow = get_workflow(workflow_name)
     structure = Structure.from_file(filename)
@@ -287,7 +287,7 @@ def run_cloud(workflow_name, filename, command, directory):
     """Runs a workflow using an input structure file"""
 
     click.echo("LOADING STRUCTURE AND WORKFLOW...")
-    from pymatgen.core.structure import Structure
+    from simmate.toolkit import Structure
 
     workflow = get_workflow(workflow_name)
     structure = Structure.from_file(filename)

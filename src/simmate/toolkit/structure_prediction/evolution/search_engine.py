@@ -2,7 +2,7 @@
 
 import time
 
-from pymatgen.core import Composition
+from simmate.toolkit import Composition
 
 from simmate.configuration.django import setup_full  # sets database connection
 from simmate.database.local_calculations.evolution import (
@@ -140,7 +140,7 @@ class SearchEngine:
 
         Parameters
         ----------
-        composition : pymatgen.core.composition.Composition or str
+        composition :
             The composition to run the evolutionary search for. Note that the
             number of sites is fixed to what is set here. (Ca2N vs Ca4N2)
         workflow : simmate.workflow_engine.workflow.Workflow or str (optional)

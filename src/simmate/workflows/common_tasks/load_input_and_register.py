@@ -5,8 +5,7 @@ from django.utils.module_loading import import_string
 import prefect
 from prefect import Task
 
-from pymatgen.core.structure import Structure
-
+from simmate.toolkit import Structure
 from simmate.website.local_calculations import models as all_datatables
 
 from typing import Tuple

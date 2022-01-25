@@ -153,7 +153,7 @@ Either way, here is a template of how that file will look like:
 from django.db import transaction
 
 from tqdm import tqdm
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 
 from simmate.database.third_parties import ExampleProviderData
 
@@ -183,7 +183,9 @@ def load_all_structures():
     for entry in tqdm(data):
 
         # The structure is in the atoms field as a dictionary. We pull this data
-        # out and convert it to a pymatgen Structure object.
+        # out and convert it to a toolkit Structure object. Note, this class
+        # is currently a subclass of pymatgen.Structure, so it supports reading
+        # from different file formats (like CIF or POSCAR) as well.
         structure = Structure(
             lattice=entry["atoms"]["lattice_mat"],
             species=entry["atoms"]["elements"],
@@ -191,7 +193,7 @@ def load_all_structures():
             coords_are_cartesian=entry["atoms"]["cartesian"],
         )
 
-        # Now that we have a pymatgen structure object, we can feed that and all
+        # Now that we have a structure object, we can feed that and all
         # other data to the from_toolkit() method. This will create a database
         # object in the Simmate format. Note the data we pass here is based on
         # the ExampleProviderData we defined in the other file.

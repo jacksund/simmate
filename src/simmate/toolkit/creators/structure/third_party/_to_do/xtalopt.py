@@ -2,7 +2,7 @@
 
 from numpy.random import choice
 
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
 
 #!!! NOT TESTED
 class XtalOptStructure:

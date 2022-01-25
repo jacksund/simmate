@@ -2,7 +2,8 @@
 
 import numpy
 
-from pymatgen.core.structure import Structure
+from simmate.toolkit import Structure
+
 from pymatgen.core.lattice import Lattice  # BUG -- this is only for a bug-fix
 
 
