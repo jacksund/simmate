@@ -26,16 +26,26 @@ class JarvisStructure(Structure):
     The id used to represent the structure (ex: "jvasp-12345")
     """
 
-    source = "JARVIS"
-    """
-    Where this structure and data came from.
-    """
-
     # TODO: contact their team to ask about reporting energy instead. That way
     # we can use the Thermodynamics mixin instead of manually listing this.
     energy_above_hull = table_column.FloatField(blank=True, null=True)
     """
     The energy above hull, as reported by the JARVIS database (no units given)
+    """
+
+    source = "JARVIS"
+    """
+    Where this structure and data came from.
+    """
+
+    source_doi = "https://doi.org/10.1038/s41524-020-00440-1"
+    """
+    Source paper that must be referenced if this dataset is used.
+    """
+
+    remote_archive_link = "https://archives.simmate.org/JarvisStructure-2022-01-26.zip"
+    """
+    The URL that is used to download the archive and then populate this table.
     """
 
     @property
