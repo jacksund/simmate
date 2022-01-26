@@ -15,6 +15,7 @@ import yaml
 import pandas
 from django.db import models, transaction
 from django_pandas.io import read_frame
+from django.utils.timezone import datetime
 
 from typing import List
 
@@ -116,21 +117,32 @@ class SearchResults(models.QuerySet):
         queryset filtering before dumping data.
 
         To load this database dump into a new database, use the class's
-        `from_mini_dump` method.
+        `from_archive` method.
 
         Parameters
         -----------
 
         - `filename_base`:
             The filename to write the zip file to. By defualt, None will make
-            a filename named MyExampleTableName.zip. Do not include the file extension
-            (.zip) in this parameter.
-
+            a filename named MyExampleTableName-2022-01-25.zip, where the date
+            will be the current day (for versioning). Do not include the file
+            extension (.zip) in this parameter.
         """
 
-        # generate the file name if one wasn't given
+        # Generate the file name if one wasn't given.
         if not filename_base:
-            filename_base = self.model.__name__
+            # This is automatically the name of the table plus the date, where
+            # the date is for versioning. For example...
+            #   MyExampleTable-2022-01-25
+            today = datetime.today()
+            filename_base = "-".join(
+                [
+                    self.model.__name__,
+                    str(today.year),
+                    str(today.month).zfill(2),
+                    str(today.day).zfill(2),
+                ]
+            )
 
         # We want to load the entire table, but only grab the fields that
         # are in base_info.
@@ -368,7 +380,7 @@ class DatabaseTable(models.Model):
     @transaction.atomic
     def load_archive(cls, filename: str = None):
         """
-        Reads a compressed zip file made by `objects.to_mini_dump` and loads the data
+        Reads a compressed zip file made by `objects.to_archive` and loads the data
         back into the Simmate database.
 
         Typically, users won't call this method directly, but instead use the
@@ -380,7 +392,9 @@ class DatabaseTable(models.Model):
 
         - `filename`:
             The filename to write the zip file to. By defualt, None will try to
-            find a file named MyExampleTableName.zip.
+            find a file named "MyExampleTableName-2022-01-25.zip", where the date
+            corresponds to version/timestamp. If multiple files match this format
+            the most recent date will be used.
         """
 
         from tqdm import tqdm
@@ -388,8 +402,22 @@ class DatabaseTable(models.Model):
 
         # generate the file name if one wasn't given
         if not filename:
-            filename = cls.__name__ + ".zip"
-
+            # The name will be something like "MyExampleTable-2022-01-25.zip".
+            # We go through all files that match "MyExampleTable-*.zip" and then
+            # grab the most recent date.
+            matching_files = [
+                file
+                for file in os.listdir()
+                if file.startswith(cls.__name__) and file.endswith(".zip")
+            ]
+            # make sure there is at least one file
+            if not matching_files:
+                raise FileNotFoundError(
+                    f"No file found matching the {cls.__name__}-*.zip format")
+            # sort the files by date and grab the first
+            matching_files.sort(reverse=True)
+            filename = matching_files[0]
+        
         # uncompress the zip file
         shutil.unpack_archive(filename)
 
@@ -416,7 +444,6 @@ class DatabaseTable(models.Model):
                     structure_str,
                     fmt=storage_format,
                 )
-                # !!!
                 entry["structure"] = structure
 
         # now iterate through all entries to save them to the database
