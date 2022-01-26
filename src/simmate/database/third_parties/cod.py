@@ -42,6 +42,11 @@ class CodStructure(Structure):
     Where this structure and data came from.
     """
 
+    source_doi = "https://doi.org/10.1107/S0021889809016690"
+    """
+    Source paper that must be referenced if this dataset is used.
+    """
+
     # These fields overwrite the default Structure fields due to a bug.
     chemical_system = table_column.TextField()
     formula_full = table_column.TextField()

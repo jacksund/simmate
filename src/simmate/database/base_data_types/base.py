@@ -413,11 +413,12 @@ class DatabaseTable(models.Model):
             # make sure there is at least one file
             if not matching_files:
                 raise FileNotFoundError(
-                    f"No file found matching the {cls.__name__}-*.zip format")
+                    f"No file found matching the {cls.__name__}-*.zip format"
+                )
             # sort the files by date and grab the first
             matching_files.sort(reverse=True)
             filename = matching_files[0]
-        
+
         # uncompress the zip file
         shutil.unpack_archive(filename)
 

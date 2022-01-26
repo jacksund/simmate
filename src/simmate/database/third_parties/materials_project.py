@@ -33,6 +33,11 @@ class MatProjStructure(Structure, Thermodynamics):
     Where this structure and data came from.
     """
 
+    source_doi = "https://doi.org/10.1063/1.4812323"
+    """
+    Source paper that must be referenced if this dataset is used.
+    """
+
     @property
     def external_link(self) -> str:
         """

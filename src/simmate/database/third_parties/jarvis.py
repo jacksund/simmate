@@ -31,6 +31,11 @@ class JarvisStructure(Structure):
     Where this structure and data came from.
     """
 
+    source_doi = "https://doi.org/10.1038/s41524-020-00440-1"
+    """
+    Source paper that must be referenced if this dataset is used.
+    """
+
     # TODO: contact their team to ask about reporting energy instead. That way
     # we can use the Thermodynamics mixin instead of manually listing this.
     energy_above_hull = table_column.FloatField(blank=True, null=True)
