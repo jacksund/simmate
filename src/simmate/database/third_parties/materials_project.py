@@ -38,6 +38,11 @@ class MatProjStructure(Structure, Thermodynamics):
     Source paper that must be referenced if this dataset is used.
     """
 
+    remote_archive_link = "https://archives.simmate.org/MatProjStructure-2022-01-26.zip"
+    """
+    The URL that is used to download the archive and then populate this table.
+    """
+
     @property
     def external_link(self) -> str:
         """

@@ -9,6 +9,7 @@ search results.
 import os
 import inspect
 import shutil
+import urllib
 
 import yaml
 
@@ -18,6 +19,14 @@ from django_pandas.io import read_frame
 from django.utils.timezone import datetime
 
 from typing import List
+
+# This line does NOTHING but rename a module. I have this because I want to use
+# "table_column.CharField(...)" instead of models.CharField(...) in my Models.
+# This let's beginners read my higher level classes and instantly understand what
+# each thing represents -- without them needing to understand
+# that Django Model == Database Table. Experts may find this annoying, so I'm
+# sorry :(
+from django.db import models as table_column
 
 
 class SearchResults(models.QuerySet):
@@ -378,7 +387,11 @@ class DatabaseTable(models.Model):
 
     @classmethod
     @transaction.atomic
-    def load_archive(cls, filename: str = None):
+    def load_archive(
+        cls,
+        filename: str = None,
+        delete_on_completion: bool = False,
+    ):
         """
         Reads a compressed zip file made by `objects.to_archive` and loads the data
         back into the Simmate database.
@@ -395,6 +408,10 @@ class DatabaseTable(models.Model):
             find a file named "MyExampleTableName-2022-01-25.zip", where the date
             corresponds to version/timestamp. If multiple files match this format
             the most recent date will be used.
+
+        - `delete_on_completion`:
+            Whether to delete the archive file once all data is loaded into the
+            database. Defaults to False
         """
 
         from tqdm import tqdm
@@ -424,7 +441,8 @@ class DatabaseTable(models.Model):
 
         # We will now have a csv file of the same name, which we load into
         # a pandas dataframe
-        df = pandas.read_csv(filename.replace(".zip", ".csv"))
+        csv_filename = filename.replace(".zip", ".csv")
+        df = pandas.read_csv(csv_filename)
 
         # convert the dataframe to a list of dictionaries that we will iterate
         # through.
@@ -452,11 +470,95 @@ class DatabaseTable(models.Model):
             entry_db = cls.from_toolkit(**entry)
             entry_db.save()
 
+        # We can now delete the files. The zip file is only deleted if requested.
+        os.remove(csv_filename)
+        if delete_on_completion:
+            os.remove(filename)  # the zip archive
 
-# This line does NOTHING but rename a module. I have this because I want to use
-# "table_column.CharField(...)" instead of models.CharField(...) in my Models.
-# This let's beginners read my higher level classes and instantly understand what
-# each thing represents -- without them needing to understand
-# that Django Model == Database Table. Experts may find this annoying, so I'm
-# sorry :(
-from django.db import models as table_column
+    @classmethod
+    @transaction.atomic
+    def load_remote_archive(
+        cls,
+        remote_archive_link: str = None,
+        confirm_override: bool = False,
+    ):
+        """
+        Downloads a compressed zip file made by `objects.to_archive` and loads
+        the data back into the Simmate database.
+
+        This method should only be called once -- when you have a completely
+        empty database. After this call, all data will be stored locally and
+        you don't need to call this method again (even accross python sessions).
+
+        Parameters
+        -----------
+        - `remote_archive_link`:
+            The URL for that the archive will be downloaded from. If not supplied,
+            it will default to the table's remote_archive_link attribute.
+
+        - `confirm_override`:
+            If the table already has data in it, the user must take particular
+            care to downloading new data. This flag makes sure the user has
+            made the proper checks to run this action.
+        """
+
+        # first check if the table has data in it already. We raise errors
+        # to stop the user from doing unneccessary and potentiall destructive
+        # downloads
+        if cls.objects.exists() and not confirm_override:
+            # if the user has a third-party app, we can be more specific with
+            # our error message.
+            if cls._meta.app_label == "third_parties":
+                raise Exception(
+                    "It looks like you're using a third-party database table and "
+                    "that the table already has data in it! This means you already "
+                    "called load_remote_archive and don't need to do it again. "
+                    "If you are trying reload a newer version of this data, make "
+                    "sure you empty this table first. This can be done by "
+                    "reseting your database or manually deleting all objects "
+                    "with `ExampleTable.objects.all().delete()`"
+                )
+
+            # otherwise warning the user of overwriting data with matching
+            # primary keys -- and ask them to use confirm_override.
+            raise Exception(
+                "It looks like this table already has data in it! By loading an "
+                "archive, you could potentially overwrite this data. The most "
+                "common mistake is non-unique primary keys between your current "
+                "data and the archive -- if there is a duplicate primary key, it "
+                "will overwrite your data. If you are confident the data is safe "
+                "to load into your database, run this command again with "
+                "confirm_override=True."
+            )
+
+        # confirm that we have a link to download from
+        if not remote_archive_link:
+            # if no link was given we take the input value from class attribute
+            if not hasattr(cls, "remote_archive_link"):
+                raise Exception(
+                    "This table does not have a default link to load the archive "
+                    " from. You must provide a remote_archive_link."
+                )
+            remote_archive_link = cls.remote_archive_link
+
+        # tell the user where the data comes from
+        if cls._meta.app_label == "third_parties":
+            print(
+                "\nWARNING: this data is NOT from the Simmate team, so be sure "
+                "to visit the provider's website and to cite their work."
+                f" This data is from {cls.source} and the following paper "
+                f"should be cited: {cls.source_doi}\n"
+            )
+
+        # Predetermine the file name, which is just the ending of the URL
+        archive_filename = remote_archive_link.split("/")[-1]
+
+        # Download the archive zip file from the URL to the current working dir
+        print("Downloading archive file...")
+        urllib.request.urlretrieve(remote_archive_link, archive_filename)
+        print("Done.\n")
+
+        # now that the archive is downloaded, we can load it into our db
+        print("Loading data into Simmate database...")
+        cls.load_archive(archive_filename, delete_on_completion=True)
+        print("Done.\n")
