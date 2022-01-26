@@ -2,6 +2,8 @@
 Overview
 ========
 
+_**WARNING:**_ This data is NOT from the Simmate team. These providers are independent groups, and you should cite them appropriately. All data from these providers remain under their source's terms and conditions.
+
 This module downloads data from third-parties and stores it to your local database.
 
 Currently, we support the following providers:
@@ -12,10 +14,7 @@ Currently, we support the following providers:
 - [Materials Project](https://materialsproject.org/)
 - [OQDM (Open Quantum Materials Database)](http://oqmd.org/)
 
-If your team hosts a database and would like to make it available via Simmate, please see the `simmate.database.third_parties.for_providers` module. Even if your database is a single table, don't hesistate to make a contribution!
-
-_**WARNING:**_ This data is NOT from the Simmate team. These providers are independent groups, and you should cite them appropriately. All data from these providers remain under their source's terms and conditions.
-
+If your team would like to make data available via Simmate, please see the `simmate.database.third_parties.for_providers` module. Even if its is a single table, don't hesistate to make a contribution! We outline the benefits of contributing and how to package your data within the `for_providers` module.
 
 Usage
 ======
@@ -54,4 +53,4 @@ This module can be viewed as an alternative to / extension of the following code
 - [pymatgen.ext](https://pymatgen.org/pymatgen.ext.html)
 - [OPTIMADE APIs](http://www.optimade.org/)
 
-This module stores data locally and then allows rapidly loading data to memory, whereas alternatives only load data into memory and involve querying external APIs.
+This module stores data locally and then allows rapidly loading data to memory, whereas alternatives involve querying external APIs and loading data into memory. We choose to store data locally because it allows stability (i.e. no breaking changes in your source data) and fast loading accross python sessions. This is particullary useful for high-throughput studies.
