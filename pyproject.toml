@@ -5,7 +5,7 @@
 
 # Tell django-pytest settings for a dummy database and also website interaction.
 # To disable django-pytest, add "-p no:django" to your pytest command
-DJANGO_SETTINGS_MODULE = "simmate.configuration.django.settings"
+DJANGO_SETTINGS_MODULE = "simmate.configuration.django.settings_test"
 
 # We classify all tests so that we can run different subgroups of tests. You can
 # run the tests marked with "slow"... "pytest -m slow"

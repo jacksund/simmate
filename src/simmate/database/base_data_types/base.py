@@ -251,7 +251,13 @@ class DatabaseTable(models.Model):
         print(yaml.dump(column_names))
 
     @classmethod
-    def create_subclass(cls, name: str, module: str, **new_columns):
+    def create_subclass(
+        cls,
+        name: str,
+        module: str,
+        app_label: str = None,
+        **new_columns,
+    ):
         """
         This method is useful for dynamically creating a subclass DatabaseTable
         from some abstract class.
@@ -271,6 +277,7 @@ class DatabaseTable(models.Model):
             module=__name__, # required for serialization
             new_field1 = table_column.FloatField()
             new_field2 = table_column.FloatField()
+            # app_label --> typically not required bc the parent class sets this
         )
         ```
 
@@ -289,7 +296,7 @@ class DatabaseTable(models.Model):
         new_columns.update(
             {
                 "__module__": module,
-                "Meta": {},
+                "Meta": {"app_label": app_label} if app_label else {},
             }
         )
         # TODO: make it so I don't have to specify the module, but it is automatically
@@ -386,11 +393,49 @@ class DatabaseTable(models.Model):
         return all_data if as_dict else cls(**all_data)
 
     @classmethod
+    def _confirm_override(cls, confirm_override: bool):
+        """
+        A utility to make sure the user wants to load new data into their table.
+
+        This utility should not be called directly, as it is used within
+        load_archive and load_remote_archive.
+        """
+        # first check if the table has data in it already. We raise errors
+        # to stop the user from doing unneccessary and potentiall destructive
+        # downloads
+        if cls.objects.exists() and not confirm_override:
+            # if the user has a third-party app, we can be more specific with
+            # our error message.
+            if cls._meta.app_label == "third_parties":
+                raise Exception(
+                    "It looks like you're using a third-party database table and "
+                    "that the table already has data in it! This means you already "
+                    "called load_remote_archive and don't need to do it again. "
+                    "If you are trying reload a newer version of this data, make "
+                    "sure you empty this table first. This can be done by "
+                    "reseting your database or manually deleting all objects "
+                    "with `ExampleTable.objects.all().delete()`"
+                )
+
+            # otherwise warning the user of overwriting data with matching
+            # primary keys -- and ask them to use confirm_override.
+            raise Exception(
+                "It looks like this table already has data in it! By loading an "
+                "archive, you could potentially overwrite this data. The most "
+                "common mistake is non-unique primary keys between your current "
+                "data and the archive -- if there is a duplicate primary key, it "
+                "will overwrite your data. If you are confident the data is safe "
+                "to load into your database, run this command again with "
+                "confirm_override=True."
+            )
+
+    @classmethod
     @transaction.atomic
     def load_archive(
         cls,
         filename: str = None,
         delete_on_completion: bool = False,
+        confirm_override: bool = False,
     ):
         """
         Reads a compressed zip file made by `objects.to_archive` and loads the data
@@ -412,7 +457,15 @@ class DatabaseTable(models.Model):
         - `delete_on_completion`:
             Whether to delete the archive file once all data is loaded into the
             database. Defaults to False
+
+        - `confirm_override`:
+            If the table already has data in it, the user must take particular
+            care to downloading new data. This flag makes sure the user has
+            made the proper checks to run this action.
         """
+
+        # make sure the user actually wants to do this!
+        cls._confirm_override(confirm_override)
 
         from tqdm import tqdm
         from simmate.toolkit import Structure as ToolkitStructure
@@ -502,34 +555,8 @@ class DatabaseTable(models.Model):
             made the proper checks to run this action.
         """
 
-        # first check if the table has data in it already. We raise errors
-        # to stop the user from doing unneccessary and potentiall destructive
-        # downloads
-        if cls.objects.exists() and not confirm_override:
-            # if the user has a third-party app, we can be more specific with
-            # our error message.
-            if cls._meta.app_label == "third_parties":
-                raise Exception(
-                    "It looks like you're using a third-party database table and "
-                    "that the table already has data in it! This means you already "
-                    "called load_remote_archive and don't need to do it again. "
-                    "If you are trying reload a newer version of this data, make "
-                    "sure you empty this table first. This can be done by "
-                    "reseting your database or manually deleting all objects "
-                    "with `ExampleTable.objects.all().delete()`"
-                )
-
-            # otherwise warning the user of overwriting data with matching
-            # primary keys -- and ask them to use confirm_override.
-            raise Exception(
-                "It looks like this table already has data in it! By loading an "
-                "archive, you could potentially overwrite this data. The most "
-                "common mistake is non-unique primary keys between your current "
-                "data and the archive -- if there is a duplicate primary key, it "
-                "will overwrite your data. If you are confident the data is safe "
-                "to load into your database, run this command again with "
-                "confirm_override=True."
-            )
+        # make sure the user actually wants to do this!
+        cls._confirm_override(confirm_override)
 
         # confirm that we have a link to download from
         if not remote_archive_link:
@@ -560,5 +587,9 @@ class DatabaseTable(models.Model):
 
         # now that the archive is downloaded, we can load it into our db
         print("Loading data into Simmate database...")
-        cls.load_archive(archive_filename, delete_on_completion=True)
+        cls.load_archive(
+            archive_filename,
+            delete_on_completion=True,
+            confirm_override=True,  # we already confirmed this above
+        )
         print("Done.\n")
