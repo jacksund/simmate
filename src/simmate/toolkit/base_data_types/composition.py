@@ -43,7 +43,10 @@ class Composition(PymatgenComposition):
         elif radius_method == "van_der_waals":
             radii = [element.van_der_waals_radius for element in self.elements]
         elif radius_method == "metallic":
-            radii = [element.metallic_radius for element in self.elements]
+            radii = [
+                element.metallic_radius if element.is_metal else None
+                for element in self.elements
+            ]
         elif radius_method == "ionic":
             # In order to predict the radius here, we first need to predict the
             # oxidation states. Note that this prediction changes composition to
