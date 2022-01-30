@@ -296,7 +296,7 @@ class S3Task(Task):
         # now inherit the parent Prefect Task class
         super().__init__(**kwargs)
 
-    def setup(self, structure: Structure, directory: str):
+    def setup(self, structure: Structure, directory: str, **kwargs):
         """
         This abstract method is ran before the command is actually executed. This
         allows for some pre-processing, such as writing input files or any other
@@ -314,10 +314,14 @@ class S3Task(Task):
             The structure to use for the task, if one is required.
         - `directory`:
             The directory to run everything in. Must exist already.
+        - `**kwargs`:
+            Extra kwargs that may be passed to some function within. Because
+            Simmate prefers fixed settings for their workflows, this is typically
+            not used, but instead, keywords should be explicitly defined when
+            writing a setup method.
         """
-        # Be sure to include directory and structure (or **kwargs) as input arguments
-        # for higher-level compatibility with the run method.
-        # You should never need to call this method directly!
+        # Be sure to include directory and structure (or **kwargs) as input
+        # arguments for higher-level compatibility with the run method.
         pass
 
     def execute(self, directory: str, command: str):
@@ -610,6 +614,7 @@ class S3Task(Task):
         structure: Structure = None,
         directory: str = None,
         command: str = None,
+        **kwargs,
     ):
         """
         Runs the entire staged task (setup, execution, workup), which includes
@@ -634,6 +639,8 @@ class S3Task(Task):
         - `directory`:
             The directory to run everything in. This is passed to the ulitities
             function simmate.ulitities.get_directory
+        - `**kwargs`:
+            Any extra keywords that should be passed to the setup() method.
 
         Returns
         -------
@@ -654,7 +661,7 @@ class S3Task(Task):
         directory = get_directory(directory)
 
         # run the setup stage of the task
-        self.setup(structure, directory)
+        self.setup(structure, directory, **kwargs)
 
         # run the shelltask and error supervision stages. This method returns
         # a list of any corrections applied during the run.

@@ -3,7 +3,6 @@
 import pytest
 
 from simmate.website.test_app.models import (
-    table_column,
     TestDatabaseTable,
     TestDatabaseTable2,
 )

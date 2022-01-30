@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import os
+import numpy
 
 from pymatgen.analysis.transition_state import NEBAnalysis
 
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
-from simmate.calculators.vasp.tasks.base import VaspTask
-from simmate.calculators.vasp.error_handlers.tetrahedron_mesh import TetrahedronMesh
-from simmate.calculators.vasp.error_handlers.eddrmm import Eddrmm
+from simmate.calculators.vasp.tasks.relaxation.neb_endpoint import NEBEndpointRelaxation
 
 # NOTE TO USER:
 # This NEB task is very different from all other VASP tasks!
@@ -26,51 +24,34 @@ from simmate.calculators.vasp.error_handlers.eddrmm import Eddrmm
 # may be useful if you'd like to make your own variation of this class.
 
 
-class NudgedElasticBandTask(VaspTask):
+class MITNudgedElasticBand(NEBEndpointRelaxation):
+    """
+    Runs a NEB relaxation on a list of structures (aka images) using MIT Project
+    settings. The lattice remains fixed and symmetry is turned off for this
+    relaxation.
 
-    # The default settings to use for this calculation.
-    # To tell VASP that we are doing an NEB calculation, we need to set the
-    # IMAGES
-    incar = dict(
-        # These settings are from MITRelaxSet
-        # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/MPRelaxSet.yaml
-        ALGO="Normal",  # TEMPORARY SWITCH FROM Fast
-        EDIFF=1.0e-05,
-        ENCUT=520,
-        # IBRION=2, --> overwritten by MITNEBSet below
-        ICHARG=1,
-        ISIF=3,
-        ISMEAR=-5,
-        ISPIN=2,
-        ISYM=0,
-        # LDAU --> These parameters are excluded for now.
-        LORBIT=11,
-        LREAL="auto",
-        LWAVE=False,
-        NELM=200,
-        NELMIN=6,
-        NSW=99,  # !!! Changed to static energy for testing
-        PREC="Accurate",
-        SIGMA=0.05,
-        KSPACING=0.5,  # --> This is VASP default and not the same as pymatgen
-        # These settings are from MITNEBSet
-        # https://github.com/materialsproject/pymatgen/blob/v2022.0.9/pymatgen/io/vasp/sets.py#L2376-L2491
-        # IMAGES=len(structures) - 2, --> set inside task
-        IBRION=1,
-        # ISYM=0, --> duplicate of setting above
-        LCHARG=False,
-        # LDAU=False, --> already the default value
-        # TODO: Allow IMAGES to be set like shown below.
-        # For this, we use "__auto" to let Simmate set this automatically by
-        # using the input structures given.
-        # IMAGES__auto=True,
+    You typically shouldn't use this workflow directly, but instead use the
+    higher-level NEB workflows (e.g. diffusion/neb_all_paths or
+    diffusion/neb_from_endpoints), which call this workflow for you.
+    """
+
+    # The settings used for this calculation are based on the MITRelaxation, but
+    # we are updating/adding new settings here.
+    # These settings are based off of pymatgen's MVLCINEBSet, which inherts from
+    # the MITNEBSet.
+    # http://guide.materialsvirtuallab.org/pymatgen-analysis-diffusion/pymatgen.analysis.diffusion.neb.io.html
+    # https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITNEBSet
+    incar = NEBEndpointRelaxation.incar.copy()
+    incar.update(
+        dict(
+            IBRION=1,
+            # TODO: Allow IMAGES to be set like shown below.
+            # For this, we use "__auto" to let Simmate set this automatically by
+            # using the input structures given.
+            # len(structures) - 2,
+            IMAGES__auto=True,
+        )
     )
-
-    # We will use the PBE functional with all default mappings
-    functional = "PBE"
-
-    # We also set up some error handlers that are commonly used with
-    error_handlers = [TetrahedronMesh()]
 
     def _pre_checks(self, structure, directory):
         # This function is used inside of this class's setup method (shown below),
@@ -107,9 +88,33 @@ class NudgedElasticBandTask(VaspTask):
         # TODO: add a precheck that ensures the number of cores VASP is ran on
         # is also divisible by the number of images. For example...
         # "mpirun -n 16 vasp" will not work for IMAGES=3 because 16 is not
-        # divisible by 3. But this also may be better suited for an ErrorHandler
+        # divisible by 3. But this also may be better suited for an ErrorHandler.
+        # An example error message from from VASP is...
+        #  M_divide: can not subdivide           16 nodes by           3
 
-    def setup(self, structure, directory):
+        # TODO: make sure all images
+        self.structures = self._process_structures(structures)
+
+    @staticmethod
+    def _process_structures(structures):
+        """
+        Remove any atom jumps across the cell.
+
+        This method is copied directly from pymatgen's MITNEBset and has not
+        been refactored/reviewed yet.
+        """
+        input_structures = structures
+        structures = [input_structures[0]]
+        for s in input_structures[1:]:
+            prev = structures[-1]
+            for i, site in enumerate(s):
+                t = numpy.round(prev[i].frac_coords - site.frac_coords)
+                if numpy.any(numpy.abs(t) > 0.5):
+                    s.translate_sites([i], t, to_unit_cell=False)
+            structures.append(s)
+        return structures
+
+    def setup(self, structures, directory):
 
         # run some prechecks to make sure the user has everything set up properly.
         self._pre_checks(structure, directory)
