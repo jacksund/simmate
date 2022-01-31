@@ -9,7 +9,7 @@ name: simmate_dev
 channels:
     - conda-forge
 dependencies:
-    - black >=21.12b0
+    - black >=22.1.0
     - click >=8.0.3
     - coverage >=6.2
     - dask-core >=2021.12.0

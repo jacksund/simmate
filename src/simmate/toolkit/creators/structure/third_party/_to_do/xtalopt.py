@@ -50,7 +50,7 @@ class XtalOptStructure:
         # let's set the minimum to the smallest radii
         min_vector = min(composition.radii_estimate())
         # let's set the maximum to volume**0.8 #!!! This is a huge range and I should test this in the future
-        max_vector = volume ** 0.8
+        max_vector = volume**0.8
         self.lattice_min = LatticeStruct(
             min_vector, min_vector, min_vector, 60.0, 60.0, 60.0
         )  # a,b,c,alpha,beta,gamma

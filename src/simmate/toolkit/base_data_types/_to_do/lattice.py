@@ -56,7 +56,7 @@ class Lattice:
         # run faster?
 
         #   numpy.linalg.norm(matrix, axis=1) --> doesn't work with numba
-        return numpy.sqrt(numpy.sum(matrix ** 2, axis=1))
+        return numpy.sqrt(numpy.sum(matrix**2, axis=1))
 
     @property
     def a(self):

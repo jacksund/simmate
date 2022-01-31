@@ -115,7 +115,7 @@ class Composition(PymatgenComposition):
         radii = self.radii_estimate(radius_method)
 
         # take the radii and find the corresponding spherical volume for each atom type
-        volumes = [4 / 3 * numpy.pi * (radius ** 3) for radius in radii]
+        volumes = [4 / 3 * numpy.pi * (radius**3) for radius in radii]
 
         # find the total volume of all spheres in the composition
         total_volume = sum(

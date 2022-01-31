@@ -52,7 +52,7 @@ def G(x, c, alpha):
 
 def L(x, c, gamma):
     """Return c-centered Lorentzian line shape at x with HWHM gamma"""
-    return gamma / (np.pi * ((x - c) ** 2 + gamma ** 2))
+    return gamma / (np.pi * ((x - c) ** 2 + gamma**2))
 
 
 def V(x, c, alphagamma):
@@ -86,14 +86,14 @@ def XRDsimulatespectra(
     x_peak = xrd_data.x
     y_peak = xrd_data.y
     grain_size = (
-        10 ** logsize
+        10**logsize
     )  # size of the grains in nm --> so 0.1nm grain size has a logsize=-1
 
     num_sigma = {"Gaussian": 5, "Lorentzian": 12, "Voigt": 12}[peak_profile]
 
     # optimal number of points per degree determined through usage experiments
     if logsize > 1:
-        N_density = 150 * (logsize ** 4)  # scaled to log size to the 4th power
+        N_density = 150 * (logsize**4)  # scaled to log size to the 4th power
     else:
         N_density = 150
 
