@@ -4,9 +4,9 @@ import os
 import numpy
 
 from pymatgen.analysis.transition_state import NEBAnalysis
-from simmate.toolkit.diffusion import MigrationImages
 
-from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
+from simmate.toolkit.diffusion import MigrationImages
+from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
 from simmate.calculators.vasp.tasks.relaxation.neb_endpoint import NEBEndpointRelaxation
 
 
@@ -21,8 +21,8 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
     diffusion/neb_from_endpoints), which call this workflow for you.
 
 
-    Devs Notes
-    ----------
+    Developer Notes
+    ----------------
 
     This NEB task is very different from all other VASP tasks!
 
@@ -48,10 +48,8 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
     incar.update(
         dict(
             IBRION=1,
-            # TODO: Allow IMAGES to be set like shown below.
-            # For this, we use "__auto" to let Simmate set this automatically by
-            # using the input structures given.
-            # len(structures) - 2,
+            # IMAGES is a special case where logic is in this file, rather than
+            # handled by the INCAR class. It is set to len(structures)-2
             IMAGES__auto=True,
         )
     )
@@ -171,7 +169,8 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
         # Here, each image (start to end structures) is put inside of its own
         # folder. We make those folders here, where they are named 00, 01, 02...N
         # Also recall that "structure" is really a list of structures here.
-        for i, image in enumerate(structure):
+        for i, image in enumerate(structures):
+
             # first make establish the foldername
             # The zfill function converts numbers from "1" to "01" for us
             foldername = os.path.join(directory, str(i).zfill(2))
@@ -182,39 +181,100 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
             Poscar.to_file(image, os.path.join(foldername, "POSCAR"))
 
         # We also need to check if the user set IMAGES in the INCAR. If not,
-        # we set that for them here.
-        if not self.incar.get("IMAGES"):
-            self.incar["IMAGES"] = len(structure) - 2
-        # BUG: changing this class attribute may not be safe to do when this
-        # task is used accross multiple pathways with different image numbers.
-        # It may be better to make a separate incar dictionary that we then pass
-        # to Incar() below.
+        # we set that for them here. Note, we use the "pop" method which removes
+        # the IMAGES__auto while grabbing its value. Because we are modifying
+        # the incar dictionary here, we must make a copy of it -- this ensures
+        # no bugs when this task is called in parallel.
+        incar = self.incar.copy()
+        # !!! Should this code be moved to the INCAR class? Or would that require
+        # too much reworking to allow INCAR to accept a list of structures?
+        if not incar.get("IMAGES") and incar.pop("IMAGES__auto", None):
+            incar["IMAGES"] = len(structures) - 2
 
-        # write the incar file
-        Incar(**self.incar).to_file(os.path.join(directory, "INCAR"))
+        # Combine our base incar settings with those of our parallel settings
+        # and then write the incar file
+        incar = Incar(**incar) + Incar(**self.incar_parallel_settings)
+        incar.to_file(
+            filename=os.path.join(directory, "INCAR"),
+            # we can use the start image for our structure -- as all structures
+            # should give the same result.
+            structure=structures[0],
+        )
 
-        # if KSPACING is not provided AND kpoints is, write the KPOINTS file
+        # if KSPACING is not provided in the incar AND kpoints is attached to this
+        # class instance, then we write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
-            Kpoints.to_file(
-                # We use the first image as all should give the same result
-                structure[0],
-                self.kpoints,
-                os.path.join(directory, "KPOINTS"),
+            raise Exception(
+                "Custom KPOINTS are not supported by Simmate yet. "
+                "Please use KSPACING in your INCAR instead."
             )
 
-        # write the POTCAR file
+        # write the POTCAR file in this folder as well. Only one is needed and
+        # all images will use refer to this POTCAR in the base directory
         Potcar.to_file_from_type(
-            # We use the first image as all should give the same result
-            structure[0].composition.elements,
+            # we can use the start image for our structure -- as all structures
+            # should give the same result.
+            structures[0].composition.elements,
             self.functional,
             os.path.join(directory, "POTCAR"),
             self.potcar_mappings,
         )
 
+        # For the user's reference, we also like to write an image of the
+        # starting path to a cif file. This can be slow for large structures
+        # (>1s), but it is very little time compared to a full NEB run.
+        path_vis = structures.get_sum_structure()
+        path_vis.to("cif", os.path.join(directory, "path_start.cif"))
+
     def workup(
         self,
         directory: str,
     ):
+        """
+        Works up data from a NEB run, including confirming convergence and
+        writing summary output files (structures, data, and plots).
+
+        Parameters
+        ----------
+        - `directory`:
+            Name of the base folder where all results are located.
+        """
+
+        # load the xml file and all of the vasprun data
+        try:
+            vasprun = Vasprun(
+                filename=os.path.join(directory, "vasprun.xml"),
+                exception_on_bad_xml=True,
+            )
+        except:
+            print(
+                "XML is malformed. This typically means there's an error with your"
+                " calculation that wasn't caught by your ErrorHandlers. We try"
+                " salvaging data here though."
+            )
+            vasprun = Vasprun(
+                filename=os.path.join(directory, "vasprun.xml"),
+                exception_on_bad_xml=False,
+            )
+            vasprun.final_structure = vasprun.structures[-1]
+        # BUG: This try/except is 100% just for my really rough calculations
+        # where I don't use any ErrorHandlers and still want the final structure
+        # regarless of what when wrong. In the future, I should consider writing
+        # a separate method for those that loads the CONTCAR and moves on.
+
+        # write output files/plots for the user to quickly reference
+        self._write_output_summary(directory, vasprun)
+
+        # confirm that the calculation converged (ionicly and electronically)
+        if self.confirm_convergence:
+            assert vasprun.converged
+
+        # OPTIMIZE: see my comment above on the return_final_structure attribute
+        if self.return_final_structure:
+            return {"structure_final": vasprun.final_structure, "vasprun": vasprun}
+
+        # return vasprun object
+        return vasprun
 
         # BUG: For now I assume there are start/end image directories are located
         # in the working directory. This bad assumption is made as I'm just quickly

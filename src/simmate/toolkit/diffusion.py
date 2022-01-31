@@ -16,7 +16,7 @@ from typing import List
 class MigrationImages(list):
     """
     This class is just a list of structures for a diffusion pathway. It has
-    utility methods to create these structures but otherwise behaves
+    utility methods to help create these structures but otherwise behaves
     exactly like a python list.
 
     Note, this class is primarily used to generate inputs for calculations. If
@@ -31,6 +31,8 @@ class MigrationImages(list):
     """
 
     def __init__(self, structures: List[Structure]):
+        # This init function does nothing except apply typing -- specifically,
+        # it says that it expects a list of structures.
         super().__init__(structures)
 
     def get_sum_structure(self, tolerance: float = 1e-3):

@@ -16,8 +16,8 @@ from simmate.database.base_data_types import Relaxation, NestedCalculation
 
 # Between all of the different relaxations that simmate runs, there's no
 # difference between any of the datatables we store results in. The difference
-# is only HOW the relaxation was ran, which is why we store them in separate
-# tables.
+# is only HOW the relaxation was ran (i.e. the VASP settings used), which is
+# why we store them in separate tables.
 
 MITRelaxation, MITIonicStep = Relaxation.create_all_subclasses("MIT", module=__name__)
 
@@ -25,6 +25,11 @@ MITRelaxation, MITIonicStep = Relaxation.create_all_subclasses("MIT", module=__n
     MatProjRelaxation,
     MatProjIonicStep,
 ) = Relaxation.create_all_subclasses("MatProj", module=__name__)
+
+NEBEndpointRelaxation, NEBEndpointIonicStep = Relaxation.create_all_subclasses(
+    "NEBEndpoint",
+    module=__name__,
+)
 
 Quality00Relaxation, Quality00IonicStep = Relaxation.create_all_subclasses(
     "Quality00",

@@ -11,4 +11,5 @@ from simmate.calculators.vasp.workflows.relaxation import (
     quality03_workflow,
     quality04_workflow,
     staged_workflow,
+    neb_endpoint_workflow,
 )

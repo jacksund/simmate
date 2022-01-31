@@ -98,12 +98,10 @@ class Incar(dict):
                 # require one.
                 if not structure:
                     raise Exception(
-                        """
-                        It looks like you used a keyword modifier but didn't
-                        supply a structure! If you want something like ENCUT__per_atom,
-                        then you need to make sure you provide a structure so that
-                        the modifier can be evaluated.
-                        """
+                        "It looks like you used a keyword modifier but didn't "
+                        f"supply a structure! If you want to use {parameter}, "
+                        "then you need to make sure you provide a structure so "
+                        "that the modifier can be evaluated."
                     )
 
                 # separate the input into the base parameter and modifier.

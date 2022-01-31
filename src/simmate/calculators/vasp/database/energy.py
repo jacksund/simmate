@@ -11,5 +11,9 @@ class MatProjStaticEnergy(StaticEnergy):
     pass
 
 
+class NEBEndpointStaticEnergy(StaticEnergy):
+    pass
+
+
 class Quality04StaticEnergy(StaticEnergy):
     pass
