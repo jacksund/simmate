@@ -1,27 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import os
 import numpy
 
 from pymatgen.analysis.transition_state import NEBAnalysis
+from simmate.toolkit.diffusion import MigrationImages
 
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
 from simmate.calculators.vasp.tasks.relaxation.neb_endpoint import NEBEndpointRelaxation
-
-# NOTE TO USER:
-# This NEB task is very different from all other VASP tasks!
-#
-# The first big difference is that it takes a list of structures instead of
-# just one structure. This means when you set "structure=..." that you should
-# actually do "structure=[structure1, structure2, structure3, ...]". This would
-# be clearer if we made this input variable named "structures" instead of just
-# "structure", but this requires more reworking on Simmate's end, and we
-# unfortunately haven't had time to fix it yet.
-#
-# The second big difference is that VASP uses a different folder setup when
-# running these calculations. It has a series of folders named 00, 01, 02, ... N,
-# where 00 is the starting image, N is the endpoint image, and 01 to (N-1) are
-# the pathway images. Simmate handles this inside the task, but knowing this
-# may be useful if you'd like to make your own variation of this class.
 
 
 class MITNudgedElasticBand(NEBEndpointRelaxation):
@@ -33,6 +19,23 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
     You typically shouldn't use this workflow directly, but instead use the
     higher-level NEB workflows (e.g. diffusion/neb_all_paths or
     diffusion/neb_from_endpoints), which call this workflow for you.
+
+
+    Devs Notes
+    ----------
+
+    This NEB task is very different from all other VASP tasks!
+
+    The first big difference is that it takes a list of structures instead of
+    just one structure. This means that instead of "structure=...", you should
+    actually do "structures=[structure1, structure2, structure3, ...]", where
+    the list of structures is your list of images.
+
+    The second big difference is that VASP uses a different folder setup when
+    running these calculations. It has a series of folders named 00, 01, 02, ... N,
+    where 00 is the starting image, N is the endpoint image, and 01 to (N-1) are
+    the midpoint images. Simmate handles this inside the task, but knowing this
+    may be useful if you'd like to make your own variation of this class.
     """
 
     # The settings used for this calculation are based on the MITRelaxation, but
@@ -53,30 +56,43 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
         )
     )
 
-    def _pre_checks(self, structure, directory):
-        # This function is used inside of this class's setup method (shown below),
-        # where we make sure the user has everything set up properly.
+    requires_structure = False
+    """
+    This is a unique case for VASP calculations because the input is NOT a 
+    single structure, but instead a list of structures -- spefically a list
+    supercell images along the diffusion pathway.
+    """
 
-        # The first common mistake is that the user didn't provide a list of
-        # structures as the input.
-        if type(structure) != list:
-            raise TypeError(
-                "This task requires multiple structures given as a list! "
-                "So your input should look like this..\n"
-                "structure=[structure_start, structure_image1, structure_image2, ..., structure_end]"
-                "\nWe apologize that this input can be confusing, and we'll "
-                " work to fix this in the future!"
+    def _pre_checks(
+        self,
+        structures: MigrationImages,
+        directory: str,
+        structure: None,
+    ):
+        """
+        Runs a series of checks to ensure the user configured the job correctly.
+
+        This is called automatically within the setup() method and shouldn't be
+        used directly.
+        """
+
+        # The first common mistake is providing a structure instead of structures
+        if structure:
+            raise Exception(
+                "This NEB calculation requires a list of structures (aka images). "
+                "Make sure you provide the structures input and NOT a single "
+                "structure."
             )
 
-        # The next common mistake is to mislabel the number of images in the INCAR
-        # file.
+        # The next common mistake is to mislabel the number of images in the
+        # INCAR file.
         # first, we check if the user set this.
         nimages = self.incar.get("IMAGES")
         if nimages:
             # if so, we check that it was set correctly. It should be equal to
             # the number of structures minus 2 (because we don't count the
             # start and end images here.)
-            if nimages != (len(structure) - 2):
+            if nimages != (len(structures) - 2):
                 raise Exception(
                     "IMAGES looks to be improperly set! This value should not"
                     " include the start/end images -- so make sure you counted"
@@ -90,18 +106,22 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
         # "mpirun -n 16 vasp" will not work for IMAGES=3 because 16 is not
         # divisible by 3. But this also may be better suited for an ErrorHandler.
         # An example error message from from VASP is...
-        #  M_divide: can not subdivide           16 nodes by           3
+        #       "M_divide: can not subdivide 16 nodes by 3"
 
-        # TODO: make sure all images
+        # make sure all images are contained with the cell
         self.structures = self._process_structures(structures)
 
     @staticmethod
-    def _process_structures(structures):
+    def _process_structures(
+        structures: MigrationImages,
+    ):
         """
         Remove any atom jumps across the cell.
 
         This method is copied directly from pymatgen's MITNEBset and has not
         been refactored/reviewed yet.
+
+        TODO: This code would be better placed as a method of MigrationImages
         """
         input_structures = structures
         structures = [input_structures[0]]
@@ -114,10 +134,39 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
             structures.append(s)
         return structures
 
-    def setup(self, structures, directory):
+    def setup(
+        self,
+        structure: None,
+        directory: str,
+        structures: MigrationImages,
+    ):
+        """
+        Writes input files for a NEB calculation. Each structure image recieves
+        it's own folder within the parent directory.
+
+        This method is typically not called directly. Instead, users should
+        use the `run` method which calls setup within it.
+
+        Parameters
+        ----------
+        - `structure`:
+            This parameter does NOTHING! NEB is a special-case workflow that
+            accepts a list of structures instead of a single one. Therefore, it
+            is strictly for compatibility with the core S3Task. Leave this
+            value at None.
+
+        - `directory`:
+            The name of the directory to write all input files in. This directory
+            should exists before calling. (see utilities.get_directory)
+
+        - `structures`:
+            The list of structures to use as a MigrationImages object.
+        """
+        # !!! The structure input is confusing for users, so I should consider
+        # removing it from the S3Task...
 
         # run some prechecks to make sure the user has everything set up properly.
-        self._pre_checks(structure, directory)
+        self._pre_checks(structures, directory, structure)
 
         # Here, each image (start to end structures) is put inside of its own
         # folder. We make those folders here, where they are named 00, 01, 02...N
@@ -162,7 +211,10 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
             self.potcar_mappings,
         )
 
-    def workup(self, directory):
+    def workup(
+        self,
+        directory: str,
+    ):
 
         # BUG: For now I assume there are start/end image directories are located
         # in the working directory. This bad assumption is made as I'm just quickly

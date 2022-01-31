@@ -26,7 +26,6 @@ class NEBEndpointRelaxation(MITRelaxation):
     incar.update(
         dict(
             ISIF=2,  # hold lattice volume and shape constant
-            EDIFF=5e-5,  # before, this was EDIFF__per_atom
             EDIFFG=-0.02,
             ISMEAR=0,
             ISYM=0,
@@ -36,7 +35,5 @@ class NEBEndpointRelaxation(MITRelaxation):
     )
     # We set ISMEAR=0 and SIGMA above, so we no longer need smart_ismear
     incar.pop("multiple_keywords__smart_ismear")
-    # EDIFF is now a fixed value
-    incar.pop("EDIFF__per_atom")
     # LDA+U is turned off
     incar.pop("multiple_keywords__smart_ldau")

@@ -13,20 +13,47 @@ from pymatgen.analysis.diffusion.neb.pathfinder import (
 from typing import List
 
 
-class MigrationImages:
+class MigrationImages(list):
     """
-    This class is just a list of structures for a diffusion pathway.
+    This class is just a list of structures for a diffusion pathway. It has
+    utility methods to create these structures but otherwise behaves
+    exactly like a python list.
 
     Note, this class is primarily used to generate inputs for calculations. If
     you'd like more advanced features, you should represent your diffusion
-    pathway as a MigrationHop instead.
+    pathway as a MigrationHop instead.As a rule of thumb: Only use this class
+    if you are manually creating your pathway from endpoint supercells or from
+    a set of supercell images.
+
+    All MigrationHop's can be converted to MigrationImages (using the
+    `from_migration_hop` method); but not all MigrationImages can be converted
+    to MigrationHops.
     """
 
-    def __init__(self, migrating_specie: str, structures: List[Structure]):
-        self.migrating_specie = migrating_specie
-        self.structures = structures
+    def __init__(self, structures: List[Structure]):
+        super().__init__(structures)
 
-    def get_sum_structure(self):
+    def get_sum_structure(self, tolerance: float = 1e-3):
+        """
+        Takes all structures and combines them into one. Atoms that are within
+        the given tolerance are joined into a single site.
+
+        This is primarily used to view a diffusing pathway within a single
+        structure -- as well as how the host lattice changes during diffusion.
+        If you are able to convert your pathway to a MigrationHop, the
+        MigrationHop.write_path() method is much faster and cleaner than this
+        method, so it should be preffered. Also, because there are many atoms
+        that are overlapping here, the output structure may cause programs
+        like VESTA to crash.
+
+        Parameters
+        ----------
+
+        - `tolerance`:
+            the angle and distance tolerance to consider fractional coordinates
+            as matching. Matching sites will be merged as 1 site in the final
+            sum structure.
+        """
 
         # OPTIMIZE: this is very inefficient. It's much faster to visualize
         # structures with MigrationHop class because you know which atom is
@@ -34,7 +61,7 @@ class MigrationImages:
         # speed this up by only looking at diffusing species too.
         final_coords = []
         final_species = []
-        for structure in self.structures:
+        for structure in self:  # recall self is a list of structures
             for site in structure:
                 is_new = True
                 for coords in final_coords:
@@ -42,8 +69,8 @@ class MigrationImages:
                         numpy.isclose(
                             site.frac_coords,
                             coords,
-                            rtol=1e-03,
-                            atol=1e-03,
+                            rtol=tolerance,
+                            atol=tolerance,
                         )
                     ):
                         is_new = False
@@ -66,6 +93,37 @@ class MigrationImages:
         min_image_step: float = 0.7,
         require_midpoint: bool = True,
     ):
+        """
+        Gives the desirable number of images (not including start/end structures).
+
+        This method helps generate a MigrationImages object, and typically is
+        not called directly. The other classmethods of MigrationImages call
+        this for you.
+
+        Parameters
+        ----------
+
+        - `pathway_length`:
+            The length of the pathway.
+
+        - `min_image_step`:
+            The minimum step distance for the diffusing atom between images.
+            The default is 0.7 Angstroms. For example, a path 2.8A long would
+            require at least 4 images for this default.
+
+        - `require_midpoint`:
+            Whether there should be an image at the midpoint. In other words,
+            whether the number of images should be odd. This is often important
+            if you expect the transition state to be at the midpoint and you are
+            not running CI-NEB. The default is True.
+
+        Returns
+        -------
+
+        - `nimages`:
+            The number of images to use for this pathway.
+
+        """
         # At a minimum, we want to have images be 0.7 angstroms apart, and
         # with one additional image.
         nimages = pathway_length // min_image_step + 1
@@ -83,14 +141,43 @@ class MigrationImages:
     def from_migration_hop(
         cls,
         migration_hop: MigrationHop,
-        vac_mode: bool = True,
+        vacancy_mode: bool = True,
         min_nsites: int = 80,
         max_nsites: int = 240,
         min_length: int = 10,
+        **kwargs,
     ):
+        """
+        Creates a MigrationImages object from a MigrationHop object
+
+        Parameters
+        ----------
+
+        - `migration_hop`:
+            The MigrationHop object that should be converted.
+
+        - `vacancy_mode`:
+            Whether to use single-vacancy diffusion (True) or interstitial
+            diffusion (False). The default is True.
+
+        - `min_nsites`:
+            The minimum number of sites to have in the supercell structure.
+            The default is 80.
+
+        - `max_nsites`:
+            The maximum number of sites to have in the supercell structure.
+            The default is 240.
+
+        - `min_length`:
+            The minimum length for each vector in the supercell structure.
+            The default is 10 Angstroms.
+
+        - `**kwargs`:
+            Any arguments that are normally accepted by IDPPSolver
+        """
         # The third thing returned is the bulk_supercell which we don't need.
         start_supercell, end_supercell, _ = migration_hop.get_sc_structures(
-            vac_mode=vac_mode,
+            vac_mode=vacancy_mode,
             min_atoms=min_nsites,
             max_atoms=max_nsites,
             min_length=min_length,
@@ -104,6 +191,7 @@ class MigrationImages:
             end_supercell,
             nimages=nimages,
             migrating_specie=str(migration_hop.isite.specie),
+            **kwargs,
         )
 
     @classmethod
@@ -115,38 +203,110 @@ class MigrationImages:
         migrating_specie: str,
         **kwargs,
     ):
+        """
+        Creates a MigrationImages object from start and end supercell structures.
+        You do not need to specify the diffusing atom(s) as all sites are
+        linearly interpolated and then relaxed by IDPP.
+
+        Parameters
+        ----------
+
+        - `structure_start`:
+            The starting supercell of the diffusion pathway.
+
+        - `structure_end`:
+            The ending supercell of the diffusion pathway.
+
+        - `nimages`:
+            The number of desired images for the pathway. Note, if you know the
+            pathway length of your path, you can use the `get_nimages` static
+            method to get a logical number of images.
+
+        - `migrating_specie`:
+            The identity of the diffusing ion (e.g. "Li" or "Li1+"). Note, only
+            provide oxidation state if you are using an oxidation-state decorated
+            structure.
+
+        - `**kwargs`:
+            Any arguments that are normally accepted by IDPPSolver
+        """
         # Run IDPP relaxation on the images before returning them
         idpp_solver = IDPPSolver.from_endpoints(
             [structure_start, structure_end],
             nimages=nimages,
+            **kwargs,
         )
         images = idpp_solver.run()
 
-        return cls(migrating_specie, images)
+        return cls(images)
 
     @classmethod
-    def from_indicies(
+    def from_startend_sites(
         cls,
         structure: Structure,
-        index_start: int,
-        index_end: int,
+        site_start: int,
+        site_end: int,
         **kwargs,
     ):
+        """
+        Creates a MigrationImages object from a bulk structure and start/end
+        periodic sites of the diffusing atom.
+
+        For example, this would allow a diffusion pathway that goes from a site
+        at (0,0,0) to (1,1,1). Thus, symmetry and periodic boundry conditions
+        are considered.
+
+        Note, this method just creates a MigrationHop and then uses the
+        `from_migration_hop` method to make a MigrationImages object.
+
+        Parameters
+        ----------
+        - `structure`:
+            The bulk crystal structure (NOT the supercell).
+
+        - `site_start`:
+            The starting periodic site for this pathway.
+
+        - `site_end`:
+            The end periodic site for this pathway.
+
+        - `**kwargs`:
+            Any arguments that are normally accepted by `from_migration_hop`.
+        """
         # This information is all we need for a MigrationHop object
-        pathway = MigrationHop(index_start, index_end, structure)
-        return cls.from_migration_hop(pathway)
+        pathway = MigrationHop(site_start, site_end, structure)
+        return cls.from_migration_hop(pathway, **kwargs)
 
     @classmethod
     def from_structure(
         cls,
         structure: Structure,
         migrating_specie: str,
-        vac_mode: bool = True,  # vacancy vs. interstitial diffusion
-        min_nsites: int = 80,  # supercell must have at least this many atoms
-        max_nsites: int = 240,  # supercell must NOT have this many atoms
-        min_length: int = 10,  # supercell must have vectors of at least this length
+        pathfinder_kwargs: dict = {},
         **kwargs,
     ):
+        """
+        Given a bulk crystal structure, this will find all symmetrically
+        unique pathways and return them as list of MigrationImages objects.
+
+        Parameters
+        ----------
+
+        - `structure`:
+            The bulk crystal structure (NOT the supercell).
+
+        - `migrating_specie`:
+            The identity of the diffusing ion (e.g. "Li" or "Li1+"). Note, only
+            provide oxidation state if you are using an oxidation-state decorated
+            structure.
+
+        - `pathfinder_kwargs`:
+            Any arguments that are normally accepted by DistinctPathFinder, but
+            given as a dictionary. The default is {}.
+
+        - `**kwargs`:
+            Any arguments that are normally accepted by `from_migration_hop`.
+        """
         # convert to the LLL reduced primitive cell to make it as cubic as possible
         structure_lll = structure.get_sanitized_structure()
 
@@ -157,7 +317,7 @@ class MigrationImages:
         pathfinder = DistinctPathFinder(
             structure_lll,
             migrating_specie=migrating_specie,
-            **kwargs,
+            **pathfinder_kwargs,
         )
         pathways = pathfinder.get_paths()
 
@@ -168,10 +328,7 @@ class MigrationImages:
 
             migration_path = cls.from_migration_hop(
                 migration_hop=pathway,
-                vac_mode=vac_mode,
-                min_nsites=min_nsites,
-                max_nsites=max_nsites,
-                min_length=min_length,
+                **kwargs,
             )
             migration_paths.append(migration_path)
 
