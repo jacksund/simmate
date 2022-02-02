@@ -18,8 +18,6 @@ class Structure(PymatgenStructure):
         Run symmetry analysis and "sanitization" on the pymatgen structure
         """
 
-        # TODO Move this to a Simmate.Structure method in the future
-
         # Make sure we have the primitive unitcell first
         # We choose to use SpagegroupAnalyzer (which uses spglib) rather than pymatgen's
         # built-in Structure.get_primitive_structure function:
@@ -43,3 +41,120 @@ class Structure(PymatgenStructure):
 
         # return back the sanitized structure
         return structure_sanitized
+
+    @classmethod
+    def from_dynamic(cls, structure):
+        """
+        This is an experimental feature.
+
+        Possible structure formats include...
+            object of toolkit structure
+            dictionary of toolkit structure
+            dictionary of...
+                (1) python path to calculation datatable
+                (2) one of the following (only one is used in this priority order):
+                    (a) prefect flow id
+                    (b) calculation id
+                    (c) directory
+                    ** these three are chosen because all three are unique for every
+                    single calculation and we have access to different ones at different
+                    times!
+                (3) (optional) attribute to use on table (e.g. structure_final)
+                    By default, we assume calculation table is also a structure table
+            filename for a structure (cif, poscar, etc.) [TODO]
+        """
+
+        # keep track of this flag too, which we use in the next sections on loading
+        # the directory and source
+        is_from_past_calc = False
+
+        # if the input is already a pymatgen structure, just return it back
+        if isinstance(structure, cls):
+            structure_cleaned = structure
+
+        # if the "@module" key is in the dictionary, then we have a pymatgen
+        # structure dict which we convert to a pymatgen object and return
+        elif isinstance(structure, dict) and "@module" in structure.keys():
+            structure_cleaned = cls.from_dict(structure)
+
+        # if there is a calculation_table key, then we are pointing to the simmate
+        # database for the input structure
+        elif isinstance(structure, dict) and "calculation_table":
+            is_from_past_calc = True
+            structure_cleaned = cls.from_database(structure)
+
+        # Otherwise an incorrect format was given
+        else:
+            raise Exception("Unknown format provided for structure input.")
+
+        # add this attribute to help with error checking in other methods
+        structure_cleaned.is_from_past_calc = is_from_past_calc
+
+        return structure_cleaned
+
+    @classmethod
+    def from_database(cls, structure: dict):
+        """
+        This is an experimental feature.
+
+        Loads a structure from the Simmate database.
+        """
+
+        # because the structure is in the databse, we need to setup django and
+        # make sure we can access the tables
+        from simmate.configuration.django import setup_full
+        from simmate.website.local_calculations import models as all_datatables
+        from django.utils.module_loading import import_string
+
+        # start by loading the datbase table, which is given as a module path
+        datatable_str = structure["calculation_table"]
+
+        # Import the datatable class -- how this is done depends on if it
+        # is from a simmate supplied class or if the user supplied a full
+        # path to the class
+        # OPTIMIZE: is there a better way to do this?
+        if hasattr(all_datatables, datatable_str):
+            datatable = getattr(all_datatables, datatable_str)
+        else:
+            datatable = import_string(datatable_str)
+
+        # These attributes tells us which structure to grab from our datatable.
+        # The user should have only provided one -- if they gave more, we just
+        # use whichever one comes first.
+        prefect_flow_run_id = structure.get("prefect_flow_run_id")
+        calculation_id = structure.get("calculation_id")
+        directory_old = structure.get("directory")
+
+        # we must have either a prefect_flow_run_id or calculation_id
+        if not prefect_flow_run_id and not calculation_id and not directory_old:
+            raise Exception(
+                "You must have either a prefect_flow_run_id, calculation_id, "
+                "or directory provided if you want to load a structure from "
+                "a previous calculation."
+            )
+
+        # now query the datable with which whichever was provided. Each of these
+        # are unique so all three should return a single calculation.
+        if calculation_id:
+            calculation = datatable.objects.get(id=calculation_id)
+        elif prefect_flow_run_id:
+            calculation = datatable.objects.get(
+                prefect_flow_run_id=prefect_flow_run_id,
+            )
+        elif directory_old:
+            calculation = datatable.objects.get(directory=directory_old)
+
+        # In some cases, the structure we want is not within the calculation table.
+        # For example, in relaxations the final structure is attached via
+        # the table.structure_final attribute
+        structure_field = structure.get("structure_field")
+        if structure_field:
+            structure_cleaned = getattr(calculation, structure_field).to_toolkit()
+        # if there's no structure field, that means we already have the correct entry
+        else:
+            structure_cleaned = calculation.to_toolkit()
+
+        # For ease of access, we also link the calculation database entry
+        structure_cleaned.calculation = calculation
+
+        return structure_cleaned
