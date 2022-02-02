@@ -1,165 +1,235 @@
 # -*- coding: utf-8 -*-
 
+"""
+This module is experimental and subject to change.
+"""
+
+
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.toolkit.diffusion import MigrationHop
+from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
 from simmate.database.base_data_types import (
     table_column,
-    DatabaseTable,
     Structure,
-    Forces,
-    Thermodynamics,
-    Calculation,
+    DatabaseTable,
+    StaticEnergy,
 )
 
 
-class DiffusionAnalysis(DatabaseTable):
-    class Meta:
-        abstract = True
-        app_label = "local_calculations"
-
-    barrier = table_column.FloatField()
-    paths_involved = table_column.CharField(max_length=100, blank=True, null=True)
-    npaths_involved = table_column.IntegerField(blank=True, null=True)
-    structure = table_column.OneToOneField(
-        "Structure",
-        on_delete=table_column.PROTECT,
-        primary_key=True,
-        related_name="cell_barrier",
-    )
-
-
-class NudgedElasticBand(Calculation):
-    class Meta:
-        abstract = True
-        app_label = "local_calculations"
-
-    # energy_start = table_column.FloatField(blank=True, null=True)
-    # energy_end = table_column.FloatField(blank=True, null=True)
-    # energy_max = table_column.FloatField(blank=True, null=True)
-    # energy_min = table_column.FloatField(blank=True, null=True)
-
-    energy_barrier = table_column.FloatField(blank=True, null=True)
-
-    # OPTIONAL bc some calcs will be "from_endpoints" or "from_images"
-    pathway = table_column.OneToOneField(
-        "Pathway",
-        on_delete=table_column.CASCADE,
-    )
-
-    # Just like Relaxation points to IonicSteps, NEB will point to MigrationImages
-
-
-class MigrationImage(Structure, Thermodynamics, Forces):
-    class Meta:
-        abstract = True
-        app_label = "local_calculations"
-
-
-class Pathway(DatabaseTable):
+class DiffusionAnalysis(Structure):
     class Meta:
         abstract = True
         app_label = "local_calculations"
 
     # The element of the diffusion atom
-    # Note: do not confuse this with ion, which has charge
-    element = table_column.CharField(max_length=2)
+    migrating_specie = table_column.CharField(max_length=2)
+
+    # Whether vacancy or interstitial diffusion was used
+    vacancy_mode = table_column.BooleanField(blank=True, null=True)
+
+    # atomic fraction of the diffusion ion
+    atomic_fraction = table_column.FloatField(blank=True, null=True)
+
+    # Evaluates all MigrationHops to find the lowest-barrier percolation network
+    barrier_cell = table_column.FloatField(blank=True, null=True)
+    paths_involved = table_column.CharField(max_length=100, blank=True, null=True)
+    npaths_involved = table_column.IntegerField(blank=True, null=True)
+
+    # has many MigrationHops
+
+    @classmethod
+    def from_toolkit(
+        cls,
+        migrating_specie: str,
+        vacancy_mode: bool,
+        as_dict: bool = False,
+        **kwargs,
+    ):
+        # the algorithm doesn't change for this method, but we do want to add
+        # a few extra columns. Therefore we make the dictionary as normal and
+        # then add those extra columns here.
+        structure_dict = super().from_toolkit(as_dict=True, **kwargs)
+
+        # now add the two extra columns
+        structure_dict["migrating_specie"] = migrating_specie
+        # Structure should be present -- otherwise an error would have been
+        # raised by the call to super()
+        structure_dict["atomic_fraction"] = kwargs[
+            "structure"
+        ].composition.get_atomic_fraction(migrating_specie)
+
+        # If as_dict is false, we build this into an Object. Otherwise, just
+        # return the dictionary
+        return structure_dict if as_dict else cls(**structure_dict)
+
+    @classmethod
+    def create_subclasses(
+        cls,
+        name: str,
+        module: str,
+        **extra_columns,
+    ):
+        """
+        Dynamically creates a subclass of Relaxation as well as a separate IonicStep
+        table for it. These tables are linked together.
+
+        Example use:
+
+        ``` python
+        from simmate.database.base_data_types import Relaxation
+
+        # note the odd formatting here is just because we are parsing three
+        # outputs from this method to three variables.
+        (
+            ExampleDiffusionAnalysis,
+            ExampleMigrationHop,
+            ExampleMigrationImage,
+        ) = DiffusionAnalysis.create_subclasses(
+            "Example",
+            module=__name__,
+        )
+        ```
+
+        Parameters
+        ----------
+        - `name` :
+            The prefix name of the subclasses that are output. "Relaxation" and
+            "IonicStep" will be attached to the end of this prefix.
+
+        - `module` :
+            name of the module this subclass should be associated with. Typically,
+            you should pass __name__ to this.
+
+        - `**extra_columns` :
+            Additional columns to add to the table. The keyword will be the
+            column name and the value should match django options
+            (e.g. table_column.FloatField())
+
+        Returns
+        -------
+        - `NewDiffusionAnalysisClass` :
+            A subclass of DiffusionAnalysis.
+        - `NewMigrationHopClass`:
+            A subclass of MigrationHop.
+        - `NewMigrationHopClass`:
+            A subclass of MigrationHop.
+        """
+
+        # For convience, we add columns that point to the start and end structures
+        NewDiffusionAnalysisClass = cls.create_subclass(
+            f"{name}DiffusionAnalysis",
+            module=module,
+            **extra_columns,
+        )
+
+        (
+            NewMigrationHopClass,
+            NewMigrationImageClass,
+        ) = MigrationHop.create_subclasses_from_diffusion_analysis(
+            name,
+            NewDiffusionAnalysisClass,
+            module=module,
+            **extra_columns,
+        )
+
+        # we now have a new child class and avoided writing some boilerplate code!
+        return NewDiffusionAnalysisClass, NewMigrationHopClass, NewMigrationImageClass
+
+
+class MigrationHop(DatabaseTable):
+    class Meta:
+        abstract = True
+        app_label = "local_calculations"
 
     # the initial, midpoint, and end site fractional coordinates
     # Really, this is a list of float values, but I save it as a string.
     # !!! for robustness, should I save cartesian coordinates and/or lattice as well?
     # !!! Does the max length make sense here and below?
-    isite = table_column.CharField(max_length=100)
-    esite = table_column.CharField(max_length=100)
+    # !!! I could also store as JSON since it's a list of coords.
+    site_start = table_column.CharField(max_length=100, blank=True, null=True)
+    site_end = table_column.CharField(max_length=100, blank=True, null=True)
 
-    # pathway dimensionality
-    dimension_path = table_column.IntegerField(blank=True, null=True)
-    dimension_host_lattice = table_column.IntegerField(blank=True, null=True)
+    # BUG: the init script for MigrationHop can't identify the site indexes
+    # properly but they should be the same as before because it is a symmetrized
+    # structure. Note that even if I'm wrong in some case -- this will have
+    # no effect because iindex and eindex are only used in one portion of
+    # the hash as well as for printing the __str__ of the object.
+    index_start = table_column.IntegerField(blank=True, null=True)
+    index_end = table_column.IntegerField(blank=True, null=True)
 
     """ Query-helper Info """
 
     # TODO:
     # The expected index in DistinctPathFinder.get_paths. The shortest path is index 0
-    # and they are all ordered by increasing length
-    # index is a reserved keyword so I need to use dpf_index
-    # dpf_index = models.IntegerField()
+    # and they are all ordered by increasing length.
+    number = table_column.IntegerField(blank=True, null=True)
 
     # The length/distance of the pathway from start to end (linear measurement)
     length = table_column.FloatField()
+
+    # pathway dimensionality
+    dimension_path = table_column.IntegerField(blank=True, null=True)
+    dimension_host_lattice = table_column.IntegerField(blank=True, null=True)
+
+    # Evaluates all MigrationImages to find the barriers
+    energy_barrier = table_column.FloatField(blank=True, null=True)
 
     # TODO:
     # Distance of the pathway relative to the shortest pathway distance
     # in the structure using the formula: (D - Dmin)/Dmin
     # distance_rel_min = models.FloatField()
 
-    # atomic fraction of the diffusion ion
-    atomic_fraction = table_column.FloatField()
-
     """ Relationships """
-    # Each Pathway corresponds to one Structure, which can have many Pathway(s)
-    structure = table_column.ForeignKey(
-        # MaterialsProjectStructure,
-        on_delete=table_column.CASCADE,
-        related_name="pathways",
-    )
+    # Each MigrationHop corresponds to the full analysis of one Structure, which
+    # can have many MigrationHop(s)
+    # diffusion_analysis = table_column.ForeignKey(
+    #     # DiffusionAnalysis,
+    #     on_delete=table_column.PROTECT,
+    #     related_name="migration_hops",
+    # )
 
-    # Each Pathway will map to a row in the PathwayCalcs table. I keep this separate
-    # for organization, though I could also move it here if I'd like
+    # TODO:
+    # image_start --> OneToOneField for specific MigrationHop
+    # image_end --> OneToOneField for specific MigrationHop
+    # image_transition_state --> OneToOneField for specific MigrationHop
+
+    # Just like Relaxation points to IonicSteps, NEB will point to MigrationImages
 
     """ Model Methods """
     # TODO: If I want a queryset to return a pymatgen-diffusion object(s) directly,
     # then I need make a new Manager rather than adding methods here.
 
     @classmethod
-    def from_pymatgen(cls, path, structure_id):
-
-        # In this table we store some extra info which we need to calculate first
-        # iterate through supercell sizes and grab the nsites for each cell size
-        min_superlattice_vectors = [7, 10, 12]
-        nsites_supercells = []
-        for min_sl_v in min_superlattice_vectors:
-            supercell = path.symm_structure.copy()
-            supercell_size = [
-                (min_sl_v // length) + 1 for length in supercell.lattice.lengths
-            ]
-            supercell.make_supercell(supercell_size)
-            nsites_supercells.append(supercell.num_sites)
-        nsites_777, nsites_101010, nsites_121212 = nsites_supercells
+    def _from_toolkit(
+        cls,
+        migration_hop: ToolkitMigrationHop,
+        as_dict: bool = False,
+        number: int = None,
+        **kwargs,
+    ):
 
         # convert the pathway object into the database table format
-        pathway_db = cls(
-            element=path.isite.specie,  # BUG: TODO: this should be element, not specie
-            isite=" ".join(str(c) for c in path.isite.frac_coords),
-            msite=" ".join(str(c) for c in path.msite.frac_coords),
-            esite=" ".join(str(c) for c in path.esite.frac_coords),
-            iindex=path.iindex,
-            eindex=path.eindex,
-            # dpf_index=path.dpf_index, # TODO
-            length=path.length,
-            # distance_rel_min = path.distance_rel_min, # TODO
-            atomic_fraction=path.symm_structure.composition.get_atomic_fraction(
-                path.isite.specie
-            ),
-            nsites_777=nsites_777,
-            nsites_101010=nsites_101010,
-            nsites_121212=nsites_121212,
-            # OPTIMIZE: will this function still work if I only grab the pk value?
-            # structure=MaterialsProjectStructure.objects.get(pk=structure_pk),
-            structure_id=structure_id,
+        hop_dict = dict(
+            site_start=" ".join(str(c) for c in migration_hop.isite.frac_coords),
+            site_end=" ".join(str(c) for c in migration_hop.esite.frac_coords),
+            index_start=migration_hop.iindex,
+            index_end=migration_hop.eindex,
+            length=migration_hop.length,
+            # diffusion_analysis_id=diffusion_analysis_id,
+            **kwargs,
         )
 
-        return pathway_db
+        # If as_dict is false, we build this into an Object. Otherwise, just
+        # return the dictionary
+        return hop_dict if as_dict else cls(**hop_dict)
 
-    def to_pymatgen(self):
-        # converts the django object to a pymatgen-diffusion MigrationHop
-
-        # grab the related structure as a pymatgen object
-        # OPTIMIZE: this makes an extra database query if structure isn't already
-        # loaded. You can improve the efficiency of this call by having loaded
-        # the self.structure.structure_json beforehand. You can do this with:
-        #   path_db = Pathway.objects.get_related("structure__structure_json").get(id=1)
-        structure = self.structure.to_pymatgen()
+    def to_toolkit(self):
+        """
+        converts the database MigrationHop to a toolkit MigrationHop
+        """
+        # The bulk crystal structure is stored in the diffusion analysis table
+        structure = self.diffusion_analysis.to_toolkit()
 
         # pathways require a symmetrized structure
         # BUG: I need to ensure the symmetrized structure comes out the same
@@ -168,24 +238,141 @@ class Pathway(DatabaseTable):
         symm_structure = sga.get_symmetrized_structure()
 
         isite_new = PeriodicSite(
-            species=self.element,
-            coords=[float(x) for x in self.isite.split(" ")],
+            species=self.diffusion_analysis.migrating_specie,
+            coords=[float(x) for x in self.site_start.split(" ")],
             lattice=symm_structure.lattice,
         )
         esite_new = PeriodicSite(
-            species=self.element,
-            coords=[float(x) for x in self.esite.split(" ")],
+            species=self.diffusion_analysis.migrating_specie,
+            coords=[float(x) for x in self.site_end.split(" ")],
             lattice=symm_structure.lattice,
         )
 
-        path = MigrationHop(isite_new, esite_new, symm_structure)
-        # BUG: the init script for MigrationPath can't identify the site indexes
-        # properly but they should be the same as before because it is a symmetrized
-        # structure. Note that even if I'm wrong in some case -- this will have
-        # no effect because iindex and eindex are only used in one portion of
-        # the hash as well as for printing the __str__ of the object.
-        path.iindex = self.iindex
-        path.eindex = self.eindex
+        path = ToolkitMigrationHop(isite_new, esite_new, symm_structure)
+        # BUG: see comment attached to definition of these fields
+        path.iindex = self.index_start
+        path.eindex = self.index_end
 
         # if the pathways match, then we can return the pathway object!
         return path
+
+    @classmethod
+    def create_subclasses_from_diffusion_analysis(
+        cls,
+        name: str,
+        diffusion_analysis: DiffusionAnalysis,
+        module: str,
+        **extra_columns,
+    ):
+        """
+        Dynamically creates subclass of MigrationHop and MigrationImage, then
+        links them to the DiffusionAnalysis table.
+
+        This method should NOT be called directly because it is instead used by
+        `DiffusionAnalysis.create_subclasses`.
+
+        Parameters
+        ----------
+        - `name` :
+            Name of the subclass that is output.
+        - `diffusion_analysis` :
+            DiffusionAnalysis table that these subclasses should be associated with.
+        - `module` :
+            name of the module this subclass should be associated with. Typically,
+            you should pass __name__ to this.
+        - `**extra_columns` :
+            Additional columns to add to the table. The keyword will be the
+            column name and the value should match django options
+            (e.g. table_column.FloatField())
+
+        Returns
+        -------
+        - `NewMigrationHopClass`:
+            A subclass of MigrationHop.
+        - `NewMigrationHopClass`:
+            A subclass of MigrationHop.
+        """
+
+        NewMigrationHopClass = cls.create_subclass(
+            f"{name}MigrationHop",
+            diffusion_analysis=table_column.ForeignKey(
+                diffusion_analysis,
+                on_delete=table_column.CASCADE,
+                related_name="migration_hops",
+            ),
+            module=module,
+            **extra_columns,
+        )
+
+        NewMigrationImageClass = MigrationImage.create_subclass_from_migration_hop(
+            name,
+            NewMigrationHopClass,
+            module=module,
+            **extra_columns,
+        )
+
+        return NewMigrationHopClass, NewMigrationImageClass
+
+
+# OPTIMIZE: Perhaps we can remove columns from this class like energy_above_hull.
+# There are many extra columns that will likely never be used here.
+class MigrationImage(StaticEnergy):
+    class Meta:
+        abstract = True
+        app_label = "local_calculations"
+
+    # 0 = start, -1 = end.
+    number = table_column.IntegerField()
+
+    def update_many_from_vasprun(self):
+        # StaticEnergy.update_from_vasp_run but adjusted to load a NEB vasprun
+        pass
+
+    @classmethod
+    def create_subclass_from_migration_hop(
+        cls,
+        name: str,
+        migration_hop: MigrationHop,
+        module: str,
+        **extra_columns,
+    ):
+        """
+        Dynamically creates subclass of MigrationImage, then links it to the
+        MigrationHop table.
+
+        This method should NOT be called directly because it is instead used by
+        `DiffusionAnalysis.create_subclasses`.
+
+        Parameters
+        ----------
+        - `name` :
+            Name of the subclass that is output.
+        - `migration_hop` :
+            MigrationHop table that these images should be associated with.
+        - `module` :
+            name of the module this subclass should be associated with. Typically,
+            you should pass __name__ to this.
+        - `**extra_columns` :
+            Additional columns to add to the table. The keyword will be the
+            column name and the value should match django options
+            (e.g. table_column.FloatField())
+
+        Returns
+        -------
+        - `NewClass` :
+            A subclass of MigrationImage.
+
+        """
+
+        NewClass = cls.create_subclass(
+            f"{name}MigrationImage",
+            migration_hop=table_column.ForeignKey(
+                migration_hop,
+                on_delete=table_column.CASCADE,
+                related_name="migration_images",
+            ),
+            module=module,
+            **extra_columns,
+        )
+
+        return NewClass

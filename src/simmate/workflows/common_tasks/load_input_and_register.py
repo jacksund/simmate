@@ -20,8 +20,8 @@ from typing import Tuple
 
 
 class LoadInputAndRegister(Task):
-    def __init__(self, calculation_table, **kwargs):
-        self.calculation_table = calculation_table
+    def __init__(self, calculation_table=None, **kwargs):
+        self.calculation_table = calculation_table  # If None, registration is skipped
         super().__init__(**kwargs)
 
     def run(
@@ -184,19 +184,23 @@ class LoadInputAndRegister(Task):
 
         # Register the calculation so the user can follow along in the UI.
 
-        # load/create the calculation for this workflow run
-        calculation = self.calculation_table.from_prefect_id(
-            prefect.context.flow_run_id,
-            # We pass the initial structure in case the calculation wasn't created
-            # yet (and creation requires the structure)
-            structure=structure_cleaned,
-            # BUG: what if the initial structure changed? An example of this happening
-            # is with a relaxation where a correction was applied and the calc
-            # was not fully restarted. This issue also will not matter when
-            # workflows are ran through cloud -- as the structure is already
-            # saved and won't be overwritten here.
-            source=source_cleaned,
-        )
+        # This is only done if a table is provided. Some special-case workflows
+        # don't store calculation information bc the flow is just a quick python
+        # analysis.
+        if self.calculation_table:
+            # load/create the calculation for this workflow run
+            calculation = self.calculation_table.from_prefect_id(
+                prefect.context.flow_run_id,
+                # We pass the initial structure in case the calculation wasn't created
+                # yet (and creation requires the structure)
+                structure=structure_cleaned,
+                # BUG: what if the initial structure changed? An example of this happening
+                # is with a relaxation where a correction was applied and the calc
+                # was not fully restarted. This issue also will not matter when
+                # workflows are ran through cloud -- as the structure is already
+                # saved and won't be overwritten here.
+                source=source_cleaned,
+            )
 
         # -------------------------------------------------------------------------
 

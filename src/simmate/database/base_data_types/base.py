@@ -305,7 +305,7 @@ class DatabaseTable(models.Model):
         #   https://stackoverflow.com/questions/59912684/
         # sys._getframe(1).f_globals["__name__"]  <-- grabs where this function is called
         # but doesn't work for multiple levels of inheritance. For example, this fails for
-        # the Relaxation subclasses because the create_all_subclasses method calls
+        # the Relaxation subclasses because the create_subclasses method calls
         # create_subclass -- therefore we'd need _getframe(3) instead of 1...
 
         # Now we dynamically create a new class that inherits from this main
@@ -351,9 +351,12 @@ class DatabaseTable(models.Model):
         # initialization? For example, I would want to pass `energy` but I wouldn't
         # want to pass the toolkit structure object. I may update this line in
         # the future to remove python objects. For now, I only remove structure
-        # becauase I know that it is a toolkit object -- not a database column
+        # and migration_hop because I know that it is a toolkit object -- not
+        # a database column.
         all_data = kwargs.copy()
-        all_data.pop("structure", None)  # None ignores error if structure not present
+        # None ignores error if key is not present
+        all_data.pop("structure", None)
+        all_data.pop("migration_hop", None)
 
         for parent in parents:
 

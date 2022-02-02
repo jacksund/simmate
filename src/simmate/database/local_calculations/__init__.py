@@ -31,6 +31,12 @@ from simmate.calculators.vasp.database.energy import (
     NEBEndpointStaticEnergy,
 )
 
+from simmate.calculators.vasp.database.nudged_elastic_band import (
+    MITDiffusionAnalysis,
+    MITMigrationHop,
+    MITMigrationImage,
+)
+
 from simmate.toolkit.structure_prediction.evolution.database import (
     EvolutionarySearch,
     StructureSource,

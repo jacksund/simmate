@@ -17,4 +17,4 @@ these database tables and/or adds new custom columns.
 
 from simmate.database.local_calculations import Relaxation
 
-MITRelaxation, MITIonicStep = Relaxation.create_all_subclasses("MIT", module=__name__)
+MITRelaxation, MITIonicStep = Relaxation.create_subclasses("MIT", module=__name__)

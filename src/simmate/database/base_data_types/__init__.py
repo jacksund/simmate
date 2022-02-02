@@ -15,3 +15,5 @@ from .thermodynamics import Thermodynamics
 from .static_energy import StaticEnergy
 from .relaxation import Relaxation
 from .calculation_nested import NestedCalculation
+
+from .nudged_elastic_band import DiffusionAnalysis

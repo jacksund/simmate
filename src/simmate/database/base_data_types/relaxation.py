@@ -13,7 +13,7 @@ This module helps you create tables to results from structure relaxations
 (aka geometry optimizations). This will store all ionic steps and the forces/stress
 associated with each step.
 
-When creating new tables for Relaxations, you should use the `Relaxation.create_all_subclasses` method, which helps remove all the 
+When creating new tables for Relaxations, you should use the `Relaxation.create_subclasses` method, which helps remove all the 
 boilerplate code needed. For Django users, it may be tricky to understand what's
 happening behind the scenes, so here's an example:
     
@@ -22,7 +22,7 @@ These two lines...
 ``` python 
 from simmate.database.base_data_types import Relaxation
 
-ExampleRelaxation, ExampleIonicStep = Relaxation.create_all_subclasses(
+ExampleRelaxation, ExampleIonicStep = Relaxation.create_subclasses(
     "Example",
     module=__name__,
 )
@@ -125,7 +125,7 @@ class Relaxation(Structure, Calculation):
     # structures --> gives list of all IonicSteps
 
     @classmethod
-    def create_all_subclasses(cls, name: str, module: str, **extra_columns):
+    def create_subclasses(cls, name: str, module: str, **extra_columns):
         """
         Dynamically creates a subclass of Relaxation as well as a separate IonicStep
         table for it. These tables are linked together.
@@ -135,7 +135,7 @@ class Relaxation(Structure, Calculation):
         ``` python
         from simmate.database.base_data_types import Relaxation
 
-        ExampleRelaxation, ExampleIonicStep = Relaxation.create_all_subclasses(
+        ExampleRelaxation, ExampleIonicStep = Relaxation.create_subclasses(
             "Example",
             module=__name__,
         )
@@ -409,7 +409,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
         table.
 
         This method should NOT be called directly because it is instead used by
-        `Relaxation.create_all_subclasses`.
+        `Relaxation.create_subclasses`.
 
         Parameters
         ----------

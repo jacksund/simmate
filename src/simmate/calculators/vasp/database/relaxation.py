@@ -19,39 +19,39 @@ from simmate.database.base_data_types import Relaxation, NestedCalculation
 # is only HOW the relaxation was ran (i.e. the VASP settings used), which is
 # why we store them in separate tables.
 
-MITRelaxation, MITIonicStep = Relaxation.create_all_subclasses("MIT", module=__name__)
+MITRelaxation, MITIonicStep = Relaxation.create_subclasses("MIT", module=__name__)
 
 (
     MatProjRelaxation,
     MatProjIonicStep,
-) = Relaxation.create_all_subclasses("MatProj", module=__name__)
+) = Relaxation.create_subclasses("MatProj", module=__name__)
 
-NEBEndpointRelaxation, NEBEndpointIonicStep = Relaxation.create_all_subclasses(
+NEBEndpointRelaxation, NEBEndpointIonicStep = Relaxation.create_subclasses(
     "NEBEndpoint",
     module=__name__,
 )
 
-Quality00Relaxation, Quality00IonicStep = Relaxation.create_all_subclasses(
+Quality00Relaxation, Quality00IonicStep = Relaxation.create_subclasses(
     "Quality00",
     module=__name__,
 )
 
-Quality01Relaxation, Quality01IonicStep = Relaxation.create_all_subclasses(
+Quality01Relaxation, Quality01IonicStep = Relaxation.create_subclasses(
     "Quality01",
     module=__name__,
 )
 
-Quality02Relaxation, Quality02IonicStep = Relaxation.create_all_subclasses(
+Quality02Relaxation, Quality02IonicStep = Relaxation.create_subclasses(
     "Quality02",
     module=__name__,
 )
 
-Quality03Relaxation, Quality03IonicStep = Relaxation.create_all_subclasses(
+Quality03Relaxation, Quality03IonicStep = Relaxation.create_subclasses(
     "Quality03",
     module=__name__,
 )
 
-Quality04Relaxation, Quality04IonicStep = Relaxation.create_all_subclasses(
+Quality04Relaxation, Quality04IonicStep = Relaxation.create_subclasses(
     "Quality04",
     module=__name__,
 )
