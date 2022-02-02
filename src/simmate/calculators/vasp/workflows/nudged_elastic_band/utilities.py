@@ -6,13 +6,17 @@
 import os
 
 from simmate.toolkit import Structure
-from simmate.toolkit.diffusion import DistinctPathFinder, MigrationHop
+from simmate.toolkit.diffusion import (
+    DistinctPathFinder,
+    MigrationHop,
+    MigrationImages,
+)
 
 from simmate.database.base_data_types import DiffusionAnalysis
 
-from simmate.workflow_engine.workflow import Task
+from simmate.workflow_engine.workflow import Task, task
 
-from typing import List
+from typing import List, Tuple
 
 
 class BuildDiffusionAnalysisTask(Task):
@@ -56,7 +60,11 @@ class BuildDiffusionAnalysisTask(Task):
 
         structure_cleaned = Structure.from_dynamic(structure)
 
-        pathfinder = DistinctPathFinder(structure_cleaned, migrating_specie, **kwargs)
+        pathfinder = DistinctPathFinder(
+            structure_cleaned,
+            migrating_specie,
+            **kwargs,
+        )
         migration_hops = pathfinder.get_paths()
 
         # We write all the path files so users can visualized them if needed
@@ -102,3 +110,35 @@ class BuildDiffusionAnalysisTask(Task):
         # Once this is all done, return the Migration hop ____ entries.
         # We do this instead of the ____ objects because ...
         return hop_ids
+
+
+@task(nout=2)
+def get_endpoint_structures(migration_hop: MigrationHop) -> Tuple[Structure]:
+    """
+    Simple wrapper for get_sc_structures method that makes it a Prefect task.
+    I assume parameters for now
+    """
+    start_supercell, end_supercell, _ = migration_hop.get_sc_structures(
+        vac_mode=True,
+    )
+    return start_supercell, end_supercell
+
+
+@task
+def get_migration_images_from_endpoints(supercell_start, supercell_end):
+    """
+    Simple wrapper for from_endpoints method that makes it a Prefect task.
+    I assume parameters for now.
+    """
+
+    # Make sure we have toolkit objects, and if not, convert them
+    supercell_start_cleaned = Structure.from_dynamic(supercell_start)
+    supercell_end_cleaned = Structure.from_dynamic(supercell_end)
+
+    images = MigrationImages.from_endpoints(
+        structure_start=supercell_start_cleaned,
+        structure_end=supercell_end_cleaned,
+        nimages=7,  # TODO: have from_endpoints figure out pathway length
+    )
+
+    return images

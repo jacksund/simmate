@@ -69,7 +69,7 @@ class Structure(PymatgenStructure):
         is_from_past_calc = False
 
         # if the input is already a pymatgen structure, just return it back
-        if isinstance(structure, cls):
+        if isinstance(structure, PymatgenStructure):
             structure_cleaned = structure
 
         # if the "@module" key is in the dictionary, then we have a pymatgen
@@ -85,7 +85,10 @@ class Structure(PymatgenStructure):
 
         # Otherwise an incorrect format was given
         else:
-            raise Exception("Unknown format provided for structure input.")
+            raise Exception(
+                "Unknown format provided for structure input. "
+                f"{type(structure)} was provided."
+            )
 
         # add this attribute to help with error checking in other methods
         structure_cleaned.is_from_past_calc = is_from_past_calc

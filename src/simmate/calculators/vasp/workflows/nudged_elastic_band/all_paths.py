@@ -12,8 +12,8 @@ simmate-task-12345/  # determined by simmate.utilities.get_directory
     ├── migration_hop_01
     ...
     └── migration_hop_N  # all migration_hop folders have the same structure
-        ├── endpoint_relaxation_end
         ├── endpoint_relaxation_start
+        ├── endpoint_relaxation_end
         ├── 01
         ├── 02
         ├── 03
@@ -38,7 +38,6 @@ from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
 )
 from simmate.calculators.vasp.workflows.relaxation import (
     mit_workflow as relaxation_mit_workflow,
-    neb_endpoint_workflow as relaxation_neb_endpoint_workflow,
 )
 from simmate.calculators.vasp.workflows.energy import (
     mit_workflow as energy_mit_workflow,
@@ -51,7 +50,7 @@ from simmate.calculators.vasp.database.nudged_elastic_band import (
 # Convert our workflow objects to task objects
 relax_bulk = relaxation_mit_workflow.to_workflow_task()
 energy_bulk = energy_mit_workflow.to_workflow_task()
-relax_endpoint = relaxation_neb_endpoint_workflow.to_workflow_task()
+
 
 # Extra setup tasks
 load_input_and_register = LoadInputAndRegister()  # TODO: make DiffusionAnalysis a calc?
@@ -80,18 +79,18 @@ with Workflow("NEB (for all unique pathways)") as workflow:
     # Load our input and make a base directory for all other workflows to run
     # within for us.
     structure_toolkit, directory_cleaned = load_input_and_register(
-        structure,
-        source,
-        directory,
+        input_obj=structure,
+        source=source,
+        directory=directory,
     )
 
     # Our step is to run a relaxation on the bulk structure and it uses our inputs
     # directly. The remaining one tasks pass on results.
-    # run_id_00 = relax_bulk(
-    #     structure=structure_toolkit,
-    #     command=subcommands["command_bulk"],
-    #     directory=directory_cleaned + os.path.sep + "bulk_relaxation",
-    # )
+    run_id_00 = relax_bulk(
+        structure=structure_toolkit,
+        command=subcommands["command_bulk"],
+        directory=directory_cleaned + os.path.sep + "bulk_relaxation",
+    )
 
     # A static energy calculation on the relaxed structure. This isn't necessarily
     # required for NEB, but it takes very little time.

@@ -262,7 +262,6 @@ class MigrationImages(list):
         structure_start: Structure,
         structure_end: Structure,
         nimages: int,
-        migrating_specie: str,
         **kwargs,
     ):
         """
@@ -284,14 +283,10 @@ class MigrationImages(list):
             pathway length of your path, you can use the `get_nimages` static
             method to get a logical number of images.
 
-        - `migrating_specie`:
-            The identity of the diffusing ion (e.g. "Li" or "Li1+"). Note, only
-            provide oxidation state if you are using an oxidation-state decorated
-            structure.
-
         - `**kwargs`:
             Any arguments that are normally accepted by IDPPSolver
         """
+
         # Run IDPP relaxation on the images before returning them
         idpp_solver = IDPPSolver.from_endpoints(
             [structure_start, structure_end],
