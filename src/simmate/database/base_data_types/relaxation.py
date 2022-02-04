@@ -275,9 +275,7 @@ class Relaxation(Structure, Calculation):
     def get_convergence_plot(self):
 
         # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = self.structures.order_by(
-            "ionic_step_number"
-        ).to_dataframe()
+        structures_dataframe = self.structures.order_by("number").to_dataframe()
 
         # We will be making a figure that consists of 3 stacked subplots that
         # all share the x-axis of ionic_step_number
@@ -290,7 +288,7 @@ class Relaxation(Structure, Calculation):
         # Generate a plot for Energy (per atom)
         figure.add_trace(
             plotly_go.Scatter(
-                x=structures_dataframe["ionic_step_number"],
+                x=structures_dataframe["number"],
                 y=structures_dataframe["energy_per_atom"],
             ),
             row=1,
@@ -300,7 +298,7 @@ class Relaxation(Structure, Calculation):
         # Generate a plot for Forces (norm per atom)
         figure.add_trace(
             plotly_go.Scatter(
-                x=structures_dataframe["ionic_step_number"],
+                x=structures_dataframe["number"],
                 y=structures_dataframe["site_forces_norm_per_atom"],
             ),
             row=2,
@@ -310,7 +308,7 @@ class Relaxation(Structure, Calculation):
         # Generate a plot for Stress (norm per atom)
         figure.add_trace(
             plotly_go.Scatter(
-                x=structures_dataframe["ionic_step_number"],
+                x=structures_dataframe["number"],
                 y=structures_dataframe["lattice_stress_norm_per_atom"],
             ),
             row=3,
@@ -370,10 +368,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
         app_label = "local_calculations"
 
     base_info = (
-        ["ionic_step_number"]
-        + Structure.base_info
-        + Thermodynamics.base_info
-        + Forces.base_info
+        ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
     )
     """
     The base information for this database table. All other columns can be calculated
@@ -385,7 +380,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
     # ensure this.
 
     # This is ionic step number for the given relaxation. This starts counting from 0.
-    ionic_step_number = table_column.IntegerField()
+    number = table_column.IntegerField()
 
     """ Relationships """
     # each of these will map to a Relaxation, so you should typically access this

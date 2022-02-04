@@ -47,14 +47,14 @@ def s3task_to_workflow(
         directory = Parameter("directory", default=None)
         use_previous_directory = Parameter("use_previous_directory", default=False)
 
-        structure_pmg, directory_cleaned = load_input_and_register(
+        structure_toolkit, directory_cleaned = load_input_and_register(
             input_obj=structure,
             source=source,
             directory=directory,
             use_previous_directory=use_previous_directory,
         )
         output = s3task_obj(
-            structure=structure_pmg,
+            structure=structure_toolkit,
             command=command,
             directory=directory_cleaned,
         )

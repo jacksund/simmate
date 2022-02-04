@@ -11,9 +11,8 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
 from simmate.database.base_data_types import (
     table_column,
-    Structure,
     DatabaseTable,
-    StaticEnergy,
+    Structure,
 )
 
 
@@ -23,7 +22,7 @@ class DiffusionAnalysis(Structure):
         app_label = "local_calculations"
 
     # The element of the diffusion atom
-    migrating_specie = table_column.CharField(max_length=2)
+    migrating_specie = table_column.CharField(max_length=4, blank=True, null=True)
 
     # Whether vacancy or interstitial diffusion was used
     vacancy_mode = table_column.BooleanField(blank=True, null=True)
@@ -36,13 +35,11 @@ class DiffusionAnalysis(Structure):
     paths_involved = table_column.CharField(max_length=100, blank=True, null=True)
     npaths_involved = table_column.IntegerField(blank=True, null=True)
 
-    # has many MigrationHops
-
     @classmethod
     def from_toolkit(
         cls,
-        migrating_specie: str,
-        vacancy_mode: bool,
+        migrating_specie: str = None,
+        vacancy_mode: bool = None,
         as_dict: bool = False,
         **kwargs,
     ):
@@ -55,9 +52,11 @@ class DiffusionAnalysis(Structure):
         structure_dict["migrating_specie"] = migrating_specie
         # Structure should be present -- otherwise an error would have been
         # raised by the call to super()
-        structure_dict["atomic_fraction"] = kwargs[
-            "structure"
-        ].composition.get_atomic_fraction(migrating_specie)
+        structure_dict["atomic_fraction"] = (
+            kwargs["structure"].composition.get_atomic_fraction(migrating_specie)
+            if migrating_specie
+            else None
+        )
 
         # If as_dict is false, we build this into an Object. Otherwise, just
         # return the dictionary
@@ -137,6 +136,8 @@ class DiffusionAnalysis(Structure):
         return NewDiffusionAnalysisClass, NewMigrationHopClass, NewMigrationImageClass
 
 
+# TODO: consider making a Calculation bc this is what the corrections/directory
+# information should be attached to.
 class MigrationHop(DatabaseTable):
     class Meta:
         abstract = True
@@ -166,7 +167,7 @@ class MigrationHop(DatabaseTable):
     number = table_column.IntegerField(blank=True, null=True)
 
     # The length/distance of the pathway from start to end (linear measurement)
-    length = table_column.FloatField()
+    length = table_column.FloatField(blank=True, null=True)
 
     # pathway dimensionality
     dimension_path = table_column.IntegerField(blank=True, null=True)
@@ -224,6 +225,10 @@ class MigrationHop(DatabaseTable):
         # return the dictionary
         return hop_dict if as_dict else cls(**hop_dict)
 
+    # BUG: because of rounding in the from_toolkit method, the get_sc_structures
+    # is unable to identify equivalent sites. I opened an issue for this
+    # with their team:
+    #   https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion/issues/296
     def to_toolkit(self):
         """
         converts the database MigrationHop to a toolkit MigrationHop
@@ -314,17 +319,39 @@ class MigrationHop(DatabaseTable):
         return NewMigrationHopClass, NewMigrationImageClass
 
 
-# OPTIMIZE: Perhaps we can remove columns from this class like energy_above_hull.
-# There are many extra columns that will likely never be used here.
-class MigrationImage(StaticEnergy):
+class MigrationImage(Structure):
     class Meta:
         abstract = True
         app_label = "local_calculations"
 
+    base_info = [
+        "number",
+        "structure_string",
+        "force_tangent",
+        "structure_distance",
+        "energy",
+    ]
+
     # 0 = start, -1 = end.
     number = table_column.IntegerField()
 
-    def update_many_from_vasprun(self):
+    # Diffusion analysis given a tangent force, so we don't mix this up with the
+    # Force mix-in.
+    force_tangent = table_column.FloatField(blank=True, null=True)
+
+    # For NEB, we only care about the total energy -- not the other fields that
+    # the Thermodynamics mix-in provides.
+    energy = table_column.FloatField(blank=True, null=True)
+
+    # This measures the fingerprint distance of the image from the starting image
+    structure_distance = table_column.FloatField(blank=True, null=True)
+
+    # We don't need the source column for the MigrationImage class because we
+    # instead stored on the DiffusionAnalysis object. This line deletes the
+    # source could from our Structure mix-in.
+    source = None
+
+    def update_many_from_analysis(self):
         # StaticEnergy.update_from_vasp_run but adjusted to load a NEB vasprun
         pass
 

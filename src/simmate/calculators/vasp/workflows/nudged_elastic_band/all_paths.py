@@ -24,8 +24,11 @@ simmate-task-12345/  # determined by simmate.utilities.get_directory
 
 import os
 
+from prefect import apply_map, unmapped
+
 from simmate.workflow_engine.workflow import (
     Workflow,
+    task,
     Parameter,
     ModuleStorage,
 )
@@ -42,6 +45,10 @@ from simmate.calculators.vasp.workflows.relaxation import (
 from simmate.calculators.vasp.workflows.energy import (
     mit_workflow as energy_mit_workflow,
 )
+from simmate.calculators.vasp.workflows.nudged_elastic_band.single_path import (
+    workflow as neb_workflow,
+)
+
 
 from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
@@ -50,11 +57,62 @@ from simmate.calculators.vasp.database.nudged_elastic_band import (
 # Convert our workflow objects to task objects
 relax_bulk = relaxation_mit_workflow.to_workflow_task()
 energy_bulk = energy_mit_workflow.to_workflow_task()
-
+run_neb = neb_workflow.to_workflow_task()
 
 # Extra setup tasks
 load_input_and_register = LoadInputAndRegister()  # TODO: make DiffusionAnalysis a calc?
 build_db = BuildDiffusionAnalysisTask(MITDiffusionAnalysis)
+
+# ------------------------
+
+# TODO: Prefect isn't able to do this for-loop. I may need to ask them how
+# to map this kind of input. Hopefully this changes with Prefect Orion. This is
+# the code that would be in the workflow context:
+#
+# for i, hop_id in enumerate(migration_hop_ids):
+#     run_neb(
+#         migration_hop={
+#             "migration_hop_table": "MITMigrationHop",
+#             "migration_hop_id": hop_id,
+#         },
+#         directory=directory_cleaned
+#         + os.path.sep
+#         + f"migration_hop_{i}",
+#         source="DistinctPathFinder",
+#         diffusion_analysis_id=None,
+#         migration_hop_id=None,
+#     )
+#
+# Instead I need these hacky task objects and code.
+
+
+@task
+def get_dir_name(number, directory):
+    number_fill = str(number).zfill(2)
+    return os.path.join(directory, f"migration_hop_{number_fill}")
+
+
+def map_neb(migration_hop_id, directory):
+
+    # !!! This should pass the mapping index... not id. Not sure how to
+    # enumerate this with Prefect.
+    hop_directory = get_dir_name(migration_hop_id, directory)
+
+    mapped_neb_task = run_neb(
+        migration_hop={
+            "migration_hop_table": "MITMigrationHop",
+            "migration_hop_id": migration_hop_id,
+        },
+        directory=hop_directory,
+        # source="DistinctPathFinder",
+        diffusion_analysis_id=None,
+        migration_hop_id=migration_hop_id,
+    )
+    return mapped_neb_task
+
+
+# ------------------------
+
 
 with Workflow("NEB (for all unique pathways)") as workflow:
 
@@ -117,6 +175,14 @@ with Workflow("NEB (for all unique pathways)") as workflow:
         directory=directory_cleaned,
         vacancy_mode=True,  # assumed for now
     )
+
+    # Run NEB single_path workflow for all these.
+    apply_map(
+        map_neb,  # the task that we are mapping
+        migration_hop_id=migration_hop_ids,  # this input is mapped
+        directory=unmapped(directory_cleaned),  # this input will be constant
+    )
+
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"

@@ -21,18 +21,29 @@ from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
 from simmate.calculators.vasp.workflows.relaxation import (
     neb_endpoint_workflow as relaxation_neb_endpoint_workflow,
 )
+from simmate.calculators.vasp.workflows.nudged_elastic_band.from_images import (
+    workflow as neb_from_images,
+)
 
 # Convert our workflow objects to task objects
 relax_endpoint = relaxation_neb_endpoint_workflow.to_workflow_task()
+run_neb = neb_from_images.to_workflow_task()
 
 # Extra setup tasks
-load_input_and_register = LoadInputAndRegister()  # TODO: make DiffusionAnalysis a calc?
+load_input_and_register = LoadInputAndRegister()  # TODO: make MigrationHop a calc?
 
 with Workflow("NEB (for a single migration hop)") as workflow:
 
     migration_hop = Parameter("migration_hop")
     directory = Parameter("directory", default=None)
     source = Parameter("source", default=None)
+
+    # This helps link to a higher-level table.
+    diffusion_analysis_id = Parameter("diffusion_analysis_id", default=None)
+    # TODO: Can the hop id be inferred from the migration_hop or somewhere
+    # else in this context? Maybe even load_input_and_register will use
+    # prefect id once it's a Calculation?
+    migration_hop_id = Parameter("migration_hop_id", default=None)
 
     # I separate these out because each calculation is a very different scale.
     # For example, you may want to run the bulk relaxation on 10 cores, the
@@ -74,13 +85,20 @@ with Workflow("NEB (for a single migration hop)") as workflow:
 
     images = get_migration_images_from_endpoints(
         supercell_start=supercell_start,
-        supercell_end=supercell_start,
+        supercell_end=supercell_end,
         # TODO: these should instead be dict objects that grab the output from
         # the relaxation above
     )
 
-    # TODO: picking up here in the morning --> I can now run the NEB task using
-    # these images.
+    # Run NEB on this set of images
+    run_id_02 = run_neb(
+        migration_images=images,
+        command=subcommands["command_neb"],
+        source=source,
+        directory=directory_cleaned,
+        diffusion_analysis_id=diffusion_analysis_id,
+        migration_hop_id=migration_hop_id,
+    )
 
 
 workflow.storage = ModuleStorage(__name__)

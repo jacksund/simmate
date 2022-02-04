@@ -29,7 +29,10 @@ class MigrationHop(PymatgenMigrationHop):
         elif isinstance(migration_hop, dict) and "@module" in migration_hop.keys():
             migration_hop_cleaned = cls.from_dict(migration_hop)
 
-        elif isinstance(migration_hop, dict) and "migration_hop_table":
+        elif (
+            isinstance(migration_hop, dict)
+            and "migration_hop_table" in migration_hop.keys()
+        ):
             is_from_past_calc = True
             migration_hop_cleaned = cls.from_database(migration_hop)
 
@@ -390,3 +393,24 @@ class MigrationImages(list):
             migration_paths.append(migration_path)
 
         return migration_paths
+
+    @classmethod
+    def from_dynamic(cls, migration_images):
+        """
+        This is an experimental feature. The code here is a repurposing of
+        Structre.from_dynamic so consider making a general class for
+        from_dynamic methods.
+        """
+        is_from_past_calc = False
+
+        # assume any list is in the MigrationHop format if there are more than
+        # two structures (i.e. there is at least one midpoint image)
+        if isinstance(migration_images, list) and len(migration_images) > 2:
+            migration_images_cleaned = migration_images
+
+        else:
+            raise Exception("Unknown format provided for migration_images input.")
+
+        migration_images_cleaned.is_from_past_calc = is_from_past_calc
+
+        return migration_images_cleaned

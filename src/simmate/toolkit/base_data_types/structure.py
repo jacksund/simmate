@@ -79,7 +79,7 @@ class Structure(PymatgenStructure):
 
         # if there is a calculation_table key, then we are pointing to the simmate
         # database for the input structure
-        elif isinstance(structure, dict) and "calculation_table":
+        elif isinstance(structure, dict) and "calculation_table" in structure.keys():
             is_from_past_calc = True
             structure_cleaned = cls.from_database(structure)
 

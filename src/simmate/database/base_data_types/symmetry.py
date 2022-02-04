@@ -2,7 +2,7 @@
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
-from pymatgen.symmetry.groups import SpaceGroup as SpaceGroup_PMG
+from pymatgen.symmetry.groups import SpaceGroup as PymatgenSpacegroup
 
 # NOTE: This class is *not* meant to store data about each spacegroup, but instead
 # is just to help with querying Structures. If you want all spacegroup data
@@ -53,7 +53,7 @@ class Spacegroup(DatabaseTable):
         for number in range(1, 231):
 
             # load the pymatgen object that we can easily grab data from
-            spacegroup = SpaceGroup_PMG.from_int_number(number)
+            spacegroup = PymatgenSpacegroup.from_int_number(number)
 
             # load the data into this django model
             spacegroup_db = Spacegroup(

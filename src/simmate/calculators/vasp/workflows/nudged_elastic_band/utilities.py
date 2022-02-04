@@ -12,7 +12,11 @@ from simmate.toolkit.diffusion import (
     MigrationImages,
 )
 
-from simmate.database.base_data_types import DiffusionAnalysis
+from simmate.database.base_data_types.nudged_elastic_band import (
+    DiffusionAnalysis as DiffusionAnalysisTable,
+    MigrationHop as MigrationHopTable,
+    MigrationImage as MigrationImageTable,
+)
 
 from simmate.workflow_engine.workflow import Task, task
 
@@ -20,7 +24,7 @@ from typing import List, Tuple
 
 
 class BuildDiffusionAnalysisTask(Task):
-    def __init__(self, diffusion_analyis: DiffusionAnalysis, **kwargs):
+    def __init__(self, diffusion_analyis: DiffusionAnalysisTable, **kwargs):
         self.diffusion_analyis = diffusion_analyis
         super().__init__(**kwargs)
 
@@ -106,9 +110,8 @@ class BuildDiffusionAnalysisTask(Task):
 
         # TODO: still figuring out if toolkit vs. db objects should be returned.
         # Maybe add ids to the toolkit objects? Or dynamic DB dictionaries?
-        #
-        # Once this is all done, return the Migration hop ____ entries.
-        # We do this instead of the ____ objects because ...
+        # For now I return the MigrationHop ids -- because this let's me
+        # indicate which MigrationHops should be updated later on.
         return hop_ids
 
 
@@ -121,6 +124,14 @@ def get_endpoint_structures(migration_hop: MigrationHop) -> Tuple[Structure]:
     start_supercell, end_supercell, _ = migration_hop.get_sc_structures(
         vac_mode=True,
     )
+    try:
+        assert start_supercell != end_supercell
+    except:
+        raise Exception(
+            "This structure has a bug due to a rounding error. "
+            "Our team is aware of this bug and addressing it here: "
+            "https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion/issues/296"
+        )
     return start_supercell, end_supercell
 
 
@@ -142,3 +153,98 @@ def get_migration_images_from_endpoints(supercell_start, supercell_end):
     )
 
     return images
+
+
+class SaveNEBOutputTask(Task):
+    # This is a modification of simmate.workflows.common_tasks.SaveOutputTask
+
+    def __init__(
+        self,
+        diffusion_analyis_table: DiffusionAnalysisTable,
+        migration_hop_table: MigrationHopTable,
+        migration_image_table: MigrationImageTable,
+        **kwargs,
+    ):
+        self.diffusion_analyis_table = diffusion_analyis_table
+        self.migration_hop_table = migration_hop_table
+        self.migration_image_table = migration_image_table
+        super().__init__(**kwargs)
+
+    def run(
+        self,
+        output,
+        diffusion_analysis_id: int = None,
+        migration_hop_id: int = None,
+    ):
+
+        # split our results and corrections (which are given as a dict) into
+        # separate variables
+        # Our result here is not a VaspRun object, but instead a NEBAnalysis
+        # object. See NudgedElasticBandTask.workup()
+        result = output["result"]
+
+        # TODO: These aren't saved for now. Consider making MigrationHopTable
+        # a Calculation and attaching these there.
+        corrections = output["corrections"]
+        directory = output["directory"]
+
+        # First, we need a migration_hop database object.
+        # All of hops should link to a diffusion_analysis entry, so we check
+        # for that here too. The key thing of these statements is that we
+        # have a migration_hop_id at the end.
+
+        # If no ids were given, then we make a new entries for each.
+        if not diffusion_analysis_id and not migration_hop_id:
+            # Note, we have minimal information if this is the case, so these
+            # table entries will have a bunch of empty columns.
+
+            # We don't have a bulk structure to use for this class, so we use
+            # the first image
+            analysis_db = self.diffusion_analyis_table.from_toolkit(
+                structure=result.structures[0],
+                vacancy_mode=True,  # assume this for now
+            )
+            analysis_db.save()
+
+            # This table entry will actually be completely empty... It only
+            # serves to link the MigrationImages together
+            hop_db = self.migration_hop_table(
+                diffusion_analysis_id=analysis_db.id,
+            )
+            hop_db.save()
+            migration_hop_id = hop_db.id
+
+        elif diffusion_analysis_id and not migration_hop_id:
+            # This table entry will actually be completely empty... It only
+            # serves to link the MigrationImages together
+            hop_db = self.migration_hop_table(
+                diffusion_analysis_id=diffusion_analysis_id
+            )
+            hop_db.save()
+            migration_hop_id = hop_db.id
+
+        elif migration_hop_id:
+            # Even though it's not required, we make sure the id given for the
+            # diffusion analysis table matches this existing hop id.
+            assert hop_db.diffusion_analysis.id == diffusion_analysis_id
+
+        # Now same migration images and link them to this parent object.
+        # Note, the start/end Migration images will exist already in the
+        # relaxation database table. We still want to save them again here for
+        # easy access.
+        for image_number, image_data in enumerate(
+            zip(result.structures, result.energies, result.forces, result.r)
+        ):
+            image, energy, force, distance = image_data
+            image_db = self.migration_image_table.from_toolkit(
+                structure=image,
+                number=image_number,
+                force_tangent=force,
+                energy=energy,
+                structure_distance=distance,
+                migration_hop_id=migration_hop_id,
+            )
+            image_db.save()
+
+        # If the user wants to access results, they can do so through the hop id
+        return migration_hop_id

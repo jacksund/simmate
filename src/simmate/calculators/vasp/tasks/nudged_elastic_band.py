@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+import shutil
+import yaml
 import numpy
 
 from pymatgen.analysis.transition_state import NEBAnalysis
@@ -16,9 +18,9 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
     settings. The lattice remains fixed and symmetry is turned off for this
     relaxation.
 
-    You typically shouldn't use this workflow directly, but instead use the
-    higher-level NEB workflows (e.g. diffusion/neb_all_paths or
-    diffusion/neb_from_endpoints), which call this workflow for you.
+    You shouldn't use this workflow directly, but instead use the higher-level
+    NEB workflows (e.g. diffusion/neb_all_paths or diffusion/neb_from_endpoints),
+    which call this workflow for you.
 
 
     Developer Notes
@@ -60,6 +62,13 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
     single structure, but instead a list of structures -- spefically a list
     supercell images along the diffusion pathway.
     """
+
+    # Pymatgen's NEB parser does not read from the vasprun.xml so it can't
+    # confirm convergence here. I'll have to write my own output class to do this.
+    confirm_convergence = False
+
+    # There's no single structure to return for NEB. It's instead a list of structures.
+    return_final_structure = False
 
     def _pre_checks(
         self,
@@ -224,7 +233,7 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
         # starting path to a cif file. This can be slow for large structures
         # (>1s), but it is very little time compared to a full NEB run.
         path_vis = structures.get_sum_structure()
-        path_vis.to("cif", os.path.join(directory, "path_start.cif"))
+        path_vis.to("cif", os.path.join(directory, "path_relaxed_idpp.cif"))
 
     def workup(
         self,
@@ -239,52 +248,92 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
         - `directory`:
             Name of the base folder where all results are located.
         """
-
-        # load the xml file and all of the vasprun data
+        # BUG: For now I assume there are start/end image directories are located
+        # in the working directory. These relaxation are actually ran by a
+        # separate workflow, which is thus a prerequisite for this workflow.
+        start_dirname = os.path.join(directory, "endpoint_relaxation_start")
+        end_dirname = os.path.join(directory, "endpoint_relaxation_end")
         try:
-            vasprun = Vasprun(
-                filename=os.path.join(directory, "vasprun.xml"),
-                exception_on_bad_xml=True,
-            )
+            assert os.path.exists(start_dirname)
+            assert os.path.exists(end_dirname)
         except:
-            print(
-                "XML is malformed. This typically means there's an error with your"
-                " calculation that wasn't caught by your ErrorHandlers. We try"
-                " salvaging data here though."
+            raise Exception(
+                "Your NEB calculation completed successfully. However, in order "
+                "to run the workup, Simmate needs the start/end point relaxations. "
+                "These should be in the same folder as your NEB run and named "
+                "endpoint_relaxation_start and endpoint_relaxation_end."
             )
-            vasprun = Vasprun(
-                filename=os.path.join(directory, "vasprun.xml"),
-                exception_on_bad_xml=False,
-            )
-            vasprun.final_structure = vasprun.structures[-1]
-        # BUG: This try/except is 100% just for my really rough calculations
-        # where I don't use any ErrorHandlers and still want the final structure
-        # regarless of what when wrong. In the future, I should consider writing
-        # a separate method for those that loads the CONTCAR and moves on.
+
+        ################
+        # BUG: NEBAnalysis.from_dir is broken for all folder structures except
+        # when the start/end points are in the 00 and N folders. I therefore
+        # need to copy the OUTCAR from the endpoint relaxations to these folders.
+        # I don't want to mess with opening a pull request with them / waiting
+        # on a new release, so I make this hacky fix here
+        new_start_filename = os.path.join(directory, "00", "OUTCAR")
+
+        # the end filename should be the highest number in the directory
+        numbered_dirs = [d for d in os.listdir(directory) if d.isdigit()]
+        numbered_dirs.sort()
+        new_end_filename = os.path.join(directory, numbered_dirs[-1], "OUTCAR")
+
+        # now copy the outcars over
+        shutil.copyfile(os.path.join(start_dirname, "OUTCAR"), new_start_filename)
+        shutil.copyfile(os.path.join(end_dirname, "OUTCAR"), new_end_filename)
+        ################
+
+        neb_results = NEBAnalysis.from_dir(
+            directory,
+            # BUG: see bug fix right above this
+            # relaxation_dirs=[
+            #     "endpoint_relaxation_start",
+            #     "endpoint_relaxation_end",
+            # ],
+        )
 
         # write output files/plots for the user to quickly reference
-        self._write_output_summary(directory, vasprun)
+        self._write_output_summary(directory, neb_results)
 
         # confirm that the calculation converged (ionicly and electronically)
         if self.confirm_convergence:
-            assert vasprun.converged
+            raise Exception("NEB is currently unable to confirm convergence.")
 
-        # OPTIMIZE: see my comment above on the return_final_structure attribute
         if self.return_final_structure:
-            return {"structure_final": vasprun.final_structure, "vasprun": vasprun}
+            raise Exception("NEB is currently unable to return a final structure.")
 
-        # return vasprun object
-        return vasprun
+        return neb_results
 
-        # BUG: For now I assume there are start/end image directories are located
-        # in the working directory. This bad assumption is made as I'm just quickly
-        # trying to get results for some labmates. In the future, I need to search
-        # a number of places for these directories.
-        neb_results = NEBAnalysis.from_dir(
-            directory,
-            relaxation_dirs=["start_image_relaxation", "end_image_relaxation"],
-        )
+    def _write_output_summary(self, directory, neb_results):
+        """
+        This is an EXPERIMENTAL feature.
+
+        This prints a "simmate_summary.yaml" file with key output information.
+
+        This method should not be called directly as it used within workup().
+        """
 
         # plot the results
         plot = neb_results.get_plot()
-        plot.savefig("NEB_plot.jpeg")
+        plot.savefig(os.path.join(directory, "NEB_plot.jpeg"))
+
+        # convert all the structures to a MigrationImages object so we can write
+        # the summed structure.
+        migration_images = MigrationImages(neb_results.structures)
+        structure_sum = migration_images.get_sum_structure()
+        structure_sum.to("cif", os.path.join(directory, "path_relaxed_neb.cif"))
+
+        results_dict = neb_results.as_dict()
+        summary = {
+            "structures": "Final structure images are the CONTCARs within image directories (00-N)",
+            "forces_tangent": results_dict["forces"],
+            "energies": results_dict["energies"],
+            "structure_distances": results_dict["r"],
+            "energy_barrier": float(
+                max(neb_results.energies) - min(neb_results.energies)
+            ),
+        }
+
+        summary_filename = os.path.join(directory, "simmate_summary.yaml")
+        with open(summary_filename, "w") as file:
+            content = yaml.dump(summary)
+            file.write(content)
