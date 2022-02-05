@@ -235,8 +235,8 @@ class Relaxation(Structure, Calculation):
             # are saving this to an IonicStepStructure datatable. To access this
             # model, we look need to use "structures.model".
             structure = self.structures.model.from_toolkit(
-                number,
-                structure,
+                number=number,
+                structure=structure,
                 energy=ionic_step["e_wo_entrp"],
                 site_forces=ionic_step["forces"],
                 lattice_stress=ionic_step["stress"],

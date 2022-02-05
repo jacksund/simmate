@@ -81,18 +81,19 @@ build_db = BuildDiffusionAnalysisTask(MITDiffusionAnalysis)
 #         source="DistinctPathFinder",
 #         diffusion_analysis_id=None,
 #         migration_hop_id=None,
+#         command=subcommands["command_supercell"] + ";" + subcommands["command_neb"]
 #     )
 #
 # Instead I need these hacky task objects and code.
 
 
 @task
-def get_dir_name(number, directory):
+def get_dir_name(number: int, directory: str):
     number_fill = str(number).zfill(2)
     return os.path.join(directory, f"migration_hop_{number_fill}")
 
 
-def map_neb(migration_hop_id, directory):
+def map_neb(migration_hop_id: int, directory: str, subcommands: dict):
 
     # !!! This should pass the mapping index... not id. Not sure how to
     # enumerate this with Prefect.
@@ -107,6 +108,7 @@ def map_neb(migration_hop_id, directory):
         # source="DistinctPathFinder",
         diffusion_analysis_id=None,
         migration_hop_id=migration_hop_id,
+        command=subcommands["command_supercell"] + ";" + subcommands["command_neb"],
     )
     return mapped_neb_task
 
@@ -152,25 +154,23 @@ with Workflow("NEB (for all unique pathways)") as workflow:
 
     # A static energy calculation on the relaxed structure. This isn't necessarily
     # required for NEB, but it takes very little time.
-    # run_id_01 = energy_bulk(
-    #     structure={
-    #         "calculation_table": "MITRelaxation",
-    #         "directory": run_id_00["directory"],
-    #         "structure_field": "structure_final",
-    #     },
-    #     command=subcommands["command_bulk"],
-    #     directory=directory_cleaned + os.path.sep + "bulk_static_energy",
-    # )
+    run_id_01 = energy_bulk(
+        structure={
+            "calculation_table": "MITRelaxation",
+            "directory": run_id_00["directory"],
+            "structure_field": "structure_final",
+        },
+        command=subcommands["command_bulk"],
+        directory=directory_cleaned + os.path.sep + "bulk_static_energy",
+    )
 
     # This step does NOT run any calculation, but instead, identifies all
     # diffusion pathways and builds the necessary database entries.
     migration_hop_ids = build_db(
-        structure=structure_toolkit,  # TODO: I'm using toolkit for quick testing
-        # structure={
-        #     "calculation_table": "MITStaticEnergy",
-        #     "directory": run_id_01["directory"],
-        #     "structure_field": "structure_final",
-        # },
+        structure={
+            "calculation_table": "MITStaticEnergy",
+            "directory": run_id_01["directory"],
+        },
         migrating_specie=migrating_specie,
         directory=directory_cleaned,
         vacancy_mode=True,  # assumed for now
@@ -181,6 +181,7 @@ with Workflow("NEB (for all unique pathways)") as workflow:
         map_neb,  # the task that we are mapping
         migration_hop_id=migration_hop_ids,  # this input is mapped
         directory=unmapped(directory_cleaned),  # this input will be constant
+        subcommands=unmapped(subcommands),  # this input will be constant
     )
 
 

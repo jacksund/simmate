@@ -86,7 +86,7 @@ class BuildDiffusionAnalysisTask(Task):
 
         # Create the main DiffusionAnalysis object that others will link to.
         da_obj = self.diffusion_analyis.from_toolkit(
-            structure=structure,
+            structure=structure_cleaned,
             migrating_specie=migrating_specie,
             vacancy_mode=vacancy_mode,
         )
@@ -123,14 +123,17 @@ def get_endpoint_structures(migration_hop: MigrationHop) -> Tuple[Structure]:
     """
     start_supercell, end_supercell, _ = migration_hop.get_sc_structures(
         vac_mode=True,
-    )
+        min_atoms=15,
+        max_atoms=50,
+        min_length=5.0,
+    )  # TODO: These values are made very small for testing.
     try:
         assert start_supercell != end_supercell
     except:
         raise Exception(
             "This structure has a bug due to a rounding error. "
-            "Our team is aware of this bug and addressing it here: "
-            "https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion/issues/296"
+            "Our team is aware of this bug and it has been fixed for the next "
+            "pymatgen-analysis-diffusion release."
         )
     return start_supercell, end_supercell
 

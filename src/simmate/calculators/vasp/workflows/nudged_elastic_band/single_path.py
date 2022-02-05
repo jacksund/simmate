@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# import os
+import os
 
 from simmate.toolkit.diffusion import MigrationHop
 
@@ -70,24 +70,30 @@ with Workflow("NEB (for a single migration hop)") as workflow:
     supercell_start, supercell_end = get_endpoint_structures(migration_hop_toolkit)
 
     # Relax the starting supercell structure
-    # run_id_00 = relax_endpoint(
-    #     structure=supercell_start,
-    #     command=subcommands["command_supercell"],
-    #     directory=directory_cleaned + os.path.sep + "endpoint_relaxation_start",
-    # )
+    run_id_00 = relax_endpoint(
+        structure=supercell_start,
+        command=subcommands["command_supercell"],
+        directory=directory_cleaned + os.path.sep + "endpoint_relaxation_start",
+    )
 
     # Relax the ending supercell structure
-    # run_id_01 = relax_endpoint(
-    #     structure=supercell_end,
-    #     command=subcommands["command_supercell"],
-    #     directory=directory_cleaned + os.path.sep + "endpoint_relaxation_end",
-    # )
+    run_id_01 = relax_endpoint(
+        structure=supercell_end,
+        command=subcommands["command_supercell"],
+        directory=directory_cleaned + os.path.sep + "endpoint_relaxation_end",
+    )
 
     images = get_migration_images_from_endpoints(
-        supercell_start=supercell_start,
-        supercell_end=supercell_end,
-        # TODO: these should instead be dict objects that grab the output from
-        # the relaxation above
+        supercell_start={
+            "calculation_table": "NEBEndpointRelaxation",
+            "directory": run_id_00["directory"],
+            "structure_field": "structure_final",
+        },
+        supercell_end={
+            "calculation_table": "NEBEndpointRelaxation",
+            "directory": run_id_01["directory"],
+            "structure_field": "structure_final",
+        },
     )
 
     # Run NEB on this set of images
