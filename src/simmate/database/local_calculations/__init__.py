@@ -20,12 +20,21 @@ from simmate.calculators.vasp.database.relaxation import (
     Quality04Relaxation,
     Quality04IonicStep,
     StagedRelaxation,
+    NEBEndpointRelaxation,
+    NEBEndpointIonicStep,
 )
 
 from simmate.calculators.vasp.database.energy import (
     MatProjStaticEnergy,
     MITStaticEnergy,
     Quality04StaticEnergy,
+    NEBEndpointStaticEnergy,
+)
+
+from simmate.calculators.vasp.database.nudged_elastic_band import (
+    MITDiffusionAnalysis,
+    MITMigrationHop,
+    MITMigrationImage,
 )
 
 from simmate.toolkit.structure_prediction.evolution.database import (

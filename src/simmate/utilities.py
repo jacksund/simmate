@@ -44,18 +44,16 @@ def get_doc_from_readme(file: str) -> str:
 
     To use, simply pass the file property:
 
-    .. code-block:: python
+    ``` python
+    from simmate.utilities import get_doc_from_readme
 
-        from simmate.utilities import get_doc_from_readme
+    __doc__ = get_doc_from_readme(__file__)
+    ```
 
-        __doc__ = get_doc_from_readme(__file__)
-
-    This is an alternative to using "include" in rst files, which `pdoc recommends`_.
+    This is an alternative to using "include" in rst files, which
+    [pdoc recommends](https://pdoc.dev/docs/pdoc.html#include-markdown-files).
     We prefer this utility because it allows Spyder to load the docs -- although
     it's slower in production (bc of opening/closing files).
-
-    .. _pdoc recommends: https://pdoc.dev/docs/pdoc.html#include-markdown-files
-
     """
 
     # We assume the file is in the same directory and named "README.rst"
@@ -76,20 +74,23 @@ def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
     for a calculation, and they may want to provide their directory in various
     formats. This includes... None, a string, or a TemporaryDirectory instance.
     Based on the input, this function does the following:
-      None --> returns the full path to a new folder inside python's
-                current working directory named "simmate-task-<randomID>"
-      TemporaryDirectory --> returns the full path to the given temp directory
-      str --> makes the directory if it doesnt exist and then returns the path
+      - `None`:
+          returns the full path to a new folder inside python's
+          current working directory named "simmate-task-<randomID>"
+      - `TemporaryDirectory`:
+          returns the full path to the given temp directory
+      - `str`:
+          makes the directory if it doesnt exist and then returns the path
 
     Parameters
     ----------
-    directory : Union[str,tempfile.TemporaryDirectory], optional
+    - `directory`:
         Either None, a path to the directory, or a tempdir. The default is None.
 
     Returns
     -------
-    directory : str
-        The path to the initialized directory
+    - `directory`:
+        The path to the initialized directory as a string
     """
 
     # if no directory was provided, we create a new folder within the current
@@ -124,7 +125,7 @@ def make_archive(directory: str):
 
     Parameters
     ----------
-    directory : str
+    - `directory`:
         Path to the folder that should be archived
     """
     # This wraps shutil.make_archive to change the default parameters. Normally,
@@ -153,9 +154,9 @@ def empty_directory(directory: str, files_to_keep: List[str] = []):
 
     Parameters
     ----------
-    directory : str
+    - `directory`:
         base directory that should be emptied
-    files_to_keep : List[str], optional
+    - `files_to_keep`:
         A list of file and folder names within the base directory that should
         not be deleted. The default is [].
     """
@@ -170,15 +171,28 @@ def empty_directory(directory: str, files_to_keep: List[str] = []):
                 os.remove(filename)
 
 
-def get_chemical_subsystems(chemical_system):
+def get_chemical_subsystems(chemical_system: str):
+    """
+    Given a chemical system, this returns all chemical systems that are also
+    contained within it.
+
+    For example, "Y-C" would return ["Y", "C", "C-Y"]. Note that the returned
+    list has elements of a given system in alphabetical order (i.e. it gives
+    "C-Y" and not "Y-C")
+
+    Parameters
+    ----------
+    - `chemical_system`:
+        A chemical system of elements. Elements must be separated by dashes (-)
+
+    Returns
+    -------
+    - `subsystems`:
+        A list of chemical systems that make up the input chemical system.
+    """
 
     # TODO: this will may be better located elsewhere. Maybe even as a method for
     # the Composition class.
-
-    # Given a chemical system, this returns all chemical systems that are also
-    # contained within it. For example, "Y-C" would return ["Y", "C", "C-Y"].
-    # Note that the returned list has elements of a given system in alphabetical
-    # order (i.e. it gives "C-Y" and not "Y-C")
 
     # Convert the system to a list of elements
     system_cleaned = chemical_system.split("-")

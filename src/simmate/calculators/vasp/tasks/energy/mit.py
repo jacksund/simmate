@@ -18,8 +18,6 @@ class MITStaticEnergy(MITRelaxation):
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.
-    # !!! we hardcode temperatures and time steps here, but may take these as inputs
-    # in the future
     incar = MITRelaxation.incar.copy()
     incar.update(
         dict(

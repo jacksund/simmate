@@ -43,7 +43,10 @@ class Composition(PymatgenComposition):
         elif radius_method == "van_der_waals":
             radii = [element.van_der_waals_radius for element in self.elements]
         elif radius_method == "metallic":
-            radii = [element.metallic_radius for element in self.elements]
+            radii = [
+                element.metallic_radius if element.is_metal else None
+                for element in self.elements
+            ]
         elif radius_method == "ionic":
             # In order to predict the radius here, we first need to predict the
             # oxidation states. Note that this prediction changes composition to
@@ -112,7 +115,7 @@ class Composition(PymatgenComposition):
         radii = self.radii_estimate(radius_method)
 
         # take the radii and find the corresponding spherical volume for each atom type
-        volumes = [4 / 3 * numpy.pi * (radius ** 3) for radius in radii]
+        volumes = [4 / 3 * numpy.pi * (radius**3) for radius in radii]
 
         # find the total volume of all spheres in the composition
         total_volume = sum(
