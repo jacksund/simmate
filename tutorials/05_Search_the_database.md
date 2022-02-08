@@ -18,11 +18,11 @@ In this tutorial, you will learn how to explore your database as well as load da
 ```python
 # OPTION 1
 from simmate.shortcuts import setup  # this connects to our database
-from simmate.database.local_calculations.energy import MITStaticEnergy
+from simmate.database.local_calculations import MITStaticEnergy
 
 # OPTION 2 (slower but recommended for convenience)
-from simmate.workflows import energy_mit
-results = energy_mit.result_table  # results here is the same thing as MITStaticEnergy above
+from simmate.workflows.static_energy import mit_workflow
+results = mit_workflow.result_table  # results here is the same thing as MITStaticEnergy above
 ```
 4. View all the possible table columns with `MITStaticEnergy.show_columns()`
 5. View the full table as pandas dataframe with `MITStaticEnergy.objects.to_dataframe()`
@@ -227,13 +227,9 @@ This isn't very exciting now because we just have one row/structure in our table
 
 ## Accessing third-party data
 
-:warning: :warning: :warning:
-This section is broken at the moment. We can not yet distribute third-party data.
-:warning: :warning: :warning:
-
 When running our own calculations with Simmate, it is also important to know what other researchers have already calculated for a given material. Many research teams around the world have built databases made of 100,000+ structures -- and many of these teams even ran calculations on all of them. Here, we will use Simmate to explore their data.
 
-Let's start with one of the smaller databases out there: [JARVIS](https://jarvis.nist.gov/). It may be smaller than the others, but their dataset still includes ><<12345>> structures! Simmate makes the download for all of these under <<12345>> GB.
+Let's start with one of the smaller databases out there: [JARVIS](https://jarvis.nist.gov/). It may be smaller than the others, but their dataset still includes ~56,000 structures! Simmate makes the download for all of these under 0.01 GB.
 
 In the previous section, we loaded our `DatabaseTable` from the workflow. But now we don't have a workflow... We just want to grab the table directly. To do this we run the following:
 
@@ -242,22 +238,22 @@ In the previous section, we loaded our `DatabaseTable` from the workflow. But no
 from simmate.shortcuts import setup  # this connects to our database
 
 # This gives the result_table we were using in the previous section
-from simmate.database.local_calculations.relaxation import MITRelaxation
+from simmate.database.local_calculations import MITRelaxation
 
 # This loads the table where we store all of the JARVIS data.
-from simmate.database.third_parties.jarvis import JarvisStructure
+from simmate.database.third_parties import JarvisStructure
 ```
 
 `result_table` above and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.shortcuts import setup`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! So don't forget to include `from simmate.shortcuts import setup`!
 
-Now that we have our datatable class (`JarvisStructure`) loaded, you'll notice it's empty to when you first access it. We can quickly load all of the data using the `load_remote_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database.
+Now that we have our datatable class (`JarvisStructure`) loaded, you'll notice it's empty to when you first access it. We can quickly load all of the data using the `load_remote_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database. This can take ~10 minutes because we are actually saving all these structures to your computer -- that way, you can rapidly load these structures in under 1 second in the future.
 
 ``` python
 # when you first run this, you'll see this table is empty
 data = JarvisStructure.objects.to_dataframe()
 
 # load all of the data from Simmate's website
-JarvisStructure.load_remote_archive()
+JarvisStructure.load_remote_archive()  # This may take ~10min to complete
 
 # you'll now see that the database is filled!
 # We use [:150] to just show the first 150 rows
@@ -274,15 +270,20 @@ from simmate.shortcuts import setup  # this connects to our database
 from simmate.database.third_parties.jarvis import JarvisStructure
 
 # EXAMPLE 1: all structures that have less than 6 sites in their unitcell
-structures = JarvisStructure.objects.filter(nsites__lt=6).all()
+structures_1 = JarvisStructure.objects.filter(nsites__lt=6).all()
 
-# EXAMPLE 2: all MoS2 structures that are less than 10g/A^3 and have a bulk
-# modulus greater than 0.5
-structures = JarvisStructure.objects.filter(
-   formula="MoS2",
-   density__lt=10,
-   elastic__bulk_modulus__gt=0.5,
+# EXAMPLE 2: all MoS2 structures that are less than 5/A^3 and have a spacegroup
+# symbol of R3mH
+structures_2 = JarvisStructure.objects.filter(
+   formula_full="Mo1 S2",
+   density__lt=5,
+   spacegroup__symbol="R3mH",
 ).all()
+
+# You can use to_dataframe() to convert these to a pandas Dataframe object and 
+# then view them in Spyder's variable explorer
+df_1 = structures_1.to_dataframe()
+df_2 = structures_2.to_dataframe()
 ```
 
 There are many ways to search through your tables, and we only covered the basics here. Advanced users will benefit from knowing that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a long time to master, so we only recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) if you plan on joining our team or are a fully computational student. Beginners can just ask for help. Figuring out the correct filter can take new users hours while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/categories/q-a).
