@@ -187,3 +187,45 @@ with Workflow("NEB (for all unique pathways)") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
+# workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet
+# workflow.register_kwargs = ["prefect_flow_run_id"]
+workflow.result_table = MITDiffusionAnalysis
+workflow.s3tasks = [
+    relaxation_mit_workflow.s3task,
+    energy_mit_workflow.s3task,
+] + neb_workflow.s3tasks
+
+workflow.__doc__ = """
+    Runs a full diffusion analysis on a bulk crystal structure using NEB.
+    
+    The bulk structure will be geometry optimized and then 
+    `simmate.toolkit.diffusion.DistinctPathFinder` is used to find all
+    symmetrically unique migration hops in the structure up until the hops 
+    become percolating (>0-D). For each unique hop, the workflow 
+    diffusion/single_path is submitted.
+
+    This is therefore a "Nested Workflow" made of the following smaller workflows:
+
+        - relaxation/mit
+        - static-energy/mit
+        - a mini task that identifies unique migration hops
+        - (for each hop) diffusion/single-path
+    
+    If you are running this workflow via the command-line, you can run this 
+    with...
+    
+    ``` bash
+    simmate workflows run diffusion/all-paths -s example.cif -c "cmd1; cmd2; cmd3"
+    ```
+    
+    Note, the `-c` here is very important! Here we are passing three commands
+    separated by semicolons. Each command is passed to a specific workflow call:
+        
+        - cmd1 --> used for bulk crystal relaxation and static energy
+        - cmd2 --> used for endpoint supercell relaxations
+        - cmd3 --> used for NEB
+    
+    Thus, you can scale your resources for each step. Here's a full -c option:
+    
+    -c "vasp_std > vasp.out; mpirun -n 12 vasp_std > vasp.out; mpirun -n 70 vasp_std > vasp.out"
+"""

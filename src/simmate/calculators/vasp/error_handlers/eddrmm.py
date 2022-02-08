@@ -8,7 +8,14 @@ from simmate.calculators.vasp.inputs import Incar
 
 class Eddrmm(ErrorHandler):
     """
-    ???
+    This is an error caused by failed call to LAPCK.
+
+    This could be caused by a number of things, such as instability of the
+    RMM-DIIS diagonalisation algorithm, an unreasonable crystal geometry, or
+    even just incorrect installation of LAPCK.
+
+    Further discussion is also located on VASP's forum
+    [here](https://www.vasp.at/forum/viewtopic.php?f=3&t=214&p=215).
     """
 
     # run this while the VASP calculation is still going
@@ -42,10 +49,27 @@ class Eddrmm(ErrorHandler):
         # and WAVECAR to ensure the next run is a clean start.
         current_icharg = incar.get("ICHARG", 0)
         if current_icharg < 10:
-            os.remove(os.path.join(directory, "CHGCAR"))
-            os.remove(os.path.join(directory, "WAVECAR"))
-            correction += " and deleted CHGCAR + WAVECAR"
 
+            # check if IMAGES is in the INCAR. If so, we have a NEB calculation,
+            # and the there will be a different organization of folders.
+            if "IMAGES" in incar.keys():
+                # here, folders will be 00, 01, 02, etc. with CHGCARs/WAVECARs
+                # in each. We iterate through and delete all of them.
+                subdirectories = [d for d in os.listdir(directory) if d.isnumeric()]
+                for subdir in subdirectories:
+                    chgcar_filename = os.path.join(directory, subdir, "CHGCAR")
+                    wavecar_filename = os.path.join(directory, subdir, "WAVECAR")
+                    if os.path.exists(chgcar_filename):
+                        os.remove(chgcar_filename)
+                    if os.path.exists(wavecar_filename):
+                        os.remove(wavecar_filename)
+                correction += " and deleted CHGCARs + WAVECARs for all images"
+
+            # Otherwise, we have a normal VASP calculation
+            else:
+                os.remove(os.path.join(directory, "CHGCAR"))
+                os.remove(os.path.join(directory, "WAVECAR"))
+                correction += " and deleted CHGCAR + WAVECAR"
         # rewrite the INCAR with new settings
         incar.to_file(incar_filename)
 
