@@ -32,14 +32,14 @@ Substitute these commands with the ones you see in the main tutorial.
 <br/>
 
 ## Sign in with...
-```
+``` shell
 ssh WarrenLab@warwulf.net
 ```
 
 <br/>
 
 ## Load VASP with...
-```
+``` shell
 module purge
 module load gnu11 impi vasp libfabric ucx
 ```
@@ -48,14 +48,14 @@ module load gnu11 impi vasp libfabric ucx
 
 ## Call VASP with... 
 We don't use `vasp_std` for our default command.
-```
+``` shell
 vasp > vasp.out 
 ```
 
 <br/>
 
 ## Create your conda env with...
-```
+``` shell
 conda create -n my_env -c conda-forge python=3.8 simmate
 conda activate my_env
 
@@ -66,21 +66,21 @@ simmate database reset
 <br/>
 
 ## Access scratch directory with...
-```
+``` shell
 cd /media/synology/user/your_name
 ```
 
 <br/>
 
 ## Create a SLURM script with...
-```
+``` shell
 nano submit.sh
 ```
 
 <br/>
 
 And paste in the example content...
-```
+``` shell
 #!/bin/bash
 
 #. /opt/ohpc/pub/suppress.sh  #supress infiniband output, set vasp path
@@ -96,7 +96,7 @@ And paste in the example content...
 #SBATCH --mail-type=ALL 
 #SBATCH --mail-user=my_username@live.unc.edu
 
-simmate workflows run energy-mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
+simmate workflows run energy-mit -s POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
 ```
 
 <br/>
@@ -110,7 +110,7 @@ Checklist before submitting:
 5. structure file (e.g. `POSCAR`) is present in working directory
 
 Once all of these are met, you can submit with...
-```
+``` shell
 sbatch submit.sh
 ```
 
@@ -118,6 +118,12 @@ sbatch submit.sh
 
 ## Monitor progress with... 
 We use a short cut for `squeue` with extra info
-```
+``` shell
 sq
+```
+
+You can filter out your jobs using
+
+``` shell
+sq | grep yourname
 ```

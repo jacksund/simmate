@@ -130,11 +130,6 @@ def explore():
 
     click.echo("==================================================================")
 
-    click.echo(
-        "\n\n To run this workflow, use the command..."
-        f"\n\n simmate workflows run {final_workflow_name} example.cif\n\n"
-    )
-
 
 @workflows.command()
 def list_all():

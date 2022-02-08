@@ -30,8 +30,8 @@ structure.to("cif", "NaCl.cif")
 
 The `Structure` class (aka a `ToolkitStructure`) provides many extra properties and methods, so nearly all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial. All available workflows can be loaded from the `simmate.workflows` module:
 ```python
-from simmate.workflows import relaxation_mit
-result = relaxation_mit.run(structure=structure)
+from simmate.workflows.relaxation import mit_workflow
+result = mit_workflow.run(structure=structure)
 ```
 
 Grab varius properties of the structure, lattice, and composition:
@@ -197,9 +197,9 @@ Whatever your method for creating a structure, we now have our `Structure` objec
 
 For example, we can use it to run a workflow. We did this with the command-line in the last tutorial but can accomplish the same thing with python:
 
-```
+``` shell
 # Using the command-line (from our previous tutorial)
-simmate workflows run energy-mit POSCAR
+simmate workflows run static-energy/mit --structure POSCAR
 ```
 
 ```python
@@ -208,10 +208,10 @@ simmate workflows run energy-mit POSCAR
 # This code does the exact same thing as the command above
 
 from simmate.toolkit import Structure
-from simmate.workflows import relaxation_mit
+from simmate.workflows.relaxation import mit_workflow
 
 nacl_structure = Structure.from_file("POSCAR")
-result = relaxation_mit.run(structure=nacl_structure)
+result = mit_workflow.run(structure=nacl_structure)
 ```
 
 <br/> <!-- add empty line -->

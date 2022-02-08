@@ -31,21 +31,21 @@ Substitute these commands with the ones you see in the main tutorial.
 <br/>
 
 ## Sign in with...
-```
+``` shell
 ssh youronyen@longleaf.unc.edu
 ```
 
 <br/>
 
 ## Load VASP with...
-```
+``` shell
 module vasp/5.4.4
 ```
 
 <br/>
 
 ## Call VASP with... 
-```
+``` shell
 # Note, we use 20 cores here but update this to match your submit script
 mpirun -n 20 vasp_std > vasp.out
 ```
@@ -53,7 +53,7 @@ mpirun -n 20 vasp_std > vasp.out
 <br/>
 
 ## Create your conda env with...
-```
+``` shell
 conda create -n my_env -c conda-forge python=3.9 simmate
 conda activate my_env
 # and initialize your database for the first time
@@ -63,7 +63,7 @@ simmate database reset
 <br/>
 
 ## Access scratch directory with...
-```
+``` shell
 # Note, the /y/o/ is decided by the first two letters of your onyen
 cd /pine/scr/y/o/youronyen
 ```
@@ -71,14 +71,14 @@ cd /pine/scr/y/o/youronyen
 <br/>
 
 ## Create a SLURM script with...
-```
+``` shell
 nano submit.sh
 ```
 
 <br/>
 
 And paste in the example content...
-```
+``` shell
 #! /bin/sh
 
 #SBATCH --job-name=my_example_job
@@ -91,7 +91,7 @@ And paste in the example content...
 #SBATCH --mail-user=youronyen@live.unc.edu
 #SBATCH --time=11-00:00
 
-simmate workflows run energy-mit POSCAR -c "mpirun -n 20 vasp_std > vasp.out"
+simmate workflows run energy-mit -s POSCAR -c "mpirun -n 20 vasp_std > vasp.out"
 ```
 
 <br/>
@@ -105,13 +105,13 @@ Checklist before submitting:
 5. structure file (e.g. `POSCAR`) is present in working directory
 
 Once all of these are met, you can submit with...
-```
+``` shell
 sbatch submit.sh
 ```
 
 <br/>
 
 ## Monitor progress with... 
-```
+``` shell
 squeue -u youronyen
 ```

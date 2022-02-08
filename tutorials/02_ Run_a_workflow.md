@@ -35,8 +35,9 @@ direct
 0.500000 0.500000 0.500000 Cl
 ```
 3. View a list of all workflows available with `simmate workflows list-all`
-4. View the settings used for the `energy-mit` workflow with `simmate workflows show-config energy-mit`
-5. Copy and paste VASP POTCAR files to the folder `~/simmate/vasp/Potentials`. Be sure to unpack the `tar.gz` files. This folder will have the potentials that came with VASP -- and with their original folder+file names:
+4. Interactively learn about all workflows with `simmate workflows explore`
+5. View the settings used for the `static-energy/mit` workflow with `simmate workflows show-config static-energy/mit`
+6. Copy and paste VASP POTCAR files to the folder `~/simmate/vasp/Potentials`. Be sure to unpack the `tar.gz` files. This folder will have the potentials that came with VASP -- and with their original folder+file names:
 ```
 # Located at /home/my_username (~)
 simmate/
@@ -55,10 +56,10 @@ simmate/
             ├── potpaw_GGA
             └── potUSPP_GGA
 ```
-6. View the input files with `simmate workflows setup-only energy-mit POSCAR`
-7. Run a workflow with `simmate workflows run energy-mit POSCAR` (run = configure + schedule + execute + save). This command should be submitted via a SLURM/PBS job script on HPC clusters.
-8. You will see a file named `simmate_summary.yaml` which contains some quick information for you. Other workflows (such as `band-structure` calculations) will also write out plots for you.
-9. While the plots and summary files are nice for quick testing, much more useful information is stored in our database. We will cover how to access your database in a later tutorial (05).
+7. View the input files with `simmate workflows setup-only static-energy/mit POSCAR`
+8. Run a workflow with `simmate workflows run static-energy/mit -s POSCAR` (run = configure + schedule + execute + save). This command should be submitted via a SLURM/PBS job script on HPC clusters.
+9. You will see a file named `simmate_summary.yaml` which contains some quick information for you. Other workflows (such as `band-structure` calculations) will also write out plots for you.
+10. While the plots and summary files are nice for quick testing, much more useful information is stored in our database. We will cover how to access your database in a later tutorial (05).
 
 <br/><br/>
 
@@ -100,7 +101,7 @@ The next three sections will address each of these requirements.
 
 We often want to run the same calculation on many materials, so Simmate pre-builds database tables for us to fill. This just means we make tables (like those used in Excel), where we have all the column headers ready to go. For example, you can imagine that a table of structures would have columns for formula, density, and number of sites, among other things. Simmate builds these tables for you and automatically fills all the columns with data after a calculation finishes. We will explore what these tables look like in tutorial 5, but for now, we want Simmate to create them. All we have to do is run the following command 
 
-```
+``` shell
 simmate database reset
 ```
 
@@ -125,7 +126,7 @@ Before we run a workflow, we need a crystal structure to run it on. There are ma
 
 First, make a new text file on your Desktop named `POSCAR.txt`. You can use which text editor you prefer (Notepad, Sublime, etc.). You can also create the file using the command like with:
 
-```
+``` shell
 nano POSCAR.txt
 ```
 
@@ -181,7 +182,7 @@ Nearly all files that you will interact with are text files -- just in different
 
 If you're using the command-line to create/edit this file, you can use the copy (`cp`) command to make the `POSCAR` file:
 
-```
+``` shell
 cp POSCAR.txt POSCAR
 ```
 
@@ -226,7 +227,7 @@ simmate/
 
 If you made this folder incorrectly, commands that you use later will fail with an error like...
 
-```python
+``` python
 FileNotFoundError: [Errno 2] No such file or directory: '/home/jacksund/simmate/vasp/Potentials/PBE/potpaw_PBE.54/Na/POTCAR'
 ```
 
@@ -243,7 +244,7 @@ At the most basic level, you'll want to use Simmate to calculate a material's en
 
 Let's start by seeing what is available by running:
 
-```
+``` shell
 simmate workflows list-all
 ```
 
@@ -251,20 +252,50 @@ The output will be similar to...
 
 ```
 Gathering all available workflows...
-These are all workflows you can use:
-    (1) energy-mit
-    (2) energy-quality04
-    (3) relaxation-mit
-    (4) relaxation-quality00
-    (5) relaxation-quality01
-    (6) relaxation-quality02
-    (7) relaxation-quality03
-    (8) relaxation-quality04
-    (9) relaxation-staged
+These are the workflows that have been registerd:
+        (01) static-energy/matproj
+        (02) static-energy/mit
+        (03) static-energy/neb-endpoint
+        (04) static-energy/quality04
+        (05) relaxation/matproj
+        (06) relaxation/mit
+        (07) relaxation/neb-endpoint
+        (08) relaxation/quality00
+        (09) relaxation/quality01
   ... << plus others that are cut-off for clarity >>
 ```
 
-In this tutorial, we will be using `energy-mit` which runs a simple static energy calculation using MIT Project settings (these settings are based on pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)).
+Next, try out the `explore` command, which gives us a more interactive way to view the available workflows.
+
+``` shell
+simmate workflows explore
+```
+
+When prompted to choose a type of workflow or a specific preset, choose whichever you'd like! A description of the workflow will be printed at the very end. As an example, here's the output of an example workflow `relaxation/staged` which is commonly used in our evolutionary search algorithm. To get this output, we used the `simmate workflows explore` then selected option `2` (relaxation) and then option `9` (staged):
+
+```
+===================== relaxation/staged =====================
+
+    Runs a series of increasing-quality relaxations and then finishes with a single
+    static energy calculation.
+
+    This is therefore a "Nested Workflow" made of the following smaller workflows:
+
+        - relaxation/quality00
+        - relaxation/quality01
+        - relaxation/quality02
+        - relaxation/quality03
+        - relaxation/quality04
+        - static-energy/quality04
+
+    This workflow is most useful for randomly-created structures or extremely
+    large supercells. More precise relaxations+energy calcs should be done
+    afterwards because ettings are still below MIT and Materials Project quality.
+
+==================================================================
+```
+
+In this tutorial, we will be using `static-energy/mit` which runs a simple static energy calculation using MIT Project settings (these settings are based on pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)).
 
 <br/> <!-- add empty line -->
 
@@ -274,24 +305,24 @@ Take a look back at the 4 key steps of a workflow above (`configure`, `schedule`
 
 To view a workflow's configuration before using it, we type the command `simmate workflows show-config`. Try this out by running:
 
-```
-simmate workflows show-config relaxation-quality00
+``` shell
+simmate workflows show-config relaxation/quality00
 ```
 
 VASP users will recognize that this specifies the contents of a VASP INCAR file.  The `relaxation_quality00` is the most basic workflow configuration because the INCAR will not depend on the structure or composition of your crystal.
 
 Next, look at a more advanced calculation. Run the command:
 
-```
-simmate workflows show-config energy-mit
+``` shell
+simmate workflows show-config static-energy/mit
 ```
 
 Here, you'll see that some INCAR settings rely on composition and that we have a list of error handlers to help ensure that the calculation finishes successfully.
 
-Now, let's go one step further and provide a specific structure (the POSCAR we just made) into a specific workflow (energy-mit). To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can type `cd Desktop` to change your active folder to your Desktop. Then run the command:
+Now, let's go one step further and provide a specific structure (the POSCAR we just made) into a specific workflow (static-energy/mit). To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can type `cd Desktop` to change your active folder to your Desktop. Then run the command:
 
-```
-simmate workflows setup-only energy-mit POSCAR
+``` shell
+simmate workflows setup-only static-energy/mit -s POSCAR
 ```
 
 You'll see a new folder created named `MIT_Static_Energy_inputs`. When you open it, you'll see all the files that Simmate made for VASP to use. This is useful when you're an advanced user who wants to alter these files before running VASP manually -- this could happen when you want to test new workflows or unique systems.
@@ -306,23 +337,23 @@ For absolute beginners, you don't immediately need to understand these files, bu
 
 The default Simmate settings will run everything immediately and locally on your desktop. When running the workflow, it will create a new folder, write the inputs in it, run the calculation, and save the results to your database.
 
-The command to do this with our POSCAR and energy-mit workflow is: 
+The command to do this with our POSCAR and static-energy/mit workflow is (the `-s` is short for `--structure`): 
 
-```
-simmate workflows run energy-mit POSCAR
+``` shell
+simmate workflows run static-energy/mit -s POSCAR
 ```
 
 By default, Simmate uses the command `vasp_std > vasp.out` and creates a new `simmate-task` folder with a unique identifier (ex: `simmate-task-j8djk3mn8`).
 
 What if we wanted to change this command or the directory it's ran in? First, check the help output for the command:
-```
+``` shell
 simmate workflows run --help
 ```
 
 Using this help info, we can change our folder name (`--directory`, `-d`) as well as the command used to run VASP (`--command`, `-c`). For example, we can update our command to this:
 
-```
-simmate workflows run energy-mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out" -d my_custom_folder
+``` shell
+simmate workflows run static-energy/mit -s POSCAR -c "mpirun -n 4 vasp_std > vasp.out" -d my_custom_folder
 ```
 
 
@@ -351,15 +382,15 @@ The remainder of this tutorial gives example commands to use. Replace these comm
 
 If you've never signed into a remote cluster before, we will do this by using SSH (Secure Shell). For example, to sign in to University of North Carolina's LongLeaf cluster, you would run the following command in your local terminal (on windows, use your Command-prompt -- not the Anaconda Powershell Prompt):
 
-```
-Sign in with...
+``` shell
+# Sign in with...
 
 ssh my_username@longleaf.unc.edu
 ```
 
 After entering your password, you are now using a terminal on the remote supercomputer. Try running the command `pwd` ("print working directory") to show that your terminal is indeed running commands on the remote cluster, not your desktop:
 
-```
+``` shell
 # This is the same for all linux clusters
 
 pwd
@@ -367,7 +398,7 @@ pwd
 
 To load VASP into your environment, you typically need to run the command:
 
-```
+``` shell
 # Load VASP with...
 
 module load vasp
@@ -376,7 +407,7 @@ vasp_std
 
 If the vasp_std command worked correctly, you will see (their command doesn't print help information like `simmate` or `conda`):
 
-```
+``` shell
 # Error output may vary between different VASP versions
 
 Error reading item 'VCAIMAGES' from file INCAR.
@@ -384,14 +415,15 @@ Error reading item 'VCAIMAGES' from file INCAR.
 
 Next we need to ensure Simmate is installed. If you see `(base)` at the start of your command-line, Anaconda is already installed! If not, ask your IT team how they want you install it (typically it's by using [miniconda](https://docs.conda.io/en/latest/miniconda.html) which is just anaconda without the graphical user interface). With Anaconda set up, you can create your environment and install Simmate just like we did in tutorial 01:
 
-```
+``` shell
 # Create your conda env with...
 
 conda create -n my_env -c conda-forge python=3.8 simmate
 conda activate my_env
 
+
 # Initialize your database on this new installation.
-# If you share a username with others, check your guide before running this.
+
 simmate database reset
 ```
 
@@ -399,7 +431,7 @@ Next, copy your Potentials into `~/simmate/vasp/Potentials` and also copy the `P
 
 Typically, clusters will have a "scratch" directory that you should submit jobs from -- which is different from your home directory. Make sure you switch to that before submitting and workflows. (note, your `POSCAR` should be in this directory too). Here is what LongLeaf's looks like as an example:
 
-```
+``` shell
 # Access scratch directory with...
 
 cd /pine/scr/j/a/jacksund
@@ -409,7 +441,7 @@ Finally, let's submit a Simmate workflow on our cluster! In the previous section
 
 For example, UNC's longleaf cluster uses [SLURM](https://slurm.schedmd.com/documentation.html). To submit, we would make a file named `submit.sh`:
 
-```
+``` shell
 # Create a SLURM script with...
 
 nano submit.sh
@@ -417,7 +449,7 @@ nano submit.sh
 
 ... and use contents likes ...
 
-```
+``` shell
 #! /bin/sh
 
 #SBATCH --job-name=my_example_job
@@ -431,7 +463,7 @@ nano submit.sh
 #SBATCH --mail-type=ALL 
 #SBATCH --mail-user=my_username@live.unc.edu
 
-simmate workflows run energy-mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
+simmate workflows run static-energy/mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
 ```
 
 Each of these `SBATCH` parameters set how we would like to sumbit a job and how many resources we expect to use. These are explained in [SLURM's documnetation for sbatch](https://slurm.schedmd.com/sbatch.html), but you may need help from your IT team to update them. But to break down these example parameters...
@@ -448,7 +480,7 @@ Each of these `SBATCH` parameters set how we would like to sumbit a job and how 
 
 Make sure you have VASP and your correct conda enviornment loaded. Then submit your job with:
 
-```
+``` shell
 # Submit with...
 
 sbatch submit.sh
@@ -456,7 +488,7 @@ sbatch submit.sh
 
 You can then monitor your jobs progress with:
 
-```
+``` shell
 # Monitor progress with...
 
 squeue -u my_username
