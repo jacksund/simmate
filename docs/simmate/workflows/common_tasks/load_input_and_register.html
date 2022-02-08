@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="pdoc 8.3.0" />
+    <meta name="generator" content="pdoc 9.0.1" />
     <title>simmate.workflows.common_tasks.load_input_and_register API documentation</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%2244.5%202.5%2015%2015%22%3E%3Cpath%20d%3D%22M49.351%2021.041c-.233-.721-.546-2.408-.772-4.076-.042-.09-.067-.187-.046-.288-.166-1.347-.277-2.625-.241-3.351-1.378-1.008-2.271-2.586-2.271-4.362%200-.976.272-1.935.788-2.774.057-.094.122-.18.184-.268-.033-.167-.052-.339-.052-.516%200-1.477%201.202-2.679%202.679-2.679.791%200%201.496.352%201.987.9a6.3%206.3%200%200%201%201.001.029c.492-.564%201.207-.929%202.012-.929%201.477%200%202.679%201.202%202.679%202.679a2.65%202.65%200%200%201-.269%201.148c.383.747.595%201.572.595%202.41%200%202.311-1.507%204.29-3.635%205.107.037.699.147%202.27.423%203.294l.137.461c.156%202.136-4.612%205.166-5.199%203.215zm.127-4.919a4.78%204.78%200%200%200%20.775-.584c-.172-.115-.505-.254-.88-.378zm.331%202.302l.828-.502c-.202-.143-.576-.328-.984-.49zm.45%202.157l.701-.403c-.214-.115-.536-.249-.891-.376l.19.779zM49.13%204.141c0%20.152.123.276.276.276s.275-.124.275-.276-.123-.276-.276-.276-.275.124-.275.276zm.735-.389a1.15%201.15%200%200%201%20.314.783%201.16%201.16%200%200%201-1.162%201.162c-.457%200-.842-.27-1.032-.653-.026.117-.042.238-.042.362a1.68%201.68%200%200%200%201.679%201.679%201.68%201.68%200%200%200%201.679-1.679c0-.843-.626-1.535-1.436-1.654zm3.076%201.654a1.68%201.68%200%200%200%201.679%201.679%201.68%201.68%200%200%200%201.679-1.679c0-.037-.009-.072-.011-.109-.21.3-.541.508-.935.508a1.16%201.16%200%200%201-1.162-1.162%201.14%201.14%200%200%201%20.474-.912c-.015%200-.03-.005-.045-.005-.926.001-1.679.754-1.679%201.68zm1.861-1.265c0%20.152.123.276.276.276s.275-.124.275-.276-.123-.276-.276-.276-.275.124-.275.276zm1.823%204.823c0-.52-.103-1.035-.288-1.52-.466.394-1.06.64-1.717.64-1.144%200-2.116-.725-2.499-1.738-.383%201.012-1.355%201.738-2.499%201.738-.867%200-1.631-.421-2.121-1.062-.307.605-.478%201.267-.478%201.942%200%202.486%202.153%204.51%204.801%204.51s4.801-2.023%204.801-4.51zm-3.032%209.156l-.146-.492c-.276-1.02-.395-2.457-.444-3.268a6.11%206.11%200%200%201-1.18.115%206.01%206.01%200%200%201-2.536-.562l.006.175c.802.215%201.848.612%202.021%201.25.079.295-.021.601-.274.837l-.598.501c.667.304%201.243.698%201.311%201.179.02.144.022.507-.393.787l-.564.365c1.285.521%201.361.96%201.381%201.126.018.142.011.496-.427.746l-.854.489c.064-1.19%201.985-2.585%202.697-3.248zM49.34%209.925c0-.667%201-.667%201%200%200%20.653.818%201.205%201.787%201.205s1.787-.552%201.787-1.205c0-.667%201-.667%201%200%200%201.216-1.25%202.205-2.787%202.205s-2.787-.989-2.787-2.205zm-.887-7.633c-.093.077-.205.114-.317.114a.5.5%200%200%201-.318-.886L49.183.397a.5.5%200%200%201%20.703.068.5.5%200%200%201-.069.703zm7.661-.065c-.086%200-.173-.022-.253-.068l-1.523-.893c-.575-.337-.069-1.2.506-.863l1.523.892a.5.5%200%200%201%20.179.685c-.094.158-.261.247-.432.247z%22%20fill%3D%22%233bb300%22/%3E%3C/svg%3E"/>
 
 
 <style>/*! * Bootstrap Reboot v5.0.0 (https://getbootstrap.com/) * Copyright 2011-2021 The Bootstrap Authors * Copyright 2011-2021 Twitter, Inc. * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE) * Forked from Normalize.css, licensed MIT (https://github.com/necolas/normalize.css/blob/master/LICENSE.md) */*,::after,::before{box-sizing:border-box}@media (prefers-reduced-motion:no-preference){:root{scroll-behavior:smooth}}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#fff;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}hr{margin:1rem 0;color:inherit;background-color:currentColor;border:0;opacity:.25}hr:not([size]){height:1px}h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}h1{font-size:calc(1.375rem + 1.5vw)}@media (min-width:1200px){h1{font-size:2.5rem}}h2{font-size:calc(1.325rem + .9vw)}@media (min-width:1200px){h2{font-size:2rem}}h3{font-size:calc(1.3rem + .6vw)}@media (min-width:1200px){h3{font-size:1.75rem}}h4{font-size:calc(1.275rem + .3vw)}@media (min-width:1200px){h4{font-size:1.5rem}}h5{font-size:1.25rem}h6{font-size:1rem}p{margin-top:0;margin-bottom:1rem}abbr[data-bs-original-title],abbr[title]{-webkit-text-decoration:underline dotted;text-decoration:underline dotted;cursor:help;-webkit-text-decoration-skip-ink:none;text-decoration-skip-ink:none}address{margin-bottom:1rem;font-style:normal;line-height:inherit}ol,ul{padding-left:2rem}dl,ol,ul{margin-top:0;margin-bottom:1rem}ol ol,ol ul,ul ol,ul ul{margin-bottom:0}dt{font-weight:700}dd{margin-bottom:.5rem;margin-left:0}blockquote{margin:0 0 1rem}b,strong{font-weight:bolder}small{font-size:.875em}mark{padding:.2em;background-color:#fcf8e3}sub,sup{position:relative;font-size:.75em;line-height:0;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}a{color:#0d6efd;text-decoration:underline}a:hover{color:#0a58ca}a:not([href]):not([class]),a:not([href]):not([class]):hover{color:inherit;text-decoration:none}code,kbd,pre,samp{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em;direction:ltr;unicode-bidi:bidi-override}pre{display:block;margin-top:0;margin-bottom:1rem;overflow:auto;font-size:.875em}pre code{font-size:inherit;color:inherit;word-break:normal}code{font-size:.875em;color:#d63384;word-wrap:break-word}a>code{color:inherit}kbd{padding:.2rem .4rem;font-size:.875em;color:#fff;background-color:#212529;border-radius:.2rem}kbd kbd{padding:0;font-size:1em;font-weight:700}figure{margin:0 0 1rem}img,svg{vertical-align:middle}table{caption-side:bottom;border-collapse:collapse}caption{padding-top:.5rem;padding-bottom:.5rem;color:#6c757d;text-align:left}th{text-align:inherit;text-align:-webkit-match-parent}tbody,td,tfoot,th,thead,tr{border-color:inherit;border-style:solid;border-width:0}label{display:inline-block}button{border-radius:0}button:focus:not(:focus-visible){outline:0}button,input,optgroup,select,textarea{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,select{text-transform:none}[role=button]{cursor:pointer}select{word-wrap:normal}select:disabled{opacity:1}[list]::-webkit-calendar-picker-indicator{display:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]:not(:disabled),[type=reset]:not(:disabled),[type=submit]:not(:disabled),button:not(:disabled){cursor:pointer}::-moz-focus-inner{padding:0;border-style:none}textarea{resize:vertical}fieldset{min-width:0;padding:0;margin:0;border:0}legend{float:left;width:100%;padding:0;margin-bottom:.5rem;font-size:calc(1.275rem + .3vw);line-height:inherit}@media (min-width:1200px){legend{font-size:1.5rem}}legend+*{clear:left}::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-text,::-webkit-datetime-edit-year-field{padding:0}::-webkit-inner-spin-button{height:auto}[type=search]{outline-offset:-2px;-webkit-appearance:textfield}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-color-swatch-wrapper{padding:0}::file-selector-button{font:inherit}::-webkit-file-upload-button{font:inherit;-webkit-appearance:button}output{display:inline-block}iframe{border:0}summary{display:list-item;cursor:pointer}progress{vertical-align:baseline}[hidden]{display:none!important}</style>
 <style>/*! pygments syntax highlighting */pre{line-height:125%;}td.linenos pre{color:#000000; background-color:#f0f0f0; padding-left:5px; padding-right:5px;}span.linenos{color:#000000; background-color:#f0f0f0; padding-left:5px; padding-right:5px;}td.linenos pre.special{color:#000000; background-color:#ffffc0; padding-left:5px; padding-right:5px;}span.linenos.special{color:#000000; background-color:#ffffc0; padding-left:5px; padding-right:5px;}.pdoc .hll{background-color:#ffffcc}.pdoc{background:#f8f8f8;}.pdoc .c{color:#408080; font-style:italic}.pdoc .err{border:1px solid #FF0000}.pdoc .k{color:#008000; font-weight:bold}.pdoc .o{color:#666666}.pdoc .ch{color:#408080; font-style:italic}.pdoc .cm{color:#408080; font-style:italic}.pdoc .cp{color:#BC7A00}.pdoc .cpf{color:#408080; font-style:italic}.pdoc .c1{color:#408080; font-style:italic}.pdoc .cs{color:#408080; font-style:italic}.pdoc .gd{color:#A00000}.pdoc .ge{font-style:italic}.pdoc .gr{color:#FF0000}.pdoc .gh{color:#000080; font-weight:bold}.pdoc .gi{color:#00A000}.pdoc .go{color:#888888}.pdoc .gp{color:#000080; font-weight:bold}.pdoc .gs{font-weight:bold}.pdoc .gu{color:#800080; font-weight:bold}.pdoc .gt{color:#0044DD}.pdoc .kc{color:#008000; font-weight:bold}.pdoc .kd{color:#008000; font-weight:bold}.pdoc .kn{color:#008000; font-weight:bold}.pdoc .kp{color:#008000}.pdoc .kr{color:#008000; font-weight:bold}.pdoc .kt{color:#B00040}.pdoc .m{color:#666666}.pdoc .s{color:#BA2121}.pdoc .na{color:#7D9029}.pdoc .nb{color:#008000}.pdoc .nc{color:#0000FF; font-weight:bold}.pdoc .no{color:#880000}.pdoc .nd{color:#AA22FF}.pdoc .ni{color:#999999; font-weight:bold}.pdoc .ne{color:#D2413A; font-weight:bold}.pdoc .nf{color:#0000FF}.pdoc .nl{color:#A0A000}.pdoc .nn{color:#0000FF; font-weight:bold}.pdoc .nt{color:#008000; font-weight:bold}.pdoc .nv{color:#19177C}.pdoc .ow{color:#AA22FF; font-weight:bold}.pdoc .w{color:#bbbbbb}.pdoc .mb{color:#666666}.pdoc .mf{color:#666666}.pdoc .mh{color:#666666}.pdoc .mi{color:#666666}.pdoc .mo{color:#666666}.pdoc .sa{color:#BA2121}.pdoc .sb{color:#BA2121}.pdoc .sc{color:#BA2121}.pdoc .dl{color:#BA2121}.pdoc .sd{color:#BA2121; font-style:italic}.pdoc .s2{color:#BA2121}.pdoc .se{color:#BB6622; font-weight:bold}.pdoc .sh{color:#BA2121}.pdoc .si{color:#BB6688; font-weight:bold}.pdoc .sx{color:#008000}.pdoc .sr{color:#BB6688}.pdoc .s1{color:#BA2121}.pdoc .ss{color:#19177C}.pdoc .bp{color:#008000}.pdoc .fm{color:#0000FF}.pdoc .vc{color:#19177C}.pdoc .vg{color:#19177C}.pdoc .vi{color:#19177C}.pdoc .vm{color:#19177C}.pdoc .il{color:#666666}</style>
-<style>/*! pdoc */:root{--pdoc-background:#fff;}.pdoc{--text:#212529;--muted:#6c757d;--link:#3660a5;--link-hover:#1659c5;--code:#f7f7f7;--active:#fff598;--accent:#eee;--accent2:#c1c1c1;--nav-hover:rgba(255, 255, 255, 0.5);--name:#0066BB;--def:#008800;--annotation:#007020;}body{background-color:var(--pdoc-background);}html, body{width:100%;height:100%;}@media (max-width:769px){#navtoggle{cursor:pointer;position:absolute;width:50px;height:40px;top:1rem;right:1rem;border-color:var(--text);color:var(--text);display:flex;opacity:0.8;}#navtoggle:hover{opacity:1;}#togglestate + div{display:none;}#togglestate:checked + div{display:inherit;}main, header{padding:2rem 3vw;}.git-button{display:none !important;}nav input[type="search"]:valid ~ *{display:none !important;}}@media (min-width:770px){:root{--sidebar-width:clamp(12.5rem, 28vw, 22rem);}nav{position:fixed;overflow:auto;height:100vh;width:var(--sidebar-width);}main, header{padding:3rem 2rem 3rem calc(var(--sidebar-width) + 3rem);width:calc(54rem + var(--sidebar-width));max-width:100%;}#navtoggle{display:none;}}#togglestate{display:none;}nav.pdoc{--pad:1.75rem;--indent:1.5rem;background-color:var(--accent);border-right:1px solid var(--accent2);box-shadow:0 0 20px rgba(50, 50, 50, .2) inset;padding:0 0 0 var(--pad);overflow-wrap:anywhere;scrollbar-width:thin; scrollbar-color:var(--accent2) transparent }nav.pdoc::-webkit-scrollbar{width:.4rem; }nav.pdoc::-webkit-scrollbar-thumb{background-color:var(--accent2); }nav.pdoc > div{padding:var(--pad) 0;}nav.pdoc .module-list-button{display:inline-flex;align-items:center;color:var(--text);border-color:var(--muted);margin-bottom:1rem;}nav.pdoc .module-list-button:hover{border-color:var(--text);}nav.pdoc input[type=search]{display:block;outline-offset:0;width:calc(100% - var(--pad));}nav.pdoc .logo{max-width:calc(100% - var(--pad));max-height:35vh;display:block;margin:0 auto 1rem;transform:translate(calc(-.5 * var(--pad)), 0);}nav.pdoc ul{list-style:none;padding-left:0;}nav.pdoc li{display:block;margin:0;padding:.2rem 0 .2rem var(--indent);transition:all 100ms;}nav.pdoc > div > ul > li{padding-left:0;}nav.pdoc li:hover{background-color:var(--nav-hover);}nav.pdoc a, nav.pdoc a:hover{color:var(--text);}nav.pdoc a{display:block;}nav.pdoc > h2:first-of-type{margin-top:1.5rem;}nav.pdoc .class:before{content:"class ";color:var(--muted);}nav.pdoc .function:after{content:"()";color:var(--muted);}nav.pdoc footer:before{content:"";display:block;width:calc(100% - var(--pad));border-top:solid var(--accent2) 1px;margin-top:1.5rem;padding-top:.5rem;}nav.pdoc footer{font-size:small;}html, main{scroll-behavior:smooth;}.pdoc{color:var(--text);box-sizing:border-box;line-height:1.5;background:none;}.pdoc .pdoc-button{display:inline-block;border:solid black 1px;border-radius:2px;font-size:.75rem;padding:calc(0.5em - 1px) 1em;transition:100ms all;}.pdoc .visually-hidden{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border:0 !important;}.pdoc h1, .pdoc h2, .pdoc h3{font-weight:300;margin:.3em 0;padding:.2em 0;}.pdoc a{text-decoration:none;color:var(--link);}.pdoc a:hover{color:var(--link-hover);}.pdoc blockquote{margin-left:2rem;}.pdoc pre{background-color:var(--code);border-top:1px solid var(--accent2);border-bottom:1px solid var(--accent2);margin-bottom:1em;padding:.5rem 0 .5rem .5rem;overflow-x:auto;}.pdoc code{color:var(--text);padding:.2em .4em;margin:0;font-size:85%;background-color:var(--code);border-radius:6px;}.pdoc a > code{color:inherit;}.pdoc pre > code{display:inline-block;font-size:inherit;background:none;border:none;padding:0;}.pdoc .modulename{margin-top:0;font-weight:bold;}.pdoc .modulename a{color:var(--link);transition:100ms all;}.pdoc .git-button{float:right;border:solid var(--link) 1px;}.pdoc .git-button:hover{background-color:var(--link);color:var(--pdoc-background);}.pdoc details{filter:opacity(1);}.pdoc details:not([open]){height:0;}.pdoc details > summary{position:absolute;top:-35px;right:0;font-size:.75rem;color:var(--muted);padding:0 .7em;user-select:none;}.pdoc details > summary:focus{outline:0;}.pdoc .docstring{margin-bottom:1.5rem;}.pdoc > section:first-of-type > .docstring{margin-bottom:2.5rem;}.pdoc .docstring pre{margin-left:1em;margin-right:1em;}.pdoc h1:target,.pdoc h2:target,.pdoc h3:target,.pdoc h4:target,.pdoc h5:target,.pdoc h6:target{background-color:var(--active);box-shadow:-1rem 0 0 0 var(--active);}.pdoc div:target > .attr,.pdoc section:target > .attr,.pdoc dd:target > a{background-color:var(--active);}.pdoc .attr:hover{filter:contrast(0.95);}.pdoc .headerlink{position:absolute;width:0;margin-left:-1.5rem;line-height:1.4rem;font-size:1.5rem;font-weight:normal;transition:all 100ms ease-in-out;opacity:0;user-select:none;}.pdoc .attr > .headerlink{margin-left:-2.5rem;}.pdoc *:hover > .headerlink,.pdoc *:target > .attr > .headerlink{opacity:1;}.pdoc .attr{display:block;color:var(--text);margin:.5rem 0 .5rem;padding:.4rem 5rem .4rem 1rem;background-color:var(--accent);}.pdoc .classattr{margin-left:2rem;}.pdoc .name{color:var(--name);font-weight:bold;}.pdoc .def{color:var(--def);font-weight:bold;}.pdoc .signature{white-space:pre-wrap;}.pdoc .annotation{color:var(--annotation);}.pdoc .inherited{margin-left:2rem;}.pdoc .inherited dt{font-weight:700;}.pdoc .inherited dt, .pdoc .inherited dd{display:inline;margin-left:0;margin-bottom:.5rem;}.pdoc .inherited dd:not(:last-child):after{content:", ";}.pdoc .inherited .class:before{content:"class ";}.pdoc .inherited .function a:after{content:"()";}.pdoc .search-result .docstring{overflow:auto;max-height:25vh;}.pdoc .search-result.focused > .attr{background-color:var(--active);}.pdoc .attribution{margin-top:2rem;display:block;opacity:0.5;transition:all 200ms;filter:grayscale(100%);}.pdoc .attribution:hover{opacity:1;filter:grayscale(0%);}.pdoc .attribution img{margin-left:5px;height:35px;vertical-align:middle;width:70px;transition:all 200ms;}.pdoc table{display:block;width:max-content;max-width:100%;overflow:auto;margin-bottom:1rem;}.pdoc table th{font-weight:600;}.pdoc table th, .pdoc table td{padding:6px 13px;border:1px solid var(--accent2);}</style>
+<style>/*! pdoc */:root{--pdoc-background:#fff;}.pdoc{--text:#212529;--muted:#6c757d;--link:#3660a5;--link-hover:#1659c5;--code:#f7f7f7;--active:#fff598;--accent:#eee;--accent2:#c1c1c1;--nav-hover:rgba(255, 255, 255, 0.5);--name:#0066BB;--def:#008800;--annotation:#007020;}body{background-color:var(--pdoc-background);}html, body{width:100%;height:100%;}@media (max-width:769px){#navtoggle{cursor:pointer;position:absolute;width:50px;height:40px;top:1rem;right:1rem;border-color:var(--text);color:var(--text);display:flex;opacity:0.8;}#navtoggle:hover{opacity:1;}#togglestate + div{display:none;}#togglestate:checked + div{display:inherit;}main, header{padding:2rem 3vw;}.git-button{display:none !important;}nav input[type="search"]{max-width:77%;}nav input[type="search"]:first-child{margin-top:-6px;}nav input[type="search"]:valid ~ *{display:none !important;}}@media (min-width:770px){:root{--sidebar-width:clamp(12.5rem, 28vw, 22rem);}nav{position:fixed;overflow:auto;height:100vh;width:var(--sidebar-width);}main, header{padding:3rem 2rem 3rem calc(var(--sidebar-width) + 3rem);width:calc(54rem + var(--sidebar-width));max-width:100%;}#navtoggle{display:none;}}#togglestate{position:absolute;height:0;}nav.pdoc{--pad:1.75rem;--indent:1.5rem;background-color:var(--accent);border-right:1px solid var(--accent2);box-shadow:0 0 20px rgba(50, 50, 50, .2) inset;padding:0 0 0 var(--pad);overflow-wrap:anywhere;scrollbar-width:thin; scrollbar-color:var(--accent2) transparent }nav.pdoc::-webkit-scrollbar{width:.4rem; }nav.pdoc::-webkit-scrollbar-thumb{background-color:var(--accent2); }nav.pdoc > div{padding:var(--pad) 0;}nav.pdoc .module-list-button{display:inline-flex;align-items:center;color:var(--text);border-color:var(--muted);margin-bottom:1rem;}nav.pdoc .module-list-button:hover{border-color:var(--text);}nav.pdoc input[type=search]{display:block;outline-offset:0;width:calc(100% - var(--pad));}nav.pdoc .logo{max-width:calc(100% - var(--pad));max-height:35vh;display:block;margin:0 auto 1rem;transform:translate(calc(-.5 * var(--pad)), 0);}nav.pdoc ul{list-style:none;padding-left:0;}nav.pdoc li{display:block;margin:0;padding:.2rem 0 .2rem var(--indent);transition:all 100ms;}nav.pdoc > div > ul > li{padding-left:0;}nav.pdoc li:hover{background-color:var(--nav-hover);}nav.pdoc a, nav.pdoc a:hover{color:var(--text);}nav.pdoc a{display:block;}nav.pdoc > h2:first-of-type{margin-top:1.5rem;}nav.pdoc .class:before{content:"class ";color:var(--muted);}nav.pdoc .function:after{content:"()";color:var(--muted);}nav.pdoc footer:before{content:"";display:block;width:calc(100% - var(--pad));border-top:solid var(--accent2) 1px;margin-top:1.5rem;padding-top:.5rem;}nav.pdoc footer{font-size:small;}html, main{scroll-behavior:smooth;}.pdoc{color:var(--text);box-sizing:border-box;line-height:1.5;background:none;}.pdoc .pdoc-button{display:inline-block;border:solid black 1px;border-radius:2px;font-size:.75rem;padding:calc(0.5em - 1px) 1em;transition:100ms all;}.pdoc .visually-hidden{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border:0 !important;}.pdoc h1, .pdoc h2, .pdoc h3{font-weight:300;margin:.3em 0;padding:.2em 0;}.pdoc a{text-decoration:none;color:var(--link);}.pdoc a:hover{color:var(--link-hover);}.pdoc blockquote{margin-left:2rem;}.pdoc pre{background-color:var(--code);border-top:1px solid var(--accent2);border-bottom:1px solid var(--accent2);margin-bottom:1em;padding:.5rem 0 .5rem .5rem;overflow-x:auto;}.pdoc code{color:var(--text);padding:.2em .4em;margin:0;font-size:85%;background-color:var(--code);border-radius:6px;}.pdoc a > code{color:inherit;}.pdoc pre > code{display:inline-block;font-size:inherit;background:none;border:none;padding:0;}.pdoc .modulename{margin-top:0;font-weight:bold;}.pdoc .modulename a{color:var(--link);transition:100ms all;}.pdoc .git-button{float:right;border:solid var(--link) 1px;}.pdoc .git-button:hover{background-color:var(--link);color:var(--pdoc-background);}.pdoc details{filter:opacity(1);}.pdoc details:not([open]){height:0;}.pdoc details > summary{position:absolute;top:-35px;right:0;font-size:.75rem;color:var(--muted);padding:0 .7em;user-select:none;}.pdoc details > summary:focus{outline:0;}.pdoc .docstring{margin-bottom:1.5rem;}.pdoc > section:first-of-type > .docstring{margin-bottom:2.5rem;}.pdoc .docstring pre{margin-left:1em;margin-right:1em;}.pdoc h1:target,.pdoc h2:target,.pdoc h3:target,.pdoc h4:target,.pdoc h5:target,.pdoc h6:target{background-color:var(--active);box-shadow:-1rem 0 0 0 var(--active);}.pdoc div:target > .attr,.pdoc section:target > .attr,.pdoc dd:target > a{background-color:var(--active);}.pdoc .attr:hover{filter:contrast(0.95);}.pdoc .headerlink{position:absolute;width:0;margin-left:-1.5rem;line-height:1.4rem;font-size:1.5rem;font-weight:normal;transition:all 100ms ease-in-out;opacity:0;user-select:none;}.pdoc .attr > .headerlink{margin-left:-2.5rem;}.pdoc *:hover > .headerlink,.pdoc *:target > .attr > .headerlink{opacity:1;}.pdoc .attr{display:block;color:var(--text);margin:.5rem 0 .5rem;padding:.4rem 5rem .4rem 1rem;background-color:var(--accent);}.pdoc .classattr{margin-left:2rem;}.pdoc .name{color:var(--name);font-weight:bold;}.pdoc .def{color:var(--def);font-weight:bold;}.pdoc .signature{white-space:pre-wrap;}.pdoc .annotation{color:var(--annotation);}.pdoc .inherited{margin-left:2rem;}.pdoc .inherited dt{font-weight:700;}.pdoc .inherited dt, .pdoc .inherited dd{display:inline;margin-left:0;margin-bottom:.5rem;}.pdoc .inherited dd:not(:last-child):after{content:", ";}.pdoc .inherited .class:before{content:"class ";}.pdoc .inherited .function a:after{content:"()";}.pdoc .search-result .docstring{overflow:auto;max-height:25vh;}.pdoc .search-result.focused > .attr{background-color:var(--active);}.pdoc .attribution{margin-top:2rem;display:block;opacity:0.5;transition:all 200ms;filter:grayscale(100%);}.pdoc .attribution:hover{opacity:1;filter:grayscale(0%);}.pdoc .attribution img{margin-left:5px;height:35px;vertical-align:middle;width:70px;transition:all 200ms;}.pdoc table{display:block;width:max-content;max-width:100%;overflow:auto;margin-bottom:1rem;}.pdoc table th{font-weight:600;}.pdoc table th, .pdoc table td{padding:6px 13px;border:1px solid var(--accent2);}</style>
 </head>
 <body>        <nav class="pdoc">
             <label id="navtoggle" for="togglestate" class="pdoc-button"><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke-linecap='round' stroke="currentColor" stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg></label>
-            <input id="togglestate" type="checkbox">
+            <input id="togglestate" type="checkbox" aria-hidden="true" tabindex="-1">
             <div>
                         <a class="pdoc-button module-list-button" href="../common_tasks.html">
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-left" viewBox="0 0 16 16">
@@ -65,163 +65,77 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="kn">import</span> <span class="n">import_string</span>
-
 <span class="kn">import</span> <span class="nn">prefect</span>
 <span class="kn">from</span> <span class="nn">prefect</span> <span class="kn">import</span> <span class="n">Task</span>
 
-<span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_directory</span>
+<span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span>
 
-<span class="kn">from</span> <span class="nn">simmate.website.local_calculations</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
-
-<span class="c1"># OPTIMIZE:</span>
-<span class="c1"># Find a better place for this code. Maybe attach it the core structure class</span>
-<span class="c1"># and have from_toolkit, from_dict, from_database methods. And then a</span>
-<span class="c1"># from_dynamic method that handles this input.</span>
-
-<span class="c1"># Also consider splitting into load_structure, load_directory, and register_calc</span>
-<span class="c1"># so that our flow_visualize looks cleaner</span>
+<span class="c1"># OPTIMIZE: consider splitting this task into load_structure, load_directory,</span>
+<span class="c1"># and register_calc so that our flow_visualize looks cleaner</span>
 
 
 <span class="k">class</span> <span class="nc">LoadInputAndRegister</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calculation_table</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span> <span class="o">=</span> <span class="n">calculation_table</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calculation_table</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span> <span class="o">=</span> <span class="n">calculation_table</span>  <span class="c1"># If None, registration is skipped</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+        <span class="n">input_obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">input_class</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">,</span>
         <span class="n">source</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_previous_directory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Structure</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        How the structure was submitted as a parameter depends on if we are submitting</span>
+<span class="sd">        How the input was submitted as a parameter depends on if we are submitting</span>
 <span class="sd">        to Prefect Cloud, running the flow locally, or even continuing from a</span>
-<span class="sd">        previous calculation.  Here, we use a task to convert the input to a pymatgen</span>
-<span class="sd">        structure and (if requested) provide the directory as well.</span>
+<span class="sd">        previous calculation.  Here, we use a task to convert the input to a toolkit</span>
+<span class="sd">        object and (if requested) provide the directory as well.</span>
 
-<span class="sd">        Possible structure formats include...</span>
-<span class="sd">            object of pymatgen structure</span>
-<span class="sd">            dictionary of pymatgen structure</span>
-<span class="sd">            dictionary of...</span>
-<span class="sd">                (1) python path to calculation datatable</span>
-<span class="sd">                (2) one of the following (only one is used in this priority order):</span>
-<span class="sd">                    (a) prefect flow id</span>
-<span class="sd">                    (b) calculation id</span>
-<span class="sd">                    (c) directory</span>
-<span class="sd">                    ** these three are chosen because all three are unique for every</span>
-<span class="sd">                    single calculation and we have access to different ones at different</span>
-<span class="sd">                    times!</span>
-<span class="sd">                (3) (optional) attribute to use on table (e.g. structure_final)</span>
-<span class="sd">                    By default, we assume calculation table is also a structure table</span>
-<span class="sd">            filename for a structure (cif, poscar, etc.) [TODO]</span>
+<span class="sd">        input_class is any class that has a from_dynamic method accepts the</span>
+<span class="sd">        input_obj format. In the large majority of cases, this is just</span>
+<span class="sd">        a Structure object so we use that as the default.</span>
 
 <span class="sd">        directory is optional</span>
 
 <span class="sd">        use_previous_directory is only used when we are pulling a structure from a</span>
 <span class="sd">        previous calculation. If use_previous_directory=True, then the directory</span>
 <span class="sd">        parameter is ignored.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
-        <span class="c1"># First we load the structure to a pymatgen object</span>
+        <span class="c1"># First we load the structure to a toolkit structure object</span>
 
-        <span class="c1"># keep track of this flag too, which we use in the next sections on loading</span>
-        <span class="c1"># the directory and source</span>
-        <span class="n">is_structure_from_past_calc</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># if the input is already a pymatgen structure, just return it back</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">Structure</span><span class="p">):</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">structure</span>
-
-        <span class="c1"># if the &quot;@module&quot; key is in the dictionary, then we have a pymatgen</span>
-        <span class="c1"># structure dict which we convert to a pymatgen object and return</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;@module&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
-
-        <span class="c1"># if there is a calculation_table key, then we are pointing to the simmate</span>
-        <span class="c1"># database for the input structure</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;calculation_table&quot;</span><span class="p">:</span>
-
-            <span class="n">is_structure_from_past_calc</span> <span class="o">=</span> <span class="kc">True</span>
-
-            <span class="c1"># start by loading the datbase table, which is given as a module path</span>
-            <span class="n">datatable_str</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;calculation_table&quot;</span><span class="p">]</span>
-
-            <span class="c1"># Import the datatable class -- how this is done depends on if it</span>
-            <span class="c1"># is from a simmate supplied class or if the user supplied a full</span>
-            <span class="c1"># path to the class</span>
-            <span class="c1"># OPTIMIZE: is there a better way to do this?</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">):</span>
-                <span class="n">datatable</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">datatable</span> <span class="o">=</span> <span class="n">import_string</span><span class="p">(</span><span class="n">datatable_str</span><span class="p">)</span>
-
-            <span class="c1"># These attributes tells us which structure to grab from our datatable.</span>
-            <span class="c1"># The user should have only provided one -- if they gave more, we just</span>
-            <span class="c1"># use whichever one comes first.</span>
-            <span class="n">prefect_flow_run_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">)</span>
-            <span class="n">calculation_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;calculation_id&quot;</span><span class="p">)</span>
-            <span class="n">directory_old</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">)</span>
-
-            <span class="c1"># we must have either a prefect_flow_run_id or calculation_id</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">prefect_flow_run_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">calculation_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">directory_old</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;You must have either a prefect_flow_run_id, calculation_id, &quot;</span>
-                    <span class="s2">&quot;or directory provided if you want to load a structure from &quot;</span>
-                    <span class="s2">&quot;a previous calculation.&quot;</span>
-                <span class="p">)</span>
-
-            <span class="c1"># now query the datable with which whichever was provided. Each of these</span>
-            <span class="c1"># are unique so all three should return a single calculation.</span>
-            <span class="k">if</span> <span class="n">calculation_id</span><span class="p">:</span>
-                <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">calculation_id</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">prefect_flow_run_id</span><span class="p">:</span>
-                <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="n">prefect_flow_run_id</span><span class="o">=</span><span class="n">prefect_flow_run_id</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">directory_old</span><span class="p">:</span>
-                <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory_old</span><span class="p">)</span>
-
-            <span class="c1"># In some cases, the structure we want is not within the calculation table.</span>
-            <span class="c1"># For example, in relaxations the final structure is attached via</span>
-            <span class="c1"># the table.structure_final attribute</span>
-            <span class="n">structure_field</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;structure_field&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">structure_field</span><span class="p">:</span>
-                <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">calculation</span><span class="p">,</span> <span class="n">structure_field</span><span class="p">)</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-            <span class="c1"># if there&#39;s no structure field, that means we already have the correct entry</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">calculation</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-
-        <span class="c1"># Otherwise an incorrect format was given</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown format provided for structure input.&quot;</span><span class="p">)</span>
+        <span class="n">input_cleaned</span> <span class="o">=</span> <span class="n">input_class</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">input_obj</span><span class="p">)</span>
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
         <span class="c1"># Now let&#39;s load the directory</span>
 
         <span class="c1"># if the user requested, we grab the previous directory as well</span>
-        <span class="k">if</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
             <span class="c1"># this variable will only be set if the above conditions are met. In</span>
             <span class="c1"># this case we can grab the directory name for the simmate database entry</span>
-            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">calculation</span><span class="o">.</span><span class="n">directory</span>
+            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">calculation</span><span class="o">.</span><span class="n">directory</span>
 
         <span class="c1"># catch incorrect use of this function</span>
-        <span class="k">elif</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;There isn&#39;t a previous directory available! Your source structure &quot;</span>
                 <span class="s2">&quot;must point to a past calculation to use this feature.&quot;</span>
             <span class="p">)</span>
 
-        <span class="c1"># otherwise use the directory that was given</span>
+        <span class="c1"># otherwise use the directory that was given. We create this directly</span>
+        <span class="c1"># immediately (rather than just passing the name to the S3Task). We</span>
+        <span class="c1"># do this because NestedWorkflows often use a parent directory to</span>
+        <span class="c1"># organize results.</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">directory</span>
+            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
 
         <span class="c1"># This guards against incorrect use of the function too. We don&#39;t want</span>
         <span class="c1"># users asking to use a previous directory while also giving a brand</span>
@@ -231,16 +145,16 @@
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
-        <span class="c1"># Load the source of the structure</span>
+        <span class="c1"># Load the source of the input object</span>
 
-        <span class="c1"># If we were given a structure from a previous calculation, the source should</span>
-        <span class="c1"># point directory to that same structure. Otherwise we are incorrectly trying</span>
+        <span class="c1"># If we were given a input from a previous calculation, the source should</span>
+        <span class="c1"># point directory to that same input. Otherwise we are incorrectly trying</span>
         <span class="c1"># to change what the source is.</span>
-        <span class="k">if</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
-            <span class="c1"># note structure here is a dictionary input</span>
-            <span class="k">assert</span> <span class="n">source</span> <span class="o">==</span> <span class="n">structure</span>
-        <span class="k">elif</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
-            <span class="n">source_cleaned</span> <span class="o">=</span> <span class="n">structure</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
+            <span class="c1"># note input_obj here is a dictionary</span>
+            <span class="k">assert</span> <span class="n">source</span> <span class="o">==</span> <span class="n">input_obj</span>
+        <span class="k">elif</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
+            <span class="n">source_cleaned</span> <span class="o">=</span> <span class="n">input_obj</span>
         <span class="k">elif</span> <span class="n">source</span><span class="p">:</span>
             <span class="n">source_cleaned</span> <span class="o">=</span> <span class="n">source</span>
         <span class="k">else</span><span class="p">:</span>
@@ -250,25 +164,29 @@
 
         <span class="c1"># Register the calculation so the user can follow along in the UI.</span>
 
-        <span class="c1"># load/create the calculation for this workflow run</span>
-        <span class="n">calculation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span><span class="o">.</span><span class="n">from_prefect_id</span><span class="p">(</span>
-            <span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">flow_run_id</span><span class="p">,</span>
-            <span class="c1"># We pass the initial structure in case the calculation wasn&#39;t created</span>
-            <span class="c1"># yet (and creation requires the structure)</span>
-            <span class="n">structure</span><span class="o">=</span><span class="n">structure_cleaned</span><span class="p">,</span>
-            <span class="c1"># BUG: what if the initial structure changed? An example of this happening</span>
-            <span class="c1"># is with a relaxation where a correction was applied and the calc</span>
-            <span class="c1"># was not fully restarted. This issue also will not matter when</span>
-            <span class="c1"># workflows are ran through cloud -- as the structure is already</span>
-            <span class="c1"># saved and won&#39;t be overwritten here.</span>
-            <span class="n">source</span><span class="o">=</span><span class="n">source_cleaned</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="c1"># This is only done if a table is provided. Some special-case workflows</span>
+        <span class="c1"># don&#39;t store calculation information bc the flow is just a quick python</span>
+        <span class="c1"># analysis.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span><span class="p">:</span>
+            <span class="c1"># load/create the calculation for this workflow run</span>
+            <span class="n">calculation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span><span class="o">.</span><span class="n">from_prefect_id</span><span class="p">(</span>
+                <span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">flow_run_id</span><span class="p">,</span>
+                <span class="c1"># We pass the initial input_obj in case the calculation wasn&#39;t created</span>
+                <span class="c1"># yet (and creation requires the structure)</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">input_cleaned</span><span class="p">,</span>
+                <span class="c1"># BUG: what if the initial structure changed? An example of this happening</span>
+                <span class="c1"># is with a relaxation where a correction was applied and the calc</span>
+                <span class="c1"># was not fully restarted. This issue also will not matter when</span>
+                <span class="c1"># workflows are ran through cloud -- as the structure is already</span>
+                <span class="c1"># saved and won&#39;t be overwritten here.</span>
+                <span class="n">source</span><span class="o">=</span><span class="n">source_cleaned</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
         <span class="c1"># the rest of the calculation doesn&#39;t need the source (that was only for</span>
         <span class="c1"># registering the calc), so we just return the pymatgen structure and dir</span>
-        <span class="k">return</span> <span class="n">structure_cleaned</span><span class="p">,</span> <span class="n">directory_cleaned</span>
+        <span class="k">return</span> <span class="n">input_cleaned</span><span class="p">,</span> <span class="n">directory_cleaned</span>
 
 
 <span class="c1"># These are my notes how we can specify a source</span>
@@ -344,142 +262,64 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LoadInputAndRegister</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calculation_table</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span> <span class="o">=</span> <span class="n">calculation_table</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calculation_table</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span> <span class="o">=</span> <span class="n">calculation_table</span>  <span class="c1"># If None, registration is skipped</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+        <span class="n">input_obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">input_class</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">,</span>
         <span class="n">source</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_previous_directory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Structure</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        How the structure was submitted as a parameter depends on if we are submitting</span>
+<span class="sd">        How the input was submitted as a parameter depends on if we are submitting</span>
 <span class="sd">        to Prefect Cloud, running the flow locally, or even continuing from a</span>
-<span class="sd">        previous calculation.  Here, we use a task to convert the input to a pymatgen</span>
-<span class="sd">        structure and (if requested) provide the directory as well.</span>
+<span class="sd">        previous calculation.  Here, we use a task to convert the input to a toolkit</span>
+<span class="sd">        object and (if requested) provide the directory as well.</span>
 
-<span class="sd">        Possible structure formats include...</span>
-<span class="sd">            object of pymatgen structure</span>
-<span class="sd">            dictionary of pymatgen structure</span>
-<span class="sd">            dictionary of...</span>
-<span class="sd">                (1) python path to calculation datatable</span>
-<span class="sd">                (2) one of the following (only one is used in this priority order):</span>
-<span class="sd">                    (a) prefect flow id</span>
-<span class="sd">                    (b) calculation id</span>
-<span class="sd">                    (c) directory</span>
-<span class="sd">                    ** these three are chosen because all three are unique for every</span>
-<span class="sd">                    single calculation and we have access to different ones at different</span>
-<span class="sd">                    times!</span>
-<span class="sd">                (3) (optional) attribute to use on table (e.g. structure_final)</span>
-<span class="sd">                    By default, we assume calculation table is also a structure table</span>
-<span class="sd">            filename for a structure (cif, poscar, etc.) [TODO]</span>
+<span class="sd">        input_class is any class that has a from_dynamic method accepts the</span>
+<span class="sd">        input_obj format. In the large majority of cases, this is just</span>
+<span class="sd">        a Structure object so we use that as the default.</span>
 
 <span class="sd">        directory is optional</span>
 
 <span class="sd">        use_previous_directory is only used when we are pulling a structure from a</span>
 <span class="sd">        previous calculation. If use_previous_directory=True, then the directory</span>
 <span class="sd">        parameter is ignored.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
-        <span class="c1"># First we load the structure to a pymatgen object</span>
+        <span class="c1"># First we load the structure to a toolkit structure object</span>
 
-        <span class="c1"># keep track of this flag too, which we use in the next sections on loading</span>
-        <span class="c1"># the directory and source</span>
-        <span class="n">is_structure_from_past_calc</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># if the input is already a pymatgen structure, just return it back</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">Structure</span><span class="p">):</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">structure</span>
-
-        <span class="c1"># if the &quot;@module&quot; key is in the dictionary, then we have a pymatgen</span>
-        <span class="c1"># structure dict which we convert to a pymatgen object and return</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;@module&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
-
-        <span class="c1"># if there is a calculation_table key, then we are pointing to the simmate</span>
-        <span class="c1"># database for the input structure</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;calculation_table&quot;</span><span class="p">:</span>
-
-            <span class="n">is_structure_from_past_calc</span> <span class="o">=</span> <span class="kc">True</span>
-
-            <span class="c1"># start by loading the datbase table, which is given as a module path</span>
-            <span class="n">datatable_str</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;calculation_table&quot;</span><span class="p">]</span>
-
-            <span class="c1"># Import the datatable class -- how this is done depends on if it</span>
-            <span class="c1"># is from a simmate supplied class or if the user supplied a full</span>
-            <span class="c1"># path to the class</span>
-            <span class="c1"># OPTIMIZE: is there a better way to do this?</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">):</span>
-                <span class="n">datatable</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">datatable</span> <span class="o">=</span> <span class="n">import_string</span><span class="p">(</span><span class="n">datatable_str</span><span class="p">)</span>
-
-            <span class="c1"># These attributes tells us which structure to grab from our datatable.</span>
-            <span class="c1"># The user should have only provided one -- if they gave more, we just</span>
-            <span class="c1"># use whichever one comes first.</span>
-            <span class="n">prefect_flow_run_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">)</span>
-            <span class="n">calculation_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;calculation_id&quot;</span><span class="p">)</span>
-            <span class="n">directory_old</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">)</span>
-
-            <span class="c1"># we must have either a prefect_flow_run_id or calculation_id</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">prefect_flow_run_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">calculation_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">directory_old</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;You must have either a prefect_flow_run_id, calculation_id, &quot;</span>
-                    <span class="s2">&quot;or directory provided if you want to load a structure from &quot;</span>
-                    <span class="s2">&quot;a previous calculation.&quot;</span>
-                <span class="p">)</span>
-
-            <span class="c1"># now query the datable with which whichever was provided. Each of these</span>
-            <span class="c1"># are unique so all three should return a single calculation.</span>
-            <span class="k">if</span> <span class="n">calculation_id</span><span class="p">:</span>
-                <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">calculation_id</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">prefect_flow_run_id</span><span class="p">:</span>
-                <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="n">prefect_flow_run_id</span><span class="o">=</span><span class="n">prefect_flow_run_id</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">directory_old</span><span class="p">:</span>
-                <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory_old</span><span class="p">)</span>
-
-            <span class="c1"># In some cases, the structure we want is not within the calculation table.</span>
-            <span class="c1"># For example, in relaxations the final structure is attached via</span>
-            <span class="c1"># the table.structure_final attribute</span>
-            <span class="n">structure_field</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;structure_field&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">structure_field</span><span class="p">:</span>
-                <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">calculation</span><span class="p">,</span> <span class="n">structure_field</span><span class="p">)</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-            <span class="c1"># if there&#39;s no structure field, that means we already have the correct entry</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">calculation</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-
-        <span class="c1"># Otherwise an incorrect format was given</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown format provided for structure input.&quot;</span><span class="p">)</span>
+        <span class="n">input_cleaned</span> <span class="o">=</span> <span class="n">input_class</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">input_obj</span><span class="p">)</span>
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
         <span class="c1"># Now let&#39;s load the directory</span>
 
         <span class="c1"># if the user requested, we grab the previous directory as well</span>
-        <span class="k">if</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
             <span class="c1"># this variable will only be set if the above conditions are met. In</span>
             <span class="c1"># this case we can grab the directory name for the simmate database entry</span>
-            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">calculation</span><span class="o">.</span><span class="n">directory</span>
+            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">calculation</span><span class="o">.</span><span class="n">directory</span>
 
         <span class="c1"># catch incorrect use of this function</span>
-        <span class="k">elif</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;There isn&#39;t a previous directory available! Your source structure &quot;</span>
                 <span class="s2">&quot;must point to a past calculation to use this feature.&quot;</span>
             <span class="p">)</span>
 
-        <span class="c1"># otherwise use the directory that was given</span>
+        <span class="c1"># otherwise use the directory that was given. We create this directly</span>
+        <span class="c1"># immediately (rather than just passing the name to the S3Task). We</span>
+        <span class="c1"># do this because NestedWorkflows often use a parent directory to</span>
+        <span class="c1"># organize results.</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">directory</span>
+            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
 
         <span class="c1"># This guards against incorrect use of the function too. We don&#39;t want</span>
         <span class="c1"># users asking to use a previous directory while also giving a brand</span>
@@ -489,16 +329,16 @@
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
-        <span class="c1"># Load the source of the structure</span>
+        <span class="c1"># Load the source of the input object</span>
 
-        <span class="c1"># If we were given a structure from a previous calculation, the source should</span>
-        <span class="c1"># point directory to that same structure. Otherwise we are incorrectly trying</span>
+        <span class="c1"># If we were given a input from a previous calculation, the source should</span>
+        <span class="c1"># point directory to that same input. Otherwise we are incorrectly trying</span>
         <span class="c1"># to change what the source is.</span>
-        <span class="k">if</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
-            <span class="c1"># note structure here is a dictionary input</span>
-            <span class="k">assert</span> <span class="n">source</span> <span class="o">==</span> <span class="n">structure</span>
-        <span class="k">elif</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
-            <span class="n">source_cleaned</span> <span class="o">=</span> <span class="n">structure</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
+            <span class="c1"># note input_obj here is a dictionary</span>
+            <span class="k">assert</span> <span class="n">source</span> <span class="o">==</span> <span class="n">input_obj</span>
+        <span class="k">elif</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
+            <span class="n">source_cleaned</span> <span class="o">=</span> <span class="n">input_obj</span>
         <span class="k">elif</span> <span class="n">source</span><span class="p">:</span>
             <span class="n">source_cleaned</span> <span class="o">=</span> <span class="n">source</span>
         <span class="k">else</span><span class="p">:</span>
@@ -508,25 +348,29 @@
 
         <span class="c1"># Register the calculation so the user can follow along in the UI.</span>
 
-        <span class="c1"># load/create the calculation for this workflow run</span>
-        <span class="n">calculation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span><span class="o">.</span><span class="n">from_prefect_id</span><span class="p">(</span>
-            <span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">flow_run_id</span><span class="p">,</span>
-            <span class="c1"># We pass the initial structure in case the calculation wasn&#39;t created</span>
-            <span class="c1"># yet (and creation requires the structure)</span>
-            <span class="n">structure</span><span class="o">=</span><span class="n">structure_cleaned</span><span class="p">,</span>
-            <span class="c1"># BUG: what if the initial structure changed? An example of this happening</span>
-            <span class="c1"># is with a relaxation where a correction was applied and the calc</span>
-            <span class="c1"># was not fully restarted. This issue also will not matter when</span>
-            <span class="c1"># workflows are ran through cloud -- as the structure is already</span>
-            <span class="c1"># saved and won&#39;t be overwritten here.</span>
-            <span class="n">source</span><span class="o">=</span><span class="n">source_cleaned</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="c1"># This is only done if a table is provided. Some special-case workflows</span>
+        <span class="c1"># don&#39;t store calculation information bc the flow is just a quick python</span>
+        <span class="c1"># analysis.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span><span class="p">:</span>
+            <span class="c1"># load/create the calculation for this workflow run</span>
+            <span class="n">calculation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span><span class="o">.</span><span class="n">from_prefect_id</span><span class="p">(</span>
+                <span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">flow_run_id</span><span class="p">,</span>
+                <span class="c1"># We pass the initial input_obj in case the calculation wasn&#39;t created</span>
+                <span class="c1"># yet (and creation requires the structure)</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">input_cleaned</span><span class="p">,</span>
+                <span class="c1"># BUG: what if the initial structure changed? An example of this happening</span>
+                <span class="c1"># is with a relaxation where a correction was applied and the calc</span>
+                <span class="c1"># was not fully restarted. This issue also will not matter when</span>
+                <span class="c1"># workflows are ran through cloud -- as the structure is already</span>
+                <span class="c1"># saved and won&#39;t be overwritten here.</span>
+                <span class="n">source</span><span class="o">=</span><span class="n">source_cleaned</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
         <span class="c1"># the rest of the calculation doesn&#39;t need the source (that was only for</span>
         <span class="c1"># registering the calc), so we just return the pymatgen structure and dir</span>
-        <span class="k">return</span> <span class="n">structure_cleaned</span><span class="p">,</span> <span class="n">directory_cleaned</span>
+        <span class="k">return</span> <span class="n">input_cleaned</span><span class="p">,</span> <span class="n">directory_cleaned</span>
 </pre></div>
 
         </details>
@@ -646,13 +490,13 @@ with the same attributes but with different values bound to their <code><a href=
                                         <div class="attr function"><a class="headerlink" href="#LoadInputAndRegister.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">LoadInputAndRegister</span><span class="signature">(calculation_table, **kwargs)</span>
+            <span class="name">LoadInputAndRegister</span><span class="signature">(calculation_table=None, **kwargs)</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calculation_table</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span> <span class="o">=</span> <span class="n">calculation_table</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calculation_table</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span> <span class="o">=</span> <span class="n">calculation_table</span>  <span class="c1"># If None, registration is skipped</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 
@@ -668,147 +512,70 @@ with the same attributes but with different values bound to their <code><a href=
             <span class="def">def</span>
             <span class="name">run</span><span class="signature">(
     self,
-    structure: pymatgen.core.structure.Structure,
+    input_obj: Any,
+    input_class: Any = &lt;class &#39;<a href="../../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a>&#39;&gt;,
     source: dict = None,
     directory: str = None,
     use_previous_directory: bool = False
-) -&gt; Tuple[pymatgen.core.structure.Structure, str]</span>:
+) -&gt; Tuple[<a href="../../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a>, str]</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+        <span class="n">input_obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">input_class</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">,</span>
         <span class="n">source</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_previous_directory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Structure</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        How the structure was submitted as a parameter depends on if we are submitting</span>
+<span class="sd">        How the input was submitted as a parameter depends on if we are submitting</span>
 <span class="sd">        to Prefect Cloud, running the flow locally, or even continuing from a</span>
-<span class="sd">        previous calculation.  Here, we use a task to convert the input to a pymatgen</span>
-<span class="sd">        structure and (if requested) provide the directory as well.</span>
+<span class="sd">        previous calculation.  Here, we use a task to convert the input to a toolkit</span>
+<span class="sd">        object and (if requested) provide the directory as well.</span>
 
-<span class="sd">        Possible structure formats include...</span>
-<span class="sd">            object of pymatgen structure</span>
-<span class="sd">            dictionary of pymatgen structure</span>
-<span class="sd">            dictionary of...</span>
-<span class="sd">                (1) python path to calculation datatable</span>
-<span class="sd">                (2) one of the following (only one is used in this priority order):</span>
-<span class="sd">                    (a) prefect flow id</span>
-<span class="sd">                    (b) calculation id</span>
-<span class="sd">                    (c) directory</span>
-<span class="sd">                    ** these three are chosen because all three are unique for every</span>
-<span class="sd">                    single calculation and we have access to different ones at different</span>
-<span class="sd">                    times!</span>
-<span class="sd">                (3) (optional) attribute to use on table (e.g. structure_final)</span>
-<span class="sd">                    By default, we assume calculation table is also a structure table</span>
-<span class="sd">            filename for a structure (cif, poscar, etc.) [TODO]</span>
+<span class="sd">        input_class is any class that has a from_dynamic method accepts the</span>
+<span class="sd">        input_obj format. In the large majority of cases, this is just</span>
+<span class="sd">        a Structure object so we use that as the default.</span>
 
 <span class="sd">        directory is optional</span>
 
 <span class="sd">        use_previous_directory is only used when we are pulling a structure from a</span>
 <span class="sd">        previous calculation. If use_previous_directory=True, then the directory</span>
 <span class="sd">        parameter is ignored.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
-        <span class="c1"># First we load the structure to a pymatgen object</span>
+        <span class="c1"># First we load the structure to a toolkit structure object</span>
 
-        <span class="c1"># keep track of this flag too, which we use in the next sections on loading</span>
-        <span class="c1"># the directory and source</span>
-        <span class="n">is_structure_from_past_calc</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># if the input is already a pymatgen structure, just return it back</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">Structure</span><span class="p">):</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">structure</span>
-
-        <span class="c1"># if the &quot;@module&quot; key is in the dictionary, then we have a pymatgen</span>
-        <span class="c1"># structure dict which we convert to a pymatgen object and return</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;@module&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
-
-        <span class="c1"># if there is a calculation_table key, then we are pointing to the simmate</span>
-        <span class="c1"># database for the input structure</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;calculation_table&quot;</span><span class="p">:</span>
-
-            <span class="n">is_structure_from_past_calc</span> <span class="o">=</span> <span class="kc">True</span>
-
-            <span class="c1"># start by loading the datbase table, which is given as a module path</span>
-            <span class="n">datatable_str</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;calculation_table&quot;</span><span class="p">]</span>
-
-            <span class="c1"># Import the datatable class -- how this is done depends on if it</span>
-            <span class="c1"># is from a simmate supplied class or if the user supplied a full</span>
-            <span class="c1"># path to the class</span>
-            <span class="c1"># OPTIMIZE: is there a better way to do this?</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">):</span>
-                <span class="n">datatable</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">datatable</span> <span class="o">=</span> <span class="n">import_string</span><span class="p">(</span><span class="n">datatable_str</span><span class="p">)</span>
-
-            <span class="c1"># These attributes tells us which structure to grab from our datatable.</span>
-            <span class="c1"># The user should have only provided one -- if they gave more, we just</span>
-            <span class="c1"># use whichever one comes first.</span>
-            <span class="n">prefect_flow_run_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">)</span>
-            <span class="n">calculation_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;calculation_id&quot;</span><span class="p">)</span>
-            <span class="n">directory_old</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">)</span>
-
-            <span class="c1"># we must have either a prefect_flow_run_id or calculation_id</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">prefect_flow_run_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">calculation_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">directory_old</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;You must have either a prefect_flow_run_id, calculation_id, &quot;</span>
-                    <span class="s2">&quot;or directory provided if you want to load a structure from &quot;</span>
-                    <span class="s2">&quot;a previous calculation.&quot;</span>
-                <span class="p">)</span>
-
-            <span class="c1"># now query the datable with which whichever was provided. Each of these</span>
-            <span class="c1"># are unique so all three should return a single calculation.</span>
-            <span class="k">if</span> <span class="n">calculation_id</span><span class="p">:</span>
-                <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">calculation_id</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">prefect_flow_run_id</span><span class="p">:</span>
-                <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="n">prefect_flow_run_id</span><span class="o">=</span><span class="n">prefect_flow_run_id</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">directory_old</span><span class="p">:</span>
-                <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory_old</span><span class="p">)</span>
-
-            <span class="c1"># In some cases, the structure we want is not within the calculation table.</span>
-            <span class="c1"># For example, in relaxations the final structure is attached via</span>
-            <span class="c1"># the table.structure_final attribute</span>
-            <span class="n">structure_field</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;structure_field&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">structure_field</span><span class="p">:</span>
-                <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">calculation</span><span class="p">,</span> <span class="n">structure_field</span><span class="p">)</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-            <span class="c1"># if there&#39;s no structure field, that means we already have the correct entry</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">calculation</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-
-        <span class="c1"># Otherwise an incorrect format was given</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown format provided for structure input.&quot;</span><span class="p">)</span>
+        <span class="n">input_cleaned</span> <span class="o">=</span> <span class="n">input_class</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">input_obj</span><span class="p">)</span>
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
         <span class="c1"># Now let&#39;s load the directory</span>
 
         <span class="c1"># if the user requested, we grab the previous directory as well</span>
-        <span class="k">if</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
             <span class="c1"># this variable will only be set if the above conditions are met. In</span>
             <span class="c1"># this case we can grab the directory name for the simmate database entry</span>
-            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">calculation</span><span class="o">.</span><span class="n">directory</span>
+            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">calculation</span><span class="o">.</span><span class="n">directory</span>
 
         <span class="c1"># catch incorrect use of this function</span>
-        <span class="k">elif</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">use_previous_directory</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;There isn&#39;t a previous directory available! Your source structure &quot;</span>
                 <span class="s2">&quot;must point to a past calculation to use this feature.&quot;</span>
             <span class="p">)</span>
 
-        <span class="c1"># otherwise use the directory that was given</span>
+        <span class="c1"># otherwise use the directory that was given. We create this directly</span>
+        <span class="c1"># immediately (rather than just passing the name to the S3Task). We</span>
+        <span class="c1"># do this because NestedWorkflows often use a parent directory to</span>
+        <span class="c1"># organize results.</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">directory</span>
+            <span class="n">directory_cleaned</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
 
         <span class="c1"># This guards against incorrect use of the function too. We don&#39;t want</span>
         <span class="c1"># users asking to use a previous directory while also giving a brand</span>
@@ -818,16 +585,16 @@ with the same attributes but with different values bound to their <code><a href=
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
-        <span class="c1"># Load the source of the structure</span>
+        <span class="c1"># Load the source of the input object</span>
 
-        <span class="c1"># If we were given a structure from a previous calculation, the source should</span>
-        <span class="c1"># point directory to that same structure. Otherwise we are incorrectly trying</span>
+        <span class="c1"># If we were given a input from a previous calculation, the source should</span>
+        <span class="c1"># point directory to that same input. Otherwise we are incorrectly trying</span>
         <span class="c1"># to change what the source is.</span>
-        <span class="k">if</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
-            <span class="c1"># note structure here is a dictionary input</span>
-            <span class="k">assert</span> <span class="n">source</span> <span class="o">==</span> <span class="n">structure</span>
-        <span class="k">elif</span> <span class="n">is_structure_from_past_calc</span><span class="p">:</span>
-            <span class="n">source_cleaned</span> <span class="o">=</span> <span class="n">structure</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
+            <span class="c1"># note input_obj here is a dictionary</span>
+            <span class="k">assert</span> <span class="n">source</span> <span class="o">==</span> <span class="n">input_obj</span>
+        <span class="k">elif</span> <span class="n">input_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span><span class="p">:</span>
+            <span class="n">source_cleaned</span> <span class="o">=</span> <span class="n">input_obj</span>
         <span class="k">elif</span> <span class="n">source</span><span class="p">:</span>
             <span class="n">source_cleaned</span> <span class="o">=</span> <span class="n">source</span>
         <span class="k">else</span><span class="p">:</span>
@@ -837,49 +604,41 @@ with the same attributes but with different values bound to their <code><a href=
 
         <span class="c1"># Register the calculation so the user can follow along in the UI.</span>
 
-        <span class="c1"># load/create the calculation for this workflow run</span>
-        <span class="n">calculation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span><span class="o">.</span><span class="n">from_prefect_id</span><span class="p">(</span>
-            <span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">flow_run_id</span><span class="p">,</span>
-            <span class="c1"># We pass the initial structure in case the calculation wasn&#39;t created</span>
-            <span class="c1"># yet (and creation requires the structure)</span>
-            <span class="n">structure</span><span class="o">=</span><span class="n">structure_cleaned</span><span class="p">,</span>
-            <span class="c1"># BUG: what if the initial structure changed? An example of this happening</span>
-            <span class="c1"># is with a relaxation where a correction was applied and the calc</span>
-            <span class="c1"># was not fully restarted. This issue also will not matter when</span>
-            <span class="c1"># workflows are ran through cloud -- as the structure is already</span>
-            <span class="c1"># saved and won&#39;t be overwritten here.</span>
-            <span class="n">source</span><span class="o">=</span><span class="n">source_cleaned</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="c1"># This is only done if a table is provided. Some special-case workflows</span>
+        <span class="c1"># don&#39;t store calculation information bc the flow is just a quick python</span>
+        <span class="c1"># analysis.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span><span class="p">:</span>
+            <span class="c1"># load/create the calculation for this workflow run</span>
+            <span class="n">calculation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_table</span><span class="o">.</span><span class="n">from_prefect_id</span><span class="p">(</span>
+                <span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">flow_run_id</span><span class="p">,</span>
+                <span class="c1"># We pass the initial input_obj in case the calculation wasn&#39;t created</span>
+                <span class="c1"># yet (and creation requires the structure)</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">input_cleaned</span><span class="p">,</span>
+                <span class="c1"># BUG: what if the initial structure changed? An example of this happening</span>
+                <span class="c1"># is with a relaxation where a correction was applied and the calc</span>
+                <span class="c1"># was not fully restarted. This issue also will not matter when</span>
+                <span class="c1"># workflows are ran through cloud -- as the structure is already</span>
+                <span class="c1"># saved and won&#39;t be overwritten here.</span>
+                <span class="n">source</span><span class="o">=</span><span class="n">source_cleaned</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># -------------------------------------------------------------------------</span>
 
         <span class="c1"># the rest of the calculation doesn&#39;t need the source (that was only for</span>
         <span class="c1"># registering the calc), so we just return the pymatgen structure and dir</span>
-        <span class="k">return</span> <span class="n">structure_cleaned</span><span class="p">,</span> <span class="n">directory_cleaned</span>
+        <span class="k">return</span> <span class="n">input_cleaned</span><span class="p">,</span> <span class="n">directory_cleaned</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>How the structure was submitted as a parameter depends on if we are submitting
+            <div class="docstring"><p>How the input was submitted as a parameter depends on if we are submitting
 to Prefect Cloud, running the flow locally, or even continuing from a
-previous calculation.  Here, we use a task to convert the input to a pymatgen
-structure and (if requested) provide the directory as well.</p>
+previous calculation.  Here, we use a task to convert the input to a toolkit
+object and (if requested) provide the directory as well.</p>
 
-<p>Possible structure formats include...
-    object of pymatgen structure
-    dictionary of pymatgen structure
-    dictionary of...
-        (1) python path to calculation datatable
-        (2) one of the following (only one is used in this priority order):
-            (a) prefect flow id
-            (b) calculation id
-            (c) directory
-            ** these three are chosen because all three are unique for every
-            single calculation and we have access to different ones at different
-            times!
-        (3) (optional) attribute to use on table (e.g. structure_final)
-            By default, we assume calculation table is also a structure table
-    filename for a structure (cif, poscar, etc.) [TODO]</p>
+<p>input_class is any class that has a from_dynamic method accepts the
+input_obj format. In the large majority of cases, this is just
+a Structure object so we use that as the default.</p>
 
 <p>directory is optional</p>
 
