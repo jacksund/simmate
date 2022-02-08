@@ -20,17 +20,17 @@ dependencies:
     - django-extensions >=3.1.5
     - django-pandas >=0.6.6
     - djangorestframework >=3.13.1
-    - matminer >=0.7.4
+    - matminer >=0.7.6
     - numba >=0.53.0
-    - numpy >=1.21.4
+    - numpy >=1.22.0
     - pandas >=1.3.5
     - plotly >=5.4.0
     - prefect >=0.15.11
-    - pymatgen >=2022.0.16
+    - pymatgen >=2022.1.9
     - pymatgen-analysis-diffusion >=2021.4.29
     - pytest >=6.2.5
     - pytest-django >=4.5.2
-    - python >=3.9
+    - python >=3.10
     - pyyaml >=6.0
     - tqdm >=4.62.3
     # Recommended IDE for development -- We leave this as a separate install

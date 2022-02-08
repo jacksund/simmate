@@ -26,7 +26,7 @@ def get_conda_env() -> str:
             # split the path into individual folder names (os.sep gives / or \\)
             folders = path.split(os.sep)
             # the conda env name will the name immediately after the /envs.
-            # example path is '/home/jacksund/anaconda3/envs/simmate_dev/lib/python3.9'
+            # example path is '/home/jacksund/anaconda3/envs/simmate_dev/lib/python3.10'
             # where we want the name simmate_dev here.
             env_name = folders[folders.index("envs") + 1]
             # once we have found this, we can exit the loop

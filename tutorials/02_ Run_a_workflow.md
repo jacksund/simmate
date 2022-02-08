@@ -418,7 +418,7 @@ Next we need to ensure Simmate is installed. If you see `(base)` at the start of
 ``` shell
 # Create your conda env with...
 
-conda create -n my_env -c conda-forge python=3.8 simmate
+conda create -n my_env -c conda-forge python=3.10 simmate
 conda activate my_env
 
 
