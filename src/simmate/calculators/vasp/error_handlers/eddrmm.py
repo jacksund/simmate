@@ -43,7 +43,7 @@ class Eddrmm(ErrorHandler):
             new_potim = current_potim / 2
             incar["POTIM"] = new_potim
             correction = f"switch POTIM from {current_potim} to {new_potim}"
-        
+
         # Check the current ICHARG setting, where default is 0
         # If the ICHARG is less than 10, then we want to delete the CHGCAR
         # and WAVECAR to ensure the next run is a clean start.
@@ -64,7 +64,7 @@ class Eddrmm(ErrorHandler):
                     if os.path.exists(wavecar_filename):
                         os.remove(wavecar_filename)
                 correction += " and deleted CHGCARs + WAVECARs for all images"
-            
+
             # Otherwise, we have a normal VASP calculation
             else:
                 os.remove(os.path.join(directory, "CHGCAR"))

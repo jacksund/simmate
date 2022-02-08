@@ -12,6 +12,7 @@ ALL_WORKFLOW_TYPES = [
     "band_structure",
     "density_of_states",
     "molecular_dynamics",
+    "diffusion",
 ]
 
 
@@ -37,7 +38,8 @@ def get_list_of_workflows_by_type(flow_type: str):
         attr = getattr(flow_module, attr_name)
         if isinstance(attr, Workflow) or isinstance(attr, S3Task):
             # We remove the _workflow ending for each because it's repetitve.
-            workflow_names.append(attr_name.strip("_workflow"))
+            # We also change the name from "flow_name" to "flow-name".
+            workflow_names.append(attr_name.removesuffix("_workflow").replace("_", "-"))
     # OPTIMIZE: is there a more efficient way to do this?
 
     return workflow_names
@@ -59,7 +61,8 @@ def get_list_of_all_workflows():
         # we add the type to the start of each workflow name and switch underscores
         # to dashes bc they are more reader-friendly
         workflow_type_names = [
-            flow_type.replace("_", "-") + "/" + w for w in workflow_type_names
+            flow_type.replace("_", "-") + "/" + w.replace("_", "-")
+            for w in workflow_type_names
         ]
 
         workflow_names += workflow_type_names

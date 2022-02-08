@@ -2,8 +2,6 @@
 
 import os
 
-from simmate.toolkit.diffusion import MigrationHop
-
 from simmate.workflow_engine.workflow import (
     Workflow,
     Parameter,
@@ -15,7 +13,6 @@ from simmate.workflows.common_tasks import (
 )
 
 from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
-    get_endpoint_structures,
     get_migration_images_from_endpoints,
 )
 from simmate.calculators.vasp.workflows.relaxation import (
@@ -35,18 +32,15 @@ run_neb = neb_from_images.to_workflow_task()
 # Extra setup tasks
 load_input_and_register = LoadInputAndRegister()  # TODO: make MigrationHop a calc?
 
-with Workflow("NEB (for a single migration hop)") as workflow:
+with Workflow("NEB (from endpoint structures)") as workflow:
 
-    migration_hop = Parameter("migration_hop")
+    supercell_start = Parameter("supercell_start")
+    supercell_end = Parameter("supercell_end")
     directory = Parameter("directory", default=None)
     source = Parameter("source", default=None)
 
     # This helps link to a higher-level table.
     diffusion_analysis_id = Parameter("diffusion_analysis_id", default=None)
-    # TODO: Can the hop id be inferred from the migration_hop or somewhere
-    # else in this context? Maybe even load_input_and_register will use
-    # prefect id once it's a Calculation?
-    migration_hop_id = Parameter("migration_hop_id", default=None)
 
     # I separate these out because each calculation is a very different scale.
     # For example, you may want to run the bulk relaxation on 10 cores, the
@@ -62,26 +56,29 @@ with Workflow("NEB (for a single migration hop)") as workflow:
 
     # Load our input and make a base directory for all other workflows to run
     # within for us.
-    migration_hop_toolkit, directory_cleaned = load_input_and_register(
-        input_obj=migration_hop,
-        input_class=MigrationHop,
+    # OPTIMIZE: is there a cleaner way to load two structures? Also,
+    # directory_cleaned is grabbed twice here.
+    supercell_start_toolkit, directory_cleaned = load_input_and_register(
+        input_obj=supercell_start,
+        source=source,
+        directory=directory,
+    )
+    supercell_end_toolkit, directory_cleaned = load_input_and_register(
+        input_obj=supercell_end,
         source=source,
         directory=directory,
     )
 
-    # get the supercell endpoint structures
-    supercell_start, supercell_end = get_endpoint_structures(migration_hop_toolkit)
-
     # Relax the starting supercell structure
     run_id_00 = relax_endpoint(
-        structure=supercell_start,
+        structure=supercell_start_toolkit,
         command=subcommands["command_supercell"],
         directory=directory_cleaned + os.path.sep + "endpoint_relaxation_start",
     )
 
     # Relax the ending supercell structure
     run_id_01 = relax_endpoint(
-        structure=supercell_end,
+        structure=supercell_end_toolkit,
         command=subcommands["command_supercell"],
         directory=directory_cleaned + os.path.sep + "endpoint_relaxation_end",
     )
@@ -106,7 +103,6 @@ with Workflow("NEB (for a single migration hop)") as workflow:
         source=source,
         directory=directory_cleaned,
         diffusion_analysis_id=diffusion_analysis_id,
-        migration_hop_id=migration_hop_id,
     )
 
 
@@ -119,16 +115,10 @@ workflow.s3tasks = [
     relaxation_neb_endpoint_workflow.s3task,
     neb_from_images.s3task,
 ]
-
 workflow.__doc__ = """
-    Runs a full diffusion analysis on a single migration hop using NEB.
+    Runs a full diffusion analysis from a start and end supercell using NEB.
     
-    Typically, this workflow is not ran directly -- but instead, you would
-    use diffusion/all-paths which submits a series of this workflow for you.
-    
-    For a given migration path, supercell structures are generated for
-    the start and end points of the migration, where vacancy-based diffsion
-    is used. These supercells are relaxed using the relaxation/neb-endpoint 
+    The input start/end structures will be relaxed using the relaxation/neb-endpoint 
     workflow and then interpolated to generate 7 images. These 7 images are
     then relaxed using NEB within the diffusion/from-images workflow.
 
@@ -138,6 +128,22 @@ workflow.__doc__ = """
         - a mini task that interpolated relaxed endpoints and makes images
         - diffusion/from-images
     
-    Currently, this workflow will not run through the command-line, as we
-    have not implemented a file format for MigrationHop's yet.
+    If you are running this workflow via the command-line, you can run this 
+    with...
+    
+    ``` bash
+    simmate workflows run diffusion/all-paths -c "cmd1; cmd2" --supercell_start example1.cif --supercell_end example2.cif
+    ```
+    
+    Note, the `-c` here is very important! Here we are passing three commands
+    separated by semicolons. Each command is passed to a specific workflow call:
+        
+        - cmd1 --> used for endpoint supercell relaxations
+        - cmd2 --> used for NEB
+    
+    Thus, you can scale your resources for each step. Here's a full -c option:
+    
+    ```
+    -c "mpirun -n 12 vasp_std > vasp.out; mpirun -n 70 vasp_std > vasp.out"
+    ```
 """

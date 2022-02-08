@@ -77,4 +77,18 @@ workflow.result_table = MITMigrationImage
 workflow.register_kwargs = ["prefect_flow_run_id"]
 workflow.result_task = output
 workflow.s3task = neb_task
-workflow.__doc__ = neb_task.__doc__
+
+# workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet
+# workflow.register_kwargs = ["prefect_flow_run_id"]
+
+# workflow.__doc__ = neb_task.__doc__
+workflow.__doc__ = """
+    Runs a NEB relaxation on a list of structures (aka images) using MIT Project
+    settings. The lattice remains fixed and symmetry is turned off for this
+    relaxation.
+    
+    Typically, this workflow is not ran directly -- but instead, you would
+    use diffusion/all-paths which submits a series of this workflow for you. Other
+    higher level workflows that call this one include diffusion/from-endpoints
+    and diffusion/single-path.
+"""
