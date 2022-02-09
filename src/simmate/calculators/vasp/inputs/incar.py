@@ -277,6 +277,13 @@ class Incar(dict):
             "PARAM1",
             "PARAM2",
             "KSPACING",
+            "SYMPREC",
+            "AMIX",
+            "BMIX",
+            "AMIN",
+            "SMASS",
+            "AMIX_MAG",
+            "BMIX_MAG",
         )
         int_keys = (
             "NSW",
@@ -298,6 +305,8 @@ class Incar(dict):
             "ISPIND",
             "LDAUTYPE",
             "IVDW",
+            "ISTART",
+            "NELMDL",
         )
 
         # If the value is not a string, then assume we are already in the

@@ -44,7 +44,7 @@ class IncorrectSmearingHandler(ErrorHandler):
 
             # If all three of these conditions are met, then we have an error:
             #   (1) bandgap is zero
-            #   (2) tetrahedron smearing was used (ISMEAR=-3)
+            #   (2) tetrahedron smearing was used (ISMEAR<-3)
             #   (3) relaxation is performed (NSW>1)
             if (
                 xmlReader.eigenvalue_band_properties[0] == 0

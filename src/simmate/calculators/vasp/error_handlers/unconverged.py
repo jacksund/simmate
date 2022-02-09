@@ -14,7 +14,7 @@ class UnconvergedErrorHandler(ErrorHandler):
     Check if a calculation converged successfully. If not, the fix depends on
     whether its the ionic steps or electronic steps are struggling to converge.
 
-    NOTE: This can be confusing when used along with the UnconvergedErrorHandler
+    NOTE: This can be confusing when used along with the NonconvergingErrorHandler
     because both attempt to fix failures in electronic convergence. These handlers
     are converted directly from Custodian, so it's not clear to me why they
     separated them. In the future, I need to clean this up.
@@ -137,9 +137,7 @@ class UnconvergedErrorHandler(ErrorHandler):
             current_ibrion = incar.get("IBRION", 0)
             if current_ibrion != 1:
                 incar["IBRION"] = 1
+                incar.to_file(incar_filename)
                 correction += " and switched IBRION to 1"
 
             return correction
-
-        # if we reached this point, we've tried all we could!
-        raise Exception("Unable to fix Unconverged error")

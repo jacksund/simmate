@@ -18,3 +18,10 @@ markers = [
 # for all of them. We also want migrations to be built from scratch, not past 
 # migration folders.
 addopts = "--no-migrations -m 'not slow'"
+
+# There are a number of warnings that are expected when running our tests.
+# We remove these from our output for clarity.
+filterwarnings = [
+    "ignore:cannot collect test class*:Warning",
+    "ignore:Issues encountered while parsing CIF*:Warning",
+]

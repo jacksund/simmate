@@ -9,7 +9,7 @@ from simmate.calculators.vasp.inputs import Incar
 
 class LargeSigmaErrorHandler(ErrorHandler):
     """
-    When ISMEAR > 0 (Gaussian or Methfessel-Paxton), we need to monitor the
+    When ISMEAR >= 0 (Gaussian or Methfessel-Paxton), we need to monitor the
     magnitude of the entropy term T*S. If the entropy term is larger than
     1 meV/atom, then we reduce value of SIGMA. See VASP documentation for ISMEAR.
     """
@@ -26,7 +26,7 @@ class LargeSigmaErrorHandler(ErrorHandler):
         incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
-        # this error is only relevent if we have ISMEAR > 0. So we return that
+        # this error is only relevent if we have ISMEAR >= 0. So we return that
         # there is no error otherwise.
         if incar.get("ISMEAR", -1) < 0:
             return False
