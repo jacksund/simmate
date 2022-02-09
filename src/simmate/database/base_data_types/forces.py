@@ -101,7 +101,7 @@ class Forces(DatabaseTable):
                 lattice_stress_norm_per_atom=numpy.linalg.norm(lattice_stress)
                 / structure.num_sites,
             )
-            if site_forces
+            if lattice_stress
             else {}
         )
 

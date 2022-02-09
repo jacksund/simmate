@@ -54,14 +54,22 @@ def test_from_toolkit():
 @pytest.mark.django_db
 def test_archive():
 
-    # add a row
+    # add sample rows
     x = TestDatabaseTable(column1=True, column2=3.14)
     x.save()
+    y = TestDatabaseTable(column1=False, column2=-3.14)
+    y.save()
+
+    # Also try to load an archive that doesn't exist yet
+    with pytest.raises(FileNotFoundError):
+        TestDatabaseTable.load_archive(
+            confirm_override=True,
+        )
 
     # write to a file
     TestDatabaseTable.objects.to_archive()
 
-    # try reloading
+    # try reloading without confirming override
     with pytest.raises(Exception):
         TestDatabaseTable.load_archive()
 
@@ -70,4 +78,23 @@ def test_archive():
     TestDatabaseTable.load_archive(
         confirm_override=True,
         delete_on_completion=True,
+    )
+
+
+@pytest.mark.django_db
+def test_remote_archive():
+
+    # Our test table doesn't have the remote_archive_link label set.
+    with pytest.raises(Exception):
+        TestDatabaseTable.load_remote_archive(
+            confirm_override=True,
+        )
+
+    # now add the attribute and try again
+    # NOTE: This is a live CDN! If my CDN server goes down, this test will fail
+    TestDatabaseTable.remote_archive_link = (
+        "https://archives.simmate.org/TestDatabaseTable-2022-02-08.zip"
+    )
+    TestDatabaseTable.load_remote_archive(
+        confirm_override=True,
     )

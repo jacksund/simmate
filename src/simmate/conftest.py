@@ -18,6 +18,8 @@ import os
 import pytest
 
 from simmate.toolkit import base_data_types
+from simmate.database.base_data_types import Spacegroup
+from simmate.website.test_app.models import TestStructure
 
 
 COMPOSITIONS_STRS = [
@@ -135,7 +137,7 @@ def sample_structures():
     def test_example(sample_structures):
 
         # grab your desired composition
-        composition = sample_structures["C_mp-48_primitive"]
+        structure = sample_structures["C_mp-48_primitive"]
 
         # now run any test you'd like with the object.
         # We use a dummy example line here.
@@ -153,3 +155,19 @@ def sample_structures():
     }
 
     return structures
+
+
+@pytest.fixture(scope="package")
+def django_db_setup(django_db_setup, django_db_blocker, sample_structures):
+    """
+    This fixture loads test data into the database that can be queried accross
+    all other tests. For now, we only add Spacegroups and 10 sample structures.
+    """
+    with django_db_blocker.unblock():
+        # populate spacegroup data
+        Spacegroup._load_database_from_toolkit()
+
+        # now add test structures
+        for name, structure in sample_structures.items():
+            structure_db = TestStructure.from_toolkit(structure=structure)
+            structure_db.save()

@@ -153,13 +153,18 @@ class SearchResults(models.QuerySet):
                 ]
             )
 
+        # grab the base_information, and if ID is not present, add it
+        base_info = self.model.base_info
+        if "id" not in base_info:
+            base_info.append("id")
+
         # We want to load the entire table, but only grab the fields that
         # are in base_info.
-        base_objs = self.only(*self.model.base_info)
+        base_objs = self.only(*base_info)
 
         # now convert these objects to a pandas dataframe, again using just
         # the base_info columns
-        df = base_objs.to_dataframe(fieldnames=self.model.base_info)
+        df = base_objs.to_dataframe(fieldnames=base_info)
 
         # Write the data to a csv file
         # OPTIMIZE: is there a better format that pandas can write to?
@@ -499,6 +504,11 @@ class DatabaseTable(models.Model):
         # a pandas dataframe
         csv_filename = filename.replace(".zip", ".csv")
         df = pandas.read_csv(csv_filename)
+
+        # BUG: NaN values throw errors when read into SQL databases, so we
+        # convert all NaN entries to None. This hacky line was taken from
+        #   https://stackoverflow.com/questions/39279824/
+        df = df.astype(object).where(df.notna(), None)
 
         # convert the dataframe to a list of dictionaries that we will iterate
         # through.
