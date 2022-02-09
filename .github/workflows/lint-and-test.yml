@@ -29,6 +29,7 @@ jobs:
         echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
+        conda update -n base -c defaults conda
         conda env update -f tutorials/Guides_for_contributors/environment.yaml -n base
         pip install -e .
     - name: Run unmarked tests
