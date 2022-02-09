@@ -10,7 +10,7 @@ from simmate.calculators.vasp.outputs import Oszicar
 
 class PotimErrorHandler(ErrorHandler):
     """
-    This hanlder checks if a run has excessively large positive energy changes,
+    This handler checks if a run has excessively large positive energy changes,
     where it's typically caused by too large of a POTIM. Runs will end up crashing
     with some other error (e.g. BRMIX) as the geometry gets progressively worse.
     """
@@ -59,6 +59,7 @@ class PotimErrorHandler(ErrorHandler):
 
         current_potim = incar.get("POTIM", 0.5)
         current_ibrion = incar.get("IBRION", 0)
+        current_symprec = incar.get("SYMPREC", 1e-5)
 
         # if we have a small potim and an ibrion that isn't damped molecular
         # dynamics, then then we switch the damped MD
@@ -68,7 +69,7 @@ class PotimErrorHandler(ErrorHandler):
             correction = "switched IBRION to 3 and SMASS to 0.75"
 
         # If we already have a small POTIM, then we try setting a low SYMPREC
-        elif current_potim < 0.1:
+        elif current_potim < 0.1 and current_symprec != 1e-8:
             incar["SYMPREC"] = 1e-8
             correction = "switched SYMPREC to 1e-8"
 

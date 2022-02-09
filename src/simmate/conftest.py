@@ -15,12 +15,13 @@ This file helps share fixtures accross files as described
 
 
 import os
+import shutil
 import pytest
 
+from simmate.utilities import get_directory
 from simmate.toolkit import base_data_types
 from simmate.database.base_data_types import Spacegroup
 from simmate.website.test_app.models import TestStructure
-
 
 COMPOSITIONS_STRS = [
     "Fe1",
@@ -171,3 +172,63 @@ def django_db_setup(django_db_setup, django_db_blocker, sample_structures):
         for name, structure in sample_structures.items():
             structure_db = TestStructure.from_toolkit(structure=structure)
             structure_db.save()
+
+
+def copy_test_files(
+    tmpdir,
+    test_directory: str,
+    test_folder: str,
+):
+    """
+    This is a test utility that takes a given directory and copies it's content
+    over to a temporary directory. You'll often use this when you want to modify
+    files within the test directory (which is often the case with ErrorHandlers).
+
+    Here is an example use-case:
+    ``` python
+    from somewhere import ExampleHandler
+    from simmate.conftest import copy_test_files
+
+    def test_example(tmpdir):
+
+        # Make our temporary directory with copied files
+        copy_test_files(
+            tmpdir,
+            test_directory=__file__,
+            test_folder="test_example",
+        )
+
+        # then you can do things like...
+        error_handler = ExampleHandler()
+        error_handler.check(tmpdir)
+    ```
+    """
+
+    # grab the path to the directory with all the test files
+    source_directory = os.path.join(
+        os.path.dirname(os.path.abspath(test_directory)),
+        test_folder,
+    )
+
+    # recursively copy all files in the directory over to the temporary directory
+    shutil.copytree(
+        src=source_directory,
+        dst=tmpdir,
+        dirs_exist_ok=True,
+    )
+
+
+def make_dummy_files(*filenames: str):
+    """
+    This is a utility that creates files. The content of these files are not
+    important -- but they are created because sometimes ErrorHanlders may simply
+    check to see that a file exists.
+    """
+
+    for filename in filenames:
+        # make sure the parent dir of the filename exists
+        get_directory(os.path.dirname(filename))
+
+        # now make the file
+        with open(filename, "w") as file:
+            file.write("This is a dummy file for testing.")

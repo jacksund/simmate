@@ -74,7 +74,7 @@ class MeshSymmetryErrorHandler(ErrorHandler):
 
         # Finally, we can now search for the error message. We can use the parent
         # class's default function to do this.
-        super().check(directory)
+        return super().check(directory)
 
     def correct(self, directory):
 
