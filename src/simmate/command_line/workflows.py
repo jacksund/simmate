@@ -44,8 +44,10 @@ def get_workflow(workflow_name: str):
 
     # The naming convention matches the import path, so we can load the workflow
     workflow_module = import_module(f"simmate.workflows.{type_name}")
-    print(f"simmate.workflows.{type_name}")
-    print(f"{preset_name}_workflow")
+
+    click.echo(
+        f"Using... from simmate.workflows.{type_name} import {preset_name}_workflow"
+    )
     workflow = getattr(workflow_module, f"{preset_name}_workflow")
 
     return workflow

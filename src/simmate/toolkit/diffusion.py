@@ -255,7 +255,6 @@ class MigrationImages(list):
             start_supercell,
             end_supercell,
             nimages=nimages,
-            migrating_specie=str(migration_hop.isite.specie),
             **kwargs,
         )
 

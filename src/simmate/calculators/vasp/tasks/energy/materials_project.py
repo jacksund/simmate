@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
+from simmate.calculators.vasp.tasks.relaxation.materials_project import (
+    MatProjRelaxation,
+)
 
 from simmate.calculators.vasp.error_handlers import (
     TetrahedronMesh,
@@ -9,7 +11,7 @@ from simmate.calculators.vasp.error_handlers import (
 )
 
 
-class MatProjStaticEnergy(MITRelaxation):
+class MatProjStaticEnergy(MatProjRelaxation):
     """
     Runs a VASP static energy calculation using Materials Project settings.
 
@@ -20,7 +22,7 @@ class MatProjStaticEnergy(MITRelaxation):
     # we are updating/adding new settings here.
     # !!! we hardcode temperatures and time steps here, but may take these as inputs
     # in the future
-    incar = MITRelaxation.incar.copy()
+    incar = MatProjRelaxation.incar.copy()
     incar.update(
         dict(
             IBRION=-1,  # (optional) locks everything between ionic steps
