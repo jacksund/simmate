@@ -143,7 +143,7 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
 
     def setup(
         self,
-        structure: None,
+        structure: None,  # This is first and required bc of S3task.run
         directory: str,
         structures: MigrationImages,
     ):

@@ -17,6 +17,7 @@ This file helps share fixtures accross files as described
 import os
 import shutil
 import pytest
+from click.testing import CliRunner
 
 from simmate.utilities import get_directory
 from simmate.toolkit import base_data_types
@@ -232,3 +233,8 @@ def make_dummy_files(*filenames: str):
         # now make the file
         with open(filename, "w") as file:
             file.write("This is a dummy file for testing.")
+
+
+@pytest.fixture(scope="package")
+def command_line_runner():
+    return CliRunner()

@@ -39,7 +39,6 @@ def test_positive_energy(tmpdir):
     with open(oszicar_filename, "r") as file:
         contents = file.readlines()
     with open(oszicar_filename, "w") as file:
-        print(contents[0])
         file.writelines(contents[0])
     assert error_handler.check(tmpdir) == False
 
