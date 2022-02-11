@@ -114,7 +114,7 @@ class SearchResults(models.QuerySet):
         # pymatgen objects as a list
         return [obj.to_toolkit() for obj in self]
 
-    def to_archive(self, filename_base: str = None):
+    def to_archive(self, filename: str = None):
         """
         Writes a compressed zip file using the table's base_info attribute.
         Underneath, the file is written in a csv format.
@@ -131,15 +131,14 @@ class SearchResults(models.QuerySet):
         Parameters
         -----------
 
-        - `filename_base`:
+        - `filename`:
             The filename to write the zip file to. By defualt, None will make
             a filename named MyExampleTableName-2022-01-25.zip, where the date
-            will be the current day (for versioning). Do not include the file
-            extension (.zip) in this parameter.
+            will be the current day (for versioning).
         """
 
         # Generate the file name if one wasn't given.
-        if not filename_base:
+        if not filename:
             # This is automatically the name of the table plus the date, where
             # the date is for versioning. For example...
             #   MyExampleTable-2022-01-25
@@ -152,6 +151,12 @@ class SearchResults(models.QuerySet):
                     str(today.day).zfill(2),
                 ]
             )
+            filename = filename_base + ".zip"
+
+        # Turn the filename into the full path. We do this because we only
+        # want to
+        # filename = os.path.abspath(filename)
+        # os.path.dirname(filename)
 
         # grab the base_information, and if ID is not present, add it
         base_info = self.model.base_info
@@ -168,15 +173,18 @@ class SearchResults(models.QuerySet):
 
         # Write the data to a csv file
         # OPTIMIZE: is there a better format that pandas can write to?
-        csv_filename = filename_base + ".csv"
+        csv_filename = filename.replace(".zip", ".csv")
         df.to_csv(csv_filename, index=False)
 
-        # now convert the dump file to a compressed zip
+        # now convert the dump file to a compressed zip. In the complex, os
+        # functions below we are just grabbing the filename without the
+        # zip ending. We are also grabbing the directory that the csv is
+        # located in
         shutil.make_archive(
-            filename_base,
-            "zip",
-            ".",  # says file is in the current working directory
-            csv_filename,
+            base_name=filename.removesuffix(".zip"),
+            format="zip",
+            root_dir=os.path.dirname(os.path.abspath(csv_filename)),
+            base_dir=os.path.basename(csv_filename),
         )
 
         # we can now delete the csv file
@@ -497,8 +505,15 @@ class DatabaseTable(models.Model):
             matching_files.sort(reverse=True)
             filename = matching_files[0]
 
-        # uncompress the zip file
-        shutil.unpack_archive(filename)
+        # Turn the filename into the full path -- which makes a number of
+        # manipulations easier below.
+        filename = os.path.abspath(filename)
+
+        # uncompress the zip file to the same directory that it is located in
+        shutil.unpack_archive(
+            filename,
+            extract_dir=os.path.dirname(filename),
+        )
 
         # We will now have a csv file of the same name, which we load into
         # a pandas dataframe

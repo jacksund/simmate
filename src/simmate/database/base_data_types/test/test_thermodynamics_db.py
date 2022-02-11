@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 import pytest
 
 from simmate.website.test_app.models import TestThermodynamics
 
 
 @pytest.mark.django_db
-def test_thermo_table(structure):
+def test_thermo_table(structure, tmpdir):
 
     # test writing columns
     TestThermodynamics.show_columns()
@@ -34,8 +36,10 @@ def test_thermo_table(structure):
     #     )
 
     # test writing and reloading these from and archive
-    TestThermodynamics.objects.to_archive()
+    archive_filename = os.path.join(tmpdir, "archive.zip")
+    TestThermodynamics.objects.to_archive(archive_filename)
     TestThermodynamics.load_archive(
+        archive_filename,
         confirm_override=True,
         delete_on_completion=True,
     )

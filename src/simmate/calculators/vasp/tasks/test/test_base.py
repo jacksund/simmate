@@ -39,8 +39,10 @@ def test_base_setup(structure, tmpdir, mocker):
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
-    Potcar.to_file_from_type = mocker.MagicMock(
-        return_value=make_dummy_files(potcar_filename)
+    mocker.patch.object(
+        Potcar,
+        "to_file_from_type",
+        return_value=make_dummy_files(potcar_filename),
     )
 
     # try to make input files in the tmpdir

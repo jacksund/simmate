@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 import pytest
 
 from pandas import DataFrame
@@ -11,7 +13,7 @@ from simmate.website.test_app.models import TestStaticEnergy
 
 
 @pytest.mark.django_db
-def test_static_energy_table(structure):
+def test_static_energy_table(structure, tmpdir):
 
     # test writing columns
     TestStaticEnergy.show_columns()
@@ -44,8 +46,10 @@ def test_static_energy_table(structure):
     # TODO:
 
     # test writing and reloading these from and archive
-    TestStaticEnergy.objects.to_archive()
+    archive_filename = os.path.join(tmpdir, "archive.zip")
+    TestStaticEnergy.objects.to_archive(archive_filename)
     TestStaticEnergy.load_archive(
+        archive_filename,
         confirm_override=True,
         delete_on_completion=True,
     )
