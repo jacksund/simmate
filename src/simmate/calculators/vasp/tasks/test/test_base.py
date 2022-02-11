@@ -57,9 +57,6 @@ def test_base_setup(structure, tmpdir, mocker):
         PBE_ELEMENT_MAPPINGS,
     )
 
-    # reset the mocked items
-    mocker.resetall()
-
 
 def test_base_workup(tmpdir):
     copy_test_files(

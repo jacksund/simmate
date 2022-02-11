@@ -55,9 +55,6 @@ def test_neb_setup(sample_structures, tmpdir, mocker):
         PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
     )
 
-    # reset the mocked items
-    mocker.resetall()
-
 
 def test_neb_workup(tmpdir):
     copy_test_files(

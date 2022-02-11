@@ -38,9 +38,6 @@ def test_band_structure_setup(structure, tmpdir, mocker):
         PBE_ELEMENT_MAPPINGS,
     )
 
-    # reset the mocked items
-    mocker.resetall()
-
 
 def test_band_structure_workup(tmpdir):
     copy_test_files(

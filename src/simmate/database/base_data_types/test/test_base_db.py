@@ -54,6 +54,10 @@ def test_from_toolkit():
 @pytest.mark.django_db
 def test_archive():
 
+    # BUG: This test does not save archives within a tmpdir -- but instead the
+    # working directory. Therefore, these tests cannot be split up and ran
+    # in parallel (with pytest-xdist).
+
     # add sample rows
     x = TestDatabaseTable(column1=True, column2=3.14)
     x.save()
@@ -79,10 +83,6 @@ def test_archive():
         confirm_override=True,
         delete_on_completion=True,
     )
-
-
-@pytest.mark.django_db
-def test_remote_archive():
 
     # Our test table doesn't have the remote_archive_link label set.
     with pytest.raises(Exception):

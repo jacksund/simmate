@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import shutil
 
 from prefect.engine.state import Success
 
@@ -61,11 +60,15 @@ def test_workflows_explore(command_line_runner):
     assert result.exit_code == 1
 
 
-def test_workflows_setup_only(command_line_runner, structure, mocker):
+def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
+
+    # establish filenames
+    cif_filename = os.path.join(tmpdir, "test.cif")
+    new_dirname = os.path.join("inputs", tmpdir)
 
     # TODO: switch out the tested workflow for one that doesn't require
     # VASP. As-is, I need to pretend to add a POTCAR file
-    potcar_filename = os.path.join("MIT_Static_Energy_inputs", "POTCAR")
+    potcar_filename = os.path.join(new_dirname, "POTCAR")
     mocker.patch.object(
         Potcar,
         "to_file_from_type",
@@ -73,37 +76,32 @@ def test_workflows_setup_only(command_line_runner, structure, mocker):
     )
 
     # write the structure to file to be used
-    structure.to("cif", "test.cif")
+    structure.to("cif", cif_filename)
 
     # now try writing input files to the tmpdir
     result = command_line_runner.invoke(
         workflows,
-        ["setup-only", "static-energy/mit", "test.cif"],
+        ["setup-only", "static-energy/mit", cif_filename, "-d", new_dirname],
     )
     assert result.exit_code == 0
-    assert os.path.exists("MIT_Static_Energy_inputs")
-
-    # remove the folder
-    shutil.rmtree("MIT_Static_Energy_inputs")
+    assert os.path.exists(new_dirname)
 
     # ensure failure when a nested workflow is given
     result = command_line_runner.invoke(
         workflows,
-        ["setup-only", "relaxation/staged", "test.cif"],
+        ["setup-only", "relaxation/staged", cif_filename],
     )
     assert result.exit_code == 1
 
-    # remove the structure file
-    os.remove("test.cif")
 
-    # reset the mocked items
-    mocker.resetall()
+def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
 
-
-def test_workflows_run(command_line_runner, structure, mocker):
+    # establish filenames
+    cif_filename = os.path.join(tmpdir, "test.cif")
+    new_dirname = os.path.join("inputs", tmpdir)
 
     # write the structure to file to be used
-    structure.to("cif", "test.cif")
+    structure.to("cif", cif_filename)
 
     # I don't want to actually run the workflow, so I override the run method
     mocker.patch.object(
@@ -115,16 +113,13 @@ def test_workflows_run(command_line_runner, structure, mocker):
     # now try writing input files to the tmpdir
     result = command_line_runner.invoke(
         workflows,
-        ["run", "static-energy/mit", "-s", "test.cif"],
+        ["run", "static-energy/mit", "-s", cif_filename, "-d", new_dirname],
     )
     assert result.exit_code == 0
     Workflow.run.assert_called_with(
         structure=structure,
-        directory=None,
+        directory=new_dirname,
     )
-
-    # remove the structure file
-    os.remove("test.cif")
 
     # ensure failure on improperly matched kwargs
     result = command_line_runner.invoke(
@@ -133,14 +128,15 @@ def test_workflows_run(command_line_runner, structure, mocker):
     )
     assert result.exit_code == 1
 
-    # reset the mocked items
-    mocker.resetall()
 
+def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
 
-def test_workflows_run_cloud(command_line_runner, structure, mocker):
+    # establish filenames
+    cif_filename = os.path.join(tmpdir, "test.cif")
+    new_dirname = os.path.join("inputs", tmpdir)
 
     # write the structure to file to be used
-    structure.to("cif", "test.cif")
+    structure.to("cif", cif_filename)
 
     # I don't want to actually run the workflow, so I override the run method
     mocker.patch.object(
@@ -152,16 +148,10 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker):
     # now try writing input files to the tmpdir
     result = command_line_runner.invoke(
         workflows,
-        ["run-cloud", "static-energy/mit", "test.cif"],
+        ["run-cloud", "static-energy/mit", cif_filename, "-d", new_dirname],
     )
     assert result.exit_code == 0
     Workflow.run_cloud.assert_called_with(
         structure=structure,
-        directory=None,
+        directory=new_dirname,
     )
-
-    # remove the structure file
-    os.remove("test.cif")
-
-    # reset the mocked items
-    mocker.resetall()
