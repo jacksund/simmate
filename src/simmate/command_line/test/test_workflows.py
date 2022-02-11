@@ -5,6 +5,9 @@ import shutil
 
 from prefect.engine.state import Success
 
+from simmate.calculators.vasp.inputs import Potcar
+from simmate.workflow_engine import Workflow
+
 from simmate.command_line.workflows import workflows
 from simmate.conftest import make_dummy_files
 
@@ -60,16 +63,14 @@ def test_workflows_explore(command_line_runner):
 
 def test_workflows_setup_only(command_line_runner, structure, mocker):
 
-    #####
     # TODO: switch out the tested workflow for one that doesn't require
     # VASP. As-is, I need to pretend to add a POTCAR file
-    from simmate.calculators.vasp.inputs import Potcar
-
     potcar_filename = os.path.join("MIT_Static_Energy_inputs", "POTCAR")
-    Potcar.to_file_from_type = mocker.MagicMock(
-        return_value=make_dummy_files(potcar_filename)
+    mocker.patch.object(
+        Potcar,
+        "to_file_from_type",
+        return_value=make_dummy_files(potcar_filename),
     )
-    #####
 
     # write the structure to file to be used
     structure.to("cif", "test.cif")
@@ -95,18 +96,21 @@ def test_workflows_setup_only(command_line_runner, structure, mocker):
     # remove the structure file
     os.remove("test.cif")
 
+    # reset the mocked items
+    mocker.resetall()
+
 
 def test_workflows_run(command_line_runner, structure, mocker):
 
     # write the structure to file to be used
     structure.to("cif", "test.cif")
 
-    #####
     # I don't want to actually run the workflow, so I override the run method
-    from simmate.workflows.static_energy import mit_workflow
-
-    mit_workflow.run = mocker.MagicMock(return_value=Success())
-    #####
+    mocker.patch.object(
+        Workflow,
+        "run",
+        return_value=Success(),
+    )
 
     # now try writing input files to the tmpdir
     result = command_line_runner.invoke(
@@ -114,7 +118,7 @@ def test_workflows_run(command_line_runner, structure, mocker):
         ["run", "static-energy/mit", "-s", "test.cif"],
     )
     assert result.exit_code == 0
-    mit_workflow.run.assert_called_with(
+    Workflow.run.assert_called_with(
         structure=structure,
         directory=None,
     )
@@ -129,18 +133,21 @@ def test_workflows_run(command_line_runner, structure, mocker):
     )
     assert result.exit_code == 1
 
+    # reset the mocked items
+    mocker.resetall()
+
 
 def test_workflows_run_cloud(command_line_runner, structure, mocker):
 
     # write the structure to file to be used
     structure.to("cif", "test.cif")
 
-    #####
     # I don't want to actually run the workflow, so I override the run method
-    from simmate.workflows.static_energy import mit_workflow
-
-    mit_workflow.run_cloud = mocker.MagicMock(return_value=Success())
-    #####
+    mocker.patch.object(
+        Workflow,
+        "run_cloud",
+        return_value=Success(),
+    )
 
     # now try writing input files to the tmpdir
     result = command_line_runner.invoke(
@@ -148,10 +155,13 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker):
         ["run-cloud", "static-energy/mit", "test.cif"],
     )
     assert result.exit_code == 0
-    mit_workflow.run_cloud.assert_called_with(
+    Workflow.run_cloud.assert_called_with(
         structure=structure,
         directory=None,
     )
 
     # remove the structure file
     os.remove("test.cif")
+
+    # reset the mocked items
+    mocker.resetall()
