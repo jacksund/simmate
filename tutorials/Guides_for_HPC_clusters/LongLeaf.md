@@ -54,7 +54,7 @@ mpirun -n 20 vasp_std > vasp.out
 
 ## Create your conda env with...
 ``` shell
-conda create -n my_env -c conda-forge python=3.10 simmate
+conda create -n my_env -c conda-forge python=3.9 simmate
 conda activate my_env
 # and initialize your database for the first time
 simmate database reset

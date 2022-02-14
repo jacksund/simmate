@@ -88,16 +88,17 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     # Specify which Python versions supported.
-    python_requires=">=3.10",
+    python_requires=">=3.9",
     # This field lists other packages that your project depends on to run.
     install_requires=[
         # Core dependencies
-        "numpy>=1.22.0",
+        "numpy>=1.21.4",
         "pandas>=1.3.5",
         "django>=4.0.0",
         "prefect>=0.15.11",
         "dask>=2021.12.0",
         "click>=8.0.3",
+        "numba>=0.53.0",
         # Extra (smaller) dependencies & utilities
         "django-crispy-forms>=1.13.0",  # for formatting of online forms
         "django-pandas>=0.6.6",  # for converting QuerySets to PandasDataFrames
@@ -118,14 +119,13 @@ setup(
         "coverage>=6.2",
         #
         # These are from the MP stack and I want to phase them out over time
-        "pymatgen>=2022.1.9",
+        "pymatgen>=2022.0.16",
         "pymatgen-analysis-diffusion>=2021.4.29",  # pymatgen-diffusion on conda
-        "matminer>=0.7.6",
+        "matminer>=0.7.4",
         #
         # These are packages that I commonly use alongside simmate. I plan to
         # organize these into optional dependencies and/or documentation. But until
         # then, I keep them here for my own reference.
-        # "numba>=0.53.0",  # for speed-up of basic calcs
         # "psycopg2-binary>=2.9.2",  # for Postgres connections (added -binary to fix bug)
         # 'selenium',  # for web scraping (slow but robust)
         # 'spyder',  # IDE for writing/editting
