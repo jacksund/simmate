@@ -98,7 +98,6 @@ setup(
         "prefect>=0.15.11",
         "dask>=2021.12.0",
         "click>=8.0.3",
-        "numba>=0.53.0",
         # Extra (smaller) dependencies & utilities
         "django-crispy-forms>=1.13.0",  # for formatting of online forms
         "django-pandas>=0.6.6",  # for converting QuerySets to PandasDataFrames
@@ -124,6 +123,7 @@ setup(
         # These are packages that I commonly use alongside simmate. I plan to
         # organize these into optional dependencies and/or documentation. But until
         # then, I keep them here for my own reference.
+        # "numba>=0.53.0",  # for speed-up of basic calcs
         # "psycopg2-binary>=2.9.2",  # for Postgres connections (added -binary to fix bug)
         # 'selenium',  # for web scraping (slow but robust)
         # 'spyder',  # IDE for writing/editting
