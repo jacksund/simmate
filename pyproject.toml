@@ -18,3 +18,14 @@ markers = [
 # for all of them. We also want migrations to be built from scratch, not past 
 # migration folders.
 addopts = "--no-migrations -m 'not slow'"
+
+# There are a number of warnings that are expected when running our tests.
+# We remove these from our output for clarity.
+filterwarnings = [
+    "ignore:cannot collect test class*:Warning",
+    "ignore:Issues encountered while parsing CIF*:Warning",
+    "ignore:No POTCAR file with matching TITEL fields*:Warning",
+    "ignore:The input structure does not match the expected standard primitive!*:Warning",
+    "ignore:Maximum iteration number is reached*:Warning",
+    # "ignore:*is an unconverged VASP run*:Warning", BUG: why won't this regex work?
+]

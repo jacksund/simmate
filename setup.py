@@ -112,6 +112,8 @@ setup(
         # For development and testing
         "pytest>=6.2.5",
         "pytest-django>=4.5.2",
+        "pytest-mock>=3.7.0",
+        "pytest-xdist>=2.5.0",
         "black>=22.1.0",
         "coverage>=6.2",
         #

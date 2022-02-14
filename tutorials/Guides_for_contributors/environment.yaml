@@ -30,6 +30,8 @@ dependencies:
     - pytest >=6.2.5
     - pytest-django >=4.5.2
     - python >=3.10
+    - pytest-mock >=3.7.0
+    - pytest-xdist >=2.5.0
     - pyyaml >=6.0
     - tqdm >=4.62.3
     # Recommended IDE for development -- We leave this as a separate install

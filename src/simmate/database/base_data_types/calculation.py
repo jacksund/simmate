@@ -145,12 +145,9 @@ class Calculation(DatabaseTable):
             return cls.objects.get(prefect_flow_run_id=id)
         # Otherwise we need to create a new one and return that.
 
-        # See if the calculation table has a from_toolkit method (most simmate calcs do)
-        # and if so, we should call that instead and pass all of our kwargs to it.
-        if hasattr(cls, "from_toolkit"):
-            calculation = cls.from_toolkit(prefect_flow_run_id=id, **kwargs)
-        else:
-            calculation = cls(prefect_flow_run_id=id, **kwargs)
+        # To handle the initialization of other Simmate mix-ins, we pass all
+        # information to the from_toolkit method rather than directly to cls.
+        calculation = cls.from_toolkit(prefect_flow_run_id=id, **kwargs)
         calculation.save()
 
         return calculation

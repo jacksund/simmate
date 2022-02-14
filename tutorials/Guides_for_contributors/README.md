@@ -5,7 +5,8 @@ In this guide, you will learn how to contribute new features to Simmate's code.
 
 1. [Learning about core dependencies](#learning-about-core-dependencies)
 2. [First-time Setup](#first-time-setup)
-3. [The full tutorial](#the-full-tutorial)
+3. [Creating and submitting changes](#creating-and-submitting-changes)
+3. [Extra notes and tips](#extra-notes-and-tips)
 
 <br/><br/>
 
@@ -89,3 +90,17 @@ pytest
 9. Open GitKraken, and you should then see your changes listed. For changes that you are happy with, `stage` and then `commit` them to the `main` branch of your repo (`yourname/simmate`). Feel free to [add an emoji](https://github.com/ikatyang/emoji-cheat-sheet/blob/master/README.md) to the start of your commit message. These icons simply tell us that you read the tutorial (and also emojis are a fun distraction).
 
 10. Now [open a pull-request](https://support.gitkraken.com/working-with-repositories/pull-requests/) to merge your changes into our main code (currently at `jacksund/simmate`). We will review your changes and merge them if they pass all of our checks.
+
+
+# Extra notes and tips
+
+### Searching the source code
+If you changed how a method significantly, you may need to find all places in Simmate that it is used. You can easily search for these using Spyders `Find` window. Use these steps to set up this window:
+
+1. In Spyder, go to the `View` tab (top of window) > `Panes` > check `Find`
+2. In the top-right window of spyder, you should now see the `Find` option. This will share a window with your `Help` window and `Variable Explorer`
+3. In the `Find` window, set `Exclude` to the following: (we don't want to search these files)
+```
+*.csv, *.dat, *.log, *.tmp, *.bak, *.orig, *.egg-info, *.svg, *.xml, OUTCAR
+```
+4. Set `Search in` to the `src/simmate` directory so that you only search source code.

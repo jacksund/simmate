@@ -121,17 +121,13 @@ class NestedCalculation(Calculation):
         # we now have a new child class and avoided writing some boilerplate code!
         return NewClass
 
-    def update_calculation(self):
-
-        raise Exception(
-            "NestedCalculation datatable is experimental so this method doesn't "
-            "work yet."
-        )
-
-        # BUG: This assumes we ran all calculations within the same directory,
-        # which isn't true in all cases.
-        for child_calc_table in self.child_calculation_tables:
-            if child_calc_table.objects.filter(directory=self.directory).exists():
-                child_calc = child_calc_table.objects.get(directory=self.directory)
-                setattr(self, child_calc._meta.model_name, child_calc)
-        self.save()
+    # This is an experimental method that iterates through child workflow tables
+    # and links the results to the NestedCalculation
+    # def update_calculation(self):
+    #     # BUG: This assumes we ran all calculations within the same directory,
+    #     # which isn't true in all cases.
+    #     for child_calc_table in self.child_calculation_tables:
+    #         if child_calc_table.objects.filter(directory=self.directory).exists():
+    #             child_calc = child_calc_table.objects.get(directory=self.directory)
+    #             setattr(self, child_calc._meta.model_name, child_calc)
+    #     self.save()

@@ -123,10 +123,7 @@ def get_endpoint_structures(migration_hop: MigrationHop) -> Tuple[Structure]:
     """
     start_supercell, end_supercell, _ = migration_hop.get_sc_structures(
         vac_mode=True,
-        min_atoms=15,
-        max_atoms=50,
-        min_length=5.0,
-    )  # TODO: These values are made very small for testing.
+    )
     try:
         assert start_supercell != end_supercell
     except:
@@ -227,9 +224,12 @@ class SaveNEBOutputTask(Task):
             migration_hop_id = hop_db.id
 
         elif migration_hop_id:
+            # We don't use the hop_id, but making this query ensures it exists.
+            hop_db = self.migration_hop_table.objects.get(id=migration_hop_id)
             # Even though it's not required, we make sure the id given for the
             # diffusion analysis table matches this existing hop id.
-            assert hop_db.diffusion_analysis.id == diffusion_analysis_id
+            if diffusion_analysis_id:
+                assert hop_db.diffusion_analysis.id == diffusion_analysis_id
 
         # Now same migration images and link them to this parent object.
         # Note, the start/end Migration images will exist already in the
