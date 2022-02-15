@@ -96,7 +96,7 @@ class VaspTask(S3Task):
         potcar_mappings=None,
         confirm_convergence=None,
         pre_sanitize_structure=None,
-        # To support other options from the Simmate SSSTask and Prefect Task
+        # To support other options from the Simmate S3Task and Prefect Task
         **kwargs,
     ):
 
@@ -119,7 +119,7 @@ class VaspTask(S3Task):
         if pre_sanitize_structure:
             self.pre_sanitize_structure = pre_sanitize_structure
 
-        # now inherit from parent SSSTask class
+        # now inherit from parent S3Task class
         super().__init__(**kwargs)
 
     def setup(self, structure, directory):
@@ -235,11 +235,10 @@ class VaspTask(S3Task):
             key: getattr(cls, key)
             for key in [
                 "__module__",
-                "incar",
                 "pre_sanitize_structure",
-                "incar",
-                "functional",
-                "potcar_mappings",
                 "confirm_convergence",
+                "functional",
+                "incar",
+                "potcar_mappings",
             ]
         }

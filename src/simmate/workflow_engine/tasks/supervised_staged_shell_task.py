@@ -98,9 +98,7 @@ class S3Task(Task):
 
     ``` python
 
-    from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
-        S3Task as SSSTask,
-    )
+    from simmate.workflow_engine import S3Task
     from example.error_handlers import PossibleError1, PossibleError2
 
 

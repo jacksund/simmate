@@ -16,7 +16,7 @@ class LoadNestedCalculationTask(Task):
         # first grab the calculation entry
         calc = self.calculation_table.from_prefect_id(prefect.context.flow_run_id)
 
-        # even though SSSTask creates a directory when passed None, it is useful
+        # even though S3Task creates a directory when passed None, it is useful
         # to make it here first because some workflows require the folder name between
         # each calculation (see workflows.relaxation.staged for an example). We therefore
         # make the directory upfront!
