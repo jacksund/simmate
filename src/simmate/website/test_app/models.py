@@ -9,6 +9,7 @@ from simmate.database.base_data_types import (
     Thermodynamics,
     StaticEnergy,
     Relaxation,
+    DynamicsRun,
 )
 
 
@@ -53,3 +54,8 @@ class TestStaticEnergy(StaticEnergy):
 
 
 TestRelaxation, TestIonicStep = Relaxation.create_subclasses("Test", module=__name__)
+
+TestDynamicsRun, TestDynamicsIonicStep = DynamicsRun.create_subclasses(
+    "Test",
+    module=__name__,
+)

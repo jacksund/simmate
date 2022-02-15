@@ -37,6 +37,11 @@ from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITMigrationImage,
 )
 
+from simmate.calculators.vasp.database.dynamics import (
+    MITDynamicsRun,
+    MITDynamicsIonicStep,
+)
+
 from simmate.toolkit.structure_prediction.evolution.database import (
     EvolutionarySearch,
     StructureSource,
