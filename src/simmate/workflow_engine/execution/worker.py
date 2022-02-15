@@ -19,7 +19,7 @@ from simmate.workflow_engine.execution.database import WorkItem
 
 # This string is just something fancy to display in the console when a worker
 # starts up.
-# This uses "Small Slant" from patorjk.com
+# This uses "Small Slant" from https://patorjk.com/software/taag/
 HEADER_ART = r"""
    _____                  __        _      __         __
   / __(_)_ _  __ _  ___ _/ /____   | | /| / /__  ____/ /_____ ____
