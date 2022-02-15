@@ -67,9 +67,6 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
     # confirm convergence here. I'll have to write my own output class to do this.
     confirm_convergence = False
 
-    # There's no single structure to return for NEB. It's instead a list of structures.
-    return_final_structure = False
-
     def _pre_checks(
         self,
         structures: MigrationImages,
@@ -297,9 +294,6 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
         # confirm that the calculation converged (ionicly and electronically)
         if self.confirm_convergence:
             raise Exception("NEB is currently unable to confirm convergence.")
-
-        if self.return_final_structure:
-            raise Exception("NEB is currently unable to return a final structure.")
 
         return neb_results
 

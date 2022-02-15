@@ -28,26 +28,6 @@ class VaspTask(S3Task):
     # Vasp calculations always need an input structure
     requires_structure = True
 
-    # BUG:
-    # Prefect is unfortunately unable access a task result's attribute when
-    # building a flow. So I am unable to do things like...
-    #
-    #   with Workflow("example") as workflow:
-    #       output = example_task()
-    #       other_example_task(structure=output.structure)
-    #
-    # instead I need to make sure my output is a dictionary like so...
-    #
-    #   with Workflow("example") as workflow:
-    #       output = example_task()
-    #       other_example_task(structure=output["structure"])
-    #
-    # This controls whether we return just the result or a dict of result and
-    # final structure. Really, the result (a Vasprun object) contains the final
-    # structure via result.final_structure, BUT Prefect is causing problems here.
-    # For now, I only set this to True during relaxations.
-    return_final_structure = False
-
     # The command to call vasp in the current directory
     # TODO: add support for grabbing a user-set default from their configuration
     command = "vasp_std > vasp.out"
@@ -212,10 +192,6 @@ class VaspTask(S3Task):
         # confirm that the calculation converged (ionicly and electronically)
         if self.confirm_convergence:
             assert vasprun.converged
-
-        # OPTIMIZE: see my comment above on the return_final_structure attribute
-        if self.return_final_structure:
-            return {"structure_final": vasprun.final_structure, "vasprun": vasprun}
 
         # return vasprun object
         return vasprun
