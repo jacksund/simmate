@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import os
+
+from simmate.toolkit import Structure
+from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
 from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 
 # This class used pymatgen's MITMDSet as it basis for settings.
@@ -25,13 +29,17 @@ class MITDynamicsTask(MITRelaxation):
     # we are updating/adding new settings here.
     # !!! we hardcode temperatures and time steps here, but may take these as inputs
     # in the future
-    incar_base = MITRelaxation.incar.copy()
-    incar_base.update(
+    incar = MITRelaxation.incar.copy()
+    incar.update(
         dict(
+            # Unique to this task, we want to allow users to set these temperatures
+            # but to keep with Simmate's strategy of showing all settings up-front,
+            # we set these messages here.
             TEBEG="Defaults to 300 but can be set by the user",  # start temperature
             TEEND="Defaults to 1200 but can be set by the user",  # end temperature
             POTIM="Defaults to 2 but can be set by the user",  # time step (in fs)
             NSW="Defaults to 10,000 but can be set by the user",  # number of steps
+            #
             EDIFF__per_atom=1e-06,
             LSCALU=False,
             LCHARG=False,
@@ -44,7 +52,7 @@ class MITDynamicsTask(MITRelaxation):
             MAXMIX=20,
             NELM=500,
             ISYM=0,  # turn off symmetry
-            ISIF=0,  # only update atom sites; lattice is fixed
+            ISIF=0,  # only update atom sites; lattice is fixed; no lattice stress
             IBRION=0,  # turns on molecular dynamics
             KBLOCK=100,
             SMASS=0,
@@ -53,48 +61,60 @@ class MITDynamicsTask(MITRelaxation):
     )
     # because we no longer use LDAU, we can also remove all relevent settings from
     # the incar for clarity.
-    incar_base.pop("multiple_keywords__smart_ldau")
+    incar.pop("multiple_keywords__smart_ldau")
     # Likewise, we set ISMEAR=0 and EDIFF above, so we no longer need smart_ismear
-    incar_base.pop("multiple_keywords__smart_ismear")
-    incar_base.pop("EDIFF")
+    incar.pop("multiple_keywords__smart_ismear")
+    incar.pop("EDIFF")
 
     # For now, I turn off all error handlers.
     # TODO
     error_handlers = []
 
-    def __init__(
+    def setup(
         self,
+        structure: Structure,
+        directory: str,
         temperature_start: int = 300,
         temperature_end: int = 1200,
         time_step: float = 2,
         nsteps: int = 10000,
-        # To support other options from the Simmate S3Task and Prefect Task
-        **kwargs,
     ):
-        # make a copy of the incar_base dict because we update its values
-        incar = self.incar_base.copy()
+
+        # If requested, we convert to the LLL-reduced unit cell, which aims to
+        # be as cubic as possible.
+        if self.pre_sanitize_structure:
+            structure = structure.copy(sanitize=True)
+
+        # write the poscar file
+        Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
+
+        # Combine our base incar settings with those of our parallelization settings
+        # and then write the incar file. Note, we update the values of this incar,
+        # so we make a copy of the dict.
+        incar = self.incar.copy()
         incar["TEBEG"] = temperature_start
         incar["TEEND"] = temperature_end
         incar["POTIM"] = time_step
         incar["NSW"] = nsteps
+        incar = Incar(**incar) + Incar(**self.incar_parallel_settings)
+        incar.to_file(
+            filename=os.path.join(directory, "INCAR"),
+            structure=structure,
+        )
 
-        # now inherit from parent S3Task class
-        super().__init__(**kwargs)
+        # if KSPACING is not provided in the incar AND kpoints is attached to this
+        # class instance, then we write the KPOINTS file
+        if self.kpoints and ("KSPACING" not in self.incar):
+            Kpoints.to_file(
+                structure,
+                self.kpoints,
+                os.path.join(directory, "KPOINTS"),
+            )
 
-    @classmethod
-    def get_config(cls):
-        """
-        Grabs the overall settings from the class. This is useful for printing out
-        settings for users to inspect.
-        """
-        return {
-            key: getattr(cls, key)
-            for key in [
-                "__module__",
-                "pre_sanitize_structure",
-                "confirm_convergence",
-                "functional",
-                "incar_base",  # This is the only line changed vs. the base VaspTask
-                "potcar_mappings",
-            ]
-        }
+        # write the POTCAR file
+        Potcar.to_file_from_type(
+            structure.composition.elements,
+            self.functional,
+            os.path.join(directory, "POTCAR"),
+            self.potcar_mappings,
+        )
