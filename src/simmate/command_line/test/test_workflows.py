@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import yaml
 
 from prefect.engine.state import Success
 
@@ -64,7 +65,7 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
 
     # establish filenames
     cif_filename = os.path.join(tmpdir, "test.cif")
-    new_dirname = os.path.join("inputs", tmpdir)
+    new_dirname = os.path.join(tmpdir, "inputs")
 
     # TODO: switch out the tested workflow for one that doesn't require
     # VASP. As-is, I need to pretend to add a POTCAR file
@@ -98,7 +99,7 @@ def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
 
     # establish filenames
     cif_filename = os.path.join(tmpdir, "test.cif")
-    new_dirname = os.path.join("inputs", tmpdir)
+    new_dirname = os.path.join(tmpdir, "inputs")
 
     # write the structure to file to be used
     structure.to("cif", cif_filename)
@@ -133,7 +134,7 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
 
     # establish filenames
     cif_filename = os.path.join(tmpdir, "test.cif")
-    new_dirname = os.path.join("inputs", tmpdir)
+    new_dirname = os.path.join(tmpdir, "inputs")
 
     # write the structure to file to be used
     structure.to("cif", cif_filename)
@@ -148,10 +149,48 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
     # now try writing input files to the tmpdir
     result = command_line_runner.invoke(
         workflows,
-        ["run-cloud", "static-energy/mit", cif_filename, "-d", new_dirname],
+        ["run-cloud", "static-energy/mit", "-s", cif_filename, "-d", new_dirname],
     )
     assert result.exit_code == 0
     Workflow.run_cloud.assert_called_with(
+        structure=structure,
+        directory=new_dirname,
+    )
+
+
+def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
+
+    # establish filenames
+    cif_filename = os.path.join(tmpdir, "test.cif")
+    yaml_filename = os.path.join(tmpdir, "test.yaml")
+    new_dirname = os.path.join(tmpdir, "inputs")
+
+    # write the structure to file to be used
+    structure.to("cif", cif_filename)
+
+    # write the yaml file with our input args
+    input_args = dict(
+        structure=cif_filename,
+        workflow_name="static-energy/mit",
+        directory=new_dirname,
+    )
+    with open(yaml_filename, "w") as file:
+        yaml.dump(input_args, file)
+
+    # I don't want to actually run the workflow, so I override the run method
+    mocker.patch.object(
+        Workflow,
+        "run",
+        return_value=Success(),
+    )
+
+    # now try writing input files to the tmpdir
+    result = command_line_runner.invoke(
+        workflows,
+        ["run-yaml", yaml_filename],
+    )
+    assert result.exit_code == 0
+    Workflow.run.assert_called_with(
         structure=structure,
         directory=new_dirname,
     )
