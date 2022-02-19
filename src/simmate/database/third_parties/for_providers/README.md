@@ -9,10 +9,10 @@ This module is for pulling data from various databases into Simmate using third-
 Benefits of adding your data to Simmate
 =======================================
 
-When deciding whether your team can benefit from using Simmate, we can break down discussion to two key questions:
+When deciding whether your team should use Simmate, we can break down discussion to two key questions:
 
-1. Can providers benifit from converting data into a Simmate format?
-2. How should providers host/distribute their archive?
+1. Can you benefit from converting data into a Simmate format?
+2. Can you benefit from distributing an archive? (private or public)
 
 We will answer these questions in the next two sections.
 
@@ -31,10 +31,15 @@ Using the concepts of "raw data" vs "secondary columns" (columns that can be rap
 
 | Provider            | Number of Structures | Av. Sites per Structure| Archive Size |
 | ------------------- | -------------------- | ---------------------- | ------------ |
-| JARVIS              | 55,712               | ~3                     | 8.0 MB       |
+| JARVIS              | 55,712               | ~10                    | 8.0 MB       |
 | Materials Project   | 137,885              | ~30                    | 45.2 MB      |
+| COD                 | n/a                  | n/a                    | n/a          |
+| OQMD                | n/a                  | n/a                    | n/a          |
+| AFLOW               | n/a                  | n/a                    | n/a          |
 
-These supersmall file sizes will make it much easier for downloading and sharing your data. This can have major savings on your database server as well.
+(Note, COD experiences poor compression because Simmate has not yet optimized storage for disordered structures.)
+
+These small file sizes will make it much easier for downloading and sharing your data. This can have major savings on your database server as well.
 
 
 Hosting & distributing the archive
@@ -223,7 +228,7 @@ except:
 
 # We make this an "atomic transaction", which means if any error is encountered
 # while saving results to the database, then the database will be reset to it's
-# original state.
+# original state. Adding this decorator is optional
 @transaction.atomic
 def load_all_structures():
 

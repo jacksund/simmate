@@ -11,41 +11,12 @@ class CodStructure(Structure):
     sturcture is ordered or has implicit hydrogens.
     """
 
-    # Make sure Django knows which app this is associated with
     class Meta:
         app_label = "third_parties"
 
     base_info = ["id", "structure_string", "energy_above_hull"]
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
-
-    id = table_column.CharField(max_length=25, primary_key=True)
-    """
-    The id used to represent the structure (ex: "jvasp-12345")
-    """
-
-    is_ordered = table_column.BooleanField()
-    """
-    whether the structure contains disordered sites (i.e. mixed occupancies)
-    """
-
-    has_implicit_hydrogens = table_column.BooleanField()
-    """
-    whether the structure has implicit Hydrogens. This means there should be
-    Hydrogens in the structure, but they weren't explicitly drawn.
-    """
-
-    source = "COD"
-    """
-    Where this structure and data came from.
-    """
-
+    source = "The Crystallography Open Database"
     source_doi = "https://doi.org/10.1107/S0021889809016690"
-    """
-    Source paper that must be referenced if this dataset is used.
-    """
 
     # These fields overwrite the default Structure fields due to a bug.
     chemical_system = table_column.TextField()
@@ -58,13 +29,31 @@ class CodStructure(Structure):
     # floats (ex: Ca2.1234567N). Until this is fixed and cleaned up, I'll
     # need to use TextField instead of CharField for these fields.
 
+    id = table_column.CharField(max_length=25, primary_key=True)
+    """
+    The id used to represent the structure (ex: "cod-12345")
+    """
+
+    is_ordered = table_column.BooleanField()
+    """
+    whether the structure contains disordered sites (i.e. mixed occupancies)
+    """
+
+    has_implicit_hydrogens = table_column.BooleanField()
+    """
+    whether the structure has implicit Hydrogens. This means there should be
+    Hydrogens in the structure, but they weren't explicitly drawn. Note,
+    implicit hydrogens will make the chemical system and formula misleading 
+    because of the absence of hydrogens.
+    """
+
     @property
     def external_link(self) -> str:
         """
         URL to this structure in the COD website.
         """
         # All COD structures have their data mapped to a URL in the same way
-        # ex: https://www.ctcms.nist.gov/~knc6/static/JARVIS-DFT/JVASP-1234.xml
+        # ex: http://www.crystallography.net/cod/12345.html"
         # we store the id as "cod-123" so we need to convert this to uppercase
         id_formatted = self.id.split("-")[-1]
         return f"http://www.crystallography.net/cod/{id_formatted}.html"

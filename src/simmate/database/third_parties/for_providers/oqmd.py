@@ -23,7 +23,7 @@ from simmate.toolkit import Structure
 
 from simmate.database.third_parties import OqmdStructure
 
-# Jarvis is not a dependency of simmate, so make sure you install it before using
+# OQMD is not a dependency of simmate, so make sure you install it before using
 # this module
 try:
     import qmpy_rester
@@ -68,7 +68,7 @@ def load_all_structures():
                 # Note delta_e is the formation energy and then stability is the
                 # energy above hull.
                 fields="entry_id,unit_cell,sites,delta_e",
-                element_set="Al,C",  # Useful for testing
+                # element_set="Al,C",  # Useful for testing
             )
             # grab the data for the next slice of structures
             query_slice = result["data"]

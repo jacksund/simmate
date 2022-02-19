@@ -12,29 +12,16 @@ class OqmdStructure(Structure, Thermodynamics):
     [REST API](http://oqmd.org/static/docs/restful.html) and website.
     """
 
-    # Make sure Django knows which app this is associated with
     class Meta:
         app_label = "third_parties"
 
     base_info = ["id", "structure_string", "energy"]
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
+    source = "OQMD"
+    source_doi = "https://doi.org/10.1007/s11837-013-0755-4"
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """
     The id used to represent the structure (ex: "oqmd-12345")
-    """
-
-    source = "OQMD"
-    """
-    Where this structure and data came from.
-    """
-
-    source_doi = "https://doi.org/10.1007/s11837-013-0755-4"
-    """
-    Source paper that must be referenced if this dataset is used.
     """
 
     @property

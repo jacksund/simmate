@@ -32,27 +32,6 @@ class Structure(DatabaseTable):
     """
 
     # EXPERIMENTAL
-    source = table_column.JSONField(blank=True, null=True)
-    """
-    Where the structure came from. This could be a number of things, including
-    a third party id, a transformation of another structure, a creation method,
-    or just a custom submission by the user.
-    
-    Source can be the name of another table or a python transformation.
-    Source id can be thought of as the "parent structure id", which can be a
-    string (mp-123), an integer (123 of same table), a list of these ([123,321]),
-    or even be nothing. We make it a JSON field to account for all scenarios.
-    
-    EXAMPLES: (source --> source_id)
-    
-    - MaterialsProject --> mp-123
-    - PyXtalStructure --> null
-    - AtomicPurmutation --> 123
-    - HereditaryMutation --> [123,124]
-    - user_submission --> null
-    """
-
-    # EXPERIMENTAL
     # Where this calculation plays a role within a "nested" workflow calculation.
     # Becuase this structure can be reused by multiple workflows, we make this
     # a list of source-like objects. For example, a relaxation could be part of

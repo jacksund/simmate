@@ -109,6 +109,8 @@ def load_all_structures(
         )
         # wait for all futures
         wait(futures)
+        # reset the client so we don't have memory overflow from all the futures
+        client.reset()
 
     # BUG: I'm unable to monitor progress on this...
     #

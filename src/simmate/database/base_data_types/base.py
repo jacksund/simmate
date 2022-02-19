@@ -238,11 +238,56 @@ class DatabaseTable(models.Model):
     class Meta:
         abstract = True
 
+    base_info: List[str] = []
+    """
+    The base information for this database table and only these fields are stored
+    when the `to_archive` method is used. Using the columns in this list, all 
+    other columns for this table can be calculated, so the columns in this list 
+    are effectively the "raw data".
+    """
+
+    source = table_column.JSONField(blank=True, null=True)
+    """
+    Where the data came from. This could be a number of things, including...
+     - a third party id
+     - a structure from a different Simmate datbase table
+     - a transformation of another structure
+     - a creation method
+     - a custom submission by the user
+    
+    By default, this is a JSON field to account for all scenarios, but some
+    tables (such as those in `simmate.database.third_parties`) this is a 
+    constant and therefore overwritten as an attribute.
+    
+    EXAMPLES: (source type --> source_id)
+    
+    - MaterialsProject --> mp-123
+    - PyXtalStructure --> null
+    - AtomicPurmutation --> 123
+    - HereditaryMutation --> [123,124]
+    - user_submission --> null
+    """
+
+    source_doi: str = None
+    """
+    Source paper that must be referenced if this data is used. If this is None,
+    please refer to the `source` attribute for further details on what to 
+    reference.
+    """
+
+    remote_archive_link: str = None
+    """
+    The URL that is used to download the archive and then populate this table.
+    Many tables, such as those in `simmate.database.third_parties`, have
+    pre-existing data that you can download and load into your local database,
+    so if this attribute is set, you can use the `load_remote_archive` method.
+    """
+
     # I override the default manager with the one we define above, which has
     # extra methods useful for our querysets.
     objects = DatabaseTableManager()
     """
-    Accesses all of the rows in this datatable and initiates SearchResults
+    Accesses all of the rows in this datatable and initiates SearchResults.
     """
 
     @classmethod
@@ -589,7 +634,7 @@ class DatabaseTable(models.Model):
         # confirm that we have a link to download from
         if not remote_archive_link:
             # if no link was given we take the input value from class attribute
-            if not hasattr(cls, "remote_archive_link"):
+            if not cls.remote_archive_link:
                 raise Exception(
                     "This table does not have a default link to load the archive "
                     " from. You must provide a remote_archive_link."

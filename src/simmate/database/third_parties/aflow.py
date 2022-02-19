@@ -13,29 +13,16 @@ class AflowStructure(Structure, Thermodynamics):
     and website.
     """
 
-    # Make sure Django knows which app this is associated with
     class Meta:
         app_label = "third_parties"
 
     base_info = ["id", "structure_string", "energy"]
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
+    source = "AFLOW"
+    source_doi = "https://doi.org/10.1016/j.commatsci.2012.02.005"
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """
     The id used to represent the structure (ex: "aflow-12345")
-    """
-
-    source = "AFLOW"
-    """
-    Where this structure and data came from.
-    """
-
-    source_doi = "https://doi.org/10.1016/j.commatsci.2012.02.005"
-    """
-    Source paper that must be referenced if this dataset is used.
     """
 
     @property
