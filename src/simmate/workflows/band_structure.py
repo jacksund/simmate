@@ -3,8 +3,6 @@
 # TODO: when I add more calculators, I can do something like this...
 # if "simmate.calculators.vasp" in installed_apps:
 
-# These are tasks that are in early development and don't have databases tables.
-# Therefore, they are s3tasks only - not workflows.
-from simmate.calculators.vasp.tasks.band_structure import MatProjBandStructure
-
-matproj_workflow = MatProjBandStructure()
+from simmate.calculators.vasp.workflows.band_structure import (
+    workflow as matproj_workflow,
+)

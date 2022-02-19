@@ -9,7 +9,12 @@ from pymatgen.electronic_structure.bandstructure import (
     BandStructure as ToolkitBandStructure,
 )
 
-from simmate.database.base_data_types import table_column, DatabaseTable
+from simmate.database.base_data_types import (
+    table_column,
+    DatabaseTable,
+    Calculation,
+    Structure,
+)
 
 
 class BandStructure(DatabaseTable):
@@ -62,3 +67,34 @@ class BandStructure(DatabaseTable):
         # If as_dict is false, we build this into an Object. Otherwise, just
         # return the dictionary
         return data if as_dict else cls(**data)
+
+
+class BandStructureCalc(Structure, BandStructure, Calculation):
+    class Meta:
+        abstract = True
+        app_label = "local_calculations"
+
+    base_info = BandStructure.base_info + Calculation.base_info
+
+    def update_from_vasp_run(self, vasprun, corrections, directory):
+        # Takes a pymatgen VaspRun object, which is what's typically returned
+        # from a simmate VaspTask.run() call.
+
+        # All data analysis is done via a BandStructure object, so we convert
+        # the vasprun object to that first.
+        band_structure = vasprun.get_band_structure(line_mode=True)
+
+        # Take our band_structure and expand its data for the rest of the columns.
+        new_kwargs = BandStructure.from_toolkit(
+            band_structure=band_structure,
+            as_dict=True,
+        )
+        for key, value in new_kwargs.items():
+            setattr(self, key, value)
+
+        # lastly, we also want to save the corrections made and directory it ran in
+        self.corrections = corrections
+        self.directory = directory
+
+        # Now we have the relaxation data all loaded and can save it to the database
+        self.save()

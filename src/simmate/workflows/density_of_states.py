@@ -3,8 +3,6 @@
 # TODO: when I add more calculators, I can do something like this...
 # if "simmate.calculators.vasp" in installed_apps:
 
-# These are tasks that are in early development and don't have databases tables.
-# Therefore, they are s3tasks only - not workflows.
-from simmate.calculators.vasp.tasks.density_of_states import MatProjDensityOfStates
-
-matproj_workflow = MatProjDensityOfStates()
+from simmate.calculators.vasp.workflows.density_of_states import (
+    workflow as matproj_workflow,
+)
