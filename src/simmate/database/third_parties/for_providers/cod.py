@@ -30,7 +30,7 @@ to account for these problematic cif files though.
 
 import os
 
-from dask.distributed import Client, wait
+from dask.distributed import Client, wait, TimeoutError
 
 from pymatgen.io.cif import CifParser
 
@@ -40,6 +40,8 @@ from simmate.database.third_parties import CodStructure
 def load_all_structures(
     base_directory: str = "cod/cif/",
     only_add_new_cifs: bool = True,
+    batch_size: int = 15000,
+    batch_timeout: float = 30 * 60,
 ):
     """
     Only use this function if you are part of the Simmate dev team!
@@ -98,31 +100,22 @@ def load_all_structures(
 
     # Dask seems to be unstable when we submit too much at once, so we chunk
     # our submissions and wait for each to finished before submitting more.
-    chunk_size = 15000
-    for i in range(0, len(new_cifs), chunk_size):
-        chunk_cifs = new_cifs[i : i + chunk_size]
+    for i in range(0, len(new_cifs), batch_size):
+        chunk_cifs = new_cifs[i : i + batch_size]
         # use our function to load the structure (defined below)
         futures = client.map(
             load_single_cif,
             chunk_cifs,
             pure=False,
         )
-        # wait for all futures
-        wait(futures)
-        # reset the client so we don't have memory overflow from all the futures
-        client.reset()
-
-    # BUG: I'm unable to monitor progress on this...
-    #
-    # from dask.distributed import progress
-    # progress(futures)
-    #
-    # from tqdm import tqdm
-    # for future in tqdm(futures):
-    #     try:
-    #         future.result()
-    #     except:
-    #         pass
+        # wait for all futures for up to batch_timeout second, and beyond that
+        # point, cancel any remaining. 30 min is plenty for a batch of
+        # 15,000 cifs. If this limit is ever hit, it's typically because a
+        # single cif is taking >15min and is problematic.
+        try:
+            wait(futures, timeout=batch_timeout)
+        except TimeoutError:
+            client.cancel(futures)
 
 
 def load_single_cif(cif_filepath):
