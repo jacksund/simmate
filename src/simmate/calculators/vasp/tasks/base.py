@@ -7,13 +7,17 @@ import yaml
 
 from pymatgen.io.vasp.outputs import Vasprun
 
+from simmate.toolkit import Structure
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
 from simmate.workflow_engine import S3Task
 
 
 def get_default_parallel_settings():
-    # We load the user's default parallel settings from ~/simmate/vasp/INCAR_parallel_settings
-    # If this file doesn't exist, then we just use an empty dictionary
+    """
+    We load the user's default parallel settings from
+        ~/simmate/vasp/INCAR_parallel_settings
+    If this file doesn't exist, then we just use an empty dictionary.
+    """
     settings_filename = os.path.join(
         Path.home(), "simmate", "vasp", "INCAR_parallel_settings"
     )
@@ -25,124 +29,114 @@ def get_default_parallel_settings():
 
 class VaspTask(S3Task):
 
-    # Vasp calculations always need an input structure
-    requires_structure = True
+    requires_structure: bool = True
+    """
+    Vasp calculations always need an input structure, so this is always True.
+    """
 
-    # BUG:
-    # Prefect is unfortunately unable access a task result's attribute when
-    # building a flow. So I am unable to do things like...
-    #
-    #   with Workflow("example") as workflow:
-    #       output = example_task()
-    #       other_example_task(structure=output.structure)
-    #
-    # instead I need to make sure my output is a dictionary like so...
-    #
-    #   with Workflow("example") as workflow:
-    #       output = example_task()
-    #       other_example_task(structure=output["structure"])
-    #
-    # This controls whether we return just the result or a dict of result and
-    # final structure. Really, the result (a Vasprun object) contains the final
-    # structure via result.final_structure, BUT Prefect is causing problems here.
-    # For now, I only set this to True during relaxations.
-    return_final_structure = False
-
-    # The command to call vasp in the current directory
+    command: str = "vasp_std > vasp.out"
+    """
+    The command to call vasp, which is typically vasp_std. To ensure error
+    handlers work properly, make sure your command has "> vasp.out" at the end.
+    """
     # TODO: add support for grabbing a user-set default from their configuration
-    command = "vasp_std > vasp.out"
+    # TODO: add auto check for vasp.out ending
 
-    # set the default vasp settings from a dictionary. This is the one thing
-    # you *must* set when subclassing VaspTask. An example is:
-    #   incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
-    incar = None
+    incar: dict = None
+    """
+    This sets the default vasp settings from a dictionary. This is the one thing
+    you *must* set when subclassing VaspTask. An example is:
+        
+    ``` python
+      incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
+    ```
+    """
 
-    # We also load any parallel settings to add on to the base incar. These
-    # should not effect the calculation in any way, but they are still selected
-    # based on the computer specs and what runs fastest on it. Therefore, these
-    # settings are loaded from ~/simmate/vasp/INCAR_parallel_settings by default.
-    # This can also be overwritten as well.
-    incar_parallel_settings = get_default_parallel_settings()
+    incar_parallel_settings: dict = get_default_parallel_settings()
+    """
+    The parallel settings to add on to the base incar. These should not effect 
+    the calculation result in any way (only how fast it completes), but they 
+    are still selected based on the computer specs and what runs fastest on it.
+    Therefore, these settings are loaded from ~/simmate/vasp/INCAR_parallel_settings
+    by default and adding to this file should be the preferred method for updating
+    these settings.
+    """
 
     # TODO: add options for poscar formation
     # add_selective_dynamics=False
     # add_velocities=False
-    # significant_figures=6
+    # significant_figures=6 --> rounding issues? what's the best way to do this?
 
-    # set the KptGrid or KptPath object
-    # TODO - KptGrid is just a float for now
-    # NOTE - this is optional because you can have KSPACING as an INCAR argument.
-    # If KSPACING is set above, we ignore whatever is set here.
     kpoints = None
+    """
+    (experimental feature)
+    The KptGrid or KptPath generator used to create the KPOINTS file. Note,
+    this attribute is optional becuase VASP supports setting Kpts by adding
+    KSPACING to the INCAR. If KSPACING is set in the INCAR, we ignore whatever 
+    is set here.
+    """
+    # TODO - KptGrid is just a float for now, so there's no typing here.
 
-    # This directs which Potcar files to grab. You would set this to a string
-    # of what you want, such as "PBE", "PBE_GW", or "LDA"
-    functional = None
+    functional: str = None
+    """
+    This directs which Potcar files to grab. You would set this to a string
+    of what you want, such as "PBE", "PBE_GW", or "LDA".
+    """
 
-    # This is an optional parameter to override Simmate's default selection of
-    # potentials based off of the functional chosen. The defaults are located
-    # in simmate.calculators.vasp.inputs.potcar_mappings. You can supply your
-    # own mapping dictionary or you can take ours and update the specific
-    # potentials you'd like. For example:
-    #   from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
-    #   element_mappings = PBE_ELEMENT_MAPPINGS.copy().update({"C": "C_h"})
-    # or if you only use Carbon and don't care about other elements...
-    #   element_mappings = {"C": "C_h"}
-    # Read more on this inside the Potcar class and be careful with updating!
-    potcar_mappings = None
+    potcar_mappings: dict = None
+    """
+    This is an optional parameter to override Simmate's default selection of
+    potentials based off of the functional chosen. The defaults are located
+    in simmate.calculators.vasp.inputs.potcar_mappings. You can supply your
+    own mapping dictionary or update the specific potentials you'd like. 
+    For example:
+    
+    ``` python
+      from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
+      element_mappings = PBE_ELEMENT_MAPPINGS.copy()  # don't forget to copy!
+      element_mappings.update({"C": "C_h"})  # if you wish to update any
+    ```
+    
+    or if you only use Carbon and don't care about other elements...
+    
+    ``` python
+      element_mappings = {"C": "C_h"}
+    ```
+    
+    Read more on this inside the Potcar class and be careful with updating!
+    """
 
-    # In somecases we still want results from calculations that did NOT converge
-    # successfully. This flag controls whether or not we raise an error when
-    # the calculation failed to converge.
+    confirm_convergence: bool = True
+    """
+    This flag controls whether or not we raise an error when the calculation 
+    failed to converge. In somecases we still want results from calculations 
+    that did NOT converge successfully.
+    """
     # OPTIMIZE: What if I updated the ErrorHandler class to allow for "warnings"
     # instead of raising the error and applying the correction...? This functionality
     # could then be moved to the UnconvergedErrorHandler. I'd have a fix_error=True
     # attribute that is used in the .check() method. and If fix_error=False, I
     # simply print a warning & also add that warning to simmate_corrections.csv
-    confirm_convergence = True
 
-    # In some cases, we may want to sanitize the structure during our setup().
-    # This means converting to the LLL-reduced primitive cell.
-    pre_sanitize_structure = False
-    # The same might be true for converting the structure to the standard primitive
-    # of a structure. For example, this is required when calculating band structures.
-    pre_standardize_structure = False  # TODO: not implemented yet
+    pre_sanitize_structure: bool = False
+    """
+    In some cases, we may want to sanitize the structure during our setup().
+    This means converting to the LLL-reduced primitive cell. This simply does:
+    ``` python
+    structure_sanitzed = structure.copy(santize=True)
+    ```
+    """
 
-    def __init__(
-        self,
-        incar=None,
-        kpoints=None,
-        functional=None,
-        potcar_mappings=None,
-        confirm_convergence=None,
-        pre_sanitize_structure=None,
-        # To support other options from the Simmate SSSTask and Prefect Task
-        **kwargs,
-    ):
+    pre_standardize_structure: bool = False
+    """
+    (experimental feature)
+    In some cases, we may want to convert the structure to the standard primitive
+    of a structure. For example, this is required when calculating band structures
+    and ensuring we have a standardized high-symmetry path.
+    """
+    # TODO: not implemented yet
 
-        # if any of these input parameters were given, overwrite the default
-        # Note to python devs: this odd formatting is because we set our defaults
-        # to None in __init__ while our actual default values are define above
-        # as class attributes. This may seem funky at first glance, but it
-        # makes inheriting from this class extremely pretty!
-        # This code is effectively the same as @defaults_from_attrs(...)
-        if incar:
-            self.incar = incar
-        if kpoints:
-            self.kpoints = kpoints
-        if functional:
-            self.functional = functional
-        if potcar_mappings:
-            self.potcar_mappings = potcar_mappings
-        if confirm_convergence:
-            self.confirm_convergence = confirm_convergence
-        if pre_sanitize_structure:
-            self.pre_sanitize_structure = pre_sanitize_structure
-
-        # now inherit from parent SSSTask class
-        super().__init__(**kwargs)
-
-    def setup(self, structure, directory):
+    def setup(self, structure: Structure, directory: str):
 
         # If requested, we convert to the LLL-reduced unit cell, which aims to
         # be as cubic as possible.
@@ -177,7 +171,7 @@ class VaspTask(S3Task):
             self.potcar_mappings,
         )
 
-    def workup(self, directory):
+    def workup(self, directory: str):
         """
         This is the most basic VASP workup where I simply load the final structure,
         final energy, and (if requested) confirm convergence. I will likely make
@@ -213,14 +207,10 @@ class VaspTask(S3Task):
         if self.confirm_convergence:
             assert vasprun.converged
 
-        # OPTIMIZE: see my comment above on the return_final_structure attribute
-        if self.return_final_structure:
-            return {"structure_final": vasprun.final_structure, "vasprun": vasprun}
-
         # return vasprun object
         return vasprun
 
-    def _write_output_summary(self, directory, vasprun):
+    def _write_output_summary(self, directory: str, vasprun: Vasprun):
         """
         This is an EXPERIMENTAL feature.
 
@@ -259,11 +249,10 @@ class VaspTask(S3Task):
             key: getattr(cls, key)
             for key in [
                 "__module__",
-                "incar",
                 "pre_sanitize_structure",
-                "incar",
-                "functional",
-                "potcar_mappings",
                 "confirm_convergence",
+                "functional",
+                "incar",
+                "potcar_mappings",
             ]
         }

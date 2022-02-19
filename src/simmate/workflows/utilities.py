@@ -11,7 +11,7 @@ ALL_WORKFLOW_TYPES = [
     "population_analysis",
     "band_structure",
     "density_of_states",
-    "molecular_dynamics",
+    "dynamics",
     "diffusion",
 ]
 

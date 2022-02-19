@@ -17,10 +17,6 @@ class SaveOutputTask(Task):
         corrections = output["corrections"]
         directory = output["directory"]
 
-        # BUG-FIX: see vasptask base for more
-        if isinstance(vasprun, dict):
-            vasprun = vasprun["vasprun"]
-
         # load the calculation entry for this workflow run. This should already
         # exist thanks to the load_input_and_register task.
         calculation = self.calculation_table.from_prefect_id(

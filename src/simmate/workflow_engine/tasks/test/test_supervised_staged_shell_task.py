@@ -112,14 +112,14 @@ def test_s3task_3():
 def test_s3task_4(tmpdir):
     # Make a task with error handlers and monitoring
     task = DummyTask(
-        error_handlers=[
-            AlwaysPassesHandler(),
-            AlwaysPassesMonitor(),
-            AlwaysPassesSpecialMonitor(),
-        ],
         polling_timestep=0,
         monitor_freq=2,
     )
+    task.error_handlers = [
+        AlwaysPassesHandler(),
+        AlwaysPassesMonitor(),
+        AlwaysPassesSpecialMonitor(),
+    ]
     # use the temporary directory
     assert task.run(directory=tmpdir) == {
         "result": None,
@@ -132,39 +132,39 @@ def test_s3task_4(tmpdir):
 def test_s3task_5(tmpdir):
     # test nonzero returncode
     task = DummyTask(
-        command="NonexistantCommand 404",
-        error_handlers=[AlwaysPassesHandler()],
         polling_timestep=0,
         monitor_freq=2,
     )
+    task.command = "NonexistantCommand 404"
+    task.error_handlers = [AlwaysPassesHandler()]
     pytest.raises(NonZeroExitError, task.run, directory=tmpdir)
 
 
 def test_s3task_6(tmpdir):
     # testing handler-triggered failures
     task = DummyTask(
-        error_handlers=[AlwaysFailsHandler()],
         polling_timestep=0,
         monitor_freq=2,
     )
+    task.error_handlers = [AlwaysFailsHandler()]
     pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)
 
 
 def test_s3task_7(tmpdir):
     # monitor failure
     task = DummyTask(
-        error_handlers=[AlwaysFailsMonitor()],
         polling_timestep=0,
         monitor_freq=2,
     )
+    task.error_handlers = [AlwaysFailsMonitor()]
     pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)
 
 
 def test_s3task_8(tmpdir):
     # special-monitor failure (non-terminating monitor)
     task = DummyTask(
-        error_handlers=[AlwaysFailsSpecialMonitor()],
         polling_timestep=0,
         monitor_freq=2,
     )
+    task.error_handlers = [AlwaysFailsSpecialMonitor()]
     pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)

@@ -15,7 +15,6 @@ class DummyTask(VaspTask):
     A minimal example VaspTask that is just for testing
     """
 
-    return_final_structure = True
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
     confirm_convergence = True

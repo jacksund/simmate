@@ -34,7 +34,7 @@ except:
     )
 
 
-@transaction.atomic
+# @transaction.atomic
 def load_all_structures():
     """
     Only use this function if you are part of the Simmate dev team!
@@ -52,12 +52,12 @@ def load_all_structures():
             # to be separately stored databases. I just use all of them by default.
             catalog=[
                 "icsd",  # 60,000 structures
-                "lib1",  # 4,000 structures
-                "lib2",  # 360,000 structures (binary phases)
-                "lib3",  # 2,530,000 structures (ternary phases)
+                # "lib1",  # 4,000 structures
+                # "lib2",  # 360,000 structures (binary phases)
+                # "lib3",  # 2,530,000 structures (ternary phases)
             ],
             # The batch size the number of results to return per HTTP request.
-            batch_size=500,
+            batch_size=2000,
         )
         # .filter(
         #     # Now we want set the conditions for which structures to pull. Because we

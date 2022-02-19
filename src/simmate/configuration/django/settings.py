@@ -105,9 +105,9 @@ if os.path.exists(DATABASE_YAML):
         DATABASES = yaml.full_load(file)
 
 # Our 2nd priority is checking for a file like "/simmate/my_env-database.yaml
-elif os.path.exists(DATABASE_YAML):
-    with open(DATABASE_YAML) as file:
-        DATABASES = yaml.full_load(CONDA_DATABASE_YAML)
+elif os.path.exists(CONDA_DATABASE_YAML):
+    with open(CONDA_DATABASE_YAML) as file:
+        DATABASES = yaml.full_load(file)
 
 # This is the default behavior
 # Our 3rd prioirity is a local sqlite database name "my_env-database.sqlite3"

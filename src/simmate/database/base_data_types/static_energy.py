@@ -10,6 +10,11 @@ from simmate.database.base_data_types import (
 
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
+    # I have other models inherit from this one, while this model doesn't need
+    # its own table.
+    class Meta:
+        abstract = True
+        app_label = "local_calculations"
 
     base_info = (
         [
@@ -83,10 +88,3 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
         # Now we have the relaxation data all loaded and can save it to the database
         self.save()
-
-    """ Set as Abstract Model """
-    # I have other models inherit from this one, while this model doesn't need
-    # its own table.
-    class Meta:
-        abstract = True
-        app_label = "local_calculations"

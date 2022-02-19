@@ -58,7 +58,7 @@ class ExampleRelaxation(Relaxation):
     )
 ```
 
-Note there are two tables involved. One stores all of the ionic step, and the
+Note there are two tables involved. One stores all of the ionic steps, and the
 other connects all ionic steps to a specific calculation and result.
 
 """
@@ -214,10 +214,6 @@ class Relaxation(Structure, Calculation):
             name of the directory that relaxation was ran in. This is only used
             to reference the archive file if it's ever needed again.
         """
-        # Takes a pymatgen VaspRun object, which is what's typically returned
-        # from a simmate VaspTask.run() call.
-        # The ionic_step_structure_subclass is where to save the structures and
-        # is a subclass of IonicStepStructure.
 
         # The data is actually easier to access as a dictionary and everything
         # we need is stored under the "output" key

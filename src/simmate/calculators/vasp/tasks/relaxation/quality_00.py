@@ -19,9 +19,6 @@ class Quality00Relaxation(VaspTask):
     calculation as a first step.
     """
 
-    # returns structure separately from vasprun object
-    return_final_structure = True
-
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria when available.
     functional = "PBE"

@@ -98,9 +98,7 @@ class S3Task(Task):
 
     ``` python
 
-    from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
-        S3Task as SSSTask,
-    )
+    from simmate.workflow_engine import S3Task
     from example.error_handlers import PossibleError1, PossibleError2
 
 
@@ -140,7 +138,7 @@ class S3Task(Task):
     # I set this here so that I don't have to copy/paste the init method
     # every time I inherit from this class and want to update the default
     # command to use for the child class.
-    command = None
+    command: str = None
     """
     The defualt shell command to use.
     """
@@ -149,92 +147,46 @@ class S3Task(Task):
     # setup method to need an input structure in matsci. I therefore include
     # this rather than having a nearly identical subclass that could cause
     # some confusion.
-    requires_structure = False
+    requires_structure: bool = False
     """
     Indicates whether a structure is needed if for the run() method.
     """
 
-    error_handlers = []
+    error_handlers: List[ErrorHandler] = []
     """
     A list of ErrorHandler objects to use in order of priority (that is, highest
-    priority is first).
-    """
-
-    max_corrections = 5
-    """
-    maximum number of times we can apply a correction and retry the shell command
-    """
-
-    # Monitoring settings.
-    # These are only ever relevent if there are ErrorHandlers added that have
-    # is_monitor=True. These handlers run while the shelltask itself is also
-    # running. Read more about ErrorHandlers for more info.
-
-    monitor = True
-    """
-    Whether to run monitor handlers while the shelltask runs. False means
-    wait until the job has completed.
-    """
-
-    polling_timestep = 1
-    """
-    If we are monitoring the job for errors while it runs, this is how often
-    (in seconds) we should check the status of our job. Note this check is
-    just whether the job is done or not. This is NOT how often we check for
-    errors. See monitor_freq for that.
-    """
-
-    monitor_freq = 300
-    """
-    The frequency we should run check for errors with our monitors. This is
-    based on the polling_timestep loops. For example, if we have a
-    polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
-    the monitor checks every other loop -- or every 2x10 = 20 seconds. Another
-    example is values of polling_timestep=10 and monitor_freq=30. Here, we'd
-    run monitoring functions every 5 minutes (10x30=300s=5min).
+    priority is first). If one handler is triggered, the correction will be 
+    applied and none of the following handlers will be checked.
     """
 
     def __init__(
         self,
-        structure: Structure = None,
-        command: str = None,
-        directory: str = None,
-        error_handlers: List[ErrorHandler] = None,
-        max_corrections: int = None,
-        monitor: bool = None,
-        polling_timestep: float = None,
-        monitor_freq: int = None,
+        max_corrections: int = 5,
+        monitor: bool = True,
+        polling_timestep: float = 1,
+        monitor_freq: int = 300,
         save_corrections_to_file: bool = True,
         corrections_filename: str = "simmate_corrections.csv",
         compress_output: bool = False,
         **kwargs: Any,
     ):
         """
-
         Creates a task instance of this class. The parameters passed will be the
         same every time you call the task.run() method.
 
+        Note, many of the parameters here are for the Monitoring settings. These
+        are only ever relevent if there are ErrorHandlers added that have
+        is_monitor=True. These handlers run while the shelltask itself is also
+        running. Read more about ErrorHandlers for more info.
+
         Parameters
         ----------
-
-        - `structure`:
-            The structure to use for the task, if one is required. Typically, this
-            class is ran for multiple structures, where you can pass this
-            option to the task.run() method instead.
-        - `command`:
-            The command that will be called during execution.
-        - `directory`:
-            The directory to run everything in. This is passed to the ulitities
-            function simmate.ulitities.get_directory
-        - `error_handlers`:
-            The list of error handler objects to use. These should be listing in
-            order of priority, where to highest priority is first. If one handler
-            is triggered, the correction will be applied and none of the
-            following handlers will be checked.
         - `max_corrections`:
-            The maximum number of times that corrections will be made before
-            giving up on the calculation. Note, once this limit is exceeded, the
-            error is stored without correcting or restarting the run.
+            The maximum number of times we can apply a correction and retry the shell
+            command. The maximum number of times that corrections will be made (and
+            shell command reran) before giving up on the calculation. Note, once this
+            limit is exceeded, the error is stored without correcting or restarting
+            the run.
         - `monitor`:
             Whether to run monitor handlers while the command runs. False means
             wait until the job has completed.
@@ -262,33 +214,13 @@ class S3Task(Task):
         - `**kwargs`:
             All extra arguments supported by
             [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).
-
         """
 
-        # if any of these input parameters were given, overwrite the default
-        # Note to python devs: this odd formatting is because we set our defaults
-        # to None in __init__ while our actual default values are defined above
-        # as class attributes. This may seem funky at first glance, but it
-        # makes inheriting from this class extremely pretty :)
-        # This code is effectively the same as @defaults_from_attrs(...).
-        if command:
-            self.command = command
-        if structure:
-            self.structure = structure
-        if error_handlers:
-            self.error_handlers = error_handlers
-        if monitor:
-            self.monitor = monitor
-        if max_corrections or max_corrections == 0:
-            self.max_corrections = max_corrections
-        if polling_timestep or polling_timestep == 0:
-            self.polling_timestep = polling_timestep
-        if monitor_freq:
-            self.monitor_freq = monitor_freq
-        # These parameters will never have a default which is set to the attribute,
-        # so go ahead and set them from what was given in the init
-        self.directory = directory
-        self.structure = structure
+        # Save the provided settings
+        self.monitor = monitor
+        self.max_corrections = max_corrections
+        self.polling_timestep = polling_timestep
+        self.monitor_freq = monitor_freq
         self.compress_output = compress_output
         self.save_corrections_to_file = save_corrections_to_file
         self.corrections_filename = corrections_filename
@@ -608,7 +540,7 @@ class S3Task(Task):
         # You should never need to call this method directly!
         pass
 
-    @defaults_from_attrs("structure", "directory", "command")
+    @defaults_from_attrs("command")
     def run(
         self,
         structure: Structure = None,
@@ -705,8 +637,7 @@ class S3Task(Task):
         print(yaml.dump(config))
 
 
-# Custom errors that indicate exactly what causes the SupervisedStagedTask
-# to exit.
+# Custom errors that indicate exactly what causes the S3Task to exit.
 
 
 class MaxCorrectionsError(Exception):

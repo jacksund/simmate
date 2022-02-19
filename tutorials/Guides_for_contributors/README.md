@@ -48,6 +48,8 @@ pip install -e .
 
 6. Make sure everything works properly by running our tests
 ``` shell
+# you can optionally run tests in parallel 
+# with a command such as "pytest -n 4"
 pytest
 ```
 
@@ -80,6 +82,8 @@ black .
 
 7. Simmate has test cases to make sure new changes don't break any of Simmate's existing features. These are written using [pytest](https://docs.pytest.org/en/6.2.x/). Run these to check your changes. Make sure you are in the `~/Documents/github/simmate` directory when you run this command:
 ``` shell
+# you can optionally run tests in parallel 
+# with a command such as "pytest -n 4"
 pytest
 ```
 
@@ -101,6 +105,6 @@ If you changed how a method significantly, you may need to find all places in Si
 2. In the top-right window of spyder, you should now see the `Find` option. This will share a window with your `Help` window and `Variable Explorer`
 3. In the `Find` window, set `Exclude` to the following: (we don't want to search these files)
 ```
-*.csv, *.dat, *.log, *.tmp, *.bak, *.orig, *.egg-info, *.svg, *.xml, OUTCAR
+*.csv, *.dat, *.log, *.tmp, *.bak, *.orig, *.egg-info, *.svg, *.xml, OUTCAR, *.js, *.html
 ```
 4. Set `Search in` to the `src/simmate` directory so that you only search source code.

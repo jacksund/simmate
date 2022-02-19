@@ -30,43 +30,41 @@ to account for these problematic cif files though.
 
 import os
 
-from tqdm import tqdm
+from dask.distributed import Client, wait
+
 from pymatgen.io.cif import CifParser
 
 from simmate.database.third_parties import CodStructure
-from simmate.utilities import get_sanitized_structure
-
-# --------------------------------------------------------------------------------------
 
 
-def load_all_structures(base_directory="cod/cif/"):
+def load_all_structures(
+    base_directory: str = "cod/cif/",
+    only_add_new_cifs: bool = True,
+):
     """
     Only use this function if you are part of the Simmate dev team!
 
     Loads all structures directly for the COD database into the local
-    Simmate database.
+    Simmate database. There are 480,160 structures as of 2022-02-18.
 
     Make sure you have downloaded the
     [COD archive]([here](http://www.crystallography.net/archives/))
     and have it upacked to match your base_directory input.
     """
 
-    # For debuging and development, I keep track of all cif files that fail, and I
-    # also keep track of all possible data in the cif files.
-    all_keywords = []
-    failed_cifs = []
+    # We run this function in parallel using Dask, so each structure is submitted
+    # to a queue. The "futures" keep track of the status/result for each.
+    client = Client(preload="simmate.configuration.dask.connect_to_database")
 
     # We need to look at all the folders that have numbered-names (1,2,3..,9). and
     # grab the folder inside that are also numbers. This continues until we find cif
     # files that we can pull structures from. Note the name of the cif file is also
     # the cod-id.
-    # We also use tqdm to monitor progress.
-    for folder_name1 in tqdm(os.listdir(base_directory)):
-
+    all_cifs = []
+    for folder_name1 in os.listdir(base_directory):
         # skip if the folder name isn't a number
         if not folder_name1.isnumeric():
             continue
-
         # otherwise go through the folders inside of this one
         for folder_name2 in os.listdir(os.path.join(base_directory, folder_name1)):
             # and then one more level until we hit the cifs!
@@ -77,102 +75,118 @@ def load_all_structures(base_directory="cod/cif/"):
                 folder_path = os.path.join(
                     base_directory, folder_name1, folder_name2, folder_name3
                 )
-
                 # now go through each cif file in this directory
                 for cif_filename in os.listdir(folder_path):
-
                     # construct the full path to the file we are after
                     cif_filepath = os.path.join(folder_path, cif_filename)
+                    all_cifs.append(cif_filepath)
 
-                    try:
+    # Sometimes we are retrying this function call from a previously failed
+    # run. In that case, we only want to run the cifs that haven't been loaded
+    # yet. We iterate throught the cif ids and select which ones aren't in
+    # the database yet. This takes roughly 2 min but saves a lot of time accross
+    # runs.
+    if only_add_new_cifs:
+        print("Removing existing cifs from to-do list...")
+        new_cifs = []
+        from tqdm import tqdm
 
-                        # Load the structure and extra data from the cif file.
-                        # Note, some occupancies are not scaled to sum to 1. For
-                        # example, a disordered site may have [Ca:1, Sr:1] instead of
-                        # [Ca:0.5, Sr:0.5]. By setting our occupancy tolerance to
-                        # infinity, we allow this  let pymatgen scale the occupancies
-                        # so they sum to 1.
-                        cif = CifParser(
-                            cif_filepath,
-                            occupancy_tolerance=float("inf"),
-                        )
-                        data = cif.as_dict()
+        for cif_filepath in tqdm(all_cifs):
+            cif_id = "cod-" + os.path.basename(cif_filepath).split(".")[0]
+            if not CodStructure.objects.filter(id=cif_id).exists():
+                new_cifs.append(cif_filepath)
 
-                        # pull out the structure
-                        # note we use CifParser.get_structures instead of
-                        # Structure.from_file because we wanted the extra data too.
-                        # The COD has a lot of structures that aren't formatted properly
-                        # and various errors are thrown throughout the loading process.
-                        # for now, I just skip the ones that give issues.
-                        # !!! I should take a closer look at failed cifs in the future.
-                        try:
-                            structure = cif.get_structures()[0]
-                        except ValueError as error:
-                            # There is a common error where no structure is found, but
-                            # if this error ends up being something different, we should
-                            # make sure it's raised for visibility.
-                            if error.args != ("Invalid cif file with no structures!",):
-                                raise error
-                            # otherwise skip to the next cif file
-                            continue
+    # Dask seems to be unstable when we submit too much at once, so we chunk
+    # our submissions and wait for each to finished before submitting more.
+    chunk_size = 15000
+    for i in range(0, len(new_cifs), chunk_size):
+        chunk_cifs = new_cifs[i : i + chunk_size]
+        # use our function to load the structure (defined below)
+        futures = client.map(
+            load_single_cif,
+            chunk_cifs,
+            pure=False,
+        )
+        # wait for all futures
+        wait(futures)
 
-                        # Run symmetry analysis and sanitization on the structure
-                        structure_sanitized = get_sanitized_structure(structure)
+    # BUG: I'm unable to monitor progress on this...
+    #
+    # from dask.distributed import progress
+    # progress(futures)
+    #
+    # from tqdm import tqdm
+    # for future in tqdm(futures):
+    #     try:
+    #         future.result()
+    #     except:
+    #         pass
 
-                        if (
-                            "Structure has implicit hydrogens defined, parsed structure"
-                            " unlikely to be suitable for use in calculations unless"
-                            " hydrogens added." in cif.warnings
-                        ):
-                            has_implicit_hydrogens = True
-                        else:
-                            has_implicit_hydrogens = False
 
-                        # Check that there aren't any new keywords. If any are new,
-                        # add them to our list.
-                        for key, value in data.items():
-                            for header in value.keys():
-                                if header not in all_keywords:
-                                    all_keywords.append(header)
+def load_single_cif(cif_filepath):
+    """
+    Loads a single COD cif into the Simmate database.
 
-                        # Compile all of our data into a dictionary
-                        entry_dict = {
-                            # the split removes ".cif" from each file name and
-                            # the remaining number is the id
-                            "id": "cod-" + cif_filename.split(".")[0],
-                            "structure": structure_sanitized,
-                            "is_ordered": structure.is_ordered,
-                            "has_implicit_hydrogens": has_implicit_hydrogens,
-                            # OPTMIZE: right now I use the title of the paper,
-                            # but I would much rather use the DOI as it's shorter
-                            # and more useful. But a lot of cifs are missing the
-                            # _journal_paper_doi... This should be fixed.
-                            # "paper_title": data[key].get("_publ_section_title"),
-                        }
+    We make this a separate function to allow parallelization above.
+    """
 
-                        # now convert the entry to a database object
-                        structure_db = CodStructure.from_toolkit(**entry_dict)
+    # Load the structure and extra data from the cif file.
+    # Note, some occupancies are not scaled to sum to 1. For
+    # example, a disordered site may have [Ca:1, Sr:1] instead of
+    # [Ca:0.5, Sr:0.5]. By setting our occupancy tolerance to
+    # infinity, we let pymatgen scale the occupancies so they sum to 1.
+    cif = CifParser(
+        cif_filepath,
+        occupancy_tolerance=float("inf"),
+    )
 
-                        # and save it to our database!
-                        structure_db.save()
+    # pull out the structure
+    # note we use CifParser.get_structures instead of
+    # Structure.from_file because we wanted the extra data too.
+    # The COD has a lot of structures that aren't formatted properly
+    # and various errors are thrown throughout the loading process.
+    # for now, I just skip the ones that give issues.
+    # !!! I should take a closer look at failed cifs in the future.
+    try:
+        structure = cif.get_structures()[0]
+    except ValueError as error:
+        # There is a common error where no structure is found, but
+        # if this error ends up being something different, we should
+        # make sure it's raised for visibility.
+        if error.args != ("Invalid cif file with no structures!",):
+            raise error
+        # otherwise exit
+        return
 
-                    except:  # there are a bunch of different Exceptions...
-                        failed_cifs.append(cif_filepath)
-                        print("FAILED: " + str(len(failed_cifs)))
-                        continue  # skip to the next structure
+    if (
+        "Structure has implicit hydrogens defined, parsed structure"
+        " unlikely to be suitable for use in calculations unless"
+        " hydrogens added." in cif.warnings
+    ):
+        has_implicit_hydrogens = True
+    else:
+        has_implicit_hydrogens = False
 
-    # when all structures are done, let's write the list of headers and the list
-    # of failed calculations to a file for storing.
-    # OPTIMIZE: it may be worth storing these in the database too.
-    with open("failed_cifs.txt", "w") as file:
-        file.write(str(failed_cifs))
-    with open("all_keywords.txt", "w") as file:
-        file.write(str(all_keywords))
-
-    return {
-        "failed_cifs": failed_cifs,
-        "all_keywords": all_keywords,
+    # Compile all of our data into a dictionary
+    entry_dict = {
+        # the split removes ".cif" from each file name and
+        # the remaining number is the id
+        "id": "cod-" + os.path.basename(cif_filepath).split(".")[0],
+        "structure": structure,
+        "is_ordered": structure.is_ordered,
+        "has_implicit_hydrogens": has_implicit_hydrogens,
+        # OPTMIZE: right now I use the title of the paper,
+        # but I would much rather use the DOI as it's shorter
+        # and more useful. But a lot of cifs are missing the
+        # _journal_paper_doi... This should be fixed.
+        # "paper_title": data[key].get("_publ_section_title"),
     }
+
+    # now convert the entry to a database object
+    structure_db = CodStructure.from_toolkit(**entry_dict)
+
+    # and save it to our database!
+    structure_db.save()
 
 
 # --------------------------------------------------------------------------------------

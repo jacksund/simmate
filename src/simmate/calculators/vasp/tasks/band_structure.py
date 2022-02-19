@@ -117,7 +117,7 @@ class MatProjBandStructure(MatProjStaticEnergy):
         the bandstructure to "band_structure.png"
         """
 
-        # run the normal out put
+        # run the normal output
         super()._write_output_summary(directory, vasprun)
 
         bs_plotter = BSPlotter(vasprun.get_band_structure(line_mode=True))

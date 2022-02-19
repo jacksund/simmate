@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import os
+
+from simmate.toolkit import Structure
+from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
 from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 
 # This class used pymatgen's MITMDSet as it basis for settings.
@@ -7,10 +11,15 @@ from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 
 class MITDynamicsTask(MITRelaxation):
     """
-    Runs a molecular dynamics simulation using MIT Project settings.
+    Runs a molecular dynamics simulation using MIT Project settings. The lattice
+    will remain fixed during the run.
 
-    This will run from 300-1200 Kelvin over 10,000 steps of 2 femtoseconds, and
-    it will keep the lattice+volume fixed.
+    By default, this will run from 300-1200 Kelvin over 10,000 steps of 2
+    femtoseconds, but start/end temperatures as well as step size/number can
+    be adjusted when initializing this class. Note, setting parameters in the
+    init is atypical for Simmate tasks, but we allow it for MD run because it
+    does not affect the interopability of results -- that is, results can
+    be compared accross runs regardless of temp/time.
 
     Provide your structure as the desired supercell, as the setup of this
     calculation does not modify your input structure.
@@ -23,9 +32,14 @@ class MITDynamicsTask(MITRelaxation):
     incar = MITRelaxation.incar.copy()
     incar.update(
         dict(
-            TEBEG=300,  # start temperature
-            TEEND=1200,  # end temperature
-            NSW=10000,  # number of steps
+            # Unique to this task, we want to allow users to set these temperatures
+            # but to keep with Simmate's strategy of showing all settings up-front,
+            # we set these messages here.
+            TEBEG="Defaults to 300 but can be set by the user",  # start temperature
+            TEEND="Defaults to 1200 but can be set by the user",  # end temperature
+            POTIM="Defaults to 2 but can be set by the user",  # time step (in fs)
+            NSW="Defaults to 10,000 but can be set by the user",  # number of steps
+            #
             EDIFF__per_atom=1e-06,
             LSCALU=False,
             LCHARG=False,
@@ -37,14 +51,11 @@ class MITDynamicsTask(MITRelaxation):
             BMIX=1,
             MAXMIX=20,
             NELM=500,
-            NSIM=4,  # number of bands to run in parallel  # !!! Should this be moved to config?
             ISYM=0,  # turn off symmetry
-            ISIF=0,  # only update atom sites
+            ISIF=0,  # only update atom sites; lattice is fixed; no lattice stress
             IBRION=0,  # turns on molecular dynamics
-            NBLOCK=1,
             KBLOCK=100,
             SMASS=0,
-            POTIM=2,  # time step (in fs)
             PREC="Low",
         )
     )
@@ -58,3 +69,52 @@ class MITDynamicsTask(MITRelaxation):
     # For now, I turn off all error handlers.
     # TODO
     error_handlers = []
+
+    def setup(
+        self,
+        structure: Structure,
+        directory: str,
+        temperature_start: int = 300,
+        temperature_end: int = 1200,
+        time_step: float = 2,
+        nsteps: int = 10000,
+    ):
+
+        # If requested, we convert to the LLL-reduced unit cell, which aims to
+        # be as cubic as possible.
+        if self.pre_sanitize_structure:
+            structure = structure.copy(sanitize=True)
+
+        # write the poscar file
+        Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
+
+        # Combine our base incar settings with those of our parallelization settings
+        # and then write the incar file. Note, we update the values of this incar,
+        # so we make a copy of the dict.
+        incar = self.incar.copy()
+        incar["TEBEG"] = temperature_start
+        incar["TEEND"] = temperature_end
+        incar["POTIM"] = time_step
+        incar["NSW"] = nsteps
+        incar = Incar(**incar) + Incar(**self.incar_parallel_settings)
+        incar.to_file(
+            filename=os.path.join(directory, "INCAR"),
+            structure=structure,
+        )
+
+        # if KSPACING is not provided in the incar AND kpoints is attached to this
+        # class instance, then we write the KPOINTS file
+        if self.kpoints and ("KSPACING" not in self.incar):
+            Kpoints.to_file(
+                structure,
+                self.kpoints,
+                os.path.join(directory, "KPOINTS"),
+            )
+
+        # write the POTCAR file
+        Potcar.to_file_from_type(
+            structure.composition.elements,
+            self.functional,
+            os.path.join(directory, "POTCAR"),
+            self.potcar_mappings,
+        )
