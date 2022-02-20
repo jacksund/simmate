@@ -647,6 +647,12 @@ of primary key relationships. Specifically:</p>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>  <span class="c1"># TODO: move to a separate app</span>
 
+    <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The source column is disabled for this table because this is common</span>
+<span class="sd">    information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># NOTE: International spacegroup info is also known as Hermann-Mauguin</span>
 
     <span class="n">number</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -700,7 +706,7 @@ of primary key relationships. Specifically:</p>
 
         </details>
 
-            <div class="docstring"><p>Spacegroup(source, number, symbol, crystal_system, point_group)</p>
+            <div class="docstring"><p>Spacegroup(number, symbol, crystal_system, point_group)</p>
 </div>
 
 
@@ -741,11 +747,11 @@ of primary key relationships. Specifically:</p>
 
             </div>
             <div><dt><a href="../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></dt>
-                                <dd id="SpacegroupSerializer.Meta.model.number" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.number">number</a></dd>
+                                <dd id="SpacegroupSerializer.Meta.model.source" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.source">source</a></dd>
+                <dd id="SpacegroupSerializer.Meta.model.number" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.number">number</a></dd>
                 <dd id="SpacegroupSerializer.Meta.model.symbol" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.symbol">symbol</a></dd>
                 <dd id="SpacegroupSerializer.Meta.model.crystal_system" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.crystal_system">crystal_system</a></dd>
                 <dd id="SpacegroupSerializer.Meta.model.point_group" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.point_group">point_group</a></dd>
-                <dd id="SpacegroupSerializer.Meta.model.source" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.source">source</a></dd>
                 <dd id="SpacegroupSerializer.Meta.model.DoesNotExist" class="class"><a href="../../database/base_data_types/symmetry.html#Spacegroup.DoesNotExist">DoesNotExist</a></dd>
                 <dd id="SpacegroupSerializer.Meta.model.MultipleObjectsReturned" class="class"><a href="../../database/base_data_types/symmetry.html#Spacegroup.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
                 <dd id="SpacegroupSerializer.Meta.model.aflowstructure_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.aflowstructure_set">aflowstructure_set</a></dd>
@@ -819,7 +825,7 @@ of primary key relationships. Specifically:</p>
                             <div id="SpacegroupViewSet.queryset" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#SpacegroupViewSet.queryset">#&nbsp;&nbsp</a>
 
-        <span class="name">queryset</span><span class="default_value"> = &lt;unable to get value representation&gt;</span>
+        <span class="name">queryset</span><span class="default_value"> = &lt;SearchResults [&lt;Spacegroup: Spacegroup object (1)&gt;, &lt;Spacegroup: Spacegroup object (2)&gt;, &lt;Spacegroup: Spacegroup object (3)&gt;, &lt;Spacegroup: Spacegroup object (4)&gt;, &lt;Spacegroup: Spacegroup object (5)&gt;, &lt;Spacegroup: Spacegroup object (6)&gt;, &lt;Spacegroup: Spacegroup object (7)&gt;, &lt;Spacegroup: Spacegroup object (8)&gt;, &lt;Spacegroup: Spacegroup object (9)&gt;, &lt;Spacegroup: Spacegroup object (10)&gt;, &lt;Spacegroup: Spacegroup object (11)&gt;, &lt;Spacegroup: Spacegroup object (12)&gt;, &lt;Spacegroup: Spacegroup object (13)&gt;, &lt;Spacegroup: Spacegroup object (14)&gt;, &lt;Spacegroup: Spacegroup object (15)&gt;, &lt;Spacegroup: Spacegroup object (16)&gt;, &lt;Spacegroup: Spacegroup object (17)&gt;, &lt;Spacegroup: Spacegroup object (18)&gt;, &lt;Spacegroup: Spacegroup object (19)&gt;, &lt;Spacegroup: Spacegroup object (20)&gt;, &#39;...(remaining elements truncated)...&#39;]&gt;</span>
     </div>
 
     
@@ -3484,9 +3490,10 @@ of primary key relationships. Specifically:</p>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;third_parties&quot;</span>
 
-    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;energy_above_hull&quot;</span><span class="p">]</span>
+    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;is_ordered&quot;</span><span class="p">,</span> <span class="s2">&quot;has_implicit_hydrogens&quot;</span><span class="p">]</span>
     <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;The Crystallography Open Database&quot;</span>
     <span class="n">source_doi</span> <span class="o">=</span> <span class="s2">&quot;https://doi.org/10.1107/S0021889809016690&quot;</span>
+    <span class="n">remote_archive_link</span> <span class="o">=</span> <span class="s2">&quot;https://archives.simmate.org/CodStructure-2022-02-20.zip&quot;</span>
 
     <span class="c1"># These fields overwrite the default Structure fields due to a bug.</span>
     <span class="n">chemical_system</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
@@ -3570,6 +3577,7 @@ sturcture is ordered or has implicit hydrogens.</p>
                                 <dd id="CodSerializer.Meta.model.base_info" class="variable"><a href="../../database/third_parties/cod.html#CodStructure.base_info">base_info</a></dd>
                 <dd id="CodSerializer.Meta.model.source" class="variable"><a href="../../database/third_parties/cod.html#CodStructure.source">source</a></dd>
                 <dd id="CodSerializer.Meta.model.source_doi" class="variable"><a href="../../database/third_parties/cod.html#CodStructure.source_doi">source_doi</a></dd>
+                <dd id="CodSerializer.Meta.model.remote_archive_link" class="variable"><a href="../../database/third_parties/cod.html#CodStructure.remote_archive_link">remote_archive_link</a></dd>
                 <dd id="CodSerializer.Meta.model.chemical_system" class="function"><a href="../../database/third_parties/cod.html#CodStructure.chemical_system">chemical_system</a></dd>
                 <dd id="CodSerializer.Meta.model.formula_full" class="function"><a href="../../database/third_parties/cod.html#CodStructure.formula_full">formula_full</a></dd>
                 <dd id="CodSerializer.Meta.model.formula_reduced" class="function"><a href="../../database/third_parties/cod.html#CodStructure.formula_reduced">formula_reduced</a></dd>
@@ -3593,8 +3601,7 @@ sturcture is ordered or has implicit hydrogens.</p>
 
             </div>
             <div><dt><a href="../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
-                                <dd id="CodSerializer.Meta.model.remote_archive_link" class="variable"><a href="../../database/base_data_types/base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
-                <dd id="CodSerializer.Meta.model.objects" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                                <dd id="CodSerializer.Meta.model.objects" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
                 <dd id="CodSerializer.Meta.model.show_columns" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
                 <dd id="CodSerializer.Meta.model.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="CodSerializer.Meta.model.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>

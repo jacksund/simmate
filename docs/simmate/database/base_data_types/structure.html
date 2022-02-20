@@ -125,9 +125,6 @@
 <span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="kn">import</span> <span class="n">Avogadro</span>
 
 <span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span> <span class="k">as</span> <span class="n">ToolkitStructure</span>
-
-<span class="c1"># from pymatgen.analysis.prototypes import AflowPrototypeMatcher</span>
-
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DatabaseTable</span><span class="p">,</span>
     <span class="n">table_column</span><span class="p">,</span>
@@ -136,15 +133,10 @@
 
 
 <span class="k">class</span> <span class="nc">Structure</span><span class="p">(</span><span class="n">DatabaseTable</span><span class="p">):</span>
-    <span class="c1"># This is an abstract class meant for inheritance</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">]</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;structure_string&quot;</span><span class="p">]</span>
 
     <span class="n">structure_string</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -153,24 +145,14 @@
 <span class="sd">    structure object, use the `to_toolkit` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># EXPERIMENTAL</span>
-    <span class="c1"># Where this calculation plays a role within a &quot;nested&quot; workflow calculation.</span>
-    <span class="c1"># Becuase this structure can be reused by multiple workflows, we make this</span>
-    <span class="c1"># a list of source-like objects. For example, a relaxation could be part of</span>
-    <span class="c1"># a series of relaxations (like in StagedRelaxation) or it can be an initial</span>
-    <span class="c1"># step of a BandStructure calculation.</span>
-    <span class="c1"># parent_nested_calculations = table_column.JSONField(blank=True, null=True)</span>
-
-    <span class="sd">&quot;&quot;&quot; Query-helper Info &quot;&quot;&quot;</span>
-
     <span class="n">nsites</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    total number of sites in the unitcell</span>
+<span class="sd">    The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">nelements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    total number of unique elements</span>
+<span class="sd">    The total number of unique elements. (e.g. Y2CF2 has 3 elements)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">elements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">()</span>
@@ -190,17 +172,17 @@
 
     <span class="n">density</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Density of the crystal (g/cm^3)</span>
+<span class="sd">    The density of the crystal in g/cm^3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">density_atomic</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Density of atoms in the crystal (atoms/Angstom^3)</span>
+<span class="sd">    The density of atoms in the crystal in atoms/Angstom^3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">volume</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Volume of the unitcell.</span>
+<span class="sd">    The volume of the unitcell in Angstom^3</span>
 <span class="sd">    </span>
 <span class="sd">    Note: in most cases, `volume_molar` should be used instead! This is because</span>
 <span class="sd">    volumne is highly dependent on the symmetry and the arbitray unitcell. If </span>
@@ -210,7 +192,7 @@
 
     <span class="n">volume_molar</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Molar volume of the crystal (cm^3/mol)</span>
+<span class="sd">    The molar volume of the crystal in cm^3/mol</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># The composition of the structure formatted in various ways</span>
@@ -234,6 +216,17 @@
 <span class="sd">    For example, all stoichiometric perovskites have anonymized_formula ABC3.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Spacegroup</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Spacegroup information. Points to a separate database table that has additional</span>
+<span class="sd">    columns:</span>
+<span class="sd">    `simmate.database.base_data_types.symmetry.Spacegroup`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The AFLOW prototype that this structure maps to.</span>
+    <span class="c1"># TODO: this will be a relationship in the future</span>
+    <span class="c1"># prototype = table_column.CharField(max_length=50, blank=True, null=True)</span>
+
     <span class="c1"># NOTE: extra fields for the Lattice and Sites are intentionally left out</span>
     <span class="c1"># in order to save on overall database size. Things such as...</span>
     <span class="c1">#   Lattice: matrix and then... a, b, c, alpha, beta, gamma, volume</span>
@@ -241,24 +234,6 @@
     <span class="c1"># shouldn&#39;t be queried directly. If you&#39;d like to sort structures by these</span>
     <span class="c1"># criteria, you can still do this in python and pandas! Just not at the</span>
     <span class="c1"># SQL level</span>
-
-    <span class="sd">&quot;&quot;&quot; Relationships &quot;&quot;&quot;</span>
-    <span class="c1"># For the majority of Structures, you&#39;ll want to have a &quot;source&quot; relation that</span>
-    <span class="c1"># indicates where the structure came from. I don&#39;t include this is the abstract</span>
-    <span class="c1"># model but there are many ways to define it. For example it may relate to another</span>
-    <span class="c1"># Structure table or even a Calculation. In another case, the entire Structure</span>
-    <span class="c1"># table may have the same exact source, in which case you&#39;d make a property!</span>
-
-    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Spacegroup</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">)</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Spacegroup information. Points to simmate.database.base_data_types.symmetry.Spacegroup</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># The AFLOW prototype that this structure maps to.</span>
-    <span class="c1"># TODO: this will be a relationship in the future</span>
-    <span class="c1"># prototype = table_column.CharField(max_length=50, blank=True, null=True)</span>
-
-    <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_from_toolkit</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -281,6 +256,7 @@
         <span class="c1"># This attempts to match the structure to an AFLOW prototype and it is</span>
         <span class="c1"># by far the slowest step of loading structures to the database. Try</span>
         <span class="c1"># to optimize this in the future.</span>
+        <span class="c1"># from pymatgen.analysis.prototypes import AflowPrototypeMatcher</span>
         <span class="c1"># prototype = AflowPrototypeMatcher().get_prototypes(structure)</span>
         <span class="c1"># prototype_name = prototype[0][&quot;tags&quot;][&quot;mineral&quot;] if prototype else None</span>
 
@@ -316,29 +292,9 @@
 
     <span class="k">def</span> <span class="nf">to_toolkit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts the database object to pymatgen structure object</span>
+<span class="sd">        Converts the database object to toolkit Structure object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># NOTE: if you know this is what you&#39;re going to do from a query, then</span>
-        <span class="c1"># it is more efficient to only grab the structure_string column because</span>
-        <span class="c1"># that&#39;s all you need! You&#39;d do that like this:</span>
-        <span class="c1">#   structure_db = Structure.objects.only(&quot;structure_string&quot;).get(id=&quot;example-id&quot;)</span>
-        <span class="c1"># This grabs the proper Structure entry and only the structure column.</span>
-
-        <span class="c1"># convert the stored string to python dictionary.</span>
-        <span class="c1"># OPTIMIZE: see my comment on storing strings in the from_toolkit method above.</span>
-        <span class="c1"># For now, I need to figure out if I used &quot;CIF&quot; or &quot;POSCAR&quot; and read the structure</span>
-        <span class="c1"># accordingly. In the future, I can just assume my new format.</span>
-        <span class="c1"># If the string starts with &quot;#&quot;, then I know that I stored it as a &quot;CIF&quot;.</span>
-        <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
-
-        <span class="c1"># convert the string to pymatgen Structure object</span>
-        <span class="n">structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">structure_string</span><span class="p">,</span>
-            <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">structure</span>
+        <span class="k">return</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_database_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_string</span><span class="p">)</span>
 
 
 <span class="c1"># TODO:</span>
@@ -390,15 +346,10 @@
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Structure</span><span class="p">(</span><span class="n">DatabaseTable</span><span class="p">):</span>
-    <span class="c1"># This is an abstract class meant for inheritance</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">]</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;structure_string&quot;</span><span class="p">]</span>
 
     <span class="n">structure_string</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -407,24 +358,14 @@
 <span class="sd">    structure object, use the `to_toolkit` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># EXPERIMENTAL</span>
-    <span class="c1"># Where this calculation plays a role within a &quot;nested&quot; workflow calculation.</span>
-    <span class="c1"># Becuase this structure can be reused by multiple workflows, we make this</span>
-    <span class="c1"># a list of source-like objects. For example, a relaxation could be part of</span>
-    <span class="c1"># a series of relaxations (like in StagedRelaxation) or it can be an initial</span>
-    <span class="c1"># step of a BandStructure calculation.</span>
-    <span class="c1"># parent_nested_calculations = table_column.JSONField(blank=True, null=True)</span>
-
-    <span class="sd">&quot;&quot;&quot; Query-helper Info &quot;&quot;&quot;</span>
-
     <span class="n">nsites</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    total number of sites in the unitcell</span>
+<span class="sd">    The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">nelements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    total number of unique elements</span>
+<span class="sd">    The total number of unique elements. (e.g. Y2CF2 has 3 elements)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">elements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">()</span>
@@ -444,17 +385,17 @@
 
     <span class="n">density</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Density of the crystal (g/cm^3)</span>
+<span class="sd">    The density of the crystal in g/cm^3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">density_atomic</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Density of atoms in the crystal (atoms/Angstom^3)</span>
+<span class="sd">    The density of atoms in the crystal in atoms/Angstom^3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">volume</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Volume of the unitcell.</span>
+<span class="sd">    The volume of the unitcell in Angstom^3</span>
 <span class="sd">    </span>
 <span class="sd">    Note: in most cases, `volume_molar` should be used instead! This is because</span>
 <span class="sd">    volumne is highly dependent on the symmetry and the arbitray unitcell. If </span>
@@ -464,7 +405,7 @@
 
     <span class="n">volume_molar</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Molar volume of the crystal (cm^3/mol)</span>
+<span class="sd">    The molar volume of the crystal in cm^3/mol</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># The composition of the structure formatted in various ways</span>
@@ -488,6 +429,17 @@
 <span class="sd">    For example, all stoichiometric perovskites have anonymized_formula ABC3.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Spacegroup</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Spacegroup information. Points to a separate database table that has additional</span>
+<span class="sd">    columns:</span>
+<span class="sd">    `simmate.database.base_data_types.symmetry.Spacegroup`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The AFLOW prototype that this structure maps to.</span>
+    <span class="c1"># TODO: this will be a relationship in the future</span>
+    <span class="c1"># prototype = table_column.CharField(max_length=50, blank=True, null=True)</span>
+
     <span class="c1"># NOTE: extra fields for the Lattice and Sites are intentionally left out</span>
     <span class="c1"># in order to save on overall database size. Things such as...</span>
     <span class="c1">#   Lattice: matrix and then... a, b, c, alpha, beta, gamma, volume</span>
@@ -495,24 +447,6 @@
     <span class="c1"># shouldn&#39;t be queried directly. If you&#39;d like to sort structures by these</span>
     <span class="c1"># criteria, you can still do this in python and pandas! Just not at the</span>
     <span class="c1"># SQL level</span>
-
-    <span class="sd">&quot;&quot;&quot; Relationships &quot;&quot;&quot;</span>
-    <span class="c1"># For the majority of Structures, you&#39;ll want to have a &quot;source&quot; relation that</span>
-    <span class="c1"># indicates where the structure came from. I don&#39;t include this is the abstract</span>
-    <span class="c1"># model but there are many ways to define it. For example it may relate to another</span>
-    <span class="c1"># Structure table or even a Calculation. In another case, the entire Structure</span>
-    <span class="c1"># table may have the same exact source, in which case you&#39;d make a property!</span>
-
-    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Spacegroup</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">)</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Spacegroup information. Points to simmate.database.base_data_types.symmetry.Spacegroup</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># The AFLOW prototype that this structure maps to.</span>
-    <span class="c1"># TODO: this will be a relationship in the future</span>
-    <span class="c1"># prototype = table_column.CharField(max_length=50, blank=True, null=True)</span>
-
-    <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_from_toolkit</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -535,6 +469,7 @@
         <span class="c1"># This attempts to match the structure to an AFLOW prototype and it is</span>
         <span class="c1"># by far the slowest step of loading structures to the database. Try</span>
         <span class="c1"># to optimize this in the future.</span>
+        <span class="c1"># from pymatgen.analysis.prototypes import AflowPrototypeMatcher</span>
         <span class="c1"># prototype = AflowPrototypeMatcher().get_prototypes(structure)</span>
         <span class="c1"># prototype_name = prototype[0][&quot;tags&quot;][&quot;mineral&quot;] if prototype else None</span>
 
@@ -570,29 +505,9 @@
 
     <span class="k">def</span> <span class="nf">to_toolkit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts the database object to pymatgen structure object</span>
+<span class="sd">        Converts the database object to toolkit Structure object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># NOTE: if you know this is what you&#39;re going to do from a query, then</span>
-        <span class="c1"># it is more efficient to only grab the structure_string column because</span>
-        <span class="c1"># that&#39;s all you need! You&#39;d do that like this:</span>
-        <span class="c1">#   structure_db = Structure.objects.only(&quot;structure_string&quot;).get(id=&quot;example-id&quot;)</span>
-        <span class="c1"># This grabs the proper Structure entry and only the structure column.</span>
-
-        <span class="c1"># convert the stored string to python dictionary.</span>
-        <span class="c1"># OPTIMIZE: see my comment on storing strings in the from_toolkit method above.</span>
-        <span class="c1"># For now, I need to figure out if I used &quot;CIF&quot; or &quot;POSCAR&quot; and read the structure</span>
-        <span class="c1"># accordingly. In the future, I can just assume my new format.</span>
-        <span class="c1"># If the string starts with &quot;#&quot;, then I know that I stored it as a &quot;CIF&quot;.</span>
-        <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
-
-        <span class="c1"># convert the string to pymatgen Structure object</span>
-        <span class="n">structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">structure_string</span><span class="p">,</span>
-            <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">structure</span>
+        <span class="k">return</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_database_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_string</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -609,12 +524,14 @@ where this class only adds extra methods for convenience.</p>
                             <div id="Structure.base_info" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Structure.base_info">#&nbsp;&nbsp</a>
 
-        <span class="name">base_info</span><span class="annotation">: List[str]</span><span class="default_value"> = [&#39;structure_string&#39;, &#39;source&#39;]</span>
+        <span class="name">base_info</span><span class="annotation">: List[str]</span><span class="default_value"> = [&#39;structure_string&#39;]</span>
     </div>
 
     
-            <div class="docstring"><p>The base information for this database table. All other columns can be calculated
-using the columns in this list.</p>
+            <div class="docstring"><p>The base information for this database table and only these fields are stored
+when the <code>to_archive</code> method is used. Using the columns in this list, all 
+other columns for this table can be calculated, so the columns in this list 
+are effectively the "raw data".</p>
 </div>
 
 
@@ -644,7 +561,7 @@ structure object, use the <code><a href="#Structure.to_toolkit">to_toolkit</a></
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -658,7 +575,7 @@ structure object, use the <code><a href="#Structure.to_toolkit">to_toolkit</a></
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -705,7 +622,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -719,7 +636,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -733,7 +650,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Structure.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -752,7 +669,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -808,7 +725,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -825,34 +744,14 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">to_toolkit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts the database object to pymatgen structure object</span>
+<span class="sd">        Converts the database object to toolkit Structure object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># NOTE: if you know this is what you&#39;re going to do from a query, then</span>
-        <span class="c1"># it is more efficient to only grab the structure_string column because</span>
-        <span class="c1"># that&#39;s all you need! You&#39;d do that like this:</span>
-        <span class="c1">#   structure_db = Structure.objects.only(&quot;structure_string&quot;).get(id=&quot;example-id&quot;)</span>
-        <span class="c1"># This grabs the proper Structure entry and only the structure column.</span>
-
-        <span class="c1"># convert the stored string to python dictionary.</span>
-        <span class="c1"># OPTIMIZE: see my comment on storing strings in the from_toolkit method above.</span>
-        <span class="c1"># For now, I need to figure out if I used &quot;CIF&quot; or &quot;POSCAR&quot; and read the structure</span>
-        <span class="c1"># accordingly. In the future, I can just assume my new format.</span>
-        <span class="c1"># If the string starts with &quot;#&quot;, then I know that I stored it as a &quot;CIF&quot;.</span>
-        <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
-
-        <span class="c1"># convert the string to pymatgen Structure object</span>
-        <span class="n">structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">structure_string</span><span class="p">,</span>
-            <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">structure</span>
+        <span class="k">return</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_database_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure_string</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Converts the database object to pymatgen structure object</p>
+            <div class="docstring"><p>Converts the database object to toolkit Structure object.</p>
 </div>
 
 

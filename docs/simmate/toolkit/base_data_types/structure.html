@@ -43,6 +43,9 @@
                         <li>
                                 <a class="function" href="#Structure.from_database">from_database</a>
                         </li>
+                        <li>
+                                <a class="function" href="#Structure.from_database_string">from_database_string</a>
+                        </li>
                 </ul>
 
             </li>
@@ -234,6 +237,45 @@ a few extra methods and does not change any other usage.</p>
         <span class="n">structure_cleaned</span><span class="o">.</span><span class="n">calculation</span> <span class="o">=</span> <span class="n">calculation</span>
 
         <span class="k">return</span> <span class="n">structure_cleaned</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_database_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads a toolkit structure from a string -- specifically strings that</span>
+<span class="sd">        are stored in the structure_string column for</span>
+<span class="sd">        simmate.database.base_data_types.Structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Dev note: this method should be merged with the Toolkit.from_str method.</span>
+        <span class="c1"># I only have this separate for now because pymatgen&#39;s from_str doesn&#39;t</span>
+        <span class="c1"># dynamically determine format from the string alone.</span>
+
+        <span class="c1"># convert the stored string to python dictionary.</span>
+        <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">structure_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
+        <span class="c1"># OPTIMIZE: see my comment on storing strings in the from_toolkit method above.</span>
+        <span class="c1"># For now, I need to figure out if I used &quot;CIF&quot; or &quot;POSCAR&quot; and read the structure</span>
+        <span class="c1"># accordingly. In the future, I can just assume my new format.</span>
+        <span class="c1"># If the string starts with &quot;#&quot;, then I know that I stored it as a &quot;CIF&quot;.</span>
+
+        <span class="c1"># convert the string to pymatgen Structure object</span>
+        <span class="k">if</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">:</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
+                <span class="n">structure_string</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># BUG: for cod structures we need to set the tolerance to &quot;inf&quot;, which</span>
+        <span class="c1"># isn&#39;t possible with the toolkit.from_str method. Instead we need to</span>
+        <span class="c1"># call the CifParser directly</span>
+        <span class="k">elif</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;CIF&quot;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pymatgen.io.cif</span> <span class="kn">import</span> <span class="n">CifParser</span>
+
+            <span class="n">parser</span> <span class="o">=</span> <span class="n">CifParser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span>
+                <span class="n">structure_string</span><span class="p">,</span>
+                <span class="n">occupancy_tolerance</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_structures</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">structure</span>
 </pre></div>
 
         </details>
@@ -401,6 +443,45 @@ a few extra methods and does not change any other usage.</p>
         <span class="n">structure_cleaned</span><span class="o">.</span><span class="n">calculation</span> <span class="o">=</span> <span class="n">calculation</span>
 
         <span class="k">return</span> <span class="n">structure_cleaned</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_database_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads a toolkit structure from a string -- specifically strings that</span>
+<span class="sd">        are stored in the structure_string column for</span>
+<span class="sd">        simmate.database.base_data_types.Structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Dev note: this method should be merged with the Toolkit.from_str method.</span>
+        <span class="c1"># I only have this separate for now because pymatgen&#39;s from_str doesn&#39;t</span>
+        <span class="c1"># dynamically determine format from the string alone.</span>
+
+        <span class="c1"># convert the stored string to python dictionary.</span>
+        <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">structure_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
+        <span class="c1"># OPTIMIZE: see my comment on storing strings in the from_toolkit method above.</span>
+        <span class="c1"># For now, I need to figure out if I used &quot;CIF&quot; or &quot;POSCAR&quot; and read the structure</span>
+        <span class="c1"># accordingly. In the future, I can just assume my new format.</span>
+        <span class="c1"># If the string starts with &quot;#&quot;, then I know that I stored it as a &quot;CIF&quot;.</span>
+
+        <span class="c1"># convert the string to pymatgen Structure object</span>
+        <span class="k">if</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">:</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
+                <span class="n">structure_string</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># BUG: for cod structures we need to set the tolerance to &quot;inf&quot;, which</span>
+        <span class="c1"># isn&#39;t possible with the toolkit.from_str method. Instead we need to</span>
+        <span class="c1"># call the CifParser directly</span>
+        <span class="k">elif</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;CIF&quot;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pymatgen.io.cif</span> <span class="kn">import</span> <span class="n">CifParser</span>
+
+            <span class="n">parser</span> <span class="o">=</span> <span class="n">CifParser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span>
+                <span class="n">structure_string</span><span class="p">,</span>
+                <span class="n">occupancy_tolerance</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_structures</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">structure</span>
 </pre></div>
 
         </details>
@@ -628,6 +709,66 @@ a few extra methods and does not change any other usage.</p>
             <div class="docstring"><p>This is an experimental feature.</p>
 
 <p>Loads a structure from the Simmate database.</p>
+</div>
+
+
+                            </div>
+                            <div id="Structure.from_database_string" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Structure.from_database_string">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">from_database_string</span><span class="signature">(cls, structure_string: str)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_database_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads a toolkit structure from a string -- specifically strings that</span>
+<span class="sd">        are stored in the structure_string column for</span>
+<span class="sd">        simmate.database.base_data_types.Structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Dev note: this method should be merged with the Toolkit.from_str method.</span>
+        <span class="c1"># I only have this separate for now because pymatgen&#39;s from_str doesn&#39;t</span>
+        <span class="c1"># dynamically determine format from the string alone.</span>
+
+        <span class="c1"># convert the stored string to python dictionary.</span>
+        <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">structure_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
+        <span class="c1"># OPTIMIZE: see my comment on storing strings in the from_toolkit method above.</span>
+        <span class="c1"># For now, I need to figure out if I used &quot;CIF&quot; or &quot;POSCAR&quot; and read the structure</span>
+        <span class="c1"># accordingly. In the future, I can just assume my new format.</span>
+        <span class="c1"># If the string starts with &quot;#&quot;, then I know that I stored it as a &quot;CIF&quot;.</span>
+
+        <span class="c1"># convert the string to pymatgen Structure object</span>
+        <span class="k">if</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">:</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
+                <span class="n">structure_string</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># BUG: for cod structures we need to set the tolerance to &quot;inf&quot;, which</span>
+        <span class="c1"># isn&#39;t possible with the toolkit.from_str method. Instead we need to</span>
+        <span class="c1"># call the CifParser directly</span>
+        <span class="k">elif</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;CIF&quot;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pymatgen.io.cif</span> <span class="kn">import</span> <span class="n">CifParser</span>
+
+            <span class="n">parser</span> <span class="o">=</span> <span class="n">CifParser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span>
+                <span class="n">structure_string</span><span class="p">,</span>
+                <span class="n">occupancy_tolerance</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_structures</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">structure</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Loads a toolkit structure from a string -- specifically strings that
+are stored in the structure_string column for
+<a href="../../database/base_data_types.html#Structure">simmate.database.base_data_types.Structure</a>.</p>
 </div>
 
 

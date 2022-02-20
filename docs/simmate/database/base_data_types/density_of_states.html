@@ -632,8 +632,10 @@ include values such as...
     </div>
 
     
-            <div class="docstring"><p>The base information for this database table. All other columns can be calculated
-using the columns in this list.</p>
+            <div class="docstring"><p>The base information for this database table and only these fields are stored
+when the <code>to_archive</code> method is used. Using the columns in this list, all 
+other columns for this table can be calculated, so the columns in this list 
+are effectively the "raw data".</p>
 </div>
 
 
@@ -702,7 +704,7 @@ structure object, use the <code><a href="#DensityofStatesCalc.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -716,7 +718,7 @@ structure object, use the <code><a href="#DensityofStatesCalc.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -763,7 +765,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -777,7 +779,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -791,7 +793,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#DensityofStatesCalc.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -810,7 +812,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -866,7 +868,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 

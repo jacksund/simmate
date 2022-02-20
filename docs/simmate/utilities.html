@@ -49,6 +49,12 @@
             <li>
                     <a class="function" href="#get_chemical_subsystems">get_chemical_subsystems</a>
             </li>
+            <li>
+                    <a class="function" href="#get_dask_client">get_dask_client</a>
+            </li>
+            <li>
+                    <a class="function" href="#dask_batch_submit">dask_batch_submit</a>
+            </li>
     </ul>
 
 
@@ -83,7 +89,9 @@
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">get_client</span><span class="p">,</span> <span class="n">wait</span><span class="p">,</span> <span class="ne">TimeoutError</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span>
 
 
 <span class="k">def</span> <span class="nf">get_conda_env</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -284,6 +292,91 @@
             <span class="n">subsystem</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">combo</span><span class="p">))</span>
             <span class="n">subsystems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subsystem</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">subsystems</span>
+
+
+<span class="k">def</span> <span class="nf">get_dask_client</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a convenience utility that grabs the client for the local Dask cluster</span>
+<span class="sd">    if it exists -- and if not, creates a new cluster and returns the client for</span>
+<span class="sd">    it.</span>
+
+<span class="sd">    Paramters</span>
+<span class="sd">    ---------</span>
+
+<span class="sd">    - `**kwargs`:</span>
+<span class="sd">        Any arguments normally accepted by dask.distributed.Client. The exception</span>
+<span class="sd">        to this is the `preload` kwarg, which is not allowed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># First, try accessing a global client.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+    <span class="c1"># If the line above fails, it&#39;s because no global client exists yet. In that</span>
+    <span class="c1"># case, we make a new cluster and return the client for it.</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># This preload script connects each worker to the Simmate database</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span>
+            <span class="n">preload</span><span class="o">=</span><span class="s2">&quot;simmate.configuration.dask.connect_to_database&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># OPTIMIZE: I&#39;m not sure if there&#39;s a better way to do implement this.</span>
+    <span class="c1"># If this gives issues, I can alternatively try...</span>
+    <span class="c1">#   from dask.distributed import client</span>
+    <span class="c1">#   client._get_global_client()</span>
+    <span class="c1"># ... based on https://stackoverflow.com/questions/59070260/</span>
+
+    <span class="k">return</span> <span class="n">client</span>
+
+
+<span class="k">def</span> <span class="nf">dask_batch_submit</span><span class="p">(</span>
+    <span class="n">function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">args_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">batch_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a function and a list of inputs that should be iterated over, this</span>
+<span class="sd">    submits all inputs to a Dask local cluster in batches.</span>
+
+<span class="sd">    This function has very specific use-cases, such as when we are submitting</span>
+<span class="sd">    &gt;100,000 tasks and each task is unstable / writing to the database. Therefore,</span>
+<span class="sd">    you should test out Dask normally before trying this utility. Always give</span>
+<span class="sd">    preference to Dask&#39;s `client.map` method over this utility.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - `function`:</span>
+<span class="sd">        Function that each kwargs entry should be called with.</span>
+<span class="sd">    - `kwargs_list`:</span>
+<span class="sd">        A list of parameters that will each be submitted to function via</span>
+<span class="sd">        function(*args).</span>
+<span class="sd">    - `batch_size`:</span>
+<span class="sd">        The number of calls to submit at a time. No new jobs will be</span>
+<span class="sd">        submitted until the entire preceeding batch completes.</span>
+<span class="sd">    - `batch_timeout`:</span>
+<span class="sd">        The timelimit to wait for any given batch before cancelling the remaining</span>
+<span class="sd">        runs. No error will be raised when jobs are cancelled. The default is</span>
+<span class="sd">        no timelimit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: I&#39;d like to support a list of kwargs as well</span>
+    <span class="c1"># TODO: should I add an option to return the results?</span>
+
+    <span class="c1"># grab the Dask client</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">get_dask_client</span><span class="p">()</span>
+
+    <span class="c1"># Iterate through our inputs and submit them to the Dask cluster in batches</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">args_list</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">args_list</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
+        <span class="n">futures</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+            <span class="n">function</span><span class="p">,</span>
+            <span class="n">chunk</span><span class="p">,</span>
+            <span class="n">pure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">wait</span><span class="p">(</span><span class="n">futures</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">batch_timeout</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -669,6 +762,166 @@ A chemical system of elements. Elements must be separated by dashes (-)</li>
 <ul>
 <li><code>subsystems</code>:
 A list of chemical systems that make up the input chemical system.</li>
+</ul>
+</div>
+
+
+                </section>
+                <section id="get_dask_client">
+                            <div class="attr function"><a class="headerlink" href="#get_dask_client">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_dask_client</span><span class="signature">(**kwargs)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_dask_client</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a convenience utility that grabs the client for the local Dask cluster</span>
+<span class="sd">    if it exists -- and if not, creates a new cluster and returns the client for</span>
+<span class="sd">    it.</span>
+
+<span class="sd">    Paramters</span>
+<span class="sd">    ---------</span>
+
+<span class="sd">    - `**kwargs`:</span>
+<span class="sd">        Any arguments normally accepted by dask.distributed.Client. The exception</span>
+<span class="sd">        to this is the `preload` kwarg, which is not allowed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># First, try accessing a global client.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+    <span class="c1"># If the line above fails, it&#39;s because no global client exists yet. In that</span>
+    <span class="c1"># case, we make a new cluster and return the client for it.</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># This preload script connects each worker to the Simmate database</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span>
+            <span class="n">preload</span><span class="o">=</span><span class="s2">&quot;simmate.configuration.dask.connect_to_database&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># OPTIMIZE: I&#39;m not sure if there&#39;s a better way to do implement this.</span>
+    <span class="c1"># If this gives issues, I can alternatively try...</span>
+    <span class="c1">#   from dask.distributed import client</span>
+    <span class="c1">#   client._get_global_client()</span>
+    <span class="c1"># ... based on https://stackoverflow.com/questions/59070260/</span>
+
+    <span class="k">return</span> <span class="n">client</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is a convenience utility that grabs the client for the local Dask cluster
+if it exists -- and if not, creates a new cluster and returns the client for
+it.</p>
+
+<h2 id="paramters">Paramters</h2>
+
+<ul>
+<li><code>**kwargs</code>:
+Any arguments normally accepted by dask.distributed.Client. The exception
+to this is the <code>preload</code> kwarg, which is not allowed.</li>
+</ul>
+</div>
+
+
+                </section>
+                <section id="dask_batch_submit">
+                            <div class="attr function"><a class="headerlink" href="#dask_batch_submit">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">dask_batch_submit</span><span class="signature">(
+    function: Callable,
+    args_list: List[dict],
+    batch_size: int,
+    batch_timeout: float = None
+)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">dask_batch_submit</span><span class="p">(</span>
+    <span class="n">function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">args_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">batch_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a function and a list of inputs that should be iterated over, this</span>
+<span class="sd">    submits all inputs to a Dask local cluster in batches.</span>
+
+<span class="sd">    This function has very specific use-cases, such as when we are submitting</span>
+<span class="sd">    &gt;100,000 tasks and each task is unstable / writing to the database. Therefore,</span>
+<span class="sd">    you should test out Dask normally before trying this utility. Always give</span>
+<span class="sd">    preference to Dask&#39;s `client.map` method over this utility.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - `function`:</span>
+<span class="sd">        Function that each kwargs entry should be called with.</span>
+<span class="sd">    - `kwargs_list`:</span>
+<span class="sd">        A list of parameters that will each be submitted to function via</span>
+<span class="sd">        function(*args).</span>
+<span class="sd">    - `batch_size`:</span>
+<span class="sd">        The number of calls to submit at a time. No new jobs will be</span>
+<span class="sd">        submitted until the entire preceeding batch completes.</span>
+<span class="sd">    - `batch_timeout`:</span>
+<span class="sd">        The timelimit to wait for any given batch before cancelling the remaining</span>
+<span class="sd">        runs. No error will be raised when jobs are cancelled. The default is</span>
+<span class="sd">        no timelimit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: I&#39;d like to support a list of kwargs as well</span>
+    <span class="c1"># TODO: should I add an option to return the results?</span>
+
+    <span class="c1"># grab the Dask client</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">get_dask_client</span><span class="p">()</span>
+
+    <span class="c1"># Iterate through our inputs and submit them to the Dask cluster in batches</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">args_list</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">args_list</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
+        <span class="n">futures</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+            <span class="n">function</span><span class="p">,</span>
+            <span class="n">chunk</span><span class="p">,</span>
+            <span class="n">pure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">wait</span><span class="p">(</span><span class="n">futures</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">batch_timeout</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Given a function and a list of inputs that should be iterated over, this
+submits all inputs to a Dask local cluster in batches.</p>
+
+<p>This function has very specific use-cases, such as when we are submitting</p>
+
+<blockquote>
+  <p>100,000 tasks and each task is unstable / writing to the database. Therefore,
+  you should test out Dask normally before trying this utility. Always give
+  preference to Dask's <code>client.map</code> method over this utility.</p>
+</blockquote>
+
+<h2 id="parameters">Parameters</h2>
+
+<ul>
+<li><code>function</code>:
+Function that each kwargs entry should be called with.</li>
+<li><code>kwargs_list</code>:
+A list of parameters that will each be submitted to function via
+function(*args).</li>
+<li><code>batch_size</code>:
+The number of calls to submit at a time. No new jobs will be
+submitted until the entire preceeding batch completes.</li>
+<li><code>batch_timeout</code>:
+The timelimit to wait for any given batch before cancelling the remaining
+runs. No error will be raised when jobs are cancelled. The default is
+no timelimit.</li>
 </ul>
 </div>
 

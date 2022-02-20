@@ -35,6 +35,9 @@
                     <a class="class" href="#Spacegroup">Spacegroup</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="variable" href="#Spacegroup.source">source</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Spacegroup.number">number</a>
                         </li>
                         <li>
@@ -45,9 +48,6 @@
                         </li>
                         <li>
                                 <a class="function" href="#Spacegroup.point_group">point_group</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#Spacegroup.source">source</a>
                         </li>
                         <li>
                                 <a class="class" href="#Spacegroup.DoesNotExist">Spacegroup.DoesNotExist</a>
@@ -222,6 +222,12 @@
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>  <span class="c1"># TODO: move to a separate app</span>
 
+    <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The source column is disabled for this table because this is common</span>
+<span class="sd">    information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># NOTE: International spacegroup info is also known as Hermann-Mauguin</span>
 
     <span class="n">number</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -291,6 +297,12 @@
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>  <span class="c1"># TODO: move to a separate app</span>
 
+    <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The source column is disabled for this table because this is common</span>
+<span class="sd">    information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># NOTE: International spacegroup info is also known as Hermann-Mauguin</span>
 
     <span class="n">number</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -344,10 +356,23 @@
 
         </details>
 
-            <div class="docstring"><p>Spacegroup(source, number, symbol, crystal_system, point_group)</p>
+            <div class="docstring"><p>Spacegroup(number, symbol, crystal_system, point_group)</p>
 </div>
 
 
+                            <div id="Spacegroup.source" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Spacegroup.source">#&nbsp;&nbsp</a>
+
+        <span class="name">source</span><span class="default_value"> = None</span>
+    </div>
+
+    
+            <div class="docstring"><p>The source column is disabled for this table because this is common
+information.</p>
+</div>
+
+
+                            </div>
                             <div id="Spacegroup.number" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Spacegroup.number">#&nbsp;&nbsp</a>
 
@@ -400,42 +425,6 @@
 
     
             <div class="docstring"><p>Point group symbol</p>
-</div>
-
-
-                            </div>
-                            <div id="Spacegroup.source" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Spacegroup.source">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">source</span><span class="signature">(unknown)</span>:
-    </div>
-
-    
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
-
-<ul>
-<li>a third party id</li>
-<li>a structure from a different Simmate datbase table</li>
-<li>a transformation of another structure</li>
-<li>a creation method</li>
-<li>a custom submission by the user</li>
-</ul>
-
-<p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
-
-<p>EXAMPLES: (source type --> source_id)</p>
-
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
 </div>
 
 

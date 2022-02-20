@@ -114,31 +114,30 @@ to account for these problematic cif files though.</p>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">wait</span>
-
 <span class="kn">from</span> <span class="nn">pymatgen.io.cif</span> <span class="kn">import</span> <span class="n">CifParser</span>
 
+<span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">dask_batch_submit</span>
 <span class="kn">from</span> <span class="nn">simmate.database.third_parties</span> <span class="kn">import</span> <span class="n">CodStructure</span>
 
 
 <span class="k">def</span> <span class="nf">load_all_structures</span><span class="p">(</span>
     <span class="n">base_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cod/cif/&quot;</span><span class="p">,</span>
     <span class="n">only_add_new_cifs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">15000</span><span class="p">,</span>
+    <span class="n">batch_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Only use this function if you are part of the Simmate dev team!</span>
 
 <span class="sd">    Loads all structures directly for the COD database into the local</span>
 <span class="sd">    Simmate database. There are 480,160 structures as of 2022-02-18.</span>
+<span class="sd">    Because of problematic cifs, only 471,664 (98.2%) are imported into</span>
+<span class="sd">    the Simmate database successfully.</span>
 
 <span class="sd">    Make sure you have downloaded the</span>
 <span class="sd">    [COD archive]([here](http://www.crystallography.net/archives/))</span>
 <span class="sd">    and have it upacked to match your base_directory input.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># We run this function in parallel using Dask, so each structure is submitted</span>
-    <span class="c1"># to a queue. The &quot;futures&quot; keep track of the status/result for each.</span>
-    <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">preload</span><span class="o">=</span><span class="s2">&quot;simmate.configuration.dask.connect_to_database&quot;</span><span class="p">)</span>
 
     <span class="c1"># We need to look at all the folders that have numbered-names (1,2,3..,9). and</span>
     <span class="c1"># grab the folder inside that are also numbers. This continues until we find cif</span>
@@ -180,40 +179,30 @@ to account for these problematic cif files though.</p>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">CodStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">cif_id</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
                 <span class="n">new_cifs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cif_filepath</span><span class="p">)</span>
 
+        <span class="c1"># replace our all_cifs with this updated list</span>
+        <span class="n">all_cifs</span> <span class="o">=</span> <span class="n">new_cifs</span>
+
+    <span class="c1"># We run this function in parallel using Dask.</span>
     <span class="c1"># Dask seems to be unstable when we submit too much at once, so we chunk</span>
     <span class="c1"># our submissions and wait for each to finished before submitting more.</span>
-    <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">15000</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_cifs</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">):</span>
-        <span class="n">chunk_cifs</span> <span class="o">=</span> <span class="n">new_cifs</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span>
-        <span class="c1"># use our function to load the structure (defined below)</span>
-        <span class="n">futures</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
-            <span class="n">load_single_cif</span><span class="p">,</span>
-            <span class="n">chunk_cifs</span><span class="p">,</span>
-            <span class="n">pure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="c1"># wait for all futures</span>
-        <span class="n">wait</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
-        <span class="c1"># reset the client so we don&#39;t have memory overflow from all the futures</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-
-    <span class="c1"># BUG: I&#39;m unable to monitor progress on this...</span>
-    <span class="c1">#</span>
-    <span class="c1"># from dask.distributed import progress</span>
-    <span class="c1"># progress(futures)</span>
-    <span class="c1">#</span>
-    <span class="c1"># from tqdm import tqdm</span>
-    <span class="c1"># for future in tqdm(futures):</span>
-    <span class="c1">#     try:</span>
-    <span class="c1">#         future.result()</span>
-    <span class="c1">#     except:</span>
-    <span class="c1">#         pass</span>
+    <span class="c1"># We only wait for all futures to complete in 30 min, and beyond that</span>
+    <span class="c1"># point, cancel any remaining. 30 min is plenty for a batch of</span>
+    <span class="c1"># 15,000 cifs. If this limit is ever hit, it&#39;s typically because a</span>
+    <span class="c1"># single cif is taking &gt;15min and is problematic.</span>
+    <span class="n">dask_batch_submit</span><span class="p">(</span>
+        <span class="n">function</span><span class="o">=</span><span class="n">load_single_cif</span><span class="p">,</span>
+        <span class="n">args_list</span><span class="o">=</span><span class="n">all_cifs</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="n">batch_timeout</span><span class="o">=</span><span class="n">batch_timeout</span><span class="p">,</span>
+    <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">load_single_cif</span><span class="p">(</span><span class="n">cif_filepath</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">load_single_cif</span><span class="p">(</span><span class="n">cif_filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loads a single COD cif into the Simmate database.</span>
 
-<span class="sd">    We make this a separate function to allow parallelization above.</span>
+<span class="sd">    You typically shouldn&#39;t call this function directly. We make this a</span>
+<span class="sd">    separate function to allow parallelization in `load_all_structures`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Load the structure and extra data from the cif file.</span>
@@ -797,7 +786,12 @@ to account for these problematic cif files though.</p>
 
         
             <span class="def">def</span>
-            <span class="name">load_all_structures</span><span class="signature">(base_directory: str = &#39;cod/cif/&#39;, only_add_new_cifs: bool = True)</span>:
+            <span class="name">load_all_structures</span><span class="signature">(
+    base_directory: str = &#39;cod/cif/&#39;,
+    only_add_new_cifs: bool = True,
+    batch_size: int = 15000,
+    batch_timeout: float = 1800
+)</span>:
     </div>
 
             <details>
@@ -805,21 +799,21 @@ to account for these problematic cif files though.</p>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_all_structures</span><span class="p">(</span>
     <span class="n">base_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cod/cif/&quot;</span><span class="p">,</span>
     <span class="n">only_add_new_cifs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">15000</span><span class="p">,</span>
+    <span class="n">batch_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Only use this function if you are part of the Simmate dev team!</span>
 
 <span class="sd">    Loads all structures directly for the COD database into the local</span>
 <span class="sd">    Simmate database. There are 480,160 structures as of 2022-02-18.</span>
+<span class="sd">    Because of problematic cifs, only 471,664 (98.2%) are imported into</span>
+<span class="sd">    the Simmate database successfully.</span>
 
 <span class="sd">    Make sure you have downloaded the</span>
 <span class="sd">    [COD archive]([here](http://www.crystallography.net/archives/))</span>
 <span class="sd">    and have it upacked to match your base_directory input.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># We run this function in parallel using Dask, so each structure is submitted</span>
-    <span class="c1"># to a queue. The &quot;futures&quot; keep track of the status/result for each.</span>
-    <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">preload</span><span class="o">=</span><span class="s2">&quot;simmate.configuration.dask.connect_to_database&quot;</span><span class="p">)</span>
 
     <span class="c1"># We need to look at all the folders that have numbered-names (1,2,3..,9). and</span>
     <span class="c1"># grab the folder inside that are also numbers. This continues until we find cif</span>
@@ -861,33 +855,22 @@ to account for these problematic cif files though.</p>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">CodStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">cif_id</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
                 <span class="n">new_cifs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cif_filepath</span><span class="p">)</span>
 
+        <span class="c1"># replace our all_cifs with this updated list</span>
+        <span class="n">all_cifs</span> <span class="o">=</span> <span class="n">new_cifs</span>
+
+    <span class="c1"># We run this function in parallel using Dask.</span>
     <span class="c1"># Dask seems to be unstable when we submit too much at once, so we chunk</span>
     <span class="c1"># our submissions and wait for each to finished before submitting more.</span>
-    <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">15000</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_cifs</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">):</span>
-        <span class="n">chunk_cifs</span> <span class="o">=</span> <span class="n">new_cifs</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span>
-        <span class="c1"># use our function to load the structure (defined below)</span>
-        <span class="n">futures</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
-            <span class="n">load_single_cif</span><span class="p">,</span>
-            <span class="n">chunk_cifs</span><span class="p">,</span>
-            <span class="n">pure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="c1"># wait for all futures</span>
-        <span class="n">wait</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
-        <span class="c1"># reset the client so we don&#39;t have memory overflow from all the futures</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-
-    <span class="c1"># BUG: I&#39;m unable to monitor progress on this...</span>
-    <span class="c1">#</span>
-    <span class="c1"># from dask.distributed import progress</span>
-    <span class="c1"># progress(futures)</span>
-    <span class="c1">#</span>
-    <span class="c1"># from tqdm import tqdm</span>
-    <span class="c1"># for future in tqdm(futures):</span>
-    <span class="c1">#     try:</span>
-    <span class="c1">#         future.result()</span>
-    <span class="c1">#     except:</span>
-    <span class="c1">#         pass</span>
+    <span class="c1"># We only wait for all futures to complete in 30 min, and beyond that</span>
+    <span class="c1"># point, cancel any remaining. 30 min is plenty for a batch of</span>
+    <span class="c1"># 15,000 cifs. If this limit is ever hit, it&#39;s typically because a</span>
+    <span class="c1"># single cif is taking &gt;15min and is problematic.</span>
+    <span class="n">dask_batch_submit</span><span class="p">(</span>
+        <span class="n">function</span><span class="o">=</span><span class="n">load_single_cif</span><span class="p">,</span>
+        <span class="n">args_list</span><span class="o">=</span><span class="n">all_cifs</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="n">batch_timeout</span><span class="o">=</span><span class="n">batch_timeout</span><span class="p">,</span>
+    <span class="p">)</span>
 </pre></div>
 
         </details>
@@ -895,7 +878,9 @@ to account for these problematic cif files though.</p>
             <div class="docstring"><p>Only use this function if you are part of the Simmate dev team!</p>
 
 <p>Loads all structures directly for the COD database into the local
-Simmate database. There are 480,160 structures as of 2022-02-18.</p>
+Simmate database. There are 480,160 structures as of 2022-02-18.
+Because of problematic cifs, only 471,664 (98.2%) are imported into
+the Simmate database successfully.</p>
 
 <p>Make sure you have downloaded the
 <a href="[here](http://www.crystallography.net/archives/)">COD archive</a>
@@ -909,16 +894,17 @@ and have it upacked to match your base_directory input.</p>
 
         
             <span class="def">def</span>
-            <span class="name">load_single_cif</span><span class="signature">(cif_filepath)</span>:
+            <span class="name">load_single_cif</span><span class="signature">(cif_filepath: str)</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_single_cif</span><span class="p">(</span><span class="n">cif_filepath</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_single_cif</span><span class="p">(</span><span class="n">cif_filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loads a single COD cif into the Simmate database.</span>
 
-<span class="sd">    We make this a separate function to allow parallelization above.</span>
+<span class="sd">    You typically shouldn&#39;t call this function directly. We make this a</span>
+<span class="sd">    separate function to allow parallelization in `load_all_structures`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Load the structure and extra data from the cif file.</span>
@@ -984,7 +970,8 @@ and have it upacked to match your base_directory input.</p>
 
             <div class="docstring"><p>Loads a single COD cif into the Simmate database.</p>
 
-<p>We make this a separate function to allow parallelization above.</p>
+<p>You typically shouldn't call this function directly. We make this a
+separate function to allow parallelization in <code><a href="#load_all_structures">load_all_structures</a></code>.</p>
 </div>
 
 

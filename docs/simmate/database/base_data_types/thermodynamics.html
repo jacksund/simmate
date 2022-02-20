@@ -35,6 +35,18 @@
                     <a class="class" href="#Thermodynamics">Thermodynamics</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="class" href="#Thermodynamics.Meta">Thermodynamics.Meta</a>
+                                        <ul class="memberlist">
+                                    <li>
+                                            <a class="function" href="#Thermodynamics.Meta.__init__">Meta</a>
+                                    </li>
+                                    <li>
+                                            <a class="variable" href="#Thermodynamics.Meta.abstract">abstract</a>
+                                    </li>
+                            </ul>
+
+                        </li>
+                        <li>
                                 <a class="variable" href="#Thermodynamics.base_info">base_info</a>
                         </li>
                         <li>
@@ -63,18 +75,6 @@
                         </li>
                         <li>
                                 <a class="function" href="#Thermodynamics.update_all_stabilities">update_all_stabilities</a>
-                        </li>
-                        <li>
-                                <a class="class" href="#Thermodynamics.Meta">Thermodynamics.Meta</a>
-                                        <ul class="memberlist">
-                                    <li>
-                                            <a class="function" href="#Thermodynamics.Meta.__init__">Meta</a>
-                                    </li>
-                                    <li>
-                                            <a class="variable" href="#Thermodynamics.Meta.abstract">abstract</a>
-                                    </li>
-                            </ul>
-
                         </li>
                         <li>
                                 <a class="function" href="#Thermodynamics.source">source</a>
@@ -114,33 +114,51 @@
 
 
 <span class="k">class</span> <span class="nc">Thermodynamics</span><span class="p">(</span><span class="n">DatabaseTable</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">energy</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The calculated energy (eV)</span>
+<span class="sd">    The calculated total energy. Units are in eV.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="sd">&quot;&quot;&quot; Query-helper Info &quot;&quot;&quot;</span>
 
     <span class="n">energy_per_atom</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    (if a structure is available) this is energy divided by nsites</span>
+<span class="sd">    The `energy` divided by `nsites`. Units are in eV.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># TODO: These three should be updated on a schedule. I&#39;d run a prefect flow</span>
-    <span class="c1"># every night that makes sure all values are up to date. I could initialize</span>
-    <span class="c1"># these values against</span>
+    <span class="c1"># TODO: These columns below should be updated on a schedule. I&#39;d run</span>
+    <span class="c1"># a prefect flow every night that makes sure all values are up to date.</span>
+
     <span class="n">energy_above_hull</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The hull energy (aka &quot;stability&quot;) of this structure compared to all other</span>
+<span class="sd">    structures in this database table. Units are in eV.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">is_stable</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Whether `energy_above_hull` is 0 -- if so, this is considered stable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">decomposes_to</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If `energy_above_hull` is above 0, these are the compositions that the </span>
+<span class="sd">    structure will decompose to (e.g. [&quot;Y2C&quot;, &quot;C&quot;, &quot;YF3&quot;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">formation_energy</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The formation energy of the structure relative to all other</span>
+<span class="sd">    structures in this database table. Units are in eV.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">formation_energy_per_atom</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The `formation_energy` divided by `nsites`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Other fields to consider</span>
     <span class="c1"># equilibrium_reaction_energy_per_atom</span>
@@ -159,13 +177,13 @@
     <span class="c1"># type(GGA,GGAU,HF)</span>
     <span class="c1"># is_hubbard</span>
 
-    <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
-
     <span class="c1"># TODO: add a from_ionic_step method in the future when I have this class.</span>
 
-    <span class="c1"># !!! Maybe make this from_energy and structure input optional...?</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_from_toolkit</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="c1"># TODO: should structure be optional?</span>
+
         <span class="c1"># Given energy, this function builds the rest of the required fields</span>
         <span class="c1"># for this class as an object (or as a dictionary).</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
@@ -254,12 +272,6 @@
                 <span class="bp">cls</span><span class="o">.</span><span class="n">update_chemical_system_stabilities</span><span class="p">(</span><span class="n">chemical_system</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed for </span><span class="si">{</span><span class="n">chemical_system</span><span class="si">}</span><span class="s2"> with error: </span><span class="si">{</span><span class="n">exception</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="sd">&quot;&quot;&quot; Set as Abstract Model &quot;&quot;&quot;</span>
-    <span class="c1"># I have other models inherit from this one, while this model doesn&#39;t need</span>
-    <span class="c1"># its own table.</span>
-    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 
         </details>
@@ -277,33 +289,51 @@
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Thermodynamics</span><span class="p">(</span><span class="n">DatabaseTable</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">energy</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The calculated energy (eV)</span>
+<span class="sd">    The calculated total energy. Units are in eV.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="sd">&quot;&quot;&quot; Query-helper Info &quot;&quot;&quot;</span>
 
     <span class="n">energy_per_atom</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    (if a structure is available) this is energy divided by nsites</span>
+<span class="sd">    The `energy` divided by `nsites`. Units are in eV.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># TODO: These three should be updated on a schedule. I&#39;d run a prefect flow</span>
-    <span class="c1"># every night that makes sure all values are up to date. I could initialize</span>
-    <span class="c1"># these values against</span>
+    <span class="c1"># TODO: These columns below should be updated on a schedule. I&#39;d run</span>
+    <span class="c1"># a prefect flow every night that makes sure all values are up to date.</span>
+
     <span class="n">energy_above_hull</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The hull energy (aka &quot;stability&quot;) of this structure compared to all other</span>
+<span class="sd">    structures in this database table. Units are in eV.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">is_stable</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Whether `energy_above_hull` is 0 -- if so, this is considered stable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">decomposes_to</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If `energy_above_hull` is above 0, these are the compositions that the </span>
+<span class="sd">    structure will decompose to (e.g. [&quot;Y2C&quot;, &quot;C&quot;, &quot;YF3&quot;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">formation_energy</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The formation energy of the structure relative to all other</span>
+<span class="sd">    structures in this database table. Units are in eV.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">formation_energy_per_atom</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The `formation_energy` divided by `nsites`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Other fields to consider</span>
     <span class="c1"># equilibrium_reaction_energy_per_atom</span>
@@ -322,13 +352,13 @@
     <span class="c1"># type(GGA,GGAU,HF)</span>
     <span class="c1"># is_hubbard</span>
 
-    <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
-
     <span class="c1"># TODO: add a from_ionic_step method in the future when I have this class.</span>
 
-    <span class="c1"># !!! Maybe make this from_energy and structure input optional...?</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_from_toolkit</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="c1"># TODO: should structure be optional?</span>
+
         <span class="c1"># Given energy, this function builds the rest of the required fields</span>
         <span class="c1"># for this class as an object (or as a dictionary).</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
@@ -417,12 +447,6 @@
                 <span class="bp">cls</span><span class="o">.</span><span class="n">update_chemical_system_stabilities</span><span class="p">(</span><span class="n">chemical_system</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed for </span><span class="si">{</span><span class="n">chemical_system</span><span class="si">}</span><span class="s2"> with error: </span><span class="si">{</span><span class="n">exception</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="sd">&quot;&quot;&quot; Set as Abstract Model &quot;&quot;&quot;</span>
-    <span class="c1"># I have other models inherit from this one, while this model doesn&#39;t need</span>
-    <span class="c1"># its own table.</span>
-    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 
         </details>
@@ -443,8 +467,10 @@ where this class only adds extra methods for convenience.</p>
     </div>
 
     
-            <div class="docstring"><p>The base information for this database table. All other columns can be calculated
-using the columns in this list.</p>
+            <div class="docstring"><p>The base information for this database table and only these fields are stored
+when the <code>to_archive</code> method is used. Using the columns in this list, all 
+other columns for this table can be calculated, so the columns in this list 
+are effectively the "raw data".</p>
 </div>
 
 
@@ -458,7 +484,7 @@ using the columns in this list.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -472,7 +498,7 @@ using the columns in this list.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#Thermodynamics.energy">energy</a></code> divided by <code>nsites</code>. Units are in eV.</p>
 </div>
 
 
@@ -486,8 +512,8 @@ using the columns in this list.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -501,8 +527,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#Thermodynamics.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -516,8 +541,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#Thermodynamics.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -531,8 +556,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -546,7 +571,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#Thermodynamics.formation_energy">formation_energy</a></code> divided by <code>nsites</code>.</p>
 </div>
 
 

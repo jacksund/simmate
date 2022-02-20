@@ -133,7 +133,7 @@ search results.</p>
 <span class="kn">import</span> <span class="nn">yaml</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span>
-<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">transaction</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>  <span class="c1"># , transaction</span>
 <span class="kn">from</span> <span class="nn">django_pandas.io</span> <span class="kn">import</span> <span class="n">read_frame</span>
 <span class="kn">from</span> <span class="nn">django.utils.timezone</span> <span class="kn">import</span> <span class="n">datetime</span>
 
@@ -524,14 +524,13 @@ search results.</p>
         <span class="c1"># and populate data using those classes. All of this is fed in to our</span>
         <span class="c1"># main class at the end of the function. We keep this running dictionary</span>
         <span class="c1"># as we go.</span>
+        <span class="n">all_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="c1"># TODO: How should I best handle passing extra kwargs to the final class</span>
         <span class="c1"># initialization? For example, I would want to pass `energy` but I wouldn&#39;t</span>
         <span class="c1"># want to pass the toolkit structure object. I may update this line in</span>
         <span class="c1"># the future to remove python objects. For now, I only remove structure</span>
         <span class="c1"># and migration_hop because I know that it is a toolkit object -- not</span>
         <span class="c1"># a database column.</span>
-        <span class="n">all_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="c1"># None ignores error if key is not present</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
@@ -573,9 +572,16 @@ search results.</p>
         <span class="k">return</span> <span class="n">all_data</span> <span class="k">if</span> <span class="n">as_dict</span> <span class="k">else</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">all_data</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_confirm_override</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_confirm_override</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">confirm_sqlite_parallel</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A utility to make sure the user wants to load new data into their table.</span>
+<span class="sd">        A utility to make sure the user wants to load new data into their table</span>
+<span class="sd">        and (if they are using sqlite) that they are aware of the risks of</span>
+<span class="sd">        parallelizing their loading.</span>
 
 <span class="sd">        This utility should not be called directly, as it is used within</span>
 <span class="sd">        load_archive and load_remote_archive.</span>
@@ -609,13 +615,35 @@ search results.</p>
                 <span class="s2">&quot;confirm_override=True.&quot;</span>
             <span class="p">)</span>
 
+        <span class="c1"># Django and Dask can only handle so much for the parallelization</span>
+        <span class="c1"># of database writing with SQLite. So if the user has SQLite as their</span>
+        <span class="c1"># backend, we need to stop them from using this feature.</span>
+        <span class="kn">from</span> <span class="nn">simmate.configuration.django.settings</span> <span class="kn">import</span> <span class="n">DATABASES</span>
+
+        <span class="k">if</span> <span class="n">parallel</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">confirm_sqlite_parallel</span> <span class="ow">and</span> <span class="s2">&quot;sqlite3&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">DATABASES</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;It looks like you are trying to run things in parallel but are &quot;</span>
+                <span class="s2">&quot;using the default database backend (sqlite3), which is not &quot;</span>
+                <span class="s2">&quot;always stable for massively parallel methods. You can still &quot;</span>
+                <span class="s2">&quot;do this, but this message serves as a word of caution. &quot;</span>
+                <span class="s2">&quot;You If you see error messages pop up saying &#39;database is &quot;</span>
+                <span class="s2">&quot;locked&#39;, then your database is not stable at the rate you&#39;re &quot;</span>
+                <span class="s2">&quot;trying to write data. This is a sign that you should either &quot;</span>
+                <span class="s2">&quot;(1) switch to a different database backend such as Postgres &quot;</span>
+                <span class="s2">&quot;or (2) reduce the parallelization of your tasks. If you are &quot;</span>
+                <span class="s2">&quot;comfortable with these warnings and know what you&#39;re doing, &quot;</span>
+                <span class="s2">&quot;set confirm_sqlite_parallel=True.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># @transaction.atomic  # We can&#39;t have an atomic transaction if we use Dask</span>
     <span class="nd">@classmethod</span>
-    <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
     <span class="k">def</span> <span class="nf">load_archive</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">delete_on_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">confirm_sqlite_parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads a compressed zip file made by `objects.to_archive` and loads the data</span>
@@ -641,11 +669,26 @@ search results.</p>
 <span class="sd">        - `confirm_override`:</span>
 <span class="sd">            If the table already has data in it, the user must take particular</span>
 <span class="sd">            care to downloading new data. This flag makes sure the user has</span>
-<span class="sd">            made the proper checks to run this action.</span>
+<span class="sd">            made the proper checks to run this action. Default is False.</span>
+
+<span class="sd">        - `parallel`:</span>
+<span class="sd">            Whether to load the data in parallel. If true, this will start</span>
+<span class="sd">            a local Dask cluster and each data row will be submitted as a task</span>
+<span class="sd">            to the cluster. This provides substansial speed-ups for loading</span>
+<span class="sd">            large datasets into the dataset. Default is False.</span>
+
+<span class="sd">        - `confirm_sqlite_parallel`:</span>
+<span class="sd">            If the database backend is sqlite, this parameter ensures the user</span>
+<span class="sd">            knows what they are doing and know the risks of parallelization.</span>
+<span class="sd">            Default is False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># make sure the user actually wants to do this!</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span><span class="n">confirm_override</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span>
+            <span class="n">confirm_override</span><span class="p">,</span>
+            <span class="n">parallel</span><span class="p">,</span>
+            <span class="n">confirm_sqlite_parallel</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
         <span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span> <span class="k">as</span> <span class="n">ToolkitStructure</span>
@@ -693,27 +736,38 @@ search results.</p>
         <span class="c1"># through.</span>
         <span class="n">entries</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
 
-        <span class="c1"># For all entries, convert the structure_string to a toolkit structure</span>
-        <span class="c1"># OPTIMIZE: is there a better way to do decide which entries need to be</span>
-        <span class="c1"># converted to toolkit structures? This code may be better placed in</span>
-        <span class="c1"># base_data_type methods (e.g. a from_base_info method for each)</span>
-        <span class="k">if</span> <span class="s2">&quot;structure_string&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="c1"># to enable parallelization, we define a function to load a single</span>
+        <span class="c1"># entry (or row) of data. This allows us to submit the function to Dask.</span>
+        <span class="k">def</span> <span class="nf">load_single_entry</span><span class="p">(</span><span class="n">entry</span><span class="p">):</span>
 
-            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
+            <span class="c1"># For all entries, convert the structure_string to a toolkit structure</span>
+            <span class="k">if</span> <span class="s2">&quot;structure_string&quot;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
                 <span class="n">structure_str</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure_string&quot;</span><span class="p">)</span>
-                <span class="c1"># !!! This code is a copy of base_data_types.Structure.to_toolkit</span>
-                <span class="c1"># This should instead be a method attached to ToolkitStructure</span>
-                <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">structure_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
-                <span class="n">structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
-                    <span class="n">structure_str</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="n">structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_database_string</span><span class="p">(</span><span class="n">structure_str</span><span class="p">)</span>
                 <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">structure</span>
+            <span class="c1"># OPTIMIZE: is there a better way to do decide which entries need to be</span>
+            <span class="c1"># converted to toolkit objects? This code may be better placed in</span>
+            <span class="c1"># base_data_type methods (e.g. a `from_base_info` method for each)</span>
 
-        <span class="c1"># now iterate through all entries to save them to the database</span>
-        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
             <span class="n">entry_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span><span class="o">**</span><span class="n">entry</span><span class="p">)</span>
             <span class="n">entry_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># now iterate through all entries to save them to the database</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parallel</span><span class="p">:</span>
+            <span class="c1"># If user doesn&#39;t want parallelization, we run these in the main</span>
+            <span class="c1"># thread and monitor progress with tqdm</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
+                <span class="n">load_single_entry</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="c1"># otherwise we use dask to submit these in batches!</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">dask_batch_submit</span>
+
+            <span class="n">dask_batch_submit</span><span class="p">(</span>
+                <span class="n">function</span><span class="o">=</span><span class="n">load_single_entry</span><span class="p">,</span>
+                <span class="n">args_list</span><span class="o">=</span><span class="n">entries</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># We can now delete the files. The zip file is only deleted if requested.</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">)</span>
@@ -721,11 +775,12 @@ search results.</p>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>  <span class="c1"># the zip archive</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
     <span class="k">def</span> <span class="nf">load_remote_archive</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">remote_archive_link</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">confirm_sqlite_parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Downloads a compressed zip file made by `objects.to_archive` and loads</span>
@@ -745,10 +800,25 @@ search results.</p>
 <span class="sd">            If the table already has data in it, the user must take particular</span>
 <span class="sd">            care to downloading new data. This flag makes sure the user has</span>
 <span class="sd">            made the proper checks to run this action.</span>
+
+<span class="sd">        - `parallel`:</span>
+<span class="sd">            Whether to load the data in parallel. If true, this will start</span>
+<span class="sd">            a local Dask cluster and each data row will be submitted as a task</span>
+<span class="sd">            to the cluster. This provides substansial speed-ups for loading</span>
+<span class="sd">            large datasets into the dataset. Default is False.</span>
+
+<span class="sd">        - `confirm_sqlite_parallel`:</span>
+<span class="sd">            If the database backend is sqlite, this parameter ensures the user</span>
+<span class="sd">            knows what they are doing and know the risks of parallelization.</span>
+<span class="sd">            Default is False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># make sure the user actually wants to do this!</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span><span class="n">confirm_override</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span>
+            <span class="n">confirm_override</span><span class="p">,</span>
+            <span class="n">parallel</span><span class="p">,</span>
+            <span class="n">confirm_sqlite_parallel</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># confirm that we have a link to download from</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">remote_archive_link</span><span class="p">:</span>
@@ -783,6 +853,8 @@ search results.</p>
             <span class="n">archive_filename</span><span class="p">,</span>
             <span class="n">delete_on_completion</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">confirm_override</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># we already confirmed this above</span>
+            <span class="n">parallel</span><span class="o">=</span><span class="n">parallel</span><span class="p">,</span>
+            <span class="n">confirm_sqlite_parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># we already confirmed this above</span>
         <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
@@ -1508,14 +1580,13 @@ will be the current day (for versioning).</li>
         <span class="c1"># and populate data using those classes. All of this is fed in to our</span>
         <span class="c1"># main class at the end of the function. We keep this running dictionary</span>
         <span class="c1"># as we go.</span>
+        <span class="n">all_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="c1"># TODO: How should I best handle passing extra kwargs to the final class</span>
         <span class="c1"># initialization? For example, I would want to pass `energy` but I wouldn&#39;t</span>
         <span class="c1"># want to pass the toolkit structure object. I may update this line in</span>
         <span class="c1"># the future to remove python objects. For now, I only remove structure</span>
         <span class="c1"># and migration_hop because I know that it is a toolkit object -- not</span>
         <span class="c1"># a database column.</span>
-        <span class="n">all_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="c1"># None ignores error if key is not present</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
@@ -1557,9 +1628,16 @@ will be the current day (for versioning).</li>
         <span class="k">return</span> <span class="n">all_data</span> <span class="k">if</span> <span class="n">as_dict</span> <span class="k">else</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">all_data</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_confirm_override</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_confirm_override</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">confirm_sqlite_parallel</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A utility to make sure the user wants to load new data into their table.</span>
+<span class="sd">        A utility to make sure the user wants to load new data into their table</span>
+<span class="sd">        and (if they are using sqlite) that they are aware of the risks of</span>
+<span class="sd">        parallelizing their loading.</span>
 
 <span class="sd">        This utility should not be called directly, as it is used within</span>
 <span class="sd">        load_archive and load_remote_archive.</span>
@@ -1593,13 +1671,35 @@ will be the current day (for versioning).</li>
                 <span class="s2">&quot;confirm_override=True.&quot;</span>
             <span class="p">)</span>
 
+        <span class="c1"># Django and Dask can only handle so much for the parallelization</span>
+        <span class="c1"># of database writing with SQLite. So if the user has SQLite as their</span>
+        <span class="c1"># backend, we need to stop them from using this feature.</span>
+        <span class="kn">from</span> <span class="nn">simmate.configuration.django.settings</span> <span class="kn">import</span> <span class="n">DATABASES</span>
+
+        <span class="k">if</span> <span class="n">parallel</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">confirm_sqlite_parallel</span> <span class="ow">and</span> <span class="s2">&quot;sqlite3&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">DATABASES</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;It looks like you are trying to run things in parallel but are &quot;</span>
+                <span class="s2">&quot;using the default database backend (sqlite3), which is not &quot;</span>
+                <span class="s2">&quot;always stable for massively parallel methods. You can still &quot;</span>
+                <span class="s2">&quot;do this, but this message serves as a word of caution. &quot;</span>
+                <span class="s2">&quot;You If you see error messages pop up saying &#39;database is &quot;</span>
+                <span class="s2">&quot;locked&#39;, then your database is not stable at the rate you&#39;re &quot;</span>
+                <span class="s2">&quot;trying to write data. This is a sign that you should either &quot;</span>
+                <span class="s2">&quot;(1) switch to a different database backend such as Postgres &quot;</span>
+                <span class="s2">&quot;or (2) reduce the parallelization of your tasks. If you are &quot;</span>
+                <span class="s2">&quot;comfortable with these warnings and know what you&#39;re doing, &quot;</span>
+                <span class="s2">&quot;set confirm_sqlite_parallel=True.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># @transaction.atomic  # We can&#39;t have an atomic transaction if we use Dask</span>
     <span class="nd">@classmethod</span>
-    <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
     <span class="k">def</span> <span class="nf">load_archive</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">delete_on_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">confirm_sqlite_parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads a compressed zip file made by `objects.to_archive` and loads the data</span>
@@ -1625,11 +1725,26 @@ will be the current day (for versioning).</li>
 <span class="sd">        - `confirm_override`:</span>
 <span class="sd">            If the table already has data in it, the user must take particular</span>
 <span class="sd">            care to downloading new data. This flag makes sure the user has</span>
-<span class="sd">            made the proper checks to run this action.</span>
+<span class="sd">            made the proper checks to run this action. Default is False.</span>
+
+<span class="sd">        - `parallel`:</span>
+<span class="sd">            Whether to load the data in parallel. If true, this will start</span>
+<span class="sd">            a local Dask cluster and each data row will be submitted as a task</span>
+<span class="sd">            to the cluster. This provides substansial speed-ups for loading</span>
+<span class="sd">            large datasets into the dataset. Default is False.</span>
+
+<span class="sd">        - `confirm_sqlite_parallel`:</span>
+<span class="sd">            If the database backend is sqlite, this parameter ensures the user</span>
+<span class="sd">            knows what they are doing and know the risks of parallelization.</span>
+<span class="sd">            Default is False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># make sure the user actually wants to do this!</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span><span class="n">confirm_override</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span>
+            <span class="n">confirm_override</span><span class="p">,</span>
+            <span class="n">parallel</span><span class="p">,</span>
+            <span class="n">confirm_sqlite_parallel</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
         <span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span> <span class="k">as</span> <span class="n">ToolkitStructure</span>
@@ -1677,27 +1792,38 @@ will be the current day (for versioning).</li>
         <span class="c1"># through.</span>
         <span class="n">entries</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
 
-        <span class="c1"># For all entries, convert the structure_string to a toolkit structure</span>
-        <span class="c1"># OPTIMIZE: is there a better way to do decide which entries need to be</span>
-        <span class="c1"># converted to toolkit structures? This code may be better placed in</span>
-        <span class="c1"># base_data_type methods (e.g. a from_base_info method for each)</span>
-        <span class="k">if</span> <span class="s2">&quot;structure_string&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="c1"># to enable parallelization, we define a function to load a single</span>
+        <span class="c1"># entry (or row) of data. This allows us to submit the function to Dask.</span>
+        <span class="k">def</span> <span class="nf">load_single_entry</span><span class="p">(</span><span class="n">entry</span><span class="p">):</span>
 
-            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
+            <span class="c1"># For all entries, convert the structure_string to a toolkit structure</span>
+            <span class="k">if</span> <span class="s2">&quot;structure_string&quot;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
                 <span class="n">structure_str</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure_string&quot;</span><span class="p">)</span>
-                <span class="c1"># !!! This code is a copy of base_data_types.Structure.to_toolkit</span>
-                <span class="c1"># This should instead be a method attached to ToolkitStructure</span>
-                <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">structure_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
-                <span class="n">structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
-                    <span class="n">structure_str</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="n">structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_database_string</span><span class="p">(</span><span class="n">structure_str</span><span class="p">)</span>
                 <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">structure</span>
+            <span class="c1"># OPTIMIZE: is there a better way to do decide which entries need to be</span>
+            <span class="c1"># converted to toolkit objects? This code may be better placed in</span>
+            <span class="c1"># base_data_type methods (e.g. a `from_base_info` method for each)</span>
 
-        <span class="c1"># now iterate through all entries to save them to the database</span>
-        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
             <span class="n">entry_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span><span class="o">**</span><span class="n">entry</span><span class="p">)</span>
             <span class="n">entry_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># now iterate through all entries to save them to the database</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parallel</span><span class="p">:</span>
+            <span class="c1"># If user doesn&#39;t want parallelization, we run these in the main</span>
+            <span class="c1"># thread and monitor progress with tqdm</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
+                <span class="n">load_single_entry</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="c1"># otherwise we use dask to submit these in batches!</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">dask_batch_submit</span>
+
+            <span class="n">dask_batch_submit</span><span class="p">(</span>
+                <span class="n">function</span><span class="o">=</span><span class="n">load_single_entry</span><span class="p">,</span>
+                <span class="n">args_list</span><span class="o">=</span><span class="n">entries</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># We can now delete the files. The zip file is only deleted if requested.</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">)</span>
@@ -1705,11 +1831,12 @@ will be the current day (for versioning).</li>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>  <span class="c1"># the zip archive</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
     <span class="k">def</span> <span class="nf">load_remote_archive</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">remote_archive_link</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">confirm_sqlite_parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Downloads a compressed zip file made by `objects.to_archive` and loads</span>
@@ -1729,10 +1856,25 @@ will be the current day (for versioning).</li>
 <span class="sd">            If the table already has data in it, the user must take particular</span>
 <span class="sd">            care to downloading new data. This flag makes sure the user has</span>
 <span class="sd">            made the proper checks to run this action.</span>
+
+<span class="sd">        - `parallel`:</span>
+<span class="sd">            Whether to load the data in parallel. If true, this will start</span>
+<span class="sd">            a local Dask cluster and each data row will be submitted as a task</span>
+<span class="sd">            to the cluster. This provides substansial speed-ups for loading</span>
+<span class="sd">            large datasets into the dataset. Default is False.</span>
+
+<span class="sd">        - `confirm_sqlite_parallel`:</span>
+<span class="sd">            If the database backend is sqlite, this parameter ensures the user</span>
+<span class="sd">            knows what they are doing and know the risks of parallelization.</span>
+<span class="sd">            Default is False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># make sure the user actually wants to do this!</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span><span class="n">confirm_override</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span>
+            <span class="n">confirm_override</span><span class="p">,</span>
+            <span class="n">parallel</span><span class="p">,</span>
+            <span class="n">confirm_sqlite_parallel</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># confirm that we have a link to download from</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">remote_archive_link</span><span class="p">:</span>
@@ -1767,6 +1909,8 @@ will be the current day (for versioning).</li>
             <span class="n">archive_filename</span><span class="p">,</span>
             <span class="n">delete_on_completion</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">confirm_override</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># we already confirmed this above</span>
+            <span class="n">parallel</span><span class="o">=</span><span class="n">parallel</span><span class="p">,</span>
+            <span class="n">confirm_sqlite_parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># we already confirmed this above</span>
         <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
@@ -2066,14 +2210,13 @@ is in <code><a href="../../calculators/vasp/database/relaxation.html">simmate.ca
         <span class="c1"># and populate data using those classes. All of this is fed in to our</span>
         <span class="c1"># main class at the end of the function. We keep this running dictionary</span>
         <span class="c1"># as we go.</span>
+        <span class="n">all_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="c1"># TODO: How should I best handle passing extra kwargs to the final class</span>
         <span class="c1"># initialization? For example, I would want to pass `energy` but I wouldn&#39;t</span>
         <span class="c1"># want to pass the toolkit structure object. I may update this line in</span>
         <span class="c1"># the future to remove python objects. For now, I only remove structure</span>
         <span class="c1"># and migration_hop because I know that it is a toolkit object -- not</span>
         <span class="c1"># a database column.</span>
-        <span class="n">all_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="c1"># None ignores error if key is not present</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
@@ -2148,26 +2291,28 @@ a Thermodynamics table would require an energy.</li>
                                         <div class="attr function"><a class="headerlink" href="#DatabaseTable.load_archive">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@classmethod</div>
-        <div class="decorator">@transaction.atomic</div>
 
             <span class="def">def</span>
             <span class="name">load_archive</span><span class="signature">(
     cls,
     filename: str = None,
     delete_on_completion: bool = False,
-    confirm_override: bool = False
+    confirm_override: bool = False,
+    parallel: bool = False,
+    confirm_sqlite_parallel: bool = False
 )</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
-    <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
     <span class="k">def</span> <span class="nf">load_archive</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">delete_on_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">confirm_sqlite_parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads a compressed zip file made by `objects.to_archive` and loads the data</span>
@@ -2193,11 +2338,26 @@ a Thermodynamics table would require an energy.</li>
 <span class="sd">        - `confirm_override`:</span>
 <span class="sd">            If the table already has data in it, the user must take particular</span>
 <span class="sd">            care to downloading new data. This flag makes sure the user has</span>
-<span class="sd">            made the proper checks to run this action.</span>
+<span class="sd">            made the proper checks to run this action. Default is False.</span>
+
+<span class="sd">        - `parallel`:</span>
+<span class="sd">            Whether to load the data in parallel. If true, this will start</span>
+<span class="sd">            a local Dask cluster and each data row will be submitted as a task</span>
+<span class="sd">            to the cluster. This provides substansial speed-ups for loading</span>
+<span class="sd">            large datasets into the dataset. Default is False.</span>
+
+<span class="sd">        - `confirm_sqlite_parallel`:</span>
+<span class="sd">            If the database backend is sqlite, this parameter ensures the user</span>
+<span class="sd">            knows what they are doing and know the risks of parallelization.</span>
+<span class="sd">            Default is False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># make sure the user actually wants to do this!</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span><span class="n">confirm_override</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span>
+            <span class="n">confirm_override</span><span class="p">,</span>
+            <span class="n">parallel</span><span class="p">,</span>
+            <span class="n">confirm_sqlite_parallel</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
         <span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span> <span class="k">as</span> <span class="n">ToolkitStructure</span>
@@ -2245,27 +2405,38 @@ a Thermodynamics table would require an energy.</li>
         <span class="c1"># through.</span>
         <span class="n">entries</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
 
-        <span class="c1"># For all entries, convert the structure_string to a toolkit structure</span>
-        <span class="c1"># OPTIMIZE: is there a better way to do decide which entries need to be</span>
-        <span class="c1"># converted to toolkit structures? This code may be better placed in</span>
-        <span class="c1"># base_data_type methods (e.g. a from_base_info method for each)</span>
-        <span class="k">if</span> <span class="s2">&quot;structure_string&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="c1"># to enable parallelization, we define a function to load a single</span>
+        <span class="c1"># entry (or row) of data. This allows us to submit the function to Dask.</span>
+        <span class="k">def</span> <span class="nf">load_single_entry</span><span class="p">(</span><span class="n">entry</span><span class="p">):</span>
 
-            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
+            <span class="c1"># For all entries, convert the structure_string to a toolkit structure</span>
+            <span class="k">if</span> <span class="s2">&quot;structure_string&quot;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
                 <span class="n">structure_str</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure_string&quot;</span><span class="p">)</span>
-                <span class="c1"># !!! This code is a copy of base_data_types.Structure.to_toolkit</span>
-                <span class="c1"># This should instead be a method attached to ToolkitStructure</span>
-                <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">structure_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
-                <span class="n">structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
-                    <span class="n">structure_str</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="n">structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_database_string</span><span class="p">(</span><span class="n">structure_str</span><span class="p">)</span>
                 <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">structure</span>
+            <span class="c1"># OPTIMIZE: is there a better way to do decide which entries need to be</span>
+            <span class="c1"># converted to toolkit objects? This code may be better placed in</span>
+            <span class="c1"># base_data_type methods (e.g. a `from_base_info` method for each)</span>
 
-        <span class="c1"># now iterate through all entries to save them to the database</span>
-        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
             <span class="n">entry_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span><span class="o">**</span><span class="n">entry</span><span class="p">)</span>
             <span class="n">entry_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># now iterate through all entries to save them to the database</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parallel</span><span class="p">:</span>
+            <span class="c1"># If user doesn&#39;t want parallelization, we run these in the main</span>
+            <span class="c1"># thread and monitor progress with tqdm</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
+                <span class="n">load_single_entry</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="c1"># otherwise we use dask to submit these in batches!</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">dask_batch_submit</span>
+
+            <span class="n">dask_batch_submit</span><span class="p">(</span>
+                <span class="n">function</span><span class="o">=</span><span class="n">load_single_entry</span><span class="p">,</span>
+                <span class="n">args_list</span><span class="o">=</span><span class="n">entries</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># We can now delete the files. The zip file is only deleted if requested.</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">)</span>
@@ -2296,7 +2467,16 @@ database. Defaults to False</p></li>
 <li><p><code>confirm_override</code>:
 If the table already has data in it, the user must take particular
 care to downloading new data. This flag makes sure the user has
-made the proper checks to run this action.</p></li>
+made the proper checks to run this action. Default is False.</p></li>
+<li><p><code>parallel</code>:
+Whether to load the data in parallel. If true, this will start
+a local Dask cluster and each data row will be submitted as a task
+to the cluster. This provides substansial speed-ups for loading
+large datasets into the dataset. Default is False.</p></li>
+<li><p><code>confirm_sqlite_parallel</code>:
+If the database backend is sqlite, this parameter ensures the user
+knows what they are doing and know the risks of parallelization.
+Default is False.</p></li>
 </ul>
 </div>
 
@@ -2306,20 +2486,26 @@ made the proper checks to run this action.</p></li>
                                         <div class="attr function"><a class="headerlink" href="#DatabaseTable.load_remote_archive">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@classmethod</div>
-        <div class="decorator">@transaction.atomic</div>
 
             <span class="def">def</span>
-            <span class="name">load_remote_archive</span><span class="signature">(cls, remote_archive_link: str = None, confirm_override: bool = False)</span>:
+            <span class="name">load_remote_archive</span><span class="signature">(
+    cls,
+    remote_archive_link: str = None,
+    confirm_override: bool = False,
+    parallel: bool = False,
+    confirm_sqlite_parallel: bool = False
+)</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
-    <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
     <span class="k">def</span> <span class="nf">load_remote_archive</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">remote_archive_link</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">confirm_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">confirm_sqlite_parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Downloads a compressed zip file made by `objects.to_archive` and loads</span>
@@ -2339,10 +2525,25 @@ made the proper checks to run this action.</p></li>
 <span class="sd">            If the table already has data in it, the user must take particular</span>
 <span class="sd">            care to downloading new data. This flag makes sure the user has</span>
 <span class="sd">            made the proper checks to run this action.</span>
+
+<span class="sd">        - `parallel`:</span>
+<span class="sd">            Whether to load the data in parallel. If true, this will start</span>
+<span class="sd">            a local Dask cluster and each data row will be submitted as a task</span>
+<span class="sd">            to the cluster. This provides substansial speed-ups for loading</span>
+<span class="sd">            large datasets into the dataset. Default is False.</span>
+
+<span class="sd">        - `confirm_sqlite_parallel`:</span>
+<span class="sd">            If the database backend is sqlite, this parameter ensures the user</span>
+<span class="sd">            knows what they are doing and know the risks of parallelization.</span>
+<span class="sd">            Default is False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># make sure the user actually wants to do this!</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span><span class="n">confirm_override</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_confirm_override</span><span class="p">(</span>
+            <span class="n">confirm_override</span><span class="p">,</span>
+            <span class="n">parallel</span><span class="p">,</span>
+            <span class="n">confirm_sqlite_parallel</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># confirm that we have a link to download from</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">remote_archive_link</span><span class="p">:</span>
@@ -2377,6 +2578,8 @@ made the proper checks to run this action.</p></li>
             <span class="n">archive_filename</span><span class="p">,</span>
             <span class="n">delete_on_completion</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">confirm_override</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># we already confirmed this above</span>
+            <span class="n">parallel</span><span class="o">=</span><span class="n">parallel</span><span class="p">,</span>
+            <span class="n">confirm_sqlite_parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># we already confirmed this above</span>
         <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
@@ -2400,6 +2603,15 @@ it will default to the table's remote_archive_link attribute.</p></li>
 If the table already has data in it, the user must take particular
 care to downloading new data. This flag makes sure the user has
 made the proper checks to run this action.</p></li>
+<li><p><code>parallel</code>:
+Whether to load the data in parallel. If true, this will start
+a local Dask cluster and each data row will be submitted as a task
+to the cluster. This provides substansial speed-ups for loading
+large datasets into the dataset. Default is False.</p></li>
+<li><p><code>confirm_sqlite_parallel</code>:
+If the database backend is sqlite, this parameter ensures the user
+knows what they are doing and know the risks of parallelization.
+Default is False.</p></li>
 </ul>
 </div>
 

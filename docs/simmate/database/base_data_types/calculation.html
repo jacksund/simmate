@@ -137,10 +137,6 @@
         <span class="s2">&quot;updated_at&quot;</span><span class="p">,</span>
         <span class="s2">&quot;corrections&quot;</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">directory</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
         <span class="n">max_length</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span>
@@ -183,6 +179,14 @@
 <span class="sd">    calaculation ran. This often involves changing settings, so we store</span>
 <span class="sd">    any of those changes here.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># EXPERIMENTAL</span>
+    <span class="c1"># Where this calculation plays a role within a &quot;nested&quot; workflow calculation.</span>
+    <span class="c1"># Becuase this structure can be reused by multiple workflows, we make this</span>
+    <span class="c1"># a list of source-like objects. For example, a relaxation could be part of</span>
+    <span class="c1"># a series of relaxations (like in StagedRelaxation) or it can be an initial</span>
+    <span class="c1"># step of a BandStructure calculation.</span>
+    <span class="c1"># parent_nested_calculations = table_column.JSONField(blank=True, null=True)</span>
 
     <span class="sd">&quot;&quot;&quot;Archived Data&quot;&quot;&quot;</span>
     <span class="c1"># I may want to add these fields because Prefect doesn&#39;t store run stats</span>
@@ -301,10 +305,6 @@
         <span class="s2">&quot;updated_at&quot;</span><span class="p">,</span>
         <span class="s2">&quot;corrections&quot;</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">directory</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
         <span class="n">max_length</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span>
@@ -347,6 +347,14 @@
 <span class="sd">    calaculation ran. This often involves changing settings, so we store</span>
 <span class="sd">    any of those changes here.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># EXPERIMENTAL</span>
+    <span class="c1"># Where this calculation plays a role within a &quot;nested&quot; workflow calculation.</span>
+    <span class="c1"># Becuase this structure can be reused by multiple workflows, we make this</span>
+    <span class="c1"># a list of source-like objects. For example, a relaxation could be part of</span>
+    <span class="c1"># a series of relaxations (like in StagedRelaxation) or it can be an initial</span>
+    <span class="c1"># step of a BandStructure calculation.</span>
+    <span class="c1"># parent_nested_calculations = table_column.JSONField(blank=True, null=True)</span>
 
     <span class="sd">&quot;&quot;&quot;Archived Data&quot;&quot;&quot;</span>
     <span class="c1"># I may want to add these fields because Prefect doesn&#39;t store run stats</span>
@@ -448,8 +456,10 @@ include values such as...
     </div>
 
     
-            <div class="docstring"><p>The base information for this database table. All other columns can be calculated
-using the columns in this list.</p>
+            <div class="docstring"><p>The base information for this database table and only these fields are stored
+when the <code>to_archive</code> method is used. Using the columns in this list, all 
+other columns for this table can be calculated, so the columns in this list 
+are effectively the "raw data".</p>
 </div>
 
 

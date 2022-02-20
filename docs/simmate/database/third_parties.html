@@ -88,13 +88,15 @@
 
 <h1 id="usage">Usage</h1>
 
-<p>Make sure you have completed <a href="https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md">our introductory tutorial</a> for downloading data from these providers.</p>
+<p>Make sure you have completed <a href="https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md">our introductory tutorial</a> for downloading data from these providers. Below we show example usage with <code>JarvisStructure</code>, but the same process can be done with all other tables in this module. </p>
 
 <p>To download all data into your database:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="">simmate.database.third_parties</a></span> <span class="kn">import</span> <span class="n">JarvisStructure</span>
 
-<span class="c1"># this can take &gt;10 min. for some providers</span>
+<span class="c1"># this can take &gt;10 min. for some providers. Optionally, you can</span>
+<span class="c1"># add `parallel=True` to speed up this process. Use caution when </span>
+<span class="c1"># parallelizing with SQLite (the default backend)</span>
 <span class="n">JarvisStructure</span><span class="o">.</span><span class="n">load_remote_archive</span><span class="p">()</span>
 
 <span class="c1"># If you use this providers data, be sure to cite them!</span>

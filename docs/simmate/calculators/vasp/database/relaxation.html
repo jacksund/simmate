@@ -2819,7 +2819,7 @@ structure object, use the <code><a href="#MITRelaxation.to_toolkit">to_toolkit</
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -2833,7 +2833,7 @@ structure object, use the <code><a href="#MITRelaxation.to_toolkit">to_toolkit</
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -2880,7 +2880,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -2894,7 +2894,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -2908,7 +2908,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#MITRelaxation.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -2927,7 +2927,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -2983,7 +2983,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -3452,7 +3454,7 @@ structure object, use the <code><a href="#MITIonicStep.to_toolkit">to_toolkit</a
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -3466,7 +3468,7 @@ structure object, use the <code><a href="#MITIonicStep.to_toolkit">to_toolkit</a
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -3513,7 +3515,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -3527,7 +3529,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -3541,7 +3543,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#MITIonicStep.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -3560,7 +3562,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -3616,7 +3618,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -3630,7 +3634,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -3644,7 +3648,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#MITIonicStep.energy">energy</a></code> divided by <code><a href="#MITIonicStep.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -3658,8 +3662,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -3673,8 +3677,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#MITIonicStep.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -3688,8 +3691,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#MITIonicStep.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -3703,8 +3706,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -3718,7 +3721,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#MITIonicStep.formation_energy">formation_energy</a></code> divided by <code><a href="#MITIonicStep.nsites">nsites</a></code>.</p>
 </div>
 
 
@@ -3734,11 +3737,13 @@ object the first time, the query is executed.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 
@@ -4206,7 +4211,7 @@ structure object, use the <code><a href="#MatProjRelaxation.to_toolkit">to_toolk
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -4220,7 +4225,7 @@ structure object, use the <code><a href="#MatProjRelaxation.to_toolkit">to_toolk
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -4267,7 +4272,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -4281,7 +4286,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -4295,7 +4300,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#MatProjRelaxation.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -4314,7 +4319,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -4370,7 +4375,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -4839,7 +4846,7 @@ structure object, use the <code><a href="#MatProjIonicStep.to_toolkit">to_toolki
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -4853,7 +4860,7 @@ structure object, use the <code><a href="#MatProjIonicStep.to_toolkit">to_toolki
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -4900,7 +4907,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -4914,7 +4921,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -4928,7 +4935,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#MatProjIonicStep.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -4947,7 +4954,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -5003,7 +5010,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -5017,7 +5026,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -5031,7 +5040,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#MatProjIonicStep.energy">energy</a></code> divided by <code><a href="#MatProjIonicStep.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -5045,8 +5054,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -5060,8 +5069,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#MatProjIonicStep.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -5075,8 +5083,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#MatProjIonicStep.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -5090,8 +5098,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -5105,7 +5113,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#MatProjIonicStep.formation_energy">formation_energy</a></code> divided by <code><a href="#MatProjIonicStep.nsites">nsites</a></code>.</p>
 </div>
 
 
@@ -5121,11 +5129,13 @@ object the first time, the query is executed.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 
@@ -5593,7 +5603,7 @@ structure object, use the <code><a href="#NEBEndpointRelaxation.to_toolkit">to_t
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -5607,7 +5617,7 @@ structure object, use the <code><a href="#NEBEndpointRelaxation.to_toolkit">to_t
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -5654,7 +5664,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -5668,7 +5678,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -5682,7 +5692,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#NEBEndpointRelaxation.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -5701,7 +5711,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -5757,7 +5767,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -6226,7 +6238,7 @@ structure object, use the <code><a href="#NEBEndpointIonicStep.to_toolkit">to_to
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -6240,7 +6252,7 @@ structure object, use the <code><a href="#NEBEndpointIonicStep.to_toolkit">to_to
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -6287,7 +6299,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -6301,7 +6313,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -6315,7 +6327,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#NEBEndpointIonicStep.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -6334,7 +6346,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -6390,7 +6402,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -6404,7 +6418,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -6418,7 +6432,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#NEBEndpointIonicStep.energy">energy</a></code> divided by <code><a href="#NEBEndpointIonicStep.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -6432,8 +6446,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -6447,8 +6461,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#NEBEndpointIonicStep.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -6462,8 +6475,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#NEBEndpointIonicStep.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -6477,8 +6490,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -6492,7 +6505,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#NEBEndpointIonicStep.formation_energy">formation_energy</a></code> divided by <code><a href="#NEBEndpointIonicStep.nsites">nsites</a></code>.</p>
 </div>
 
 
@@ -6508,11 +6521,13 @@ object the first time, the query is executed.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 
@@ -6980,7 +6995,7 @@ structure object, use the <code><a href="#Quality00Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -6994,7 +7009,7 @@ structure object, use the <code><a href="#Quality00Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -7041,7 +7056,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -7055,7 +7070,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -7069,7 +7084,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality00Relaxation.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -7088,7 +7103,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -7144,7 +7159,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -7634,7 +7651,7 @@ structure object, use the <code><a href="#Quality00IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -7648,7 +7665,7 @@ structure object, use the <code><a href="#Quality00IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -7695,7 +7712,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -7709,7 +7726,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -7723,7 +7740,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality00IonicStep.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -7742,7 +7759,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -7798,7 +7815,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -7812,7 +7831,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -7826,7 +7845,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#Quality00IonicStep.energy">energy</a></code> divided by <code><a href="#Quality00IonicStep.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -7840,8 +7859,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -7855,8 +7874,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#Quality00IonicStep.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -7870,8 +7888,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#Quality00IonicStep.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -7885,8 +7903,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -7900,7 +7918,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#Quality00IonicStep.formation_energy">formation_energy</a></code> divided by <code><a href="#Quality00IonicStep.nsites">nsites</a></code>.</p>
 </div>
 
 
@@ -7916,11 +7934,13 @@ object the first time, the query is executed.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 
@@ -8388,7 +8408,7 @@ structure object, use the <code><a href="#Quality01Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -8402,7 +8422,7 @@ structure object, use the <code><a href="#Quality01Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -8449,7 +8469,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -8463,7 +8483,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -8477,7 +8497,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality01Relaxation.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -8496,7 +8516,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -8552,7 +8572,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -9042,7 +9064,7 @@ structure object, use the <code><a href="#Quality01IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -9056,7 +9078,7 @@ structure object, use the <code><a href="#Quality01IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -9103,7 +9125,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -9117,7 +9139,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -9131,7 +9153,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality01IonicStep.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -9150,7 +9172,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -9206,7 +9228,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -9220,7 +9244,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -9234,7 +9258,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#Quality01IonicStep.energy">energy</a></code> divided by <code><a href="#Quality01IonicStep.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -9248,8 +9272,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -9263,8 +9287,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#Quality01IonicStep.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -9278,8 +9301,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#Quality01IonicStep.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -9293,8 +9316,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -9308,7 +9331,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#Quality01IonicStep.formation_energy">formation_energy</a></code> divided by <code><a href="#Quality01IonicStep.nsites">nsites</a></code>.</p>
 </div>
 
 
@@ -9324,11 +9347,13 @@ object the first time, the query is executed.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 
@@ -9796,7 +9821,7 @@ structure object, use the <code><a href="#Quality02Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -9810,7 +9835,7 @@ structure object, use the <code><a href="#Quality02Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -9857,7 +9882,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -9871,7 +9896,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -9885,7 +9910,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality02Relaxation.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -9904,7 +9929,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -9960,7 +9985,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -10450,7 +10477,7 @@ structure object, use the <code><a href="#Quality02IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -10464,7 +10491,7 @@ structure object, use the <code><a href="#Quality02IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -10511,7 +10538,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -10525,7 +10552,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -10539,7 +10566,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality02IonicStep.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -10558,7 +10585,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -10614,7 +10641,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -10628,7 +10657,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -10642,7 +10671,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#Quality02IonicStep.energy">energy</a></code> divided by <code><a href="#Quality02IonicStep.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -10656,8 +10685,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -10671,8 +10700,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#Quality02IonicStep.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -10686,8 +10714,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#Quality02IonicStep.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -10701,8 +10729,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -10716,7 +10744,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#Quality02IonicStep.formation_energy">formation_energy</a></code> divided by <code><a href="#Quality02IonicStep.nsites">nsites</a></code>.</p>
 </div>
 
 
@@ -10732,11 +10760,13 @@ object the first time, the query is executed.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 
@@ -11204,7 +11234,7 @@ structure object, use the <code><a href="#Quality03Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -11218,7 +11248,7 @@ structure object, use the <code><a href="#Quality03Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -11265,7 +11295,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -11279,7 +11309,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -11293,7 +11323,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality03Relaxation.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -11312,7 +11342,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -11368,7 +11398,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -11858,7 +11890,7 @@ structure object, use the <code><a href="#Quality03IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -11872,7 +11904,7 @@ structure object, use the <code><a href="#Quality03IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -11919,7 +11951,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -11933,7 +11965,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -11947,7 +11979,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality03IonicStep.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -11966,7 +11998,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -12022,7 +12054,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -12036,7 +12070,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -12050,7 +12084,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#Quality03IonicStep.energy">energy</a></code> divided by <code><a href="#Quality03IonicStep.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -12064,8 +12098,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -12079,8 +12113,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#Quality03IonicStep.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -12094,8 +12127,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#Quality03IonicStep.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -12109,8 +12142,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -12124,7 +12157,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#Quality03IonicStep.formation_energy">formation_energy</a></code> divided by <code><a href="#Quality03IonicStep.nsites">nsites</a></code>.</p>
 </div>
 
 
@@ -12140,11 +12173,13 @@ object the first time, the query is executed.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 
@@ -12612,7 +12647,7 @@ structure object, use the <code><a href="#Quality04Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -12626,7 +12661,7 @@ structure object, use the <code><a href="#Quality04Relaxation.to_toolkit">to_too
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -12673,7 +12708,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -12687,7 +12722,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -12701,7 +12736,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality04Relaxation.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -12720,7 +12755,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -12776,7 +12811,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -13266,7 +13303,7 @@ structure object, use the <code><a href="#Quality04IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -13280,7 +13317,7 @@ structure object, use the <code><a href="#Quality04IonicStep.to_toolkit">to_tool
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -13327,7 +13364,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -13341,7 +13378,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -13355,7 +13392,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Quality04IonicStep.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -13374,7 +13411,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -13430,7 +13467,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -13444,7 +13483,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -13458,7 +13497,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#Quality04IonicStep.energy">energy</a></code> divided by <code><a href="#Quality04IonicStep.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -13472,8 +13511,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -13487,8 +13526,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#Quality04IonicStep.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -13502,8 +13540,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#Quality04IonicStep.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -13517,8 +13555,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -13532,7 +13570,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#Quality04IonicStep.formation_energy">formation_energy</a></code> divided by <code><a href="#Quality04IonicStep.nsites">nsites</a></code>.</p>
 </div>
 
 
@@ -13548,11 +13586,13 @@ object the first time, the query is executed.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 

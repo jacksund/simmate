@@ -441,8 +441,6 @@ other connects all ionic steps to a specific calculation and result.</p>
 <span class="sd">    `structure_final` attribute (which is the final IonicStep).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># I have other models inherit from this one, while this model doesn&#39;t need</span>
-    <span class="c1"># its own table.</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
@@ -708,8 +706,6 @@ other connects all ionic steps to a specific calculation and result.</p>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># I have other models inherit from this one, while this model doesn&#39;t need</span>
-    <span class="c1"># its own table.</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
@@ -717,10 +713,6 @@ other connects all ionic steps to a specific calculation and result.</p>
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Structure</span><span class="o">.</span><span class="n">base_info</span> <span class="o">+</span> <span class="n">Thermodynamics</span><span class="o">.</span><span class="n">base_info</span> <span class="o">+</span> <span class="n">Forces</span><span class="o">.</span><span class="n">base_info</span>
     <span class="p">)</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Note: we assume that only converged data is being stored! So there is no</span>
     <span class="c1"># &quot;converged_electronic&quot; section here. ErrorHandlers and workups should</span>
@@ -820,8 +812,6 @@ other connects all ionic steps to a specific calculation and result.</p>
 <span class="sd">    `structure_final` attribute (which is the final IonicStep).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># I have other models inherit from this one, while this model doesn&#39;t need</span>
-    <span class="c1"># its own table.</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
@@ -1510,7 +1500,7 @@ structure object, use the <code><a href="#Relaxation.to_toolkit">to_toolkit</a><
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -1524,7 +1514,7 @@ structure object, use the <code><a href="#Relaxation.to_toolkit">to_toolkit</a><
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -1571,7 +1561,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -1585,7 +1575,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -1599,7 +1589,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#Relaxation.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -1618,7 +1608,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -1674,7 +1664,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -2011,8 +2003,6 @@ callables as instance methods.</p>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># I have other models inherit from this one, while this model doesn&#39;t need</span>
-    <span class="c1"># its own table.</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
@@ -2020,10 +2010,6 @@ callables as instance methods.</p>
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Structure</span><span class="o">.</span><span class="n">base_info</span> <span class="o">+</span> <span class="n">Thermodynamics</span><span class="o">.</span><span class="n">base_info</span> <span class="o">+</span> <span class="n">Forces</span><span class="o">.</span><span class="n">base_info</span>
     <span class="p">)</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Note: we assume that only converged data is being stored! So there is no</span>
     <span class="c1"># &quot;converged_electronic&quot; section here. ErrorHandlers and workups should</span>
@@ -2129,12 +2115,14 @@ accessed through the <code>structures</code> attribute on appropiate Relaxation 
                             <div id="IonicStep.base_info" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#IonicStep.base_info">#&nbsp;&nbsp</a>
 
-        <span class="name">base_info</span><span class="annotation">: List[str]</span><span class="default_value"> = [&#39;number&#39;, &#39;structure_string&#39;, &#39;source&#39;, &#39;energy&#39;, &#39;site_forces&#39;, &#39;lattice_stress&#39;]</span>
+        <span class="name">base_info</span><span class="annotation">: List[str]</span><span class="default_value"> = [&#39;number&#39;, &#39;structure_string&#39;, &#39;energy&#39;, &#39;site_forces&#39;, &#39;lattice_stress&#39;]</span>
     </div>
 
     
-            <div class="docstring"><p>The base information for this database table. All other columns can be calculated
-using the columns in this list.</p>
+            <div class="docstring"><p>The base information for this database table and only these fields are stored
+when the <code>to_archive</code> method is used. Using the columns in this list, all 
+other columns for this table can be calculated, so the columns in this list 
+are effectively the "raw data".</p>
 </div>
 
 
@@ -2286,7 +2274,7 @@ structure object, use the <code><a href="#IonicStep.to_toolkit">to_toolkit</a></
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -2300,7 +2288,7 @@ structure object, use the <code><a href="#IonicStep.to_toolkit">to_toolkit</a></
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -2347,7 +2335,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -2361,7 +2349,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -2375,7 +2363,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#IonicStep.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -2394,7 +2382,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -2450,7 +2438,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -2464,7 +2454,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -2478,7 +2468,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#IonicStep.energy">energy</a></code> divided by <code><a href="#IonicStep.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -2492,8 +2482,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -2507,8 +2497,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#IonicStep.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -2522,8 +2511,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#IonicStep.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -2537,8 +2526,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -2552,7 +2541,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#IonicStep.formation_energy">formation_energy</a></code> divided by <code><a href="#IonicStep.nsites">nsites</a></code>.</p>
 </div>
 
 
@@ -2568,11 +2557,13 @@ object the first time, the query is executed.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 

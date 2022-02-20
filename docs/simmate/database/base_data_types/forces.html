@@ -111,28 +111,23 @@
         <span class="s2">&quot;site_forces&quot;</span><span class="p">,</span>
         <span class="s2">&quot;lattice_stress&quot;</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">site_forces</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A list of forces for each atomic site (eV/AA). So this is a list like...</span>
-<span class="sd">    </span>
+<span class="sd">    ```</span>
 <span class="sd">    [site1, site2, site3, ...] </span>
-<span class="sd">    </span>
-<span class="sd">    where </span>
-<span class="sd">    </span>
+<span class="sd">    ```</span>
+<span class="sd">    ... where ...</span>
+<span class="sd">    ```</span>
 <span class="sd">    site1=[force_x, force_y, force_z]</span>
+<span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">lattice_stress</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The is 3x3 matrix that represents stress on the structure lattice</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="sd">&quot;&quot;&quot; Query-helper Info &quot;&quot;&quot;</span>
 
     <span class="n">site_force_norm_max</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -162,8 +157,6 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    lattice_stress_norm divided by nsites</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_from_toolkit</span><span class="p">(</span>
@@ -232,28 +225,23 @@
         <span class="s2">&quot;site_forces&quot;</span><span class="p">,</span>
         <span class="s2">&quot;lattice_stress&quot;</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base information for this database table. All other columns can be calculated</span>
-<span class="sd">    using the columns in this list.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">site_forces</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A list of forces for each atomic site (eV/AA). So this is a list like...</span>
-<span class="sd">    </span>
+<span class="sd">    ```</span>
 <span class="sd">    [site1, site2, site3, ...] </span>
-<span class="sd">    </span>
-<span class="sd">    where </span>
-<span class="sd">    </span>
+<span class="sd">    ```</span>
+<span class="sd">    ... where ...</span>
+<span class="sd">    ```</span>
 <span class="sd">    site1=[force_x, force_y, force_z]</span>
+<span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">lattice_stress</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The is 3x3 matrix that represents stress on the structure lattice</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="sd">&quot;&quot;&quot; Query-helper Info &quot;&quot;&quot;</span>
 
     <span class="n">site_force_norm_max</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -283,8 +271,6 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    lattice_stress_norm divided by nsites</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_from_toolkit</span><span class="p">(</span>
@@ -349,8 +335,10 @@ where this class only adds extra methods for convenience.</p>
     </div>
 
     
-            <div class="docstring"><p>The base information for this database table. All other columns can be calculated
-using the columns in this list.</p>
+            <div class="docstring"><p>The base information for this database table and only these fields are stored
+when the <code>to_archive</code> method is used. Using the columns in this list, all 
+other columns for this table can be calculated, so the columns in this list 
+are effectively the "raw data".</p>
 </div>
 
 
@@ -366,11 +354,13 @@ using the columns in this list.</p>
     
             <div class="docstring"><p>A list of forces for each atomic site (eV/AA). So this is a list like...</p>
 
-<p>[site1, site2, site3, ...] </p>
+<pre><code>[site1, site2, site3, ...] 
+</code></pre>
 
-<p>where </p>
+<p>... where ...</p>
 
-<p>site1=[force_x, force_y, force_z]</p>
+<pre><code>site1=[force_x, force_y, force_z]
+</code></pre>
 </div>
 
 

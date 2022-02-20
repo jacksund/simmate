@@ -255,8 +255,10 @@ but the Materials Project has much more data available via their
     </div>
 
     
-            <div class="docstring"><p>The base information for this database table. All other columns can be calculated
-using the columns in this list.</p>
+            <div class="docstring"><p>The base information for this database table and only these fields are stored
+when the <code>to_archive</code> method is used. Using the columns in this list, all 
+other columns for this table can be calculated, so the columns in this list 
+are effectively the "raw data".</p>
 </div>
 
 
@@ -375,7 +377,7 @@ structure object, use the <code><a href="#MatProjStructure.to_toolkit">to_toolki
     </div>
 
     
-            <div class="docstring"><p>total number of sites in the unitcell</p>
+            <div class="docstring"><p>The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</p>
 </div>
 
 
@@ -389,7 +391,7 @@ structure object, use the <code><a href="#MatProjStructure.to_toolkit">to_toolki
     </div>
 
     
-            <div class="docstring"><p>total number of unique elements</p>
+            <div class="docstring"><p>The total number of unique elements. (e.g. Y2CF2 has 3 elements)</p>
 </div>
 
 
@@ -436,7 +438,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of the crystal (g/cm^3)</p>
+            <div class="docstring"><p>The density of the crystal in g/cm^3</p>
 </div>
 
 
@@ -450,7 +452,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Density of atoms in the crystal (atoms/Angstom^3)</p>
+            <div class="docstring"><p>The density of atoms in the crystal in atoms/Angstom^3</p>
 </div>
 
 
@@ -464,7 +466,7 @@ that contain a specific element, use elements__contains="C" instead.</p>
     </div>
 
     
-            <div class="docstring"><p>Volume of the unitcell.</p>
+            <div class="docstring"><p>The volume of the unitcell in Angstom^3</p>
 
 <p>Note: in most cases, <code><a href="#MatProjStructure.volume_molar">volume_molar</a></code> should be used instead! This is because
 volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -483,7 +485,7 @@ just want to search by spacegroup.</p>
     </div>
 
     
-            <div class="docstring"><p>Molar volume of the crystal (cm^3/mol)</p>
+            <div class="docstring"><p>The molar volume of the crystal in cm^3/mol</p>
 </div>
 
 
@@ -539,7 +541,9 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>Spacegroup information. Points to <a href="../base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></p>
+            <div class="docstring"><p>Spacegroup information. Points to a separate database table that has additional
+columns:
+<code><a href="../base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></code></p>
 </div>
 
 
@@ -553,7 +557,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>The calculated energy (eV)</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -567,7 +571,7 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>(if a structure is available) this is energy divided by nsites</p>
+            <div class="docstring"><p>The <code><a href="#MatProjStructure.energy">energy</a></code> divided by <code><a href="#MatProjStructure.nsites">nsites</a></code>. Units are in eV.</p>
 </div>
 
 
@@ -581,8 +585,8 @@ For example, all stoichiometric perovskites have anonymized_formula ABC3.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -596,8 +600,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Whether <code><a href="#MatProjStructure.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
 </div>
 
 
@@ -611,8 +614,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>If <code><a href="#MatProjStructure.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
 </div>
 
 
@@ -626,8 +629,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
 </div>
 
 
@@ -641,7 +644,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Properties</p>
+            <div class="docstring"><p>The <code><a href="#MatProjStructure.formation_energy">formation_energy</a></code> divided by <code><a href="#MatProjStructure.nsites">nsites</a></code>.</p>
 </div>
 
 

@@ -47,9 +47,18 @@
                         <div class="docstring"><p>To prevent database-connection leaks, we want to setup django upfront when
 a worker is started -- rather than have each task connect separately.</p>
 
-<p>You can use this script like so...
-    from dask.distributed import Client
-    client = Client(preload="<a href="">simmate.configuration.dask.connect_to_database</a>")</p>
+<p>You can use this script like so...</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code>    <span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Client</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">preload</span><span class="o">=</span><span class="s2">&quot;<a href="">simmate.configuration.dask.connect_to_database</a>&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Note, there is also a high-level utility for this, which can be easier to
+remember:</p>
+
+<p>``` python
+from <a href="../../utilities.html">simmate.utilities</a> import get_dask_client
+client = get_dask_client()</p>
 </div>
 
                         <details>
@@ -61,8 +70,18 @@ a worker is started -- rather than have each task connect separately.</p>
 <span class="sd">a worker is started -- rather than have each task connect separately.</span>
 
 <span class="sd">You can use this script like so...</span>
+
+<span class="sd">``` python </span>
 <span class="sd">    from dask.distributed import Client</span>
 <span class="sd">    client = Client(preload=&quot;simmate.configuration.dask.connect_to_database&quot;)</span>
+<span class="sd">```</span>
+
+<span class="sd">Note, there is also a high-level utility for this, which can be easier to</span>
+<span class="sd">remember:</span>
+<span class="sd">    </span>
+<span class="sd">``` python</span>
+<span class="sd">from simmate.utilities import get_dask_client</span>
+<span class="sd">client = get_dask_client()</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1"># --------------------------------------------------------------------------------------</span>
