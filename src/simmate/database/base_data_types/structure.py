@@ -3,9 +3,6 @@
 from scipy.constants import Avogadro
 
 from simmate.toolkit import Structure as ToolkitStructure
-
-# from pymatgen.analysis.prototypes import AflowPrototypeMatcher
-
 from simmate.database.base_data_types import (
     DatabaseTable,
     table_column,
@@ -14,15 +11,10 @@ from simmate.database.base_data_types import (
 
 
 class Structure(DatabaseTable):
-    # This is an abstract class meant for inheritance
     class Meta:
         abstract = True
 
-    base_info = ["structure_string", "source"]
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
+    base_info = ["structure_string"]
 
     structure_string = table_column.TextField()
     """
@@ -31,24 +23,14 @@ class Structure(DatabaseTable):
     structure object, use the `to_toolkit` method.
     """
 
-    # EXPERIMENTAL
-    # Where this calculation plays a role within a "nested" workflow calculation.
-    # Becuase this structure can be reused by multiple workflows, we make this
-    # a list of source-like objects. For example, a relaxation could be part of
-    # a series of relaxations (like in StagedRelaxation) or it can be an initial
-    # step of a BandStructure calculation.
-    # parent_nested_calculations = table_column.JSONField(blank=True, null=True)
-
-    """ Query-helper Info """
-
     nsites = table_column.IntegerField()
     """
-    total number of sites in the unitcell
+    The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)
     """
 
     nelements = table_column.IntegerField()
     """
-    total number of unique elements
+    The total number of unique elements. (e.g. Y2CF2 has 3 elements)
     """
 
     elements = table_column.JSONField()
@@ -68,17 +50,17 @@ class Structure(DatabaseTable):
 
     density = table_column.FloatField()
     """
-    Density of the crystal (g/cm^3)
+    The density of the crystal in g/cm^3
     """
 
     density_atomic = table_column.FloatField()
     """
-    Density of atoms in the crystal (atoms/Angstom^3)
+    The density of atoms in the crystal in atoms/Angstom^3
     """
 
     volume = table_column.FloatField()
     """
-    Volume of the unitcell.
+    The volume of the unitcell in Angstom^3
     
     Note: in most cases, `volume_molar` should be used instead! This is because
     volumne is highly dependent on the symmetry and the arbitray unitcell. If 
@@ -88,7 +70,7 @@ class Structure(DatabaseTable):
 
     volume_molar = table_column.FloatField()
     """
-    Molar volume of the crystal (cm^3/mol)
+    The molar volume of the crystal in cm^3/mol
     """
 
     # The composition of the structure formatted in various ways
@@ -112,6 +94,17 @@ class Structure(DatabaseTable):
     For example, all stoichiometric perovskites have anonymized_formula ABC3.
     """
 
+    spacegroup = table_column.ForeignKey(Spacegroup, on_delete=table_column.PROTECT)
+    """
+    Spacegroup information. Points to a separate database table that has additional
+    columns:
+    `simmate.database.base_data_types.symmetry.Spacegroup`
+    """
+
+    # The AFLOW prototype that this structure maps to.
+    # TODO: this will be a relationship in the future
+    # prototype = table_column.CharField(max_length=50, blank=True, null=True)
+
     # NOTE: extra fields for the Lattice and Sites are intentionally left out
     # in order to save on overall database size. Things such as...
     #   Lattice: matrix and then... a, b, c, alpha, beta, gamma, volume
@@ -119,24 +112,6 @@ class Structure(DatabaseTable):
     # shouldn't be queried directly. If you'd like to sort structures by these
     # criteria, you can still do this in python and pandas! Just not at the
     # SQL level
-
-    """ Relationships """
-    # For the majority of Structures, you'll want to have a "source" relation that
-    # indicates where the structure came from. I don't include this is the abstract
-    # model but there are many ways to define it. For example it may relate to another
-    # Structure table or even a Calculation. In another case, the entire Structure
-    # table may have the same exact source, in which case you'd make a property!
-
-    spacegroup = table_column.ForeignKey(Spacegroup, on_delete=table_column.PROTECT)
-    """
-    Spacegroup information. Points to simmate.database.base_data_types.symmetry.Spacegroup
-    """
-
-    # The AFLOW prototype that this structure maps to.
-    # TODO: this will be a relationship in the future
-    # prototype = table_column.CharField(max_length=50, blank=True, null=True)
-
-    """ Model Methods """
 
     @classmethod
     def _from_toolkit(cls, structure, as_dict=False, **kwargs):
@@ -159,6 +134,7 @@ class Structure(DatabaseTable):
         # This attempts to match the structure to an AFLOW prototype and it is
         # by far the slowest step of loading structures to the database. Try
         # to optimize this in the future.
+        # from pymatgen.analysis.prototypes import AflowPrototypeMatcher
         # prototype = AflowPrototypeMatcher().get_prototypes(structure)
         # prototype_name = prototype[0]["tags"]["mineral"] if prototype else None
 
@@ -194,29 +170,9 @@ class Structure(DatabaseTable):
 
     def to_toolkit(self):
         """
-        Converts the database object to pymatgen structure object
+        Converts the database object to toolkit Structure object.
         """
-
-        # NOTE: if you know this is what you're going to do from a query, then
-        # it is more efficient to only grab the structure_string column because
-        # that's all you need! You'd do that like this:
-        #   structure_db = Structure.objects.only("structure_string").get(id="example-id")
-        # This grabs the proper Structure entry and only the structure column.
-
-        # convert the stored string to python dictionary.
-        # OPTIMIZE: see my comment on storing strings in the from_toolkit method above.
-        # For now, I need to figure out if I used "CIF" or "POSCAR" and read the structure
-        # accordingly. In the future, I can just assume my new format.
-        # If the string starts with "#", then I know that I stored it as a "CIF".
-        storage_format = "CIF" if (self.structure_string[0] == "#") else "POSCAR"
-
-        # convert the string to pymatgen Structure object
-        structure = ToolkitStructure.from_str(
-            self.structure_string,
-            fmt=storage_format,
-        )
-
-        return structure
+        return ToolkitStructure.from_database_string(self.structure_string)
 
 
 # TODO:

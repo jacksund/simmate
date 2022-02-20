@@ -24,10 +24,6 @@ class Calculation(DatabaseTable):
         "updated_at",
         "corrections",
     ]
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
 
     directory = table_column.CharField(
         max_length=250,
@@ -70,6 +66,14 @@ class Calculation(DatabaseTable):
     calaculation ran. This often involves changing settings, so we store
     any of those changes here.
     """
+
+    # EXPERIMENTAL
+    # Where this calculation plays a role within a "nested" workflow calculation.
+    # Becuase this structure can be reused by multiple workflows, we make this
+    # a list of source-like objects. For example, a relaxation could be part of
+    # a series of relaxations (like in StagedRelaxation) or it can be an initial
+    # step of a BandStructure calculation.
+    # parent_nested_calculations = table_column.JSONField(blank=True, null=True)
 
     """Archived Data"""
     # I may want to add these fields because Prefect doesn't store run stats

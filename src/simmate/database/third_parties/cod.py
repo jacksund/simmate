@@ -14,9 +14,10 @@ class CodStructure(Structure):
     class Meta:
         app_label = "third_parties"
 
-    base_info = ["id", "structure_string", "energy_above_hull"]
+    base_info = ["id", "structure_string", "is_ordered", "has_implicit_hydrogens"]
     source = "The Crystallography Open Database"
     source_doi = "https://doi.org/10.1107/S0021889809016690"
+    remote_archive_link = "https://archives.simmate.org/CodStructure-2022-02-20.zip"
 
     # These fields overwrite the default Structure fields due to a bug.
     chemical_system = table_column.TextField()

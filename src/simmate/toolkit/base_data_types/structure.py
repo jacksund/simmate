@@ -161,3 +161,42 @@ class Structure(PymatgenStructure):
         structure_cleaned.calculation = calculation
 
         return structure_cleaned
+
+    @classmethod
+    def from_database_string(cls, structure_string: str):
+        """
+        Loads a toolkit structure from a string -- specifically strings that
+        are stored in the structure_string column for
+        simmate.database.base_data_types.Structure.
+        """
+        # Dev note: this method should be merged with the Toolkit.from_str method.
+        # I only have this separate for now because pymatgen's from_str doesn't
+        # dynamically determine format from the string alone.
+
+        # convert the stored string to python dictionary.
+        storage_format = "CIF" if (structure_string[0] == "#") else "POSCAR"
+        # OPTIMIZE: see my comment on storing strings in the from_toolkit method above.
+        # For now, I need to figure out if I used "CIF" or "POSCAR" and read the structure
+        # accordingly. In the future, I can just assume my new format.
+        # If the string starts with "#", then I know that I stored it as a "CIF".
+
+        # convert the string to pymatgen Structure object
+        if storage_format == "POSCAR":
+            structure = cls.from_str(
+                structure_string,
+                fmt=storage_format,
+            )
+
+        # BUG: for cod structures we need to set the tolerance to "inf", which
+        # isn't possible with the toolkit.from_str method. Instead we need to
+        # call the CifParser directly
+        elif storage_format == "CIF":
+            from pymatgen.io.cif import CifParser
+
+            parser = CifParser.from_string(
+                structure_string,
+                occupancy_tolerance=float("inf"),
+            )
+            structure = parser.get_structures()[0]
+
+        return structure

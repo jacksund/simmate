@@ -27,14 +27,16 @@ If your team would like to make data available via Simmate, please see the `simm
 Usage
 ======
 
-Make sure you have completed [our introductory tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md) for downloading data from these providers.
+Make sure you have completed [our introductory tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md) for downloading data from these providers. Below we show example usage with `JarvisStructure`, but the same process can be done with all other tables in this module. 
 
 To download all data into your database:
 
 ``` python
 from simmate.database.third_parties import JarvisStructure
 
-# this can take >10 min. for some providers
+# this can take >10 min. for some providers. Optionally, you can
+# add `parallel=True` to speed up this process. Use caution when 
+# parallelizing with SQLite (the default backend)
 JarvisStructure.load_remote_archive()
 
 # If you use this providers data, be sure to cite them!
