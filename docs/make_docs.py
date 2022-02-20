@@ -1,15 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# This file generates our html documentation using pdoc.
+"""
+This file generates our html documentation using pdoc.
+"""
 
+import os
 from pathlib import Path
 
 import pdoc
 
+import django
+
 if __name__ == "__main__":
 
     # We must load Django settings first -- otherwise model imports will raise errors
-    from simmate.configuration.django import setup_full  # sets up Django
+    #   from simmate.configuration.django import setup_full  # sets up Django
+    # Normally we'd use the line above this, but we want to include the test
+    # database tables too, so we modify that here.
+    os.environ.setdefault(
+        "DJANGO_SETTINGS_MODULE", "simmate.configuration.django.settings_test"
+    )
+    django.setup()
+    os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
     # Set our default settings for the pdoc command
     pdoc.render.configure(

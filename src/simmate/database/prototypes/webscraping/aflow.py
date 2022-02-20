@@ -24,7 +24,6 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from simmate.configuration.django import setup_full  # connect to database
 from simmate.database.prototypes.aflow import AflowPrototype
-from simmate.utilities import get_sanitized_structure
 
 
 @transaction.atomic
@@ -32,19 +31,16 @@ def load_all_prototypes():
 
     for prototype_data in tqdm(AFLOW_PROTOTYPE_LIBRARY):
 
-        # first let's grab the structure and sanitize it
+        # first let's grab the structure
         structure = prototype_data["snl"].structure
-        structure_sanitized = get_sanitized_structure(structure)
 
         # To see how many unique wyckoff sites there are we also need the
         # symmetrized structure
-        structure_sym = SpacegroupAnalyzer(
-            structure_sanitized, 0.1
-        ).get_symmetrized_structure()
+        structure_sym = SpacegroupAnalyzer(structure, 0.1).get_symmetrized_structure()
 
         # Organize the data into our database format
         prototype = AflowPrototype.from_toolkit(
-            structure=structure_sanitized,
+            structure=structure,
             mineral_name=prototype_data["tags"]["mineral"],
             aflow_id=prototype_data["tags"]["aflow"],
             pearson_symbol=prototype_data["tags"]["pearson"],

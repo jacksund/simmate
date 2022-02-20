@@ -10,8 +10,6 @@ from simmate.database.base_data_types import (
 
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
-    # I have other models inherit from this one, while this model doesn't need
-    # its own table.
     class Meta:
         abstract = True
         app_label = "local_calculations"
@@ -28,10 +26,6 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         + Forces.base_info
         + Calculation.base_info
     )
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
 
     # Note: we assume that only converged data is being stored! So there is no
     # "converged_electronic" section here. ErrorHandlers and workups should

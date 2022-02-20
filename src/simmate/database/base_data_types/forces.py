@@ -13,28 +13,23 @@ class Forces(DatabaseTable):
         "site_forces",
         "lattice_stress",
     ]
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
 
     site_forces = table_column.JSONField(blank=True, null=True)
     """
     A list of forces for each atomic site (eV/AA). So this is a list like...
-    
+    ```
     [site1, site2, site3, ...] 
-    
-    where 
-    
+    ```
+    ... where ...
+    ```
     site1=[force_x, force_y, force_z]
+    ```
     """
 
     lattice_stress = table_column.JSONField(blank=True, null=True)
     """
     The is 3x3 matrix that represents stress on the structure lattice
     """
-
-    """ Query-helper Info """
 
     site_force_norm_max = table_column.FloatField(blank=True, null=True)
     """
@@ -64,8 +59,6 @@ class Forces(DatabaseTable):
     """
     lattice_stress_norm divided by nsites
     """
-
-    """ Model Methods """
 
     @classmethod
     def _from_toolkit(

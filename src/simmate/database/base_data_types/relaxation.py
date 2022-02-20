@@ -90,8 +90,6 @@ class Relaxation(Structure, Calculation):
     `structure_final` attribute (which is the final IonicStep).
     """
 
-    # I have other models inherit from this one, while this model doesn't need
-    # its own table.
     class Meta:
         abstract = True
         app_label = "local_calculations"
@@ -357,8 +355,6 @@ class IonicStep(Structure, Thermodynamics, Forces):
     ```
     """
 
-    # I have other models inherit from this one, while this model doesn't need
-    # its own table.
     class Meta:
         abstract = True
         app_label = "local_calculations"
@@ -366,10 +362,6 @@ class IonicStep(Structure, Thermodynamics, Forces):
     base_info = (
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
     )
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
 
     # Note: we assume that only converged data is being stored! So there is no
     # "converged_electronic" section here. ErrorHandlers and workups should

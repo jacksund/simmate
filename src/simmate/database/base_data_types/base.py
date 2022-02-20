@@ -14,7 +14,7 @@ import urllib
 import yaml
 
 import pandas
-from django.db import models, transaction
+from django.db import models  # , transaction
 from django_pandas.io import read_frame
 from django.utils.timezone import datetime
 
@@ -238,11 +238,56 @@ class DatabaseTable(models.Model):
     class Meta:
         abstract = True
 
+    base_info: List[str] = []
+    """
+    The base information for this database table and only these fields are stored
+    when the `to_archive` method is used. Using the columns in this list, all 
+    other columns for this table can be calculated, so the columns in this list 
+    are effectively the "raw data".
+    """
+
+    source = table_column.JSONField(blank=True, null=True)
+    """
+    Where the data came from. This could be a number of things, including...
+     - a third party id
+     - a structure from a different Simmate datbase table
+     - a transformation of another structure
+     - a creation method
+     - a custom submission by the user
+    
+    By default, this is a JSON field to account for all scenarios, but some
+    tables (such as those in `simmate.database.third_parties`) this is a 
+    constant and therefore overwritten as an attribute.
+    
+    EXAMPLES: (source type --> source_id)
+    
+    - MaterialsProject --> mp-123
+    - PyXtalStructure --> null
+    - AtomicPurmutation --> 123
+    - HereditaryMutation --> [123,124]
+    - user_submission --> null
+    """
+
+    source_doi: str = None
+    """
+    Source paper that must be referenced if this data is used. If this is None,
+    please refer to the `source` attribute for further details on what to 
+    reference.
+    """
+
+    remote_archive_link: str = None
+    """
+    The URL that is used to download the archive and then populate this table.
+    Many tables, such as those in `simmate.database.third_parties`, have
+    pre-existing data that you can download and load into your local database,
+    so if this attribute is set, you can use the `load_remote_archive` method.
+    """
+
     # I override the default manager with the one we define above, which has
     # extra methods useful for our querysets.
     objects = DatabaseTableManager()
     """
-    Accesses all of the rows in this datatable and initiates SearchResults
+    Accesses all of the rows in this datatable and initiates SearchResults.
     """
 
     @classmethod
@@ -360,14 +405,13 @@ class DatabaseTable(models.Model):
         # and populate data using those classes. All of this is fed in to our
         # main class at the end of the function. We keep this running dictionary
         # as we go.
+        all_data = kwargs.copy()
         # TODO: How should I best handle passing extra kwargs to the final class
         # initialization? For example, I would want to pass `energy` but I wouldn't
         # want to pass the toolkit structure object. I may update this line in
         # the future to remove python objects. For now, I only remove structure
         # and migration_hop because I know that it is a toolkit object -- not
         # a database column.
-        all_data = kwargs.copy()
-        # None ignores error if key is not present
         all_data.pop("structure", None)
         all_data.pop("migration_hop", None)
 
@@ -409,9 +453,16 @@ class DatabaseTable(models.Model):
         return all_data if as_dict else cls(**all_data)
 
     @classmethod
-    def _confirm_override(cls, confirm_override: bool):
+    def _confirm_override(
+        cls,
+        confirm_override: bool,
+        parallel: bool,
+        confirm_sqlite_parallel: bool,
+    ):
         """
-        A utility to make sure the user wants to load new data into their table.
+        A utility to make sure the user wants to load new data into their table
+        and (if they are using sqlite) that they are aware of the risks of
+        parallelizing their loading.
 
         This utility should not be called directly, as it is used within
         load_archive and load_remote_archive.
@@ -445,13 +496,35 @@ class DatabaseTable(models.Model):
                 "confirm_override=True."
             )
 
+        # Django and Dask can only handle so much for the parallelization
+        # of database writing with SQLite. So if the user has SQLite as their
+        # backend, we need to stop them from using this feature.
+        from simmate.configuration.django.settings import DATABASES
+
+        if parallel and not confirm_sqlite_parallel and "sqlite3" in str(DATABASES):
+            raise Exception(
+                "It looks like you are trying to run things in parallel but are "
+                "using the default database backend (sqlite3), which is not "
+                "always stable for massively parallel methods. You can still "
+                "do this, but this message serves as a word of caution. "
+                "You If you see error messages pop up saying 'database is "
+                "locked', then your database is not stable at the rate you're "
+                "trying to write data. This is a sign that you should either "
+                "(1) switch to a different database backend such as Postgres "
+                "or (2) reduce the parallelization of your tasks. If you are "
+                "comfortable with these warnings and know what you're doing, "
+                "set confirm_sqlite_parallel=True."
+            )
+
+    # @transaction.atomic  # We can't have an atomic transaction if we use Dask
     @classmethod
-    @transaction.atomic
     def load_archive(
         cls,
         filename: str = None,
         delete_on_completion: bool = False,
         confirm_override: bool = False,
+        parallel: bool = False,
+        confirm_sqlite_parallel: bool = False,
     ):
         """
         Reads a compressed zip file made by `objects.to_archive` and loads the data
@@ -477,11 +550,26 @@ class DatabaseTable(models.Model):
         - `confirm_override`:
             If the table already has data in it, the user must take particular
             care to downloading new data. This flag makes sure the user has
-            made the proper checks to run this action.
+            made the proper checks to run this action. Default is False.
+
+        - `parallel`:
+            Whether to load the data in parallel. If true, this will start
+            a local Dask cluster and each data row will be submitted as a task
+            to the cluster. This provides substansial speed-ups for loading
+            large datasets into the dataset. Default is False.
+
+        - `confirm_sqlite_parallel`:
+            If the database backend is sqlite, this parameter ensures the user
+            knows what they are doing and know the risks of parallelization.
+            Default is False.
         """
 
         # make sure the user actually wants to do this!
-        cls._confirm_override(confirm_override)
+        cls._confirm_override(
+            confirm_override,
+            parallel,
+            confirm_sqlite_parallel,
+        )
 
         from tqdm import tqdm
         from simmate.toolkit import Structure as ToolkitStructure
@@ -529,27 +617,38 @@ class DatabaseTable(models.Model):
         # through.
         entries = df.to_dict(orient="records")
 
-        # For all entries, convert the structure_string to a toolkit structure
-        # OPTIMIZE: is there a better way to do decide which entries need to be
-        # converted to toolkit structures? This code may be better placed in
-        # base_data_type methods (e.g. a from_base_info method for each)
-        if "structure_string" in df.columns:
+        # to enable parallelization, we define a function to load a single
+        # entry (or row) of data. This allows us to submit the function to Dask.
+        def load_single_entry(entry):
 
-            for entry in tqdm(entries):
+            # For all entries, convert the structure_string to a toolkit structure
+            if "structure_string" in entry:
                 structure_str = entry.pop("structure_string")
-                # !!! This code is a copy of base_data_types.Structure.to_toolkit
-                # This should instead be a method attached to ToolkitStructure
-                storage_format = "CIF" if (structure_str[0] == "#") else "POSCAR"
-                structure = ToolkitStructure.from_str(
-                    structure_str,
-                    fmt=storage_format,
-                )
+                structure = ToolkitStructure.from_database_string(structure_str)
                 entry["structure"] = structure
+            # OPTIMIZE: is there a better way to do decide which entries need to be
+            # converted to toolkit objects? This code may be better placed in
+            # base_data_type methods (e.g. a `from_base_info` method for each)
 
-        # now iterate through all entries to save them to the database
-        for entry in tqdm(entries):
             entry_db = cls.from_toolkit(**entry)
             entry_db.save()
+
+        # now iterate through all entries to save them to the database
+        if not parallel:
+            # If user doesn't want parallelization, we run these in the main
+            # thread and monitor progress with tqdm
+            for entry in tqdm(entries):
+                load_single_entry(entry)
+        # otherwise we use dask to submit these in batches!
+        else:
+
+            from simmate.utilities import dask_batch_submit
+
+            dask_batch_submit(
+                function=load_single_entry,
+                args_list=entries,
+                batch_size=15000,
+            )
 
         # We can now delete the files. The zip file is only deleted if requested.
         os.remove(csv_filename)
@@ -557,11 +656,12 @@ class DatabaseTable(models.Model):
             os.remove(filename)  # the zip archive
 
     @classmethod
-    @transaction.atomic
     def load_remote_archive(
         cls,
         remote_archive_link: str = None,
         confirm_override: bool = False,
+        parallel: bool = False,
+        confirm_sqlite_parallel: bool = False,
     ):
         """
         Downloads a compressed zip file made by `objects.to_archive` and loads
@@ -581,15 +681,30 @@ class DatabaseTable(models.Model):
             If the table already has data in it, the user must take particular
             care to downloading new data. This flag makes sure the user has
             made the proper checks to run this action.
+
+        - `parallel`:
+            Whether to load the data in parallel. If true, this will start
+            a local Dask cluster and each data row will be submitted as a task
+            to the cluster. This provides substansial speed-ups for loading
+            large datasets into the dataset. Default is False.
+
+        - `confirm_sqlite_parallel`:
+            If the database backend is sqlite, this parameter ensures the user
+            knows what they are doing and know the risks of parallelization.
+            Default is False.
         """
 
         # make sure the user actually wants to do this!
-        cls._confirm_override(confirm_override)
+        cls._confirm_override(
+            confirm_override,
+            parallel,
+            confirm_sqlite_parallel,
+        )
 
         # confirm that we have a link to download from
         if not remote_archive_link:
             # if no link was given we take the input value from class attribute
-            if not hasattr(cls, "remote_archive_link"):
+            if not cls.remote_archive_link:
                 raise Exception(
                     "This table does not have a default link to load the archive "
                     " from. You must provide a remote_archive_link."
@@ -619,5 +734,7 @@ class DatabaseTable(models.Model):
             archive_filename,
             delete_on_completion=True,
             confirm_override=True,  # we already confirmed this above
+            parallel=parallel,
+            confirm_sqlite_parallel=True,  # we already confirmed this above
         )
         print("Done.\n")

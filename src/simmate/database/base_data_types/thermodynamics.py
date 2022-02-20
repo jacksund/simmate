@@ -10,33 +10,51 @@ from pymatgen.analysis.phase_diagram import PhaseDiagram
 
 
 class Thermodynamics(DatabaseTable):
+    class Meta:
+        abstract = True
 
     base_info = ["energy"]
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
 
     energy = table_column.FloatField(blank=True, null=True)
     """
-    The calculated energy (eV)
+    The calculated total energy. Units are in eV.
     """
-
-    """ Query-helper Info """
 
     energy_per_atom = table_column.FloatField(blank=True, null=True)
     """
-    (if a structure is available) this is energy divided by nsites
+    The `energy` divided by `nsites`. Units are in eV.
     """
 
-    # TODO: These three should be updated on a schedule. I'd run a prefect flow
-    # every night that makes sure all values are up to date. I could initialize
-    # these values against
+    # TODO: These columns below should be updated on a schedule. I'd run
+    # a prefect flow every night that makes sure all values are up to date.
+
     energy_above_hull = table_column.FloatField(blank=True, null=True)
+    """
+    The hull energy (aka "stability") of this structure compared to all other
+    structures in this database table. Units are in eV.
+    """
+
     is_stable = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether `energy_above_hull` is 0 -- if so, this is considered stable.
+    """
+
     decomposes_to = table_column.JSONField(blank=True, null=True)
+    """
+    If `energy_above_hull` is above 0, these are the compositions that the 
+    structure will decompose to (e.g. ["Y2C", "C", "YF3"])
+    """
+
     formation_energy = table_column.FloatField(blank=True, null=True)
+    """
+    The formation energy of the structure relative to all other
+    structures in this database table. Units are in eV.
+    """
+
     formation_energy_per_atom = table_column.FloatField(blank=True, null=True)
+    """
+    The `formation_energy` divided by `nsites`.
+    """
 
     # Other fields to consider
     # equilibrium_reaction_energy_per_atom
@@ -55,13 +73,13 @@ class Thermodynamics(DatabaseTable):
     # type(GGA,GGAU,HF)
     # is_hubbard
 
-    """ Model Methods """
-
     # TODO: add a from_ionic_step method in the future when I have this class.
 
-    # !!! Maybe make this from_energy and structure input optional...?
     @classmethod
     def _from_toolkit(cls, structure, energy=None, as_dict=False):
+
+        # TODO: should structure be optional?
+
         # Given energy, this function builds the rest of the required fields
         # for this class as an object (or as a dictionary).
         data = (
@@ -150,9 +168,3 @@ class Thermodynamics(DatabaseTable):
                 cls.update_chemical_system_stabilities(chemical_system)
             except ValueError as exception:
                 print(f"Failed for {chemical_system} with error: {exception}")
-
-    """ Set as Abstract Model """
-    # I have other models inherit from this one, while this model doesn't need
-    # its own table.
-    class Meta:
-        abstract = True

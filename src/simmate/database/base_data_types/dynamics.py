@@ -162,10 +162,6 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     base_info = (
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
     )
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
 
     """Base Info"""
     # This is ionic step number for the given relaxation. This starts counting from 0.

@@ -30,31 +30,30 @@ to account for these problematic cif files though.
 
 import os
 
-from dask.distributed import Client, wait
-
 from pymatgen.io.cif import CifParser
 
+from simmate.utilities import dask_batch_submit
 from simmate.database.third_parties import CodStructure
 
 
 def load_all_structures(
     base_directory: str = "cod/cif/",
     only_add_new_cifs: bool = True,
+    batch_size: int = 15000,
+    batch_timeout: float = 30 * 60,
 ):
     """
     Only use this function if you are part of the Simmate dev team!
 
     Loads all structures directly for the COD database into the local
     Simmate database. There are 480,160 structures as of 2022-02-18.
+    Because of problematic cifs, only 471,664 (98.2%) are imported into
+    the Simmate database successfully.
 
     Make sure you have downloaded the
     [COD archive]([here](http://www.crystallography.net/archives/))
     and have it upacked to match your base_directory input.
     """
-
-    # We run this function in parallel using Dask, so each structure is submitted
-    # to a queue. The "futures" keep track of the status/result for each.
-    client = Client(preload="simmate.configuration.dask.connect_to_database")
 
     # We need to look at all the folders that have numbered-names (1,2,3..,9). and
     # grab the folder inside that are also numbers. This continues until we find cif
@@ -96,38 +95,30 @@ def load_all_structures(
             if not CodStructure.objects.filter(id=cif_id).exists():
                 new_cifs.append(cif_filepath)
 
+        # replace our all_cifs with this updated list
+        all_cifs = new_cifs
+
+    # We run this function in parallel using Dask.
     # Dask seems to be unstable when we submit too much at once, so we chunk
     # our submissions and wait for each to finished before submitting more.
-    chunk_size = 15000
-    for i in range(0, len(new_cifs), chunk_size):
-        chunk_cifs = new_cifs[i : i + chunk_size]
-        # use our function to load the structure (defined below)
-        futures = client.map(
-            load_single_cif,
-            chunk_cifs,
-            pure=False,
-        )
-        # wait for all futures
-        wait(futures)
-
-    # BUG: I'm unable to monitor progress on this...
-    #
-    # from dask.distributed import progress
-    # progress(futures)
-    #
-    # from tqdm import tqdm
-    # for future in tqdm(futures):
-    #     try:
-    #         future.result()
-    #     except:
-    #         pass
+    # We only wait for all futures to complete in 30 min, and beyond that
+    # point, cancel any remaining. 30 min is plenty for a batch of
+    # 15,000 cifs. If this limit is ever hit, it's typically because a
+    # single cif is taking >15min and is problematic.
+    dask_batch_submit(
+        function=load_single_cif,
+        args_list=all_cifs,
+        batch_size=batch_size,
+        batch_timeout=batch_timeout,
+    )
 
 
-def load_single_cif(cif_filepath):
+def load_single_cif(cif_filepath: str):
     """
     Loads a single COD cif into the Simmate database.
 
-    We make this a separate function to allow parallelization above.
+    You typically shouldn't call this function directly. We make this a
+    separate function to allow parallelization in `load_all_structures`.
     """
 
     # Load the structure and extra data from the cif file.

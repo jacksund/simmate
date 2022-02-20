@@ -17,16 +17,20 @@ At the lowest level...
 Next are a series of mixins defined in each of these modules...
 
 - `calculation` : holds information about a flow run (corrections, timestamps, etc.)
-- `calculation_nested` : a special type of calculation that involves running a workflow made of smaller workflows
 - `structure` : holds a periodic crystal structure
 - `symmetry` : NOT a mixin. Defines symmetry info for `structure` to reference
 - `forces` : holds site forces and lattice stress information
 - `thermodynamics` : holds energy and stability information
+- `density_of_states`: holds results of a density of states calculation
+- `band_structure`: holds results of a band structure calculation
 
 These mixins are frequently combined in for types of calculations. We define some of those common classes here too:
 
-- `static_energy` : holds a single point energy calculations on a structure
+- `static_energy` : holds results of single point energy calculation
 - `relaxation` : holds all steps of a structure geometry optimization
+- `nudged_elastic_band` : holds all results from trajectory calculations
+- `dynamics` : holds all steps of a molecular dynamics simmulation
+- `calculation_nested` : a special type of calculation that involves running a workflow made of smaller workflows
 
 
 Usage Guide
@@ -51,6 +55,12 @@ from simmate.database.base_data_types import (
 # Inherit from all the types you'd like to store data on. All of the columns
 # define in each of these types will be incorporated into your table.
 class MyCustomTable(Structure, Thermodynamics):
+
+    # If you are not using the `Calculation` mix-in, you'll have to specify
+    # which app this table is associated with. To determine what you set here,
+    # you should have completed the advanced simmate tutorials (08-09).
+    class Meta:
+        app_label = "my_custom_app"
     
     # Define the "raw data" for your table. This is required if you'd like to
     # use the to_archive method.
@@ -66,7 +76,7 @@ class MyCustomTable(Structure, Thermodynamics):
     # Add any custom columns you'd like
     # These follow the types supported by Django.
     
-    # This field is required and must be supplied at creation
+    # This custom field will be required and must be supplied at creation
     custom_column_01 = table_column.IntegerField()
 
     # This column we say is allowed to be empty. This is often needed if you
@@ -88,7 +98,7 @@ new_row = MyCustomTable.from_toolkit(
     # Because we inherited from Structure, we must provide structure
     structure=new_structure,  # provide a ToolkitStructure here
     # 
-    # Structures can optionally include a source too.
+    # All tables can optionally include a source too.
     source="made by jacksund",
     #
     # Because we inherited from Thermodynamics, we must provide energy
@@ -152,7 +162,3 @@ Every base model class has its attributes and methods separated (separated only 
     These are convience functions added onto the model. For example, it's useful
     to have a method to quickly convert a model Structure (so an object representing
     a row in a database) to a pymatgen Structure (a really powerful python object)
-
-- `For website compatibility` :
-    This contains the extra metadata and code needed to get the class to work
-    with Django and other models properly.

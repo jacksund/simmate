@@ -11,15 +11,13 @@ class JarvisStructure(Structure):
     The calculated energy is not reported, so the Thermodynamics mixin is not used.
     """
 
-    # Make sure Django knows which app this is associated with
     class Meta:
         app_label = "third_parties"
 
     base_info = ["id", "structure_string", "energy_above_hull"]
-    """
-    The base information for this database table. All other columns can be calculated
-    using the columns in this list.
-    """
+    source = "JARVIS"
+    source_doi = "https://doi.org/10.1038/s41524-020-00440-1"
+    remote_archive_link = "https://archives.simmate.org/JarvisStructure-2022-01-26.zip"
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """
@@ -31,21 +29,6 @@ class JarvisStructure(Structure):
     energy_above_hull = table_column.FloatField(blank=True, null=True)
     """
     The energy above hull, as reported by the JARVIS database (no units given)
-    """
-
-    source = "JARVIS"
-    """
-    Where this structure and data came from.
-    """
-
-    source_doi = "https://doi.org/10.1038/s41524-020-00440-1"
-    """
-    Source paper that must be referenced if this dataset is used.
-    """
-
-    remote_archive_link = "https://archives.simmate.org/JarvisStructure-2022-01-26.zip"
-    """
-    The URL that is used to download the archive and then populate this table.
     """
 
     @property

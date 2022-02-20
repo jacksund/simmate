@@ -37,7 +37,7 @@ cd ~/Documents/github/simmate
 4. Create your conda env using our conda file. Note, this will install Spyder for you and name your new environment `simmate_dev`. We highly recommend you use Spyder as your IDE so that you have the same overall setup as the rest of the team.
 ``` shell
 conda env update -f tutorials/Guides_for_contributors/environment.yaml
-conda install -n simmate_dev -c conda-forge spyder
+conda install -n simmate_dev -c conda-forge spyder -y
 conda activate simmate_dev
 ```
 
@@ -108,3 +108,34 @@ If you changed how a method significantly, you may need to find all places in Si
 *.csv, *.dat, *.log, *.tmp, *.bak, *.orig, *.egg-info, *.svg, *.xml, OUTCAR, *.js, *.html
 ```
 4. Set `Search in` to the `src/simmate` directory so that you only search source code.
+
+# For maintainers
+
+(currently this section is only relevant to @jacksund)
+
+To make a new release, you must follow these steps:
+
+1. **Create the new documentation.**:
+``` bash
+# Before the new documentation can be produced, there are a number
+# of optional dependencies that need to be installed.
+conda install -n simmate_dev -c conda-forge fabric jarvis-tools aflow -y
+pip install qmpy_rester
+
+# you can the change into the docs directory and run the make_docs.py
+cd docs/
+python make_docs.py
+```
+
+2. Update the Simmate version number in `setup.py` [link](https://github.com/jacksund/simmate/blob/main/setup.py)
+
+3. Make a [release](https://github.com/jacksund/simmate/releases/new) on Github (which will automatically release to pypi)
+
+4. Use [grayskull](https://www.marcelotrevisani.com/grayskull) to help update the version number, sha256, and dependencies of the [simmate feedstock](https://github.com/conda-forge/simmate-feedstock).
+
+5. If this a dev release, you can test the conda install with:
+``` bash
+conda create -n my_env -c conda-forge python=3.10 -y
+conda install -n my_env -c conda-forge -c conda-forge/label/simmate_dev simmate -y
+conda install -n my_env -c conda-forge spyder -y
+```
