@@ -34,7 +34,7 @@ Using the concepts of "raw data" vs "secondary columns" (columns that can be rap
 | JARVIS              | 55,712               | ~10                    | 8.0 MB       |
 | Materials Project   | 137,885              | ~30                    | 45.2 MB      |
 | COD                 | 471,664              | ~248                   | 1.16 GB      |
-| OQMD                | n/a                  | n/a                    | n/a          |
+| OQMD                | 1,013,521            | ~7                     | 79.2 MB      |
 | AFLOW               | n/a                  | n/a                    | n/a          |
 
 (Note, COD experiences poor compression because Simmate has not yet optimized storage for disordered structures.)
