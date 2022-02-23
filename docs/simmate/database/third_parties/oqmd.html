@@ -44,7 +44,13 @@
                                 <a class="variable" href="#OqmdStructure.source_doi">source_doi</a>
                         </li>
                         <li>
+                                <a class="variable" href="#OqmdStructure.remote_archive_link">remote_archive_link</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#OqmdStructure.id">id</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#OqmdStructure.formation_energy">formation_energy</a>
                         </li>
                         <li>
                                 <a class="variable" href="#OqmdStructure.external_link">external_link</a>
@@ -89,27 +95,6 @@
                                 <a class="variable" href="#OqmdStructure.spacegroup">spacegroup</a>
                         </li>
                         <li>
-                                <a class="function" href="#OqmdStructure.energy">energy</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#OqmdStructure.energy_per_atom">energy_per_atom</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#OqmdStructure.energy_above_hull">energy_above_hull</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#OqmdStructure.is_stable">is_stable</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#OqmdStructure.decomposes_to">decomposes_to</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#OqmdStructure.formation_energy">formation_energy</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#OqmdStructure.formation_energy_per_atom">formation_energy_per_atom</a>
-                        </li>
-                        <li>
                                 <a class="class" href="#OqmdStructure.DoesNotExist">OqmdStructure.DoesNotExist</a>
                                         <ul class="memberlist">
                             </ul>
@@ -149,10 +134,10 @@
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">table_column</span><span class="p">,</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span>
+<span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">table_column</span><span class="p">,</span> <span class="n">Structure</span>
 
 
-<span class="k">class</span> <span class="nc">OqmdStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">OqmdStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crystal structures from the [OQMD](http://oqmd.org/) database.</span>
 
@@ -164,13 +149,20 @@
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;third_parties&quot;</span>
 
-    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;energy&quot;</span><span class="p">]</span>
-    <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;OQMD&quot;</span>
+    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;formation_energy&quot;</span><span class="p">]</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;The Open Quantum Materials Database&quot;</span>
     <span class="n">source_doi</span> <span class="o">=</span> <span class="s2">&quot;https://doi.org/10.1007/s11837-013-0755-4&quot;</span>
+    <span class="n">remote_archive_link</span> <span class="o">=</span> <span class="s2">&quot;https://archives.simmate.org/OqmdStructure-2022-02-22.zip&quot;</span>
 
     <span class="nb">id</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The id used to represent the structure (ex: &quot;oqmd-12345&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># OQMD did not provide energy so the Thermodynamics mix-in can&#39;t be used</span>
+    <span class="n">formation_energy</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The formation energy of the structure as provided by the OQMD.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
@@ -193,12 +185,12 @@
 
         
         <span class="def">class</span>
-        <span class="name">OqmdStructure</span><wbr>(<span class="base"><a href="../base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></span>, <span class="base"><a href="../base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></span>):
+        <span class="name">OqmdStructure</span><wbr>(<span class="base"><a href="../base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">OqmdStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">OqmdStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crystal structures from the [OQMD](http://oqmd.org/) database.</span>
 
@@ -210,13 +202,20 @@
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;third_parties&quot;</span>
 
-    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;energy&quot;</span><span class="p">]</span>
-    <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;OQMD&quot;</span>
+    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;formation_energy&quot;</span><span class="p">]</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;The Open Quantum Materials Database&quot;</span>
     <span class="n">source_doi</span> <span class="o">=</span> <span class="s2">&quot;https://doi.org/10.1007/s11837-013-0755-4&quot;</span>
+    <span class="n">remote_archive_link</span> <span class="o">=</span> <span class="s2">&quot;https://archives.simmate.org/OqmdStructure-2022-02-22.zip&quot;</span>
 
     <span class="nb">id</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The id used to represent the structure (ex: &quot;oqmd-12345&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># OQMD did not provide energy so the Thermodynamics mix-in can&#39;t be used</span>
+    <span class="n">formation_energy</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The formation energy of the structure as provided by the OQMD.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
@@ -243,7 +242,7 @@ but OQDMD has much more data available via their
                             <div id="OqmdStructure.base_info" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#OqmdStructure.base_info">#&nbsp;&nbsp</a>
 
-        <span class="name">base_info</span><span class="annotation">: List[str]</span><span class="default_value"> = [&#39;id&#39;, &#39;structure_string&#39;, &#39;energy&#39;]</span>
+        <span class="name">base_info</span><span class="annotation">: List[str]</span><span class="default_value"> = [&#39;id&#39;, &#39;structure_string&#39;, &#39;formation_energy&#39;]</span>
     </div>
 
     
@@ -258,7 +257,7 @@ are effectively the "raw data".</p>
                             <div id="OqmdStructure.source" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#OqmdStructure.source">#&nbsp;&nbsp</a>
 
-        <span class="name">source</span><span class="default_value"> = &#39;OQMD&#39;</span>
+        <span class="name">source</span><span class="default_value"> = &#39;The Open Quantum Materials Database&#39;</span>
     </div>
 
     
@@ -303,6 +302,21 @@ reference.</p>
 
 
                             </div>
+                            <div id="OqmdStructure.remote_archive_link" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#OqmdStructure.remote_archive_link">#&nbsp;&nbsp</a>
+
+        <span class="name">remote_archive_link</span><span class="annotation">: str</span><span class="default_value"> = &#39;https://archives.simmate.org/OqmdStructure-2022-02-22.zip&#39;</span>
+    </div>
+
+    
+            <div class="docstring"><p>The URL that is used to download the archive and then populate this table.
+Many tables, such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>, have
+pre-existing data that you can download and load into your local database,
+so if this attribute is set, you can use the <code><a href="#OqmdStructure.load_remote_archive">load_remote_archive</a></code> method.</p>
+</div>
+
+
+                            </div>
                             <div id="OqmdStructure.id" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#OqmdStructure.id">#&nbsp;&nbsp</a>
 
@@ -313,6 +327,20 @@ reference.</p>
 
     
             <div class="docstring"><p>The id used to represent the structure (ex: "oqmd-12345")</p>
+</div>
+
+
+                            </div>
+                            <div id="OqmdStructure.formation_energy" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#OqmdStructure.formation_energy">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">formation_energy</span><span class="signature">(unknown)</span>:
+    </div>
+
+    
+            <div class="docstring"><p>The formation energy of the structure as provided by the OQMD.</p>
 </div>
 
 
@@ -525,107 +553,6 @@ columns:
 
 
                             </div>
-                            <div id="OqmdStructure.energy" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#OqmdStructure.energy">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">energy</span><span class="signature">(unknown)</span>:
-    </div>
-
-    
-            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
-</div>
-
-
-                            </div>
-                            <div id="OqmdStructure.energy_per_atom" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#OqmdStructure.energy_per_atom">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">energy_per_atom</span><span class="signature">(unknown)</span>:
-    </div>
-
-    
-            <div class="docstring"><p>The <code><a href="#OqmdStructure.energy">energy</a></code> divided by <code><a href="#OqmdStructure.nsites">nsites</a></code>. Units are in eV.</p>
-</div>
-
-
-                            </div>
-                            <div id="OqmdStructure.energy_above_hull" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#OqmdStructure.energy_above_hull">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">energy_above_hull</span><span class="signature">(unknown)</span>:
-    </div>
-
-    
-            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
-structures in this database table. Units are in eV.</p>
-</div>
-
-
-                            </div>
-                            <div id="OqmdStructure.is_stable" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#OqmdStructure.is_stable">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">is_stable</span><span class="signature">(unknown)</span>:
-    </div>
-
-    
-            <div class="docstring"><p>Whether <code><a href="#OqmdStructure.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
-</div>
-
-
-                            </div>
-                            <div id="OqmdStructure.decomposes_to" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#OqmdStructure.decomposes_to">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">decomposes_to</span><span class="signature">(unknown)</span>:
-    </div>
-
-    
-            <div class="docstring"><p>If <code><a href="#OqmdStructure.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
-structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
-</div>
-
-
-                            </div>
-                            <div id="OqmdStructure.formation_energy" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#OqmdStructure.formation_energy">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">formation_energy</span><span class="signature">(unknown)</span>:
-    </div>
-
-    
-            <div class="docstring"><p>The formation energy of the structure relative to all other
-structures in this database table. Units are in eV.</p>
-</div>
-
-
-                            </div>
-                            <div id="OqmdStructure.formation_energy_per_atom" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#OqmdStructure.formation_energy_per_atom">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">formation_energy_per_atom</span><span class="signature">(unknown)</span>:
-    </div>
-
-    
-            <div class="docstring"><p>The <code><a href="#OqmdStructure.formation_energy">formation_energy</a></code> divided by <code><a href="#OqmdStructure.nsites">nsites</a></code>.</p>
-</div>
-
-
-                            </div>
                             <div id="OqmdStructure.spacegroup_id" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#OqmdStructure.spacegroup_id">#&nbsp;&nbsp</a>
 
@@ -664,14 +591,8 @@ structures in this database table. Units are in eV.</p>
                 <dd id="OqmdStructure.to_toolkit" class="function"><a href="../base_data_types/structure.html#Structure.to_toolkit">to_toolkit</a></dd>
 
             </div>
-            <div><dt><a href="../base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></dt>
-                                <dd id="OqmdStructure.update_chemical_system_stabilities" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
-                <dd id="OqmdStructure.update_all_stabilities" class="function"><a href="../base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
-
-            </div>
             <div><dt><a href="../base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
-                                <dd id="OqmdStructure.remote_archive_link" class="variable"><a href="../base_data_types/base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
-                <dd id="OqmdStructure.objects" class="function"><a href="../base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                                <dd id="OqmdStructure.objects" class="function"><a href="../base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
                 <dd id="OqmdStructure.show_columns" class="function"><a href="../base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
                 <dd id="OqmdStructure.create_subclass" class="function"><a href="../base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="OqmdStructure.from_toolkit" class="function"><a href="../base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>

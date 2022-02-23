@@ -11,11 +11,11 @@ Currently, we support the following providers:
 - [COD (Crystallography Open Database)](http://www.crystallography.net/cod/)
 - [JARVIS (Joint Automated Repository for Various Integrated Simulations)](https://jarvis.nist.gov/)
 - [Materials Project](https://materialsproject.org/)
+- [OQMD (Open Quantum Materials Database)](http://oqmd.org/)
 
 These providers are configured, but our team is waiting for permission to redistribute their data:
 
 - [AFLOW (Automatic FLOW for Materials Discovery)](http://www.aflowlib.org/)
-- [OQDM (Open Quantum Materials Database)](http://oqmd.org/)
 
 
 Contributing your data
@@ -34,9 +34,11 @@ To download all data into your database:
 ``` python
 from simmate.database.third_parties import JarvisStructure
 
-# this can take >10 min. for some providers. Optionally, you can
-# add `parallel=True` to speed up this process. Use caution when 
-# parallelizing with SQLite (the default backend)
+# This can take >1 hour for some providers. Optionally, you can
+# add `parallel=True` to speed up this process, but use caution when 
+# parallelizing with SQLite (the default backend). We recommend 
+# avoiding the use of parallel=True, and instead running
+# this line overnight.
 JarvisStructure.load_remote_archive()
 
 # If you use this providers data, be sure to cite them!

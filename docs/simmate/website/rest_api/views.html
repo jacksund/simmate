@@ -2915,12 +2915,12 @@ of primary key relationships. Specifically:</p>
 
         
         <span class="def">class</span>
-        <span class="name">OqmdSerializer.Meta.model</span><wbr>(<span class="base"><a href="../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></span>, <span class="base"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></span>):
+        <span class="name">OqmdSerializer.Meta.model</span><wbr>(<span class="base"><a href="../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">OqmdStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">OqmdStructure</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crystal structures from the [OQMD](http://oqmd.org/) database.</span>
 
@@ -2932,13 +2932,20 @@ of primary key relationships. Specifically:</p>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;third_parties&quot;</span>
 
-    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;energy&quot;</span><span class="p">]</span>
-    <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;OQMD&quot;</span>
+    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;structure_string&quot;</span><span class="p">,</span> <span class="s2">&quot;formation_energy&quot;</span><span class="p">]</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;The Open Quantum Materials Database&quot;</span>
     <span class="n">source_doi</span> <span class="o">=</span> <span class="s2">&quot;https://doi.org/10.1007/s11837-013-0755-4&quot;</span>
+    <span class="n">remote_archive_link</span> <span class="o">=</span> <span class="s2">&quot;https://archives.simmate.org/OqmdStructure-2022-02-22.zip&quot;</span>
 
     <span class="nb">id</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The id used to represent the structure (ex: &quot;oqmd-12345&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># OQMD did not provide energy so the Thermodynamics mix-in can&#39;t be used</span>
+    <span class="n">formation_energy</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The formation energy of the structure as provided by the OQMD.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
@@ -2994,7 +3001,9 @@ but OQDMD has much more data available via their
                                 <dd id="OqmdSerializer.Meta.model.base_info" class="variable"><a href="../../database/third_parties/oqmd.html#OqmdStructure.base_info">base_info</a></dd>
                 <dd id="OqmdSerializer.Meta.model.source" class="variable"><a href="../../database/third_parties/oqmd.html#OqmdStructure.source">source</a></dd>
                 <dd id="OqmdSerializer.Meta.model.source_doi" class="variable"><a href="../../database/third_parties/oqmd.html#OqmdStructure.source_doi">source_doi</a></dd>
+                <dd id="OqmdSerializer.Meta.model.remote_archive_link" class="variable"><a href="../../database/third_parties/oqmd.html#OqmdStructure.remote_archive_link">remote_archive_link</a></dd>
                 <dd id="OqmdSerializer.Meta.model.id" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.id">id</a></dd>
+                <dd id="OqmdSerializer.Meta.model.formation_energy" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.formation_energy">formation_energy</a></dd>
                 <dd id="OqmdSerializer.Meta.model.external_link" class="variable"><a href="../../database/third_parties/oqmd.html#OqmdStructure.external_link">external_link</a></dd>
                 <dd id="OqmdSerializer.Meta.model.structure_string" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.structure_string">structure_string</a></dd>
                 <dd id="OqmdSerializer.Meta.model.nsites" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.nsites">nsites</a></dd>
@@ -3009,26 +3018,13 @@ but OQDMD has much more data available via their
                 <dd id="OqmdSerializer.Meta.model.formula_reduced" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.formula_reduced">formula_reduced</a></dd>
                 <dd id="OqmdSerializer.Meta.model.formula_anonymous" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.formula_anonymous">formula_anonymous</a></dd>
                 <dd id="OqmdSerializer.Meta.model.spacegroup" class="variable"><a href="../../database/third_parties/oqmd.html#OqmdStructure.spacegroup">spacegroup</a></dd>
-                <dd id="OqmdSerializer.Meta.model.energy" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.energy">energy</a></dd>
-                <dd id="OqmdSerializer.Meta.model.energy_per_atom" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.energy_per_atom">energy_per_atom</a></dd>
-                <dd id="OqmdSerializer.Meta.model.energy_above_hull" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.energy_above_hull">energy_above_hull</a></dd>
-                <dd id="OqmdSerializer.Meta.model.is_stable" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.is_stable">is_stable</a></dd>
-                <dd id="OqmdSerializer.Meta.model.decomposes_to" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.decomposes_to">decomposes_to</a></dd>
-                <dd id="OqmdSerializer.Meta.model.formation_energy" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.formation_energy">formation_energy</a></dd>
-                <dd id="OqmdSerializer.Meta.model.formation_energy_per_atom" class="function"><a href="../../database/third_parties/oqmd.html#OqmdStructure.formation_energy_per_atom">formation_energy_per_atom</a></dd>
                 <dd id="OqmdSerializer.Meta.model.DoesNotExist" class="class"><a href="../../database/third_parties/oqmd.html#OqmdStructure.DoesNotExist">DoesNotExist</a></dd>
                 <dd id="OqmdSerializer.Meta.model.MultipleObjectsReturned" class="class"><a href="../../database/third_parties/oqmd.html#OqmdStructure.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
                 <dd id="OqmdSerializer.Meta.model.spacegroup_id" class="variable"><a href="../../database/third_parties/oqmd.html#OqmdStructure.spacegroup_id">spacegroup_id</a></dd>
 
             </div>
-            <div><dt><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></dt>
-                                <dd id="OqmdSerializer.Meta.model.update_chemical_system_stabilities" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
-                <dd id="OqmdSerializer.Meta.model.update_all_stabilities" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
-
-            </div>
             <div><dt><a href="../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
-                                <dd id="OqmdSerializer.Meta.model.remote_archive_link" class="variable"><a href="../../database/base_data_types/base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
-                <dd id="OqmdSerializer.Meta.model.objects" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                                <dd id="OqmdSerializer.Meta.model.objects" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
                 <dd id="OqmdSerializer.Meta.model.show_columns" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
                 <dd id="OqmdSerializer.Meta.model.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="OqmdSerializer.Meta.model.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
