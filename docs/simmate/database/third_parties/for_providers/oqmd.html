@@ -32,7 +32,10 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="function" href="#load_all_structures">load_all_structures</a>
+                    <a class="function" href="#load_all_structures_from_api">load_all_structures_from_api</a>
+            </li>
+            <li>
+                    <a class="function" href="#load_all_structures_from_files">load_all_structures_from_files</a>
             </li>
     </ul>
 
@@ -86,25 +89,18 @@ via a pip install.</p>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">transaction</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">transaction</span>
+
 <span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span>
-
 <span class="kn">from</span> <span class="nn">simmate.database.third_parties</span> <span class="kn">import</span> <span class="n">OqmdStructure</span>
-
-<span class="c1"># OQMD is not a dependency of simmate, so make sure you install it before using</span>
-<span class="c1"># this module</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">qmpy_rester</span>
-<span class="k">except</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
-        <span class="s2">&quot;You must install qmpy-rester with `pip install qmpy_rester`&quot;</span>
-    <span class="p">)</span>
 
 
 <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
-<span class="k">def</span> <span class="nf">load_all_structures</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">load_all_structures_from_api</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Only use this function if you are part of the Simmate dev team!</span>
 
@@ -112,6 +108,14 @@ via a pip install.</p>
 <span class="sd">    Simmate database.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># OQMD is not a dependency of simmate, so make sure you install it before using</span>
+    <span class="c1"># this module</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">qmpy_rester</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
+            <span class="s2">&quot;You must install qmpy-rester with `pip install qmpy_rester`&quot;</span>
+        <span class="p">)</span>
     <span class="c1"># The documentation indicates that we handle a query via a context manager</span>
     <span class="c1"># for qmpy_rester. Each query is returned as a page of data, where we need</span>
     <span class="c1"># to iterate through all of the pages. To do this, we constantly make a query</span>
@@ -149,15 +153,12 @@ via a pip install.</p>
             <span class="c1"># store the slice of entrys in our main list</span>
             <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">query_slice</span><span class="p">:</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-
             <span class="c1"># on the very first page, let&#39;s also check the total number of pages</span>
             <span class="k">if</span> <span class="n">current_page</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">total_pages</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;meta&quot;</span><span class="p">][</span><span class="s2">&quot;data_available&quot;</span><span class="p">]</span> <span class="o">//</span> <span class="n">results_per_page</span>
-
             <span class="c1"># move on to the next page</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully downloaded page </span><span class="si">{</span><span class="n">current_page</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">total_pages</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">current_page</span> <span class="o">+=</span> <span class="mi">1</span>
-
     <span class="c1"># Now iterate through all the data -- which is a list of dictionaries.</span>
     <span class="c1"># We convert the data into a pymatgen object and sanitize it before saving</span>
     <span class="c1"># to the Simmate database</span>
@@ -186,24 +187,78 @@ via a pip install.</p>
 
         <span class="c1"># and save it to our database!</span>
         <span class="n">structure_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+
+<span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+<span class="k">def</span> <span class="nf">load_all_structures_from_files</span><span class="p">(</span>
+    <span class="n">base_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;oqmd&quot;</span><span class="p">,</span>
+    <span class="n">only_add_new_cifs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Jiahong Shen was kind enough to provide all the crystal structures from</span>
+<span class="sd">    the OQMD as POSCAR files. This makes loading the structures into the</span>
+<span class="sd">    Simmate database much faster as we are no longer bottlenecked by the REST</span>
+<span class="sd">    API and internet connections.</span>
+
+<span class="sd">    All POSCARs are in the same folder, where the name of each is the</span>
+<span class="sd">    &lt;id&gt;-&lt;composition&gt; (ex: 12345-NaCl). There are also csv&#39;s that contain</span>
+<span class="sd">    additional data such as the energy:</span>
+
+<span class="sd">        - all_oqmd_entry.csv</span>
+<span class="sd">        - all_public_entries.csv</span>
+<span class="sd">        - all_public_fes.csv</span>
+<span class="sd">        - get_all_entry_id_public.py</span>
+<span class="sd">        - get_all_entry_poscar.py</span>
+
+<span class="sd">    There are currently 1,013,654 structures and this function takes roughly</span>
+<span class="sd">    3hrs to run.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># load the csv that contains the list of filenames and their values</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_directory</span><span class="p">,</span> <span class="s2">&quot;all_oqmd_entry.csv&quot;</span><span class="p">))</span>
+
+    <span class="c1"># iterate through the list and load the structures to our database!</span>
+    <span class="c1"># Use tqdm to monitor progress.</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()):</span>
+
+        <span class="c1"># load the structure from the poscar file</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_directory</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="s2">&quot;poscar&quot;</span><span class="p">)</span>
+
+        <span class="c1"># save the data to the Simmate database</span>
+        <span class="c1"># now convert the entry to a database object</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">structure_db</span> <span class="o">=</span> <span class="n">OqmdStructure</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;oqmd-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">entry_id</span><span class="p">),</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                <span class="n">formation_energy</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="n">formationenergy</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">structure_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="c1"># A few structures fail because of the symmetry analyzer can&#39;t determine</span>
+        <span class="c1"># the spacegroup. These are...</span>
+        <span class="c1"># 1443135, 1443014, 1451986, 1452015, 1452024</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed: </span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">entry_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
             </section>
-                <section id="load_all_structures">
-                            <div class="attr function"><a class="headerlink" href="#load_all_structures">#&nbsp;&nbsp</a>
+                <section id="load_all_structures_from_api">
+                            <div class="attr function"><a class="headerlink" href="#load_all_structures_from_api">#&nbsp;&nbsp</a>
 
                 <div class="decorator">@transaction.atomic</div>
 
             <span class="def">def</span>
-            <span class="name">load_all_structures</span><span class="signature">()</span>:
+            <span class="name">load_all_structures_from_api</span><span class="signature">()</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
-<span class="k">def</span> <span class="nf">load_all_structures</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">load_all_structures_from_api</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Only use this function if you are part of the Simmate dev team!</span>
 
@@ -211,6 +266,14 @@ via a pip install.</p>
 <span class="sd">    Simmate database.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># OQMD is not a dependency of simmate, so make sure you install it before using</span>
+    <span class="c1"># this module</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">qmpy_rester</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
+            <span class="s2">&quot;You must install qmpy-rester with `pip install qmpy_rester`&quot;</span>
+        <span class="p">)</span>
     <span class="c1"># The documentation indicates that we handle a query via a context manager</span>
     <span class="c1"># for qmpy_rester. Each query is returned as a page of data, where we need</span>
     <span class="c1"># to iterate through all of the pages. To do this, we constantly make a query</span>
@@ -248,15 +311,12 @@ via a pip install.</p>
             <span class="c1"># store the slice of entrys in our main list</span>
             <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">query_slice</span><span class="p">:</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-
             <span class="c1"># on the very first page, let&#39;s also check the total number of pages</span>
             <span class="k">if</span> <span class="n">current_page</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">total_pages</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;meta&quot;</span><span class="p">][</span><span class="s2">&quot;data_available&quot;</span><span class="p">]</span> <span class="o">//</span> <span class="n">results_per_page</span>
-
             <span class="c1"># move on to the next page</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully downloaded page </span><span class="si">{</span><span class="n">current_page</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">total_pages</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">current_page</span> <span class="o">+=</span> <span class="mi">1</span>
-
     <span class="c1"># Now iterate through all the data -- which is a list of dictionaries.</span>
     <span class="c1"># We convert the data into a pymatgen object and sanitize it before saving</span>
     <span class="c1"># to the Simmate database</span>
@@ -293,6 +353,95 @@ via a pip install.</p>
 
 <p>Loads all structures directly for the OQMD database into the local
 Simmate database.</p>
+</div>
+
+
+                </section>
+                <section id="load_all_structures_from_files">
+                            <div class="attr function"><a class="headerlink" href="#load_all_structures_from_files">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@transaction.atomic</div>
+
+            <span class="def">def</span>
+            <span class="name">load_all_structures_from_files</span><span class="signature">(base_directory: str = &#39;oqmd&#39;, only_add_new_cifs: bool = True)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+<span class="k">def</span> <span class="nf">load_all_structures_from_files</span><span class="p">(</span>
+    <span class="n">base_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;oqmd&quot;</span><span class="p">,</span>
+    <span class="n">only_add_new_cifs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Jiahong Shen was kind enough to provide all the crystal structures from</span>
+<span class="sd">    the OQMD as POSCAR files. This makes loading the structures into the</span>
+<span class="sd">    Simmate database much faster as we are no longer bottlenecked by the REST</span>
+<span class="sd">    API and internet connections.</span>
+
+<span class="sd">    All POSCARs are in the same folder, where the name of each is the</span>
+<span class="sd">    &lt;id&gt;-&lt;composition&gt; (ex: 12345-NaCl). There are also csv&#39;s that contain</span>
+<span class="sd">    additional data such as the energy:</span>
+
+<span class="sd">        - all_oqmd_entry.csv</span>
+<span class="sd">        - all_public_entries.csv</span>
+<span class="sd">        - all_public_fes.csv</span>
+<span class="sd">        - get_all_entry_id_public.py</span>
+<span class="sd">        - get_all_entry_poscar.py</span>
+
+<span class="sd">    There are currently 1,013,654 structures and this function takes roughly</span>
+<span class="sd">    3hrs to run.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># load the csv that contains the list of filenames and their values</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_directory</span><span class="p">,</span> <span class="s2">&quot;all_oqmd_entry.csv&quot;</span><span class="p">))</span>
+
+    <span class="c1"># iterate through the list and load the structures to our database!</span>
+    <span class="c1"># Use tqdm to monitor progress.</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()):</span>
+
+        <span class="c1"># load the structure from the poscar file</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_directory</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="s2">&quot;poscar&quot;</span><span class="p">)</span>
+
+        <span class="c1"># save the data to the Simmate database</span>
+        <span class="c1"># now convert the entry to a database object</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">structure_db</span> <span class="o">=</span> <span class="n">OqmdStructure</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;oqmd-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">entry_id</span><span class="p">),</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                <span class="n">formation_energy</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="n">formationenergy</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">structure_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="c1"># A few structures fail because of the symmetry analyzer can&#39;t determine</span>
+        <span class="c1"># the spacegroup. These are...</span>
+        <span class="c1"># 1443135, 1443014, 1451986, 1452015, 1452024</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed: </span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">entry_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Jiahong Shen was kind enough to provide all the crystal structures from
+the OQMD as POSCAR files. This makes loading the structures into the
+Simmate database much faster as we are no longer bottlenecked by the REST
+API and internet connections.</p>
+
+<p>All POSCARs are in the same folder, where the name of each is the
+<id>-<composition> (ex: 12345-NaCl). There are also csv's that contain
+additional data such as the energy:</p>
+
+<pre><code>- all_oqmd_entry.csv
+- all_public_entries.csv
+- all_public_fes.csv
+- get_all_entry_id_public.py
+- get_all_entry_poscar.py
+</code></pre>
+
+<p>There are currently 1,013,654 structures and this function takes roughly
+3hrs to run.</p>
 </div>
 
 
