@@ -4,7 +4,9 @@
 This module is experimental and subject to change.
 """
 
+import os
 
+from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.electronic_structure.bandstructure import (
     BandStructure as ToolkitBandStructure,
 )
@@ -36,7 +38,7 @@ class BandStructure(DatabaseTable):
     energy_fermi = table_column.FloatField(blank=True, null=True)
     conduction_band_minimum = table_column.FloatField(blank=True, null=True)
     valence_band_maximum = table_column.FloatField(blank=True, null=True)
-    is_metal = is_gap_direct = table_column.BooleanField(blank=True, null=True)
+    is_metal = table_column.BooleanField(blank=True, null=True)
     # magnetic_ordering (Magnetic ordering of the calculation.)
     # equivalent_labels (Equivalent k-point labels in other k-path conventions)
 
@@ -68,6 +70,9 @@ class BandStructure(DatabaseTable):
         # return the dictionary
         return data if as_dict else cls(**data)
 
+    def to_toolkit_band_structure(self):
+        return ToolkitBandStructure.from_dict(self.band_structure_data)
+
 
 class BandStructureCalc(Structure, BandStructure, Calculation):
     class Meta:
@@ -98,3 +103,17 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
 
         # Now we have the relaxation data all loaded and can save it to the database
         self.save()
+
+    @classmethod
+    def from_directory(cls, directory: str):
+        # I assume the directory is from a vasp calculation, but I need to update
+        # this when I begin adding new calculators.
+        vasprun_filename = os.path.join(directory, "vasprun.xml")
+        vasprun = Vasprun(vasprun_filename)
+        band_structure = vasprun.get_band_structure(line_mode=True)
+        band_structure_db = cls.from_toolkit(
+            structure=vasprun.structures[0],
+            band_structure=band_structure,
+        )
+        band_structure_db.save()
+        return band_structure_db

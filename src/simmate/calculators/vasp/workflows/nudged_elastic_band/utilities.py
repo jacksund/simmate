@@ -193,61 +193,11 @@ class SaveNEBOutputTask(Task):
         # for that here too. The key thing of these statements is that we
         # have a migration_hop_id at the end.
 
-        # If no ids were given, then we make a new entries for each.
-        if not diffusion_analysis_id and not migration_hop_id:
-            # Note, we have minimal information if this is the case, so these
-            # table entries will have a bunch of empty columns.
-
-            # We don't have a bulk structure to use for this class, so we use
-            # the first image
-            analysis_db = self.diffusion_analyis_table.from_toolkit(
-                structure=result.structures[0],
-                vacancy_mode=True,  # assume this for now
-            )
-            analysis_db.save()
-
-            # This table entry will actually be completely empty... It only
-            # serves to link the MigrationImages together
-            hop_db = self.migration_hop_table(
-                diffusion_analysis_id=analysis_db.id,
-            )
-            hop_db.save()
-            migration_hop_id = hop_db.id
-
-        elif diffusion_analysis_id and not migration_hop_id:
-            # This table entry will actually be completely empty... It only
-            # serves to link the MigrationImages together
-            hop_db = self.migration_hop_table(
-                diffusion_analysis_id=diffusion_analysis_id
-            )
-            hop_db.save()
-            migration_hop_id = hop_db.id
-
-        elif migration_hop_id:
-            # We don't use the hop_id, but making this query ensures it exists.
-            hop_db = self.migration_hop_table.objects.get(id=migration_hop_id)
-            # Even though it's not required, we make sure the id given for the
-            # diffusion analysis table matches this existing hop id.
-            if diffusion_analysis_id:
-                assert hop_db.diffusion_analysis.id == diffusion_analysis_id
-
-        # Now same migration images and link them to this parent object.
-        # Note, the start/end Migration images will exist already in the
-        # relaxation database table. We still want to save them again here for
-        # easy access.
-        for image_number, image_data in enumerate(
-            zip(result.structures, result.energies, result.forces, result.r)
-        ):
-            image, energy, force, distance = image_data
-            image_db = self.migration_image_table.from_toolkit(
-                structure=image,
-                number=image_number,
-                force_tangent=force,
-                energy=energy,
-                structure_distance=distance,
-                migration_hop_id=migration_hop_id,
-            )
-            image_db.save()
+        migration_hop_db = self.migration_hop_table.from_pymatgen(
+            analysis=result,
+            diffusion_analysis_id=diffusion_analysis_id,
+            migration_hop_id=migration_hop_id,
+        )
 
         # If the user wants to access results, they can do so through the hop id
-        return migration_hop_id
+        return migration_hop_db.id
