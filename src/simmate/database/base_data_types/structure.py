@@ -157,7 +157,7 @@ class Structure(DatabaseTable):
             * Avogadro
             * 1e-27
             * 1e3,
-            spacegroup_id=structure.get_space_group_info(0.1)[1],  # OPTIMIZE
+            spacegroup_id=structure.get_space_group_info()[1],  # OPTIMIZE
             formula_full=structure.composition.formula,
             formula_reduced=structure.composition.reduced_formula,
             formula_anonymous=structure.composition.anonymized_formula,
