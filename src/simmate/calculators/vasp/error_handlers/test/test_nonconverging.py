@@ -6,7 +6,7 @@ import pytest
 
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.inputs import Incar
-from simmate.calculators.vasp.error_handlers import NonConvergingErrorHandler
+from simmate.calculators.vasp.error_handlers import NonConverging
 
 
 def test_nonconverging(tmpdir):
@@ -21,11 +21,11 @@ def test_nonconverging(tmpdir):
     oszicar_filename = os.path.join(tmpdir, "OSZICAR")
 
     # Confirm an error IS NOT found when there aren't enough ionic steps
-    error_handler = NonConvergingErrorHandler()  # default is 10
+    error_handler = NonConverging()  # default is 10
     assert error_handler.check(tmpdir) == False
 
     # We limit this to 2 steps to ensure we get the error
-    error_handler = NonConvergingErrorHandler(min_ionic_steps=2)
+    error_handler = NonConverging(min_ionic_steps=2)
     assert error_handler.check(tmpdir) == True
 
     # Make first attempt at fixing the error

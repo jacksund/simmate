@@ -7,7 +7,7 @@ from simmate.calculators.vasp.tasks.relaxation.neb_endpoint import (
 from simmate.calculators.vasp.error_handlers import (
     TetrahedronMesh,
     Eddrmm,
-    NonConvergingErrorHandler,
+    NonConverging,
 )
 
 
@@ -38,5 +38,5 @@ class NEBEndpointStaticEnergy(NEBEndpointRelaxation):
     error_handlers = [
         TetrahedronMesh(),
         Eddrmm(),
-        NonConvergingErrorHandler(),
+        NonConverging(),
     ]

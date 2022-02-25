@@ -9,23 +9,34 @@ from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
 
 
-class ChangeInChargeDensity(ErrorHandler):
+class Brmix(ErrorHandler):
     """
     This handler addresses changes in charge density during a SCF loop. There are
     a series of fixes that depend on the type and state of the calculation being
     ran, so be sure to read the stages below.
     """
 
-    # run this while the VASP calculation is still going
     is_monitor = True
-
-    # we assume that we are checking the vasp.out file
     filename_to_check = "vasp.out"
-
-    # These are the error messages that we are looking for in the file
     possible_error_messages = ["BRMIX: very serious problems"]
 
-    def correct(self, directory):
+    def check(self, directory: str) -> bool:
+
+        # load the INCAR file to view the current settings
+        incar_filename = os.path.join(dir, "INCAR")
+        incar = Incar.from_file(incar_filename)
+
+        # if NELECT is in the INCAR, that means we are running
+        # a charged calculation (e.g. defects). If this is the
+        # case, then we want to ingore a change in electron
+        # density (brmix) and move on to checking the next error.
+        if "NELECT" in incar:
+            return False
+
+        # otherwise check the file as usual for the error
+        super().check(directory)
+
+    def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")

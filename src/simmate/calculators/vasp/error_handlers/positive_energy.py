@@ -9,7 +9,7 @@ from simmate.calculators.vasp.outputs import Oszicar
 from simmate.workflow_engine import ErrorHandler
 
 
-class PositiveEnergyErrorHandler(ErrorHandler):
+class PositiveEnergy(ErrorHandler):
     """
     Check if a run has positive absolute energy.
     If so, we trying changeing ALGO to Normal or alternatively halve the POTIM.
@@ -18,7 +18,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
     # run this while the VASP calculation is still going
     is_monitor = True
 
-    def check(self, directory):
+    def check(self, directory: str) -> bool:
         """
         Check for error in the specified directory. Note, we assume that we are
         checking the OSZICAR file. If that file is not present, we say that there
@@ -56,7 +56,7 @@ class PositiveEnergyErrorHandler(ErrorHandler):
         # we can say there is no error.
         return False
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
         """
         Perform corrections based on the INCAR.
         """

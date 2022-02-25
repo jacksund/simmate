@@ -7,20 +7,19 @@ from simmate.calculators.vasp.outputs import Oszicar
 from simmate.workflow_engine import ErrorHandler
 
 
-class NonConvergingErrorHandler(ErrorHandler):
+class NonConverging(ErrorHandler):
     """
     If a run is hitting the maximum number of electronic steps for a significant
     number of ionic steps (i.e. 10), then we consider the job to be nonconverging
     and in error. To try fixing this, we switch the ALGO to Normal.
     """
 
-    # run this while the VASP calculation is still going
     is_monitor = True
 
-    def __init__(self, min_ionic_steps=10):
+    def __init__(self, min_ionic_steps: int = 10):
         self.min_ionic_steps = min_ionic_steps
 
-    def check(self, directory):
+    def check(self, directory: str) -> bool:
         """
         Check for error in the specified directory. Note, we assume that we are
         checking the OSZICAR file. If that file is not present, we say that there
@@ -70,7 +69,7 @@ class NonConvergingErrorHandler(ErrorHandler):
         # if the files don't exist, we are not seeing any error yet
         return False
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
         """
         Perform corrections based on the INCAR.
         """

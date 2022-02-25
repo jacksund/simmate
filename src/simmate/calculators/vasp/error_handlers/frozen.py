@@ -7,20 +7,19 @@ from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
 
 
-class FrozenErrorHandler(ErrorHandler):
+class Frozen(ErrorHandler):
     """
     Checks when the output file has last been editted. If the job has been sitting
     for a long time (i.e. 1 hour), we consider it frozen and want to change the
     ALGO from Normal to Fast or alternatively reduce SYMPREC.
     """
 
-    # run this while the VASP calculation is still going
     is_monitor = True
 
-    def __init__(self, timeout_limit=3600):
+    def __init__(self, timeout_limit: float = 3600):
         self.timeout_limit = timeout_limit
 
-    def check(self, directory):
+    def check(self, directory: str) -> bool:
         """
         Check for error in the specified directory. Note, we assume that we are
         checking the vasp.out file. If that file is not present, we say that there
@@ -47,12 +46,7 @@ class FrozenErrorHandler(ErrorHandler):
         # our timeout specified -- where the job is still running and looks good.
         return False
 
-    def correct(self, directory):
-        """
-        Perform corrections based on the INCAR.
-        """
-        # Note "error" here is just True because there is no variation in this ErrorHandler.
-        # This value isn't used in fixing the Error anyways.
+    def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")

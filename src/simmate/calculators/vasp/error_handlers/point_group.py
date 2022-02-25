@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os
-import shutil
 
 from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
 
 
-class Zbrent(ErrorHandler):
+class PointGroup(ErrorHandler):
     """
-    Calculation is simply restarted using the most recent structure (CONTCAR)
+    Fixes an error where VASP does not have the symmetry group operations
+    available. To fix this, we simply need to turn symmetry off.
     """
 
     # run this while the VASP calculation is still going
@@ -19,23 +19,17 @@ class Zbrent(ErrorHandler):
     filename_to_check = "vasp.out"
 
     # These are the error messages that we are looking for in the file
-    possible_error_messages = [
-        "ZBRENT: fatal internal in",
-        "ZBRENT: fatal error in bracketing",
-    ]
+    possible_error_messages = ["group operation missing"]
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
-        # make the fix
-        incar["IBRION"] = 1
-        poscar_filename = os.path.join(directory, "POSCAR")
-        contcar_filename = os.path.join(directory, "CONTCAR")
-        shutil.copyfile(contcar_filename, poscar_filename)
-        correction = "switched IBRION to 1 and copied the CONTCAR over to the POSCAR"
+        # turn off symmetry
+        incar["ISYM"] = 0
+        correction = "switched ISYM to 0"
 
         # rewrite the INCAR with new settings
         incar.to_file(incar_filename)

@@ -5,7 +5,7 @@ import pytest
 
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.inputs import Incar
-from simmate.calculators.vasp.error_handlers import MeshSymmetryErrorHandler
+from simmate.calculators.vasp.error_handlers import MeshSymmetry
 
 
 def test_mesh_symmetry(tmpdir):
@@ -21,7 +21,7 @@ def test_mesh_symmetry(tmpdir):
     vasprun_filename = os.path.join(tmpdir, "vasprun.xml")
 
     # init class with default settings
-    error_handler = MeshSymmetryErrorHandler()
+    error_handler = MeshSymmetry()
 
     # Confirm an error IS NOT found when file doesn't exist
     error_handler.filename_to_check = "vasp.does_not_exist"

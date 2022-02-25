@@ -7,20 +7,19 @@ from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
 
 
-class LargeSigmaErrorHandler(ErrorHandler):
+class LargeSigma(ErrorHandler):
     """
     When ISMEAR >= 0 (Gaussian or Methfessel-Paxton), we need to monitor the
     magnitude of the entropy term T*S. If the entropy term is larger than
     1 meV/atom, then we reduce value of SIGMA. See VASP documentation for ISMEAR.
     """
 
-    # run this while the VASP calculation is still going
     is_monitor = True
 
     def __init__(self, entropy_per_atom_threshold=0.001):
         self.entropy_per_atom_threshold = entropy_per_atom_threshold
 
-    def check(self, directory):
+    def check(self, directory: str) -> bool:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")
@@ -64,7 +63,7 @@ class LargeSigmaErrorHandler(ErrorHandler):
         # not seeing any error.
         return False
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")
