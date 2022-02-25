@@ -23,7 +23,7 @@ class Brmix(ErrorHandler):
     def check(self, directory: str) -> bool:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(dir, "INCAR")
+        incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
         # if NELECT is in the INCAR, that means we are running
@@ -34,7 +34,7 @@ class Brmix(ErrorHandler):
             return False
 
         # otherwise check the file as usual for the error
-        super().check(directory)
+        return super().check(directory)
 
     def correct(self, directory: str) -> str:
 

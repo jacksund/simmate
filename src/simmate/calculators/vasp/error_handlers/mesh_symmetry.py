@@ -73,6 +73,12 @@ class MeshSymmetry(ErrorHandler):
 
     def correct(self, directory: str) -> str:
 
+        raise NotImplementedError(
+            "The fix for MeshSymmetryError hasn't been converted from Custodian "
+            "to Simmate yet. A fix does exist though, so be sure to tell our "
+            "that team you need it!"
+        )
+
         # load the INCAR file to view the current settings
         kpoints_filename = os.path.join(directory, "KPOINTS")
         kpoints = Kpoints.from_file(kpoints_filename)
@@ -91,9 +97,3 @@ class MeshSymmetry(ErrorHandler):
         # actions = [{"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}}]
         # VaspModder(vi=vi).apply_actions(actions)
         # return {"errors": ["mesh_symmetry"], "actions": actions}
-
-        raise NotImplementedError(
-            "The fix for MeshSymmetryError hasn't been converted from Custodian "
-            "to Simmate yet. A fix does exist though, so be sure to tell our "
-            "that team you need it!"
-        )

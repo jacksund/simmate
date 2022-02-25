@@ -18,8 +18,8 @@ class Tetirr(ErrorHandler):
     def correct(self, directory: str) -> str:
 
         # apply the fixes uses these other error handlers
-        fixes_1 = TetrahedronMesh.correct(directory)
-        fixes_2 = IncorrectShift.correct(directory)
+        fixes_1 = TetrahedronMesh().correct(directory)
+        fixes_2 = IncorrectShift().correct(directory)
 
         # combine the output messages and return
         return f"{fixes_1} and {fixes_2}"
