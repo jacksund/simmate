@@ -9,6 +9,7 @@ import itertools
 from tempfile import TemporaryDirectory, mkdtemp
 import shutil
 import sys
+import time
 
 from dask.distributed import Client, get_client, wait, TimeoutError
 
@@ -147,6 +148,46 @@ def make_archive(directory: str):
     )
     # now remove the directory we just archived
     shutil.rmtree(directory)
+
+
+def archive_old_runs(
+    directory: str = ".",
+    time_cutoff: float = 3 * 7 * 24 * 60 * 60,  # equal to 3 weeks
+):
+    """
+    Goes through a given directory and finds all "simmate-task-" folders that
+    are older than a given time cutoff. Each of these folders is then compressed
+    to a zip file and then the original folder is removed.
+
+    Parameters
+    ----------
+    - `directory`:
+        base directory that will contain folders to archive. Defaults to the
+        working directory.
+    - `time_cutoff`:
+        The time (in seconds) required to determine whether a folder is old or not.
+        If the folder is considered old, then it will be archived and then deleted.
+        The default is 3 weeks.
+
+    """
+    # load the full path to the desired directory
+    directory = get_directory(directory)
+
+    # grab all files/folders in this directory and then limit this list to those
+    # that are...
+    #   1. folders
+    #   2. start with "simmate-task-"
+    #   3. haven't been modified for at least time_cutoff
+    foldernames = [
+        os.path.join(directory, f)
+        for f in os.listdir(directory)
+        if os.path.isdir(f)
+        and "simmate-task-" in os.path.basename(f)
+        and time.time() - os.path.getmtime(f) > time_cutoff
+    ]
+
+    # now go through this list and archive the folders that met the criteria
+    [make_archive(f) for f in foldernames]
 
 
 def empty_directory(directory: str, files_to_keep: List[str] = []):

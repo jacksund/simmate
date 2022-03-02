@@ -60,7 +60,11 @@ energy_bulk = energy_mit_workflow.to_workflow_task()
 run_neb = neb_workflow.to_workflow_task()
 
 # Extra setup tasks
-load_input_and_register = LoadInputAndRegister()  # TODO: make DiffusionAnalysis a calc?
+load_input_and_register = LoadInputAndRegister(
+    workflow_name="diffusion/all-paths",
+    input_obj_name="structure",
+)  # TODO: make MigrationHop a calc so we can use calculation_table?
+
 build_db = BuildDiffusionAnalysisTask(MITDiffusionAnalysis)
 
 # ------------------------

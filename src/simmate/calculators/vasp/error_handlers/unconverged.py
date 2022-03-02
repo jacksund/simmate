@@ -9,21 +9,20 @@ from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
 
 
-class UnconvergedErrorHandler(ErrorHandler):
+class Unconverged(ErrorHandler):
     """
     Check if a calculation converged successfully. If not, the fix depends on
     whether its the ionic steps or electronic steps are struggling to converge.
 
-    NOTE: This can be confusing when used along with the NonconvergingErrorHandler
+    NOTE: This can be confusing when used along with the Nonconverging error handler
     because both attempt to fix failures in electronic convergence. These handlers
     are converted directly from Custodian, so it's not clear to me why they
     separated them. In the future, I need to clean this up.
     """
 
-    # This handler doesn't run until the calculation is complete
     is_monitor = False
 
-    def check(self, directory):
+    def check(self, directory: str) -> bool:
 
         # Now check if the calculation converged. If not, we have the error!
         xml_filename = os.path.join(directory, "vasprun.xml")
@@ -46,7 +45,7 @@ class UnconvergedErrorHandler(ErrorHandler):
         # don't have this error.
         return False
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")

@@ -8,7 +8,7 @@ from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
 
 
-class IncorrectSmearingHandler(ErrorHandler):
+class IncorrectSmearing(ErrorHandler):
     """
     This checks if a calculation is a metal (zero bandgap), has been run with
     ISMEAR=-5, and is not a static calculation. This type of smearing is only
@@ -17,13 +17,10 @@ class IncorrectSmearingHandler(ErrorHandler):
     using the smearing settings appropriate for metals (ISMEAR=2, SIGMA=0.2).
     """
 
-    # This handler doesn't run until the calculation is complete
     is_monitor = False
-
-    # we need to load all of the vasprun results to check for this error
     filename_to_check = "vasprun.xml"
 
-    def check(self, directory):
+    def check(self, directory: str) -> bool:
 
         # establish the full path to the output file
         filename = os.path.join(directory, self.filename_to_check)
@@ -61,7 +58,7 @@ class IncorrectSmearingHandler(ErrorHandler):
         # if we reach this point, there is no error
         return False
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")

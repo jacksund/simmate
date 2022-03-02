@@ -9,7 +9,7 @@ from simmate.calculators.vasp.database.density_of_states import (
 )
 
 workflow = s3task_to_workflow(
-    name="MatProj Density of States",
+    name="density-of-states/matproj",
     module=__name__,
     project_name="Simmate-Density-of-States",
     s3task=MatProjDensityOfStatesTask,

@@ -8,20 +8,19 @@ from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.outputs import Oszicar
 
 
-class PotimErrorHandler(ErrorHandler):
+class Potim(ErrorHandler):
     """
     This handler checks if a run has excessively large positive energy changes,
     where it's typically caused by too large of a POTIM. Runs will end up crashing
     with some other error (e.g. BRMIX) as the geometry gets progressively worse.
     """
 
-    # run this while the VASP calculation is still going
     is_monitor = True
 
-    def __init__(self, dE_per_atom_threshold=1):
+    def __init__(self, dE_per_atom_threshold: float = 1):
         self.dE_per_atom_threshold = dE_per_atom_threshold
 
-    def check(self, directory):
+    def check(self, directory: str) -> bool:
 
         # We check for this error in the OSZICAR because it's the smallest file
         # that will tell us energies -- and therefore the fastest to read.
@@ -51,7 +50,7 @@ class PotimErrorHandler(ErrorHandler):
         # not seeing any error.
         return False
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")

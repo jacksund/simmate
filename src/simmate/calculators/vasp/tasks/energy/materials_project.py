@@ -7,7 +7,7 @@ from simmate.calculators.vasp.tasks.relaxation.materials_project import (
 from simmate.calculators.vasp.error_handlers import (
     TetrahedronMesh,
     Eddrmm,
-    NonConvergingErrorHandler,
+    NonConverging,
 )
 
 
@@ -36,5 +36,5 @@ class MatProjStaticEnergy(MatProjRelaxation):
     error_handlers = [
         TetrahedronMesh(),
         Eddrmm(),
-        NonConvergingErrorHandler(),
+        NonConverging(),
     ]

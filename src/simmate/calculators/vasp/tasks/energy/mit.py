@@ -5,7 +5,7 @@ from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 from simmate.calculators.vasp.error_handlers import (
     TetrahedronMesh,
     Eddrmm,
-    NonConvergingErrorHandler,
+    NonConverging,
 )
 
 
@@ -38,5 +38,5 @@ class MITStaticEnergy(MITRelaxation):
     error_handlers = [
         TetrahedronMesh(),
         Eddrmm(),
-        NonConvergingErrorHandler(),
+        NonConverging(),
     ]

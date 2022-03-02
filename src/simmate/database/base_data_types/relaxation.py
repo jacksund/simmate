@@ -63,6 +63,7 @@ other connects all ionic steps to a specific calculation and result.
 
 """
 
+import os
 
 from simmate.database.base_data_types import (
     table_column,
@@ -191,6 +192,72 @@ class Relaxation(Structure, Calculation):
 
         # we now have a new child class and avoided writing some boilerplate code!
         return NewRelaxationClass, NewIonicStepClass
+
+    @classmethod
+    def from_directory(cls, directory: str):
+        # I assume the directory is from a vasp calculation, but I need to update
+        # this when I begin adding new calculators.
+        vasprun_filename = os.path.join(directory, "vasprun.xml")
+        vasprun = Vasprun(vasprun_filename)
+        return cls.from_vasp_run(vasprun)
+
+    @classmethod
+    def from_vasp_run(cls, vasprun: Vasprun):
+        # The data is actually easier to access as a dictionary and everything
+        # we need is stored under the "output" key
+        data = vasprun.as_dict()["output"]
+
+        # The only other data we need to grab is the list of structures. We can
+        # pull the structure for each ionic step from the vasprun class directly.
+        structures = vasprun.structures
+
+        # Make the relaxation entry. Note we need to save this to the database
+        # in order to link/save the ionic steps below. We save the structure
+        # as the final one in the calculation.
+        relaxation = cls.from_toolkit(
+            structure=structures[-1],
+            volume_change=(structures[-1].volume - structures[0].volume)
+            / structures[0].volume,
+            band_gap=data.get("bandgap"),
+            is_gap_direct=data.get("is_gap_direct"),
+            energy_fermi=data.get("efermi"),
+            conduction_band_minimum=data.get("cbm"),
+            valence_band_maximum=data.get("vbm"),
+        )
+
+        # lastly, we also want to save the corrections made and directory it ran in
+        # relaxation.corrections = corrections
+        # relaxation.directory = directory
+
+        # Now we have the relaxation data all loaded and can save it to the database
+        relaxation.save()
+
+        # Now let's iterate through the ionic steps and save these to the database.
+        for number, (structure, ionic_step) in enumerate(
+            zip(structures, data["ionic_steps"])
+        ):
+            # first pull all the data together and save it to the database. We
+            # are saving this to an IonicStepStructure datatable.
+            structure_db = cls.structures.field.model.from_toolkit(
+                number=number,
+                structure=structure,
+                energy=ionic_step["e_wo_entrp"],
+                site_forces=ionic_step["forces"],
+                lattice_stress=ionic_step["stress"],
+                relaxation=relaxation,  # this links the structure to this relaxation
+            )
+            structure_db.save()
+
+            # If this is the first structure, we want to link it as such
+            if number == 0:
+                relaxation.structure_start_id = structure_db.id
+            # and same for the final structure. Note, we can't use elif becuase
+            # there's a chance the start/end structure are the same, which occurs
+            # when the starting structure is found to be relaxed already.
+            if number == len(structures) - 1:
+                relaxation.structure_final_id = structure_db.id
+
+        return relaxation
 
     def update_from_vasp_run(
         self,

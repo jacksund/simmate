@@ -4,7 +4,7 @@ import os
 
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.inputs import Incar
-from simmate.calculators.vasp.error_handlers import PotimErrorHandler
+from simmate.calculators.vasp.error_handlers import Potim
 
 
 def test_potim(tmpdir):
@@ -19,7 +19,7 @@ def test_potim(tmpdir):
     oszicar_filename = os.path.join(tmpdir, "OSZICAR")
 
     # init class with default settings
-    error_handler = PotimErrorHandler()
+    error_handler = Potim()
 
     # Confirm an error IS found using test files
     assert error_handler.check(tmpdir) == True

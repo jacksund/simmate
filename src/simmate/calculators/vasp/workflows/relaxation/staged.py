@@ -39,7 +39,7 @@ relax_task_03 = relaxation_quality03.to_workflow_task()
 relax_task_04 = relaxation_quality04.to_workflow_task()
 static_task_04 = energy_quality04.to_workflow_task()
 
-with Workflow("Staged Relaxation") as workflow:
+with Workflow("relaxation/staged") as workflow:
 
     structure = Parameter("structure")
     command = Parameter("command", default="vasp_std > vasp.out")

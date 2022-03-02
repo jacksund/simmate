@@ -11,20 +11,16 @@ from simmate.calculators.vasp.inputs import Incar
 class RealOptlay(ErrorHandler):
     """
     This handler addresses a series of warning messages that each have the same
-    attempted fixes. Note that this affect how we handle correcting the error!
-
-    NOTE: I call this RealOptlay but don't have a good understanding of what
-    the error exactly is. This is simply a conversion from Custodian of the
-    following errors: ["rspher", "real_optlay", "nicht_konv"]
+    attempted fixes. There are a series of fixes that can be attempted, so we
+    keep a running log of how many times this handler is called.
     """
 
-    # run this while the VASP calculation is still going
+    # NOTE: I call this RealOptlay but don't have a good understanding of what
+    # the error exactly is. This is simply a conversion from Custodian of the
+    # following errors: ["rspher", "real_optlay", "nicht_konv"]
+
     is_monitor = True
-
-    # we assume that we are checking the vasp.out file
     filename_to_check = "vasp.out"
-
-    # These are the error messages that we are looking for in the file
     possible_error_messages = [
         "ERROR RSPHER",
         "REAL_OPTLAY: internal error",
@@ -36,7 +32,7 @@ class RealOptlay(ErrorHandler):
     # how we treat the error and correct it.
     natoms_large_cell = 100
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")

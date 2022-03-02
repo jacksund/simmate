@@ -6,7 +6,7 @@ import pytest
 
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.inputs import Incar
-from simmate.calculators.vasp.error_handlers import FrozenErrorHandler
+from simmate.calculators.vasp.error_handlers import Frozen
 
 
 def test_frozen(tmpdir):
@@ -21,7 +21,7 @@ def test_frozen(tmpdir):
     out_filename = os.path.join(tmpdir, "vasp.out")
 
     # We use a negative timeout to ensure this class fails
-    error_handler = FrozenErrorHandler(timeout_limit=-1)
+    error_handler = Frozen(timeout_limit=-1)
 
     # Confirm an error IS found
     assert error_handler.check(tmpdir) == True

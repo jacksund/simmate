@@ -4,6 +4,9 @@
 This module is experimental and subject to change.
 """
 
+import os
+
+from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.electronic_structure.dos import CompleteDos
 
 from simmate.database.base_data_types import (
@@ -58,6 +61,9 @@ class DensityofStates(DatabaseTable):
         # return the dictionary
         return data if as_dict else cls(**data)
 
+    def to_toolkit_density_of_states(self):
+        return CompleteDos.from_dict(self.density_of_states_data)
+
 
 class DensityofStatesCalc(Structure, DensityofStates, Calculation):
     class Meta:
@@ -88,3 +94,16 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
 
         # Now we have the relaxation data all loaded and can save it to the database
         self.save()
+
+    @classmethod
+    def from_directory(cls, directory: str):
+        # I assume the directory is from a vasp calculation, but I need to update
+        # this when I begin adding new calculators.
+        vasprun_filename = os.path.join(directory, "vasprun.xml")
+        vasprun = Vasprun(vasprun_filename)
+        density_of_states_db = cls.from_toolkit(
+            structure=vasprun.structures[0],
+            density_of_states=vasprun.complete_dos,
+        )
+        density_of_states_db.save()
+        return density_of_states_db

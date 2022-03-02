@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import os
+import yaml
+
 import prefect
 from prefect import Task
 
 from simmate.utilities import get_directory
 from simmate.toolkit import Structure
+from simmate.database.base_data_types import DatabaseTable
 
 from typing import Tuple, Any
 
@@ -13,7 +17,15 @@ from typing import Tuple, Any
 
 
 class LoadInputAndRegister(Task):
-    def __init__(self, calculation_table=None, **kwargs):
+    def __init__(
+        self,
+        workflow_name: str = None,
+        input_obj_name: str = None,
+        calculation_table: DatabaseTable = None,
+        **kwargs,
+    ):
+        self.workflow_name = workflow_name
+        self.input_obj_name = input_obj_name
         self.calculation_table = calculation_table  # If None, registration is skipped
         super().__init__(**kwargs)
 
@@ -24,6 +36,7 @@ class LoadInputAndRegister(Task):
         source: dict = None,
         directory: str = None,
         use_previous_directory: bool = False,
+        **kwargs: Any,
     ) -> Tuple[Structure, str]:
         """
         How the input was submitted as a parameter depends on if we are submitting
@@ -40,6 +53,8 @@ class LoadInputAndRegister(Task):
         use_previous_directory is only used when we are pulling a structure from a
         previous calculation. If use_previous_directory=True, then the directory
         parameter is ignored.
+
+        **kwargs is anything extra that you want saved to simmate_input.yaml
         """
 
         # -------------------------------------------------------------------------
@@ -102,10 +117,11 @@ class LoadInputAndRegister(Task):
         # This is only done if a table is provided. Some special-case workflows
         # don't store calculation information bc the flow is just a quick python
         # analysis.
+        prefect_flow_run_id = prefect.context.flow_run_id
         if self.calculation_table:
             # load/create the calculation for this workflow run
             calculation = self.calculation_table.from_prefect_id(
-                prefect.context.flow_run_id,
+                id=prefect_flow_run_id,
                 # We pass the initial input_obj in case the calculation wasn't created
                 # yet (and creation requires the structure)
                 structure=input_cleaned,
@@ -119,64 +135,34 @@ class LoadInputAndRegister(Task):
 
         # -------------------------------------------------------------------------
 
+        # Lastly, we want to write a file summarizing the inputs used for this
+        # workflow run. This allows future users to reproduce the results if
+        # desired -- and it also allows us to load old results into a database.
+        input_summary = dict(
+            workflow_name=self.workflow_name,
+            source=source_cleaned,
+            directory=directory_cleaned,
+            # this ID is ingored as an input but needed for loading past data
+            prefect_flow_run_id=prefect_flow_run_id,
+            **kwargs,
+        )
+        # As a final thing to add, we want the input_obj, but we want to save
+        # this to the proper input name. Also, this input should either be a
+        # dictionary or a python object, where we convert to a dictionary in
+        # order to write to file.
+        input_dict = input_obj if isinstance(input_obj, dict) else input_obj.as_dict()
+        input_summary[self.input_obj_name] = input_dict
+
+        # now write the summary to file in the same directory as the calc.
+        input_summary_filename = os.path.join(
+            directory_cleaned, "simmate_metadata.yaml"
+        )
+        with open(input_summary_filename, "w") as file:
+            content = yaml.dump(input_summary)
+            file.write(content)
+
+        # -------------------------------------------------------------------------
+
         # the rest of the calculation doesn't need the source (that was only for
         # registering the calc), so we just return the pymatgen structure and dir
         return input_cleaned, directory_cleaned
-
-
-# These are my notes how we can specify a source
-"""
-
-method
-
-table
-    either Calculation, Structure table, or a table that is both
-    if not Structure table:
-        structure_field
-
-
-
-if transformation and transformation.ninput > 1:
-    one of the following:
-        ids
-        prefect_flow_ids
-        directories
-else:
-    one of the following:
-        id
-        prefect_flow_id # only if Calculation table
-        directory  # only if Calculation table
-
-
-
-EXAMPLES...
-
-# from a thirdparty database
-source = {
-    "table": "MatProjStructure",
-    "id": "mp-123",
-}
-
-# from a random structure creator
-source = {"method": "PyXtalStructure"}
-
-# from a templated structure creator (e.g. substituition or prototypes)
-source = {
-    "method": "PrototypeStructure",
-    "table": "AFLOWPrototypes",
-    "id": 123,
-}
-source = {
-    "method": "SubstituitionStructure",
-    "table": "MatProjStructure",
-    "id": "mp-123",
-}
-
-# from a transformation
-source = {
-    "method": "MirrorMutation",
-    "table": "MatProjStructure",
-    "id": "mp-123",
-}
-
-"""

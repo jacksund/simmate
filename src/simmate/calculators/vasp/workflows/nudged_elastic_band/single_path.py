@@ -28,14 +28,20 @@ from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
 )
 
+WORKFLOW_NAME = "diffusion/single-path"
+
 # Convert our workflow objects to task objects
 relax_endpoint = relaxation_neb_endpoint_workflow.to_workflow_task()
 run_neb = neb_from_images.to_workflow_task()
 
 # Extra setup tasks
-load_input_and_register = LoadInputAndRegister()  # TODO: make MigrationHop a calc?
+load_input_and_register = LoadInputAndRegister(
+    workflow_name=WORKFLOW_NAME,
+    input_obj_name="migration_hop",
+)  # TODO: make MigrationHop a calc so we can use calculation_table?
 
-with Workflow("NEB (for a single migration hop)") as workflow:
+
+with Workflow(WORKFLOW_NAME) as workflow:
 
     migration_hop = Parameter("migration_hop")
     directory = Parameter("directory", default=None)

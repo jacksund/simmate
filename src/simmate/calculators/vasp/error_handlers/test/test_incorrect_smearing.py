@@ -4,7 +4,7 @@ import os
 
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.inputs import Incar
-from simmate.calculators.vasp.error_handlers import IncorrectSmearingHandler
+from simmate.calculators.vasp.error_handlers import IncorrectSmearing
 
 
 def test_incorrect_smearing(tmpdir):
@@ -18,7 +18,7 @@ def test_incorrect_smearing(tmpdir):
     incar_filename = os.path.join(tmpdir, "INCAR")
 
     # init class with default settings
-    error_handler = IncorrectSmearingHandler()
+    error_handler = IncorrectSmearing()
 
     # Confirm an error IS NOT found
     error_handler.filename_to_check = "vasprun.does_not_exist"

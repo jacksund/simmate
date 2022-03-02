@@ -11,16 +11,11 @@ class Pricel(ErrorHandler):
     This fixes an internal VASP error by turning off symmetry.
     """
 
-    # run this while the VASP calculation is still going
     is_monitor = True
-
-    # we assume that we are checking the vasp.out file
     filename_to_check = "vasp.out"
-
-    # These are the error messages that we are looking for in the file
     possible_error_messages = ["internal error in subroutine PRICEL"]
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")

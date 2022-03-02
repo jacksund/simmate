@@ -9,11 +9,18 @@ from simmate.workflows.common_tasks import LoadInputAndRegister, SaveOutputTask
 from simmate.calculators.vasp.tasks.dynamics import MITDynamicsTask
 from simmate.calculators.vasp.database.dynamics import MITDynamicsRun
 
+WORKFLOW_NAME = "dynamics/mit"
+
 s3task_obj = MITDynamicsTask()
 load_input_and_register = LoadInputAndRegister(MITDynamicsRun)
+load_input_and_register = LoadInputAndRegister(
+    workflow_name=WORKFLOW_NAME,
+    input_obj_name="structure",
+    calculation_table=MITDynamicsRun,
+)
 save_results = SaveOutputTask(MITDynamicsRun)
 
-with Workflow("MIT Molecular Dynamics") as workflow:
+with Workflow(WORKFLOW_NAME) as workflow:
     structure = Parameter("structure")
     command = Parameter("command", default="vasp_std > vasp.out")
     source = Parameter("source", default=None)

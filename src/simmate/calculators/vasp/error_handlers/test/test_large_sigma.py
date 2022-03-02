@@ -6,7 +6,7 @@ import pytest
 
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.inputs import Incar
-from simmate.calculators.vasp.error_handlers import LargeSigmaErrorHandler
+from simmate.calculators.vasp.error_handlers import LargeSigma
 
 
 def test_large_sigma(tmpdir):
@@ -21,7 +21,7 @@ def test_large_sigma(tmpdir):
     outcar_filename = os.path.join(tmpdir, "OUTCAR")
 
     # init class with default settings
-    error_handler = LargeSigmaErrorHandler()
+    error_handler = LargeSigma()
 
     # Confirm an error IS found
     assert error_handler.check(tmpdir) == True

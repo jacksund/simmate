@@ -9,7 +9,7 @@ from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
 
 
-class MeshSymmetryErrorHandler(ErrorHandler):
+class MeshSymmetry(ErrorHandler):
     """
     Corrects the mesh symmetry error in VASP. This error is sometimes
     non-fatal and the job can complete successfully. So this error handler
@@ -18,18 +18,13 @@ class MeshSymmetryErrorHandler(ErrorHandler):
     automatic k-mesh has been used.
     """
 
-    # This handler doesn't run until the calculation is complete
     is_monitor = False
-
-    # we assume that we are checking the vasp.out file
     filename_to_check = "vasp.out"
-
-    # These are the error messages that we are looking for in the file
     possible_error_messages = [
         "Reciprocal lattice and k-lattice belong to different class of"
     ]
 
-    def check(self, directory):
+    def check(self, directory: str) -> bool:
 
         # load the INCAR file to view the current settings
         incar_filename = os.path.join(directory, "INCAR")
@@ -76,7 +71,13 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         # class's default function to do this.
         return super().check(directory)
 
-    def correct(self, directory):
+    def correct(self, directory: str) -> str:
+
+        raise NotImplementedError(
+            "The fix for MeshSymmetryError hasn't been converted from Custodian "
+            "to Simmate yet. A fix does exist though, so be sure to tell our "
+            "that team you need it!"
+        )
 
         # load the INCAR file to view the current settings
         kpoints_filename = os.path.join(directory, "KPOINTS")
@@ -96,9 +97,3 @@ class MeshSymmetryErrorHandler(ErrorHandler):
         # actions = [{"dict": "KPOINTS", "action": {"_set": {"kpoints": [[m] * 3]}}}]
         # VaspModder(vi=vi).apply_actions(actions)
         # return {"errors": ["mesh_symmetry"], "actions": actions}
-
-        raise NotImplementedError(
-            "The fix for MeshSymmetryError hasn't been converted from Custodian "
-            "to Simmate yet. A fix does exist though, so be sure to tell our "
-            "that team you need it!"
-        )
