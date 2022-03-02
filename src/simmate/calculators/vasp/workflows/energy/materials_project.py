@@ -9,7 +9,7 @@ from simmate.calculators.vasp.database.energy import (
 )
 
 workflow = s3task_to_workflow(
-    name="Materials Project Static Energy",
+    name="static-energy/matproj",
     module=__name__,
     project_name="Simmate-Energy",
     s3task=MPStaticEnergyTask,

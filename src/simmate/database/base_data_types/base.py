@@ -248,7 +248,11 @@ class DatabaseTable(models.Model):
 
     source = table_column.JSONField(blank=True, null=True)
     """
-    Where the data came from. This could be a number of things, including...
+    > Note, this field is highly experimental at the moment and subject to
+    change.
+    
+    This column indicated the data came from, and it could be a number of things,
+    including...
      - a third party id
      - a structure from a different Simmate datbase table
      - a transformation of another structure
@@ -256,16 +260,44 @@ class DatabaseTable(models.Model):
      - a custom submission by the user
     
     By default, this is a JSON field to account for all scenarios, but some
-    tables (such as those in `simmate.database.third_parties`) this is a 
-    constant and therefore overwritten as an attribute.
+    tables (such as those in `simmate.database.third_parties`) this is value
+    should be the same for ALL entries in the table and therefore the column is
+    overwritten as an attribute.
     
-    EXAMPLES: (source type --> source_id)
+    For other tables where this is not a constant, here are some examples of
+    values used in this column:
     
-    - MaterialsProject --> mp-123
-    - PyXtalStructure --> null
-    - AtomicPurmutation --> 123
-    - HereditaryMutation --> [123,124]
-    - user_submission --> null
+    ``` python
+    # from a thirdparty database or separate table
+    source = {
+        "table": "MatProjStructure",
+        "id": "mp-123",
+    }
+    
+    # from a random structure creator
+    source = {"method": "PyXtalStructure"}
+    
+    # from a templated structure creator (e.g. substituition or prototypes)
+    source = {
+        "method": "PrototypeStructure",
+        "table": "AFLOWPrototypes",
+        "id": 123,
+    }
+    
+    # from a transformation
+    source = {
+        "method": "MirrorMutation",
+        "table": "MatProjStructure",
+        "id": "mp-123",
+    }
+    
+    # from a multi-structure transformation
+    source = {
+        "method": "HereditaryMutation",
+        "table": "MatProjStructure",
+        "ids": ["mp-123", "mp-321"],
+    }
+    ```
     """
 
     source_doi: str = None
@@ -287,7 +319,9 @@ class DatabaseTable(models.Model):
     # extra methods useful for our querysets.
     objects = DatabaseTableManager()
     """
-    Accesses all of the rows in this datatable and initiates SearchResults.
+    Accesses all of the rows in this datatable and initiates a SearchResults
+    object. Using this, you can perform complex filtering and conversions on
+    data from this table.
     """
 
     @classmethod

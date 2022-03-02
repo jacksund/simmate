@@ -28,15 +28,20 @@ from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
     SaveNEBOutputTask,
 )
 
+WORKFLOW_NAME = "diffusion/from-images"
+
 neb_task = MITNudgedElasticBand()
-load_input_and_register = LoadInputAndRegister()  # TODO: make MigrationHop a calc?
+load_input_and_register = LoadInputAndRegister(
+    workflow_name=WORKFLOW_NAME,
+    input_obj_name="migration_images",
+)
 save_results = SaveNEBOutputTask(
     MITDiffusionAnalysis,
     MITMigrationHop,
     MITMigrationImage,
 )
 
-with Workflow("NEB (for a set of migration images)") as workflow:
+with Workflow(WORKFLOW_NAME) as workflow:
 
     migration_images = Parameter("migration_images")
     command = Parameter("command", default="vasp_std > vasp.out")

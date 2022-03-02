@@ -9,7 +9,7 @@ from simmate.calculators.vasp.database.band_structure import (
 )
 
 workflow = s3task_to_workflow(
-    name="MatProj Band Structure",
+    name="band-structure/matproj",
     module=__name__,
     project_name="Simmate-Band-Structure",
     s3task=MatProjBandStructureTask,

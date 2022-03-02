@@ -37,7 +37,11 @@ def s3task_to_workflow(
     """
 
     s3task_obj = s3task()  # Use defaults
-    load_input_and_register = LoadInputAndRegister(calculation_table)
+    load_input_and_register = LoadInputAndRegister(
+        workflow_name=name,
+        input_obj_name="structure",
+        calculation_table=calculation_table,
+    )
     save_results = SaveOutputTask(calculation_table)
 
     with Workflow(name) as workflow:

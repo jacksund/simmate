@@ -9,7 +9,7 @@ from simmate.calculators.vasp.database.relaxation import (
 )
 
 workflow = s3task_to_workflow(
-    name="Materials Project Relaxation",
+    name="relaxation/matproj",
     module=__name__,
     project_name="Simmate-Relaxation",
     s3task=MPRelaxationTask,

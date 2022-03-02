@@ -25,14 +25,19 @@ from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
 )
 
+WORKFLOW_NAME = "diffusion/from-endpoints"
+
 # Convert our workflow objects to task objects
 relax_endpoint = relaxation_neb_endpoint_workflow.to_workflow_task()
 run_neb = neb_from_images.to_workflow_task()
 
 # Extra setup tasks
-load_input_and_register = LoadInputAndRegister()  # TODO: make MigrationHop a calc?
+load_input_and_register = LoadInputAndRegister(
+    workflow_name=WORKFLOW_NAME,
+    input_obj_name="structure",
+)
 
-with Workflow("NEB (from endpoint structures)") as workflow:
+with Workflow(WORKFLOW_NAME) as workflow:
 
     supercell_start = Parameter("supercell_start")
     supercell_end = Parameter("supercell_end")

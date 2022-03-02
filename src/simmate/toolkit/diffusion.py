@@ -413,3 +413,6 @@ class MigrationImages(list):
         migration_images_cleaned.is_from_past_calc = is_from_past_calc
 
         return migration_images_cleaned
+
+    def as_dict(self):
+        return [s.as_dict() for s in self]
