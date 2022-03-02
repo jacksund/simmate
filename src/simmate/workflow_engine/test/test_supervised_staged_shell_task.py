@@ -22,7 +22,7 @@ import os
 import pytest
 
 from simmate.workflow_engine.error_handler import ErrorHandler
-from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
+from simmate.workflow_engine.supervised_staged_shell_task import (
     S3Task,
     NonZeroExitError,
     MaxCorrectionsError,

@@ -7,7 +7,7 @@ from simmate.workflows.common_tasks import (
 )
 
 from typing import List
-from simmate.workflow_engine.tasks.supervised_staged_shell_task import S3Task
+from simmate.workflow_engine.supervised_staged_shell_task import S3Task
 from simmate.database.base_data_types import Calculation
 
 

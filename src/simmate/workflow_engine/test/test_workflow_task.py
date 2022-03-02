@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.workflow_engine.workflow import Workflow, task
-from simmate.workflow_engine.tasks.workflow_task import WorkflowTask
+from simmate.workflow_engine.workflow_task import WorkflowTask
 
 
 @task
