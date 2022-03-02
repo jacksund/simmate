@@ -12,48 +12,6 @@ def workflows():
     pass
 
 
-def get_workflow(workflow_name: str):
-    """
-    This is a utility for click (cli) that grabs a workflow from the simmate
-    workflows. If the workflow can't be found, it raises a ClickException.
-
-    Parameters
-    ----------
-    workflow_name : str
-        Name of the workflow to grab (e.g. relaxation-matproj)
-    """
-
-    from simmate.workflows.utilities import get_list_of_all_workflows
-
-    allowed_workflows = get_list_of_all_workflows()
-
-    # make sure we have a proper workflow name provided
-    if workflow_name not in allowed_workflows:
-        raise click.ClickException(
-            "The workflow you provided isn't known. Make sure you don't have any "
-            "typos! If you want a list of all available workflows, use the command "
-            "`simmate workflows list-all`. You can also interactively explore "
-            "workflows with `simmate workflows explore`"
-        )
-
-    from importlib import import_module
-
-    # parse the workflow name. (e.g. static-energy/mit --> static-energy + mit)
-    type_name, preset_name = workflow_name.split("/")
-    type_name = type_name.replace("-", "_")
-    preset_name = preset_name.replace("-", "_")
-
-    # The naming convention matches the import path, so we can load the workflow
-    workflow_module = import_module(f"simmate.workflows.{type_name}")
-
-    click.echo(
-        f"Using... from simmate.workflows.{type_name} import {preset_name}_workflow"
-    )
-    workflow = getattr(workflow_module, f"{preset_name}_workflow")
-
-    return workflow
-
-
 def list_options(options: List) -> int:
     """
     This is a utility for click (cli) that prints of list of items as a numbered
@@ -208,6 +166,7 @@ def explore():
     from simmate.workflows.utilities import (
         ALL_WORKFLOW_TYPES,
         get_list_of_workflows_by_type,
+        get_workflow,
     )
 
     click.echo("\n\nWhat type of analysis are you interested in?")
@@ -227,7 +186,11 @@ def explore():
     click.echo(f"\n\n===================== {final_workflow_name} =====================")
 
     # now we load this workflow and print the docstring.
-    workflow = get_workflow(final_workflow_name)
+    workflow = get_workflow(
+        workflow_name=final_workflow_name,
+        precheck_flow_exists=True,
+        print_equivalent_import=True,
+    )
 
     click.echo(workflow.__doc__)
 
@@ -263,7 +226,13 @@ def show_config(workflow_name):
     """
 
     click.echo("LOADING WORKFLOW...")
-    workflow = get_workflow(workflow_name)
+    from simmate.workflows.utilities import get_workflow
+
+    workflow = get_workflow(
+        workflow_name=workflow_name,
+        precheck_flow_exists=True,
+        print_equivalent_import=True,
+    )
 
     click.echo("PRINTING WORKFLOW CONFIG...")
 
@@ -296,8 +265,13 @@ def setup_only(workflow_name, filename, directory):
 
     click.echo("LOADING STRUCTURE AND WORKFLOW...")
     from simmate.toolkit import Structure
+    from simmate.workflows.utilities import get_workflow
 
-    workflow = get_workflow(workflow_name)
+    workflow = get_workflow(
+        workflow_name=workflow_name,
+        precheck_flow_exists=True,
+        print_equivalent_import=True,
+    )
     structure = Structure.from_file(filename)
 
     click.echo("WRITING INPUT FILES...")
@@ -354,7 +328,13 @@ def run(context, workflow_name, structure, command, directory):
 
     click.echo("LOADING WORKFLOW & INPUT PARAMETERS...")
 
-    workflow = get_workflow(workflow_name)
+    from simmate.workflows.utilities import get_workflow
+
+    workflow = get_workflow(
+        workflow_name=workflow_name,
+        precheck_flow_exists=True,
+        print_equivalent_import=True,
+    )
     kwargs_cleaned = parse_parameters(
         context=context,
         structure=structure,
@@ -405,7 +385,13 @@ def run_cloud(context, workflow_name, structure, command, directory):
 
     click.echo("LOADING WORKFLOW & INPUT PARAMETERS...")
 
-    workflow = get_workflow(workflow_name)
+    from simmate.workflows.utilities import get_workflow
+
+    workflow = get_workflow(
+        workflow_name=workflow_name,
+        precheck_flow_exists=True,
+        print_equivalent_import=True,
+    )
     kwargs_cleaned = parse_parameters(
         context=context,
         structure=structure,
@@ -441,7 +427,13 @@ def run_yaml(context, filename):
         kwargs = yaml.full_load(file)
 
     # we pop the workflow name so that it is also removed from the rest of kwargs
-    workflow = get_workflow(kwargs.pop("workflow_name"))
+    from simmate.workflows.utilities import get_workflow
+
+    workflow = get_workflow(
+        workflow_name=kwargs.pop("workflow_name"),
+        precheck_flow_exists=True,
+        print_equivalent_import=True,
+    )
     kwargs_cleaned = parse_parameters(context=kwargs)
 
     click.echo("RUNNING WORKFLOW...")
