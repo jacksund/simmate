@@ -21,8 +21,8 @@ class Workflow(PrefectFlow):
     """
     This class behaves exactly like a normal Prefect workflow, where we add some
     common utilities and pre-submit tasks. For example, there is the `run_cloud`
-    methods, which us to register a calculation along with submitting a workflow
-    to the cloud.
+    method, which allows us to register a calculation to a database table before
+    we submit the workflow to Prefect Cloud.
 
     To learn how to use this class, see [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)
     """
@@ -41,11 +41,20 @@ class Workflow(PrefectFlow):
     attribute is mainly just for organizing workflows in the Prefect Cloud interface.
     """
 
+    s3task: S3Task = None
+    """
+    The supervised-staged-shell task (or S3Task) that this workflow uses to run.
+    For understanding what the calculation does and the settings it uses, users
+    should start here. You can also use a workflows `s3task.run` to run the workflow
+    without storing results in the database.
+    """
+
     calculation_table: Calculation = None
     """
     The database table where calculation information (such as the prefect_flow_run_id)
     is stored. Note, for NestedWorkflows, this table will not be the same as the
-    result table!
+    result table! The table should use 
+    `simmate.database.base_data_types.Calculation`
     """
 
     result_table: DatabaseTable = None
@@ -55,15 +64,8 @@ class Workflow(PrefectFlow):
     for NestedWorkflows, where the result table may point to a specific
     sub-workflow's table for results. An example of this is the relaxation/staged
     workflow, which is made up of a series of relaxations -- and the result 
-    table points to the final relaxation in this series.
-    """
-
-    s3task: S3Task = None
-    """
-    The supervised-staged-shell task (or S3Task) that this workflow uses to run.
-    For understanding what the calculation does and the settings it uses, users
-    should start here. You can also use a workflows `s3task.run` to run the workflow
-    without storing results in the database.
+    table points to the final relaxation in this series. The table should use 
+    `simmate.database.base_data_types.DatabaseTable`
     """
 
     def run_cloud(

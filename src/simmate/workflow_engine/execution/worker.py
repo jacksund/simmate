@@ -7,7 +7,6 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 
 from django.db import transaction
 
-from simmate.configuration.django import setup_full  # ensures setup
 from simmate.workflow_engine.execution.database import WorkItem
 
 # In the future, I might want this worker to be a local dask cluster that has
