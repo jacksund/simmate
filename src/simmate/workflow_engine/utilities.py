@@ -53,6 +53,7 @@ def s3task_to_workflow(
 
         structure_toolkit, directory_cleaned = load_input_and_register(
             input_obj=structure,
+            command=command,
             source=source,
             directory=directory,
             use_previous_directory=use_previous_directory,

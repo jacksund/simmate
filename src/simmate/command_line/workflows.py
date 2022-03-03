@@ -128,12 +128,12 @@ def parse_parameters(
     # we need to load as toolkit object. This is also the case for a number
     # of inputs like migration_hop, structures, etc.
     if structure:
-        kwargs_cleaned["structure"] = Structure.from_file(structure)
+        kwargs_cleaned["structure"] = Structure.from_dynamic(structure)
 
     if "structures" in kwargs_cleaned.keys():
         structure_filenames = kwargs_cleaned["structures"].split(";")
         kwargs_cleaned["structures"] = [
-            Structure.from_file(file) for file in structure_filenames
+            Structure.from_dynamic(file) for file in structure_filenames
         ]
 
     if "migration_hop" in kwargs_cleaned.keys():
@@ -143,12 +143,12 @@ def parse_parameters(
         kwargs_cleaned["migration_hop"] = migration_hop
 
     if "supercell_start" in kwargs_cleaned.keys():
-        kwargs_cleaned["supercell_start"] = Structure.from_file(
+        kwargs_cleaned["supercell_start"] = Structure.from_dynamic(
             kwargs_cleaned["supercell_start"]
         )
 
     if "supercell_end" in kwargs_cleaned.keys():
-        kwargs_cleaned["supercell_end"] = Structure.from_file(
+        kwargs_cleaned["supercell_end"] = Structure.from_dynamic(
             kwargs_cleaned["supercell_end"]
         )
 

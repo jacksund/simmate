@@ -13,6 +13,8 @@ from prefect.utilities.graphql import with_args
 from prefect.backend.flow_run import FlowRunView, FlowView, watch_flow_run
 
 from typing import List
+from simmate.workflow_engine.supervised_staged_shell_task import S3Task
+from simmate.database.base_data_types import DatabaseTable, Calculation
 
 
 class Workflow(PrefectFlow):
@@ -25,12 +27,43 @@ class Workflow(PrefectFlow):
     To learn how to use this class, see [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)
     """
 
-    result_task = None
+    result_task: Task = None
     """
     In many ETL workflows, we may also want the result of the some terminating
     task directly. This would save us from having to go find the result in
     the database. So by setting `result_task`, we are able get access a specific task's
     result -- directly as a python object(s). This is optional.
+    """
+
+    project_name: str = None
+    """
+    The name of the project in the  that this workflow is associated with. This 
+    attribute is mainly just for organizing workflows in the Prefect Cloud interface.
+    """
+
+    calculation_table: Calculation = None
+    """
+    The database table where calculation information (such as the prefect_flow_run_id)
+    is stored. Note, for NestedWorkflows, this table will not be the same as the
+    result table!
+    """
+
+    result_table: DatabaseTable = None
+    """
+    The database table where all calculation results are stored. In many cases,
+    this is the same table as `calculation_table` -- the exception is
+    for NestedWorkflows, where the result table may point to a specific
+    sub-workflow's table for results. An example of this is the relaxation/staged
+    workflow, which is made up of a series of relaxations -- and the result 
+    table points to the final relaxation in this series.
+    """
+
+    s3task: S3Task = None
+    """
+    The supervised-staged-shell task (or S3Task) that this workflow uses to run.
+    For understanding what the calculation does and the settings it uses, users
+    should start here. You can also use a workflows `s3task.run` to run the workflow
+    without storing results in the database.
     """
 
     def run_cloud(
@@ -233,19 +266,20 @@ class Workflow(PrefectFlow):
 
         return WorkflowTask(workflow=self)
 
-
-# TODO: This is an example query where I grab all ids. This may be useful in the
-# future.
-# query = {
-#     "query": {
-#         with_args(
-#             "flow_run",
-#             {
-#                 "where": {
-#                     "flow": {"name": {"_eq": "MIT Relaxation"}},
-#                     "state": {"_in": ["Completed", "Scheduled"]},
-#                 },
-#             },
-#         ): ["id"]
-#     }
-# }
+    # @classmethod
+    # def get_all_ids_in_state(cls, states=["Completed", "Scheduled"]):
+    #     # TODO: This is an example query where I grab all ids. This may be useful in the
+    #     # future.
+    #     query = {
+    #         "query": {
+    #             with_args(
+    #                 "flow_run",
+    #                 {
+    #                     "where": {
+    #                         "flow": {"name": {"_eq": cls.name}},
+    #                         "state": {"_in": states},
+    #                     },
+    #                 },
+    #             ): ["id"]
+    #         }
+    #     }

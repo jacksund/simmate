@@ -146,6 +146,8 @@ with Workflow("NEB (for all unique pathways)") as workflow:
         input_obj=structure,
         source=source,
         directory=directory,
+        command=command,
+        migrating_specie=migrating_specie,
     )
 
     # Our step is to run a relaxation on the bulk structure and it uses our inputs

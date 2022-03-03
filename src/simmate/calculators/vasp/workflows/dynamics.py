@@ -37,7 +37,12 @@ with Workflow(WORKFLOW_NAME) as workflow:
         input_obj=structure,
         source=source,
         directory=directory,
+        command=command,
         use_previous_directory=use_previous_directory,
+        temperature_start=temperature_start,
+        temperature_end=temperature_end,
+        time_step=time_step,
+        nsteps=nsteps,
     )
     output = s3task_obj(
         structure=structure_toolkit,

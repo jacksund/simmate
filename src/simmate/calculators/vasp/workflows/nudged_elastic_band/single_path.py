@@ -73,6 +73,9 @@ with Workflow(WORKFLOW_NAME) as workflow:
         input_class=MigrationHop,
         source=source,
         directory=directory,
+        command=command,
+        diffusion_analysis_id=diffusion_analysis_id,
+        migration_hop_id=migration_hop_id,
     )
 
     # get the supercell endpoint structures
