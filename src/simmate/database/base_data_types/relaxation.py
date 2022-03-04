@@ -93,7 +93,7 @@ class Relaxation(Structure, Calculation):
 
     class Meta:
         abstract = True
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     """Base Info"""
 
@@ -412,7 +412,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
 
     ``` python
     from simmate.shortcuts import setup
-    from simmate.database.local_calculations import MITRelaxation
+    from simmate.database.workflow_results import MITRelaxation
 
     # grab your desired relaxation
     relax = MITRelaxation.objects.get(id=1)
@@ -424,7 +424,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
 
     class Meta:
         abstract = True
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     base_info = (
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info

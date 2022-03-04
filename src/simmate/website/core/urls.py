@@ -39,9 +39,9 @@ urlpatterns = [
     ),
     # All local calculations are stored at this endpoint
     path(
-        route="local-calculations/",
-        view=include("simmate.website.local_calculations.urls"),
-        name="local_calculations",
+        route="workflows/",
+        view=include("simmate.website.workflows.urls"),
+        name="workflows",
     ),
     #
     # This app is for viewing crystal structures in a 3D viewport

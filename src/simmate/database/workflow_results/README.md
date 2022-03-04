@@ -23,7 +23,7 @@ You can also access a table directly with...
 ``` python
 from simmate.shortcuts import setup  # connects to database
 
-from simmate.database.local_calculations import MITStaticEnergy
+from simmate.database.workflow_results import MITStaticEnergy
 
 # NOTE: MITStaticEnergy here is the exact same as result_table in the codeblock
 # above this one. These are just two different ways of accessing it.
@@ -37,7 +37,7 @@ Location of Each Table's Source-code
 The code that defines these tables are located in the corresponding `simmate.calculators` module. We make tables accessible here because users often want to search for results by application -- not by their calculator name. For example, the results from all static energy calculations that use VASP under MIT project settings can be imported with...
 
 ``` python
-from simmate.database.local_calculations import MITStaticEnergy
+from simmate.database.workflow_results import MITStaticEnergy
 ```
 
 Alternatively, this same results could have been imported with...

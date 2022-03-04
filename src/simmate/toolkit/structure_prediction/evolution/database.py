@@ -81,7 +81,7 @@ class EvolutionarySearch(DatabaseTable):
     """
 
     class Meta:
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     # consider formula_full or chemical_system by making a composition-based mixin
     composition = table_column.CharField(max_length=50)  # !!! change to formula_full?
@@ -117,7 +117,7 @@ class EvolutionarySearch(DatabaseTable):
         # property
         # we assume the table is registered in the local_calcs app
         return django_apps.get_model(
-            app_label="local_calculations",
+            app_label="workflows",
             model_name=self.individuals_datatable_str,
         )
 
@@ -247,7 +247,7 @@ class EvolutionarySearch(DatabaseTable):
 
 class StructureSource(DatabaseTable):
     class Meta:
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     name = table_column.CharField(max_length=50)
 

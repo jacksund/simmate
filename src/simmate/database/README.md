@@ -8,7 +8,7 @@ For beginners, make sure you have completed [our database tutorial](https://gith
 Submodules include...
 
 - `base_data_types` : fundamental mixins for creating new tables
-- `local_calculations` : collection of result tables for `simmate.workflows`
+- `workflow_results` : collection of result tables for `simmate.workflows`
 - `prototypes` : tables of prototype structures
 - `third_parties` : loads data from external providers (such as Materials Project)
 
@@ -32,7 +32,7 @@ For interactive use, Django settings must be configured before any of these subm
 from simmate.shortcuts import setup  # configures Django
 
 # and now you can import tables in this module
-from simmate.database.local_calculations import MITStaticEnergy
+from simmate.database.workflow_results import MITStaticEnergy
 ```
 
 If this is not done, you will recieve the following error:

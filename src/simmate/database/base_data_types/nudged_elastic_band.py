@@ -22,7 +22,7 @@ from simmate.database.base_data_types import (
 class DiffusionAnalysis(Structure):
     class Meta:
         abstract = True
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     # The element of the diffusion atom
     migrating_specie = table_column.CharField(max_length=4, blank=True, null=True)
@@ -189,7 +189,7 @@ class DiffusionAnalysis(Structure):
 class MigrationHop(DatabaseTable):
     class Meta:
         abstract = True
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     # the initial, midpoint, and end site fractional coordinates
     # Really, this is a list of float values, but I save it as a string.
@@ -465,7 +465,7 @@ class MigrationHop(DatabaseTable):
 class MigrationImage(Structure):
     class Meta:
         abstract = True
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     base_info = [
         "number",

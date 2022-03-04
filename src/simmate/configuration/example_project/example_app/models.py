@@ -15,6 +15,6 @@ to add everything from scratch. The only code that we write here simply connects
 these database tables and/or adds new custom columns.
 """
 
-from simmate.database.local_calculations import Relaxation
+from simmate.database.workflow_results import Relaxation
 
 MITRelaxation, MITIonicStep = Relaxation.create_subclasses("MIT", module=__name__)

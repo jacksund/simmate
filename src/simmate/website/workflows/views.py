@@ -5,20 +5,20 @@ from django.contrib.auth.decorators import login_required
 
 from prefect.backend.flow_run import FlowView
 
-from simmate.database.local_calculations import (
+from simmate.database.workflow_results import (
     MITRelaxation,
     # MITIonicStep,
 )
-from simmate.website.local_calculations.forms import MITRelaxationForm
+from simmate.website.workflows.forms import MITRelaxationForm
 from simmate.workflow_engine import WorkflowTask
 
 
 @login_required
-def all_local_calculations(request):
+def all_workflows(request):
 
     # now let's put the data and template together to send the user
     context = {"active_tab_id": "workflows"}
-    template = "local_calculations/all.html"
+    template = "workflows/all.html"
     return render(request, template, context)
 
 
@@ -36,7 +36,7 @@ def relaxations(request):
         "active_tab_id": "workflows",
         "mit_flow_id": mit_flow_id,
     }
-    template = "local_calculations/relaxations.html"
+    template = "workflows/relaxations.html"
     return render(request, template, context)
 
 
@@ -57,7 +57,7 @@ def mit_about(request):
         "active_tab_id": "workflows",
         "mit_flow_id": mit_flow_id,
     }
-    template = "local_calculations/mit/about.html"
+    template = "workflows/mit/about.html"
     return render(request, template, context)
 
 
@@ -90,7 +90,7 @@ def mit_submit(request):
         "active_tab_id": "workflows",
         "submission_form": submission_form,
     }
-    template = "local_calculations/mit/submit.html"
+    template = "workflows/mit/submit.html"
     return render(request, template, context)
 
 
@@ -109,7 +109,7 @@ def mit_all(request):
         "calculations": calculations,
         "ncalculations_possible": ncalculations_possible,
     }
-    template = "local_calculations/mit/all.html"
+    template = "workflows/mit/all.html"
     return render(request, template, context)
 
 
@@ -131,5 +131,5 @@ def mit_single(request, mitrelax_id):
         "calculation": calculation,
         "figure_convergence_html": figure_convergence_html,
     }
-    template = "local_calculations/mit/single.html"
+    template = "workflows/mit/single.html"
     return render(request, template, context)

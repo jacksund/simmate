@@ -2,15 +2,15 @@
 
 from django.urls import path
 
-from simmate.website.local_calculations import views
+from simmate.website.workflows import views
 
 urlpatterns = [
     #
     # Lists off the different types of calculations
     path(
         route="",
-        view=views.all_local_calculations,
-        name="local_calculations",
+        view=views.all_workflows,
+        name="workflows",
     ),
     #
     # Lists off the different types of relaxations

@@ -117,7 +117,7 @@ class Structure(PymatgenStructure):
         # make sure we can access the tables. This import break the modularity
         # of this toolkit, so we therefore keep import within this function.
         from simmate.configuration.django import setup_full  # connects to database
-        from simmate.website.local_calculations import models as all_datatables
+        from simmate.website.workflows import models as all_datatables
         from django.utils.module_loading import import_string
 
         # start by loading the datbase table, which is given as a module path

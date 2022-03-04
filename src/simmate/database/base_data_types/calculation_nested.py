@@ -18,7 +18,7 @@ class NestedCalculation(Calculation):
 
     class Meta:
         abstract = True
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     # @abstractproperty
     # child_calculation_tables = [...]

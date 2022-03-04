@@ -15,7 +15,7 @@ class Calculation(DatabaseTable):
 
     class Meta:
         abstract = True
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     base_info = [
         "directory",

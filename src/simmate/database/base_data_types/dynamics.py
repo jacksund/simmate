@@ -20,7 +20,7 @@ from pymatgen.io.vasp.outputs import Vasprun
 class DynamicsRun(Structure, Calculation):
     class Meta:
         abstract = True
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     """Base Info"""
 
@@ -157,7 +157,7 @@ class DynamicsRun(Structure, Calculation):
 class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     class Meta:
         abstract = True
-        app_label = "local_calculations"
+        app_label = "workflows"
 
     base_info = (
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
