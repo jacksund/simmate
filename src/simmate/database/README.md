@@ -76,9 +76,11 @@ MITStaticEnergy.objects.filter(
     nsites__gte=3,  # greater or equal to 3 sites
     energy__isnull=False,  # the structure DOES have a energy
     density__range=(1,5),  # density is between 1 and 5
-    elements__contains="Ca",  # the structure includes the element Ca
+    elements__contains='"C"',  # the structure includes the element Carbon
 ).all()
 ```
+
+Note, for the final filtering condition (`elements__contains`), we used some odd quotations: we wrote '"C"' usingquotes inside single quotes. This is not a typo! The quotes ensure we don't accidentally grab Ca, Cs, Ce, Cl, and so on. This is an issue with our filtering logic that we are currently working to fix.
 
 ## Converting data to desired format
 

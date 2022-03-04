@@ -7,6 +7,8 @@ It is a very basic extension PyMatGen's core Structure class, as it only adds
 a few extra methods and does not change any other usage.
 """
 
+import os
+
 from pymatgen.core import Structure as PymatgenStructure
 
 
@@ -83,11 +85,19 @@ class Structure(PymatgenStructure):
             is_from_past_calc = True
             structure_cleaned = cls.from_database(structure)
 
+        # if the value is a str and it relates to a filepath, then we load the
+        # structure from a file.
+        elif isinstance(structure, str) and os.path.exists(structure):
+            structure_cleaned = cls.from_file(structure)
+
         # Otherwise an incorrect format was given
         else:
             raise Exception(
                 "Unknown format provided for structure input. "
-                f"{type(structure)} was provided."
+                f"{type(structure)} was provided. If you are trying "
+                "to provide a filepath (str), make sure you don't have "
+                "any typos and that the path is relative to the working "
+                "directory."
             )
 
         # add this attribute to help with error checking in other methods
@@ -103,9 +113,10 @@ class Structure(PymatgenStructure):
         Loads a structure from the Simmate database.
         """
 
-        # because the structure is in the databse, we need to setup django and
-        # make sure we can access the tables
-        from simmate.configuration.django import setup_full
+        # because the structure is in the database, we need to setup django and
+        # make sure we can access the tables. This import break the modularity
+        # of this toolkit, so we therefore keep import within this function.
+        from simmate.configuration.django import setup_full  # connects to database
         from simmate.website.local_calculations import models as all_datatables
         from django.utils.module_loading import import_string
 

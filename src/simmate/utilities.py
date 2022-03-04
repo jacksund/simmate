@@ -101,14 +101,15 @@ def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
     # Note: we can't name these nicely (like simmate-task-001) because that will
     # introduce race conditions when making these folders in production.
     if not directory:
-
         # create a directory in the current working directory. Note, even though
         # we are creating a "TemporaryDirectory" here, this directory is never
         # actually deleted.
         directory = mkdtemp(prefix="simmate-task-", dir=os.getcwd())
+
     # if the user provided a tempdir, we want it's name
     elif isinstance(directory, TemporaryDirectory):
         directory = directory.name
+
     # otherwise make sure the directory the user provided exists and if it does
     # not, then make it!
     else:
@@ -117,8 +118,9 @@ def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
         # multiple folders can be made with one call.
         # Also if the folder already exists, we don't want to raise an error.
         os.makedirs(directory, exist_ok=True)
+
     # and return the full path to the directory
-    return directory
+    return os.path.abspath(directory)
 
 
 def make_archive(directory: str):

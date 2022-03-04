@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine.utilities import s3task_to_workflow
+from simmate.workflow_engine import s3task_to_workflow
 from simmate.calculators.vasp.tasks.relaxation import (
     MITRelaxation as MITRelaxationTask,
 )

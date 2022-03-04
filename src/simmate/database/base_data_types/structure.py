@@ -42,10 +42,11 @@ class Structure(DatabaseTable):
     """
     the base chemical system (ex: "Y-C-F")
     
-    Note: be careful when searching for elements! Running chemical_system__includes="C"
+    Note: be careful when searching for elements! Running chemical_system__contains="C"
     on this field won't do what you expect -- because it will return structures
     containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-    that contain a specific element, use elements__contains="C" instead.
+    that contain a specific element, use elements__contains='"C"' instead. The
+    odd use of quotes '"C"' is required here!
     """
 
     density = table_column.FloatField()

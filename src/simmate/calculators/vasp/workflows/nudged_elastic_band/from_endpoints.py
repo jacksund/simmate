@@ -67,12 +67,20 @@ with Workflow(WORKFLOW_NAME) as workflow:
         input_obj=supercell_start,
         source=source,
         directory=directory,
+        command=command,
+        diffusion_analysis_id=diffusion_analysis_id,
     )
     supercell_end_toolkit, directory_cleaned = load_input_and_register(
         input_obj=supercell_end,
         source=source,
         directory=directory,
+        command=command,
+        diffusion_analysis_id=diffusion_analysis_id,
     )
+    # BUG: if directory isn't supplied, then we'd be making two directories
+    # here -- and then only using the 2nd.
+    # BUG: simmate_metadata.yaml will not include the supercell_start and
+    # supercell_end it.
 
     # Relax the starting supercell structure
     run_id_00 = relax_endpoint(
