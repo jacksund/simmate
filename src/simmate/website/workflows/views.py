@@ -5,10 +5,7 @@ from django.contrib.auth.decorators import login_required
 
 from prefect.backend.flow_run import FlowView
 
-from simmate.database.workflow_results import (
-    MITRelaxation,
-    # MITIonicStep,
-)
+from simmate.workflows.utilities import get_workflow
 from simmate.website.workflows.forms import MITRelaxationForm
 from simmate.workflow_engine import WorkflowTask
 

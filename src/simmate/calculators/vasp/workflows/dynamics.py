@@ -5,7 +5,7 @@ from simmate.workflow_engine.workflow import (
     Parameter,
     ModuleStorage,
 )
-from simmate.workflows.common_tasks import LoadInputAndRegister, SaveOutputTask
+from simmate.workflow_engine.common_tasks import LoadInputAndRegister, SaveOutputTask
 from simmate.calculators.vasp.tasks.dynamics import MITDynamicsTask
 from simmate.calculators.vasp.database.dynamics import MITDynamicsRun
 

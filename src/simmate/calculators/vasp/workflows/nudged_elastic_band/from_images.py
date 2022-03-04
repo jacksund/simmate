@@ -17,7 +17,7 @@ from simmate.workflow_engine.workflow import (
     Parameter,
     ModuleStorage,
 )
-from simmate.workflows.common_tasks import LoadInputAndRegister
+from simmate.workflow_engine.common_tasks import LoadInputAndRegister
 from simmate.calculators.vasp.tasks.nudged_elastic_band import MITNudgedElasticBand
 from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,

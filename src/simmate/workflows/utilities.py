@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import os
+import yaml
+import shutil
+
 from importlib import import_module
 
+from simmate.utilities import get_directory, make_archive
 from simmate.workflow_engine import Workflow, S3Task
 
 
@@ -150,3 +155,74 @@ def get_workflow(
     workflow = getattr(workflow_module, f"{preset_name}_workflow")
 
     return workflow
+
+
+def load_results_from_directories(
+    base_directory: str = ".",
+):
+    """
+    Goes through a given directory and finds all "simmate-task-" folders and zip
+    archives present. The simmate_metadata.yaml file is used in each of these
+    to load results into the database. All folders will be converted to archives
+    once they've been loaded.
+
+    Parameters
+    ----------
+    - `base_directory`:
+        The main directory that will contain folders to archive. Defaults to the
+        working directory.
+    """
+    # load the full path to the desired directory
+    directory = get_directory(base_directory)
+
+    # grab all files/folders in this directory and then limit this list to those
+    # that are...
+    #   1. folders
+    #   2. start with "simmate-task-"
+    #   3. haven't been modified for at least time_cutoff
+    foldernames = [
+        os.path.join(directory, f)
+        for f in os.listdir(directory)
+        if "simmate-task-" in os.path.basename(f)
+    ]
+
+    # Now go through this list and archive the folders that met the criteria
+    # and load the data from each.
+    for foldername in foldernames:
+
+        # Print message for monitoring progress.
+        # TODO: consider switching to tqdm
+        print(f"Loading data from... \n\t{foldername}")
+
+        # If we have a zip file, we need to unpack it before we can read results
+        if not os.path.isdir(foldername):
+            shutil.unpack_archive(
+                filename=foldername,
+                extract_dir=directory,
+            )
+            # remove the ".zip" ending for our folder
+            foldername = foldername.removesuffix(".zip")
+
+        # Grab the metadata file which tells us key information
+        filename = os.path.join(foldername, "simmate_metadata.yaml")
+        with open(filename) as file:
+            metadata = yaml.full_load(file)
+
+        # see which workflow was used -- which also tells us the database table
+        workflow_name = metadata["workflow_name"]
+        workflow = get_workflow(workflow_name)
+
+        # now load the data
+        results_db = workflow.result_table.from_directory(foldername)
+
+        # use the metadata to update the other fields
+        results_db.source = metadata["source"]
+        results_db.prefect_flow_run_id = metadata["prefect_flow_run_id"]
+
+        # note the directory might have been moved from when this was originally
+        # ran vs where it is now. Therefore, we update the folder location here.
+        results_db.directory = foldername
+
+        # Now save the results and convert the folder to an archive
+        results_db.save()
+        make_archive(foldername)
