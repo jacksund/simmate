@@ -9,32 +9,39 @@ from importlib import import_module
 from simmate.utilities import get_directory, make_archive
 from simmate.workflow_engine import Workflow, S3Task
 
+from typing import List, Dict
 
-ALL_WORKFLOW_TYPES = [
-    "static_energy",
+WORKFLOW_TYPES = [
+    "static-energy",
     "relaxation",
-    "population_analysis",
-    "band_structure",
-    "density_of_states",
+    "population-analysis",
+    "band-structure",
+    "density-of-states",
     "dynamics",
     "diffusion",
 ]
 
 
-def get_list_of_workflows_by_type(flow_type: str):
+def get_list_of_workflows_by_type(
+    flow_type: str,
+    full_name: bool = True,
+) -> List[str]:
     """
-    Returns a list of all the workflows located in the given module
+    Returns a list of all the workflows located in the given module.
     """
 
     # Make sure the type is supported
-    if flow_type not in ALL_WORKFLOW_TYPES:
+    if flow_type not in WORKFLOW_TYPES:
         raise TypeError(
             f"{flow_type} is not allowed. Please use a workflow type from this"
-            f" list: {ALL_WORKFLOW_TYPES}"
+            f" list: {WORKFLOW_TYPES}"
         )
 
+    # switch the naming convention from "flow-name" to "flow_name".
+    flow_type_u = flow_type.replace("-", "_")
+
     # grab the relevent module
-    flow_module = import_module(f"simmate.workflows.{flow_type}")
+    flow_module = import_module(f"simmate.workflows.{flow_type_u}")
 
     # This loop goes through all attributes (as strings) of the workflow module
     # and select only those that are workflow or s3tasks.
@@ -44,13 +51,17 @@ def get_list_of_workflows_by_type(flow_type: str):
         if isinstance(attr, Workflow) or isinstance(attr, S3Task):
             # We remove the _workflow ending for each because it's repetitve.
             # We also change the name from "flow_name" to "flow-name".
-            workflow_names.append(attr_name.removesuffix("_workflow").replace("_", "-"))
+            workflow_name = attr_name.removesuffix("_workflow").replace("_", "-")
+            # If requested, convert this to the full name.
+            if full_name:
+                workflow_name = flow_type + "/" + workflow_name
+            workflow_names.append(workflow_name)
     # OPTIMIZE: is there a more efficient way to do this?
 
     return workflow_names
 
 
-def get_list_of_all_workflows():
+def get_list_of_all_workflows() -> List[str]:
     """
     Returns a list of all the workflows of all types.
 
@@ -59,18 +70,8 @@ def get_list_of_all_workflows():
     """
 
     workflow_names = []
-    for flow_type in ALL_WORKFLOW_TYPES:
-
-        workflow_type_names = get_list_of_workflows_by_type(flow_type)
-
-        # we add the type to the start of each workflow name and switch underscores
-        # to dashes bc they are more reader-friendly
-        workflow_type_names = [
-            flow_type.replace("_", "-") + "/" + w.replace("_", "-")
-            for w in workflow_type_names
-        ]
-
-        workflow_names += workflow_type_names
+    for flow_type in WORKFLOW_TYPES:
+        workflow_names += get_list_of_workflows_by_type(flow_type)
 
     return workflow_names
 
@@ -79,7 +80,7 @@ def get_workflow(
     workflow_name: str,
     precheck_flow_exists: bool = False,
     print_equivalent_import: bool = False,
-):
+) -> Workflow:
     """
     This is a utility for that grabs a workflow from the simmate workflows.
 

@@ -68,6 +68,31 @@ class Workflow(PrefectFlow):
     `simmate.database.base_data_types.DatabaseTable`
     """
 
+    @property
+    def type(self) -> str:
+        """
+        Gives the workflow type of this workflow. For example the workflow named
+        'static-energy/matproj' would have the type `static-energy`.
+        """
+        return self.name.split("/")[0]
+
+    @property
+    def name_short(self) -> str:
+        """
+        Gives the present name of the workflow. For example the workflow named
+        'static-energy/matproj' would have the shortname `matproj`
+        """
+        return self.name.split("/")[-1]
+
+    @property
+    def description(self) -> str:
+        """
+        This simply returns the documentation string of this workflow -- so this
+        is the same as `__doc__`. This attribute is only defined for beginners
+        to python and for use in django templates for the website interface.
+        """
+        return self.__doc__
+
     def run_cloud(
         self,
         labels: List[str] = [],

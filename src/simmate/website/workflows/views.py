@@ -5,61 +5,144 @@ from django.contrib.auth.decorators import login_required
 
 from prefect.backend.flow_run import FlowView
 
-from simmate.workflows.utilities import get_workflow
-from simmate.website.workflows.forms import MITRelaxationForm
+from simmate.workflows.utilities import (
+    # WORKFLOW_TYPES,
+    get_workflow,
+    get_list_of_workflows_by_type,
+)
+from simmate.website.workflows.forms import MITRelaxationForm, ResultsForm
 from simmate.workflow_engine import WorkflowTask
 
 
 @login_required
-def all_workflows(request):
+def workflows_all(request):
+
+    # TODO: maybe instead load these descriptions from the simmate.{module}'s docstr
+    # This would look something like...
+    # all_metadata = {}
+    # for flow_type in WORKFLOW_TYPES:
+    #     --> grab the module
+    #     --> use the __doc__ as the text.
+
+    workflows_metadata = {
+        "static-energy": (
+            "These workflows calculate the energy for a structure. In many cases, "
+            "this also involves calculating the lattice strain and forces for each site."
+        ),
+        "relaxation": (
+            "These workflows geometry-optimize a structure's the lattice and sites "
+            "until specified covergence criteria are met."
+        ),
+        "population-analysis": (
+            "These workflows evaluate where electrons exist in a structure -- and "
+            "they are often assigned to a specific site/atom. As a result of assigning "
+            "electrons, these workflows give predicted oxidation states for each site."
+        ),
+        "band-structure": (
+            "These workflows calculate the electronic band structure for a material."
+        ),
+        "density-of-states": (
+            "These workflows calculate the electronic density of states for a material."
+        ),
+        "dynamics": (
+            "These workflows run a molecular dynamics simulation for a material. This "
+            "often involves iteratively evaluating the energy/forces of structure at "
+            "specific temperature (or temperature ramp)."
+        ),
+        "diffusion": (
+            "These workflows evaluate the diffusion of an atom through a material. "
+            "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
+            "calculations."
+        ),
+    }
 
     # now let's put the data and template together to send the user
-    context = {"active_tab_id": "workflows"}
+    context = {
+        "active_tab_id": "workflows",
+        "workflows_metadata": workflows_metadata,
+    }
     template = "workflows/all.html"
     return render(request, template, context)
 
 
 @login_required
-def relaxations(request):
+def workflows_by_type(request, workflow_type):
 
-    # In order to make links to the monitoring pages for each of these, we need
-    # to grab the prefect id
-    # BUG: If no flow exists, a ValueError is raised. I may want to account for
-    # this when the user doesn't have Prefect set up.
-    mit_flow_id = FlowView.from_flow_name("MIT Relaxation").flow_id
+    workflow_names = get_list_of_workflows_by_type(workflow_type)
+
+    # pull the information together for each individual flow
+    workflows = [get_workflow(n) for n in workflow_names]
 
     # now let's put the data and template together to send the user
     context = {
         "active_tab_id": "workflows",
-        "mit_flow_id": mit_flow_id,
+        "workflow_type": workflow_type,
+        "workflows": workflows,
     }
-    template = "workflows/relaxations.html"
+    template = "workflows/by_type.html"
     return render(request, template, context)
 
 
 @login_required
-def mit_about(request):
+def workflow_detail(request, workflow_type, workflow_name):
+    # note, workflow_name here is the workflow.name_short
+
+    workflow_name_full = workflow_type + "/" + workflow_name
+    workflow = get_workflow(workflow_name_full)
 
     # In order to make links to the monitoring pages for each of these, we need
     # to grab the prefect id
-    # BUG: If no flow exists, a ValueError is raised. I may want to account for
-    # this when the user doesn't have Prefect set up.
-    mit_flow_id = FlowView.from_flow_name("MIT Relaxation").flow_id
+    # If no flow exists in Prefect cloud, a ValueError is raised, so I can't
+    # share this info
+    try:
+        flow_id = FlowView.from_flow_name(workflow_name_full).flow_id
+        nflows_submitted = workflow.nflows_submitted
+    except:  # ValueError is no query result. Need to test what error is if no API key.
+        flow_id = None
+        nflows_submitted = None
 
     # TODO: grab some metadata about this calc. For example...
     # ncalculations = MITRelaxation.objects.count()
 
+    # ---- Querying results ----
+    if request.method == "POST":
+        search_form = ResultsForm(request.POST, request.FILES)
+        if search_form.is_valid():
+            # TODO
+            raise Exception("This view is still under development")
+    else:
+        # create an empty form
+        search_form = ResultsForm()
+
+        # even though our form is empty, we still want
+        # Grab the most recent 50 calculations that have been registered/ran
+        calculations = workflow.result_table.objects.order_by("-created_at").all()[:50]
+
+        # We also want to count how many total calculations there are beyond these
+        # most recent 50.
+        ncalculations_possible = workflow.result_table.objects.count()
+
+    # --------------------------
+
     # now let's put the data and template together to send the user
     context = {
         "active_tab_id": "workflows",
-        "mit_flow_id": mit_flow_id,
+        "workflow": workflow,
+        "flow_id": flow_id,
+        "search_form": search_form,
+        "calculations": calculations,
+        "ncalculations_possible": ncalculations_possible,
+        "nflows_submitted": nflows_submitted,
     }
-    template = "workflows/mit/about.html"
+    template = "workflows/detail.html"
     return render(request, template, context)
 
 
 @login_required
-def mit_submit(request):
+def workflow_submit(request, workflow_type, workflow_name):
+
+    workflow_name_full = workflow_type + "/" + workflow_name
+    workflow = get_workflow(workflow_name_full)
 
     if request.method == "POST":
         submission_form = MITRelaxationForm(request.POST, request.FILES)
@@ -70,8 +153,7 @@ def mit_submit(request):
             vasp_command = submission_form.cleaned_data["vasp_command"]
 
             # We can now submit the workflow for the structure.
-            flowtask = WorkflowTask(workflow_name="MIT Relaxation")
-            flow_run_id = flowtask.run(
+            flow_run_id = workflow.run_cloud(
                 structure=structure,
                 vasp_command=vasp_command,
                 labels=labels,
@@ -85,48 +167,32 @@ def mit_submit(request):
     # now let's put the data and template together to send the user
     context = {
         "active_tab_id": "workflows",
+        "workflow": workflow,
         "submission_form": submission_form,
     }
-    template = "workflows/mit/submit.html"
+    template = "workflows/submit.html"
     return render(request, template, context)
 
 
 @login_required
-def mit_all(request):
+def workflow_run_detail(request, workflow_type, workflow_name, workflow_run_id):
 
-    # Grab the most recent 50 MIT relaxations that have been registered/ran
-    calculations = MITRelaxation.objects.order_by("created_at").reverse().all()[:50]
+    workflow_name_full = workflow_type + "/" + workflow_name
+    workflow = get_workflow(workflow_name_full)
+    workflow_run = workflow.result_table.get(id=workflow_run_id)
 
-    # We also want to count how many total calculations there are.
-    ncalculations_possible = MITRelaxation.objects.count()
-
-    # now let's put the data and template together to send the user
-    context = {
-        "active_tab_id": "workflows",
-        "calculations": calculations,
-        "ncalculations_possible": ncalculations_possible,
-    }
-    template = "workflows/mit/all.html"
-    return render(request, template, context)
-
-
-@login_required
-def mit_single(request, mitrelax_id):
-
-    # Grab the most recent 50 MIT relaxations that have been registered/ran
-    calculation = MITRelaxation.objects.get(id=mitrelax_id)
-
+    # !!! this is old code that may be useful as I reimpliment detail views
     # Make the convergence figure and convert it to an html div
-    figure_convergence = calculation.get_convergence_plot()
-    figure_convergence_html = figure_convergence.to_html(
-        full_html=False, include_plotlyjs=False
-    )
+    # figure_convergence = calculation.get_convergence_plot()
+    # figure_convergence_html = figure_convergence.to_html(
+    #     full_html=False, include_plotlyjs=False
+    # )
 
     # now let's put the data and template together to send the user
     context = {
         "active_tab_id": "workflows",
-        "calculation": calculation,
-        "figure_convergence_html": figure_convergence_html,
+        "workflow_run": workflow_run,
+        # "figure_convergence_html": figure_convergence_html,
     }
-    template = "workflows/mit/single.html"
+    template = "workflows/detail_run.html"
     return render(request, template, context)

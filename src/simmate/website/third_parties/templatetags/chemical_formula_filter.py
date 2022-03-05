@@ -10,6 +10,7 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 
+@register.filter(name="chemical_formula")
 def formula_to_html(formula_str):
     """
     Converts a chemical formula to html format by wrapping numbers with a
@@ -31,7 +32,3 @@ def formula_to_html(formula_str):
     # ensure it safe before returning. Read more about this here:
     # https://docs.djangoproject.com/en/3.2/howto/custom-template-tags/#filters-and-auto-escaping
     return mark_safe(new_formula_str)
-
-
-# now register the new filter with django
-register.filter("chemical_formula", formula_to_html)

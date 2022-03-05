@@ -97,6 +97,7 @@ def home(request):
     return render(request, template, context)
 
 
+@login_required
 def extras(request):
 
     # now let's put the data and template together to send the user

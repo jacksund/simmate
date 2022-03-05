@@ -9,38 +9,37 @@ urlpatterns = [
     # Lists off the different types of calculations
     path(
         route="",
-        view=views.all_workflows,
+        view=views.workflows_all,
         name="workflows",
     ),
     #
-    # Lists off the different types of relaxations
+    # Lists off the different workflows of a given type
     path(
-        route="relaxations/",
-        view=views.relaxations,
-        name="relaxations",
+        route="<workflow_type>/",
+        view=views.workflows_by_type,
+        name="workflows_by_type",
     ),
     #
-    # TODO: For now I list all calculation types here, but it will be useful
-    # to have subapps that do this. I also want to incorporate dynamic loading
-    # of the different options.
+    # A detailed view of a specific workflow. This page will contain sections
+    # about the workflow as well as host actions for submitting and querying
+    # new flow runs.
     path(
-        route="relaxations/mit/",
-        view=views.mit_about,
-        name="mit_about",
+        route="<workflow_type>/<workflow_name>/",
+        view=views.workflow_detail,
+        name="workflow_detail",
     ),
+    #
+    # Views in results for an individual  calculation
     path(
-        route="relaxations/mit/submit",
-        view=views.mit_submit,
-        name="mit_submit",
+        route="<workflow_type>/<workflow_name>/<int:workflow_run_id>",
+        view=views.workflow_run_detail,
+        name="workflow_run_detail",
     ),
+    #
+    # Views in results for an individual  calculation
     path(
-        route="relaxations/mit/results",
-        view=views.mit_all,
-        name="mit_all",
-    ),
-    path(
-        route="relaxations/mit/results/<int:mitrelax_id>",
-        view=views.mit_single,
-        name="mit_single",
+        route="<workflow_type>/<workflow_name>/submit",
+        view=views.workflow_submit,
+        name="workflow_submit",
     ),
 ]

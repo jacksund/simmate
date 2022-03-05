@@ -164,25 +164,25 @@ def explore():
 
     click.echo("\nGathering all available workflows...")
     from simmate.workflows.utilities import (
-        ALL_WORKFLOW_TYPES,
+        WORKFLOW_TYPES,
         get_list_of_workflows_by_type,
         get_workflow,
     )
 
     click.echo("\n\nWhat type of analysis are you interested in?")
-    types_cleaned = [t.replace("_", " ") for t in ALL_WORKFLOW_TYPES]
+    types_cleaned = [t.replace("-", " ") for t in WORKFLOW_TYPES]
     type_index = list_options(types_cleaned)
-    selected_type = ALL_WORKFLOW_TYPES[type_index]
+    selected_type = WORKFLOW_TYPES[type_index]
 
     # TODO: have the user select a calculator for this analysis. For now,
     # we are assuming VASP because those are our only workflows
 
     click.echo("\n\nWhat settings preset do you want to see the description for?")
-    presets = [t for t in get_list_of_workflows_by_type(selected_type)]
+    presets = get_list_of_workflows_by_type(selected_type, full_name=False)
     present_index = list_options(presets)
     selected_preset = presets[present_index]
 
-    final_workflow_name = selected_type.replace("_", "-") + "/" + selected_preset
+    final_workflow_name = selected_type + "/" + selected_preset
     click.echo(f"\n\n===================== {final_workflow_name} =====================")
 
     # now we load this workflow and print the docstring.

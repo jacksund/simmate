@@ -4,6 +4,14 @@ from django import forms
 
 from simmate.toolkit import Structure
 
+from simmate.workflows.static_energy import mit_workflow
+
+
+class ResultsForm(forms.ModelForm):
+    class Meta:
+        model = mit_workflow.result_table
+        fields = "__all__"
+
 
 class MITRelaxationForm(forms.Form):
 
