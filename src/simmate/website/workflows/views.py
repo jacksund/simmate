@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from django import forms
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
@@ -11,8 +10,9 @@ from simmate.workflows.utilities import (
     get_workflow,
     get_list_of_workflows_by_type,
 )
-from simmate.website.workflows.forms import MITRelaxationForm, StructureForm
-from simmate.workflow_engine import WorkflowTask
+from simmate.website.workflows.forms import SubmitWorkflow
+
+from simmate.website.workflows.utilities import get_form_from_table
 
 
 @login_required
@@ -101,32 +101,24 @@ def workflow_detail(request, workflow_type, workflow_name):
     except:  # ValueError is no query result. Need to test what error is if no API key.
         flow_id = None
         nflows_submitted = None
-
     # TODO: grab some metadata about this calc. For example...
     # ncalculations = MITRelaxation.objects.count()
 
-    # ----- Dynamically make a form from this model -----
+    # Dynamically make a form from this model
+    SearchForm = get_form_from_table(workflow.result_table)
 
-    # TODO: consider using workflow.result_table.__base__ (or __bases__) to
-    # determine which form mix-ins to use. Or alternatively use inspect.getrmo
-    # to get all subclasses (as DatabaseTable.from_toolkit does)
-    class ResultsForm(forms.ModelForm, StructureForm):
-        class Meta:
-            model = workflow.result_table
-            fields = "__all__"
-            # To remove fields, we combine the exclude attributes from
-            # each subclass.
-            exclude = StructureForm.Meta.exclude
+    # Check this form to see which Form mix-ins were used
+    form_mixins_used = SearchForm.get_mixin_names()
 
     # ---- Querying results ----
     if request.method == "POST":
-        search_form = ResultsForm(request.POST, request.FILES)
+        search_form = SearchForm(request.POST, request.FILES)
         if search_form.is_valid():
             # TODO
             raise Exception("This view is still under development")
     else:
         # create an empty form
-        search_form = ResultsForm()
+        search_form = SearchForm()
 
         # even though our form is empty, we still want
         # Grab the most recent 50 calculations that have been registered/ran
@@ -135,7 +127,6 @@ def workflow_detail(request, workflow_type, workflow_name):
         # We also want to count how many total calculations there are beyond these
         # most recent 50.
         ncalculations_possible = workflow.result_table.objects.count()
-
     # --------------------------
 
     # now let's put the data and template together to send the user
@@ -144,6 +135,7 @@ def workflow_detail(request, workflow_type, workflow_name):
         "workflow": workflow,
         "flow_id": flow_id,
         "search_form": search_form,
+        "form_mixins_used": form_mixins_used,
         "calculations": calculations,
         "ncalculations_possible": ncalculations_possible,
         "nflows_submitted": nflows_submitted,
@@ -159,7 +151,7 @@ def workflow_submit(request, workflow_type, workflow_name):
     workflow = get_workflow(workflow_name_full)
 
     if request.method == "POST":
-        submission_form = MITRelaxationForm(request.POST, request.FILES)
+        submission_form = SubmitWorkflow(request.POST, request.FILES)
         if submission_form.is_valid():
             # grab the structure (as a pymatgen object) and all other inputs
             structure = submission_form.cleaned_data["structure_file"]
@@ -176,8 +168,7 @@ def workflow_submit(request, workflow_type, workflow_name):
 
             return redirect(f"https://cloud.prefect.io/simmate/flow-run/{flow_run_id}")
     else:
-        submission_form = MITRelaxationForm()
-
+        submission_form = SubmitWorkflow()
     # now let's put the data and template together to send the user
     context = {
         "active_tab_id": "workflows",

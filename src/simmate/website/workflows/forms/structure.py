@@ -2,21 +2,17 @@
 
 from django import forms
 
-from simmate.toolkit import Structure
-from simmate.workflows.static_energy import mit_workflow
 from simmate.utilities import get_chemical_subsystems
-
-# I'm still learning the best way to dynamically create the mix-in forms
-# but there may be beneifits to using django-filter or alternatively django's
-# class-based views to create these forms and views. I also avoid the use of
-# forms.ModelForm for now because I want to slowly add query fields.
+from simmate.database.base_data_types import Structure as StructureTable
 
 
-class StructureForm(forms.Form):
+class Structure(forms.ModelForm):
     class Meta:
-        # model = ExampleModel
+        model = StructureTable
         fields = "__all__"
-        exclude = ["source", "structure_string"]
+        # We removed elements because this is handled through the chemical_system
+        # query instead.
+        exclude = ["source", "structure_string", "elements"]
 
     include_subsystems = forms.BooleanField(
         label="Include Subsytems",
@@ -73,48 +69,3 @@ class StructureForm(forms.Form):
         # now return the cleaned value. Note that this is now a list of
         # chemical systems, where all elements are in alphabetical order.
         return systems_cleaned
-
-
-class MITRelaxationForm(forms.Form):
-
-    # Max length refers to the filename length, not its contents
-    structure_file = forms.FileField(max_length=100)
-
-    # The vasp_command to submit with
-    vasp_command = forms.CharField(initial="mpirun -n 4 vasp_std > vasp.out")
-
-    # List of labels to submit the workflow with. Use commas to separate.
-    labels = forms.CharField(initial="WarWulf")
-
-    def clean_structure_file(self):
-        # Grab what the user submitted
-        structure_file = self.cleaned_data["structure_file"]
-
-        # Make sure the file isn't too large
-        if structure_file:
-            # 5e6 is 5MB limit
-            if structure_file.size > 5e6:
-                raise Exception("File upload is too large (>5MB)")
-        else:
-            raise Exception("Couldn't read uploaded image")
-
-        # If we make it through the checks above, we can now convert the
-        # text of the file into a pymatgen structure object
-        structure_str = structure_file.read().decode("utf-8")
-        structure = Structure.from_str(structure_str, fmt="POSCAR")
-
-        return structure
-
-    def clean_labels(self):
-
-        # Grab what the user submitted
-        labels_str = self.cleaned_data["labels"]
-
-        # convert the string to a list of labels.
-        # For example...
-        #   "WarWulf, LongLeaf, DogWood"
-        #       converts to
-        #   ['WarWulf', ' LongLeaf', ' DogWood']
-        labels = labels_str.strip().split(",")
-
-        return labels
