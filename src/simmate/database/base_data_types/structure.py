@@ -16,29 +16,29 @@ class Structure(DatabaseTable):
 
     base_info = ["structure_string"]
 
-    structure_string = table_column.TextField()
+    structure_string = table_column.TextField(blank=True, null=True)
     """
     The core structure information, which is written to a string and in a 
     compressed format using the `from_toolkit` method. To get back to our toolkit
     structure object, use the `to_toolkit` method.
     """
 
-    nsites = table_column.IntegerField()
+    nsites = table_column.IntegerField(blank=True, null=True)
     """
     The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)
     """
 
-    nelements = table_column.IntegerField()
+    nelements = table_column.IntegerField(blank=True, null=True)
     """
     The total number of unique elements. (e.g. Y2CF2 has 3 elements)
     """
 
-    elements = table_column.JSONField()
+    elements = table_column.JSONField(blank=True, null=True)
     """
     List of elements in the structure (ex: ["Y", "C", "F"])
     """
 
-    chemical_system = table_column.CharField(max_length=25)
+    chemical_system = table_column.CharField(max_length=25, blank=True, null=True)
     """
     the base chemical system (ex: "Y-C-F")
     
@@ -49,17 +49,17 @@ class Structure(DatabaseTable):
     odd use of quotes '"C"' is required here!
     """
 
-    density = table_column.FloatField()
+    density = table_column.FloatField(blank=True, null=True)
     """
     The density of the crystal in g/cm^3
     """
 
-    density_atomic = table_column.FloatField()
+    density_atomic = table_column.FloatField(blank=True, null=True)
     """
     The density of atoms in the crystal in atoms/Angstom^3
     """
 
-    volume = table_column.FloatField()
+    volume = table_column.FloatField(blank=True, null=True)
     """
     The volume of the unitcell in Angstom^3
     
@@ -69,7 +69,7 @@ class Structure(DatabaseTable):
     just want to search by spacegroup.
     """
 
-    volume_molar = table_column.FloatField()
+    volume_molar = table_column.FloatField(blank=True, null=True)
     """
     The molar volume of the crystal in cm^3/mol
     """
@@ -78,24 +78,41 @@ class Structure(DatabaseTable):
     # BUG: The max length here is overkill because there are many structures
     # with 8+ elements and disordered formula (e.g. "Ca2.103 N0.98")
 
-    formula_full = table_column.CharField(max_length=50)
+    formula_full = table_column.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
     """
     The chemical formula with elements sorted by electronegativity (ex: Li4 Fe4 P4 O16)
     """
 
-    formula_reduced = table_column.CharField(max_length=50)
+    formula_reduced = table_column.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
     """
     The reduced chemical formula. (ex: Li4Fe4P4O16 --> LiFePO4)
     """
 
-    formula_anonymous = table_column.CharField(max_length=50)
+    formula_anonymous = table_column.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
     """
     An anonymized formula. Unique species are arranged in ordering of 
     amounts and assigned ascending alphabets. Useful for prototyping formulas. 
     For example, all stoichiometric perovskites have anonymized_formula ABC3.
     """
 
-    spacegroup = table_column.ForeignKey(Spacegroup, on_delete=table_column.PROTECT)
+    spacegroup = table_column.ForeignKey(
+        Spacegroup,
+        on_delete=table_column.PROTECT,
+        blank=True,
+        null=True,
+    )
     """
     Spacegroup information. Points to a separate database table that has additional
     columns:

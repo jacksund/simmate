@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django import forms
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
@@ -10,7 +11,7 @@ from simmate.workflows.utilities import (
     get_workflow,
     get_list_of_workflows_by_type,
 )
-from simmate.website.workflows.forms import MITRelaxationForm, ResultsForm
+from simmate.website.workflows.forms import MITRelaxationForm, StructureForm
 from simmate.workflow_engine import WorkflowTask
 
 
@@ -103,6 +104,19 @@ def workflow_detail(request, workflow_type, workflow_name):
 
     # TODO: grab some metadata about this calc. For example...
     # ncalculations = MITRelaxation.objects.count()
+
+    # ----- Dynamically make a form from this model -----
+
+    # TODO: consider using workflow.result_table.__base__ (or __bases__) to
+    # determine which form mix-ins to use. Or alternatively use inspect.getrmo
+    # to get all subclasses (as DatabaseTable.from_toolkit does)
+    class ResultsForm(forms.ModelForm, StructureForm):
+        class Meta:
+            model = workflow.result_table
+            fields = "__all__"
+            # To remove fields, we combine the exclude attributes from
+            # each subclass.
+            exclude = StructureForm.Meta.exclude
 
     # ---- Querying results ----
     if request.method == "POST":
