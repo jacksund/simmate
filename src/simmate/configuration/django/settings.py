@@ -188,6 +188,7 @@ INSTALLED_APPS = [
     # These are apps created by third-parties that give us extra features
     "crispy_forms",  # django-crispy-forms
     "rest_framework",  # djangorestframework
+    "django_filters",  # django-filter
     "django_extensions",  # for development tools
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
@@ -357,4 +358,13 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {"anon": "100/day", "user": "1000/day"},
+    # We use django-filter to automatically handle filtering from a REST url
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    # There are multiple ways to render the data, where we default to a nice HTML
+    # view, but also support pure JSON or using Django-REST's interactive API
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.TemplateHTMLRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+        "rest_framework.renderers.JSONRenderer",
+    ],
 }

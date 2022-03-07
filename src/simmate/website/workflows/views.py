@@ -12,7 +12,7 @@ from simmate.workflows.utilities import (
 )
 from simmate.website.workflows.forms import SubmitWorkflow
 
-from simmate.website.workflows.utilities import get_form_from_table
+from simmate.website.workflows.utilities import get_form_from_table, render_from_table
 
 
 @login_required
@@ -104,44 +104,53 @@ def workflow_detail(request, workflow_type, workflow_name):
     # TODO: grab some metadata about this calc. For example...
     # ncalculations = MITRelaxation.objects.count()
 
-    # Dynamically make a form from this model
-    SearchForm = get_form_from_table(workflow.result_table)
+    return render_from_table(
+        request=request,
+        template="workflows/list-test.html",
+        context={
+            "active_tab_id": "workflows",
+        },
+        table=workflow.result_table,
+    )
 
-    # Check this form to see which Form mix-ins were used
-    form_mixins_used = SearchForm.get_mixin_names()
+    # # Dynamically make a form from this model
+    # SearchForm = get_form_from_table(workflow.result_table)
 
-    # ---- Querying results ----
-    if request.method == "POST":
-        search_form = SearchForm(request.POST, request.FILES)
-        if search_form.is_valid():
-            # TODO
-            raise Exception("This view is still under development")
-    else:
-        # create an empty form
-        search_form = SearchForm()
+    # # Check this form to see which Form mix-ins were used
+    # form_mixins_used = SearchForm.get_mixin_names()
 
-        # even though our form is empty, we still want
-        # Grab the most recent 50 calculations that have been registered/ran
-        calculations = workflow.result_table.objects.order_by("-created_at").all()[:50]
+    # # ---- Querying results ----
+    # if request.method == "POST":
+    #     search_form = SearchForm(request.POST, request.FILES)
+    #     if search_form.is_valid():
+    #         # TODO
+    #         raise Exception("This view is still under development")
+    # else:
+    #     # create an empty form
+    #     search_form = SearchForm()
 
-        # We also want to count how many total calculations there are beyond these
-        # most recent 50.
-        ncalculations_possible = workflow.result_table.objects.count()
-    # --------------------------
+    #     # even though our form is empty, we still want
+    #     # Grab the most recent 50 calculations that have been registered/ran
+    #     calculations = workflow.result_table.objects.order_by("-created_at").all()[:50]
 
-    # now let's put the data and template together to send the user
-    context = {
-        "active_tab_id": "workflows",
-        "workflow": workflow,
-        "flow_id": flow_id,
-        "search_form": search_form,
-        "form_mixins_used": form_mixins_used,
-        "calculations": calculations,
-        "ncalculations_possible": ncalculations_possible,
-        "nflows_submitted": nflows_submitted,
-    }
-    template = "workflows/detail.html"
-    return render(request, template, context)
+    #     # We also want to count how many total calculations there are beyond these
+    #     # most recent 50.
+    #     ncalculations_possible = workflow.result_table.objects.count()
+    # # --------------------------
+
+    # # now let's put the data and template together to send the user
+    # context = {
+    #     "active_tab_id": "workflows",
+    #     "workflow": workflow,
+    #     "flow_id": flow_id,
+    #     "search_form": search_form,
+    #     "form_mixins_used": form_mixins_used,
+    #     "calculations": calculations,
+    #     "ncalculations_possible": ncalculations_possible,
+    #     "nflows_submitted": nflows_submitted,
+    # }
+    # template = "workflows/detail.html"
+    # return render(request, template, context)
 
 
 @login_required

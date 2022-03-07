@@ -1,0 +1,18 @@
+{% extends "core/site-base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+{{ active_tab_id }}
+{{ results }}
+{{ previous }}
+{{ next }}
+{{ count }}
+{% endblock %}

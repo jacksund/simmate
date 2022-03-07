@@ -31,12 +31,6 @@ urlpatterns = [
     ),
     #
     #
-    # This maps to our REST api endpoints
-    path(
-        route="rest-api/",
-        view=include("simmate.website.rest_api.urls"),
-        name="rest_api",
-    ),
     # All local calculations are stored at this endpoint
     path(
         route="workflows/",
