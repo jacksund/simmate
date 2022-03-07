@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .base import DatabaseTableForm
+from .base import DatabaseTableFilter
 
 from .symmetry import Spacegroup
 from .structure import Structure
@@ -15,5 +15,3 @@ from .band_structure import BandStructure, BandStructureCalc
 from .density_of_states import DensityofStates, DensityofStatesCalc
 
 from .nudged_elastic_band import DiffusionAnalysis
-
-from .submit_workflow import SubmitWorkflow

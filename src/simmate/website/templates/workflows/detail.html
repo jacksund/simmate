@@ -44,11 +44,11 @@ Simmate
   <!-- Search Form -->
   <div class="container p-4">
     <h2>Filter Search Results:</h2>
-    <form action="{% url 'workflow_detail' workflow.type workflow.name_short %}" method="post"
+    <form action="{% url 'workflow_detail' workflow.type workflow.name_short %}" method="get"
       enctype="multipart/form-data">
       {% csrf_token %}
       {% load crispy_forms_tags %}
-      {{ search_form | crispy }}
+      {{ filter.form | crispy }}
       <button type="submit" class="btn btn-primary">Search</button>
     </form>
   </div>

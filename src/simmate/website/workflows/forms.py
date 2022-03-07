@@ -5,7 +5,7 @@ from django import forms
 from simmate.toolkit import Structure
 
 
-class SubmitWorkflow(forms.Form):
+class SubmitWorkflow(forms.ModelForm):
 
     # Max length refers to the filename length, not its contents
     structure_file = forms.FileField(max_length=100)

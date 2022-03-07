@@ -29,7 +29,6 @@ urlpatterns = [
     path(
         route="",
         view=include(router.urls),
-        name="third_parties_list",
         # To view all other urls that this maps, you can use django_extensions
         # to list all of them. The command is... python manage.py show_urls
     ),

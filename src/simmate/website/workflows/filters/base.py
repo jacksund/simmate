@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from django import forms
+from django_filters import rest_framework as filters
+
+from simmate.database.base_data_types import DatabaseTable
 
 
-class DatabaseTableForm(forms.ModelForm):
+class DatabaseTableFilter(filters.FilterSet):
     class Meta:
-        fields = "__all__"
-        exclude = ["source"]
+        table = DatabaseTable
+        fields = {}
 
     @classmethod
     def get_mixins(cls):
@@ -21,6 +23,14 @@ class DatabaseTableForm(forms.ModelForm):
     @classmethod
     def get_mixin_names(cls):
         return [mixin.__name__ for mixin in cls.get_mixins()]
+
+    # @classmethod
+    # def get_mixin_declared_filters(cls):
+    #     filters_declared = {
+    #         name: filter_obj
+    #         for mixin in filter_mixins
+    #         for name, filter_obj in mixin.declared_filters.items()
+    #     }
 
     @classmethod
     def get_extra_columns(cls):

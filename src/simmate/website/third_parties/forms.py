@@ -8,7 +8,7 @@ from simmate.utilities import get_chemical_subsystems
 # for information -- so it is therefore not a ModelForm and cannot use
 # our mix-ins. I need to think of the best way to leverage these mix-ins without
 # creating this form from scratch. For now, this form is effectively a copy/paste
-# of `from simmate.website.workflows.forms import Structure`.
+# of `from simmate.website.workflows.filters import Structure`.
 
 
 class ChemicalSystemForm(forms.Form):

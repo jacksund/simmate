@@ -1,22 +1,33 @@
 # -*- coding: utf-8 -*-
 
-from django import forms
+from django_filters import rest_framework as filters
 
 from simmate.utilities import get_chemical_subsystems
 from simmate.database.base_data_types import Structure as StructureTable
 
+# from simmate.website.workflows.filters import Spacegroup
 
-class Structure(forms.ModelForm):
+
+class Structure(filters.FilterSet):
     class Meta:
         model = StructureTable
-        fields = "__all__"
-        # We removed elements because this is handled through the chemical_system
-        # query instead.
-        exclude = ["source", "structure_string", "elements"]
+        fields = dict(
+            nsites=["exact", "range"],
+            nelements=["exact", "range"],
+            # elements=["contains"],
+            density=["exact", "range"],
+            density_atomic=["exact", "range"],
+            volume=["exact", "range"],
+            volume_molar=["exact"],
+            formula_full=["exact"],
+            formula_reduced=["exact"],
+            formula_anonymous=["exact"],
+            # spacegroup=Spacegroup.get_fields(),
+        )
 
-    include_subsystems = forms.BooleanField(
-        label="Include Subsytems",
-        required=False,
+    include_subsystems = filters.BooleanFilter(
+        field_name="include_subsystems",
+        label="Include chemical subsystems in results?",
     )
     """
     Whether to include subsystems of the given `chemical_system`. For example,
@@ -29,16 +40,12 @@ class Structure(forms.ModelForm):
     # TODO: Supra-systems would include all the elements listed AND more. For example,
     # searching Y-C-F would also return Y-C-F-Br, Y-Sc-C-F, etc.
 
-    chemical_system = forms.CharField(
-        label="Chemical System",
-        max_length=20,
-        required=False,
-    )
+    chemical_system = filters.CharFilter(method="filter_chemical_system")
     """
     The chemical system of the structure (e.g. "Y-C-F" or "Na-Cl")
     """
 
-    def clean_chemical_system(self):
+    def filter_chemical_system(self, queryset, name, value):
 
         # Our database expects the chemical system to be given in alphabetical
         # order, but we don't want users to recieve errors when they search for

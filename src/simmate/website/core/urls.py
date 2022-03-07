@@ -26,7 +26,10 @@ urlpatterns = [
     #
     path(
         route="third-parties/",
-        view=include("simmate.website.third_parties.urls"),
+        view=include(
+            ("simmate.website.third_parties.urls", "simmate.website.third_parties"),
+            namespace="third_parties",
+        ),
         name="third_parties",
     ),
     #
