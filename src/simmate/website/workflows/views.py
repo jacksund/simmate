@@ -112,17 +112,50 @@ def workflow_detail(request, workflow_type, workflow_name):
             "workflow": workflow,
             "flow_id": flow_id,
             "nflows_submitted": nflows_submitted,
-            # "search_form": search_form,
-            # "form_mixins_used": form_mixins_used,
-            # "calculations": calculations,
-            # "ncalculations_possible": ncalculations_possible,
         },
         table=workflow.result_table,
+        view_type="list",
     )
 
 
 @login_required
-def workflow_submit(request, workflow_type, workflow_name):
+def workflow_run_detail(
+    request,
+    workflow_type: str,
+    workflow_name: str,
+    workflow_run_id: str,
+):
+
+    workflow_name_full = workflow_type + "/" + workflow_name
+    workflow = get_workflow(workflow_name_full)
+    workflow_run = workflow.result_table.objects.get(id=workflow_run_id)
+
+    # !!! this is old code that may be useful as I reimpliment detail views
+    # Make the convergence figure and convert it to an html div
+    # figure_convergence = calculation.get_convergence_plot()
+    # figure_convergence_html = figure_convergence.to_html(
+    #     full_html=False, include_plotlyjs=False
+    # )
+
+    return render_from_table(
+        request=request,
+        template="workflows/detail.html",
+        context={
+            "active_tab_id": "workflows",
+            "workflow": workflow,
+            "workflow_run": workflow_run,
+        },
+        table=workflow.result_table,
+        view_type="retrieve",
+    )
+
+
+@login_required
+def workflow_submit(
+    request,
+    workflow_type: str,
+    workflow_name: str,
+):
 
     workflow_name_full = workflow_type + "/" + workflow_name
     workflow = get_workflow(workflow_name_full)
@@ -153,28 +186,4 @@ def workflow_submit(request, workflow_type, workflow_name):
         "submission_form": submission_form,
     }
     template = "workflows/submit.html"
-    return render(request, template, context)
-
-
-@login_required
-def workflow_run_detail(request, workflow_type, workflow_name, workflow_run_id):
-
-    workflow_name_full = workflow_type + "/" + workflow_name
-    workflow = get_workflow(workflow_name_full)
-    workflow_run = workflow.result_table.get(id=workflow_run_id)
-
-    # !!! this is old code that may be useful as I reimpliment detail views
-    # Make the convergence figure and convert it to an html div
-    # figure_convergence = calculation.get_convergence_plot()
-    # figure_convergence_html = figure_convergence.to_html(
-    #     full_html=False, include_plotlyjs=False
-    # )
-
-    # now let's put the data and template together to send the user
-    context = {
-        "active_tab_id": "workflows",
-        "workflow_run": workflow_run,
-        # "figure_convergence_html": figure_convergence_html,
-    }
-    template = "workflows/detail_run.html"
     return render(request, template, context)

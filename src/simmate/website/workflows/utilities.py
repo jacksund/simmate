@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from django.http import HttpRequest
+
 from rest_framework.generics import GenericAPIView
-from rest_framework.response import Response
+from rest_framework.response import Response  # this is a sublcass of HttpResponse
 from rest_framework.serializers import Serializer, HyperlinkedModelSerializer
 
 from simmate.website.workflows import filters
@@ -19,10 +21,10 @@ class SimmateAPIView(GenericAPIView):
     define a property. The only requirement is that a dictionary is returned.
     """
 
-    def get_response(self, serializer: Serializer) -> Response:
+    def get_response(self, request, serializer: Serializer) -> Response:
         if self._format_kwarg == "html":
             data = {
-                "filter": self.filterset_class(serializer.data),
+                "filter": self.filterset_class(request.GET),
                 "results": serializer.data,  # would it be better to use .initial_data?
                 **self.extra_context,
             }
@@ -36,7 +38,7 @@ class ListAPIView(SimmateAPIView):
     Concrete view for listing a queryset.
     """
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs) -> Response:
 
         # self.format_kwarg --> not sure why this always returns None, so I
         # grab the format from the request instead. If it isn't listed, then
@@ -56,7 +58,7 @@ class ListAPIView(SimmateAPIView):
         serializer = self.get_serializer(queryset, many=True)
         # return Response(serializer.data)  <--- removed from original
         # ---------------------------------------------------
-        return self.get_response(serializer)
+        return self.get_response(request, serializer)
 
 
 class RetrieveAPIView(SimmateAPIView):
@@ -64,7 +66,7 @@ class RetrieveAPIView(SimmateAPIView):
     Concrete view for retrieving a model instance.
     """
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs):
 
         # ---------------------------------------------------
         # This code is from the RetrieveModelMixin, where instead of returning
@@ -76,7 +78,13 @@ class RetrieveAPIView(SimmateAPIView):
         return self.get_response(serializer)
 
 
-def render_from_table(request, template: str, context, table: DatabaseTable):
+def render_from_table(
+    request: HttpRequest,
+    template: str,
+    context,
+    table: DatabaseTable,
+    view_type: str,
+) -> Response:
 
     # NOTE: This dynamically creates a serializer and a view EVERY TIME a
     # URL is requested. This means...
@@ -91,10 +99,8 @@ def render_from_table(request, template: str, context, table: DatabaseTable):
     #   1. having a utility that prints out the full API spec but isn't called on startup
     #   2. making all APIViews up-front
 
-    # TODO: consider using the following to dynamically name these classes
-    #   NewClass = type(table.__name__, mixins, extra_attributes)
-
-    # For all tables, we share all the data -- no columns are hidden.
+    # For all tables, we share all the data -- no columns are hidden. Therefore
+    # the code for the Serializer is always the same.
     class NewSerializer(HyperlinkedModelSerializer):
         class Meta:
             model = table
@@ -102,14 +108,29 @@ def render_from_table(request, template: str, context, table: DatabaseTable):
 
     NewFilterSet = get_filterset_from_table(table)
 
-    # Querying each table varies though
-    class NewViewSet(ListAPIView):
-        queryset = table.objects.all()  # TODO: order_by("created_at") by default?
-        serializer_class = NewSerializer
-        template_name = template
-        extra_context = context
-        filterset_class = NewFilterSet
+    # TODO: consider using the following to dynamically name these classes
+    #   NewClass = type(table.__name__, mixins, extra_attributes)
 
+    if view_type == "list":
+
+        class NewViewSet(ListAPIView):
+            queryset = table.objects.all()  # TODO: order_by("created_at") by default?
+            serializer_class = NewSerializer
+            template_name = template
+            extra_context = context
+            filterset_class = NewFilterSet
+
+    elif view_type == "retrieve":
+
+        class NewViewSet(RetrieveAPIView):
+            queryset = table.objects.all()  # TODO: order_by("created_at") by default?
+            serializer_class = NewSerializer
+            template_name = template
+            extra_context = context
+            filterset_class = NewFilterSet
+
+    else:
+        raise Exception("Unknown view_type provided. Must be list or retrieve.")
     # now pull together the html response
     response = NewViewSet.as_view()(request)
     return response
@@ -140,7 +161,7 @@ def get_filterset_from_table(table: DatabaseTable) -> filters.DatabaseTableFilte
             model = MatProjStructure  # this is database table
             fields = {...} # this combines the fields from Structure/Thermo mixins
 
-        # These attributed are set using the declared filters from Structure/Thermo mixins
+        # These attributes are set using the declared filters from Structure/Thermo mixins
         declared_filter1 = ...
         declared_filter1 = ...
     ```
