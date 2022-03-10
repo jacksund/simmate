@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from prefect.backend.flow_run import FlowRunView
+
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 
@@ -126,6 +128,22 @@ class Calculation(DatabaseTable):
         URL to this calculation (flow-run) in the Prefect Cloud webstite.
         """
         return f"https://cloud.prefect.io/simmate/flow-run/{self.prefect_flow_run_id}"
+
+    @property
+    def flow_run_view(self) -> FlowRunView:
+        try:
+            return FlowRunView.from_flow_run_id(self.prefect_flow_run_id)
+        except:  # may fail if this is a local run or prefect api key not configured
+            return None
+
+    @property
+    def prefect_flow_run_name(self) -> str:
+        flowrunview = self.flow_run_view
+        return flowrunview.name if flowrunview else None
+
+    def prefect_state(self) -> str:
+        flowrunview = self.flow_run_view
+        return flowrunview.state.__class__.__name__ if flowrunview else None
 
     """ Model Methods """
 

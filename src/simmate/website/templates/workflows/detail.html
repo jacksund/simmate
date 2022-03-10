@@ -77,27 +77,28 @@ Simmate
       <thead>
         <tr>
           <th>Prefect ID</th>
+          <th>Prefect State</th>
           <th>Simmate ID</th>
           <th>Final Energy (eV/atom)</th>
-          <th>Reduced Formula</th>
-          <th>Number of Sites</th>
+          <th>Full Formula</th>
           <th>Spacegroup</th>
-          <th>Density (g/mL)</th>
-          <th>Molar Volume (mL/mol)</th>
         </tr>
       </thead>
       <tbody>
         {% for calculation in calculations %}
         <tr>
-          <td><a href="{{ calculation.prefect_cloud_link }}" target="_blank">{{
-              calculation.prefect_flow_run_name }}</a></td>
-          <td><a href="results/{{ calculation.id }}">mitrelax-{{ calculation.id }}</a></td>
+          {% if calculation.flow_run_view %}
+          <td><a href="{{ calculation.prefect_cloud_link }}" target="_blank">
+              {{ calculation.prefect_flow_run_name }}</a></td>
+          <td>{{ calculation.prefect_state }}</td>
+          {% else %}
+          <td>--</td>
+          <td>--</td>
+          {% endif %}
+          <td><a href="{{ calculation.id }}">{{ calculation.id }}</a></td>
           <td>{{ calculation.structure_final.energy_per_atom | floatformat:3 }}</td>
-          <td>{{ calculation.structure_start.formula_reduced | chemical_formula }}</td>
-          <td>{{ calculation.structure_start.nsites }}</td>
-          <td>{{ calculation.structure_start.spacegroup.number }}</td>
-          <td>{{ calculation.structure_start.density | floatformat:3 }}</td>
-          <td>{{ calculation.structure_start.molar_volume | floatformat:3 }}</td>
+          <td>{{ calculation.formula_full | chemical_formula }}</td>
+          <td>{{ calculation.spacegroup.number }}</td>
         </tr>
         {% endfor %}
       </tbody>

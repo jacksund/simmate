@@ -128,7 +128,6 @@ def workflow_run_detail(
 
     workflow_name_full = workflow_type + "/" + workflow_name
     workflow = get_workflow(workflow_name_full)
-    workflow_run = workflow.result_table.objects.get(id=workflow_run_id)
 
     # !!! this is old code that may be useful as I reimpliment detail views
     # Make the convergence figure and convert it to an html div
@@ -139,11 +138,15 @@ def workflow_run_detail(
 
     return render_from_table(
         request=request,
-        template="workflows/detail.html",
+        request_kwargs={
+            "workflow_type": workflow_type,
+            "workflow_name": workflow_name,
+            "workflow_run_id": workflow_run_id,
+        },
+        template="workflows/detail_run.html",
         context={
             "active_tab_id": "workflows",
             "workflow": workflow,
-            "workflow_run": workflow_run,
         },
         table=workflow.result_table,
         view_type="retrieve",
