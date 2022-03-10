@@ -4,7 +4,10 @@ from django.http import HttpRequest
 
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response  # this is a sublcass of HttpResponse
-from rest_framework.serializers import Serializer, HyperlinkedModelSerializer
+from rest_framework.serializers import (
+    Serializer,
+    ModelSerializer,
+)  # HyperlinkedModelSerializer
 
 from simmate.website.workflows import filters
 from simmate.database.base_data_types import DatabaseTable
@@ -101,7 +104,7 @@ def render_from_table(
 
     # For all tables, we share all the data -- no columns are hidden. Therefore
     # the code for the Serializer is always the same.
-    class NewSerializer(HyperlinkedModelSerializer):
+    class NewSerializer(ModelSerializer):
         class Meta:
             model = table
             fields = "__all__"
@@ -136,6 +139,7 @@ def render_from_table(
     return response
 
 
+# TODO: move this to a classmethod for DatabaseTableFilter
 def get_filterset_from_table(table: DatabaseTable) -> filters.DatabaseTableFilter:
     """
     Dynamically creates a Django Filter from a Simmate database table.
