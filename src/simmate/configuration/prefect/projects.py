@@ -12,32 +12,11 @@ def build():
     #   client.login_to_tenant(tenant_slug='a-tenant-slug')
 
     # grab all of the workflows that need to be registered
-    from simmate.workflows import (
-        energy_mit,
-        energy_quality04,
-        relaxation_mit,
-        relaxation_quality00,
-        relaxation_quality01,
-        relaxation_quality02,
-        relaxation_quality03,
-        relaxation_quality04,
-        relaxation_staged,
-    )
+    from simmate.workflows.utilities import get_list_of_all_workflows, get_workflow
 
-    # TODO: grab the user's custom workflows
-
-    # make these workflows into a list so we can iterate through them
-    workflows = [
-        energy_mit,
-        energy_quality04,
-        relaxation_mit,
-        relaxation_quality00,
-        relaxation_quality01,
-        relaxation_quality02,
-        relaxation_quality03,
-        relaxation_quality04,
-        relaxation_staged,
-    ]
+    # Load all workflows
+    workflow_names = get_list_of_all_workflows()
+    workflows = [get_workflow(name) for name in workflow_names]
 
     # Iterate through and grab all the unique Project names. The brackets here
     # make this return as a set

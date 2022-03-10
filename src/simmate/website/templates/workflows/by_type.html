@@ -1,0 +1,57 @@
+{% extends "core/site-base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<!--
+NOTE: in the future, use Bootstraps grid system when I add more cards here
+https://getbootstrap.com/docs/5.0/components/card/#grid-cards
+-->
+
+<div class="container p-4 bg-light border">
+
+  <!-- Breadcrumb links -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'workflows' %}">workflows</a></li>
+      <li class="breadcrumb-item active">{{ workflow_type }}</li>
+    </ol>
+  </nav>
+
+  <section class="pt-5 jumbotron text-center">
+    <div class="container">
+      <h1 class="jumbotron-heading">{{ workflow_type }}</h1>
+      <p class="lead text-muted">(to-do) a short description of this workflow type</p>
+    </div>
+  </section>
+
+  {% load chemical_formula_filter %}
+  <div class="row row-cols-1 g-4">
+    {% for workflow in workflows %}
+    <div class="col">
+      <div class="card h-100" style="width: 30rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{ workflow.name_short }}</h5>
+          <p class="card-text">
+            {{ workflow.description_doc }}
+            </br></br>
+            <a role="button" class="btn btn-primary btn"
+              href="{% url 'workflow_detail' workflow_type workflow.name_short %}">About</a>
+
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+{% endblock %}

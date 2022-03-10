@@ -9,7 +9,7 @@ from simmate.workflow_engine.workflow import (
     Parameter,
     ModuleStorage,
 )
-from simmate.workflows.common_tasks import (
+from simmate.workflow_engine.common_tasks import (
     LoadInputAndRegister,
     parse_multi_command,
 )

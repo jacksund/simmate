@@ -18,7 +18,7 @@ In this tutorial, you will learn how to explore your database as well as load da
 ```python
 # OPTION 1
 from simmate.shortcuts import setup  # this connects to our database
-from simmate.database.local_calculations import MITStaticEnergy
+from simmate.database.workflow_results import MITStaticEnergy
 
 # OPTION 2 (slower but recommended for convenience)
 from simmate.workflows.static_energy import mit_workflow
@@ -238,7 +238,7 @@ In the previous section, we loaded our `DatabaseTable` from the workflow. But no
 from simmate.shortcuts import setup  # this connects to our database
 
 # This gives the result_table we were using in the previous section
-from simmate.database.local_calculations import MITRelaxation
+from simmate.database.workflow_results import MITRelaxation
 
 # This loads the table where we store all of the JARVIS data.
 from simmate.database.third_parties import JarvisStructure

@@ -26,22 +26,19 @@ urlpatterns = [
     #
     path(
         route="third-parties/",
-        view=include("simmate.website.third_parties.urls"),
+        view=include(
+            ("simmate.website.third_parties.urls", "simmate.website.third_parties"),
+            namespace="third_parties",
+        ),
         name="third_parties",
     ),
     #
     #
-    # This maps to our REST api endpoints
-    path(
-        route="rest-api/",
-        view=include("simmate.website.rest_api.urls"),
-        name="rest_api",
-    ),
     # All local calculations are stored at this endpoint
     path(
-        route="local-calculations/",
-        view=include("simmate.website.local_calculations.urls"),
-        name="local_calculations",
+        route="workflows/",
+        view=include("simmate.website.workflows.urls"),
+        name="workflows",
     ),
     #
     # This app is for viewing crystal structures in a 3D viewport

@@ -5,7 +5,7 @@ import time
 from simmate.toolkit import Composition
 
 from simmate.configuration.django import setup_full  # sets database connection
-from simmate.database.local_calculations.evolution import (
+from simmate.database.workflow_results.evolution import (
     EvolutionarySearch as SearchDatatable,
     StructureSource as SourceDatatable,
 )

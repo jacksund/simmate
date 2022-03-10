@@ -19,6 +19,7 @@ dependencies:
     - django-crispy-forms >=1.13.0
     - django-extensions >=3.1.5
     - django-pandas >=0.6.6
+    - django-filter >=21.1
     - djangorestframework >=3.13.1
     - matminer >=0.7.6
     - numpy >=1.22.0

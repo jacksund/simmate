@@ -385,6 +385,8 @@ class DatabaseTable(models.Model):
 
         # BUG: I'm honestly not sure what this does, but it works...
         # https://stackoverflow.com/questions/27112816/
+        # For a more robust way of setting the Meta class, see my code in
+        # simmate.website.workflows.utilities
         new_columns.update(
             {
                 "__module__": module,

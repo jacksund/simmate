@@ -8,4 +8,4 @@
 from simmate.database.base_data_types import Spacegroup
 
 # Rather than retyping all of the logic from this file, I use the copy method here.
-from simmate.database.local_calculations import *
+from simmate.database.workflow_results import *

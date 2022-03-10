@@ -56,17 +56,18 @@ def list_options(options: List) -> int:
 
 
 def parse_parameters(
-    context: Union[Context, dict],
+    context: Context,
     structure: str = None,
     command: str = None,
     directory: str = None,
 ) -> dict:
     """
     This is a utility for click (cli) that formats input parameters for workflow
-    runs.
+    runs. It is a small wrapper around
+    `simmate.workflow_engine.utilities.parse_parameters` that accounts for
+    recieving a `click.Context` object.
 
-    In order to provide a context, make sure the click command has the following
-    set:
+    In order to provide a context, make sure the click command has the following:
 
     ``` python
     @click.command(
@@ -85,12 +86,7 @@ def parse_parameters(
     This is also why we have pass_context and then the kwarg context.
     """
 
-    from simmate.toolkit import Structure
-
-    # we don't want to pass arguments like command=None or structure=None if the
-    # user didn't provide this input. Instead, we want the workflow to use
-    # its own default value. To do this, we pass the command input as a kwarg
-    # or an empty dict if it wasn't given.
+    from simmate.workflows.utilities import parse_parameters
 
     # The extra keywords passed are given as a list such as...
     #   ["--arg1", "val1", "--arg2", "val2",]
@@ -98,19 +94,14 @@ def parse_parameters(
     #   https://stackoverflow.com/questions/32944131/
     # If there's any issue parsing the data, we alert the user with a hint.
     try:
-        # check if we have a click context or a dictionary
-        if isinstance(context, Context):
-            kwargs_cleaned = {
-                context.args[i][2:]: context.args[i + 1]
-                for i in range(0, len(context.args), 2)
-            }
-        # otherwise we have dictionary, which we can use directly. We need
-        # to pull specific kwargs out of this dictionary too.
-        else:
-            kwargs_cleaned = context.copy()
-            structure = kwargs_cleaned.pop("structure", None)
-            command = kwargs_cleaned.pop("command", None)
-            directory = kwargs_cleaned.pop("directory", None)
+        kwargs_cleaned = {
+            context.args[i][2:]: context.args[i + 1]
+            for i in range(0, len(context.args), 2)
+        }
+        kwargs_cleaned["structure"] = structure
+        kwargs_cleaned["directory"] = directory
+        kwargs_cleaned["command"] = command
+
     except:
         raise click.ClickException(
             "This workflow command appears to be improperly formatted. \n"
@@ -118,39 +109,9 @@ def parse_parameters(
             "keyword and the value (such as `--example_kwarg example_value`)."
         )
 
-    if command:
-        kwargs_cleaned["command"] = command
-
-    if directory:
-        kwargs_cleaned["directory"] = directory
-
-    # The structure input (which is optional) is given as a filename, which
-    # we need to load as toolkit object. This is also the case for a number
-    # of inputs like migration_hop, structures, etc.
-    if structure:
-        kwargs_cleaned["structure"] = Structure.from_dynamic(structure)
-
-    if "structures" in kwargs_cleaned.keys():
-        structure_filenames = kwargs_cleaned["structures"].split(";")
-        kwargs_cleaned["structures"] = [
-            Structure.from_dynamic(file) for file in structure_filenames
-        ]
-
-    if "migration_hop" in kwargs_cleaned.keys():
-        from simmate.toolkit.diffusion import MigrationHop
-
-        migration_hop = MigrationHop.from_dynamic(kwargs_cleaned["migration_hop"])
-        kwargs_cleaned["migration_hop"] = migration_hop
-
-    if "supercell_start" in kwargs_cleaned.keys():
-        kwargs_cleaned["supercell_start"] = Structure.from_dynamic(
-            kwargs_cleaned["supercell_start"]
-        )
-
-    if "supercell_end" in kwargs_cleaned.keys():
-        kwargs_cleaned["supercell_end"] = Structure.from_dynamic(
-            kwargs_cleaned["supercell_end"]
-        )
+    # We can now pass this dictionary to our normal parse_parameters utility
+    # that will convert everything to python objects for us.
+    kwargs_cleaned = parse_parameters(**kwargs_cleaned)
 
     return kwargs_cleaned
 
@@ -164,25 +125,25 @@ def explore():
 
     click.echo("\nGathering all available workflows...")
     from simmate.workflows.utilities import (
-        ALL_WORKFLOW_TYPES,
+        WORKFLOW_TYPES,
         get_list_of_workflows_by_type,
         get_workflow,
     )
 
     click.echo("\n\nWhat type of analysis are you interested in?")
-    types_cleaned = [t.replace("_", " ") for t in ALL_WORKFLOW_TYPES]
+    types_cleaned = [t.replace("-", " ") for t in WORKFLOW_TYPES]
     type_index = list_options(types_cleaned)
-    selected_type = ALL_WORKFLOW_TYPES[type_index]
+    selected_type = WORKFLOW_TYPES[type_index]
 
     # TODO: have the user select a calculator for this analysis. For now,
     # we are assuming VASP because those are our only workflows
 
     click.echo("\n\nWhat settings preset do you want to see the description for?")
-    presets = [t for t in get_list_of_workflows_by_type(selected_type)]
+    presets = get_list_of_workflows_by_type(selected_type, full_name=False)
     present_index = list_options(presets)
     selected_preset = presets[present_index]
 
-    final_workflow_name = selected_type.replace("_", "-") + "/" + selected_preset
+    final_workflow_name = selected_type + "/" + selected_preset
     click.echo(f"\n\n===================== {final_workflow_name} =====================")
 
     # now we load this workflow and print the docstring.
@@ -415,8 +376,7 @@ def run_cloud(context, workflow_name, structure, command, directory):
     )
 )
 @click.argument("filename", type=click.Path(exists=True))
-@click.pass_context
-def run_yaml(context, filename):
+def run_yaml(filename):
     """Runs a workflow where parameters are loaded from a yaml file."""
 
     click.echo("LOADING WORKFLOW & INPUT PARAMETERS...")
@@ -427,14 +387,14 @@ def run_yaml(context, filename):
         kwargs = yaml.full_load(file)
 
     # we pop the workflow name so that it is also removed from the rest of kwargs
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utilities import get_workflow, parse_parameters
 
     workflow = get_workflow(
         workflow_name=kwargs.pop("workflow_name"),
         precheck_flow_exists=True,
         print_equivalent_import=True,
     )
-    kwargs_cleaned = parse_parameters(context=kwargs)
+    kwargs_cleaned = parse_parameters(**kwargs)
 
     click.echo("RUNNING WORKFLOW...")
 

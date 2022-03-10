@@ -68,6 +68,33 @@ class Workflow(PrefectFlow):
     `simmate.database.base_data_types.DatabaseTable`
     """
 
+    @property
+    def type(self) -> str:
+        """
+        Gives the workflow type of this workflow. For example the workflow named
+        'static-energy/matproj' would have the type `static-energy`.
+        """
+        return self.name.split("/")[0]
+
+    @property
+    def name_short(self) -> str:
+        """
+        Gives the present name of the workflow. For example the workflow named
+        'static-energy/matproj' would have the shortname `matproj`
+        """
+        return self.name.split("/")[-1]
+
+    # BUG: naming this `description` causes issues.
+    # See https://github.com/PrefectHQ/prefect/issues/3911
+    @property
+    def description_doc(self) -> str:
+        """
+        This simply returns the documentation string of this workflow -- so this
+        is the same as `__doc__`. This attribute is only defined for beginners
+        to python and for use in django templates for the website interface.
+        """
+        return self.__doc__
+
     def run_cloud(
         self,
         labels: List[str] = [],
@@ -109,11 +136,13 @@ class Workflow(PrefectFlow):
         This may change in the future if I need to set flow run names or schedules.
         """
 
-        # Grab the logger as we will print useful information below
-        logger = prefect.context.logger
+        # Grab the logger as we will print useful information below.
+        # In some cases, there is no logger present, so we just set logger=None.
+        # This possibility is why we use `if logger else None` statements below.
+        logger = getattr(prefect.context, "logger", None)
 
         # Grab the Flow's ID from Prefect Cloud
-        logger.debug("Looking up flow metadata...")
+        logger.debug("Looking up flow metadata...") if logger else None
         flow_view = FlowView.from_flow_name(
             self.name,
             project_name=self.project_name,
@@ -123,7 +152,7 @@ class Workflow(PrefectFlow):
         parameters_serialized = self._serialize_parameters(kwargs)
 
         # Now we submit the workflow
-        logger.info(f"Creating flow run for {self.name}...")
+        logger.info(f"Creating flow run for {self.name}...") if logger else None
         client = Client()
         flow_run_id = client.create_flow_run(
             flow_id=flow_view.flow_id,
@@ -133,7 +162,7 @@ class Workflow(PrefectFlow):
 
         # we log the website url to the flow for the user
         run_url = client.get_cloud_url("flow-run", flow_run_id, as_user=False)
-        logger.info(f"Created flow run: {run_url}")
+        logger.info(f"Created flow run: {run_url}") if logger else None
 
         # -----------------------------------
         # This part is unique to Simmate. Because we often want to save some info

@@ -32,7 +32,7 @@ from simmate.workflow_engine.workflow import (
     Parameter,
     ModuleStorage,
 )
-from simmate.workflows.common_tasks import (
+from simmate.workflow_engine.common_tasks import (
     LoadInputAndRegister,
     parse_multi_command,
 )
@@ -54,6 +54,8 @@ from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
 )
 
+workflow_name = "diffusion/all-paths"
+
 # Convert our workflow objects to task objects
 relax_bulk = relaxation_mit_workflow.to_workflow_task()
 energy_bulk = energy_mit_workflow.to_workflow_task()
@@ -61,7 +63,7 @@ run_neb = neb_workflow.to_workflow_task()
 
 # Extra setup tasks
 load_input_and_register = LoadInputAndRegister(
-    workflow_name="diffusion/all-paths",
+    workflow_name=workflow_name,
     input_obj_name="structure",
 )  # TODO: make MigrationHop a calc so we can use calculation_table?
 
@@ -120,7 +122,7 @@ def map_neb(migration_hop_id: int, directory: str, subcommands: dict):
 # ------------------------
 
 
-with Workflow("NEB (for all unique pathways)") as workflow:
+with Workflow(workflow_name) as workflow:
 
     structure = Parameter("structure")
     migrating_specie = Parameter("migrating_specie")
