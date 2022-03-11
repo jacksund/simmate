@@ -34,7 +34,7 @@ First, we need to set up our Cloud database, tell Simmate how to connect to it, 
 ### creating the cloud database
 
 1. On our DigitalOcean dashboard, click the green "Create" button in the top right and then select "Database". It should bring you to [this page](https://cloud.digitalocean.com/databases/new).
-2. For "database engine", select the newest version of PostgreSQL (currently 13)
+2. For "database engine", select the newest version of PostgreSQL (currently 14)
 3. The remainder of the page's options can be left at their default values.
 4. Select **Create a Database Cluster** when you're ready.
 
@@ -135,28 +135,29 @@ This section follows the tutorials listed here. If you are struggling with our g
 
 1. On our DigitalOcean dashboard, click the green "Create" button in the top right and then select "Apps". It should bring you to [this page](https://cloud.digitalocean.com/apps/new).
 2. Select Github (and give github access if this is your first time)
-3. For your "Source", we want to select our project. For me, this is "jacksund/simmate". Leave everything else at its default. 
+3. For your "Source", we want to select our project. For me, this is "jacksund/simmate". Leave everything else at its default.
 4. When you go to the next page, you should see that Python was detected. We will now update some of these settings in steps 5-8.
 5. Edit "Enviornment Variables" to include the following. Also note that we are connecting to our database pool and that your secret key should be [randomly generated](https://passwordsgenerator.net/) and encrypted!:
 ```
 DJANGO_ALLOWED_HOSTS=${APP_DOMAIN}
-DATABASE_URL=${db-postgresql-nyc3-09114.DATABASE_URL}
 DEBUG=False
 DJANGO_SECRET_KEY=randomly-generated-passord-12345
 USE_LOCAL_DATABASE=False
+PREFECT__CLOUD__API_KEY=your-prefect-api-key
 ```
 > note to simmate devs: [consider switching to setting all database variables directly](https://docs.digitalocean.com/products/app-platform/how-to/use-environment-variables/)
+> note for prefect: in the future, I may want to link API keys to profiles so that we can submit to proper clouds -- rather than assume all go through a single prefect account.
 
 6. Change our "Build Command" to... (`pip install .` is ran automatically)
 ```
-pip install gunicorn psycopg2
+pip install gunicorn psycopg2; prefect backend cloud;
 ```
 7. Change our "Run Command" to...
 ```
 gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi
 ```
 8. Use the button at the bottom of this page to connect to our PostgreSQL database set-up above
-9. We can still with the defaults for the rest of the pages! Create your server when you're ready!
+9. We can stick with the defaults for the rest of the pages! Create your server when you're ready!
 
 
 ### creating our static file server (CDN)
@@ -177,7 +178,7 @@ We use google domains as I found it had the easiest setup and cheapest prices.
 For connecting this to DigitalOcean, I followed these guides: [1](https://docs.digitalocean.com/products/app-platform/how-to/manage-domains/), [2](https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars), [3](https://docs.digitalocean.com/products/networking/dns/how-to/manage-records/). These can give extra details if the steps below aren't enough.
 
 1. Purchase your website (domain) name on https://domains.google.com/registrar/
-2. Select the domain you just purchased and now go to it "DNS" tab. For example, ours brings us to https://domains.google.com/registrar/simmate.org/DNS
+2. Select the domain you just purchased and now go to its "DNS" tab. For example, ours brings us to https://domains.google.com/registrar/simmate.org/DNS
 3. Switch to the "Custom name servers" tab and add the following three servers:
     - ns1.digitalocean.com
     - ns2.digitalocean.com
