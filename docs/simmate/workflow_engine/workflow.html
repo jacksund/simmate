@@ -38,6 +38,27 @@
                                 <a class="variable" href="#Workflow.result_task">result_task</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Workflow.project_name">project_name</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Workflow.s3task">s3task</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Workflow.calculation_table">calculation_table</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Workflow.result_table">result_table</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Workflow.type">type</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Workflow.name_short">name_short</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Workflow.description_doc">description_doc</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Workflow.run_cloud">run_cloud</a>
                         </li>
                         <li>
@@ -87,25 +108,87 @@
 <span class="kn">from</span> <span class="nn">prefect.backend.flow_run</span> <span class="kn">import</span> <span class="n">FlowRunView</span><span class="p">,</span> <span class="n">FlowView</span><span class="p">,</span> <span class="n">watch_flow_run</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine.supervised_staged_shell_task</span> <span class="kn">import</span> <span class="n">S3Task</span>
+<span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">DatabaseTable</span><span class="p">,</span> <span class="n">Calculation</span>
 
 
 <span class="k">class</span> <span class="nc">Workflow</span><span class="p">(</span><span class="n">PrefectFlow</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class behaves exactly like a normal Prefect workflow, where we add some</span>
 <span class="sd">    common utilities and pre-submit tasks. For example, there is the `run_cloud`</span>
-<span class="sd">    methods, which us to register a calculation along with submitting a workflow</span>
-<span class="sd">    to the cloud.</span>
+<span class="sd">    method, which allows us to register a calculation to a database table before</span>
+<span class="sd">    we submit the workflow to Prefect Cloud.</span>
 
 <span class="sd">    To learn how to use this class, see [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">result_task</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">result_task</span><span class="p">:</span> <span class="n">Task</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    In many ETL workflows, we may also want the result of the some terminating</span>
 <span class="sd">    task directly. This would save us from having to go find the result in</span>
 <span class="sd">    the database. So by setting `result_task`, we are able get access a specific task&#39;s</span>
 <span class="sd">    result -- directly as a python object(s). This is optional.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">project_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The name of the project in the  that this workflow is associated with. This </span>
+<span class="sd">    attribute is mainly just for organizing workflows in the Prefect Cloud interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">s3task</span><span class="p">:</span> <span class="n">S3Task</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The supervised-staged-shell task (or S3Task) that this workflow uses to run.</span>
+<span class="sd">    For understanding what the calculation does and the settings it uses, users</span>
+<span class="sd">    should start here. You can also use a workflows `s3task.run` to run the workflow</span>
+<span class="sd">    without storing results in the database.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">calculation_table</span><span class="p">:</span> <span class="n">Calculation</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The database table where calculation information (such as the prefect_flow_run_id)</span>
+<span class="sd">    is stored. Note, for NestedWorkflows, this table will not be the same as the</span>
+<span class="sd">    result table! The table should use </span>
+<span class="sd">    `simmate.database.base_data_types.Calculation`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">result_table</span><span class="p">:</span> <span class="n">DatabaseTable</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The database table where all calculation results are stored. In many cases,</span>
+<span class="sd">    this is the same table as `calculation_table` -- the exception is</span>
+<span class="sd">    for NestedWorkflows, where the result table may point to a specific</span>
+<span class="sd">    sub-workflow&#39;s table for results. An example of this is the relaxation/staged</span>
+<span class="sd">    workflow, which is made up of a series of relaxations -- and the result </span>
+<span class="sd">    table points to the final relaxation in this series. The table should use </span>
+<span class="sd">    `simmate.database.base_data_types.DatabaseTable`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gives the workflow type of this workflow. For example the workflow named</span>
+<span class="sd">        &#39;static-energy/matproj&#39; would have the type `static-energy`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name_short</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gives the present name of the workflow. For example the workflow named</span>
+<span class="sd">        &#39;static-energy/matproj&#39; would have the shortname `matproj`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># BUG: naming this `description` causes issues.</span>
+    <span class="c1"># See https://github.com/PrefectHQ/prefect/issues/3911</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">description_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This simply returns the documentation string of this workflow -- so this</span>
+<span class="sd">        is the same as `__doc__`. This attribute is only defined for beginners</span>
+<span class="sd">        to python and for use in django templates for the website interface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span>
 
     <span class="k">def</span> <span class="nf">run_cloud</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -148,11 +231,13 @@
 <span class="sd">        This may change in the future if I need to set flow run names or schedules.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Grab the logger as we will print useful information below</span>
-        <span class="n">logger</span> <span class="o">=</span> <span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">logger</span>
+        <span class="c1"># Grab the logger as we will print useful information below.</span>
+        <span class="c1"># In some cases, there is no logger present, so we just set logger=None.</span>
+        <span class="c1"># This possibility is why we use `if logger else None` statements below.</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="s2">&quot;logger&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Grab the Flow&#39;s ID from Prefect Cloud</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Looking up flow metadata...&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Looking up flow metadata...&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">flow_view</span> <span class="o">=</span> <span class="n">FlowView</span><span class="o">.</span><span class="n">from_flow_name</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">project_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
@@ -162,7 +247,7 @@
         <span class="n">parameters_serialized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Now we submit the workflow</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating flow run for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating flow run for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
         <span class="n">flow_run_id</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_flow_run</span><span class="p">(</span>
             <span class="n">flow_id</span><span class="o">=</span><span class="n">flow_view</span><span class="o">.</span><span class="n">flow_id</span><span class="p">,</span>
@@ -172,7 +257,7 @@
 
         <span class="c1"># we log the website url to the flow for the user</span>
         <span class="n">run_url</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_cloud_url</span><span class="p">(</span><span class="s2">&quot;flow-run&quot;</span><span class="p">,</span> <span class="n">flow_run_id</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created flow run: </span><span class="si">{</span><span class="n">run_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created flow run: </span><span class="si">{</span><span class="n">run_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="kc">None</span>
 
         <span class="c1"># -----------------------------------</span>
         <span class="c1"># This part is unique to Simmate. Because we often want to save some info</span>
@@ -307,22 +392,23 @@
 
         <span class="k">return</span> <span class="n">WorkflowTask</span><span class="p">(</span><span class="n">workflow</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
-
-<span class="c1"># TODO: This is an example query where I grab all ids. This may be useful in the</span>
-<span class="c1"># future.</span>
-<span class="c1"># query = {</span>
-<span class="c1">#     &quot;query&quot;: {</span>
-<span class="c1">#         with_args(</span>
-<span class="c1">#             &quot;flow_run&quot;,</span>
-<span class="c1">#             {</span>
-<span class="c1">#                 &quot;where&quot;: {</span>
-<span class="c1">#                     &quot;flow&quot;: {&quot;name&quot;: {&quot;_eq&quot;: &quot;MIT Relaxation&quot;}},</span>
-<span class="c1">#                     &quot;state&quot;: {&quot;_in&quot;: [&quot;Completed&quot;, &quot;Scheduled&quot;]},</span>
-<span class="c1">#                 },</span>
-<span class="c1">#             },</span>
-<span class="c1">#         ): [&quot;id&quot;]</span>
-<span class="c1">#     }</span>
-<span class="c1"># }</span>
+    <span class="c1"># @classmethod</span>
+    <span class="c1"># def get_all_ids_in_state(cls, states=[&quot;Completed&quot;, &quot;Scheduled&quot;]):</span>
+    <span class="c1">#     # TODO: This is an example query where I grab all ids. This may be useful in the</span>
+    <span class="c1">#     # future.</span>
+    <span class="c1">#     query = {</span>
+    <span class="c1">#         &quot;query&quot;: {</span>
+    <span class="c1">#             with_args(</span>
+    <span class="c1">#                 &quot;flow_run&quot;,</span>
+    <span class="c1">#                 {</span>
+    <span class="c1">#                     &quot;where&quot;: {</span>
+    <span class="c1">#                         &quot;flow&quot;: {&quot;name&quot;: {&quot;_eq&quot;: cls.name}},</span>
+    <span class="c1">#                         &quot;state&quot;: {&quot;_in&quot;: states},</span>
+    <span class="c1">#                     },</span>
+    <span class="c1">#                 },</span>
+    <span class="c1">#             ): [&quot;id&quot;]</span>
+    <span class="c1">#         }</span>
+    <span class="c1">#     }</span>
 </pre></div>
 
         </details>
@@ -343,19 +429,79 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class behaves exactly like a normal Prefect workflow, where we add some</span>
 <span class="sd">    common utilities and pre-submit tasks. For example, there is the `run_cloud`</span>
-<span class="sd">    methods, which us to register a calculation along with submitting a workflow</span>
-<span class="sd">    to the cloud.</span>
+<span class="sd">    method, which allows us to register a calculation to a database table before</span>
+<span class="sd">    we submit the workflow to Prefect Cloud.</span>
 
 <span class="sd">    To learn how to use this class, see [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">result_task</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">result_task</span><span class="p">:</span> <span class="n">Task</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    In many ETL workflows, we may also want the result of the some terminating</span>
 <span class="sd">    task directly. This would save us from having to go find the result in</span>
 <span class="sd">    the database. So by setting `result_task`, we are able get access a specific task&#39;s</span>
 <span class="sd">    result -- directly as a python object(s). This is optional.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">project_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The name of the project in the  that this workflow is associated with. This </span>
+<span class="sd">    attribute is mainly just for organizing workflows in the Prefect Cloud interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">s3task</span><span class="p">:</span> <span class="n">S3Task</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The supervised-staged-shell task (or S3Task) that this workflow uses to run.</span>
+<span class="sd">    For understanding what the calculation does and the settings it uses, users</span>
+<span class="sd">    should start here. You can also use a workflows `s3task.run` to run the workflow</span>
+<span class="sd">    without storing results in the database.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">calculation_table</span><span class="p">:</span> <span class="n">Calculation</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The database table where calculation information (such as the prefect_flow_run_id)</span>
+<span class="sd">    is stored. Note, for NestedWorkflows, this table will not be the same as the</span>
+<span class="sd">    result table! The table should use </span>
+<span class="sd">    `simmate.database.base_data_types.Calculation`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">result_table</span><span class="p">:</span> <span class="n">DatabaseTable</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The database table where all calculation results are stored. In many cases,</span>
+<span class="sd">    this is the same table as `calculation_table` -- the exception is</span>
+<span class="sd">    for NestedWorkflows, where the result table may point to a specific</span>
+<span class="sd">    sub-workflow&#39;s table for results. An example of this is the relaxation/staged</span>
+<span class="sd">    workflow, which is made up of a series of relaxations -- and the result </span>
+<span class="sd">    table points to the final relaxation in this series. The table should use </span>
+<span class="sd">    `simmate.database.base_data_types.DatabaseTable`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gives the workflow type of this workflow. For example the workflow named</span>
+<span class="sd">        &#39;static-energy/matproj&#39; would have the type `static-energy`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name_short</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gives the present name of the workflow. For example the workflow named</span>
+<span class="sd">        &#39;static-energy/matproj&#39; would have the shortname `matproj`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># BUG: naming this `description` causes issues.</span>
+    <span class="c1"># See https://github.com/PrefectHQ/prefect/issues/3911</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">description_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This simply returns the documentation string of this workflow -- so this</span>
+<span class="sd">        is the same as `__doc__`. This attribute is only defined for beginners</span>
+<span class="sd">        to python and for use in django templates for the website interface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span>
 
     <span class="k">def</span> <span class="nf">run_cloud</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -398,11 +544,13 @@
 <span class="sd">        This may change in the future if I need to set flow run names or schedules.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Grab the logger as we will print useful information below</span>
-        <span class="n">logger</span> <span class="o">=</span> <span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">logger</span>
+        <span class="c1"># Grab the logger as we will print useful information below.</span>
+        <span class="c1"># In some cases, there is no logger present, so we just set logger=None.</span>
+        <span class="c1"># This possibility is why we use `if logger else None` statements below.</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="s2">&quot;logger&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Grab the Flow&#39;s ID from Prefect Cloud</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Looking up flow metadata...&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Looking up flow metadata...&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">flow_view</span> <span class="o">=</span> <span class="n">FlowView</span><span class="o">.</span><span class="n">from_flow_name</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">project_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
@@ -412,7 +560,7 @@
         <span class="n">parameters_serialized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Now we submit the workflow</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating flow run for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating flow run for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
         <span class="n">flow_run_id</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_flow_run</span><span class="p">(</span>
             <span class="n">flow_id</span><span class="o">=</span><span class="n">flow_view</span><span class="o">.</span><span class="n">flow_id</span><span class="p">,</span>
@@ -422,7 +570,7 @@
 
         <span class="c1"># we log the website url to the flow for the user</span>
         <span class="n">run_url</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_cloud_url</span><span class="p">(</span><span class="s2">&quot;flow-run&quot;</span><span class="p">,</span> <span class="n">flow_run_id</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created flow run: </span><span class="si">{</span><span class="n">run_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created flow run: </span><span class="si">{</span><span class="n">run_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="kc">None</span>
 
         <span class="c1"># -----------------------------------</span>
         <span class="c1"># This part is unique to Simmate. Because we often want to save some info</span>
@@ -556,14 +704,32 @@
         <span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">WorkflowTask</span>
 
         <span class="k">return</span> <span class="n">WorkflowTask</span><span class="p">(</span><span class="n">workflow</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c1"># @classmethod</span>
+    <span class="c1"># def get_all_ids_in_state(cls, states=[&quot;Completed&quot;, &quot;Scheduled&quot;]):</span>
+    <span class="c1">#     # TODO: This is an example query where I grab all ids. This may be useful in the</span>
+    <span class="c1">#     # future.</span>
+    <span class="c1">#     query = {</span>
+    <span class="c1">#         &quot;query&quot;: {</span>
+    <span class="c1">#             with_args(</span>
+    <span class="c1">#                 &quot;flow_run&quot;,</span>
+    <span class="c1">#                 {</span>
+    <span class="c1">#                     &quot;where&quot;: {</span>
+    <span class="c1">#                         &quot;flow&quot;: {&quot;name&quot;: {&quot;_eq&quot;: cls.name}},</span>
+    <span class="c1">#                         &quot;state&quot;: {&quot;_in&quot;: states},</span>
+    <span class="c1">#                     },</span>
+    <span class="c1">#                 },</span>
+    <span class="c1">#             ): [&quot;id&quot;]</span>
+    <span class="c1">#         }</span>
+    <span class="c1">#     }</span>
 </pre></div>
 
         </details>
 
             <div class="docstring"><p>This class behaves exactly like a normal Prefect workflow, where we add some
 common utilities and pre-submit tasks. For example, there is the <code><a href="#Workflow.run_cloud">run_cloud</a></code>
-methods, which us to register a calculation along with submitting a workflow
-to the cloud.</p>
+method, which allows us to register a calculation to a database table before
+we submit the workflow to Prefect Cloud.</p>
 
 <p>To learn how to use this class, see <a href="https://docs.prefect.io/api/latest/core/flow.html#flow-2">prefect.core.flow.Flow</a></p>
 </div>
@@ -572,7 +738,7 @@ to the cloud.</p>
                             <div id="Workflow.result_task" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Workflow.result_task">#&nbsp;&nbsp</a>
 
-        <span class="name">result_task</span><span class="default_value"> = None</span>
+        <span class="name">result_task</span><span class="annotation">: prefect.core.task.Task</span><span class="default_value"> = None</span>
     </div>
 
     
@@ -580,6 +746,107 @@ to the cloud.</p>
 task directly. This would save us from having to go find the result in
 the database. So by setting <code><a href="#Workflow.result_task">result_task</a></code>, we are able get access a specific task's
 result -- directly as a python object(s). This is optional.</p>
+</div>
+
+
+                            </div>
+                            <div id="Workflow.project_name" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Workflow.project_name">#&nbsp;&nbsp</a>
+
+        <span class="name">project_name</span><span class="annotation">: str</span><span class="default_value"> = None</span>
+    </div>
+
+    
+            <div class="docstring"><p>The name of the project in the  that this workflow is associated with. This 
+attribute is mainly just for organizing workflows in the Prefect Cloud interface.</p>
+</div>
+
+
+                            </div>
+                            <div id="Workflow.s3task" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Workflow.s3task">#&nbsp;&nbsp</a>
+
+        <span class="name">s3task</span><span class="annotation">: <a href="supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></span><span class="default_value"> = None</span>
+    </div>
+
+    
+            <div class="docstring"><p>The supervised-staged-shell task (or S3Task) that this workflow uses to run.
+For understanding what the calculation does and the settings it uses, users
+should start here. You can also use a workflows <code>s3task.run</code> to run the workflow
+without storing results in the database.</p>
+</div>
+
+
+                            </div>
+                            <div id="Workflow.calculation_table" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Workflow.calculation_table">#&nbsp;&nbsp</a>
+
+        <span class="name">calculation_table</span><span class="annotation">: <a href="../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></span><span class="default_value"> = None</span>
+    </div>
+
+    
+            <div class="docstring"><p>The database table where calculation information (such as the prefect_flow_run_id)
+is stored. Note, for NestedWorkflows, this table will not be the same as the
+result table! The table should use 
+<code><a href="../database/base_data_types.html#Calculation">simmate.database.base_data_types.Calculation</a></code></p>
+</div>
+
+
+                            </div>
+                            <div id="Workflow.result_table" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Workflow.result_table">#&nbsp;&nbsp</a>
+
+        <span class="name">result_table</span><span class="annotation">: <a href="../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></span><span class="default_value"> = None</span>
+    </div>
+
+    
+            <div class="docstring"><p>The database table where all calculation results are stored. In many cases,
+this is the same table as <code><a href="#Workflow.calculation_table">calculation_table</a></code> -- the exception is
+for NestedWorkflows, where the result table may point to a specific
+sub-workflow's table for results. An example of this is the relaxation/staged
+workflow, which is made up of a series of relaxations -- and the result 
+table points to the final relaxation in this series. The table should use 
+<code><a href="../database/base_data_types.html#DatabaseTable">simmate.database.base_data_types.DatabaseTable</a></code></p>
+</div>
+
+
+                            </div>
+                            <div id="Workflow.type" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Workflow.type">#&nbsp;&nbsp</a>
+
+        <span class="name">type</span><span class="annotation">: str</span>
+    </div>
+
+    
+            <div class="docstring"><p>Gives the workflow type of this workflow. For example the workflow named
+'static-energy/matproj' would have the type <code>static-energy</code>.</p>
+</div>
+
+
+                            </div>
+                            <div id="Workflow.name_short" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Workflow.name_short">#&nbsp;&nbsp</a>
+
+        <span class="name">name_short</span><span class="annotation">: str</span>
+    </div>
+
+    
+            <div class="docstring"><p>Gives the present name of the workflow. For example the workflow named
+'static-energy/matproj' would have the shortname <code>matproj</code></p>
+</div>
+
+
+                            </div>
+                            <div id="Workflow.description_doc" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Workflow.description_doc">#&nbsp;&nbsp</a>
+
+        <span class="name">description_doc</span><span class="annotation">: str</span>
+    </div>
+
+    
+            <div class="docstring"><p>This simply returns the documentation string of this workflow -- so this
+is the same as <code>__doc__</code>. This attribute is only defined for beginners
+to python and for use in django templates for the website interface.</p>
 </div>
 
 
@@ -640,11 +907,13 @@ result -- directly as a python object(s). This is optional.</p>
 <span class="sd">        This may change in the future if I need to set flow run names or schedules.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Grab the logger as we will print useful information below</span>
-        <span class="n">logger</span> <span class="o">=</span> <span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">logger</span>
+        <span class="c1"># Grab the logger as we will print useful information below.</span>
+        <span class="c1"># In some cases, there is no logger present, so we just set logger=None.</span>
+        <span class="c1"># This possibility is why we use `if logger else None` statements below.</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">prefect</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="s2">&quot;logger&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Grab the Flow&#39;s ID from Prefect Cloud</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Looking up flow metadata...&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Looking up flow metadata...&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">flow_view</span> <span class="o">=</span> <span class="n">FlowView</span><span class="o">.</span><span class="n">from_flow_name</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">project_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
@@ -654,7 +923,7 @@ result -- directly as a python object(s). This is optional.</p>
         <span class="n">parameters_serialized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Now we submit the workflow</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating flow run for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating flow run for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
         <span class="n">flow_run_id</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_flow_run</span><span class="p">(</span>
             <span class="n">flow_id</span><span class="o">=</span><span class="n">flow_view</span><span class="o">.</span><span class="n">flow_id</span><span class="p">,</span>
@@ -664,7 +933,7 @@ result -- directly as a python object(s). This is optional.</p>
 
         <span class="c1"># we log the website url to the flow for the user</span>
         <span class="n">run_url</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_cloud_url</span><span class="p">(</span><span class="s2">&quot;flow-run&quot;</span><span class="p">,</span> <span class="n">flow_run_id</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created flow run: </span><span class="si">{</span><span class="n">run_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created flow run: </span><span class="si">{</span><span class="n">run_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">logger</span> <span class="k">else</span> <span class="kc">None</span>
 
         <span class="c1"># -----------------------------------</span>
         <span class="c1"># This part is unique to Simmate. Because we often want to save some info</span>

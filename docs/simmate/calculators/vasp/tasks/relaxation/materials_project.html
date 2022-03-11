@@ -77,15 +77,38 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.error_handlers</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">TetrahedronMesh</span><span class="p">,</span>
+    <span class="n">RotationMatrix</span><span class="p">,</span>
+    <span class="n">Brmix</span><span class="p">,</span>
+    <span class="n">Zpotrf</span><span class="p">,</span>
+    <span class="n">SubspaceMatrix</span><span class="p">,</span>
+    <span class="n">IncorrectShift</span><span class="p">,</span>
+    <span class="n">RealOptlay</span><span class="p">,</span>
+    <span class="n">Tetirr</span><span class="p">,</span>
+    <span class="n">RotationNonIntMatrix</span><span class="p">,</span>
+    <span class="n">LongVector</span><span class="p">,</span>
+    <span class="n">TripleProduct</span><span class="p">,</span>
+    <span class="n">Pricel</span><span class="p">,</span>
+    <span class="n">Brions</span><span class="p">,</span>
+    <span class="n">Zbrent</span><span class="p">,</span>
+    <span class="n">InsufficientBands</span><span class="p">,</span>
+    <span class="n">Pssyevx</span><span class="p">,</span>
     <span class="n">Eddrmm</span><span class="p">,</span>
-    <span class="n">IncorrectSmearingHandler</span><span class="p">,</span>
-    <span class="n">MeshSymmetryErrorHandler</span><span class="p">,</span>
-    <span class="n">UnconvergedErrorHandler</span><span class="p">,</span>
-    <span class="n">NonConvergingErrorHandler</span><span class="p">,</span>
-    <span class="n">PotimErrorHandler</span><span class="p">,</span>
-    <span class="n">PositiveEnergyErrorHandler</span><span class="p">,</span>
-    <span class="n">FrozenErrorHandler</span><span class="p">,</span>
-    <span class="n">LargeSigmaErrorHandler</span><span class="p">,</span>
+    <span class="n">Edddav</span><span class="p">,</span>
+    <span class="n">Edwav</span><span class="p">,</span>
+    <span class="n">Zheev</span><span class="p">,</span>
+    <span class="n">ElfKpar</span><span class="p">,</span>
+    <span class="n">Rhosyg</span><span class="p">,</span>
+    <span class="n">Posmap</span><span class="p">,</span>
+    <span class="n">PointGroup</span><span class="p">,</span>
+    <span class="n">SymprecNoise</span><span class="p">,</span>
+    <span class="n">IncorrectSmearing</span><span class="p">,</span>
+    <span class="n">MeshSymmetry</span><span class="p">,</span>
+    <span class="n">Unconverged</span><span class="p">,</span>
+    <span class="n">NonConverging</span><span class="p">,</span>
+    <span class="n">Potim</span><span class="p">,</span>
+    <span class="n">PositiveEnergy</span><span class="p">,</span>
+    <span class="n">Frozen</span><span class="p">,</span>
+    <span class="n">LargeSigma</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -224,15 +247,38 @@
     <span class="c1"># These are some default error handlers to use</span>
     <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">TetrahedronMesh</span><span class="p">(),</span>
+        <span class="n">RotationMatrix</span><span class="p">(),</span>
+        <span class="n">Brmix</span><span class="p">(),</span>
+        <span class="n">Zpotrf</span><span class="p">(),</span>
+        <span class="n">SubspaceMatrix</span><span class="p">(),</span>
+        <span class="n">IncorrectShift</span><span class="p">(),</span>
+        <span class="n">RealOptlay</span><span class="p">(),</span>
+        <span class="n">Tetirr</span><span class="p">(),</span>
+        <span class="n">RotationNonIntMatrix</span><span class="p">(),</span>
+        <span class="n">LongVector</span><span class="p">(),</span>
+        <span class="n">TripleProduct</span><span class="p">(),</span>
+        <span class="n">Pricel</span><span class="p">(),</span>
+        <span class="n">Brions</span><span class="p">(),</span>
+        <span class="n">Zbrent</span><span class="p">(),</span>
+        <span class="n">InsufficientBands</span><span class="p">(),</span>
+        <span class="n">Pssyevx</span><span class="p">(),</span>
         <span class="n">Eddrmm</span><span class="p">(),</span>
-        <span class="n">IncorrectSmearingHandler</span><span class="p">(),</span>
-        <span class="n">MeshSymmetryErrorHandler</span><span class="p">(),</span>
-        <span class="n">UnconvergedErrorHandler</span><span class="p">(),</span>
-        <span class="n">NonConvergingErrorHandler</span><span class="p">(),</span>
-        <span class="n">PotimErrorHandler</span><span class="p">(),</span>
-        <span class="n">PositiveEnergyErrorHandler</span><span class="p">(),</span>
-        <span class="n">FrozenErrorHandler</span><span class="p">(),</span>
-        <span class="n">LargeSigmaErrorHandler</span><span class="p">(),</span>
+        <span class="n">Edddav</span><span class="p">(),</span>
+        <span class="n">Edwav</span><span class="p">(),</span>
+        <span class="n">Zheev</span><span class="p">(),</span>
+        <span class="n">ElfKpar</span><span class="p">(),</span>
+        <span class="n">Rhosyg</span><span class="p">(),</span>
+        <span class="n">Posmap</span><span class="p">(),</span>
+        <span class="n">PointGroup</span><span class="p">(),</span>
+        <span class="n">SymprecNoise</span><span class="p">(),</span>
+        <span class="n">IncorrectSmearing</span><span class="p">(),</span>
+        <span class="n">MeshSymmetry</span><span class="p">(),</span>
+        <span class="n">Unconverged</span><span class="p">(),</span>
+        <span class="n">NonConverging</span><span class="p">(),</span>
+        <span class="n">Potim</span><span class="p">(),</span>
+        <span class="n">PositiveEnergy</span><span class="p">(),</span>
+        <span class="n">Frozen</span><span class="p">(),</span>
+        <span class="n">LargeSigma</span><span class="p">(),</span>
     <span class="p">]</span>
 </pre></div>
 
@@ -385,15 +431,38 @@
     <span class="c1"># These are some default error handlers to use</span>
     <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">TetrahedronMesh</span><span class="p">(),</span>
+        <span class="n">RotationMatrix</span><span class="p">(),</span>
+        <span class="n">Brmix</span><span class="p">(),</span>
+        <span class="n">Zpotrf</span><span class="p">(),</span>
+        <span class="n">SubspaceMatrix</span><span class="p">(),</span>
+        <span class="n">IncorrectShift</span><span class="p">(),</span>
+        <span class="n">RealOptlay</span><span class="p">(),</span>
+        <span class="n">Tetirr</span><span class="p">(),</span>
+        <span class="n">RotationNonIntMatrix</span><span class="p">(),</span>
+        <span class="n">LongVector</span><span class="p">(),</span>
+        <span class="n">TripleProduct</span><span class="p">(),</span>
+        <span class="n">Pricel</span><span class="p">(),</span>
+        <span class="n">Brions</span><span class="p">(),</span>
+        <span class="n">Zbrent</span><span class="p">(),</span>
+        <span class="n">InsufficientBands</span><span class="p">(),</span>
+        <span class="n">Pssyevx</span><span class="p">(),</span>
         <span class="n">Eddrmm</span><span class="p">(),</span>
-        <span class="n">IncorrectSmearingHandler</span><span class="p">(),</span>
-        <span class="n">MeshSymmetryErrorHandler</span><span class="p">(),</span>
-        <span class="n">UnconvergedErrorHandler</span><span class="p">(),</span>
-        <span class="n">NonConvergingErrorHandler</span><span class="p">(),</span>
-        <span class="n">PotimErrorHandler</span><span class="p">(),</span>
-        <span class="n">PositiveEnergyErrorHandler</span><span class="p">(),</span>
-        <span class="n">FrozenErrorHandler</span><span class="p">(),</span>
-        <span class="n">LargeSigmaErrorHandler</span><span class="p">(),</span>
+        <span class="n">Edddav</span><span class="p">(),</span>
+        <span class="n">Edwav</span><span class="p">(),</span>
+        <span class="n">Zheev</span><span class="p">(),</span>
+        <span class="n">ElfKpar</span><span class="p">(),</span>
+        <span class="n">Rhosyg</span><span class="p">(),</span>
+        <span class="n">Posmap</span><span class="p">(),</span>
+        <span class="n">PointGroup</span><span class="p">(),</span>
+        <span class="n">SymprecNoise</span><span class="p">(),</span>
+        <span class="n">IncorrectSmearing</span><span class="p">(),</span>
+        <span class="n">MeshSymmetry</span><span class="p">(),</span>
+        <span class="n">Unconverged</span><span class="p">(),</span>
+        <span class="n">NonConverging</span><span class="p">(),</span>
+        <span class="n">Potim</span><span class="p">(),</span>
+        <span class="n">PositiveEnergy</span><span class="p">(),</span>
+        <span class="n">Frozen</span><span class="p">(),</span>
+        <span class="n">LargeSigma</span><span class="p">(),</span>
     <span class="p">]</span>
 </pre></div>
 
@@ -471,7 +540,7 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div id="MatProjRelaxation.error_handlers" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MatProjRelaxation.error_handlers">#&nbsp;&nbsp</a>
 
-        <span class="name">error_handlers</span><span class="annotation">: List[<a href="../../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a>]</span><span class="default_value"> = [&lt;<a href="../../error_handlers/tetrahedron_mesh.html#TetrahedronMesh">simmate.calculators.vasp.error_handlers.tetrahedron_mesh.TetrahedronMesh</a> object&gt;, &lt;<a href="../../error_handlers/eddrmm.html#Eddrmm">simmate.calculators.vasp.error_handlers.eddrmm.Eddrmm</a> object&gt;, &lt;<a href="../../error_handlers/incorrect_smearing.html#IncorrectSmearingHandler">simmate.calculators.vasp.error_handlers.incorrect_smearing.IncorrectSmearingHandler</a> object&gt;, &lt;<a href="../../error_handlers/mesh_symmetry.html#MeshSymmetryErrorHandler">simmate.calculators.vasp.error_handlers.mesh_symmetry.MeshSymmetryErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/unconverged.html#UnconvergedErrorHandler">simmate.calculators.vasp.error_handlers.unconverged.UnconvergedErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/nonconverging.html#NonConvergingErrorHandler">simmate.calculators.vasp.error_handlers.nonconverging.NonConvergingErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/potim.html#PotimErrorHandler">simmate.calculators.vasp.error_handlers.potim.PotimErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/positive_energy.html#PositiveEnergyErrorHandler">simmate.calculators.vasp.error_handlers.positive_energy.PositiveEnergyErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/frozen.html#FrozenErrorHandler">simmate.calculators.vasp.error_handlers.frozen.FrozenErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/large_sigma.html#LargeSigmaErrorHandler">simmate.calculators.vasp.error_handlers.large_sigma.LargeSigmaErrorHandler</a> object&gt;]</span>
+        <span class="name">error_handlers</span><span class="annotation">: List[<a href="../../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a>]</span><span class="default_value"> = [&lt;<a href="../../error_handlers/tetrahedron_mesh.html#TetrahedronMesh">simmate.calculators.vasp.error_handlers.tetrahedron_mesh.TetrahedronMesh</a> object&gt;, &lt;<a href="../../error_handlers/rotation_matrix.html#RotationMatrix">simmate.calculators.vasp.error_handlers.rotation_matrix.RotationMatrix</a> object&gt;, &lt;<a href="../../error_handlers/brmix.html#Brmix">simmate.calculators.vasp.error_handlers.brmix.Brmix</a> object&gt;, &lt;<a href="../../error_handlers/zpotrf.html#Zpotrf">simmate.calculators.vasp.error_handlers.zpotrf.Zpotrf</a> object&gt;, &lt;<a href="../../error_handlers/subspace_matrix.html#SubspaceMatrix">simmate.calculators.vasp.error_handlers.subspace_matrix.SubspaceMatrix</a> object&gt;, &lt;<a href="../../error_handlers/incorrect_shift.html#IncorrectShift">simmate.calculators.vasp.error_handlers.incorrect_shift.IncorrectShift</a> object&gt;, &lt;<a href="../../error_handlers/real_optlay.html#RealOptlay">simmate.calculators.vasp.error_handlers.real_optlay.RealOptlay</a> object&gt;, &lt;<a href="../../error_handlers/tetirr.html#Tetirr">simmate.calculators.vasp.error_handlers.tetirr.Tetirr</a> object&gt;, &lt;<a href="../../error_handlers/rotation_matrix_nonint.html#RotationNonIntMatrix">simmate.calculators.vasp.error_handlers.rotation_matrix_nonint.RotationNonIntMatrix</a> object&gt;, &lt;<a href="../../error_handlers/long_vector.html#LongVector">simmate.calculators.vasp.error_handlers.long_vector.LongVector</a> object&gt;, &lt;<a href="../../error_handlers/triple_product.html#TripleProduct">simmate.calculators.vasp.error_handlers.triple_product.TripleProduct</a> object&gt;, &lt;<a href="../../error_handlers/pricel.html#Pricel">simmate.calculators.vasp.error_handlers.pricel.Pricel</a> object&gt;, &lt;<a href="../../error_handlers/brions.html#Brions">simmate.calculators.vasp.error_handlers.brions.Brions</a> object&gt;, &lt;<a href="../../error_handlers/zbrent.html#Zbrent">simmate.calculators.vasp.error_handlers.zbrent.Zbrent</a> object&gt;, &lt;<a href="../../error_handlers/insufficient_bands.html#InsufficientBands">simmate.calculators.vasp.error_handlers.insufficient_bands.InsufficientBands</a> object&gt;, &lt;<a href="../../error_handlers/pssyevx.html#Pssyevx">simmate.calculators.vasp.error_handlers.pssyevx.Pssyevx</a> object&gt;, &lt;<a href="../../error_handlers/eddrmm.html#Eddrmm">simmate.calculators.vasp.error_handlers.eddrmm.Eddrmm</a> object&gt;, &lt;<a href="../../error_handlers/edddav.html#Edddav">simmate.calculators.vasp.error_handlers.edddav.Edddav</a> object&gt;, &lt;<a href="../../error_handlers/edwav.html#Edwav">simmate.calculators.vasp.error_handlers.edwav.Edwav</a> object&gt;, &lt;<a href="../../error_handlers/zheev.html#Zheev">simmate.calculators.vasp.error_handlers.zheev.Zheev</a> object&gt;, &lt;<a href="../../error_handlers/elf_kpar.html#ElfKpar">simmate.calculators.vasp.error_handlers.elf_kpar.ElfKpar</a> object&gt;, &lt;<a href="../../error_handlers/rhosyg.html#Rhosyg">simmate.calculators.vasp.error_handlers.rhosyg.Rhosyg</a> object&gt;, &lt;<a href="../../error_handlers/posmap.html#Posmap">simmate.calculators.vasp.error_handlers.posmap.Posmap</a> object&gt;, &lt;<a href="../../error_handlers/point_group.html#PointGroup">simmate.calculators.vasp.error_handlers.point_group.PointGroup</a> object&gt;, &lt;<a href="../../error_handlers/symprec_noise.html#SymprecNoise">simmate.calculators.vasp.error_handlers.symprec_noise.SymprecNoise</a> object&gt;, &lt;<a href="../../error_handlers/incorrect_smearing.html#IncorrectSmearing">simmate.calculators.vasp.error_handlers.incorrect_smearing.IncorrectSmearing</a> object&gt;, &lt;<a href="../../error_handlers/mesh_symmetry.html#MeshSymmetry">simmate.calculators.vasp.error_handlers.mesh_symmetry.MeshSymmetry</a> object&gt;, &lt;<a href="../../error_handlers/unconverged.html#Unconverged">simmate.calculators.vasp.error_handlers.unconverged.Unconverged</a> object&gt;, &lt;<a href="../../error_handlers/nonconverging.html#NonConverging">simmate.calculators.vasp.error_handlers.nonconverging.NonConverging</a> object&gt;, &lt;<a href="../../error_handlers/potim.html#Potim">simmate.calculators.vasp.error_handlers.potim.Potim</a> object&gt;, &lt;<a href="../../error_handlers/positive_energy.html#PositiveEnergy">simmate.calculators.vasp.error_handlers.positive_energy.PositiveEnergy</a> object&gt;, &lt;<a href="../../error_handlers/frozen.html#Frozen">simmate.calculators.vasp.error_handlers.frozen.Frozen</a> object&gt;, &lt;<a href="../../error_handlers/large_sigma.html#LargeSigma">simmate.calculators.vasp.error_handlers.large_sigma.LargeSigma</a> object&gt;]</span>
     </div>
 
     
@@ -485,11 +554,11 @@ applied and none of the following handlers will be checked.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.tasks.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatProjRelaxation.__init__" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatProjRelaxation.execute" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatProjRelaxation.run" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatProjRelaxation.print_config" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatProjRelaxation.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
+                <dd id="MatProjRelaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatProjRelaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatProjRelaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>

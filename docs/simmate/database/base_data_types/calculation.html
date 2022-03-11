@@ -71,6 +71,15 @@
                                 <a class="variable" href="#Calculation.prefect_cloud_link">prefect_cloud_link</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Calculation.flow_run_view">flow_run_view</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Calculation.prefect_flow_run_name">prefect_flow_run_name</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Calculation.prefect_state">prefect_state</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Calculation.from_prefect_id">from_prefect_id</a>
                         </li>
                         <li>
@@ -113,6 +122,8 @@
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
+<span class="kn">from</span> <span class="nn">prefect.backend.flow_run</span> <span class="kn">import</span> <span class="n">FlowRunView</span>
+
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">DatabaseTable</span><span class="p">,</span> <span class="n">table_column</span>
 
 
@@ -128,7 +139,7 @@
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;directory&quot;</span><span class="p">,</span>
@@ -239,6 +250,22 @@
 <span class="sd">        URL to this calculation (flow-run) in the Prefect Cloud webstite.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;https://cloud.prefect.io/simmate/flow-run/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prefect_flow_run_id</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flow_run_view</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FlowRunView</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">FlowRunView</span><span class="o">.</span><span class="n">from_flow_run_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefect_flow_run_id</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># may fail if this is a local run or prefect api key not configured</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">prefect_flow_run_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">flowrunview</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_run_view</span>
+        <span class="k">return</span> <span class="n">flowrunview</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">flowrunview</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">prefect_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">flowrunview</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_run_view</span>
+        <span class="k">return</span> <span class="n">flowrunview</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="n">flowrunview</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
 
@@ -296,7 +323,7 @@
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;directory&quot;</span><span class="p">,</span>
@@ -407,6 +434,22 @@
 <span class="sd">        URL to this calculation (flow-run) in the Prefect Cloud webstite.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;https://cloud.prefect.io/simmate/flow-run/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prefect_flow_run_id</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flow_run_view</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FlowRunView</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">FlowRunView</span><span class="o">.</span><span class="n">from_flow_run_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefect_flow_run_id</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># may fail if this is a local run or prefect api key not configured</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">prefect_flow_run_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">flowrunview</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_run_view</span>
+        <span class="k">return</span> <span class="n">flowrunview</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">flowrunview</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">prefect_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">flowrunview</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_run_view</span>
+        <span class="k">return</span> <span class="n">flowrunview</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="n">flowrunview</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
 
@@ -553,6 +596,46 @@ any of those changes here.</p>
 
 
                             </div>
+                            <div id="Calculation.flow_run_view" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Calculation.flow_run_view">#&nbsp;&nbsp</a>
+
+        <span class="name">flow_run_view</span><span class="annotation">: prefect.backend.flow_run.FlowRunView</span>
+    </div>
+
+    
+    
+
+                            </div>
+                            <div id="Calculation.prefect_flow_run_name" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Calculation.prefect_flow_run_name">#&nbsp;&nbsp</a>
+
+        <span class="name">prefect_flow_run_name</span><span class="annotation">: str</span>
+    </div>
+
+    
+    
+
+                            </div>
+                            <div id="Calculation.prefect_state" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Calculation.prefect_state">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">prefect_state</span><span class="signature">(self) -&gt; str</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">prefect_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">flowrunview</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_run_view</span>
+        <span class="k">return</span> <span class="n">flowrunview</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="n">flowrunview</span> <span class="k">else</span> <span class="kc">None</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
                             <div id="Calculation.from_prefect_id" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Calculation.from_prefect_id">#&nbsp;&nbsp</a>
 
@@ -613,7 +696,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -624,18 +713,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -762,7 +876,7 @@ callables as instance methods.</p>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 </pre></div>
 
         </details>
@@ -793,7 +907,7 @@ callables as instance methods.</p>
                             <div id="Calculation.Meta.app_label" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Calculation.Meta.app_label">#&nbsp;&nbsp</a>
 
-        <span class="name">app_label</span><span class="default_value"> = &#39;local_calculations&#39;</span>
+        <span class="name">app_label</span><span class="default_value"> = &#39;workflows&#39;</span>
     </div>
 
     

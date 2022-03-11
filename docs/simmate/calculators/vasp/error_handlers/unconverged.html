@@ -32,19 +32,19 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#UnconvergedErrorHandler">UnconvergedErrorHandler</a>
+                    <a class="class" href="#Unconverged">Unconverged</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#UnconvergedErrorHandler.__init__">UnconvergedErrorHandler</a>
+                                <a class="function" href="#Unconverged.__init__">Unconverged</a>
                         </li>
                         <li>
-                                <a class="variable" href="#UnconvergedErrorHandler.is_monitor">is_monitor</a>
+                                <a class="variable" href="#Unconverged.is_monitor">is_monitor</a>
                         </li>
                         <li>
-                                <a class="function" href="#UnconvergedErrorHandler.check">check</a>
+                                <a class="function" href="#Unconverged.check">check</a>
                         </li>
                         <li>
-                                <a class="function" href="#UnconvergedErrorHandler.correct">correct</a>
+                                <a class="function" href="#Unconverged.correct">correct</a>
                         </li>
                 </ul>
 
@@ -80,21 +80,20 @@
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs</span> <span class="kn">import</span> <span class="n">Incar</span>
 
 
-<span class="k">class</span> <span class="nc">UnconvergedErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Unconverged</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if a calculation converged successfully. If not, the fix depends on</span>
 <span class="sd">    whether its the ionic steps or electronic steps are struggling to converge.</span>
 
-<span class="sd">    NOTE: This can be confusing when used along with the NonconvergingErrorHandler</span>
+<span class="sd">    NOTE: This can be confusing when used along with the Nonconverging error handler</span>
 <span class="sd">    because both attempt to fix failures in electronic convergence. These handlers</span>
 <span class="sd">    are converted directly from Custodian, so it&#39;s not clear to me why they</span>
 <span class="sd">    separated them. In the future, I need to clean this up.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This handler doesn&#39;t run until the calculation is complete</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># Now check if the calculation converged. If not, we have the error!</span>
         <span class="n">xml_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
@@ -117,7 +116,7 @@
         <span class="c1"># don&#39;t have this error.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -217,32 +216,31 @@
         </details>
 
             </section>
-                <section id="UnconvergedErrorHandler">
+                <section id="Unconverged">
                                 <div class="attr class">
-        <a class="headerlink" href="#UnconvergedErrorHandler">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#Unconverged">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">UnconvergedErrorHandler</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
+        <span class="name">Unconverged</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">UnconvergedErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Unconverged</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if a calculation converged successfully. If not, the fix depends on</span>
 <span class="sd">    whether its the ionic steps or electronic steps are struggling to converge.</span>
 
-<span class="sd">    NOTE: This can be confusing when used along with the NonconvergingErrorHandler</span>
+<span class="sd">    NOTE: This can be confusing when used along with the Nonconverging error handler</span>
 <span class="sd">    because both attempt to fix failures in electronic convergence. These handlers</span>
 <span class="sd">    are converted directly from Custodian, so it&#39;s not clear to me why they</span>
 <span class="sd">    separated them. In the future, I need to clean this up.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This handler doesn&#39;t run until the calculation is complete</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># Now check if the calculation converged. If not, we have the error!</span>
         <span class="n">xml_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
@@ -265,7 +263,7 @@
         <span class="c1"># don&#39;t have this error.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -367,26 +365,26 @@
             <div class="docstring"><p>Check if a calculation converged successfully. If not, the fix depends on
 whether its the ionic steps or electronic steps are struggling to converge.</p>
 
-<p>NOTE: This can be confusing when used along with the NonconvergingErrorHandler
+<p>NOTE: This can be confusing when used along with the Nonconverging error handler
 because both attempt to fix failures in electronic convergence. These handlers
 are converted directly from Custodian, so it's not clear to me why they
 separated them. In the future, I need to clean this up.</p>
 </div>
 
 
-                            <div id="UnconvergedErrorHandler.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#UnconvergedErrorHandler.__init__">#&nbsp;&nbsp</a>
+                            <div id="Unconverged.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Unconverged.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">UnconvergedErrorHandler</span><span class="signature">()</span>
+            <span class="name">Unconverged</span><span class="signature">()</span>
     </div>
 
     
     
 
                             </div>
-                            <div id="UnconvergedErrorHandler.is_monitor" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#UnconvergedErrorHandler.is_monitor">#&nbsp;&nbsp</a>
+                            <div id="Unconverged.is_monitor" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Unconverged.is_monitor">#&nbsp;&nbsp</a>
 
         <span class="name">is_monitor</span><span class="default_value"> = False</span>
     </div>
@@ -404,17 +402,17 @@ is_terminating description below for why!</p>
 
 
                             </div>
-                            <div id="UnconvergedErrorHandler.check" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#UnconvergedErrorHandler.check">#&nbsp;&nbsp</a>
+                            <div id="Unconverged.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Unconverged.check">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">check</span><span class="signature">(self, directory)</span>:
+            <span class="name">check</span><span class="signature">(self, directory: str) -&gt; bool</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># Now check if the calculation converged. If not, we have the error!</span>
         <span class="n">xml_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
@@ -447,7 +445,7 @@ errors, then None (or an empty list) will be returned. In many cases,
 you should read through the files directly rather than use
 calculators.example.outputs which in many cases assumes a completed file.</p>
 
-<p>As some example, ErrorHandler's can have <code><a href="#UnconvergedErrorHandler.check">check</a></code> functions that do one
+<p>As some example, ErrorHandler's can have <code><a href="#Unconverged.check">check</a></code> functions that do one
 of the following:</p>
 
 <ol>
@@ -466,17 +464,17 @@ error. It then returns True if the errors is found and False otherwise.</p>
 
 
                             </div>
-                            <div id="UnconvergedErrorHandler.correct" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#UnconvergedErrorHandler.correct">#&nbsp;&nbsp</a>
+                            <div id="Unconverged.correct" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Unconverged.correct">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">correct</span><span class="signature">(self, directory)</span>:
+            <span class="name">correct</span><span class="signature">(self, directory: str) -&gt; str</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -586,10 +584,10 @@ error. It then returns the fix or list of fixes made.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></dt>
-                                <dd id="UnconvergedErrorHandler.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
-                <dd id="UnconvergedErrorHandler.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
-                <dd id="UnconvergedErrorHandler.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
-                <dd id="UnconvergedErrorHandler.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
+                                <dd id="Unconverged.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
+                <dd id="Unconverged.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
+                <dd id="Unconverged.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
+                <dd id="Unconverged.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
 
             </div>
                                 </dl>

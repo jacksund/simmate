@@ -66,6 +66,7 @@
 <span class="n">register</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">Library</span><span class="p">()</span>
 
 
+<span class="nd">@register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;chemical_formula&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">formula_to_html</span><span class="p">(</span><span class="n">formula_str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a chemical formula to html format by wrapping numbers with a</span>
@@ -87,10 +88,6 @@
     <span class="c1"># ensure it safe before returning. Read more about this here:</span>
     <span class="c1"># https://docs.djangoproject.com/en/3.2/howto/custom-template-tags/#filters-and-auto-escaping</span>
     <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="n">new_formula_str</span><span class="p">)</span>
-
-
-<span class="c1"># now register the new filter with django</span>
-<span class="n">register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">&quot;chemical_formula&quot;</span><span class="p">,</span> <span class="n">formula_to_html</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -99,14 +96,16 @@
                 <section id="formula_to_html">
                             <div class="attr function"><a class="headerlink" href="#formula_to_html">#&nbsp;&nbsp</a>
 
-        
+                <div class="decorator">@register.filter(name=&#39;chemical_formula&#39;)</div>
+
             <span class="def">def</span>
             <span class="name">formula_to_html</span><span class="signature">(formula_str)</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">formula_to_html</span><span class="p">(</span><span class="n">formula_str</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;chemical_formula&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">formula_to_html</span><span class="p">(</span><span class="n">formula_str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a chemical formula to html format by wrapping numbers with a</span>
 <span class="sd">    subscript tag. For example, &quot;Y2CF2&quot; will be turned into &quot;Y&lt;sub&gt;2&lt;/sub&gt;CF&lt;sub&gt;2&lt;/sub&gt;&quot;</span>

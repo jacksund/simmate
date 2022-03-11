@@ -226,7 +226,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/</p>
     <span class="c1"># These are all apps that are built by Simmate</span>
     <span class="s2">&quot;simmate.website.accounts.apps.AccountsConfig&quot;</span><span class="p">,</span>
     <span class="s2">&quot;simmate.website.third_parties.apps.ThirdPartyConfig&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;simmate.website.local_calculations.apps.LocalCalculationsConfig&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;simmate.website.workflows.apps.WorkflowsConfig&quot;</span><span class="p">,</span>
     <span class="s2">&quot;simmate.website.workflow_execution.apps.WorkflowExecutionConfig&quot;</span><span class="p">,</span>
     <span class="s2">&quot;simmate.website.prototypes.apps.PrototypesConfig&quot;</span><span class="p">,</span>
     <span class="s2">&quot;simmate.website.structure_viewer.apps.StructureViewerConfig&quot;</span><span class="p">,</span>
@@ -247,6 +247,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/</p>
     <span class="c1"># These are apps created by third-parties that give us extra features</span>
     <span class="s2">&quot;crispy_forms&quot;</span><span class="p">,</span>  <span class="c1"># django-crispy-forms</span>
     <span class="s2">&quot;rest_framework&quot;</span><span class="p">,</span>  <span class="c1"># djangorestframework</span>
+    <span class="s2">&quot;django_filters&quot;</span><span class="p">,</span>  <span class="c1"># django-filter</span>
     <span class="s2">&quot;django_extensions&quot;</span><span class="p">,</span>  <span class="c1"># for development tools</span>
     <span class="c1"># Other third-party apps/tools to consider. Note that some of these don&#39;t</span>
     <span class="c1"># need to be installed apps while some also request different setups.</span>
@@ -416,6 +417,15 @@ https://docs.djangoproject.com/en/3.0/ref/settings/</p>
         <span class="s2">&quot;rest_framework.throttling.UserRateThrottle&quot;</span><span class="p">,</span>
     <span class="p">],</span>
     <span class="s2">&quot;DEFAULT_THROTTLE_RATES&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;anon&quot;</span><span class="p">:</span> <span class="s2">&quot;100/day&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="s2">&quot;1000/day&quot;</span><span class="p">},</span>
+    <span class="c1"># We use django-filter to automatically handle filtering from a REST url</span>
+    <span class="s2">&quot;DEFAULT_FILTER_BACKENDS&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;django_filters.rest_framework.DjangoFilterBackend&quot;</span><span class="p">],</span>
+    <span class="c1"># There are multiple ways to render the data, where we default to a nice HTML</span>
+    <span class="c1"># view, but also support pure JSON or using Django-REST&#39;s interactive API</span>
+    <span class="s2">&quot;DEFAULT_RENDERER_CLASSES&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;rest_framework.renderers.TemplateHTMLRenderer&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rest_framework.renderers.BrowsableAPIRenderer&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rest_framework.renderers.JSONRenderer&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
 <span class="p">}</span>
 </pre></div>
 

@@ -72,7 +72,7 @@
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.error_handlers</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">TetrahedronMesh</span><span class="p">,</span>
     <span class="n">Eddrmm</span><span class="p">,</span>
-    <span class="n">NonConvergingErrorHandler</span><span class="p">,</span>
+    <span class="n">NonConverging</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -101,7 +101,7 @@
     <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">TetrahedronMesh</span><span class="p">(),</span>
         <span class="n">Eddrmm</span><span class="p">(),</span>
-        <span class="n">NonConvergingErrorHandler</span><span class="p">(),</span>
+        <span class="n">NonConverging</span><span class="p">(),</span>
     <span class="p">]</span>
 </pre></div>
 
@@ -144,7 +144,7 @@
     <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">TetrahedronMesh</span><span class="p">(),</span>
         <span class="n">Eddrmm</span><span class="p">(),</span>
-        <span class="n">NonConvergingErrorHandler</span><span class="p">(),</span>
+        <span class="n">NonConverging</span><span class="p">(),</span>
     <span class="p">]</span>
 </pre></div>
 
@@ -175,7 +175,7 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div id="MatProjStaticEnergy.error_handlers" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MatProjStaticEnergy.error_handlers">#&nbsp;&nbsp</a>
 
-        <span class="name">error_handlers</span><span class="annotation">: List[<a href="../../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a>]</span><span class="default_value"> = [&lt;<a href="../../error_handlers/tetrahedron_mesh.html#TetrahedronMesh">simmate.calculators.vasp.error_handlers.tetrahedron_mesh.TetrahedronMesh</a> object&gt;, &lt;<a href="../../error_handlers/eddrmm.html#Eddrmm">simmate.calculators.vasp.error_handlers.eddrmm.Eddrmm</a> object&gt;, &lt;<a href="../../error_handlers/nonconverging.html#NonConvergingErrorHandler">simmate.calculators.vasp.error_handlers.nonconverging.NonConvergingErrorHandler</a> object&gt;]</span>
+        <span class="name">error_handlers</span><span class="annotation">: List[<a href="../../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a>]</span><span class="default_value"> = [&lt;<a href="../../error_handlers/tetrahedron_mesh.html#TetrahedronMesh">simmate.calculators.vasp.error_handlers.tetrahedron_mesh.TetrahedronMesh</a> object&gt;, &lt;<a href="../../error_handlers/eddrmm.html#Eddrmm">simmate.calculators.vasp.error_handlers.eddrmm.Eddrmm</a> object&gt;, &lt;<a href="../../error_handlers/nonconverging.html#NonConverging">simmate.calculators.vasp.error_handlers.nonconverging.NonConverging</a> object&gt;]</span>
     </div>
 
     
@@ -189,11 +189,11 @@ applied and none of the following handlers will be checked.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.tasks.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatProjStaticEnergy.__init__" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatProjStaticEnergy.execute" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatProjStaticEnergy.run" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatProjStaticEnergy.print_config" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatProjStaticEnergy.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
+                <dd id="MatProjStaticEnergy.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatProjStaticEnergy.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatProjStaticEnergy.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
             <div><dt><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>

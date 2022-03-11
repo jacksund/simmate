@@ -367,7 +367,11 @@ search results.</p>
 
     <span class="n">source</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Where the data came from. This could be a number of things, including...</span>
+<span class="sd">    &gt; Note, this field is highly experimental at the moment and subject to</span>
+<span class="sd">    change.</span>
+<span class="sd">    </span>
+<span class="sd">    This column indicated the data came from, and it could be a number of things,</span>
+<span class="sd">    including...</span>
 <span class="sd">     - a third party id</span>
 <span class="sd">     - a structure from a different Simmate datbase table</span>
 <span class="sd">     - a transformation of another structure</span>
@@ -375,16 +379,44 @@ search results.</p>
 <span class="sd">     - a custom submission by the user</span>
 <span class="sd">    </span>
 <span class="sd">    By default, this is a JSON field to account for all scenarios, but some</span>
-<span class="sd">    tables (such as those in `simmate.database.third_parties`) this is a </span>
-<span class="sd">    constant and therefore overwritten as an attribute.</span>
+<span class="sd">    tables (such as those in `simmate.database.third_parties`) this is value</span>
+<span class="sd">    should be the same for ALL entries in the table and therefore the column is</span>
+<span class="sd">    overwritten as an attribute.</span>
 <span class="sd">    </span>
-<span class="sd">    EXAMPLES: (source type --&gt; source_id)</span>
+<span class="sd">    For other tables where this is not a constant, here are some examples of</span>
+<span class="sd">    values used in this column:</span>
 <span class="sd">    </span>
-<span class="sd">    - MaterialsProject --&gt; mp-123</span>
-<span class="sd">    - PyXtalStructure --&gt; null</span>
-<span class="sd">    - AtomicPurmutation --&gt; 123</span>
-<span class="sd">    - HereditaryMutation --&gt; [123,124]</span>
-<span class="sd">    - user_submission --&gt; null</span>
+<span class="sd">    ``` python</span>
+<span class="sd">    # from a thirdparty database or separate table</span>
+<span class="sd">    source = {</span>
+<span class="sd">        &quot;table&quot;: &quot;MatProjStructure&quot;,</span>
+<span class="sd">        &quot;id&quot;: &quot;mp-123&quot;,</span>
+<span class="sd">    }</span>
+<span class="sd">    </span>
+<span class="sd">    # from a random structure creator</span>
+<span class="sd">    source = {&quot;method&quot;: &quot;PyXtalStructure&quot;}</span>
+<span class="sd">    </span>
+<span class="sd">    # from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="sd">    source = {</span>
+<span class="sd">        &quot;method&quot;: &quot;PrototypeStructure&quot;,</span>
+<span class="sd">        &quot;table&quot;: &quot;AFLOWPrototypes&quot;,</span>
+<span class="sd">        &quot;id&quot;: 123,</span>
+<span class="sd">    }</span>
+<span class="sd">    </span>
+<span class="sd">    # from a transformation</span>
+<span class="sd">    source = {</span>
+<span class="sd">        &quot;method&quot;: &quot;MirrorMutation&quot;,</span>
+<span class="sd">        &quot;table&quot;: &quot;MatProjStructure&quot;,</span>
+<span class="sd">        &quot;id&quot;: &quot;mp-123&quot;,</span>
+<span class="sd">    }</span>
+<span class="sd">    </span>
+<span class="sd">    # from a multi-structure transformation</span>
+<span class="sd">    source = {</span>
+<span class="sd">        &quot;method&quot;: &quot;HereditaryMutation&quot;,</span>
+<span class="sd">        &quot;table&quot;: &quot;MatProjStructure&quot;,</span>
+<span class="sd">        &quot;ids&quot;: [&quot;mp-123&quot;, &quot;mp-321&quot;],</span>
+<span class="sd">    }</span>
+<span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">source_doi</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
@@ -406,7 +438,9 @@ search results.</p>
     <span class="c1"># extra methods useful for our querysets.</span>
     <span class="n">objects</span> <span class="o">=</span> <span class="n">DatabaseTableManager</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Accesses all of the rows in this datatable and initiates SearchResults.</span>
+<span class="sd">    Accesses all of the rows in this datatable and initiates a SearchResults</span>
+<span class="sd">    object. Using this, you can perform complex filtering and conversions on</span>
+<span class="sd">    data from this table.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
@@ -470,6 +504,8 @@ search results.</p>
 
         <span class="c1"># BUG: I&#39;m honestly not sure what this does, but it works...</span>
         <span class="c1"># https://stackoverflow.com/questions/27112816/</span>
+        <span class="c1"># For a more robust way of setting the Meta class, see my code in</span>
+        <span class="c1"># simmate.website.workflows.utilities</span>
         <span class="n">new_columns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;__module__&quot;</span><span class="p">:</span> <span class="n">module</span><span class="p">,</span>
@@ -533,6 +569,8 @@ search results.</p>
         <span class="c1"># a database column.</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;band_structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;density_of_states&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">:</span>
 
@@ -1423,7 +1461,11 @@ will be the current day (for versioning).</li>
 
     <span class="n">source</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Where the data came from. This could be a number of things, including...</span>
+<span class="sd">    &gt; Note, this field is highly experimental at the moment and subject to</span>
+<span class="sd">    change.</span>
+<span class="sd">    </span>
+<span class="sd">    This column indicated the data came from, and it could be a number of things,</span>
+<span class="sd">    including...</span>
 <span class="sd">     - a third party id</span>
 <span class="sd">     - a structure from a different Simmate datbase table</span>
 <span class="sd">     - a transformation of another structure</span>
@@ -1431,16 +1473,44 @@ will be the current day (for versioning).</li>
 <span class="sd">     - a custom submission by the user</span>
 <span class="sd">    </span>
 <span class="sd">    By default, this is a JSON field to account for all scenarios, but some</span>
-<span class="sd">    tables (such as those in `simmate.database.third_parties`) this is a </span>
-<span class="sd">    constant and therefore overwritten as an attribute.</span>
+<span class="sd">    tables (such as those in `simmate.database.third_parties`) this is value</span>
+<span class="sd">    should be the same for ALL entries in the table and therefore the column is</span>
+<span class="sd">    overwritten as an attribute.</span>
 <span class="sd">    </span>
-<span class="sd">    EXAMPLES: (source type --&gt; source_id)</span>
+<span class="sd">    For other tables where this is not a constant, here are some examples of</span>
+<span class="sd">    values used in this column:</span>
 <span class="sd">    </span>
-<span class="sd">    - MaterialsProject --&gt; mp-123</span>
-<span class="sd">    - PyXtalStructure --&gt; null</span>
-<span class="sd">    - AtomicPurmutation --&gt; 123</span>
-<span class="sd">    - HereditaryMutation --&gt; [123,124]</span>
-<span class="sd">    - user_submission --&gt; null</span>
+<span class="sd">    ``` python</span>
+<span class="sd">    # from a thirdparty database or separate table</span>
+<span class="sd">    source = {</span>
+<span class="sd">        &quot;table&quot;: &quot;MatProjStructure&quot;,</span>
+<span class="sd">        &quot;id&quot;: &quot;mp-123&quot;,</span>
+<span class="sd">    }</span>
+<span class="sd">    </span>
+<span class="sd">    # from a random structure creator</span>
+<span class="sd">    source = {&quot;method&quot;: &quot;PyXtalStructure&quot;}</span>
+<span class="sd">    </span>
+<span class="sd">    # from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="sd">    source = {</span>
+<span class="sd">        &quot;method&quot;: &quot;PrototypeStructure&quot;,</span>
+<span class="sd">        &quot;table&quot;: &quot;AFLOWPrototypes&quot;,</span>
+<span class="sd">        &quot;id&quot;: 123,</span>
+<span class="sd">    }</span>
+<span class="sd">    </span>
+<span class="sd">    # from a transformation</span>
+<span class="sd">    source = {</span>
+<span class="sd">        &quot;method&quot;: &quot;MirrorMutation&quot;,</span>
+<span class="sd">        &quot;table&quot;: &quot;MatProjStructure&quot;,</span>
+<span class="sd">        &quot;id&quot;: &quot;mp-123&quot;,</span>
+<span class="sd">    }</span>
+<span class="sd">    </span>
+<span class="sd">    # from a multi-structure transformation</span>
+<span class="sd">    source = {</span>
+<span class="sd">        &quot;method&quot;: &quot;HereditaryMutation&quot;,</span>
+<span class="sd">        &quot;table&quot;: &quot;MatProjStructure&quot;,</span>
+<span class="sd">        &quot;ids&quot;: [&quot;mp-123&quot;, &quot;mp-321&quot;],</span>
+<span class="sd">    }</span>
+<span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">source_doi</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1462,7 +1532,9 @@ will be the current day (for versioning).</li>
     <span class="c1"># extra methods useful for our querysets.</span>
     <span class="n">objects</span> <span class="o">=</span> <span class="n">DatabaseTableManager</span><span class="p">()</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Accesses all of the rows in this datatable and initiates SearchResults.</span>
+<span class="sd">    Accesses all of the rows in this datatable and initiates a SearchResults</span>
+<span class="sd">    object. Using this, you can perform complex filtering and conversions on</span>
+<span class="sd">    data from this table.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
@@ -1526,6 +1598,8 @@ will be the current day (for versioning).</li>
 
         <span class="c1"># BUG: I&#39;m honestly not sure what this does, but it works...</span>
         <span class="c1"># https://stackoverflow.com/questions/27112816/</span>
+        <span class="c1"># For a more robust way of setting the Meta class, see my code in</span>
+        <span class="c1"># simmate.website.workflows.utilities</span>
         <span class="n">new_columns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;__module__&quot;</span><span class="p">:</span> <span class="n">module</span><span class="p">,</span>
@@ -1589,6 +1663,8 @@ will be the current day (for versioning).</li>
         <span class="c1"># a database column.</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;band_structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;density_of_states&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">:</span>
 
@@ -1950,7 +2026,13 @@ are effectively the "raw data".</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -1961,18 +2043,43 @@ are effectively the "raw data".</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -2015,7 +2122,9 @@ so if this attribute is set, you can use the <code><a href="#DatabaseTable.load_
     </div>
 
     
-            <div class="docstring"><p>Accesses all of the rows in this datatable and initiates SearchResults.</p>
+            <div class="docstring"><p>Accesses all of the rows in this datatable and initiates a SearchResults
+object. Using this, you can perform complex filtering and conversions on
+data from this table.</p>
 </div>
 
 
@@ -2113,6 +2222,8 @@ interactively view what data is available.</p>
 
         <span class="c1"># BUG: I&#39;m honestly not sure what this does, but it works...</span>
         <span class="c1"># https://stackoverflow.com/questions/27112816/</span>
+        <span class="c1"># For a more robust way of setting the Meta class, see my code in</span>
+        <span class="c1"># simmate.website.workflows.utilities</span>
         <span class="n">new_columns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;__module__&quot;</span><span class="p">:</span> <span class="n">module</span><span class="p">,</span>
@@ -2219,6 +2330,8 @@ is in <code><a href="../../calculators/vasp/database/relaxation.html">simmate.ca
         <span class="c1"># a database column.</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;band_structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">all_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;density_of_states&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">:</span>
 

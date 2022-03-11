@@ -269,7 +269,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="c1"># consider formula_full or chemical_system by making a composition-based mixin</span>
     <span class="n">composition</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>  <span class="c1"># !!! change to formula_full?</span>
@@ -305,7 +305,7 @@
         <span class="c1"># property</span>
         <span class="c1"># we assume the table is registered in the local_calcs app</span>
         <span class="k">return</span> <span class="n">django_apps</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span>
-            <span class="n">app_label</span><span class="o">=</span><span class="s2">&quot;local_calculations&quot;</span><span class="p">,</span>
+            <span class="n">app_label</span><span class="o">=</span><span class="s2">&quot;workflows&quot;</span><span class="p">,</span>
             <span class="n">model_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">individuals_datatable_str</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -435,7 +435,7 @@
 
 <span class="k">class</span> <span class="nc">StructureSource</span><span class="p">(</span><span class="n">DatabaseTable</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 
@@ -581,7 +581,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="c1"># consider formula_full or chemical_system by making a composition-based mixin</span>
     <span class="n">composition</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>  <span class="c1"># !!! change to formula_full?</span>
@@ -617,7 +617,7 @@
         <span class="c1"># property</span>
         <span class="c1"># we assume the table is registered in the local_calcs app</span>
         <span class="k">return</span> <span class="n">django_apps</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span>
-            <span class="n">app_label</span><span class="o">=</span><span class="s2">&quot;local_calculations&quot;</span><span class="p">,</span>
+            <span class="n">app_label</span><span class="o">=</span><span class="s2">&quot;workflows&quot;</span><span class="p">,</span>
             <span class="n">model_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">individuals_datatable_str</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -1113,7 +1113,13 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -1124,18 +1130,43 @@ object the first time, the query is executed.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -1293,7 +1324,7 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">StructureSource</span><span class="p">(</span><span class="n">DatabaseTable</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 
@@ -1551,7 +1582,13 @@ one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -1562,18 +1599,43 @@ one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 

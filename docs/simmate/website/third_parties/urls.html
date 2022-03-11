@@ -49,17 +49,45 @@
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">include</span><span class="p">,</span> <span class="n">path</span>
 
-<span class="kn">from</span> <span class="nn">simmate.website.third_parties</span> <span class="kn">import</span> <span class="n">views</span>
+<span class="kn">from</span> <span class="nn">rest_framework</span> <span class="kn">import</span> <span class="n">routers</span>
 
-<span class="n">app_name</span> <span class="o">=</span> <span class="s2">&quot;third_parties&quot;</span>
+<span class="kn">from</span> <span class="nn">simmate.website.third_parties.views</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SpacegroupViewSet</span><span class="p">,</span>
+    <span class="n">MatProjViewSet</span><span class="p">,</span>
+    <span class="n">JarvisViewSet</span><span class="p">,</span>
+    <span class="n">AflowViewSet</span><span class="p">,</span>
+    <span class="n">OqmdViewSet</span><span class="p">,</span>
+    <span class="n">CodViewSet</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">routers</span><span class="o">.</span><span class="n">DefaultRouter</span><span class="p">()</span>
+<span class="n">router</span><span class="o">.</span><span class="n">root_view_name</span> <span class="o">=</span> <span class="s2">&quot;third-parties-list&quot;</span>
+<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;space-groups&quot;</span><span class="p">,</span> <span class="n">SpacegroupViewSet</span><span class="p">)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;materials-project&quot;</span><span class="p">,</span> <span class="n">MatProjViewSet</span><span class="p">)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;jarvis&quot;</span><span class="p">,</span> <span class="n">JarvisViewSet</span><span class="p">)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;aflow&quot;</span><span class="p">,</span> <span class="n">AflowViewSet</span><span class="p">)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;oqmd&quot;</span><span class="p">,</span> <span class="n">OqmdViewSet</span><span class="p">)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;cod&quot;</span><span class="p">,</span> <span class="n">CodViewSet</span><span class="p">)</span>
+
 <span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="c1"># This is the main page for this app.</span>
+    <span class="c1"># Our router automatically handle each possible endpoint for us! We stick</span>
+    <span class="c1"># with the default REST templates and views too.</span>
     <span class="n">path</span><span class="p">(</span>
         <span class="n">route</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">home</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;third_parties_home&quot;</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">include</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">urls</span><span class="p">),</span>
+        <span class="c1"># To view all other urls that this maps, you can use django_extensions</span>
+        <span class="c1"># to list all of them. The command is... python manage.py show_urls</span>
+    <span class="p">),</span>
+    <span class="c1">#</span>
+    <span class="c1"># Additionally, we include login URLs. This doesn&#39;t do anything other than</span>
+    <span class="c1"># let the user login on the default REST interface.</span>
+    <span class="n">path</span><span class="p">(</span>
+        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;accounts/&quot;</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">include</span><span class="p">(</span><span class="s2">&quot;rest_framework.urls&quot;</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;rest_login&quot;</span><span class="p">,</span>
     <span class="p">),</span>
 <span class="p">]</span>
 </pre></div>

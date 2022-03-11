@@ -58,7 +58,7 @@
     <span class="n">Parameter</span><span class="p">,</span>
     <span class="n">ModuleStorage</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">simmate.workflows.common_tasks</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine.common_tasks</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">LoadInputAndRegister</span><span class="p">,</span>
     <span class="n">parse_multi_command</span><span class="p">,</span>
 <span class="p">)</span>
@@ -77,14 +77,20 @@
     <span class="n">MITDiffusionAnalysis</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="n">WORKFLOW_NAME</span> <span class="o">=</span> <span class="s2">&quot;diffusion/single-path&quot;</span>
+
 <span class="c1"># Convert our workflow objects to task objects</span>
 <span class="n">relax_endpoint</span> <span class="o">=</span> <span class="n">relaxation_neb_endpoint_workflow</span><span class="o">.</span><span class="n">to_workflow_task</span><span class="p">()</span>
 <span class="n">run_neb</span> <span class="o">=</span> <span class="n">neb_from_images</span><span class="o">.</span><span class="n">to_workflow_task</span><span class="p">()</span>
 
 <span class="c1"># Extra setup tasks</span>
-<span class="n">load_input_and_register</span> <span class="o">=</span> <span class="n">LoadInputAndRegister</span><span class="p">()</span>  <span class="c1"># TODO: make MigrationHop a calc?</span>
+<span class="n">load_input_and_register</span> <span class="o">=</span> <span class="n">LoadInputAndRegister</span><span class="p">(</span>
+    <span class="n">workflow_name</span><span class="o">=</span><span class="n">WORKFLOW_NAME</span><span class="p">,</span>
+    <span class="n">input_obj_name</span><span class="o">=</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># TODO: make MigrationHop a calc so we can use calculation_table?</span>
 
-<span class="k">with</span> <span class="n">Workflow</span><span class="p">(</span><span class="s2">&quot;NEB (for a single migration hop)&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">workflow</span><span class="p">:</span>
+
+<span class="k">with</span> <span class="n">Workflow</span><span class="p">(</span><span class="n">WORKFLOW_NAME</span><span class="p">)</span> <span class="k">as</span> <span class="n">workflow</span><span class="p">:</span>
 
     <span class="n">migration_hop</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">)</span>
     <span class="n">directory</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
@@ -116,6 +122,9 @@
         <span class="n">input_class</span><span class="o">=</span><span class="n">MigrationHop</span><span class="p">,</span>
         <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
         <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
+        <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
+        <span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">diffusion_analysis_id</span><span class="p">,</span>
+        <span class="n">migration_hop_id</span><span class="o">=</span><span class="n">migration_hop_id</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># get the supercell endpoint structures</span>

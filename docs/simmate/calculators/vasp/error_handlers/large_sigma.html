@@ -32,19 +32,19 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#LargeSigmaErrorHandler">LargeSigmaErrorHandler</a>
+                    <a class="class" href="#LargeSigma">LargeSigma</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#LargeSigmaErrorHandler.__init__">LargeSigmaErrorHandler</a>
+                                <a class="function" href="#LargeSigma.__init__">LargeSigma</a>
                         </li>
                         <li>
-                                <a class="variable" href="#LargeSigmaErrorHandler.is_monitor">is_monitor</a>
+                                <a class="variable" href="#LargeSigma.is_monitor">is_monitor</a>
                         </li>
                         <li>
-                                <a class="function" href="#LargeSigmaErrorHandler.check">check</a>
+                                <a class="function" href="#LargeSigma.check">check</a>
                         </li>
                         <li>
-                                <a class="function" href="#LargeSigmaErrorHandler.correct">correct</a>
+                                <a class="function" href="#LargeSigma.correct">correct</a>
                         </li>
                 </ul>
 
@@ -78,20 +78,19 @@
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs</span> <span class="kn">import</span> <span class="n">Incar</span>
 
 
-<span class="k">class</span> <span class="nc">LargeSigmaErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">LargeSigma</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When ISMEAR &gt;= 0 (Gaussian or Methfessel-Paxton), we need to monitor the</span>
 <span class="sd">    magnitude of the entropy term T*S. If the entropy term is larger than</span>
 <span class="sd">    1 meV/atom, then we reduce value of SIGMA. See VASP documentation for ISMEAR.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entropy_per_atom_threshold</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entropy_per_atom_threshold</span> <span class="o">=</span> <span class="n">entropy_per_atom_threshold</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -135,7 +134,7 @@
         <span class="c1"># not seeing any error.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -175,31 +174,30 @@
         </details>
 
             </section>
-                <section id="LargeSigmaErrorHandler">
+                <section id="LargeSigma">
                                 <div class="attr class">
-        <a class="headerlink" href="#LargeSigmaErrorHandler">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#LargeSigma">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">LargeSigmaErrorHandler</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
+        <span class="name">LargeSigma</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LargeSigmaErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LargeSigma</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When ISMEAR &gt;= 0 (Gaussian or Methfessel-Paxton), we need to monitor the</span>
 <span class="sd">    magnitude of the entropy term T*S. If the entropy term is larger than</span>
 <span class="sd">    1 meV/atom, then we reduce value of SIGMA. See VASP documentation for ISMEAR.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entropy_per_atom_threshold</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entropy_per_atom_threshold</span> <span class="o">=</span> <span class="n">entropy_per_atom_threshold</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -243,7 +241,7 @@
         <span class="c1"># not seeing any error.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -288,11 +286,11 @@ magnitude of the entropy term T*S. If the entropy term is larger than
 </div>
 
 
-                            <div id="LargeSigmaErrorHandler.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#LargeSigmaErrorHandler.__init__">#&nbsp;&nbsp</a>
+                            <div id="LargeSigma.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#LargeSigma.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">LargeSigmaErrorHandler</span><span class="signature">(entropy_per_atom_threshold=0.001)</span>
+            <span class="name">LargeSigma</span><span class="signature">(entropy_per_atom_threshold=0.001)</span>
     </div>
 
             <details>
@@ -306,8 +304,8 @@ magnitude of the entropy term T*S. If the entropy term is larger than
     
 
                             </div>
-                            <div id="LargeSigmaErrorHandler.is_monitor" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#LargeSigmaErrorHandler.is_monitor">#&nbsp;&nbsp</a>
+                            <div id="LargeSigma.is_monitor" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#LargeSigma.is_monitor">#&nbsp;&nbsp</a>
 
         <span class="name">is_monitor</span><span class="default_value"> = True</span>
     </div>
@@ -325,17 +323,17 @@ is_terminating description below for why!</p>
 
 
                             </div>
-                            <div id="LargeSigmaErrorHandler.check" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#LargeSigmaErrorHandler.check">#&nbsp;&nbsp</a>
+                            <div id="LargeSigma.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#LargeSigma.check">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">check</span><span class="signature">(self, directory)</span>:
+            <span class="name">check</span><span class="signature">(self, directory: str) -&gt; bool</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -389,7 +387,7 @@ errors, then None (or an empty list) will be returned. In many cases,
 you should read through the files directly rather than use
 calculators.example.outputs which in many cases assumes a completed file.</p>
 
-<p>As some example, ErrorHandler's can have <code><a href="#LargeSigmaErrorHandler.check">check</a></code> functions that do one
+<p>As some example, ErrorHandler's can have <code><a href="#LargeSigma.check">check</a></code> functions that do one
 of the following:</p>
 
 <ol>
@@ -408,17 +406,17 @@ error. It then returns True if the errors is found and False otherwise.</p>
 
 
                             </div>
-                            <div id="LargeSigmaErrorHandler.correct" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#LargeSigmaErrorHandler.correct">#&nbsp;&nbsp</a>
+                            <div id="LargeSigma.correct" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#LargeSigma.correct">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">correct</span><span class="signature">(self, directory)</span>:
+            <span class="name">correct</span><span class="signature">(self, directory: str) -&gt; str</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -468,10 +466,10 @@ error. It then returns the fix or list of fixes made.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></dt>
-                                <dd id="LargeSigmaErrorHandler.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
-                <dd id="LargeSigmaErrorHandler.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
-                <dd id="LargeSigmaErrorHandler.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
-                <dd id="LargeSigmaErrorHandler.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
+                                <dd id="LargeSigma.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
+                <dd id="LargeSigma.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
+                <dd id="LargeSigma.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
+                <dd id="LargeSigma.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
 
             </div>
                                 </dl>

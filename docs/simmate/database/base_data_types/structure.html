@@ -138,49 +138,50 @@
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;structure_string&quot;</span><span class="p">]</span>
 
-    <span class="n">structure_string</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
+    <span class="n">structure_string</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The core structure information, which is written to a string and in a </span>
 <span class="sd">    compressed format using the `from_toolkit` method. To get back to our toolkit</span>
 <span class="sd">    structure object, use the `to_toolkit` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">nsites</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">nsites</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">nelements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">nelements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The total number of unique elements. (e.g. Y2CF2 has 3 elements)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">elements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">()</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List of elements in the structure (ex: [&quot;Y&quot;, &quot;C&quot;, &quot;F&quot;])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">chemical_system</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+    <span class="n">chemical_system</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    the base chemical system (ex: &quot;Y-C-F&quot;)</span>
 <span class="sd">    </span>
-<span class="sd">    Note: be careful when searching for elements! Running chemical_system__includes=&quot;C&quot;</span>
+<span class="sd">    Note: be careful when searching for elements! Running chemical_system__contains=&quot;C&quot;</span>
 <span class="sd">    on this field won&#39;t do what you expect -- because it will return structures</span>
 <span class="sd">    containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures</span>
-<span class="sd">    that contain a specific element, use elements__contains=&quot;C&quot; instead.</span>
+<span class="sd">    that contain a specific element, use elements__contains=&#39;&quot;C&quot;&#39; instead. The</span>
+<span class="sd">    odd use of quotes &#39;&quot;C&quot;&#39; is required here!</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">density</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The density of the crystal in g/cm^3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">density_atomic</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">density_atomic</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The density of atoms in the crystal in atoms/Angstom^3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">volume</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The volume of the unitcell in Angstom^3</span>
 <span class="sd">    </span>
@@ -190,7 +191,7 @@
 <span class="sd">    just want to search by spacegroup.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">volume_molar</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">volume_molar</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The molar volume of the crystal in cm^3/mol</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -199,24 +200,41 @@
     <span class="c1"># BUG: The max length here is overkill because there are many structures</span>
     <span class="c1"># with 8+ elements and disordered formula (e.g. &quot;Ca2.103 N0.98&quot;)</span>
 
-    <span class="n">formula_full</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">formula_full</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The chemical formula with elements sorted by electronegativity (ex: Li4 Fe4 P4 O16)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">formula_reduced</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">formula_reduced</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The reduced chemical formula. (ex: Li4Fe4P4O16 --&gt; LiFePO4)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">formula_anonymous</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">formula_anonymous</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An anonymized formula. Unique species are arranged in ordering of </span>
 <span class="sd">    amounts and assigned ascending alphabets. Useful for prototyping formulas. </span>
 <span class="sd">    For example, all stoichiometric perovskites have anonymized_formula ABC3.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Spacegroup</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">)</span>
+    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Spacegroup</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Spacegroup information. Points to a separate database table that has additional</span>
 <span class="sd">    columns:</span>
@@ -279,7 +297,7 @@
             <span class="o">*</span> <span class="n">Avogadro</span>
             <span class="o">*</span> <span class="mf">1e-27</span>
             <span class="o">*</span> <span class="mf">1e3</span><span class="p">,</span>
-            <span class="n">spacegroup_id</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">get_space_group_info</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># OPTIMIZE</span>
+            <span class="n">spacegroup_id</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">get_space_group_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># OPTIMIZE</span>
             <span class="n">formula_full</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">formula</span><span class="p">,</span>
             <span class="n">formula_reduced</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">reduced_formula</span><span class="p">,</span>
             <span class="n">formula_anonymous</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">anonymized_formula</span><span class="p">,</span>
@@ -351,49 +369,50 @@
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;structure_string&quot;</span><span class="p">]</span>
 
-    <span class="n">structure_string</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
+    <span class="n">structure_string</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The core structure information, which is written to a string and in a </span>
 <span class="sd">    compressed format using the `from_toolkit` method. To get back to our toolkit</span>
 <span class="sd">    structure object, use the `to_toolkit` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">nsites</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">nsites</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The total number of sites in the unitcell. (e.g. Y2CF2 has 5 sites)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">nelements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">nelements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The total number of unique elements. (e.g. Y2CF2 has 3 elements)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">elements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">()</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List of elements in the structure (ex: [&quot;Y&quot;, &quot;C&quot;, &quot;F&quot;])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">chemical_system</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+    <span class="n">chemical_system</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    the base chemical system (ex: &quot;Y-C-F&quot;)</span>
 <span class="sd">    </span>
-<span class="sd">    Note: be careful when searching for elements! Running chemical_system__includes=&quot;C&quot;</span>
+<span class="sd">    Note: be careful when searching for elements! Running chemical_system__contains=&quot;C&quot;</span>
 <span class="sd">    on this field won&#39;t do what you expect -- because it will return structures</span>
 <span class="sd">    containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures</span>
-<span class="sd">    that contain a specific element, use elements__contains=&quot;C&quot; instead.</span>
+<span class="sd">    that contain a specific element, use elements__contains=&#39;&quot;C&quot;&#39; instead. The</span>
+<span class="sd">    odd use of quotes &#39;&quot;C&quot;&#39; is required here!</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">density</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The density of the crystal in g/cm^3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">density_atomic</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">density_atomic</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The density of atoms in the crystal in atoms/Angstom^3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">volume</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The volume of the unitcell in Angstom^3</span>
 <span class="sd">    </span>
@@ -403,7 +422,7 @@
 <span class="sd">    just want to search by spacegroup.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">volume_molar</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">volume_molar</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The molar volume of the crystal in cm^3/mol</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -412,24 +431,41 @@
     <span class="c1"># BUG: The max length here is overkill because there are many structures</span>
     <span class="c1"># with 8+ elements and disordered formula (e.g. &quot;Ca2.103 N0.98&quot;)</span>
 
-    <span class="n">formula_full</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">formula_full</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The chemical formula with elements sorted by electronegativity (ex: Li4 Fe4 P4 O16)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">formula_reduced</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">formula_reduced</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The reduced chemical formula. (ex: Li4Fe4P4O16 --&gt; LiFePO4)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">formula_anonymous</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">formula_anonymous</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An anonymized formula. Unique species are arranged in ordering of </span>
 <span class="sd">    amounts and assigned ascending alphabets. Useful for prototyping formulas. </span>
 <span class="sd">    For example, all stoichiometric perovskites have anonymized_formula ABC3.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Spacegroup</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">)</span>
+    <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Spacegroup</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">table_column</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Spacegroup information. Points to a separate database table that has additional</span>
 <span class="sd">    columns:</span>
@@ -492,7 +528,7 @@
             <span class="o">*</span> <span class="n">Avogadro</span>
             <span class="o">*</span> <span class="mf">1e-27</span>
             <span class="o">*</span> <span class="mf">1e3</span><span class="p">,</span>
-            <span class="n">spacegroup_id</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">get_space_group_info</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># OPTIMIZE</span>
+            <span class="n">spacegroup_id</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">get_space_group_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># OPTIMIZE</span>
             <span class="n">formula_full</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">formula</span><span class="p">,</span>
             <span class="n">formula_reduced</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">reduced_formula</span><span class="p">,</span>
             <span class="n">formula_anonymous</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">anonymized_formula</span><span class="p">,</span>
@@ -605,10 +641,11 @@ structure object, use the <code><a href="#Structure.to_toolkit">to_toolkit</a></
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -765,7 +802,13 @@ columns:
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -776,18 +819,43 @@ columns:
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 

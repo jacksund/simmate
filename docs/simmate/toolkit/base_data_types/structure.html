@@ -83,6 +83,8 @@ a few extra methods and does not change any other usage.</p>
 <span class="sd">a few extra methods and does not change any other usage.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Structure</span> <span class="k">as</span> <span class="n">PymatgenStructure</span>
 
 
@@ -159,11 +161,19 @@ a few extra methods and does not change any other usage.</p>
             <span class="n">is_from_past_calc</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_database</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
 
+        <span class="c1"># if the value is a str and it relates to a filepath, then we load the</span>
+        <span class="c1"># structure from a file.</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
         <span class="c1"># Otherwise an incorrect format was given</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;Unknown format provided for structure input. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span><span class="si">}</span><span class="s2"> was provided.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span><span class="si">}</span><span class="s2"> was provided. If you are trying &quot;</span>
+                <span class="s2">&quot;to provide a filepath (str), make sure you don&#39;t have &quot;</span>
+                <span class="s2">&quot;any typos and that the path is relative to the working &quot;</span>
+                <span class="s2">&quot;directory.&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># add this attribute to help with error checking in other methods</span>
@@ -179,10 +189,11 @@ a few extra methods and does not change any other usage.</p>
 <span class="sd">        Loads a structure from the Simmate database.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># because the structure is in the databse, we need to setup django and</span>
-        <span class="c1"># make sure we can access the tables</span>
-        <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>
-        <span class="kn">from</span> <span class="nn">simmate.website.local_calculations</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
+        <span class="c1"># because the structure is in the database, we need to setup django and</span>
+        <span class="c1"># make sure we can access the tables. This import break the modularity</span>
+        <span class="c1"># of this toolkit, so we therefore keep import within this function.</span>
+        <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># connects to database</span>
+        <span class="kn">from</span> <span class="nn">simmate.website.workflows</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
         <span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="kn">import</span> <span class="n">import_string</span>
 
         <span class="c1"># start by loading the datbase table, which is given as a module path</span>
@@ -365,11 +376,19 @@ a few extra methods and does not change any other usage.</p>
             <span class="n">is_from_past_calc</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_database</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
 
+        <span class="c1"># if the value is a str and it relates to a filepath, then we load the</span>
+        <span class="c1"># structure from a file.</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
         <span class="c1"># Otherwise an incorrect format was given</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;Unknown format provided for structure input. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span><span class="si">}</span><span class="s2"> was provided.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span><span class="si">}</span><span class="s2"> was provided. If you are trying &quot;</span>
+                <span class="s2">&quot;to provide a filepath (str), make sure you don&#39;t have &quot;</span>
+                <span class="s2">&quot;any typos and that the path is relative to the working &quot;</span>
+                <span class="s2">&quot;directory.&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># add this attribute to help with error checking in other methods</span>
@@ -385,10 +404,11 @@ a few extra methods and does not change any other usage.</p>
 <span class="sd">        Loads a structure from the Simmate database.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># because the structure is in the databse, we need to setup django and</span>
-        <span class="c1"># make sure we can access the tables</span>
-        <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>
-        <span class="kn">from</span> <span class="nn">simmate.website.local_calculations</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
+        <span class="c1"># because the structure is in the database, we need to setup django and</span>
+        <span class="c1"># make sure we can access the tables. This import break the modularity</span>
+        <span class="c1"># of this toolkit, so we therefore keep import within this function.</span>
+        <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># connects to database</span>
+        <span class="kn">from</span> <span class="nn">simmate.website.workflows</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
         <span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="kn">import</span> <span class="n">import_string</span>
 
         <span class="c1"># start by loading the datbase table, which is given as a module path</span>
@@ -589,11 +609,19 @@ a few extra methods and does not change any other usage.</p>
             <span class="n">is_from_past_calc</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_database</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
 
+        <span class="c1"># if the value is a str and it relates to a filepath, then we load the</span>
+        <span class="c1"># structure from a file.</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
         <span class="c1"># Otherwise an incorrect format was given</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;Unknown format provided for structure input. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span><span class="si">}</span><span class="s2"> was provided.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span><span class="si">}</span><span class="s2"> was provided. If you are trying &quot;</span>
+                <span class="s2">&quot;to provide a filepath (str), make sure you don&#39;t have &quot;</span>
+                <span class="s2">&quot;any typos and that the path is relative to the working &quot;</span>
+                <span class="s2">&quot;directory.&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># add this attribute to help with error checking in other methods</span>
@@ -644,10 +672,11 @@ a few extra methods and does not change any other usage.</p>
 <span class="sd">        Loads a structure from the Simmate database.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># because the structure is in the databse, we need to setup django and</span>
-        <span class="c1"># make sure we can access the tables</span>
-        <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>
-        <span class="kn">from</span> <span class="nn">simmate.website.local_calculations</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
+        <span class="c1"># because the structure is in the database, we need to setup django and</span>
+        <span class="c1"># make sure we can access the tables. This import break the modularity</span>
+        <span class="c1"># of this toolkit, so we therefore keep import within this function.</span>
+        <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># connects to database</span>
+        <span class="kn">from</span> <span class="nn">simmate.website.workflows</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
         <span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="kn">import</span> <span class="n">import_string</span>
 
         <span class="c1"># start by loading the datbase table, which is given as a module path</span>

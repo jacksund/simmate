@@ -66,7 +66,7 @@
     <span class="n">Parameter</span><span class="p">,</span>
     <span class="n">ModuleStorage</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">simmate.workflows.common_tasks</span> <span class="kn">import</span> <span class="n">LoadInputAndRegister</span>
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine.common_tasks</span> <span class="kn">import</span> <span class="n">LoadInputAndRegister</span>
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.nudged_elastic_band</span> <span class="kn">import</span> <span class="n">MITNudgedElasticBand</span>
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.database.nudged_elastic_band</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MITDiffusionAnalysis</span><span class="p">,</span>
@@ -77,15 +77,20 @@
     <span class="n">SaveNEBOutputTask</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="n">WORKFLOW_NAME</span> <span class="o">=</span> <span class="s2">&quot;diffusion/from-images&quot;</span>
+
 <span class="n">neb_task</span> <span class="o">=</span> <span class="n">MITNudgedElasticBand</span><span class="p">()</span>
-<span class="n">load_input_and_register</span> <span class="o">=</span> <span class="n">LoadInputAndRegister</span><span class="p">()</span>  <span class="c1"># TODO: make MigrationHop a calc?</span>
+<span class="n">load_input_and_register</span> <span class="o">=</span> <span class="n">LoadInputAndRegister</span><span class="p">(</span>
+    <span class="n">workflow_name</span><span class="o">=</span><span class="n">WORKFLOW_NAME</span><span class="p">,</span>
+    <span class="n">input_obj_name</span><span class="o">=</span><span class="s2">&quot;migration_images&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="n">save_results</span> <span class="o">=</span> <span class="n">SaveNEBOutputTask</span><span class="p">(</span>
     <span class="n">MITDiffusionAnalysis</span><span class="p">,</span>
     <span class="n">MITMigrationHop</span><span class="p">,</span>
     <span class="n">MITMigrationImage</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="k">with</span> <span class="n">Workflow</span><span class="p">(</span><span class="s2">&quot;NEB (for a set of migration images)&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">workflow</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">Workflow</span><span class="p">(</span><span class="n">WORKFLOW_NAME</span><span class="p">)</span> <span class="k">as</span> <span class="n">workflow</span><span class="p">:</span>
 
     <span class="n">migration_images</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;migration_images&quot;</span><span class="p">)</span>
     <span class="n">command</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;vasp_std &gt; vasp.out&quot;</span><span class="p">)</span>

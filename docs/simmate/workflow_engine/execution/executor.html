@@ -86,7 +86,6 @@
 <span class="c1"># from concurrent.futures import Executor # No need to inherit at the moment</span>
 <span class="kn">from</span> <span class="nn">prefect.executors.base</span> <span class="kn">import</span> <span class="n">Executor</span>  <span class="c1"># OPTIMIZE: prefect is slow AF</span>
 
-<span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># ensures setup</span>
 <span class="kn">from</span> <span class="nn">simmate.workflow_engine.execution.database</span> <span class="kn">import</span> <span class="n">WorkItem</span>
 <span class="kn">from</span> <span class="nn">simmate.workflow_engine.execution.future</span> <span class="kn">import</span> <span class="n">DjangoFuture</span>
 

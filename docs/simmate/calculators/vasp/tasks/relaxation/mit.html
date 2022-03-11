@@ -77,15 +77,38 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.error_handlers</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">TetrahedronMesh</span><span class="p">,</span>
+    <span class="n">RotationMatrix</span><span class="p">,</span>
+    <span class="n">Brmix</span><span class="p">,</span>
+    <span class="n">Zpotrf</span><span class="p">,</span>
+    <span class="n">SubspaceMatrix</span><span class="p">,</span>
+    <span class="n">IncorrectShift</span><span class="p">,</span>
+    <span class="n">RealOptlay</span><span class="p">,</span>
+    <span class="n">Tetirr</span><span class="p">,</span>
+    <span class="n">RotationNonIntMatrix</span><span class="p">,</span>
+    <span class="n">LongVector</span><span class="p">,</span>
+    <span class="n">TripleProduct</span><span class="p">,</span>
+    <span class="n">Pricel</span><span class="p">,</span>
+    <span class="n">Brions</span><span class="p">,</span>
+    <span class="n">Zbrent</span><span class="p">,</span>
+    <span class="n">InsufficientBands</span><span class="p">,</span>
+    <span class="n">Pssyevx</span><span class="p">,</span>
     <span class="n">Eddrmm</span><span class="p">,</span>
-    <span class="n">IncorrectSmearingHandler</span><span class="p">,</span>
-    <span class="n">MeshSymmetryErrorHandler</span><span class="p">,</span>
-    <span class="n">UnconvergedErrorHandler</span><span class="p">,</span>
-    <span class="n">NonConvergingErrorHandler</span><span class="p">,</span>
-    <span class="n">PotimErrorHandler</span><span class="p">,</span>
-    <span class="n">PositiveEnergyErrorHandler</span><span class="p">,</span>
-    <span class="n">FrozenErrorHandler</span><span class="p">,</span>
-    <span class="n">LargeSigmaErrorHandler</span><span class="p">,</span>
+    <span class="n">Edddav</span><span class="p">,</span>
+    <span class="n">Edwav</span><span class="p">,</span>
+    <span class="n">Zheev</span><span class="p">,</span>
+    <span class="n">ElfKpar</span><span class="p">,</span>
+    <span class="n">Rhosyg</span><span class="p">,</span>
+    <span class="n">Posmap</span><span class="p">,</span>
+    <span class="n">PointGroup</span><span class="p">,</span>
+    <span class="n">SymprecNoise</span><span class="p">,</span>
+    <span class="n">IncorrectSmearing</span><span class="p">,</span>
+    <span class="n">MeshSymmetry</span><span class="p">,</span>
+    <span class="n">Unconverged</span><span class="p">,</span>
+    <span class="n">NonConverging</span><span class="p">,</span>
+    <span class="n">Potim</span><span class="p">,</span>
+    <span class="n">PositiveEnergy</span><span class="p">,</span>
+    <span class="n">Frozen</span><span class="p">,</span>
+    <span class="n">LargeSigma</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -178,6 +201,8 @@
                 <span class="n">SIGMA</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">},</span>
+        <span class="c1"># Changing limits of mixing for larger atoms</span>
+        <span class="n">LMAXMIX__smart_lmaxmix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="c1"># We run LDA+U for certain compositions. This is a complex configuration</span>
         <span class="c1"># so be sure to read the &quot;__smart_ldau&quot; modifier for more information.</span>
         <span class="c1"># But as an example for how the mappings work...</span>
@@ -187,7 +212,6 @@
             <span class="n">LDAU__auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">LDAUTYPE</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="n">LDAUPRINT</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">LMAXMIX__auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">LDAUJ</span><span class="o">=</span><span class="p">{},</span>  <span class="c1"># pymatgen sets these, but they&#39;re all default values anyways</span>
             <span class="n">LDAUL</span><span class="o">=</span><span class="p">{</span>
                 <span class="s2">&quot;F&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -267,15 +291,38 @@
     <span class="c1"># These are some default error handlers to use</span>
     <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">TetrahedronMesh</span><span class="p">(),</span>
+        <span class="n">RotationMatrix</span><span class="p">(),</span>
+        <span class="n">Brmix</span><span class="p">(),</span>
+        <span class="n">Zpotrf</span><span class="p">(),</span>
+        <span class="n">SubspaceMatrix</span><span class="p">(),</span>
+        <span class="n">IncorrectShift</span><span class="p">(),</span>
+        <span class="n">RealOptlay</span><span class="p">(),</span>
+        <span class="n">Tetirr</span><span class="p">(),</span>
+        <span class="n">RotationNonIntMatrix</span><span class="p">(),</span>
+        <span class="n">LongVector</span><span class="p">(),</span>
+        <span class="n">TripleProduct</span><span class="p">(),</span>
+        <span class="n">Pricel</span><span class="p">(),</span>
+        <span class="n">Brions</span><span class="p">(),</span>
+        <span class="n">Zbrent</span><span class="p">(),</span>
+        <span class="n">InsufficientBands</span><span class="p">(),</span>
+        <span class="n">Pssyevx</span><span class="p">(),</span>
         <span class="n">Eddrmm</span><span class="p">(),</span>
-        <span class="n">IncorrectSmearingHandler</span><span class="p">(),</span>
-        <span class="n">MeshSymmetryErrorHandler</span><span class="p">(),</span>
-        <span class="n">UnconvergedErrorHandler</span><span class="p">(),</span>
-        <span class="n">NonConvergingErrorHandler</span><span class="p">(),</span>
-        <span class="n">PotimErrorHandler</span><span class="p">(),</span>
-        <span class="n">PositiveEnergyErrorHandler</span><span class="p">(),</span>
-        <span class="n">FrozenErrorHandler</span><span class="p">(),</span>
-        <span class="n">LargeSigmaErrorHandler</span><span class="p">(),</span>
+        <span class="n">Edddav</span><span class="p">(),</span>
+        <span class="n">Edwav</span><span class="p">(),</span>
+        <span class="n">Zheev</span><span class="p">(),</span>
+        <span class="n">ElfKpar</span><span class="p">(),</span>
+        <span class="n">Rhosyg</span><span class="p">(),</span>
+        <span class="n">Posmap</span><span class="p">(),</span>
+        <span class="n">PointGroup</span><span class="p">(),</span>
+        <span class="n">SymprecNoise</span><span class="p">(),</span>
+        <span class="n">IncorrectSmearing</span><span class="p">(),</span>
+        <span class="n">MeshSymmetry</span><span class="p">(),</span>
+        <span class="n">Unconverged</span><span class="p">(),</span>
+        <span class="n">NonConverging</span><span class="p">(),</span>
+        <span class="n">Potim</span><span class="p">(),</span>
+        <span class="n">PositiveEnergy</span><span class="p">(),</span>
+        <span class="n">Frozen</span><span class="p">(),</span>
+        <span class="n">LargeSigma</span><span class="p">(),</span>
     <span class="p">]</span>
 </pre></div>
 
@@ -382,6 +429,8 @@
                 <span class="n">SIGMA</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">},</span>
+        <span class="c1"># Changing limits of mixing for larger atoms</span>
+        <span class="n">LMAXMIX__smart_lmaxmix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="c1"># We run LDA+U for certain compositions. This is a complex configuration</span>
         <span class="c1"># so be sure to read the &quot;__smart_ldau&quot; modifier for more information.</span>
         <span class="c1"># But as an example for how the mappings work...</span>
@@ -391,7 +440,6 @@
             <span class="n">LDAU__auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">LDAUTYPE</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="n">LDAUPRINT</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">LMAXMIX__auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">LDAUJ</span><span class="o">=</span><span class="p">{},</span>  <span class="c1"># pymatgen sets these, but they&#39;re all default values anyways</span>
             <span class="n">LDAUL</span><span class="o">=</span><span class="p">{</span>
                 <span class="s2">&quot;F&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -471,15 +519,38 @@
     <span class="c1"># These are some default error handlers to use</span>
     <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">TetrahedronMesh</span><span class="p">(),</span>
+        <span class="n">RotationMatrix</span><span class="p">(),</span>
+        <span class="n">Brmix</span><span class="p">(),</span>
+        <span class="n">Zpotrf</span><span class="p">(),</span>
+        <span class="n">SubspaceMatrix</span><span class="p">(),</span>
+        <span class="n">IncorrectShift</span><span class="p">(),</span>
+        <span class="n">RealOptlay</span><span class="p">(),</span>
+        <span class="n">Tetirr</span><span class="p">(),</span>
+        <span class="n">RotationNonIntMatrix</span><span class="p">(),</span>
+        <span class="n">LongVector</span><span class="p">(),</span>
+        <span class="n">TripleProduct</span><span class="p">(),</span>
+        <span class="n">Pricel</span><span class="p">(),</span>
+        <span class="n">Brions</span><span class="p">(),</span>
+        <span class="n">Zbrent</span><span class="p">(),</span>
+        <span class="n">InsufficientBands</span><span class="p">(),</span>
+        <span class="n">Pssyevx</span><span class="p">(),</span>
         <span class="n">Eddrmm</span><span class="p">(),</span>
-        <span class="n">IncorrectSmearingHandler</span><span class="p">(),</span>
-        <span class="n">MeshSymmetryErrorHandler</span><span class="p">(),</span>
-        <span class="n">UnconvergedErrorHandler</span><span class="p">(),</span>
-        <span class="n">NonConvergingErrorHandler</span><span class="p">(),</span>
-        <span class="n">PotimErrorHandler</span><span class="p">(),</span>
-        <span class="n">PositiveEnergyErrorHandler</span><span class="p">(),</span>
-        <span class="n">FrozenErrorHandler</span><span class="p">(),</span>
-        <span class="n">LargeSigmaErrorHandler</span><span class="p">(),</span>
+        <span class="n">Edddav</span><span class="p">(),</span>
+        <span class="n">Edwav</span><span class="p">(),</span>
+        <span class="n">Zheev</span><span class="p">(),</span>
+        <span class="n">ElfKpar</span><span class="p">(),</span>
+        <span class="n">Rhosyg</span><span class="p">(),</span>
+        <span class="n">Posmap</span><span class="p">(),</span>
+        <span class="n">PointGroup</span><span class="p">(),</span>
+        <span class="n">SymprecNoise</span><span class="p">(),</span>
+        <span class="n">IncorrectSmearing</span><span class="p">(),</span>
+        <span class="n">MeshSymmetry</span><span class="p">(),</span>
+        <span class="n">Unconverged</span><span class="p">(),</span>
+        <span class="n">NonConverging</span><span class="p">(),</span>
+        <span class="n">Potim</span><span class="p">(),</span>
+        <span class="n">PositiveEnergy</span><span class="p">(),</span>
+        <span class="n">Frozen</span><span class="p">(),</span>
+        <span class="n">LargeSigma</span><span class="p">(),</span>
     <span class="p">]</span>
 </pre></div>
 
@@ -545,7 +616,7 @@ For example:</p>
                             <div id="MITRelaxation.incar" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MITRelaxation.incar">#&nbsp;&nbsp</a>
 
-        <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;EDIFF&#39;: 1e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: 2, &#39;ICHARG&#39;: 1, &#39;ISIF&#39;: 3, &#39;ISPIN&#39;: 2, &#39;ISYM&#39;: 0, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 200, &#39;NELMIN&#39;: 6, &#39;NSW&#39;: 99, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;KSPACING&#39;: 0.5, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;multiple_keywords__smart_ismear&#39;: {&#39;metal&#39;: {&#39;ISMEAR&#39;: 2, &#39;SIGMA&#39;: 0.2}, &#39;non-metal&#39;: {&#39;ISMEAR&#39;: -5, &#39;SIGMA&#39;: 0.05}}, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LMAXMIX__auto&#39;: True, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Ag&#39;: 2, &#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Cu&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Nb&#39;: 2, &#39;Ni&#39;: 2, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Ag&#39;: 2, &#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Cu&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Nb&#39;: 2, &#39;Ni&#39;: 2, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;S&#39;: {&#39;Fe&#39;: 2, &#39;Mn&#39;: 2.5}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Ag&#39;: 1.5, &#39;Co&#39;: 3.4, &#39;Cr&#39;: 3.5, &#39;Cu&#39;: 4, &#39;Fe&#39;: 4.0, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Nb&#39;: 1.5, &#39;Ni&#39;: 6, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 3.1, &#39;W&#39;: 4.0}, &#39;O&#39;: {&#39;Ag&#39;: 1.5, &#39;Co&#39;: 3.4, &#39;Cr&#39;: 3.5, &#39;Cu&#39;: 4, &#39;Fe&#39;: 4.0, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Nb&#39;: 1.5, &#39;Ni&#39;: 6, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 3.1, &#39;W&#39;: 4.0}, &#39;S&#39;: {&#39;Fe&#39;: 1.9, &#39;Mn&#39;: 2.5}}}}</span>
+        <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;EDIFF&#39;: 1e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: 2, &#39;ICHARG&#39;: 1, &#39;ISIF&#39;: 3, &#39;ISPIN&#39;: 2, &#39;ISYM&#39;: 0, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 200, &#39;NELMIN&#39;: 6, &#39;NSW&#39;: 99, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;KSPACING&#39;: 0.5, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;multiple_keywords__smart_ismear&#39;: {&#39;metal&#39;: {&#39;ISMEAR&#39;: 2, &#39;SIGMA&#39;: 0.2}, &#39;non-metal&#39;: {&#39;ISMEAR&#39;: -5, &#39;SIGMA&#39;: 0.05}}, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Ag&#39;: 2, &#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Cu&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Nb&#39;: 2, &#39;Ni&#39;: 2, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Ag&#39;: 2, &#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Cu&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Nb&#39;: 2, &#39;Ni&#39;: 2, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;S&#39;: {&#39;Fe&#39;: 2, &#39;Mn&#39;: 2.5}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Ag&#39;: 1.5, &#39;Co&#39;: 3.4, &#39;Cr&#39;: 3.5, &#39;Cu&#39;: 4, &#39;Fe&#39;: 4.0, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Nb&#39;: 1.5, &#39;Ni&#39;: 6, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 3.1, &#39;W&#39;: 4.0}, &#39;O&#39;: {&#39;Ag&#39;: 1.5, &#39;Co&#39;: 3.4, &#39;Cr&#39;: 3.5, &#39;Cu&#39;: 4, &#39;Fe&#39;: 4.0, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Nb&#39;: 1.5, &#39;Ni&#39;: 6, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 3.1, &#39;W&#39;: 4.0}, &#39;S&#39;: {&#39;Fe&#39;: 1.9, &#39;Mn&#39;: 2.5}}}}</span>
     </div>
 
     
@@ -561,7 +632,7 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div id="MITRelaxation.error_handlers" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MITRelaxation.error_handlers">#&nbsp;&nbsp</a>
 
-        <span class="name">error_handlers</span><span class="annotation">: List[<a href="../../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a>]</span><span class="default_value"> = [&lt;<a href="../../error_handlers/tetrahedron_mesh.html#TetrahedronMesh">simmate.calculators.vasp.error_handlers.tetrahedron_mesh.TetrahedronMesh</a> object&gt;, &lt;<a href="../../error_handlers/eddrmm.html#Eddrmm">simmate.calculators.vasp.error_handlers.eddrmm.Eddrmm</a> object&gt;, &lt;<a href="../../error_handlers/incorrect_smearing.html#IncorrectSmearingHandler">simmate.calculators.vasp.error_handlers.incorrect_smearing.IncorrectSmearingHandler</a> object&gt;, &lt;<a href="../../error_handlers/mesh_symmetry.html#MeshSymmetryErrorHandler">simmate.calculators.vasp.error_handlers.mesh_symmetry.MeshSymmetryErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/unconverged.html#UnconvergedErrorHandler">simmate.calculators.vasp.error_handlers.unconverged.UnconvergedErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/nonconverging.html#NonConvergingErrorHandler">simmate.calculators.vasp.error_handlers.nonconverging.NonConvergingErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/potim.html#PotimErrorHandler">simmate.calculators.vasp.error_handlers.potim.PotimErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/positive_energy.html#PositiveEnergyErrorHandler">simmate.calculators.vasp.error_handlers.positive_energy.PositiveEnergyErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/frozen.html#FrozenErrorHandler">simmate.calculators.vasp.error_handlers.frozen.FrozenErrorHandler</a> object&gt;, &lt;<a href="../../error_handlers/large_sigma.html#LargeSigmaErrorHandler">simmate.calculators.vasp.error_handlers.large_sigma.LargeSigmaErrorHandler</a> object&gt;]</span>
+        <span class="name">error_handlers</span><span class="annotation">: List[<a href="../../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a>]</span><span class="default_value"> = [&lt;<a href="../../error_handlers/tetrahedron_mesh.html#TetrahedronMesh">simmate.calculators.vasp.error_handlers.tetrahedron_mesh.TetrahedronMesh</a> object&gt;, &lt;<a href="../../error_handlers/rotation_matrix.html#RotationMatrix">simmate.calculators.vasp.error_handlers.rotation_matrix.RotationMatrix</a> object&gt;, &lt;<a href="../../error_handlers/brmix.html#Brmix">simmate.calculators.vasp.error_handlers.brmix.Brmix</a> object&gt;, &lt;<a href="../../error_handlers/zpotrf.html#Zpotrf">simmate.calculators.vasp.error_handlers.zpotrf.Zpotrf</a> object&gt;, &lt;<a href="../../error_handlers/subspace_matrix.html#SubspaceMatrix">simmate.calculators.vasp.error_handlers.subspace_matrix.SubspaceMatrix</a> object&gt;, &lt;<a href="../../error_handlers/incorrect_shift.html#IncorrectShift">simmate.calculators.vasp.error_handlers.incorrect_shift.IncorrectShift</a> object&gt;, &lt;<a href="../../error_handlers/real_optlay.html#RealOptlay">simmate.calculators.vasp.error_handlers.real_optlay.RealOptlay</a> object&gt;, &lt;<a href="../../error_handlers/tetirr.html#Tetirr">simmate.calculators.vasp.error_handlers.tetirr.Tetirr</a> object&gt;, &lt;<a href="../../error_handlers/rotation_matrix_nonint.html#RotationNonIntMatrix">simmate.calculators.vasp.error_handlers.rotation_matrix_nonint.RotationNonIntMatrix</a> object&gt;, &lt;<a href="../../error_handlers/long_vector.html#LongVector">simmate.calculators.vasp.error_handlers.long_vector.LongVector</a> object&gt;, &lt;<a href="../../error_handlers/triple_product.html#TripleProduct">simmate.calculators.vasp.error_handlers.triple_product.TripleProduct</a> object&gt;, &lt;<a href="../../error_handlers/pricel.html#Pricel">simmate.calculators.vasp.error_handlers.pricel.Pricel</a> object&gt;, &lt;<a href="../../error_handlers/brions.html#Brions">simmate.calculators.vasp.error_handlers.brions.Brions</a> object&gt;, &lt;<a href="../../error_handlers/zbrent.html#Zbrent">simmate.calculators.vasp.error_handlers.zbrent.Zbrent</a> object&gt;, &lt;<a href="../../error_handlers/insufficient_bands.html#InsufficientBands">simmate.calculators.vasp.error_handlers.insufficient_bands.InsufficientBands</a> object&gt;, &lt;<a href="../../error_handlers/pssyevx.html#Pssyevx">simmate.calculators.vasp.error_handlers.pssyevx.Pssyevx</a> object&gt;, &lt;<a href="../../error_handlers/eddrmm.html#Eddrmm">simmate.calculators.vasp.error_handlers.eddrmm.Eddrmm</a> object&gt;, &lt;<a href="../../error_handlers/edddav.html#Edddav">simmate.calculators.vasp.error_handlers.edddav.Edddav</a> object&gt;, &lt;<a href="../../error_handlers/edwav.html#Edwav">simmate.calculators.vasp.error_handlers.edwav.Edwav</a> object&gt;, &lt;<a href="../../error_handlers/zheev.html#Zheev">simmate.calculators.vasp.error_handlers.zheev.Zheev</a> object&gt;, &lt;<a href="../../error_handlers/elf_kpar.html#ElfKpar">simmate.calculators.vasp.error_handlers.elf_kpar.ElfKpar</a> object&gt;, &lt;<a href="../../error_handlers/rhosyg.html#Rhosyg">simmate.calculators.vasp.error_handlers.rhosyg.Rhosyg</a> object&gt;, &lt;<a href="../../error_handlers/posmap.html#Posmap">simmate.calculators.vasp.error_handlers.posmap.Posmap</a> object&gt;, &lt;<a href="../../error_handlers/point_group.html#PointGroup">simmate.calculators.vasp.error_handlers.point_group.PointGroup</a> object&gt;, &lt;<a href="../../error_handlers/symprec_noise.html#SymprecNoise">simmate.calculators.vasp.error_handlers.symprec_noise.SymprecNoise</a> object&gt;, &lt;<a href="../../error_handlers/incorrect_smearing.html#IncorrectSmearing">simmate.calculators.vasp.error_handlers.incorrect_smearing.IncorrectSmearing</a> object&gt;, &lt;<a href="../../error_handlers/mesh_symmetry.html#MeshSymmetry">simmate.calculators.vasp.error_handlers.mesh_symmetry.MeshSymmetry</a> object&gt;, &lt;<a href="../../error_handlers/unconverged.html#Unconverged">simmate.calculators.vasp.error_handlers.unconverged.Unconverged</a> object&gt;, &lt;<a href="../../error_handlers/nonconverging.html#NonConverging">simmate.calculators.vasp.error_handlers.nonconverging.NonConverging</a> object&gt;, &lt;<a href="../../error_handlers/potim.html#Potim">simmate.calculators.vasp.error_handlers.potim.Potim</a> object&gt;, &lt;<a href="../../error_handlers/positive_energy.html#PositiveEnergy">simmate.calculators.vasp.error_handlers.positive_energy.PositiveEnergy</a> object&gt;, &lt;<a href="../../error_handlers/frozen.html#Frozen">simmate.calculators.vasp.error_handlers.frozen.Frozen</a> object&gt;, &lt;<a href="../../error_handlers/large_sigma.html#LargeSigma">simmate.calculators.vasp.error_handlers.large_sigma.LargeSigma</a> object&gt;]</span>
     </div>
 
     
@@ -575,11 +646,11 @@ applied and none of the following handlers will be checked.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.tasks.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MITRelaxation.__init__" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MITRelaxation.execute" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MITRelaxation.run" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MITRelaxation.print_config" class="function"><a href="../../../../workflow_engine/tasks/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MITRelaxation.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
+                <dd id="MITRelaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MITRelaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MITRelaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>

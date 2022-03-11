@@ -75,22 +75,19 @@
     <span class="c1">#</span>
     <span class="n">path</span><span class="p">(</span>
         <span class="n">route</span><span class="o">=</span><span class="s2">&quot;third-parties/&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">include</span><span class="p">(</span><span class="s2">&quot;simmate.website.third_parties.urls&quot;</span><span class="p">),</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">include</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;simmate.website.third_parties.urls&quot;</span><span class="p">,</span> <span class="s2">&quot;simmate.website.third_parties&quot;</span><span class="p">),</span>
+            <span class="n">namespace</span><span class="o">=</span><span class="s2">&quot;third_parties&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;third_parties&quot;</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1">#</span>
     <span class="c1">#</span>
-    <span class="c1"># This maps to our REST api endpoints</span>
-    <span class="n">path</span><span class="p">(</span>
-        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;rest-api/&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">include</span><span class="p">(</span><span class="s2">&quot;simmate.website.rest_api.urls&quot;</span><span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;rest_api&quot;</span><span class="p">,</span>
-    <span class="p">),</span>
     <span class="c1"># All local calculations are stored at this endpoint</span>
     <span class="n">path</span><span class="p">(</span>
-        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;local-calculations/&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">include</span><span class="p">(</span><span class="s2">&quot;simmate.website.local_calculations.urls&quot;</span><span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;local_calculations&quot;</span><span class="p">,</span>
+        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;workflows/&quot;</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">include</span><span class="p">(</span><span class="s2">&quot;simmate.website.workflows.urls&quot;</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;workflows&quot;</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1">#</span>
     <span class="c1"># This app is for viewing crystal structures in a 3D viewport</span>

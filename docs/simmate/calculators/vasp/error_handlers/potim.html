@@ -32,19 +32,19 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#PotimErrorHandler">PotimErrorHandler</a>
+                    <a class="class" href="#Potim">Potim</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#PotimErrorHandler.__init__">PotimErrorHandler</a>
+                                <a class="function" href="#Potim.__init__">Potim</a>
                         </li>
                         <li>
-                                <a class="variable" href="#PotimErrorHandler.is_monitor">is_monitor</a>
+                                <a class="variable" href="#Potim.is_monitor">is_monitor</a>
                         </li>
                         <li>
-                                <a class="function" href="#PotimErrorHandler.check">check</a>
+                                <a class="function" href="#Potim.check">check</a>
                         </li>
                         <li>
-                                <a class="function" href="#PotimErrorHandler.correct">correct</a>
+                                <a class="function" href="#Potim.correct">correct</a>
                         </li>
                 </ul>
 
@@ -79,20 +79,19 @@
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.outputs</span> <span class="kn">import</span> <span class="n">Oszicar</span>
 
 
-<span class="k">class</span> <span class="nc">PotimErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Potim</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This handler checks if a run has excessively large positive energy changes,</span>
 <span class="sd">    where it&#39;s typically caused by too large of a POTIM. Runs will end up crashing</span>
 <span class="sd">    with some other error (e.g. BRMIX) as the geometry gets progressively worse.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dE_per_atom_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dE_per_atom_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dE_per_atom_threshold</span> <span class="o">=</span> <span class="n">dE_per_atom_threshold</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># We check for this error in the OSZICAR because it&#39;s the smallest file</span>
         <span class="c1"># that will tell us energies -- and therefore the fastest to read.</span>
@@ -122,7 +121,7 @@
         <span class="c1"># not seeing any error.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -159,31 +158,30 @@
         </details>
 
             </section>
-                <section id="PotimErrorHandler">
+                <section id="Potim">
                                 <div class="attr class">
-        <a class="headerlink" href="#PotimErrorHandler">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#Potim">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">PotimErrorHandler</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
+        <span class="name">Potim</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PotimErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Potim</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This handler checks if a run has excessively large positive energy changes,</span>
 <span class="sd">    where it&#39;s typically caused by too large of a POTIM. Runs will end up crashing</span>
 <span class="sd">    with some other error (e.g. BRMIX) as the geometry gets progressively worse.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dE_per_atom_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dE_per_atom_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dE_per_atom_threshold</span> <span class="o">=</span> <span class="n">dE_per_atom_threshold</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># We check for this error in the OSZICAR because it&#39;s the smallest file</span>
         <span class="c1"># that will tell us energies -- and therefore the fastest to read.</span>
@@ -213,7 +211,7 @@
         <span class="c1"># not seeing any error.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -255,16 +253,16 @@ with some other error (e.g. BRMIX) as the geometry gets progressively worse.</p>
 </div>
 
 
-                            <div id="PotimErrorHandler.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#PotimErrorHandler.__init__">#&nbsp;&nbsp</a>
+                            <div id="Potim.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Potim.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">PotimErrorHandler</span><span class="signature">(dE_per_atom_threshold=1)</span>
+            <span class="name">Potim</span><span class="signature">(dE_per_atom_threshold: float = 1)</span>
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dE_per_atom_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dE_per_atom_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dE_per_atom_threshold</span> <span class="o">=</span> <span class="n">dE_per_atom_threshold</span>
 </pre></div>
 
@@ -273,8 +271,8 @@ with some other error (e.g. BRMIX) as the geometry gets progressively worse.</p>
     
 
                             </div>
-                            <div id="PotimErrorHandler.is_monitor" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#PotimErrorHandler.is_monitor">#&nbsp;&nbsp</a>
+                            <div id="Potim.is_monitor" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Potim.is_monitor">#&nbsp;&nbsp</a>
 
         <span class="name">is_monitor</span><span class="default_value"> = True</span>
     </div>
@@ -292,17 +290,17 @@ is_terminating description below for why!</p>
 
 
                             </div>
-                            <div id="PotimErrorHandler.check" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#PotimErrorHandler.check">#&nbsp;&nbsp</a>
+                            <div id="Potim.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Potim.check">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">check</span><span class="signature">(self, directory)</span>:
+            <span class="name">check</span><span class="signature">(self, directory: str) -&gt; bool</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># We check for this error in the OSZICAR because it&#39;s the smallest file</span>
         <span class="c1"># that will tell us energies -- and therefore the fastest to read.</span>
@@ -342,7 +340,7 @@ errors, then None (or an empty list) will be returned. In many cases,
 you should read through the files directly rather than use
 calculators.example.outputs which in many cases assumes a completed file.</p>
 
-<p>As some example, ErrorHandler's can have <code><a href="#PotimErrorHandler.check">check</a></code> functions that do one
+<p>As some example, ErrorHandler's can have <code><a href="#Potim.check">check</a></code> functions that do one
 of the following:</p>
 
 <ol>
@@ -361,17 +359,17 @@ error. It then returns True if the errors is found and False otherwise.</p>
 
 
                             </div>
-                            <div id="PotimErrorHandler.correct" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#PotimErrorHandler.correct">#&nbsp;&nbsp</a>
+                            <div id="Potim.correct" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Potim.correct">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">correct</span><span class="signature">(self, directory)</span>:
+            <span class="name">correct</span><span class="signature">(self, directory: str) -&gt; str</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -418,10 +416,10 @@ error. It then returns the fix or list of fixes made.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></dt>
-                                <dd id="PotimErrorHandler.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
-                <dd id="PotimErrorHandler.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
-                <dd id="PotimErrorHandler.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
-                <dd id="PotimErrorHandler.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
+                                <dd id="Potim.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
+                <dd id="Potim.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
+                <dd id="Potim.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
+                <dd id="Potim.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
 
             </div>
                                 </dl>
