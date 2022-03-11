@@ -68,6 +68,9 @@
                                 <a class="function" href="#Incar.keyword_modifier_smart_magmom">keyword_modifier_smart_magmom</a>
                         </li>
                         <li>
+                                <a class="function" href="#Incar.keyword_modifier_smart_lmaxmix">keyword_modifier_smart_lmaxmix</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Incar.keyword_modifier_smart_ldau">keyword_modifier_smart_ldau</a>
                         </li>
                         <li>
@@ -570,14 +573,12 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">keyword_modifier_per_atom</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">per_atom_value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The __density modifier means the user wants a specific density. They</span>
-<span class="sd">        provide this density in per-angstrom^3 units and we return the</span>
-<span class="sd">        structure-specific count that gives this density.</span>
-<span class="sd">        For example, density=10 and a structure lattice that volume of 5,</span>
-<span class="sd">        then this returns value=10*5=50.</span>
+<span class="sd">        The __per_atom modifier means the user wants a specific value per atom</span>
+<span class="sd">        in the unit cell. For example, EDIFF__per_atom=1e-5 and a structure</span>
+<span class="sd">        with 50 sites in it would return a value of 1e-5*50=50.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># VASP expect integers for a lot of these values, so we round up</span>
-        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">per_atom_value</span> <span class="o">/</span> <span class="n">structure</span><span class="o">.</span><span class="n">num_sites</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">per_atom_value</span> <span class="o">*</span> <span class="n">structure</span><span class="o">.</span><span class="n">num_sites</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">keyword_modifier_smart_magmom</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">override_values</span><span class="p">):</span>
@@ -617,6 +618,32 @@
         <span class="c1">#     incar[&quot;NUPDOWN&quot;] = nupdown</span>
 
         <span class="k">return</span> <span class="n">magnetic_moments</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">keyword_modifier_smart_lmaxmix</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">lmaxmix_config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This modifier sets LMAXMIX if there are any d or f electrons present</span>
+<span class="sd">        in the structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># COMMENT (from pymatgen team):</span>
+        <span class="c1"># Note that if the user explicitly sets LMAXMIX in settings it will</span>
+        <span class="c1"># override this logic.</span>
+        <span class="c1"># Previously, this was only set if Hubbard U was enabled as per the</span>
+        <span class="c1"># VASP manual but following an investigation it was determined that</span>
+        <span class="c1"># this would lead to a significant difference between SCF -&gt; NonSCF</span>
+        <span class="c1"># even without Hubbard U enabled. Thanks to Andrew Rosen for</span>
+        <span class="c1"># investigating and reporting.</span>
+
+        <span class="c1"># first iterate through all elements and check for f-electrons</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">56</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">6</span>
+        <span class="c1"># now check for elements that contain d-electrons</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="c1"># otherwise use the default for VASP</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">keyword_modifier_smart_ldau</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">ldau_config</span><span class="p">):</span>
@@ -695,15 +722,6 @@
             <span class="n">ldau_settings</span><span class="p">[</span><span class="s2">&quot;LDAU&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
-
-        <span class="c1"># we want to modify LMAXMIX if LSDA+U and there are any d or f electrons</span>
-        <span class="k">if</span> <span class="s2">&quot;LMAXMIX__auto&quot;</span> <span class="ow">in</span> <span class="n">ldau_config</span><span class="p">:</span>
-            <span class="c1"># first iterate through all elements and check for f-electrons</span>
-            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">56</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
-                <span class="n">ldau_settings</span><span class="p">[</span><span class="s2">&quot;LMAXMIX&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">6</span>
-            <span class="c1"># now check for elements that contain d-electrons</span>
-            <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
-                <span class="n">ldau_settings</span><span class="p">[</span><span class="s2">&quot;LMAXMIX&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
 
         <span class="c1"># The remaining LDAU keywords are LDAUPRINT and LDAUTYPE, which we just</span>
         <span class="c1"># leave at what is set in the input</span>
@@ -1241,14 +1259,12 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">keyword_modifier_per_atom</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">per_atom_value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The __density modifier means the user wants a specific density. They</span>
-<span class="sd">        provide this density in per-angstrom^3 units and we return the</span>
-<span class="sd">        structure-specific count that gives this density.</span>
-<span class="sd">        For example, density=10 and a structure lattice that volume of 5,</span>
-<span class="sd">        then this returns value=10*5=50.</span>
+<span class="sd">        The __per_atom modifier means the user wants a specific value per atom</span>
+<span class="sd">        in the unit cell. For example, EDIFF__per_atom=1e-5 and a structure</span>
+<span class="sd">        with 50 sites in it would return a value of 1e-5*50=50.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># VASP expect integers for a lot of these values, so we round up</span>
-        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">per_atom_value</span> <span class="o">/</span> <span class="n">structure</span><span class="o">.</span><span class="n">num_sites</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">per_atom_value</span> <span class="o">*</span> <span class="n">structure</span><span class="o">.</span><span class="n">num_sites</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">keyword_modifier_smart_magmom</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">override_values</span><span class="p">):</span>
@@ -1288,6 +1304,32 @@
         <span class="c1">#     incar[&quot;NUPDOWN&quot;] = nupdown</span>
 
         <span class="k">return</span> <span class="n">magnetic_moments</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">keyword_modifier_smart_lmaxmix</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">lmaxmix_config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This modifier sets LMAXMIX if there are any d or f electrons present</span>
+<span class="sd">        in the structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># COMMENT (from pymatgen team):</span>
+        <span class="c1"># Note that if the user explicitly sets LMAXMIX in settings it will</span>
+        <span class="c1"># override this logic.</span>
+        <span class="c1"># Previously, this was only set if Hubbard U was enabled as per the</span>
+        <span class="c1"># VASP manual but following an investigation it was determined that</span>
+        <span class="c1"># this would lead to a significant difference between SCF -&gt; NonSCF</span>
+        <span class="c1"># even without Hubbard U enabled. Thanks to Andrew Rosen for</span>
+        <span class="c1"># investigating and reporting.</span>
+
+        <span class="c1"># first iterate through all elements and check for f-electrons</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">56</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">6</span>
+        <span class="c1"># now check for elements that contain d-electrons</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="c1"># otherwise use the default for VASP</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">keyword_modifier_smart_ldau</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">ldau_config</span><span class="p">):</span>
@@ -1366,15 +1408,6 @@
             <span class="n">ldau_settings</span><span class="p">[</span><span class="s2">&quot;LDAU&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
-
-        <span class="c1"># we want to modify LMAXMIX if LSDA+U and there are any d or f electrons</span>
-        <span class="k">if</span> <span class="s2">&quot;LMAXMIX__auto&quot;</span> <span class="ow">in</span> <span class="n">ldau_config</span><span class="p">:</span>
-            <span class="c1"># first iterate through all elements and check for f-electrons</span>
-            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">56</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
-                <span class="n">ldau_settings</span><span class="p">[</span><span class="s2">&quot;LMAXMIX&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">6</span>
-            <span class="c1"># now check for elements that contain d-electrons</span>
-            <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
-                <span class="n">ldau_settings</span><span class="p">[</span><span class="s2">&quot;LMAXMIX&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
 
         <span class="c1"># The remaining LDAU keywords are LDAUPRINT and LDAUTYPE, which we just</span>
         <span class="c1"># leave at what is set in the input</span>
@@ -1899,23 +1932,19 @@ then this returns value=10*5=50.</p>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">keyword_modifier_per_atom</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">per_atom_value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The __density modifier means the user wants a specific density. They</span>
-<span class="sd">        provide this density in per-angstrom^3 units and we return the</span>
-<span class="sd">        structure-specific count that gives this density.</span>
-<span class="sd">        For example, density=10 and a structure lattice that volume of 5,</span>
-<span class="sd">        then this returns value=10*5=50.</span>
+<span class="sd">        The __per_atom modifier means the user wants a specific value per atom</span>
+<span class="sd">        in the unit cell. For example, EDIFF__per_atom=1e-5 and a structure</span>
+<span class="sd">        with 50 sites in it would return a value of 1e-5*50=50.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># VASP expect integers for a lot of these values, so we round up</span>
-        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">per_atom_value</span> <span class="o">/</span> <span class="n">structure</span><span class="o">.</span><span class="n">num_sites</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">per_atom_value</span> <span class="o">*</span> <span class="n">structure</span><span class="o">.</span><span class="n">num_sites</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>The __density modifier means the user wants a specific density. They
-provide this density in per-angstrom^3 units and we return the
-structure-specific count that gives this density.
-For example, density=10 and a structure lattice that volume of 5,
-then this returns value=10*5=50.</p>
+            <div class="docstring"><p>The __per_atom modifier means the user wants a specific value per atom
+in the unit cell. For example, EDIFF__per_atom=1e-5 and a structure
+with 50 sites in it would return a value of 1e-5*50=50.</p>
 </div>
 
 
@@ -1979,6 +2008,52 @@ what to set the MAGMOM as for VASP. In order of priority they are...
     (2) the spin property attached to the site's specie
     (3) a value provided explicitly (e.g. {"Co": 0.5})
     (4) a value of 0.6</p>
+</div>
+
+
+                            </div>
+                            <div id="Incar.keyword_modifier_smart_lmaxmix" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Incar.keyword_modifier_smart_lmaxmix">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">keyword_modifier_smart_lmaxmix</span><span class="signature">(structure, lmaxmix_config)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">keyword_modifier_smart_lmaxmix</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">lmaxmix_config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This modifier sets LMAXMIX if there are any d or f electrons present</span>
+<span class="sd">        in the structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># COMMENT (from pymatgen team):</span>
+        <span class="c1"># Note that if the user explicitly sets LMAXMIX in settings it will</span>
+        <span class="c1"># override this logic.</span>
+        <span class="c1"># Previously, this was only set if Hubbard U was enabled as per the</span>
+        <span class="c1"># VASP manual but following an investigation it was determined that</span>
+        <span class="c1"># this would lead to a significant difference between SCF -&gt; NonSCF</span>
+        <span class="c1"># even without Hubbard U enabled. Thanks to Andrew Rosen for</span>
+        <span class="c1"># investigating and reporting.</span>
+
+        <span class="c1"># first iterate through all elements and check for f-electrons</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">56</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">6</span>
+        <span class="c1"># now check for elements that contain d-electrons</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="c1"># otherwise use the default for VASP</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This modifier sets LMAXMIX if there are any d or f electrons present
+in the structure.</p>
 </div>
 
 
@@ -2071,15 +2146,6 @@ what to set the MAGMOM as for VASP. In order of priority they are...
             <span class="n">ldau_settings</span><span class="p">[</span><span class="s2">&quot;LDAU&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
-
-        <span class="c1"># we want to modify LMAXMIX if LSDA+U and there are any d or f electrons</span>
-        <span class="k">if</span> <span class="s2">&quot;LMAXMIX__auto&quot;</span> <span class="ow">in</span> <span class="n">ldau_config</span><span class="p">:</span>
-            <span class="c1"># first iterate through all elements and check for f-electrons</span>
-            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">56</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
-                <span class="n">ldau_settings</span><span class="p">[</span><span class="s2">&quot;LMAXMIX&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">6</span>
-            <span class="c1"># now check for elements that contain d-electrons</span>
-            <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">Z</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">):</span>
-                <span class="n">ldau_settings</span><span class="p">[</span><span class="s2">&quot;LMAXMIX&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
 
         <span class="c1"># The remaining LDAU keywords are LDAUPRINT and LDAUTYPE, which we just</span>
         <span class="c1"># leave at what is set in the input</span>

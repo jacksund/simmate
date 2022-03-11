@@ -299,7 +299,13 @@ are effectively the "raw data".</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -310,18 +316,43 @@ are effectively the "raw data".</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -366,10 +397,11 @@ so if this attribute is set, you can use the <code><a href="#CodStructure.load_r
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 

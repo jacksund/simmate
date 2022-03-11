@@ -35,6 +35,12 @@
                     <a class="class" href="#ChemicalSystemForm">ChemicalSystemForm</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="variable" href="#ChemicalSystemForm.include_subsystems">include_subsystems</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#ChemicalSystemForm.chemical_system">chemical_system</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#ChemicalSystemForm.clean_chemical_system">clean_chemical_system</a>
                         </li>
                         <li>
@@ -75,20 +81,38 @@
 
 <span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_chemical_subsystems</span>
 
+<span class="c1"># NOTE TO DEV: This form is a special case where we are searching MANY tables</span>
+<span class="c1"># for information -- so it is therefore not a ModelForm and cannot use</span>
+<span class="c1"># our mix-ins. I need to think of the best way to leverage these mix-ins without</span>
+<span class="c1"># creating this form from scratch. For now, this form is effectively a copy/paste</span>
+<span class="c1"># of `from simmate.website.workflows.filters import Structure`.</span>
+
 
 <span class="k">class</span> <span class="nc">ChemicalSystemForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
 
-    <span class="c1"># This is the most basic form for querying data, which only takes</span>
-    <span class="c1"># the chemical system. This way users can quickly query with a composition</span>
-    <span class="c1"># such as &quot;Y-C-F&quot;. We also ask if they want the subsystem too. For example,</span>
-    <span class="c1"># Y-C-F would also include Y, C, F, Y-C, Y-F, etc. in the search results.</span>
+    <span class="n">include_subsystems</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Include Subsytems&quot;</span><span class="p">,</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Whether to include subsystems of the given `chemical_system`. For example,</span>
+<span class="sd">    the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note: this attribute must be positioned BEFORE chemical_system to ensure</span>
+    <span class="c1"># it is present in self.cleaned_data before chemical_system is accessed.</span>
 
-    <span class="c1"># We want a lot of control here and this form will be applied to multiple</span>
-    <span class="c1"># tables/models, so we don&#39;t use django-filter here.</span>
+    <span class="c1"># include_suprasystems = forms.BooleanField(label=&quot;Include Subsytems&quot;, required=False)</span>
+    <span class="c1"># TODO: Supra-systems would include all the elements listed AND more. For example,</span>
+    <span class="c1"># searching Y-C-F would also return Y-C-F-Br, Y-Sc-C-F, etc.</span>
 
-    <span class="c1"># Searching by Chemical System</span>
-    <span class="n">include_subsystems</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Include Subsytems&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">chemical_system</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Chemical System&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">chemical_system</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Chemical System&quot;</span><span class="p">,</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The chemical system of the structure (e.g. &quot;Y-C-F&quot; or &quot;Na-Cl&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Searching by Database Providers</span>
     <span class="n">aflow</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -115,7 +139,6 @@
         <span class="c1"># check if the user wants subsystems included (This will be True or False)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;include_subsystems&quot;</span><span class="p">]:</span>
             <span class="n">systems_cleaned</span> <span class="o">=</span> <span class="n">get_chemical_subsystems</span><span class="p">(</span><span class="n">chemical_system</span><span class="p">)</span>
-
         <span class="c1"># otherwise just clean the single system</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Convert the system to a list of elements</span>
@@ -125,7 +148,6 @@
             <span class="c1"># NOTE: we call this &quot;systems_cleaned&quot; and put it in a list so</span>
             <span class="c1"># that our other methods don&#39;t have to deal with multiple cases</span>
             <span class="c1"># when running a django filter.</span>
-
         <span class="c1"># now return the cleaned value. Note that this is now a list of</span>
         <span class="c1"># chemical systems, where all elements are in alphabetical order.</span>
         <span class="k">return</span> <span class="n">systems_cleaned</span>
@@ -147,17 +169,29 @@
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ChemicalSystemForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
 
-    <span class="c1"># This is the most basic form for querying data, which only takes</span>
-    <span class="c1"># the chemical system. This way users can quickly query with a composition</span>
-    <span class="c1"># such as &quot;Y-C-F&quot;. We also ask if they want the subsystem too. For example,</span>
-    <span class="c1"># Y-C-F would also include Y, C, F, Y-C, Y-F, etc. in the search results.</span>
+    <span class="n">include_subsystems</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Include Subsytems&quot;</span><span class="p">,</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Whether to include subsystems of the given `chemical_system`. For example,</span>
+<span class="sd">    the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note: this attribute must be positioned BEFORE chemical_system to ensure</span>
+    <span class="c1"># it is present in self.cleaned_data before chemical_system is accessed.</span>
 
-    <span class="c1"># We want a lot of control here and this form will be applied to multiple</span>
-    <span class="c1"># tables/models, so we don&#39;t use django-filter here.</span>
+    <span class="c1"># include_suprasystems = forms.BooleanField(label=&quot;Include Subsytems&quot;, required=False)</span>
+    <span class="c1"># TODO: Supra-systems would include all the elements listed AND more. For example,</span>
+    <span class="c1"># searching Y-C-F would also return Y-C-F-Br, Y-Sc-C-F, etc.</span>
 
-    <span class="c1"># Searching by Chemical System</span>
-    <span class="n">include_subsystems</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Include Subsytems&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">chemical_system</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Chemical System&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">chemical_system</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Chemical System&quot;</span><span class="p">,</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The chemical system of the structure (e.g. &quot;Y-C-F&quot; or &quot;Na-Cl&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Searching by Database Providers</span>
     <span class="n">aflow</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -184,7 +218,6 @@
         <span class="c1"># check if the user wants subsystems included (This will be True or False)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;include_subsystems&quot;</span><span class="p">]:</span>
             <span class="n">systems_cleaned</span> <span class="o">=</span> <span class="n">get_chemical_subsystems</span><span class="p">(</span><span class="n">chemical_system</span><span class="p">)</span>
-
         <span class="c1"># otherwise just clean the single system</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Convert the system to a list of elements</span>
@@ -194,7 +227,6 @@
             <span class="c1"># NOTE: we call this &quot;systems_cleaned&quot; and put it in a list so</span>
             <span class="c1"># that our other methods don&#39;t have to deal with multiple cases</span>
             <span class="c1"># when running a django filter.</span>
-
         <span class="c1"># now return the cleaned value. Note that this is now a list of</span>
         <span class="c1"># chemical systems, where all elements are in alphabetical order.</span>
         <span class="k">return</span> <span class="n">systems_cleaned</span>
@@ -206,6 +238,31 @@
 </div>
 
 
+                            <div id="ChemicalSystemForm.include_subsystems" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#ChemicalSystemForm.include_subsystems">#&nbsp;&nbsp</a>
+
+        <span class="name">include_subsystems</span>
+    </div>
+
+    
+            <div class="docstring"><p>Whether to include subsystems of the given <code><a href="#ChemicalSystemForm.chemical_system">chemical_system</a></code>. For example,
+the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..</p>
+</div>
+
+
+                            </div>
+                            <div id="ChemicalSystemForm.chemical_system" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#ChemicalSystemForm.chemical_system">#&nbsp;&nbsp</a>
+
+        <span class="name">chemical_system</span>
+    </div>
+
+    
+            <div class="docstring"><p>The chemical system of the structure (e.g. "Y-C-F" or "Na-Cl")</p>
+</div>
+
+
+                            </div>
                             <div id="ChemicalSystemForm.clean_chemical_system" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#ChemicalSystemForm.clean_chemical_system">#&nbsp;&nbsp</a>
 
@@ -233,7 +290,6 @@
         <span class="c1"># check if the user wants subsystems included (This will be True or False)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;include_subsystems&quot;</span><span class="p">]:</span>
             <span class="n">systems_cleaned</span> <span class="o">=</span> <span class="n">get_chemical_subsystems</span><span class="p">(</span><span class="n">chemical_system</span><span class="p">)</span>
-
         <span class="c1"># otherwise just clean the single system</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Convert the system to a list of elements</span>
@@ -243,7 +299,6 @@
             <span class="c1"># NOTE: we call this &quot;systems_cleaned&quot; and put it in a list so</span>
             <span class="c1"># that our other methods don&#39;t have to deal with multiple cases</span>
             <span class="c1"># when running a django filter.</span>
-
         <span class="c1"># now return the cleaned value. Note that this is now a list of</span>
         <span class="c1"># chemical systems, where all elements are in alphabetical order.</span>
         <span class="k">return</span> <span class="n">systems_cleaned</span>

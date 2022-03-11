@@ -472,14 +472,12 @@ class Incar(dict):
     @staticmethod
     def keyword_modifier_per_atom(structure, per_atom_value):
         """
-        The __density modifier means the user wants a specific density. They
-        provide this density in per-angstrom^3 units and we return the
-        structure-specific count that gives this density.
-        For example, density=10 and a structure lattice that volume of 5,
-        then this returns value=10*5=50.
+        The __per_atom modifier means the user wants a specific value per atom
+        in the unit cell. For example, EDIFF__per_atom=1e-5 and a structure
+        with 50 sites in it would return a value of 1e-5*50=50.
         """
         # VASP expect integers for a lot of these values, so we round up
-        return math.ceil(per_atom_value / structure.num_sites)
+        return per_atom_value * structure.num_sites
 
     @staticmethod
     def keyword_modifier_smart_magmom(structure, override_values):
@@ -519,6 +517,32 @@ class Incar(dict):
         #     incar["NUPDOWN"] = nupdown
 
         return magnetic_moments
+
+    @staticmethod
+    def keyword_modifier_smart_lmaxmix(structure, lmaxmix_config):
+        """
+        This modifier sets LMAXMIX if there are any d or f electrons present
+        in the structure.
+        """
+
+        # COMMENT (from pymatgen team):
+        # Note that if the user explicitly sets LMAXMIX in settings it will
+        # override this logic.
+        # Previously, this was only set if Hubbard U was enabled as per the
+        # VASP manual but following an investigation it was determined that
+        # this would lead to a significant difference between SCF -> NonSCF
+        # even without Hubbard U enabled. Thanks to Andrew Rosen for
+        # investigating and reporting.
+
+        # first iterate through all elements and check for f-electrons
+        if any(element.Z > 56 for element in structure.composition):
+            return 6
+        # now check for elements that contain d-electrons
+        elif any(element.Z > 20 for element in structure.composition):
+            return 4
+        # otherwise use the default for VASP
+        else:
+            return 2
 
     @staticmethod
     def keyword_modifier_smart_ldau(structure, ldau_config):
@@ -597,15 +621,6 @@ class Incar(dict):
             ldau_settings["LDAU"] = True
         else:
             return {}
-
-        # we want to modify LMAXMIX if LSDA+U and there are any d or f electrons
-        if "LMAXMIX__auto" in ldau_config:
-            # first iterate through all elements and check for f-electrons
-            if any(element.Z > 56 for element in structure.composition):
-                ldau_settings["LMAXMIX"] = 6
-            # now check for elements that contain d-electrons
-            elif any(element.Z > 20 for element in structure.composition):
-                ldau_settings["LMAXMIX"] = 4
 
         # The remaining LDAU keywords are LDAUPRINT and LDAUTYPE, which we just
         # leave at what is set in the input

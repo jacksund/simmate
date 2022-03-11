@@ -42,9 +42,9 @@
         <h2>Submodules</h2>
         <ul>
                 <li><a href="database/base_data_types.html">simmate.database.base_data_types</a></li>
-                <li><a href="database/local_calculations.html">simmate.database.local_calculations</a></li>
                 <li><a href="database/prototypes.html">simmate.database.prototypes</a></li>
                 <li><a href="database/third_parties.html">simmate.database.third_parties</a></li>
+                <li><a href="database/workflow_results.html">simmate.database.workflow_results</a></li>
         </ul>
 
 
@@ -72,7 +72,7 @@
 
 <ul>
 <li><code>base_data_types</code> : fundamental mixins for creating new tables</li>
-<li><code>local_calculations</code> : collection of result tables for <code><a href="workflows.html">simmate.workflows</a></code></li>
+<li><code>workflow_results</code> : collection of result tables for <code><a href="workflows.html">simmate.workflows</a></code></li>
 <li><code>prototypes</code> : tables of prototype structures</li>
 <li><code>third_parties</code> : loads data from external providers (such as Materials Project)</li>
 </ul>
@@ -96,7 +96,7 @@
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="shortcuts.html">simmate.shortcuts</a></span> <span class="kn">import</span> <span class="n">setup</span>  <span class="c1"># configures Django</span>
 
 <span class="c1"># and now you can import tables in this module</span>
-<span class="kn">from</span> <span class="nn"><a href="database/local_calculations.html">simmate.database.local_calculations</a></span> <span class="kn">import</span> <span class="n">MITStaticEnergy</span>
+<span class="kn">from</span> <span class="nn"><a href="database/workflow_results.html">simmate.database.workflow_results</a></span> <span class="kn">import</span> <span class="n">MITStaticEnergy</span>
 </code></pre></div>
 
 <p>If this is not done, you will recieve the following error:</p>
@@ -141,9 +141,11 @@
     <span class="n">nsites__gte</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>  <span class="c1"># greater or equal to 3 sites</span>
     <span class="n">energy__isnull</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># the structure DOES have a energy</span>
     <span class="n">density__range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>  <span class="c1"># density is between 1 and 5</span>
-    <span class="n">elements__contains</span><span class="o">=</span><span class="s2">&quot;Ca&quot;</span><span class="p">,</span>  <span class="c1"># the structure includes the element Ca</span>
+    <span class="n">elements__contains</span><span class="o">=</span><span class="s1">&#39;&quot;C&quot;&#39;</span><span class="p">,</span>  <span class="c1"># the structure includes the element Carbon</span>
 <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </code></pre></div>
+
+<p>Note, for the final filtering condition (<code>elements__contains</code>), we used some odd quotations: we wrote '"C"' usingquotes inside single quotes. This is not a typo! The quotes ensure we don't accidentally grab Ca, Cs, Ce, Cl, and so on. This is an issue with our filtering logic that we are currently working to fix.</p>
 
 <h2 id="converting-data-to-desired-format">Converting data to desired format</h2>
 

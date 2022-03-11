@@ -32,19 +32,19 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#NonConvergingErrorHandler">NonConvergingErrorHandler</a>
+                    <a class="class" href="#NonConverging">NonConverging</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#NonConvergingErrorHandler.__init__">NonConvergingErrorHandler</a>
+                                <a class="function" href="#NonConverging.__init__">NonConverging</a>
                         </li>
                         <li>
-                                <a class="variable" href="#NonConvergingErrorHandler.is_monitor">is_monitor</a>
+                                <a class="variable" href="#NonConverging.is_monitor">is_monitor</a>
                         </li>
                         <li>
-                                <a class="function" href="#NonConvergingErrorHandler.check">check</a>
+                                <a class="function" href="#NonConverging.check">check</a>
                         </li>
                         <li>
-                                <a class="function" href="#NonConvergingErrorHandler.correct">correct</a>
+                                <a class="function" href="#NonConverging.correct">correct</a>
                         </li>
                 </ul>
 
@@ -78,20 +78,19 @@
 <span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
 
 
-<span class="k">class</span> <span class="nc">NonConvergingErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">NonConverging</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    If a run is hitting the maximum number of electronic steps for a significant</span>
 <span class="sd">    number of ionic steps (i.e. 10), then we consider the job to be nonconverging</span>
 <span class="sd">    and in error. To try fixing this, we switch the ALGO to Normal.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_ionic_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_ionic_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_ionic_steps</span> <span class="o">=</span> <span class="n">min_ionic_steps</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error in the specified directory. Note, we assume that we are</span>
 <span class="sd">        checking the OSZICAR file. If that file is not present, we say that there</span>
@@ -141,7 +140,7 @@
         <span class="c1"># if the files don&#39;t exist, we are not seeing any error yet</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform corrections based on the INCAR.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -215,31 +214,30 @@
         </details>
 
             </section>
-                <section id="NonConvergingErrorHandler">
+                <section id="NonConverging">
                                 <div class="attr class">
-        <a class="headerlink" href="#NonConvergingErrorHandler">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#NonConverging">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">NonConvergingErrorHandler</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
+        <span class="name">NonConverging</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">NonConvergingErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">NonConverging</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    If a run is hitting the maximum number of electronic steps for a significant</span>
 <span class="sd">    number of ionic steps (i.e. 10), then we consider the job to be nonconverging</span>
 <span class="sd">    and in error. To try fixing this, we switch the ALGO to Normal.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_ionic_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_ionic_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_ionic_steps</span> <span class="o">=</span> <span class="n">min_ionic_steps</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error in the specified directory. Note, we assume that we are</span>
 <span class="sd">        checking the OSZICAR file. If that file is not present, we say that there</span>
@@ -289,7 +287,7 @@
         <span class="c1"># if the files don&#39;t exist, we are not seeing any error yet</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform corrections based on the INCAR.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -368,16 +366,16 @@ and in error. To try fixing this, we switch the ALGO to Normal.</p>
 </div>
 
 
-                            <div id="NonConvergingErrorHandler.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#NonConvergingErrorHandler.__init__">#&nbsp;&nbsp</a>
+                            <div id="NonConverging.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#NonConverging.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">NonConvergingErrorHandler</span><span class="signature">(min_ionic_steps=10)</span>
+            <span class="name">NonConverging</span><span class="signature">(min_ionic_steps: int = 10)</span>
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_ionic_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_ionic_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_ionic_steps</span> <span class="o">=</span> <span class="n">min_ionic_steps</span>
 </pre></div>
 
@@ -386,8 +384,8 @@ and in error. To try fixing this, we switch the ALGO to Normal.</p>
     
 
                             </div>
-                            <div id="NonConvergingErrorHandler.is_monitor" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#NonConvergingErrorHandler.is_monitor">#&nbsp;&nbsp</a>
+                            <div id="NonConverging.is_monitor" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#NonConverging.is_monitor">#&nbsp;&nbsp</a>
 
         <span class="name">is_monitor</span><span class="default_value"> = True</span>
     </div>
@@ -405,17 +403,17 @@ is_terminating description below for why!</p>
 
 
                             </div>
-                            <div id="NonConvergingErrorHandler.check" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#NonConvergingErrorHandler.check">#&nbsp;&nbsp</a>
+                            <div id="NonConverging.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#NonConverging.check">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">check</span><span class="signature">(self, directory)</span>:
+            <span class="name">check</span><span class="signature">(self, directory: str) -&gt; bool</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error in the specified directory. Note, we assume that we are</span>
 <span class="sd">        checking the OSZICAR file. If that file is not present, we say that there</span>
@@ -475,17 +473,17 @@ is no error because another handler will address this.</p>
 
 
                             </div>
-                            <div id="NonConvergingErrorHandler.correct" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#NonConvergingErrorHandler.correct">#&nbsp;&nbsp</a>
+                            <div id="NonConverging.correct" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#NonConverging.correct">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">correct</span><span class="signature">(self, directory)</span>:
+            <span class="name">correct</span><span class="signature">(self, directory: str) -&gt; str</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform corrections based on the INCAR.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -567,10 +565,10 @@ is no error because another handler will address this.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></dt>
-                                <dd id="NonConvergingErrorHandler.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
-                <dd id="NonConvergingErrorHandler.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
-                <dd id="NonConvergingErrorHandler.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
-                <dd id="NonConvergingErrorHandler.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
+                                <dd id="NonConverging.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
+                <dd id="NonConverging.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
+                <dd id="NonConverging.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
+                <dd id="NonConverging.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
 
             </div>
                                 </dl>

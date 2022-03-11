@@ -156,6 +156,7 @@
     <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 
 
+<span class="nd">@login_required</span>
 <span class="k">def</span> <span class="nf">extras</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
 
     <span class="c1"># now let&#39;s put the data and template together to send the user</span>
@@ -268,14 +269,16 @@
                 <section id="extras">
                             <div class="attr function"><a class="headerlink" href="#extras">#&nbsp;&nbsp</a>
 
-        
+                <div class="decorator">@login_required</div>
+
             <span class="def">def</span>
             <span class="name">extras</span><span class="signature">(request)</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extras</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="nd">@login_required</span>
+<span class="k">def</span> <span class="nf">extras</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
 
     <span class="c1"># now let&#39;s put the data and template together to send the user</span>
     <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;active_tab_id&quot;</span><span class="p">:</span> <span class="s2">&quot;extras&quot;</span><span class="p">}</span>

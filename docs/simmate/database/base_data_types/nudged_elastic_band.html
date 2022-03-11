@@ -71,6 +71,9 @@
                                 <a class="function" href="#DiffusionAnalysis.from_toolkit">from_toolkit</a>
                         </li>
                         <li>
+                                <a class="function" href="#DiffusionAnalysis.from_directory">from_directory</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#DiffusionAnalysis.create_subclasses">create_subclasses</a>
                         </li>
                         <li>
@@ -170,6 +173,12 @@
                                 <a class="function" href="#MigrationHop.to_toolkit">to_toolkit</a>
                         </li>
                         <li>
+                                <a class="function" href="#MigrationHop.from_directory">from_directory</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#MigrationHop.from_pymatgen">from_pymatgen</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#MigrationHop.create_subclasses_from_diffusion_analysis">create_subclasses_from_diffusion_analysis</a>
                         </li>
                         <li>
@@ -213,9 +222,6 @@
                         </li>
                         <li>
                                 <a class="variable" href="#MigrationImage.source">source</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#MigrationImage.update_many_from_analysis">update_many_from_analysis</a>
                         </li>
                         <li>
                                 <a class="function" href="#MigrationImage.create_subclass_from_migration_hop">create_subclass_from_migration_hop</a>
@@ -293,10 +299,13 @@
 <span class="sd">This module is experimental and subject to change.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">pymatgen.core.sites</span> <span class="kn">import</span> <span class="n">PeriodicSite</span>
 <span class="kn">from</span> <span class="nn">pymatgen.symmetry.analyzer</span> <span class="kn">import</span> <span class="n">SpacegroupAnalyzer</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.transition_state</span> <span class="kn">import</span> <span class="n">NEBAnalysis</span>
 
+<span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span> <span class="k">as</span> <span class="n">ToolkitStructure</span>
 <span class="kn">from</span> <span class="nn">simmate.toolkit.diffusion</span> <span class="kn">import</span> <span class="n">MigrationHop</span> <span class="k">as</span> <span class="n">ToolkitMigrationHop</span>
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">table_column</span><span class="p">,</span>
@@ -308,7 +317,7 @@
 <span class="k">class</span> <span class="nc">DiffusionAnalysis</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="c1"># The element of the diffusion atom</span>
     <span class="n">migrating_specie</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -350,6 +359,51 @@
         <span class="c1"># If as_dict is false, we build this into an Object. Otherwise, just</span>
         <span class="c1"># return the dictionary</span>
         <span class="k">return</span> <span class="n">structure_dict</span> <span class="k">if</span> <span class="n">as_dict</span> <span class="k">else</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">structure_dict</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+
+        <span class="c1"># TODO: It there a way I can figure out which tables the other calculations</span>
+        <span class="c1"># are linked to? Specifically, the bulk relaxation, bulk static energy,</span>
+        <span class="c1"># and the supercell relaxations. They are all in these directories too</span>
+        <span class="c1"># but I can&#39;t save those results until I know where they belong.</span>
+        <span class="c1"># Consider adding an attribute that points to those tables...? Or</span>
+        <span class="c1"># maybe a relationship (which I&#39;d rather avoid bc it makes things very</span>
+        <span class="c1"># messy for users)</span>
+        <span class="c1"># For now, I only grab the structure from the static-energy and store</span>
+        <span class="c1"># it in the DiffusionAnalysis table.</span>
+        <span class="n">bulk_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;bulk_static_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span>
+        <span class="n">bulk_structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">bulk_filename</span><span class="p">)</span>
+
+        <span class="c1"># Save a diffusion analysis object so we can connect all other data</span>
+        <span class="c1"># to it.</span>
+        <span class="n">analysis_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">bulk_structure</span><span class="p">,</span>
+            <span class="n">vacancy_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># assume this for now</span>
+        <span class="p">)</span>
+        <span class="n">analysis_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># Iterate through all the subdirectories that start with &quot;migration_hop*&quot;.</span>
+        <span class="c1"># We also need to make sure we only grab directories because there are</span>
+        <span class="c1"># also cifs present that match this naming convention.</span>
+        <span class="c1"># We ignore the number when saving to avoid overwriting data.</span>
+        <span class="n">migration_directories</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
+            <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;migration_hop_&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="c1"># now save each migration hop present</span>
+        <span class="k">for</span> <span class="n">migration_dir</span> <span class="ow">in</span> <span class="n">migration_directories</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">migration_hops</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span>
+                <span class="n">directory</span><span class="o">=</span><span class="n">migration_dir</span><span class="p">,</span>
+                <span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">analysis_db</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">analysis_db</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_subclasses</span><span class="p">(</span>
@@ -430,7 +484,7 @@
 <span class="k">class</span> <span class="nc">MigrationHop</span><span class="p">(</span><span class="n">DatabaseTable</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="c1"># the initial, midpoint, and end site fractional coordinates</span>
     <span class="c1"># Really, this is a list of float values, but I save it as a string.</span>
@@ -550,6 +604,101 @@
         <span class="c1"># if the pathways match, then we can return the pathway object!</span>
         <span class="k">return</span> <span class="n">path</span>
 
+    <span class="c1">#######</span>
+    <span class="c1"># BUG: I need to distinguish between the from_toolkit/to_toolkit methods</span>
+    <span class="c1"># above that just load a MigrationImages object vs. the from_directory and</span>
+    <span class="c1"># from_pymatgen methods below that include results. As-is these similar</span>
+    <span class="c1"># names but very different use cases makes things confusing for users.</span>
+    <span class="c1">#######</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+
+        <span class="c1"># BUG: A fix is make during the workup() method that may be relevant here.</span>
+        <span class="c1"># simmate.calculators.vasp.tasks.nudged_elastic_band.MITNudgedElasticBand.workup</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="n">NEBAnalysis</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_pymatgen</span><span class="p">(</span><span class="n">analysis</span><span class="o">=</span><span class="n">analysis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_pymatgen</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="p">:</span> <span class="n">NEBAnalysis</span><span class="p">,</span>
+        <span class="n">diffusion_analysis_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># only used if updating</span>
+        <span class="n">migration_hop_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># only used if updating</span>
+    <span class="p">):</span>
+        <span class="c1"># We reference these related tables frequently below so it easier to</span>
+        <span class="c1"># grab them up front.</span>
+        <span class="n">diffusion_analysis_table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">diffusion_analysis</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">related_model</span>
+        <span class="n">migration_image_table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">migration_images</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">model</span>
+
+        <span class="c1"># First, we need a migration_hop database object.</span>
+        <span class="c1"># All of hops should link to a diffusion_analysis entry, so we check</span>
+        <span class="c1"># for that here too. The key thing of these statements is that we</span>
+        <span class="c1"># have a migration_hop_id at the end.</span>
+
+        <span class="c1"># If no ids were given, then we make a new entries for each.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">diffusion_analysis_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">migration_hop_id</span><span class="p">:</span>
+            <span class="c1"># Note, we have minimal information if this is the case, so these</span>
+            <span class="c1"># table entries will have a bunch of empty columns.</span>
+
+            <span class="c1"># We don&#39;t have a bulk structure to use for this class, so we use</span>
+            <span class="c1"># the first image</span>
+            <span class="n">analysis_db</span> <span class="o">=</span> <span class="n">diffusion_analysis_table</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">analysis</span><span class="o">.</span><span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">vacancy_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># assume this for now</span>
+            <span class="p">)</span>
+            <span class="n">analysis_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="c1"># This table entry will actually be completely empty... It only</span>
+            <span class="c1"># serves to link the MigrationImages together</span>
+            <span class="n">hop_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+                <span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">analysis_db</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">hop_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">migration_hop_id</span> <span class="o">=</span> <span class="n">hop_db</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">elif</span> <span class="n">diffusion_analysis_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">migration_hop_id</span><span class="p">:</span>
+            <span class="c1"># This table entry will actually be completely empty... It only</span>
+            <span class="c1"># serves to link the MigrationImages together</span>
+            <span class="n">hop_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">diffusion_analysis_id</span><span class="p">)</span>
+            <span class="n">hop_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">migration_hop_id</span> <span class="o">=</span> <span class="n">hop_db</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">elif</span> <span class="n">migration_hop_id</span><span class="p">:</span>
+            <span class="c1"># We don&#39;t use the hop_id, but making this query ensures it exists.</span>
+            <span class="n">hop_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">migration_hop_id</span><span class="p">)</span>
+            <span class="c1"># Even though it&#39;s not required, we make sure the id given for the</span>
+            <span class="c1"># diffusion analysis table matches this existing hop id.</span>
+            <span class="k">if</span> <span class="n">diffusion_analysis_id</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">hop_db</span><span class="o">.</span><span class="n">diffusion_analysis</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">diffusion_analysis_id</span>
+
+        <span class="c1"># Now same migration images and link them to this parent object.</span>
+        <span class="c1"># Note, the start/end Migration images will exist already in the</span>
+        <span class="c1"># relaxation database table. We still want to save them again here for</span>
+        <span class="c1"># easy access.</span>
+        <span class="k">for</span> <span class="n">image_number</span><span class="p">,</span> <span class="n">image_data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">structures</span><span class="p">,</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">forces</span><span class="p">,</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">r</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">image</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">image_data</span>
+            <span class="n">image_db</span> <span class="o">=</span> <span class="n">migration_image_table</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">image</span><span class="p">,</span>
+                <span class="n">number</span><span class="o">=</span><span class="n">image_number</span><span class="p">,</span>
+                <span class="n">force_tangent</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+                <span class="n">structure_distance</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
+                <span class="n">migration_hop_id</span><span class="o">=</span><span class="n">migration_hop_id</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">image_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">hop_db</span>
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_subclasses_from_diffusion_analysis</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
@@ -611,7 +760,7 @@
 <span class="k">class</span> <span class="nc">MigrationImage</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;number&quot;</span><span class="p">,</span>
@@ -636,13 +785,9 @@
     <span class="n">structure_distance</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># We don&#39;t need the source column for the MigrationImage class because we</span>
-    <span class="c1"># instead stored on the DiffusionAnalysis object. This line deletes the</span>
-    <span class="c1"># source could from our Structure mix-in.</span>
+    <span class="c1"># instead stored the source on the DiffusionAnalysis object. This line</span>
+    <span class="c1"># deletes the source column from our Structure mix-in.</span>
     <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">def</span> <span class="nf">update_many_from_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># StaticEnergy.update_from_vasp_run but adjusted to load a NEB vasprun</span>
-        <span class="k">pass</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_subclass_from_migration_hop</span><span class="p">(</span>
@@ -711,7 +856,7 @@
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">DiffusionAnalysis</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="c1"># The element of the diffusion atom</span>
     <span class="n">migrating_specie</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -753,6 +898,51 @@
         <span class="c1"># If as_dict is false, we build this into an Object. Otherwise, just</span>
         <span class="c1"># return the dictionary</span>
         <span class="k">return</span> <span class="n">structure_dict</span> <span class="k">if</span> <span class="n">as_dict</span> <span class="k">else</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">structure_dict</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+
+        <span class="c1"># TODO: It there a way I can figure out which tables the other calculations</span>
+        <span class="c1"># are linked to? Specifically, the bulk relaxation, bulk static energy,</span>
+        <span class="c1"># and the supercell relaxations. They are all in these directories too</span>
+        <span class="c1"># but I can&#39;t save those results until I know where they belong.</span>
+        <span class="c1"># Consider adding an attribute that points to those tables...? Or</span>
+        <span class="c1"># maybe a relationship (which I&#39;d rather avoid bc it makes things very</span>
+        <span class="c1"># messy for users)</span>
+        <span class="c1"># For now, I only grab the structure from the static-energy and store</span>
+        <span class="c1"># it in the DiffusionAnalysis table.</span>
+        <span class="n">bulk_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;bulk_static_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span>
+        <span class="n">bulk_structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">bulk_filename</span><span class="p">)</span>
+
+        <span class="c1"># Save a diffusion analysis object so we can connect all other data</span>
+        <span class="c1"># to it.</span>
+        <span class="n">analysis_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">bulk_structure</span><span class="p">,</span>
+            <span class="n">vacancy_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># assume this for now</span>
+        <span class="p">)</span>
+        <span class="n">analysis_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># Iterate through all the subdirectories that start with &quot;migration_hop*&quot;.</span>
+        <span class="c1"># We also need to make sure we only grab directories because there are</span>
+        <span class="c1"># also cifs present that match this naming convention.</span>
+        <span class="c1"># We ignore the number when saving to avoid overwriting data.</span>
+        <span class="n">migration_directories</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
+            <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;migration_hop_&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="c1"># now save each migration hop present</span>
+        <span class="k">for</span> <span class="n">migration_dir</span> <span class="ow">in</span> <span class="n">migration_directories</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">migration_hops</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span>
+                <span class="n">directory</span><span class="o">=</span><span class="n">migration_dir</span><span class="p">,</span>
+                <span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">analysis_db</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">analysis_db</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_subclasses</span><span class="p">(</span>
@@ -1003,6 +1193,68 @@ a Thermodynamics table would require an energy.</li>
 
 
                             </div>
+                            <div id="DiffusionAnalysis.from_directory" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#DiffusionAnalysis.from_directory">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">from_directory</span><span class="signature">(cls, directory: str, **kwargs)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+
+        <span class="c1"># TODO: It there a way I can figure out which tables the other calculations</span>
+        <span class="c1"># are linked to? Specifically, the bulk relaxation, bulk static energy,</span>
+        <span class="c1"># and the supercell relaxations. They are all in these directories too</span>
+        <span class="c1"># but I can&#39;t save those results until I know where they belong.</span>
+        <span class="c1"># Consider adding an attribute that points to those tables...? Or</span>
+        <span class="c1"># maybe a relationship (which I&#39;d rather avoid bc it makes things very</span>
+        <span class="c1"># messy for users)</span>
+        <span class="c1"># For now, I only grab the structure from the static-energy and store</span>
+        <span class="c1"># it in the DiffusionAnalysis table.</span>
+        <span class="n">bulk_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;bulk_static_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span>
+        <span class="n">bulk_structure</span> <span class="o">=</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">bulk_filename</span><span class="p">)</span>
+
+        <span class="c1"># Save a diffusion analysis object so we can connect all other data</span>
+        <span class="c1"># to it.</span>
+        <span class="n">analysis_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">bulk_structure</span><span class="p">,</span>
+            <span class="n">vacancy_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># assume this for now</span>
+        <span class="p">)</span>
+        <span class="n">analysis_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># Iterate through all the subdirectories that start with &quot;migration_hop*&quot;.</span>
+        <span class="c1"># We also need to make sure we only grab directories because there are</span>
+        <span class="c1"># also cifs present that match this naming convention.</span>
+        <span class="c1"># We ignore the number when saving to avoid overwriting data.</span>
+        <span class="n">migration_directories</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
+            <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;migration_hop_&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="c1"># now save each migration hop present</span>
+        <span class="k">for</span> <span class="n">migration_dir</span> <span class="ow">in</span> <span class="n">migration_directories</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">migration_hops</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span>
+                <span class="n">directory</span><span class="o">=</span><span class="n">migration_dir</span><span class="p">,</span>
+                <span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">analysis_db</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">analysis_db</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
                             <div id="DiffusionAnalysis.create_subclasses" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#DiffusionAnalysis.create_subclasses">#&nbsp;&nbsp</a>
 
@@ -1207,10 +1459,11 @@ structure object, use the <code><a href="#DiffusionAnalysis.to_toolkit">to_toolk
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -1343,7 +1596,13 @@ columns:
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -1354,18 +1613,43 @@ columns:
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -1434,7 +1718,7 @@ constant and therefore overwritten as an attribute.</p>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 </pre></div>
 
         </details>
@@ -1465,7 +1749,7 @@ constant and therefore overwritten as an attribute.</p>
                             <div id="DiffusionAnalysis.Meta.app_label" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#DiffusionAnalysis.Meta.app_label">#&nbsp;&nbsp</a>
 
-        <span class="name">app_label</span><span class="default_value"> = &#39;local_calculations&#39;</span>
+        <span class="name">app_label</span><span class="default_value"> = &#39;workflows&#39;</span>
     </div>
 
     
@@ -1487,7 +1771,7 @@ constant and therefore overwritten as an attribute.</p>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MigrationHop</span><span class="p">(</span><span class="n">DatabaseTable</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="c1"># the initial, midpoint, and end site fractional coordinates</span>
     <span class="c1"># Really, this is a list of float values, but I save it as a string.</span>
@@ -1606,6 +1890,101 @@ constant and therefore overwritten as an attribute.</p>
 
         <span class="c1"># if the pathways match, then we can return the pathway object!</span>
         <span class="k">return</span> <span class="n">path</span>
+
+    <span class="c1">#######</span>
+    <span class="c1"># BUG: I need to distinguish between the from_toolkit/to_toolkit methods</span>
+    <span class="c1"># above that just load a MigrationImages object vs. the from_directory and</span>
+    <span class="c1"># from_pymatgen methods below that include results. As-is these similar</span>
+    <span class="c1"># names but very different use cases makes things confusing for users.</span>
+    <span class="c1">#######</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+
+        <span class="c1"># BUG: A fix is make during the workup() method that may be relevant here.</span>
+        <span class="c1"># simmate.calculators.vasp.tasks.nudged_elastic_band.MITNudgedElasticBand.workup</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="n">NEBAnalysis</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_pymatgen</span><span class="p">(</span><span class="n">analysis</span><span class="o">=</span><span class="n">analysis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_pymatgen</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="p">:</span> <span class="n">NEBAnalysis</span><span class="p">,</span>
+        <span class="n">diffusion_analysis_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># only used if updating</span>
+        <span class="n">migration_hop_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># only used if updating</span>
+    <span class="p">):</span>
+        <span class="c1"># We reference these related tables frequently below so it easier to</span>
+        <span class="c1"># grab them up front.</span>
+        <span class="n">diffusion_analysis_table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">diffusion_analysis</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">related_model</span>
+        <span class="n">migration_image_table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">migration_images</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">model</span>
+
+        <span class="c1"># First, we need a migration_hop database object.</span>
+        <span class="c1"># All of hops should link to a diffusion_analysis entry, so we check</span>
+        <span class="c1"># for that here too. The key thing of these statements is that we</span>
+        <span class="c1"># have a migration_hop_id at the end.</span>
+
+        <span class="c1"># If no ids were given, then we make a new entries for each.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">diffusion_analysis_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">migration_hop_id</span><span class="p">:</span>
+            <span class="c1"># Note, we have minimal information if this is the case, so these</span>
+            <span class="c1"># table entries will have a bunch of empty columns.</span>
+
+            <span class="c1"># We don&#39;t have a bulk structure to use for this class, so we use</span>
+            <span class="c1"># the first image</span>
+            <span class="n">analysis_db</span> <span class="o">=</span> <span class="n">diffusion_analysis_table</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">analysis</span><span class="o">.</span><span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">vacancy_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># assume this for now</span>
+            <span class="p">)</span>
+            <span class="n">analysis_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="c1"># This table entry will actually be completely empty... It only</span>
+            <span class="c1"># serves to link the MigrationImages together</span>
+            <span class="n">hop_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+                <span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">analysis_db</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">hop_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">migration_hop_id</span> <span class="o">=</span> <span class="n">hop_db</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">elif</span> <span class="n">diffusion_analysis_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">migration_hop_id</span><span class="p">:</span>
+            <span class="c1"># This table entry will actually be completely empty... It only</span>
+            <span class="c1"># serves to link the MigrationImages together</span>
+            <span class="n">hop_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">diffusion_analysis_id</span><span class="p">)</span>
+            <span class="n">hop_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">migration_hop_id</span> <span class="o">=</span> <span class="n">hop_db</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">elif</span> <span class="n">migration_hop_id</span><span class="p">:</span>
+            <span class="c1"># We don&#39;t use the hop_id, but making this query ensures it exists.</span>
+            <span class="n">hop_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">migration_hop_id</span><span class="p">)</span>
+            <span class="c1"># Even though it&#39;s not required, we make sure the id given for the</span>
+            <span class="c1"># diffusion analysis table matches this existing hop id.</span>
+            <span class="k">if</span> <span class="n">diffusion_analysis_id</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">hop_db</span><span class="o">.</span><span class="n">diffusion_analysis</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">diffusion_analysis_id</span>
+
+        <span class="c1"># Now same migration images and link them to this parent object.</span>
+        <span class="c1"># Note, the start/end Migration images will exist already in the</span>
+        <span class="c1"># relaxation database table. We still want to save them again here for</span>
+        <span class="c1"># easy access.</span>
+        <span class="k">for</span> <span class="n">image_number</span><span class="p">,</span> <span class="n">image_data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">structures</span><span class="p">,</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">forces</span><span class="p">,</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">r</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">image</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">image_data</span>
+            <span class="n">image_db</span> <span class="o">=</span> <span class="n">migration_image_table</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">image</span><span class="p">,</span>
+                <span class="n">number</span><span class="o">=</span><span class="n">image_number</span><span class="p">,</span>
+                <span class="n">force_tangent</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+                <span class="n">structure_distance</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
+                <span class="n">migration_hop_id</span><span class="o">=</span><span class="n">migration_hop_id</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">image_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">hop_db</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_subclasses_from_diffusion_analysis</span><span class="p">(</span>
@@ -1859,6 +2238,133 @@ object the first time, the query is executed.</p>
 
 
                             </div>
+                            <div id="MigrationHop.from_directory" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MigrationHop.from_directory">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">from_directory</span><span class="signature">(cls, directory: str, **kwargs)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+
+        <span class="c1"># BUG: A fix is make during the workup() method that may be relevant here.</span>
+        <span class="c1"># simmate.calculators.vasp.tasks.nudged_elastic_band.MITNudgedElasticBand.workup</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="n">NEBAnalysis</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_pymatgen</span><span class="p">(</span><span class="n">analysis</span><span class="o">=</span><span class="n">analysis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="MigrationHop.from_pymatgen" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MigrationHop.from_pymatgen">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">from_pymatgen</span><span class="signature">(
+    cls,
+    analysis: pymatgen.analysis.transition_state.NEBAnalysis,
+    diffusion_analysis_id: int = None,
+    migration_hop_id: int = None
+)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_pymatgen</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="p">:</span> <span class="n">NEBAnalysis</span><span class="p">,</span>
+        <span class="n">diffusion_analysis_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># only used if updating</span>
+        <span class="n">migration_hop_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># only used if updating</span>
+    <span class="p">):</span>
+        <span class="c1"># We reference these related tables frequently below so it easier to</span>
+        <span class="c1"># grab them up front.</span>
+        <span class="n">diffusion_analysis_table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">diffusion_analysis</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">related_model</span>
+        <span class="n">migration_image_table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">migration_images</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">model</span>
+
+        <span class="c1"># First, we need a migration_hop database object.</span>
+        <span class="c1"># All of hops should link to a diffusion_analysis entry, so we check</span>
+        <span class="c1"># for that here too. The key thing of these statements is that we</span>
+        <span class="c1"># have a migration_hop_id at the end.</span>
+
+        <span class="c1"># If no ids were given, then we make a new entries for each.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">diffusion_analysis_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">migration_hop_id</span><span class="p">:</span>
+            <span class="c1"># Note, we have minimal information if this is the case, so these</span>
+            <span class="c1"># table entries will have a bunch of empty columns.</span>
+
+            <span class="c1"># We don&#39;t have a bulk structure to use for this class, so we use</span>
+            <span class="c1"># the first image</span>
+            <span class="n">analysis_db</span> <span class="o">=</span> <span class="n">diffusion_analysis_table</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">analysis</span><span class="o">.</span><span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">vacancy_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># assume this for now</span>
+            <span class="p">)</span>
+            <span class="n">analysis_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="c1"># This table entry will actually be completely empty... It only</span>
+            <span class="c1"># serves to link the MigrationImages together</span>
+            <span class="n">hop_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+                <span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">analysis_db</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">hop_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">migration_hop_id</span> <span class="o">=</span> <span class="n">hop_db</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">elif</span> <span class="n">diffusion_analysis_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">migration_hop_id</span><span class="p">:</span>
+            <span class="c1"># This table entry will actually be completely empty... It only</span>
+            <span class="c1"># serves to link the MigrationImages together</span>
+            <span class="n">hop_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">diffusion_analysis_id</span><span class="o">=</span><span class="n">diffusion_analysis_id</span><span class="p">)</span>
+            <span class="n">hop_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">migration_hop_id</span> <span class="o">=</span> <span class="n">hop_db</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">elif</span> <span class="n">migration_hop_id</span><span class="p">:</span>
+            <span class="c1"># We don&#39;t use the hop_id, but making this query ensures it exists.</span>
+            <span class="n">hop_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">migration_hop_id</span><span class="p">)</span>
+            <span class="c1"># Even though it&#39;s not required, we make sure the id given for the</span>
+            <span class="c1"># diffusion analysis table matches this existing hop id.</span>
+            <span class="k">if</span> <span class="n">diffusion_analysis_id</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">hop_db</span><span class="o">.</span><span class="n">diffusion_analysis</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">diffusion_analysis_id</span>
+
+        <span class="c1"># Now same migration images and link them to this parent object.</span>
+        <span class="c1"># Note, the start/end Migration images will exist already in the</span>
+        <span class="c1"># relaxation database table. We still want to save them again here for</span>
+        <span class="c1"># easy access.</span>
+        <span class="k">for</span> <span class="n">image_number</span><span class="p">,</span> <span class="n">image_data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">structures</span><span class="p">,</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">forces</span><span class="p">,</span>
+                <span class="n">analysis</span><span class="o">.</span><span class="n">r</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">image</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">image_data</span>
+            <span class="n">image_db</span> <span class="o">=</span> <span class="n">migration_image_table</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">image</span><span class="p">,</span>
+                <span class="n">number</span><span class="o">=</span><span class="n">image_number</span><span class="p">,</span>
+                <span class="n">force_tangent</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+                <span class="n">structure_distance</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
+                <span class="n">migration_hop_id</span><span class="o">=</span><span class="n">migration_hop_id</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">image_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">hop_db</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
                             <div id="MigrationHop.create_subclasses_from_diffusion_analysis" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#MigrationHop.create_subclasses_from_diffusion_analysis">#&nbsp;&nbsp</a>
 
@@ -1979,7 +2485,13 @@ A subclass of MigrationHop.</li>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -1990,18 +2502,43 @@ A subclass of MigrationHop.</li>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -2057,7 +2594,7 @@ constant and therefore overwritten as an attribute.</p>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 </pre></div>
 
         </details>
@@ -2088,7 +2625,7 @@ constant and therefore overwritten as an attribute.</p>
                             <div id="MigrationHop.Meta.app_label" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MigrationHop.Meta.app_label">#&nbsp;&nbsp</a>
 
-        <span class="name">app_label</span><span class="default_value"> = &#39;local_calculations&#39;</span>
+        <span class="name">app_label</span><span class="default_value"> = &#39;workflows&#39;</span>
     </div>
 
     
@@ -2110,7 +2647,7 @@ constant and therefore overwritten as an attribute.</p>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MigrationImage</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;number&quot;</span><span class="p">,</span>
@@ -2135,13 +2672,9 @@ constant and therefore overwritten as an attribute.</p>
     <span class="n">structure_distance</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># We don&#39;t need the source column for the MigrationImage class because we</span>
-    <span class="c1"># instead stored on the DiffusionAnalysis object. This line deletes the</span>
-    <span class="c1"># source could from our Structure mix-in.</span>
+    <span class="c1"># instead stored the source on the DiffusionAnalysis object. This line</span>
+    <span class="c1"># deletes the source column from our Structure mix-in.</span>
     <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">def</span> <span class="nf">update_many_from_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># StaticEnergy.update_from_vasp_run but adjusted to load a NEB vasprun</span>
-        <span class="k">pass</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_subclass_from_migration_hop</span><span class="p">(</span>
@@ -2286,7 +2819,13 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -2297,40 +2836,45 @@ object the first time, the query is executed.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
-
-                            </div>
-                            <div id="MigrationImage.update_many_from_analysis" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MigrationImage.update_many_from_analysis">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">update_many_from_analysis</span><span class="signature">(self)</span>:
-    </div>
-
-            <details>
-            <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update_many_from_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># StaticEnergy.update_from_vasp_run but adjusted to load a NEB vasprun</span>
-        <span class="k">pass</span>
-</pre></div>
-
-        </details>
-
-    
 
                             </div>
                             <div id="MigrationImage.create_subclass_from_migration_hop" class="classattr">
@@ -2503,10 +3047,11 @@ structure object, use the <code><a href="#MigrationImage.to_toolkit">to_toolkit<
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -2694,7 +3239,7 @@ columns:
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 </pre></div>
 
         </details>
@@ -2725,7 +3270,7 @@ columns:
                             <div id="MigrationImage.Meta.app_label" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MigrationImage.Meta.app_label">#&nbsp;&nbsp</a>
 
-        <span class="name">app_label</span><span class="default_value"> = &#39;local_calculations&#39;</span>
+        <span class="name">app_label</span><span class="default_value"> = &#39;workflows&#39;</span>
     </div>
 
     

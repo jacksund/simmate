@@ -32,25 +32,25 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#MeshSymmetryErrorHandler">MeshSymmetryErrorHandler</a>
+                    <a class="class" href="#MeshSymmetry">MeshSymmetry</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#MeshSymmetryErrorHandler.__init__">MeshSymmetryErrorHandler</a>
+                                <a class="function" href="#MeshSymmetry.__init__">MeshSymmetry</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MeshSymmetryErrorHandler.is_monitor">is_monitor</a>
+                                <a class="variable" href="#MeshSymmetry.is_monitor">is_monitor</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MeshSymmetryErrorHandler.filename_to_check">filename_to_check</a>
+                                <a class="variable" href="#MeshSymmetry.filename_to_check">filename_to_check</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MeshSymmetryErrorHandler.possible_error_messages">possible_error_messages</a>
+                                <a class="variable" href="#MeshSymmetry.possible_error_messages">possible_error_messages</a>
                         </li>
                         <li>
-                                <a class="function" href="#MeshSymmetryErrorHandler.check">check</a>
+                                <a class="function" href="#MeshSymmetry.check">check</a>
                         </li>
                         <li>
-                                <a class="function" href="#MeshSymmetryErrorHandler.correct">correct</a>
+                                <a class="function" href="#MeshSymmetry.correct">correct</a>
                         </li>
                 </ul>
 
@@ -86,7 +86,7 @@
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs</span> <span class="kn">import</span> <span class="n">Incar</span>
 
 
-<span class="k">class</span> <span class="nc">MeshSymmetryErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MeshSymmetry</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Corrects the mesh symmetry error in VASP. This error is sometimes</span>
 <span class="sd">    non-fatal and the job can complete successfully. So this error handler</span>
@@ -95,18 +95,13 @@
 <span class="sd">    automatic k-mesh has been used.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This handler doesn&#39;t run until the calculation is complete</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="c1"># we assume that we are checking the vasp.out file</span>
     <span class="n">filename_to_check</span> <span class="o">=</span> <span class="s2">&quot;vasp.out&quot;</span>
-
-    <span class="c1"># These are the error messages that we are looking for in the file</span>
     <span class="n">possible_error_messages</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;Reciprocal lattice and k-lattice belong to different class of&quot;</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -153,7 +148,13 @@
         <span class="c1"># class&#39;s default function to do this.</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;The fix for MeshSymmetryError hasn&#39;t been converted from Custodian &quot;</span>
+            <span class="s2">&quot;to Simmate yet. A fix does exist though, so be sure to tell our &quot;</span>
+            <span class="s2">&quot;that team you need it!&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">kpoints_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
@@ -173,29 +174,23 @@
         <span class="c1"># actions = [{&quot;dict&quot;: &quot;KPOINTS&quot;, &quot;action&quot;: {&quot;_set&quot;: {&quot;kpoints&quot;: [[m] * 3]}}}]</span>
         <span class="c1"># VaspModder(vi=vi).apply_actions(actions)</span>
         <span class="c1"># return {&quot;errors&quot;: [&quot;mesh_symmetry&quot;], &quot;actions&quot;: actions}</span>
-
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;The fix for MeshSymmetryError hasn&#39;t been converted from Custodian &quot;</span>
-            <span class="s2">&quot;to Simmate yet. A fix does exist though, so be sure to tell our &quot;</span>
-            <span class="s2">&quot;that team you need it!&quot;</span>
-        <span class="p">)</span>
 </pre></div>
 
         </details>
 
             </section>
-                <section id="MeshSymmetryErrorHandler">
+                <section id="MeshSymmetry">
                                 <div class="attr class">
-        <a class="headerlink" href="#MeshSymmetryErrorHandler">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MeshSymmetry">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MeshSymmetryErrorHandler</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
+        <span class="name">MeshSymmetry</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MeshSymmetryErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MeshSymmetry</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Corrects the mesh symmetry error in VASP. This error is sometimes</span>
 <span class="sd">    non-fatal and the job can complete successfully. So this error handler</span>
@@ -204,18 +199,13 @@
 <span class="sd">    automatic k-mesh has been used.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This handler doesn&#39;t run until the calculation is complete</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="c1"># we assume that we are checking the vasp.out file</span>
     <span class="n">filename_to_check</span> <span class="o">=</span> <span class="s2">&quot;vasp.out&quot;</span>
-
-    <span class="c1"># These are the error messages that we are looking for in the file</span>
     <span class="n">possible_error_messages</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;Reciprocal lattice and k-lattice belong to different class of&quot;</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -262,7 +252,13 @@
         <span class="c1"># class&#39;s default function to do this.</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;The fix for MeshSymmetryError hasn&#39;t been converted from Custodian &quot;</span>
+            <span class="s2">&quot;to Simmate yet. A fix does exist though, so be sure to tell our &quot;</span>
+            <span class="s2">&quot;that team you need it!&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">kpoints_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
@@ -282,12 +278,6 @@
         <span class="c1"># actions = [{&quot;dict&quot;: &quot;KPOINTS&quot;, &quot;action&quot;: {&quot;_set&quot;: {&quot;kpoints&quot;: [[m] * 3]}}}]</span>
         <span class="c1"># VaspModder(vi=vi).apply_actions(actions)</span>
         <span class="c1"># return {&quot;errors&quot;: [&quot;mesh_symmetry&quot;], &quot;actions&quot;: actions}</span>
-
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;The fix for MeshSymmetryError hasn&#39;t been converted from Custodian &quot;</span>
-            <span class="s2">&quot;to Simmate yet. A fix does exist though, so be sure to tell our &quot;</span>
-            <span class="s2">&quot;that team you need it!&quot;</span>
-        <span class="p">)</span>
 </pre></div>
 
         </details>
@@ -300,19 +290,19 @@ automatic k-mesh has been used.</p>
 </div>
 
 
-                            <div id="MeshSymmetryErrorHandler.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MeshSymmetryErrorHandler.__init__">#&nbsp;&nbsp</a>
+                            <div id="MeshSymmetry.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MeshSymmetry.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">MeshSymmetryErrorHandler</span><span class="signature">()</span>
+            <span class="name">MeshSymmetry</span><span class="signature">()</span>
     </div>
 
     
     
 
                             </div>
-                            <div id="MeshSymmetryErrorHandler.is_monitor" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MeshSymmetryErrorHandler.is_monitor">#&nbsp;&nbsp</a>
+                            <div id="MeshSymmetry.is_monitor" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MeshSymmetry.is_monitor">#&nbsp;&nbsp</a>
 
         <span class="name">is_monitor</span><span class="default_value"> = False</span>
     </div>
@@ -330,22 +320,22 @@ is_terminating description below for why!</p>
 
 
                             </div>
-                            <div id="MeshSymmetryErrorHandler.filename_to_check" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MeshSymmetryErrorHandler.filename_to_check">#&nbsp;&nbsp</a>
+                            <div id="MeshSymmetry.filename_to_check" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MeshSymmetry.filename_to_check">#&nbsp;&nbsp</a>
 
         <span class="name">filename_to_check</span><span class="default_value"> = &#39;vasp.out&#39;</span>
     </div>
 
     
             <div class="docstring"><p>If you are using the default check() method, this is the file to check for
-errors (using <code><a href="#MeshSymmetryErrorHandler.possible_error_messages">possible_error_messages</a></code>). This should be a string of the 
+errors (using <code><a href="#MeshSymmetry.possible_error_messages">possible_error_messages</a></code>). This should be a string of the 
 filename relative path to main directory.</p>
 </div>
 
 
                             </div>
-                            <div id="MeshSymmetryErrorHandler.possible_error_messages" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MeshSymmetryErrorHandler.possible_error_messages">#&nbsp;&nbsp</a>
+                            <div id="MeshSymmetry.possible_error_messages" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MeshSymmetry.possible_error_messages">#&nbsp;&nbsp</a>
 
         <span class="name">possible_error_messages</span><span class="default_value"> = [&#39;Reciprocal lattice and k-lattice belong to different class of&#39;]</span>
     </div>
@@ -353,22 +343,22 @@ filename relative path to main directory.</p>
     
             <div class="docstring"><p>If you are using the default check() method, then this is the list of messages
 to find in the file (filename_to_check). As soon as one of these messages is
-found, the <code><a href="#MeshSymmetryErrorHandler.check">check</a></code> will return True.</p>
+found, the <code><a href="#MeshSymmetry.check">check</a></code> will return True.</p>
 </div>
 
 
                             </div>
-                            <div id="MeshSymmetryErrorHandler.check" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MeshSymmetryErrorHandler.check">#&nbsp;&nbsp</a>
+                            <div id="MeshSymmetry.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MeshSymmetry.check">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">check</span><span class="signature">(self, directory)</span>:
+            <span class="name">check</span><span class="signature">(self, directory: str) -&gt; bool</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -425,7 +415,7 @@ errors, then None (or an empty list) will be returned. In many cases,
 you should read through the files directly rather than use
 calculators.example.outputs which in many cases assumes a completed file.</p>
 
-<p>As some example, ErrorHandler's can have <code><a href="#MeshSymmetryErrorHandler.check">check</a></code> functions that do one
+<p>As some example, ErrorHandler's can have <code><a href="#MeshSymmetry.check">check</a></code> functions that do one
 of the following:</p>
 
 <ol>
@@ -444,17 +434,23 @@ error. It then returns True if the errors is found and False otherwise.</p>
 
 
                             </div>
-                            <div id="MeshSymmetryErrorHandler.correct" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MeshSymmetryErrorHandler.correct">#&nbsp;&nbsp</a>
+                            <div id="MeshSymmetry.correct" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MeshSymmetry.correct">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">correct</span><span class="signature">(self, directory)</span>:
+            <span class="name">correct</span><span class="signature">(self, directory: str) -&gt; str</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;The fix for MeshSymmetryError hasn&#39;t been converted from Custodian &quot;</span>
+            <span class="s2">&quot;to Simmate yet. A fix does exist though, so be sure to tell our &quot;</span>
+            <span class="s2">&quot;that team you need it!&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">kpoints_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;KPOINTS&quot;</span><span class="p">)</span>
@@ -474,12 +470,6 @@ error. It then returns True if the errors is found and False otherwise.</p>
         <span class="c1"># actions = [{&quot;dict&quot;: &quot;KPOINTS&quot;, &quot;action&quot;: {&quot;_set&quot;: {&quot;kpoints&quot;: [[m] * 3]}}}]</span>
         <span class="c1"># VaspModder(vi=vi).apply_actions(actions)</span>
         <span class="c1"># return {&quot;errors&quot;: [&quot;mesh_symmetry&quot;], &quot;actions&quot;: actions}</span>
-
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;The fix for MeshSymmetryError hasn&#39;t been converted from Custodian &quot;</span>
-            <span class="s2">&quot;to Simmate yet. A fix does exist though, so be sure to tell our &quot;</span>
-            <span class="s2">&quot;that team you need it!&quot;</span>
-        <span class="p">)</span>
 </pre></div>
 
         </details>
@@ -495,8 +485,8 @@ error. It then returns the fix or list of fixes made.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></dt>
-                                <dd id="MeshSymmetryErrorHandler.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
-                <dd id="MeshSymmetryErrorHandler.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
+                                <dd id="MeshSymmetry.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
+                <dd id="MeshSymmetry.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
 
             </div>
                                 </dl>

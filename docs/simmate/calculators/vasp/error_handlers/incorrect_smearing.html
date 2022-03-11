@@ -32,22 +32,22 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#IncorrectSmearingHandler">IncorrectSmearingHandler</a>
+                    <a class="class" href="#IncorrectSmearing">IncorrectSmearing</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#IncorrectSmearingHandler.__init__">IncorrectSmearingHandler</a>
+                                <a class="function" href="#IncorrectSmearing.__init__">IncorrectSmearing</a>
                         </li>
                         <li>
-                                <a class="variable" href="#IncorrectSmearingHandler.is_monitor">is_monitor</a>
+                                <a class="variable" href="#IncorrectSmearing.is_monitor">is_monitor</a>
                         </li>
                         <li>
-                                <a class="variable" href="#IncorrectSmearingHandler.filename_to_check">filename_to_check</a>
+                                <a class="variable" href="#IncorrectSmearing.filename_to_check">filename_to_check</a>
                         </li>
                         <li>
-                                <a class="function" href="#IncorrectSmearingHandler.check">check</a>
+                                <a class="function" href="#IncorrectSmearing.check">check</a>
                         </li>
                         <li>
-                                <a class="function" href="#IncorrectSmearingHandler.correct">correct</a>
+                                <a class="function" href="#IncorrectSmearing.correct">correct</a>
                         </li>
                 </ul>
 
@@ -82,7 +82,7 @@
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs</span> <span class="kn">import</span> <span class="n">Incar</span>
 
 
-<span class="k">class</span> <span class="nc">IncorrectSmearingHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IncorrectSmearing</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This checks if a calculation is a metal (zero bandgap), has been run with</span>
 <span class="sd">    ISMEAR=-5, and is not a static calculation. This type of smearing is only</span>
@@ -91,13 +91,10 @@
 <span class="sd">    using the smearing settings appropriate for metals (ISMEAR=2, SIGMA=0.2).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This handler doesn&#39;t run until the calculation is complete</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="c1"># we need to load all of the vasprun results to check for this error</span>
     <span class="n">filename_to_check</span> <span class="o">=</span> <span class="s2">&quot;vasprun.xml&quot;</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># establish the full path to the output file</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_to_check</span><span class="p">)</span>
@@ -135,7 +132,7 @@
         <span class="c1"># if we reach this point, there is no error</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -155,18 +152,18 @@
         </details>
 
             </section>
-                <section id="IncorrectSmearingHandler">
+                <section id="IncorrectSmearing">
                                 <div class="attr class">
-        <a class="headerlink" href="#IncorrectSmearingHandler">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#IncorrectSmearing">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">IncorrectSmearingHandler</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
+        <span class="name">IncorrectSmearing</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">IncorrectSmearingHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">IncorrectSmearing</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This checks if a calculation is a metal (zero bandgap), has been run with</span>
 <span class="sd">    ISMEAR=-5, and is not a static calculation. This type of smearing is only</span>
@@ -175,13 +172,10 @@
 <span class="sd">    using the smearing settings appropriate for metals (ISMEAR=2, SIGMA=0.2).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This handler doesn&#39;t run until the calculation is complete</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="c1"># we need to load all of the vasprun results to check for this error</span>
     <span class="n">filename_to_check</span> <span class="o">=</span> <span class="s2">&quot;vasprun.xml&quot;</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># establish the full path to the output file</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_to_check</span><span class="p">)</span>
@@ -219,7 +213,7 @@
         <span class="c1"># if we reach this point, there is no error</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -246,19 +240,19 @@ using the smearing settings appropriate for metals (ISMEAR=2, SIGMA=0.2).</p>
 </div>
 
 
-                            <div id="IncorrectSmearingHandler.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#IncorrectSmearingHandler.__init__">#&nbsp;&nbsp</a>
+                            <div id="IncorrectSmearing.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#IncorrectSmearing.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">IncorrectSmearingHandler</span><span class="signature">()</span>
+            <span class="name">IncorrectSmearing</span><span class="signature">()</span>
     </div>
 
     
     
 
                             </div>
-                            <div id="IncorrectSmearingHandler.is_monitor" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#IncorrectSmearingHandler.is_monitor">#&nbsp;&nbsp</a>
+                            <div id="IncorrectSmearing.is_monitor" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#IncorrectSmearing.is_monitor">#&nbsp;&nbsp</a>
 
         <span class="name">is_monitor</span><span class="default_value"> = False</span>
     </div>
@@ -276,31 +270,31 @@ is_terminating description below for why!</p>
 
 
                             </div>
-                            <div id="IncorrectSmearingHandler.filename_to_check" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#IncorrectSmearingHandler.filename_to_check">#&nbsp;&nbsp</a>
+                            <div id="IncorrectSmearing.filename_to_check" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#IncorrectSmearing.filename_to_check">#&nbsp;&nbsp</a>
 
         <span class="name">filename_to_check</span><span class="default_value"> = &#39;vasprun.xml&#39;</span>
     </div>
 
     
             <div class="docstring"><p>If you are using the default check() method, this is the file to check for
-errors (using <code><a href="#IncorrectSmearingHandler.possible_error_messages">possible_error_messages</a></code>). This should be a string of the 
+errors (using <code><a href="#IncorrectSmearing.possible_error_messages">possible_error_messages</a></code>). This should be a string of the 
 filename relative path to main directory.</p>
 </div>
 
 
                             </div>
-                            <div id="IncorrectSmearingHandler.check" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#IncorrectSmearingHandler.check">#&nbsp;&nbsp</a>
+                            <div id="IncorrectSmearing.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#IncorrectSmearing.check">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">check</span><span class="signature">(self, directory)</span>:
+            <span class="name">check</span><span class="signature">(self, directory: str) -&gt; bool</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># establish the full path to the output file</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_to_check</span><span class="p">)</span>
@@ -348,7 +342,7 @@ errors, then None (or an empty list) will be returned. In many cases,
 you should read through the files directly rather than use
 calculators.example.outputs which in many cases assumes a completed file.</p>
 
-<p>As some example, ErrorHandler's can have <code><a href="#IncorrectSmearingHandler.check">check</a></code> functions that do one
+<p>As some example, ErrorHandler's can have <code><a href="#IncorrectSmearing.check">check</a></code> functions that do one
 of the following:</p>
 
 <ol>
@@ -367,17 +361,17 @@ error. It then returns True if the errors is found and False otherwise.</p>
 
 
                             </div>
-                            <div id="IncorrectSmearingHandler.correct" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#IncorrectSmearingHandler.correct">#&nbsp;&nbsp</a>
+                            <div id="IncorrectSmearing.correct" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#IncorrectSmearing.correct">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">correct</span><span class="signature">(self, directory)</span>:
+            <span class="name">correct</span><span class="signature">(self, directory: str) -&gt; str</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -407,9 +401,9 @@ error. It then returns the fix or list of fixes made.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></dt>
-                                <dd id="IncorrectSmearingHandler.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
-                <dd id="IncorrectSmearingHandler.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
-                <dd id="IncorrectSmearingHandler.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
+                                <dd id="IncorrectSmearing.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
+                <dd id="IncorrectSmearing.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
+                <dd id="IncorrectSmearing.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
 
             </div>
                                 </dl>

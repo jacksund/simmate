@@ -840,10 +840,11 @@ structure object, use the <code><a href="#MITStaticEnergy.to_toolkit">to_toolkit
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -1264,7 +1265,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -1275,18 +1282,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -1414,6 +1446,8 @@ object the first time, the query is executed.</p>
             <div><dt><a href="../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></dt>
                                 <dd id="MITStaticEnergy.Meta" class="class"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.Meta">Meta</a></dd>
                 <dd id="MITStaticEnergy.base_info" class="variable"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.base_info">base_info</a></dd>
+                <dd id="MITStaticEnergy.from_directory" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.from_directory">from_directory</a></dd>
+                <dd id="MITStaticEnergy.from_vasp_run" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="MITStaticEnergy.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.update_from_vasp_run">update_from_vasp_run</a></dd>
 
             </div>
@@ -1428,6 +1462,9 @@ object the first time, the query is executed.</p>
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="MITStaticEnergy.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="MITStaticEnergy.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="MITStaticEnergy.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="MITStaticEnergy.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="MITStaticEnergy.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -1672,10 +1709,11 @@ structure object, use the <code><a href="#MatProjStaticEnergy.to_toolkit">to_too
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -2096,7 +2134,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -2107,18 +2151,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -2246,6 +2315,8 @@ object the first time, the query is executed.</p>
             <div><dt><a href="../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></dt>
                                 <dd id="MatProjStaticEnergy.Meta" class="class"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.Meta">Meta</a></dd>
                 <dd id="MatProjStaticEnergy.base_info" class="variable"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.base_info">base_info</a></dd>
+                <dd id="MatProjStaticEnergy.from_directory" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.from_directory">from_directory</a></dd>
+                <dd id="MatProjStaticEnergy.from_vasp_run" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="MatProjStaticEnergy.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.update_from_vasp_run">update_from_vasp_run</a></dd>
 
             </div>
@@ -2260,6 +2331,9 @@ object the first time, the query is executed.</p>
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="MatProjStaticEnergy.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="MatProjStaticEnergy.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="MatProjStaticEnergy.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="MatProjStaticEnergy.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="MatProjStaticEnergy.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -2504,10 +2578,11 @@ structure object, use the <code><a href="#NEBEndpointStaticEnergy.to_toolkit">to
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -2928,7 +3003,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -2939,18 +3020,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -3078,6 +3184,8 @@ object the first time, the query is executed.</p>
             <div><dt><a href="../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></dt>
                                 <dd id="NEBEndpointStaticEnergy.Meta" class="class"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.Meta">Meta</a></dd>
                 <dd id="NEBEndpointStaticEnergy.base_info" class="variable"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.base_info">base_info</a></dd>
+                <dd id="NEBEndpointStaticEnergy.from_directory" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.from_directory">from_directory</a></dd>
+                <dd id="NEBEndpointStaticEnergy.from_vasp_run" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="NEBEndpointStaticEnergy.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.update_from_vasp_run">update_from_vasp_run</a></dd>
 
             </div>
@@ -3092,6 +3200,9 @@ object the first time, the query is executed.</p>
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="NEBEndpointStaticEnergy.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="NEBEndpointStaticEnergy.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="NEBEndpointStaticEnergy.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="NEBEndpointStaticEnergy.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="NEBEndpointStaticEnergy.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -3336,10 +3447,11 @@ structure object, use the <code><a href="#Quality04StaticEnergy.to_toolkit">to_t
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -3760,7 +3872,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -3771,18 +3889,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -3910,6 +4053,8 @@ object the first time, the query is executed.</p>
             <div><dt><a href="../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></dt>
                                 <dd id="Quality04StaticEnergy.Meta" class="class"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.Meta">Meta</a></dd>
                 <dd id="Quality04StaticEnergy.base_info" class="variable"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.base_info">base_info</a></dd>
+                <dd id="Quality04StaticEnergy.from_directory" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.from_directory">from_directory</a></dd>
+                <dd id="Quality04StaticEnergy.from_vasp_run" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="Quality04StaticEnergy.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/static_energy.html#StaticEnergy.update_from_vasp_run">update_from_vasp_run</a></dd>
 
             </div>
@@ -3924,6 +4069,9 @@ object the first time, the query is executed.</p>
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="Quality04StaticEnergy.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="Quality04StaticEnergy.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="Quality04StaticEnergy.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="Quality04StaticEnergy.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="Quality04StaticEnergy.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>

@@ -2307,7 +2307,13 @@ An example id is... d8a785e1-e344-463a-bede-0e7b3da7bab6</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -2318,18 +2324,43 @@ An example id is... d8a785e1-e344-463a-bede-0e7b3da7bab6</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -2613,6 +2644,9 @@ object the first time, the query is executed.</p>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="StagedRelaxation.base_info" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.base_info">base_info</a></dd>
                 <dd id="StagedRelaxation.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="StagedRelaxation.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="StagedRelaxation.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="StagedRelaxation.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="StagedRelaxation.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -2863,10 +2897,11 @@ structure object, use the <code><a href="#MITRelaxation.to_toolkit">to_toolkit</
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -3076,7 +3111,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -3087,18 +3128,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -3310,6 +3376,8 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
                                 <dd id="MITRelaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
                 <dd id="MITRelaxation.create_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_subclasses">create_subclasses</a></dd>
+                <dd id="MITRelaxation.from_directory" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_directory">from_directory</a></dd>
+                <dd id="MITRelaxation.from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="MITRelaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="MITRelaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="MITRelaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
@@ -3322,6 +3390,9 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="MITRelaxation.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="MITRelaxation.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="MITRelaxation.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="MITRelaxation.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="MITRelaxation.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -3498,10 +3569,11 @@ structure object, use the <code><a href="#MITIonicStep.to_toolkit">to_toolkit</a
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -3845,7 +3917,13 @@ structures in this database table. Units are in eV.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -3856,18 +3934,43 @@ structures in this database table. Units are in eV.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -4255,10 +4358,11 @@ structure object, use the <code><a href="#MatProjRelaxation.to_toolkit">to_toolk
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -4468,7 +4572,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -4479,18 +4589,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -4702,6 +4837,8 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
                                 <dd id="MatProjRelaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
                 <dd id="MatProjRelaxation.create_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_subclasses">create_subclasses</a></dd>
+                <dd id="MatProjRelaxation.from_directory" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_directory">from_directory</a></dd>
+                <dd id="MatProjRelaxation.from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="MatProjRelaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="MatProjRelaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="MatProjRelaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
@@ -4714,6 +4851,9 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="MatProjRelaxation.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="MatProjRelaxation.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="MatProjRelaxation.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="MatProjRelaxation.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="MatProjRelaxation.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -4890,10 +5030,11 @@ structure object, use the <code><a href="#MatProjIonicStep.to_toolkit">to_toolki
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -5237,7 +5378,13 @@ structures in this database table. Units are in eV.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -5248,18 +5395,43 @@ structures in this database table. Units are in eV.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -5647,10 +5819,11 @@ structure object, use the <code><a href="#NEBEndpointRelaxation.to_toolkit">to_t
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -5860,7 +6033,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -5871,18 +6050,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -6094,6 +6298,8 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
                                 <dd id="NEBEndpointRelaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
                 <dd id="NEBEndpointRelaxation.create_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_subclasses">create_subclasses</a></dd>
+                <dd id="NEBEndpointRelaxation.from_directory" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_directory">from_directory</a></dd>
+                <dd id="NEBEndpointRelaxation.from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="NEBEndpointRelaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="NEBEndpointRelaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="NEBEndpointRelaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
@@ -6106,6 +6312,9 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="NEBEndpointRelaxation.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="NEBEndpointRelaxation.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="NEBEndpointRelaxation.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="NEBEndpointRelaxation.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="NEBEndpointRelaxation.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -6282,10 +6491,11 @@ structure object, use the <code><a href="#NEBEndpointIonicStep.to_toolkit">to_to
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -6629,7 +6839,13 @@ structures in this database table. Units are in eV.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -6640,18 +6856,43 @@ structures in this database table. Units are in eV.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -7039,10 +7280,11 @@ structure object, use the <code><a href="#Quality00Relaxation.to_toolkit">to_too
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -7252,7 +7494,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -7263,18 +7511,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -7507,6 +7780,8 @@ relation.</p>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
                                 <dd id="Quality00Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
                 <dd id="Quality00Relaxation.create_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_subclasses">create_subclasses</a></dd>
+                <dd id="Quality00Relaxation.from_directory" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_directory">from_directory</a></dd>
+                <dd id="Quality00Relaxation.from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="Quality00Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality00Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality00Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
@@ -7519,6 +7794,9 @@ relation.</p>
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="Quality00Relaxation.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="Quality00Relaxation.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="Quality00Relaxation.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="Quality00Relaxation.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="Quality00Relaxation.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -7695,10 +7973,11 @@ structure object, use the <code><a href="#Quality00IonicStep.to_toolkit">to_tool
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -8042,7 +8321,13 @@ structures in this database table. Units are in eV.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -8053,18 +8338,43 @@ structures in this database table. Units are in eV.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -8452,10 +8762,11 @@ structure object, use the <code><a href="#Quality01Relaxation.to_toolkit">to_too
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -8665,7 +8976,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -8676,18 +8993,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -8920,6 +9262,8 @@ relation.</p>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
                                 <dd id="Quality01Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
                 <dd id="Quality01Relaxation.create_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_subclasses">create_subclasses</a></dd>
+                <dd id="Quality01Relaxation.from_directory" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_directory">from_directory</a></dd>
+                <dd id="Quality01Relaxation.from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="Quality01Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality01Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality01Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
@@ -8932,6 +9276,9 @@ relation.</p>
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="Quality01Relaxation.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="Quality01Relaxation.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="Quality01Relaxation.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="Quality01Relaxation.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="Quality01Relaxation.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -9108,10 +9455,11 @@ structure object, use the <code><a href="#Quality01IonicStep.to_toolkit">to_tool
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -9455,7 +9803,13 @@ structures in this database table. Units are in eV.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -9466,18 +9820,43 @@ structures in this database table. Units are in eV.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -9865,10 +10244,11 @@ structure object, use the <code><a href="#Quality02Relaxation.to_toolkit">to_too
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -10078,7 +10458,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -10089,18 +10475,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -10333,6 +10744,8 @@ relation.</p>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
                                 <dd id="Quality02Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
                 <dd id="Quality02Relaxation.create_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_subclasses">create_subclasses</a></dd>
+                <dd id="Quality02Relaxation.from_directory" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_directory">from_directory</a></dd>
+                <dd id="Quality02Relaxation.from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="Quality02Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality02Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality02Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
@@ -10345,6 +10758,9 @@ relation.</p>
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="Quality02Relaxation.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="Quality02Relaxation.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="Quality02Relaxation.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="Quality02Relaxation.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="Quality02Relaxation.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -10521,10 +10937,11 @@ structure object, use the <code><a href="#Quality02IonicStep.to_toolkit">to_tool
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -10868,7 +11285,13 @@ structures in this database table. Units are in eV.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -10879,18 +11302,43 @@ structures in this database table. Units are in eV.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -11278,10 +11726,11 @@ structure object, use the <code><a href="#Quality03Relaxation.to_toolkit">to_too
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -11491,7 +11940,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -11502,18 +11957,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -11746,6 +12226,8 @@ relation.</p>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
                                 <dd id="Quality03Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
                 <dd id="Quality03Relaxation.create_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_subclasses">create_subclasses</a></dd>
+                <dd id="Quality03Relaxation.from_directory" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_directory">from_directory</a></dd>
+                <dd id="Quality03Relaxation.from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="Quality03Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality03Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality03Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
@@ -11758,6 +12240,9 @@ relation.</p>
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="Quality03Relaxation.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="Quality03Relaxation.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="Quality03Relaxation.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="Quality03Relaxation.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="Quality03Relaxation.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -11934,10 +12419,11 @@ structure object, use the <code><a href="#Quality03IonicStep.to_toolkit">to_tool
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -12281,7 +12767,13 @@ structures in this database table. Units are in eV.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -12292,18 +12784,43 @@ structures in this database table. Units are in eV.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -12691,10 +13208,11 @@ structure object, use the <code><a href="#Quality04Relaxation.to_toolkit">to_too
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -12904,7 +13422,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -12915,18 +13439,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -13159,6 +13708,8 @@ relation.</p>
             <div><dt><a href="../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
                                 <dd id="Quality04Relaxation.Meta" class="class"><a href="../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
                 <dd id="Quality04Relaxation.create_subclasses" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.create_subclasses">create_subclasses</a></dd>
+                <dd id="Quality04Relaxation.from_directory" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_directory">from_directory</a></dd>
+                <dd id="Quality04Relaxation.from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.from_vasp_run">from_vasp_run</a></dd>
                 <dd id="Quality04Relaxation.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
                 <dd id="Quality04Relaxation.get_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
                 <dd id="Quality04Relaxation.view_convergence_plot" class="function"><a href="../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
@@ -13171,6 +13722,9 @@ relation.</p>
             </div>
             <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="Quality04Relaxation.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="Quality04Relaxation.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="Quality04Relaxation.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="Quality04Relaxation.prefect_state" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="Quality04Relaxation.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -13347,10 +13901,11 @@ structure object, use the <code><a href="#Quality04IonicStep.to_toolkit">to_tool
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -13694,7 +14249,13 @@ structures in this database table. Units are in eV.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -13705,18 +14266,43 @@ structures in this database table. Units are in eV.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 

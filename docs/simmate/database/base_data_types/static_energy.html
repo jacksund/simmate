@@ -68,6 +68,12 @@
                                 <a class="function" href="#StaticEnergy.valence_band_maximum">valence_band_maximum</a>
                         </li>
                         <li>
+                                <a class="function" href="#StaticEnergy.from_directory">from_directory</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#StaticEnergy.from_vasp_run">from_vasp_run</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#StaticEnergy.update_from_vasp_run">update_from_vasp_run</a>
                         </li>
                         <li>
@@ -209,6 +215,8 @@
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">table_column</span><span class="p">,</span>
     <span class="n">Structure</span><span class="p">,</span>
@@ -217,11 +225,13 @@
     <span class="n">Calculation</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">Vasprun</span>
+
 
 <span class="k">class</span> <span class="nc">StaticEnergy</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">,</span> <span class="n">Forces</span><span class="p">,</span> <span class="n">Calculation</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">[</span>
@@ -252,7 +262,48 @@
     <span class="n">conduction_band_minimum</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">valence_band_maximum</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">update_from_vasp_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">,</span> <span class="n">corrections</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+        <span class="n">vasprun_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
+        <span class="n">vasprun</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">vasprun_filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_vasp_run</span><span class="p">(</span><span class="n">vasprun</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_vasp_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">:</span> <span class="n">Vasprun</span><span class="p">):</span>
+        <span class="c1"># Takes a pymatgen VaspRun object, which is what&#39;s typically returned</span>
+        <span class="c1"># from a simmate VaspTask.run() call.</span>
+
+        <span class="c1"># The data is actually easier to access as a dictionary and everything</span>
+        <span class="c1"># we need is stored under the &quot;output&quot; key.</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+        <span class="c1"># In a static energy calculation, there is only one ionic step so we</span>
+        <span class="c1"># grab that up front.</span>
+        <span class="n">ionic_step</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ionic_steps&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Take our structure, energy, and forces to build all of our other</span>
+        <span class="c1"># fields for this datatable</span>
+        <span class="n">static_energy</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">vasprun</span><span class="o">.</span><span class="n">final_structure</span><span class="p">,</span>
+            <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">],</span>
+            <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">],</span>
+            <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">],</span>
+            <span class="n">band_gap</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bandgap&quot;</span><span class="p">),</span>
+            <span class="n">is_gap_direct</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_gap_direct&quot;</span><span class="p">),</span>
+            <span class="n">energy_fermi</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;efermi&quot;</span><span class="p">),</span>
+            <span class="n">conduction_band_minimum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cbm&quot;</span><span class="p">),</span>
+            <span class="n">valence_band_maximum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">static_energy</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">static_energy</span>
+
+    <span class="k">def</span> <span class="nf">update_from_vasp_run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vasprun</span><span class="p">:</span> <span class="n">Vasprun</span><span class="p">,</span>
+        <span class="n">corrections</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="c1"># Takes a pymatgen VaspRun object, which is what&#39;s typically returned</span>
         <span class="c1"># from a simmate VaspTask.run() call.</span>
 
@@ -310,7 +361,7 @@
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">StaticEnergy</span><span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Thermodynamics</span><span class="p">,</span> <span class="n">Forces</span><span class="p">,</span> <span class="n">Calculation</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">[</span>
@@ -341,7 +392,48 @@
     <span class="n">conduction_band_minimum</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">valence_band_maximum</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">update_from_vasp_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">,</span> <span class="n">corrections</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+        <span class="n">vasprun_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
+        <span class="n">vasprun</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">vasprun_filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_vasp_run</span><span class="p">(</span><span class="n">vasprun</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_vasp_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">:</span> <span class="n">Vasprun</span><span class="p">):</span>
+        <span class="c1"># Takes a pymatgen VaspRun object, which is what&#39;s typically returned</span>
+        <span class="c1"># from a simmate VaspTask.run() call.</span>
+
+        <span class="c1"># The data is actually easier to access as a dictionary and everything</span>
+        <span class="c1"># we need is stored under the &quot;output&quot; key.</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+        <span class="c1"># In a static energy calculation, there is only one ionic step so we</span>
+        <span class="c1"># grab that up front.</span>
+        <span class="n">ionic_step</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ionic_steps&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Take our structure, energy, and forces to build all of our other</span>
+        <span class="c1"># fields for this datatable</span>
+        <span class="n">static_energy</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">vasprun</span><span class="o">.</span><span class="n">final_structure</span><span class="p">,</span>
+            <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">],</span>
+            <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">],</span>
+            <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">],</span>
+            <span class="n">band_gap</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bandgap&quot;</span><span class="p">),</span>
+            <span class="n">is_gap_direct</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_gap_direct&quot;</span><span class="p">),</span>
+            <span class="n">energy_fermi</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;efermi&quot;</span><span class="p">),</span>
+            <span class="n">conduction_band_minimum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cbm&quot;</span><span class="p">),</span>
+            <span class="n">valence_band_maximum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">static_energy</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">static_energy</span>
+
+    <span class="k">def</span> <span class="nf">update_from_vasp_run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vasprun</span><span class="p">:</span> <span class="n">Vasprun</span><span class="p">,</span>
+        <span class="n">corrections</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="c1"># Takes a pymatgen VaspRun object, which is what&#39;s typically returned</span>
         <span class="c1"># from a simmate VaspTask.run() call.</span>
 
@@ -483,17 +575,97 @@ object the first time, the query is executed.</p>
 
 
                             </div>
+                            <div id="StaticEnergy.from_directory" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#StaticEnergy.from_directory">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">from_directory</span><span class="signature">(cls, directory: str)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+        <span class="n">vasprun_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
+        <span class="n">vasprun</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">vasprun_filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_vasp_run</span><span class="p">(</span><span class="n">vasprun</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="StaticEnergy.from_vasp_run" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#StaticEnergy.from_vasp_run">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">from_vasp_run</span><span class="signature">(cls, vasprun: pymatgen.io.vasp.outputs.Vasprun)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_vasp_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">:</span> <span class="n">Vasprun</span><span class="p">):</span>
+        <span class="c1"># Takes a pymatgen VaspRun object, which is what&#39;s typically returned</span>
+        <span class="c1"># from a simmate VaspTask.run() call.</span>
+
+        <span class="c1"># The data is actually easier to access as a dictionary and everything</span>
+        <span class="c1"># we need is stored under the &quot;output&quot; key.</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+        <span class="c1"># In a static energy calculation, there is only one ionic step so we</span>
+        <span class="c1"># grab that up front.</span>
+        <span class="n">ionic_step</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ionic_steps&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Take our structure, energy, and forces to build all of our other</span>
+        <span class="c1"># fields for this datatable</span>
+        <span class="n">static_energy</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">vasprun</span><span class="o">.</span><span class="n">final_structure</span><span class="p">,</span>
+            <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">],</span>
+            <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">],</span>
+            <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">],</span>
+            <span class="n">band_gap</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bandgap&quot;</span><span class="p">),</span>
+            <span class="n">is_gap_direct</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_gap_direct&quot;</span><span class="p">),</span>
+            <span class="n">energy_fermi</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;efermi&quot;</span><span class="p">),</span>
+            <span class="n">conduction_band_minimum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cbm&quot;</span><span class="p">),</span>
+            <span class="n">valence_band_maximum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">static_energy</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">static_energy</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
                             <div id="StaticEnergy.update_from_vasp_run" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#StaticEnergy.update_from_vasp_run">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">update_from_vasp_run</span><span class="signature">(self, vasprun, corrections, directory)</span>:
+            <span class="name">update_from_vasp_run</span><span class="signature">(
+    self,
+    vasprun: pymatgen.io.vasp.outputs.Vasprun,
+    corrections: list,
+    directory: str
+)</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update_from_vasp_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">,</span> <span class="n">corrections</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update_from_vasp_run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vasprun</span><span class="p">:</span> <span class="n">Vasprun</span><span class="p">,</span>
+        <span class="n">corrections</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="c1"># Takes a pymatgen VaspRun object, which is what&#39;s typically returned</span>
         <span class="c1"># from a simmate VaspTask.run() call.</span>
 
@@ -608,10 +780,11 @@ structure object, use the <code><a href="#StaticEnergy.to_toolkit">to_toolkit</a
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -1032,7 +1205,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -1043,18 +1222,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -1175,6 +1379,9 @@ callables as instance methods.</p>
             </div>
             <div><dt><a href="calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="StaticEnergy.prefect_cloud_link" class="variable"><a href="calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="StaticEnergy.flow_run_view" class="variable"><a href="calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="StaticEnergy.prefect_flow_run_name" class="variable"><a href="calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="StaticEnergy.prefect_state" class="function"><a href="calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="StaticEnergy.from_prefect_id" class="function"><a href="calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -1205,7 +1412,7 @@ callables as instance methods.</p>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 </pre></div>
 
         </details>
@@ -1236,7 +1443,7 @@ callables as instance methods.</p>
                             <div id="StaticEnergy.Meta.app_label" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#StaticEnergy.Meta.app_label">#&nbsp;&nbsp</a>
 
-        <span class="name">app_label</span><span class="default_value"> = &#39;local_calculations&#39;</span>
+        <span class="name">app_label</span><span class="default_value"> = &#39;workflows&#39;</span>
     </div>
 
     

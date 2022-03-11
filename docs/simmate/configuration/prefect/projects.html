@@ -71,32 +71,11 @@
     <span class="c1">#   client.login_to_tenant(tenant_slug=&#39;a-tenant-slug&#39;)</span>
 
     <span class="c1"># grab all of the workflows that need to be registered</span>
-    <span class="kn">from</span> <span class="nn">simmate.workflows</span> <span class="kn">import</span> <span class="p">(</span>
-        <span class="n">energy_mit</span><span class="p">,</span>
-        <span class="n">energy_quality04</span><span class="p">,</span>
-        <span class="n">relaxation_mit</span><span class="p">,</span>
-        <span class="n">relaxation_quality00</span><span class="p">,</span>
-        <span class="n">relaxation_quality01</span><span class="p">,</span>
-        <span class="n">relaxation_quality02</span><span class="p">,</span>
-        <span class="n">relaxation_quality03</span><span class="p">,</span>
-        <span class="n">relaxation_quality04</span><span class="p">,</span>
-        <span class="n">relaxation_staged</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_list_of_all_workflows</span><span class="p">,</span> <span class="n">get_workflow</span>
 
-    <span class="c1"># TODO: grab the user&#39;s custom workflows</span>
-
-    <span class="c1"># make these workflows into a list so we can iterate through them</span>
-    <span class="n">workflows</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">energy_mit</span><span class="p">,</span>
-        <span class="n">energy_quality04</span><span class="p">,</span>
-        <span class="n">relaxation_mit</span><span class="p">,</span>
-        <span class="n">relaxation_quality00</span><span class="p">,</span>
-        <span class="n">relaxation_quality01</span><span class="p">,</span>
-        <span class="n">relaxation_quality02</span><span class="p">,</span>
-        <span class="n">relaxation_quality03</span><span class="p">,</span>
-        <span class="n">relaxation_quality04</span><span class="p">,</span>
-        <span class="n">relaxation_staged</span><span class="p">,</span>
-    <span class="p">]</span>
+    <span class="c1"># Load all workflows</span>
+    <span class="n">workflow_names</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
+    <span class="n">workflows</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_workflow</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">workflow_names</span><span class="p">]</span>
 
     <span class="c1"># Iterate through and grab all the unique Project names. The brackets here</span>
     <span class="c1"># make this return as a set</span>
@@ -187,32 +166,11 @@
     <span class="c1">#   client.login_to_tenant(tenant_slug=&#39;a-tenant-slug&#39;)</span>
 
     <span class="c1"># grab all of the workflows that need to be registered</span>
-    <span class="kn">from</span> <span class="nn">simmate.workflows</span> <span class="kn">import</span> <span class="p">(</span>
-        <span class="n">energy_mit</span><span class="p">,</span>
-        <span class="n">energy_quality04</span><span class="p">,</span>
-        <span class="n">relaxation_mit</span><span class="p">,</span>
-        <span class="n">relaxation_quality00</span><span class="p">,</span>
-        <span class="n">relaxation_quality01</span><span class="p">,</span>
-        <span class="n">relaxation_quality02</span><span class="p">,</span>
-        <span class="n">relaxation_quality03</span><span class="p">,</span>
-        <span class="n">relaxation_quality04</span><span class="p">,</span>
-        <span class="n">relaxation_staged</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_list_of_all_workflows</span><span class="p">,</span> <span class="n">get_workflow</span>
 
-    <span class="c1"># TODO: grab the user&#39;s custom workflows</span>
-
-    <span class="c1"># make these workflows into a list so we can iterate through them</span>
-    <span class="n">workflows</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">energy_mit</span><span class="p">,</span>
-        <span class="n">energy_quality04</span><span class="p">,</span>
-        <span class="n">relaxation_mit</span><span class="p">,</span>
-        <span class="n">relaxation_quality00</span><span class="p">,</span>
-        <span class="n">relaxation_quality01</span><span class="p">,</span>
-        <span class="n">relaxation_quality02</span><span class="p">,</span>
-        <span class="n">relaxation_quality03</span><span class="p">,</span>
-        <span class="n">relaxation_quality04</span><span class="p">,</span>
-        <span class="n">relaxation_staged</span><span class="p">,</span>
-    <span class="p">]</span>
+    <span class="c1"># Load all workflows</span>
+    <span class="n">workflow_names</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
+    <span class="n">workflows</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_workflow</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">workflow_names</span><span class="p">]</span>
 
     <span class="c1"># Iterate through and grab all the unique Project names. The brackets here</span>
     <span class="c1"># make this return as a set</span>

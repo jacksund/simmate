@@ -88,7 +88,7 @@
 <span class="n">relax_task_04</span> <span class="o">=</span> <span class="n">relaxation_quality04</span><span class="o">.</span><span class="n">to_workflow_task</span><span class="p">()</span>
 <span class="n">static_task_04</span> <span class="o">=</span> <span class="n">energy_quality04</span><span class="o">.</span><span class="n">to_workflow_task</span><span class="p">()</span>
 
-<span class="k">with</span> <span class="n">Workflow</span><span class="p">(</span><span class="s2">&quot;Staged Relaxation&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">workflow</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">Workflow</span><span class="p">(</span><span class="s2">&quot;relaxation/staged&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">workflow</span><span class="p">:</span>
 
     <span class="n">structure</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">)</span>
     <span class="n">command</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;vasp_std &gt; vasp.out&quot;</span><span class="p">)</span>

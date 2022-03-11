@@ -32,9 +32,6 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="function" href="#get_workflow">get_workflow</a>
-            </li>
-            <li>
                     <a class="function" href="#list_options">list_options</a>
             </li>
             <li>
@@ -72,48 +69,6 @@
 <span class="k">def</span> <span class="nf">workflows</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;A group of commands for running workflows or viewing their settings.&quot;&quot;&quot;</span>
     <span class="k">pass</span>
-
-
-<span class="k">def</span> <span class="nf">get_workflow</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is a utility for click (cli) that grabs a workflow from the simmate</span>
-<span class="sd">    workflows. If the workflow can&#39;t be found, it raises a ClickException.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    workflow_name : str</span>
-<span class="sd">        Name of the workflow to grab (e.g. relaxation-matproj)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_list_of_all_workflows</span>
-
-    <span class="n">allowed_workflows</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
-
-    <span class="c1"># make sure we have a proper workflow name provided</span>
-    <span class="k">if</span> <span class="n">workflow_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_workflows</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
-            <span class="s2">&quot;The workflow you provided isn&#39;t known. Make sure you don&#39;t have any &quot;</span>
-            <span class="s2">&quot;typos! If you want a list of all available workflows, use the command &quot;</span>
-            <span class="s2">&quot;`simmate workflows list-all`. You can also interactively explore &quot;</span>
-            <span class="s2">&quot;workflows with `simmate workflows explore`&quot;</span>
-        <span class="p">)</span>
-
-    <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
-
-    <span class="c1"># parse the workflow name. (e.g. static-energy/mit --&gt; static-energy + mit)</span>
-    <span class="n">type_name</span><span class="p">,</span> <span class="n">preset_name</span> <span class="o">=</span> <span class="n">workflow_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-    <span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
-    <span class="n">preset_name</span> <span class="o">=</span> <span class="n">preset_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
-
-    <span class="c1"># The naming convention matches the import path, so we can load the workflow</span>
-    <span class="n">workflow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Using... from simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2"> import </span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span>
-    <span class="p">)</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflow_module</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">workflow</span>
 
 
 <span class="k">def</span> <span class="nf">list_options</span><span class="p">(</span><span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -160,17 +115,18 @@
 
 
 <span class="k">def</span> <span class="nf">parse_parameters</span><span class="p">(</span>
-    <span class="n">context</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Context</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span>
     <span class="n">structure</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a utility for click (cli) that formats input parameters for workflow</span>
-<span class="sd">    runs.</span>
+<span class="sd">    runs. It is a small wrapper around</span>
+<span class="sd">    `simmate.workflow_engine.utilities.parse_parameters` that accounts for</span>
+<span class="sd">    recieving a `click.Context` object.</span>
 
-<span class="sd">    In order to provide a context, make sure the click command has the following</span>
-<span class="sd">    set:</span>
+<span class="sd">    In order to provide a context, make sure the click command has the following:</span>
 
 <span class="sd">    ``` python</span>
 <span class="sd">    @click.command(</span>
@@ -189,12 +145,7 @@
 <span class="sd">    This is also why we have pass_context and then the kwarg context.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span>
-
-    <span class="c1"># we don&#39;t want to pass arguments like command=None or structure=None if the</span>
-    <span class="c1"># user didn&#39;t provide this input. Instead, we want the workflow to use</span>
-    <span class="c1"># its own default value. To do this, we pass the command input as a kwarg</span>
-    <span class="c1"># or an empty dict if it wasn&#39;t given.</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">parse_parameters</span>
 
     <span class="c1"># The extra keywords passed are given as a list such as...</span>
     <span class="c1">#   [&quot;--arg1&quot;, &quot;val1&quot;, &quot;--arg2&quot;, &quot;val2&quot;,]</span>
@@ -202,19 +153,14 @@
     <span class="c1">#   https://stackoverflow.com/questions/32944131/</span>
     <span class="c1"># If there&#39;s any issue parsing the data, we alert the user with a hint.</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># check if we have a click context or a dictionary</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">Context</span><span class="p">):</span>
-            <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">:]:</span> <span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="p">}</span>
-        <span class="c1"># otherwise we have dictionary, which we can use directly. We need</span>
-        <span class="c1"># to pull specific kwargs out of this dictionary too.</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">command</span> <span class="o">=</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">directory</span> <span class="o">=</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">:]:</span> <span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">structure</span>
+        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">directory</span>
+        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;command&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">command</span>
+
     <span class="k">except</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
             <span class="s2">&quot;This workflow command appears to be improperly formatted. </span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -222,39 +168,9 @@
             <span class="s2">&quot;keyword and the value (such as `--example_kwarg example_value`).&quot;</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">command</span><span class="p">:</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;command&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">command</span>
-
-    <span class="k">if</span> <span class="n">directory</span><span class="p">:</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">directory</span>
-
-    <span class="c1"># The structure input (which is optional) is given as a filename, which</span>
-    <span class="c1"># we need to load as toolkit object. This is also the case for a number</span>
-    <span class="c1"># of inputs like migration_hop, structures, etc.</span>
-    <span class="k">if</span> <span class="n">structure</span><span class="p">:</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="s2">&quot;structures&quot;</span> <span class="ow">in</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">structure_filenames</span> <span class="o">=</span> <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;structures&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;structures&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">structure_filenames</span>
-        <span class="p">]</span>
-
-    <span class="k">if</span> <span class="s2">&quot;migration_hop&quot;</span> <span class="ow">in</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="kn">from</span> <span class="nn">simmate.toolkit.diffusion</span> <span class="kn">import</span> <span class="n">MigrationHop</span>
-
-        <span class="n">migration_hop</span> <span class="o">=</span> <span class="n">MigrationHop</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">])</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">migration_hop</span>
-
-    <span class="k">if</span> <span class="s2">&quot;supercell_start&quot;</span> <span class="ow">in</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;supercell_start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span>
-            <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;supercell_start&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-
-    <span class="k">if</span> <span class="s2">&quot;supercell_end&quot;</span> <span class="ow">in</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span>
-            <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+    <span class="c1"># We can now pass this dictionary to our normal parse_parameters utility</span>
+    <span class="c1"># that will convert everything to python objects for us.</span>
+    <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="n">parse_parameters</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs_cleaned</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">kwargs_cleaned</span>
 
@@ -268,28 +184,33 @@
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Gathering all available workflows...&quot;</span><span class="p">)</span>
     <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="p">(</span>
-        <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">,</span>
+        <span class="n">WORKFLOW_TYPES</span><span class="p">,</span>
         <span class="n">get_list_of_workflows_by_type</span><span class="p">,</span>
+        <span class="n">get_workflow</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">What type of analysis are you interested in?&quot;</span><span class="p">)</span>
-    <span class="n">types_cleaned</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">]</span>
+    <span class="n">types_cleaned</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">WORKFLOW_TYPES</span><span class="p">]</span>
     <span class="n">type_index</span> <span class="o">=</span> <span class="n">list_options</span><span class="p">(</span><span class="n">types_cleaned</span><span class="p">)</span>
-    <span class="n">selected_type</span> <span class="o">=</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">[</span><span class="n">type_index</span><span class="p">]</span>
+    <span class="n">selected_type</span> <span class="o">=</span> <span class="n">WORKFLOW_TYPES</span><span class="p">[</span><span class="n">type_index</span><span class="p">]</span>
 
     <span class="c1"># TODO: have the user select a calculator for this analysis. For now,</span>
     <span class="c1"># we are assuming VASP because those are our only workflows</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">What settings preset do you want to see the description for?&quot;</span><span class="p">)</span>
-    <span class="n">presets</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">selected_type</span><span class="p">)]</span>
+    <span class="n">presets</span> <span class="o">=</span> <span class="n">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">selected_type</span><span class="p">,</span> <span class="n">full_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">present_index</span> <span class="o">=</span> <span class="n">list_options</span><span class="p">(</span><span class="n">presets</span><span class="p">)</span>
     <span class="n">selected_preset</span> <span class="o">=</span> <span class="n">presets</span><span class="p">[</span><span class="n">present_index</span><span class="p">]</span>
 
-    <span class="n">final_workflow_name</span> <span class="o">=</span> <span class="n">selected_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">selected_preset</span>
+    <span class="n">final_workflow_name</span> <span class="o">=</span> <span class="n">selected_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">selected_preset</span>
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">===================== </span><span class="si">{</span><span class="n">final_workflow_name</span><span class="si">}</span><span class="s2"> =====================&quot;</span><span class="p">)</span>
 
     <span class="c1"># now we load this workflow and print the docstring.</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">final_workflow_name</span><span class="p">)</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span>
+        <span class="n">workflow_name</span><span class="o">=</span><span class="n">final_workflow_name</span><span class="p">,</span>
+        <span class="n">precheck_flow_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">print_equivalent_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">workflow</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
 
@@ -325,7 +246,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;LOADING WORKFLOW...&quot;</span><span class="p">)</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_workflow</span>
+
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span>
+        <span class="n">workflow_name</span><span class="o">=</span><span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">precheck_flow_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">print_equivalent_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;PRINTING WORKFLOW CONFIG...&quot;</span><span class="p">)</span>
 
@@ -358,8 +285,13 @@
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;LOADING STRUCTURE AND WORKFLOW...&quot;</span><span class="p">)</span>
     <span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_workflow</span>
 
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span>
+        <span class="n">workflow_name</span><span class="o">=</span><span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">precheck_flow_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">print_equivalent_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;WRITING INPUT FILES...&quot;</span><span class="p">)</span>
@@ -416,7 +348,13 @@
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;LOADING WORKFLOW &amp; INPUT PARAMETERS...&quot;</span><span class="p">)</span>
 
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_workflow</span>
+
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span>
+        <span class="n">workflow_name</span><span class="o">=</span><span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">precheck_flow_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">print_equivalent_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="n">parse_parameters</span><span class="p">(</span>
         <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
         <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
@@ -467,7 +405,13 @@
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;LOADING WORKFLOW &amp; INPUT PARAMETERS...&quot;</span><span class="p">)</span>
 
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_workflow</span>
+
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span>
+        <span class="n">workflow_name</span><span class="o">=</span><span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">precheck_flow_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">print_equivalent_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="n">parse_parameters</span><span class="p">(</span>
         <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
         <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
@@ -491,8 +435,7 @@
     <span class="p">)</span>
 <span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;filename&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
-<span class="k">def</span> <span class="nf">run_yaml</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">run_yaml</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Runs a workflow where parameters are loaded from a yaml file.&quot;&quot;&quot;</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;LOADING WORKFLOW &amp; INPUT PARAMETERS...&quot;</span><span class="p">)</span>
@@ -503,8 +446,14 @@
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">full_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
     <span class="c1"># we pop the workflow name so that it is also removed from the rest of kwargs</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;workflow_name&quot;</span><span class="p">))</span>
-    <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="n">parse_parameters</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_workflow</span><span class="p">,</span> <span class="n">parse_parameters</span>
+
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span>
+        <span class="n">workflow_name</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;workflow_name&quot;</span><span class="p">),</span>
+        <span class="n">precheck_flow_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">print_equivalent_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="n">parse_parameters</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;RUNNING WORKFLOW...&quot;</span><span class="p">)</span>
 
@@ -518,71 +467,6 @@
         </details>
 
             </section>
-                <section id="get_workflow">
-                            <div class="attr function"><a class="headerlink" href="#get_workflow">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">get_workflow</span><span class="signature">(workflow_name: str)</span>:
-    </div>
-
-            <details>
-            <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_workflow</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is a utility for click (cli) that grabs a workflow from the simmate</span>
-<span class="sd">    workflows. If the workflow can&#39;t be found, it raises a ClickException.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    workflow_name : str</span>
-<span class="sd">        Name of the workflow to grab (e.g. relaxation-matproj)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">get_list_of_all_workflows</span>
-
-    <span class="n">allowed_workflows</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
-
-    <span class="c1"># make sure we have a proper workflow name provided</span>
-    <span class="k">if</span> <span class="n">workflow_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_workflows</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
-            <span class="s2">&quot;The workflow you provided isn&#39;t known. Make sure you don&#39;t have any &quot;</span>
-            <span class="s2">&quot;typos! If you want a list of all available workflows, use the command &quot;</span>
-            <span class="s2">&quot;`simmate workflows list-all`. You can also interactively explore &quot;</span>
-            <span class="s2">&quot;workflows with `simmate workflows explore`&quot;</span>
-        <span class="p">)</span>
-
-    <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
-
-    <span class="c1"># parse the workflow name. (e.g. static-energy/mit --&gt; static-energy + mit)</span>
-    <span class="n">type_name</span><span class="p">,</span> <span class="n">preset_name</span> <span class="o">=</span> <span class="n">workflow_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-    <span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
-    <span class="n">preset_name</span> <span class="o">=</span> <span class="n">preset_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
-
-    <span class="c1"># The naming convention matches the import path, so we can load the workflow</span>
-    <span class="n">workflow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Using... from simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2"> import </span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span>
-    <span class="p">)</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflow_module</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">workflow</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>This is a utility for click (cli) that grabs a workflow from the simmate
-workflows. If the workflow can't be found, it raises a ClickException.</p>
-
-<h2 id="parameters">Parameters</h2>
-
-<p>workflow_name : str
-    Name of the workflow to grab (e.g. relaxation-matproj)</p>
-</div>
-
-
-                </section>
                 <section id="list_options">
                             <div class="attr function"><a class="headerlink" href="#list_options">#&nbsp;&nbsp</a>
 
@@ -673,7 +557,7 @@ returned)</li>
         
             <span class="def">def</span>
             <span class="name">parse_parameters</span><span class="signature">(
-    context: Union[click.core.Context, dict],
+    context: click.core.Context,
     structure: str = None,
     command: str = None,
     directory: str = None
@@ -683,17 +567,18 @@ returned)</li>
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">parse_parameters</span><span class="p">(</span>
-    <span class="n">context</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Context</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span>
     <span class="n">structure</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a utility for click (cli) that formats input parameters for workflow</span>
-<span class="sd">    runs.</span>
+<span class="sd">    runs. It is a small wrapper around</span>
+<span class="sd">    `simmate.workflow_engine.utilities.parse_parameters` that accounts for</span>
+<span class="sd">    recieving a `click.Context` object.</span>
 
-<span class="sd">    In order to provide a context, make sure the click command has the following</span>
-<span class="sd">    set:</span>
+<span class="sd">    In order to provide a context, make sure the click command has the following:</span>
 
 <span class="sd">    ``` python</span>
 <span class="sd">    @click.command(</span>
@@ -712,12 +597,7 @@ returned)</li>
 <span class="sd">    This is also why we have pass_context and then the kwarg context.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span>
-
-    <span class="c1"># we don&#39;t want to pass arguments like command=None or structure=None if the</span>
-    <span class="c1"># user didn&#39;t provide this input. Instead, we want the workflow to use</span>
-    <span class="c1"># its own default value. To do this, we pass the command input as a kwarg</span>
-    <span class="c1"># or an empty dict if it wasn&#39;t given.</span>
+    <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="n">parse_parameters</span>
 
     <span class="c1"># The extra keywords passed are given as a list such as...</span>
     <span class="c1">#   [&quot;--arg1&quot;, &quot;val1&quot;, &quot;--arg2&quot;, &quot;val2&quot;,]</span>
@@ -725,19 +605,14 @@ returned)</li>
     <span class="c1">#   https://stackoverflow.com/questions/32944131/</span>
     <span class="c1"># If there&#39;s any issue parsing the data, we alert the user with a hint.</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># check if we have a click context or a dictionary</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">Context</span><span class="p">):</span>
-            <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">:]:</span> <span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="p">}</span>
-        <span class="c1"># otherwise we have dictionary, which we can use directly. We need</span>
-        <span class="c1"># to pull specific kwargs out of this dictionary too.</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">command</span> <span class="o">=</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">directory</span> <span class="o">=</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">:]:</span> <span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">args</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">structure</span>
+        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">directory</span>
+        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;command&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">command</span>
+
     <span class="k">except</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
             <span class="s2">&quot;This workflow command appears to be improperly formatted. </span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -745,39 +620,9 @@ returned)</li>
             <span class="s2">&quot;keyword and the value (such as `--example_kwarg example_value`).&quot;</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">command</span><span class="p">:</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;command&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">command</span>
-
-    <span class="k">if</span> <span class="n">directory</span><span class="p">:</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">directory</span>
-
-    <span class="c1"># The structure input (which is optional) is given as a filename, which</span>
-    <span class="c1"># we need to load as toolkit object. This is also the case for a number</span>
-    <span class="c1"># of inputs like migration_hop, structures, etc.</span>
-    <span class="k">if</span> <span class="n">structure</span><span class="p">:</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="s2">&quot;structures&quot;</span> <span class="ow">in</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">structure_filenames</span> <span class="o">=</span> <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;structures&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;structures&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">structure_filenames</span>
-        <span class="p">]</span>
-
-    <span class="k">if</span> <span class="s2">&quot;migration_hop&quot;</span> <span class="ow">in</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="kn">from</span> <span class="nn">simmate.toolkit.diffusion</span> <span class="kn">import</span> <span class="n">MigrationHop</span>
-
-        <span class="n">migration_hop</span> <span class="o">=</span> <span class="n">MigrationHop</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">])</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">migration_hop</span>
-
-    <span class="k">if</span> <span class="s2">&quot;supercell_start&quot;</span> <span class="ow">in</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;supercell_start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span>
-            <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;supercell_start&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-
-    <span class="k">if</span> <span class="s2">&quot;supercell_end&quot;</span> <span class="ow">in</span> <span class="n">kwargs_cleaned</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span>
-            <span class="n">kwargs_cleaned</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+    <span class="c1"># We can now pass this dictionary to our normal parse_parameters utility</span>
+    <span class="c1"># that will convert everything to python objects for us.</span>
+    <span class="n">kwargs_cleaned</span> <span class="o">=</span> <span class="n">parse_parameters</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs_cleaned</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">kwargs_cleaned</span>
 </pre></div>
@@ -785,10 +630,11 @@ returned)</li>
         </details>
 
             <div class="docstring"><p>This is a utility for click (cli) that formats input parameters for workflow
-runs.</p>
+runs. It is a small wrapper around
+<code><a href="../workflow_engine/utilities.html#parse_parameters">simmate.workflow_engine.utilities.parse_parameters</a></code> that accounts for
+recieving a <code>click.Context</code> object.</p>
 
-<p>In order to provide a context, make sure the click command has the following
-set:</p>
+<p>In order to provide a context, make sure the click command has the following:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span>
     <span class="n">context_settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>

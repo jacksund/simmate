@@ -71,6 +71,12 @@
                                 <a class="function" href="#Relaxation.create_subclasses">create_subclasses</a>
                         </li>
                         <li>
+                                <a class="function" href="#Relaxation.from_directory">from_directory</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Relaxation.from_vasp_run">from_vasp_run</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Relaxation.update_from_vasp_run">update_from_vasp_run</a>
                         </li>
                         <li>
@@ -414,6 +420,7 @@ other connects all ionic steps to a specific calculation and result.</p>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">table_column</span><span class="p">,</span>
@@ -443,7 +450,7 @@ other connects all ionic steps to a specific calculation and result.</p>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="sd">&quot;&quot;&quot;Base Info&quot;&quot;&quot;</span>
 
@@ -542,6 +549,72 @@ other connects all ionic steps to a specific calculation and result.</p>
 
         <span class="c1"># we now have a new child class and avoided writing some boilerplate code!</span>
         <span class="k">return</span> <span class="n">NewRelaxationClass</span><span class="p">,</span> <span class="n">NewIonicStepClass</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+        <span class="n">vasprun_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
+        <span class="n">vasprun</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">vasprun_filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_vasp_run</span><span class="p">(</span><span class="n">vasprun</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_vasp_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">:</span> <span class="n">Vasprun</span><span class="p">):</span>
+        <span class="c1"># The data is actually easier to access as a dictionary and everything</span>
+        <span class="c1"># we need is stored under the &quot;output&quot; key</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+
+        <span class="c1"># The only other data we need to grab is the list of structures. We can</span>
+        <span class="c1"># pull the structure for each ionic step from the vasprun class directly.</span>
+        <span class="n">structures</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">structures</span>
+
+        <span class="c1"># Make the relaxation entry. Note we need to save this to the database</span>
+        <span class="c1"># in order to link/save the ionic steps below. We save the structure</span>
+        <span class="c1"># as the final one in the calculation.</span>
+        <span class="n">relaxation</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">structures</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">volume_change</span><span class="o">=</span><span class="p">(</span><span class="n">structures</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span> <span class="o">-</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span>
+            <span class="n">band_gap</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bandgap&quot;</span><span class="p">),</span>
+            <span class="n">is_gap_direct</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_gap_direct&quot;</span><span class="p">),</span>
+            <span class="n">energy_fermi</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;efermi&quot;</span><span class="p">),</span>
+            <span class="n">conduction_band_minimum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cbm&quot;</span><span class="p">),</span>
+            <span class="n">valence_band_maximum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># lastly, we also want to save the corrections made and directory it ran in</span>
+        <span class="c1"># relaxation.corrections = corrections</span>
+        <span class="c1"># relaxation.directory = directory</span>
+
+        <span class="c1"># Now we have the relaxation data all loaded and can save it to the database</span>
+        <span class="n">relaxation</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># Now let&#39;s iterate through the ionic steps and save these to the database.</span>
+        <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">ionic_step</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ionic_steps&quot;</span><span class="p">])</span>
+        <span class="p">):</span>
+            <span class="c1"># first pull all the data together and save it to the database. We</span>
+            <span class="c1"># are saving this to an IonicStepStructure datatable.</span>
+            <span class="n">structure_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">structures</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">,</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">],</span>
+                <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">],</span>
+                <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">],</span>
+                <span class="n">relaxation</span><span class="o">=</span><span class="n">relaxation</span><span class="p">,</span>  <span class="c1"># this links the structure to this relaxation</span>
+            <span class="p">)</span>
+            <span class="n">structure_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="c1"># If this is the first structure, we want to link it as such</span>
+            <span class="k">if</span> <span class="n">number</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">relaxation</span><span class="o">.</span><span class="n">structure_start_id</span> <span class="o">=</span> <span class="n">structure_db</span><span class="o">.</span><span class="n">id</span>
+            <span class="c1"># and same for the final structure. Note, we can&#39;t use elif becuase</span>
+            <span class="c1"># there&#39;s a chance the start/end structure are the same, which occurs</span>
+            <span class="c1"># when the starting structure is found to be relaxed already.</span>
+            <span class="k">if</span> <span class="n">number</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">structures</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">relaxation</span><span class="o">.</span><span class="n">structure_final_id</span> <span class="o">=</span> <span class="n">structure_db</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">return</span> <span class="n">relaxation</span>
 
     <span class="k">def</span> <span class="nf">update_from_vasp_run</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -696,7 +769,7 @@ other connects all ionic steps to a specific calculation and result.</p>
 
 <span class="sd">    ``` python</span>
 <span class="sd">    from simmate.shortcuts import setup</span>
-<span class="sd">    from simmate.database.local_calculations import MITRelaxation</span>
+<span class="sd">    from simmate.database.workflow_results import MITRelaxation</span>
 
 <span class="sd">    # grab your desired relaxation</span>
 <span class="sd">    relax = MITRelaxation.objects.get(id=1)</span>
@@ -708,7 +781,7 @@ other connects all ionic steps to a specific calculation and result.</p>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Structure</span><span class="o">.</span><span class="n">base_info</span> <span class="o">+</span> <span class="n">Thermodynamics</span><span class="o">.</span><span class="n">base_info</span> <span class="o">+</span> <span class="n">Forces</span><span class="o">.</span><span class="n">base_info</span>
@@ -814,7 +887,7 @@ other connects all ionic steps to a specific calculation and result.</p>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="sd">&quot;&quot;&quot;Base Info&quot;&quot;&quot;</span>
 
@@ -913,6 +986,72 @@ other connects all ionic steps to a specific calculation and result.</p>
 
         <span class="c1"># we now have a new child class and avoided writing some boilerplate code!</span>
         <span class="k">return</span> <span class="n">NewRelaxationClass</span><span class="p">,</span> <span class="n">NewIonicStepClass</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+        <span class="n">vasprun_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
+        <span class="n">vasprun</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">vasprun_filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_vasp_run</span><span class="p">(</span><span class="n">vasprun</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_vasp_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">:</span> <span class="n">Vasprun</span><span class="p">):</span>
+        <span class="c1"># The data is actually easier to access as a dictionary and everything</span>
+        <span class="c1"># we need is stored under the &quot;output&quot; key</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+
+        <span class="c1"># The only other data we need to grab is the list of structures. We can</span>
+        <span class="c1"># pull the structure for each ionic step from the vasprun class directly.</span>
+        <span class="n">structures</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">structures</span>
+
+        <span class="c1"># Make the relaxation entry. Note we need to save this to the database</span>
+        <span class="c1"># in order to link/save the ionic steps below. We save the structure</span>
+        <span class="c1"># as the final one in the calculation.</span>
+        <span class="n">relaxation</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">structures</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">volume_change</span><span class="o">=</span><span class="p">(</span><span class="n">structures</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span> <span class="o">-</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span>
+            <span class="n">band_gap</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bandgap&quot;</span><span class="p">),</span>
+            <span class="n">is_gap_direct</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_gap_direct&quot;</span><span class="p">),</span>
+            <span class="n">energy_fermi</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;efermi&quot;</span><span class="p">),</span>
+            <span class="n">conduction_band_minimum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cbm&quot;</span><span class="p">),</span>
+            <span class="n">valence_band_maximum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># lastly, we also want to save the corrections made and directory it ran in</span>
+        <span class="c1"># relaxation.corrections = corrections</span>
+        <span class="c1"># relaxation.directory = directory</span>
+
+        <span class="c1"># Now we have the relaxation data all loaded and can save it to the database</span>
+        <span class="n">relaxation</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># Now let&#39;s iterate through the ionic steps and save these to the database.</span>
+        <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">ionic_step</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ionic_steps&quot;</span><span class="p">])</span>
+        <span class="p">):</span>
+            <span class="c1"># first pull all the data together and save it to the database. We</span>
+            <span class="c1"># are saving this to an IonicStepStructure datatable.</span>
+            <span class="n">structure_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">structures</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">,</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">],</span>
+                <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">],</span>
+                <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">],</span>
+                <span class="n">relaxation</span><span class="o">=</span><span class="n">relaxation</span><span class="p">,</span>  <span class="c1"># this links the structure to this relaxation</span>
+            <span class="p">)</span>
+            <span class="n">structure_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="c1"># If this is the first structure, we want to link it as such</span>
+            <span class="k">if</span> <span class="n">number</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">relaxation</span><span class="o">.</span><span class="n">structure_start_id</span> <span class="o">=</span> <span class="n">structure_db</span><span class="o">.</span><span class="n">id</span>
+            <span class="c1"># and same for the final structure. Note, we can&#39;t use elif becuase</span>
+            <span class="c1"># there&#39;s a chance the start/end structure are the same, which occurs</span>
+            <span class="c1"># when the starting structure is found to be relaxed already.</span>
+            <span class="k">if</span> <span class="n">number</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">structures</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">relaxation</span><span class="o">.</span><span class="n">structure_final_id</span> <span class="o">=</span> <span class="n">structure_db</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">return</span> <span class="n">relaxation</span>
 
     <span class="k">def</span> <span class="nf">update_from_vasp_run</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1274,6 +1413,106 @@ A subclass of IonicStep.</li>
 
 
                             </div>
+                            <div id="Relaxation.from_directory" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Relaxation.from_directory">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">from_directory</span><span class="signature">(cls, directory: str)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
+        <span class="c1"># this when I begin adding new calculators.</span>
+        <span class="n">vasprun_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">)</span>
+        <span class="n">vasprun</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">vasprun_filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_vasp_run</span><span class="p">(</span><span class="n">vasprun</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="Relaxation.from_vasp_run" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Relaxation.from_vasp_run">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">from_vasp_run</span><span class="signature">(cls, vasprun: pymatgen.io.vasp.outputs.Vasprun)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_vasp_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">:</span> <span class="n">Vasprun</span><span class="p">):</span>
+        <span class="c1"># The data is actually easier to access as a dictionary and everything</span>
+        <span class="c1"># we need is stored under the &quot;output&quot; key</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+
+        <span class="c1"># The only other data we need to grab is the list of structures. We can</span>
+        <span class="c1"># pull the structure for each ionic step from the vasprun class directly.</span>
+        <span class="n">structures</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">structures</span>
+
+        <span class="c1"># Make the relaxation entry. Note we need to save this to the database</span>
+        <span class="c1"># in order to link/save the ionic steps below. We save the structure</span>
+        <span class="c1"># as the final one in the calculation.</span>
+        <span class="n">relaxation</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">structures</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">volume_change</span><span class="o">=</span><span class="p">(</span><span class="n">structures</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span> <span class="o">-</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span>
+            <span class="n">band_gap</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bandgap&quot;</span><span class="p">),</span>
+            <span class="n">is_gap_direct</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_gap_direct&quot;</span><span class="p">),</span>
+            <span class="n">energy_fermi</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;efermi&quot;</span><span class="p">),</span>
+            <span class="n">conduction_band_minimum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cbm&quot;</span><span class="p">),</span>
+            <span class="n">valence_band_maximum</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vbm&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># lastly, we also want to save the corrections made and directory it ran in</span>
+        <span class="c1"># relaxation.corrections = corrections</span>
+        <span class="c1"># relaxation.directory = directory</span>
+
+        <span class="c1"># Now we have the relaxation data all loaded and can save it to the database</span>
+        <span class="n">relaxation</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># Now let&#39;s iterate through the ionic steps and save these to the database.</span>
+        <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">ionic_step</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ionic_steps&quot;</span><span class="p">])</span>
+        <span class="p">):</span>
+            <span class="c1"># first pull all the data together and save it to the database. We</span>
+            <span class="c1"># are saving this to an IonicStepStructure datatable.</span>
+            <span class="n">structure_db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">structures</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+                <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">,</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">],</span>
+                <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">],</span>
+                <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">],</span>
+                <span class="n">relaxation</span><span class="o">=</span><span class="n">relaxation</span><span class="p">,</span>  <span class="c1"># this links the structure to this relaxation</span>
+            <span class="p">)</span>
+            <span class="n">structure_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="c1"># If this is the first structure, we want to link it as such</span>
+            <span class="k">if</span> <span class="n">number</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">relaxation</span><span class="o">.</span><span class="n">structure_start_id</span> <span class="o">=</span> <span class="n">structure_db</span><span class="o">.</span><span class="n">id</span>
+            <span class="c1"># and same for the final structure. Note, we can&#39;t use elif becuase</span>
+            <span class="c1"># there&#39;s a chance the start/end structure are the same, which occurs</span>
+            <span class="c1"># when the starting structure is found to be relaxed already.</span>
+            <span class="k">if</span> <span class="n">number</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">structures</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">relaxation</span><span class="o">.</span><span class="n">structure_final_id</span> <span class="o">=</span> <span class="n">structure_db</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">return</span> <span class="n">relaxation</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
                             <div id="Relaxation.update_from_vasp_run" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Relaxation.update_from_vasp_run">#&nbsp;&nbsp</a>
 
@@ -1544,10 +1783,11 @@ structure object, use the <code><a href="#Relaxation.to_toolkit">to_toolkit</a><
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -1757,7 +1997,13 @@ any of those changes here.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -1768,18 +2014,43 @@ any of those changes here.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -1896,6 +2167,9 @@ callables as instance methods.</p>
             </div>
             <div><dt><a href="calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="Relaxation.prefect_cloud_link" class="variable"><a href="calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="Relaxation.flow_run_view" class="variable"><a href="calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="Relaxation.prefect_flow_run_name" class="variable"><a href="calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="Relaxation.prefect_state" class="function"><a href="calculation.html#Calculation.prefect_state">prefect_state</a></dd>
                 <dd id="Relaxation.from_prefect_id" class="function"><a href="calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
 
             </div>
@@ -1926,7 +2200,7 @@ callables as instance methods.</p>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 </pre></div>
 
         </details>
@@ -1957,7 +2231,7 @@ callables as instance methods.</p>
                             <div id="Relaxation.Meta.app_label" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Relaxation.Meta.app_label">#&nbsp;&nbsp</a>
 
-        <span class="name">app_label</span><span class="default_value"> = &#39;local_calculations&#39;</span>
+        <span class="name">app_label</span><span class="default_value"> = &#39;workflows&#39;</span>
     </div>
 
     
@@ -1993,7 +2267,7 @@ callables as instance methods.</p>
 
 <span class="sd">    ``` python</span>
 <span class="sd">    from simmate.shortcuts import setup</span>
-<span class="sd">    from simmate.database.local_calculations import MITRelaxation</span>
+<span class="sd">    from simmate.database.workflow_results import MITRelaxation</span>
 
 <span class="sd">    # grab your desired relaxation</span>
 <span class="sd">    relax = MITRelaxation.objects.get(id=1)</span>
@@ -2005,7 +2279,7 @@ callables as instance methods.</p>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
     <span class="n">base_info</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Structure</span><span class="o">.</span><span class="n">base_info</span> <span class="o">+</span> <span class="n">Thermodynamics</span><span class="o">.</span><span class="n">base_info</span> <span class="o">+</span> <span class="n">Forces</span><span class="o">.</span><span class="n">base_info</span>
@@ -2101,7 +2375,7 @@ accessed through the <code>structures</code> attribute on appropiate Relaxation 
 <p>For example:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../shortcuts.html">simmate.shortcuts</a></span> <span class="kn">import</span> <span class="n">setup</span>
-<span class="kn">from</span> <span class="nn"><a href="../local_calculations.html">simmate.database.local_calculations</a></span> <span class="kn">import</span> <span class="n">MITRelaxation</span>
+<span class="kn">from</span> <span class="nn"><a href="../workflow_results.html">simmate.database.workflow_results</a></span> <span class="kn">import</span> <span class="n">MITRelaxation</span>
 
 <span class="c1"># grab your desired relaxation</span>
 <span class="n">relax</span> <span class="o">=</span> <span class="n">MITRelaxation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -2318,10 +2592,11 @@ structure object, use the <code><a href="#IonicStep.to_toolkit">to_toolkit</a></
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -2665,7 +2940,13 @@ structures in this database table. Units are in eV.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -2676,18 +2957,43 @@ structures in this database table. Units are in eV.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -2761,7 +3067,7 @@ constant and therefore overwritten as an attribute.</p>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;local_calculations&quot;</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 </pre></div>
 
         </details>
@@ -2792,7 +3098,7 @@ constant and therefore overwritten as an attribute.</p>
                             <div id="IonicStep.Meta.app_label" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#IonicStep.Meta.app_label">#&nbsp;&nbsp</a>
 
-        <span class="name">app_label</span><span class="default_value"> = &#39;local_calculations&#39;</span>
+        <span class="name">app_label</span><span class="default_value"> = &#39;workflows&#39;</span>
     </div>
 
     

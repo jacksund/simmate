@@ -88,13 +88,8 @@
 <span class="sd">    tetrahedron method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="c1"># we assume that we are checking the vasp.out file</span>
     <span class="n">filename_to_check</span> <span class="o">=</span> <span class="s2">&quot;vasp.out&quot;</span>
-
-    <span class="c1"># These are the error messages that we are looking for in the file</span>
     <span class="n">possible_error_messages</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;Tetrahedron method fails&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Fatal error detecting k-mesh&quot;</span><span class="p">,</span>
@@ -107,7 +102,7 @@
         <span class="s2">&quot;DENTET&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -158,13 +153,8 @@
 <span class="sd">    tetrahedron method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="c1"># we assume that we are checking the vasp.out file</span>
     <span class="n">filename_to_check</span> <span class="o">=</span> <span class="s2">&quot;vasp.out&quot;</span>
-
-    <span class="c1"># These are the error messages that we are looking for in the file</span>
     <span class="n">possible_error_messages</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;Tetrahedron method fails&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Fatal error detecting k-mesh&quot;</span><span class="p">,</span>
@@ -177,7 +167,7 @@
         <span class="s2">&quot;DENTET&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -278,12 +268,12 @@ found, the <code><a href="#TetrahedronMesh.check">check</a></code> will return T
 
         
             <span class="def">def</span>
-            <span class="name">correct</span><span class="signature">(self, directory)</span>:
+            <span class="name">correct</span><span class="signature">(self, directory: str) -&gt; str</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>

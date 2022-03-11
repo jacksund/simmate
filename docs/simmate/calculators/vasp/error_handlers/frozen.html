@@ -32,19 +32,19 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#FrozenErrorHandler">FrozenErrorHandler</a>
+                    <a class="class" href="#Frozen">Frozen</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#FrozenErrorHandler.__init__">FrozenErrorHandler</a>
+                                <a class="function" href="#Frozen.__init__">Frozen</a>
                         </li>
                         <li>
-                                <a class="variable" href="#FrozenErrorHandler.is_monitor">is_monitor</a>
+                                <a class="variable" href="#Frozen.is_monitor">is_monitor</a>
                         </li>
                         <li>
-                                <a class="function" href="#FrozenErrorHandler.check">check</a>
+                                <a class="function" href="#Frozen.check">check</a>
                         </li>
                         <li>
-                                <a class="function" href="#FrozenErrorHandler.correct">correct</a>
+                                <a class="function" href="#Frozen.correct">correct</a>
                         </li>
                 </ul>
 
@@ -78,20 +78,19 @@
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs</span> <span class="kn">import</span> <span class="n">Incar</span>
 
 
-<span class="k">class</span> <span class="nc">FrozenErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Frozen</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks when the output file has last been editted. If the job has been sitting</span>
 <span class="sd">    for a long time (i.e. 1 hour), we consider it frozen and want to change the</span>
 <span class="sd">    ALGO from Normal to Fast or alternatively reduce SYMPREC.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout_limit</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout_limit</span> <span class="o">=</span> <span class="n">timeout_limit</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error in the specified directory. Note, we assume that we are</span>
 <span class="sd">        checking the vasp.out file. If that file is not present, we say that there</span>
@@ -118,12 +117,7 @@
         <span class="c1"># our timeout specified -- where the job is still running and looks good.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Perform corrections based on the INCAR.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Note &quot;error&quot; here is just True because there is no variation in this ErrorHandler.</span>
-        <span class="c1"># This value isn&#39;t used in fixing the Error anyways.</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -162,31 +156,30 @@
         </details>
 
             </section>
-                <section id="FrozenErrorHandler">
+                <section id="Frozen">
                                 <div class="attr class">
-        <a class="headerlink" href="#FrozenErrorHandler">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#Frozen">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">FrozenErrorHandler</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
+        <span class="name">Frozen</span><wbr>(<span class="base"><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FrozenErrorHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Frozen</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks when the output file has last been editted. If the job has been sitting</span>
 <span class="sd">    for a long time (i.e. 1 hour), we consider it frozen and want to change the</span>
 <span class="sd">    ALGO from Normal to Fast or alternatively reduce SYMPREC.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># run this while the VASP calculation is still going</span>
     <span class="n">is_monitor</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout_limit</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout_limit</span> <span class="o">=</span> <span class="n">timeout_limit</span>
 
-    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error in the specified directory. Note, we assume that we are</span>
 <span class="sd">        checking the vasp.out file. If that file is not present, we say that there</span>
@@ -213,12 +206,7 @@
         <span class="c1"># our timeout specified -- where the job is still running and looks good.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Perform corrections based on the INCAR.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Note &quot;error&quot; here is just True because there is no variation in this ErrorHandler.</span>
-        <span class="c1"># This value isn&#39;t used in fixing the Error anyways.</span>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -262,16 +250,16 @@ ALGO from Normal to Fast or alternatively reduce SYMPREC.</p>
 </div>
 
 
-                            <div id="FrozenErrorHandler.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#FrozenErrorHandler.__init__">#&nbsp;&nbsp</a>
+                            <div id="Frozen.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Frozen.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">FrozenErrorHandler</span><span class="signature">(timeout_limit=3600)</span>
+            <span class="name">Frozen</span><span class="signature">(timeout_limit: float = 3600)</span>
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout_limit</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout_limit</span> <span class="o">=</span> <span class="n">timeout_limit</span>
 </pre></div>
 
@@ -280,8 +268,8 @@ ALGO from Normal to Fast or alternatively reduce SYMPREC.</p>
     
 
                             </div>
-                            <div id="FrozenErrorHandler.is_monitor" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#FrozenErrorHandler.is_monitor">#&nbsp;&nbsp</a>
+                            <div id="Frozen.is_monitor" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Frozen.is_monitor">#&nbsp;&nbsp</a>
 
         <span class="name">is_monitor</span><span class="default_value"> = True</span>
     </div>
@@ -299,17 +287,17 @@ is_terminating description below for why!</p>
 
 
                             </div>
-                            <div id="FrozenErrorHandler.check" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#FrozenErrorHandler.check">#&nbsp;&nbsp</a>
+                            <div id="Frozen.check" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Frozen.check">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">check</span><span class="signature">(self, directory)</span>:
+            <span class="name">check</span><span class="signature">(self, directory: str) -&gt; bool</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for error in the specified directory. Note, we assume that we are</span>
 <span class="sd">        checking the vasp.out file. If that file is not present, we say that there</span>
@@ -346,22 +334,17 @@ is no error because another handler will address this.</p>
 
 
                             </div>
-                            <div id="FrozenErrorHandler.correct" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#FrozenErrorHandler.correct">#&nbsp;&nbsp</a>
+                            <div id="Frozen.correct" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Frozen.correct">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">correct</span><span class="signature">(self, directory)</span>:
+            <span class="name">correct</span><span class="signature">(self, directory: str) -&gt; str</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Perform corrections based on the INCAR.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Note &quot;error&quot; here is just True because there is no variation in this ErrorHandler.</span>
-        <span class="c1"># This value isn&#39;t used in fixing the Error anyways.</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="c1"># load the INCAR file to view the current settings</span>
         <span class="n">incar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">)</span>
@@ -399,7 +382,9 @@ is no error because another handler will address this.</p>
 
         </details>
 
-            <div class="docstring"><p>Perform corrections based on the INCAR.</p>
+            <div class="docstring"><p>This method is called at the end of a job when an error is detected.
+It should perform any corrective measures relating to the detected
+error. It then returns the fix or list of fixes made.</p>
 </div>
 
 
@@ -408,10 +393,10 @@ is no error because another handler will address this.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></dt>
-                                <dd id="FrozenErrorHandler.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
-                <dd id="FrozenErrorHandler.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
-                <dd id="FrozenErrorHandler.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
-                <dd id="FrozenErrorHandler.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
+                                <dd id="Frozen.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
+                <dd id="Frozen.filename_to_check" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.filename_to_check">filename_to_check</a></dd>
+                <dd id="Frozen.possible_error_messages" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.possible_error_messages">possible_error_messages</a></dd>
+                <dd id="Frozen.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
 
             </div>
                                 </dl>

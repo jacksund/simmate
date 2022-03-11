@@ -37,6 +37,18 @@
             <li>
                     <a class="function" href="#get_list_of_all_workflows">get_list_of_all_workflows</a>
             </li>
+            <li>
+                    <a class="function" href="#get_workflow">get_workflow</a>
+            </li>
+            <li>
+                    <a class="function" href="#load_results_from_directories">load_results_from_directories</a>
+            </li>
+            <li>
+                    <a class="function" href="#get_unique_parameters">get_unique_parameters</a>
+            </li>
+            <li>
+                    <a class="function" href="#parse_parameters">parse_parameters</a>
+            </li>
     </ul>
 
 
@@ -59,36 +71,51 @@
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 
+<span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">simmate.toolkit.diffusion</span> <span class="kn">import</span> <span class="n">MigrationHop</span>
+
+<span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_directory</span><span class="p">,</span> <span class="n">make_archive</span>
 <span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">S3Task</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
-<span class="n">ALL_WORKFLOW_TYPES</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;static_energy&quot;</span><span class="p">,</span>
+<span class="n">WORKFLOW_TYPES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;static-energy&quot;</span><span class="p">,</span>
     <span class="s2">&quot;relaxation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;population_analysis&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;band_structure&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;density_of_states&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;population-analysis&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;band-structure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;density-of-states&quot;</span><span class="p">,</span>
     <span class="s2">&quot;dynamics&quot;</span><span class="p">,</span>
     <span class="s2">&quot;diffusion&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_list_of_workflows_by_type</span><span class="p">(</span>
+    <span class="n">flow_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">full_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a list of all the workflows located in the given module</span>
+<span class="sd">    Returns a list of all the workflows located in the given module.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Make sure the type is supported</span>
-    <span class="k">if</span> <span class="n">flow_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">flow_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">WORKFLOW_TYPES</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">flow_type</span><span class="si">}</span><span class="s2"> is not allowed. Please use a workflow type from this&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; list: </span><span class="si">{</span><span class="n">ALL_WORKFLOW_TYPES</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; list: </span><span class="si">{</span><span class="n">WORKFLOW_TYPES</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
+    <span class="c1"># switch the naming convention from &quot;flow-name&quot; to &quot;flow_name&quot;.</span>
+    <span class="n">flow_type_u</span> <span class="o">=</span> <span class="n">flow_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
     <span class="c1"># grab the relevent module</span>
-    <span class="n">flow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">flow_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">flow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">flow_type_u</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># This loop goes through all attributes (as strings) of the workflow module</span>
     <span class="c1"># and select only those that are workflow or s3tasks.</span>
@@ -98,13 +125,17 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">S3Task</span><span class="p">):</span>
             <span class="c1"># We remove the _workflow ending for each because it&#39;s repetitve.</span>
             <span class="c1"># We also change the name from &quot;flow_name&quot; to &quot;flow-name&quot;.</span>
-            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr_name</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s2">&quot;_workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">))</span>
+            <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">attr_name</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s2">&quot;_workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="c1"># If requested, convert this to the full name.</span>
+            <span class="k">if</span> <span class="n">full_name</span><span class="p">:</span>
+                <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">flow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span>
     <span class="c1"># OPTIMIZE: is there a more efficient way to do this?</span>
 
     <span class="k">return</span> <span class="n">workflow_names</span>
 
 
-<span class="k">def</span> <span class="nf">get_list_of_all_workflows</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">get_list_of_all_workflows</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of all the workflows of all types.</span>
 
@@ -113,20 +144,242 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">flow_type</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">:</span>
-
-        <span class="n">workflow_type_names</span> <span class="o">=</span> <span class="n">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">)</span>
-
-        <span class="c1"># we add the type to the start of each workflow name and switch underscores</span>
-        <span class="c1"># to dashes bc they are more reader-friendly</span>
-        <span class="n">workflow_type_names</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">flow_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">w</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workflow_type_names</span>
-        <span class="p">]</span>
-
-        <span class="n">workflow_names</span> <span class="o">+=</span> <span class="n">workflow_type_names</span>
+    <span class="k">for</span> <span class="n">flow_type</span> <span class="ow">in</span> <span class="n">WORKFLOW_TYPES</span><span class="p">:</span>
+        <span class="n">workflow_names</span> <span class="o">+=</span> <span class="n">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">workflow_names</span>
+
+
+<span class="k">def</span> <span class="nf">get_workflow</span><span class="p">(</span>
+    <span class="n">workflow_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">precheck_flow_exists</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">print_equivalent_import</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Workflow</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a utility for that grabs a workflow from the simmate workflows.</span>
+
+<span class="sd">    This is typically used when we need to dynamically import a workflow, such</span>
+<span class="sd">    as when calling a workflow through the command-line. We recommend avoiding</span>
+<span class="sd">    this function when possible, and instead directly import your workflow.</span>
+
+<span class="sd">    For example...</span>
+<span class="sd">    ``` python</span>
+<span class="sd">    from simmate.workflows.utilities import get_workflow</span>
+
+<span class="sd">    matproj_workflow = get_workflow(&quot;relaxation/matproj&quot;)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    ...does the same exact thing as...</span>
+<span class="sd">    ``` python</span>
+<span class="sd">    from simmate.workflows.relaxation import matproj_workflow</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Note the naming of workflows therefore follows the format:</span>
+<span class="sd">    ``` python</span>
+
+<span class="sd">    # an example import of some workflow</span>
+<span class="sd">    from simmate.workflows.example_module import example_flowtype_workflow</span>
+
+<span class="sd">    # an example of how what this workflows name would be</span>
+<span class="sd">    workflow_name = &quot;example-module/example-flowtype&quot;</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - `workflow_name`:</span>
+<span class="sd">        Name of the workflow to load. Examples include &quot;relaxation/matproj&quot;,</span>
+<span class="sd">        &quot;static-energy/quality01&quot;, and &quot;diffusion/all-paths&quot;</span>
+<span class="sd">    - `precheck_flow_exists`:</span>
+<span class="sd">        Whether to check if the workflow actually exists before attempting the</span>
+<span class="sd">        import. Note, this requires loading all other workflows in order to make</span>
+<span class="sd">        this check, so it slows down the function substansially. Defaults to false.</span>
+<span class="sd">    - `print_equivalent_import`:</span>
+<span class="sd">        Whether to print a message indicating the equivalent import for this</span>
+<span class="sd">        workflow. Typically this is only useful for beginners using the CLI.</span>
+<span class="sd">        Defaults to false.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># make sure we have a proper workflow name provided.</span>
+    <span class="c1"># This is optional because it is slow and loads all other workflows, rather</span>
+    <span class="c1"># than just the one we are interested in.</span>
+    <span class="k">if</span> <span class="n">precheck_flow_exists</span><span class="p">:</span>
+        <span class="n">allowed_workflows</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">workflow_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_workflows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
+                <span class="s2">&quot;The workflow you provided isn&#39;t known. Make sure you don&#39;t have any &quot;</span>
+                <span class="s2">&quot;typos! If you want a list of all available workflows, use the command &quot;</span>
+                <span class="s2">&quot;`simmate workflows list-all`. You can also interactively explore &quot;</span>
+                <span class="s2">&quot;workflows with `simmate workflows explore`&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># parse the workflow name. (e.g. static-energy/mit --&gt; static-energy + mit)</span>
+    <span class="n">type_name</span><span class="p">,</span> <span class="n">preset_name</span> <span class="o">=</span> <span class="n">workflow_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+    <span class="n">preset_name</span> <span class="o">=</span> <span class="n">preset_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+    <span class="c1"># The naming convention matches the import path, so we can load the workflow</span>
+    <span class="n">workflow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># If requested, print a message indicating the import we are using</span>
+    <span class="k">if</span> <span class="n">print_equivalent_import</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Using... from simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2"> import </span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span>
+        <span class="p">)</span>
+    <span class="c1"># This line effectly does the same as...</span>
+    <span class="c1">#   from simmate.workflows.{type_name} import {preset_name}_workflow</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflow_module</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">workflow</span>
+
+
+<span class="k">def</span> <span class="nf">load_results_from_directories</span><span class="p">(</span>
+    <span class="n">base_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Goes through a given directory and finds all &quot;simmate-task-&quot; folders and zip</span>
+<span class="sd">    archives present. The simmate_metadata.yaml file is used in each of these</span>
+<span class="sd">    to load results into the database. All folders will be converted to archives</span>
+<span class="sd">    once they&#39;ve been loaded.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - `base_directory`:</span>
+<span class="sd">        The main directory that will contain folders to archive. Defaults to the</span>
+<span class="sd">        working directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># load the full path to the desired directory</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">base_directory</span><span class="p">)</span>
+
+    <span class="c1"># grab all files/folders in this directory and then limit this list to those</span>
+    <span class="c1"># that are...</span>
+    <span class="c1">#   1. folders</span>
+    <span class="c1">#   2. start with &quot;simmate-task-&quot;</span>
+    <span class="c1">#   3. haven&#39;t been modified for at least time_cutoff</span>
+    <span class="n">foldernames</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;simmate-task-&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Now go through this list and archive the folders that met the criteria</span>
+    <span class="c1"># and load the data from each.</span>
+    <span class="k">for</span> <span class="n">foldername</span> <span class="ow">in</span> <span class="n">foldernames</span><span class="p">:</span>
+
+        <span class="c1"># Print message for monitoring progress.</span>
+        <span class="c1"># TODO: consider switching to tqdm</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading data from... </span><span class="se">\n\t</span><span class="si">{</span><span class="n">foldername</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If we have a zip file, we need to unpack it before we can read results</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">foldername</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span>
+                <span class="n">filename</span><span class="o">=</span><span class="n">foldername</span><span class="p">,</span>
+                <span class="n">extract_dir</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># remove the &quot;.zip&quot; ending for our folder</span>
+            <span class="n">foldername</span> <span class="o">=</span> <span class="n">foldername</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s2">&quot;.zip&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Grab the metadata file which tells us key information</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">foldername</span><span class="p">,</span> <span class="s2">&quot;simmate_metadata.yaml&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">full_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="c1"># see which workflow was used -- which also tells us the database table</span>
+        <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;workflow_name&quot;</span><span class="p">]</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span>
+
+        <span class="c1"># now load the data</span>
+        <span class="n">results_db</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="n">foldername</span><span class="p">)</span>
+
+        <span class="c1"># use the metadata to update the other fields</span>
+        <span class="n">results_db</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span>
+        <span class="n">results_db</span><span class="o">.</span><span class="n">prefect_flow_run_id</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">]</span>
+
+        <span class="c1"># note the directory might have been moved from when this was originally</span>
+        <span class="c1"># ran vs where it is now. Therefore, we update the folder location here.</span>
+        <span class="n">results_db</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">foldername</span>
+
+        <span class="c1"># Now save the results and convert the folder to an archive</span>
+        <span class="n">results_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">make_archive</span><span class="p">(</span><span class="n">foldername</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_unique_parameters</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of all unique parameter names accross all workflows.</span>
+
+<span class="sd">    This utility is really just to help developers ensure they are covering</span>
+<span class="sd">    all cases when implementing new features, so this function isn&#39;t actually</span>
+<span class="sd">    called elsewhere.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">flownames</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
+    <span class="n">unique_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">flowname</span> <span class="ow">in</span> <span class="n">flownames</span><span class="p">:</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">flowname</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">workflow</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_parameters</span><span class="p">:</span>
+                <span class="n">unique_parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">unique_parameters</span>
+
+
+<span class="c1"># TODO: what if I called this within the workflow.run method instead?</span>
+<span class="c1"># I could have a `_parse_parameters` method for each Workflow class that does this</span>
+<span class="c1"># right before calling super().run() too</span>
+<span class="k">def</span> <span class="nf">parse_parameters</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This utility is meant to take a dictionary of parameters for a workflow and</span>
+<span class="sd">    then convert them to proper python objects.</span>
+
+<span class="sd">    For example, a common input parameter for workflows is &quot;structure&quot;, which</span>
+<span class="sd">    can be provided a number of ways:</span>
+<span class="sd">        - a filename</span>
+<span class="sd">        - a json string</span>
+<span class="sd">        - a dictionary pointing to a database entry</span>
+<span class="sd">        - a toolkit Structure object</span>
+<span class="sd">        - etc...</span>
+
+<span class="sd">    Even though all of these inputs are accepts, `workflow.run` always expects</span>
+<span class="sd">    a</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># we don&#39;t want to pass arguments like command=None or structure=None if the</span>
+    <span class="c1"># user didn&#39;t provide this input parameter. Instead, we want the workflow to</span>
+    <span class="c1"># use its own default value. To do this, we first check if the parameter</span>
+    <span class="c1"># is set in our kwargs dictionary and making sure the value is NOT None.</span>
+    <span class="c1"># If it is None, then we remove it from our final list of kwargs. This</span>
+    <span class="c1"># is only done for command, directory, and structure inputs -- as these</span>
+    <span class="c1"># are the three that are typically assumed to be present (see the CLI).</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">structure</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">structure</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;structures&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">structure_filenames</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;structures&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;structures&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">structure_filenames</span>
+        <span class="p">]</span>
+
+    <span class="k">if</span> <span class="s2">&quot;migration_hop&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">migration_hop</span> <span class="o">=</span> <span class="n">MigrationHop</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">])</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">migration_hop</span>
+
+    <span class="k">if</span> <span class="s2">&quot;supercell_start&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_start&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="s2">&quot;supercell_end&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">kwargs</span>
 </pre></div>
 
         </details>
@@ -137,25 +390,31 @@
 
         
             <span class="def">def</span>
-            <span class="name">get_list_of_workflows_by_type</span><span class="signature">(flow_type: str)</span>:
+            <span class="name">get_list_of_workflows_by_type</span><span class="signature">(flow_type: str, full_name: bool = True) -&gt; List[str]</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_list_of_workflows_by_type</span><span class="p">(</span>
+    <span class="n">flow_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">full_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a list of all the workflows located in the given module</span>
+<span class="sd">    Returns a list of all the workflows located in the given module.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Make sure the type is supported</span>
-    <span class="k">if</span> <span class="n">flow_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">flow_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">WORKFLOW_TYPES</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">flow_type</span><span class="si">}</span><span class="s2"> is not allowed. Please use a workflow type from this&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; list: </span><span class="si">{</span><span class="n">ALL_WORKFLOW_TYPES</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; list: </span><span class="si">{</span><span class="n">WORKFLOW_TYPES</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
+    <span class="c1"># switch the naming convention from &quot;flow-name&quot; to &quot;flow_name&quot;.</span>
+    <span class="n">flow_type_u</span> <span class="o">=</span> <span class="n">flow_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
     <span class="c1"># grab the relevent module</span>
-    <span class="n">flow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">flow_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">flow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">flow_type_u</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># This loop goes through all attributes (as strings) of the workflow module</span>
     <span class="c1"># and select only those that are workflow or s3tasks.</span>
@@ -165,7 +424,11 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">S3Task</span><span class="p">):</span>
             <span class="c1"># We remove the _workflow ending for each because it&#39;s repetitve.</span>
             <span class="c1"># We also change the name from &quot;flow_name&quot; to &quot;flow-name&quot;.</span>
-            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr_name</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s2">&quot;_workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">))</span>
+            <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">attr_name</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s2">&quot;_workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="c1"># If requested, convert this to the full name.</span>
+            <span class="k">if</span> <span class="n">full_name</span><span class="p">:</span>
+                <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">flow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+            <span class="n">workflow_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span>
     <span class="c1"># OPTIMIZE: is there a more efficient way to do this?</span>
 
     <span class="k">return</span> <span class="n">workflow_names</span>
@@ -173,7 +436,7 @@
 
         </details>
 
-            <div class="docstring"><p>Returns a list of all the workflows located in the given module</p>
+            <div class="docstring"><p>Returns a list of all the workflows located in the given module.</p>
 </div>
 
 
@@ -183,12 +446,12 @@
 
         
             <span class="def">def</span>
-            <span class="name">get_list_of_all_workflows</span><span class="signature">()</span>:
+            <span class="name">get_list_of_all_workflows</span><span class="signature">() -&gt; List[str]</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_list_of_all_workflows</span><span class="p">():</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_list_of_all_workflows</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of all the workflows of all types.</span>
 
@@ -197,18 +460,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">workflow_names</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">flow_type</span> <span class="ow">in</span> <span class="n">ALL_WORKFLOW_TYPES</span><span class="p">:</span>
-
-        <span class="n">workflow_type_names</span> <span class="o">=</span> <span class="n">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">)</span>
-
-        <span class="c1"># we add the type to the start of each workflow name and switch underscores</span>
-        <span class="c1"># to dashes bc they are more reader-friendly</span>
-        <span class="n">workflow_type_names</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">flow_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">w</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workflow_type_names</span>
-        <span class="p">]</span>
-
-        <span class="n">workflow_names</span> <span class="o">+=</span> <span class="n">workflow_type_names</span>
+    <span class="k">for</span> <span class="n">flow_type</span> <span class="ow">in</span> <span class="n">WORKFLOW_TYPES</span><span class="p">:</span>
+        <span class="n">workflow_names</span> <span class="o">+=</span> <span class="n">get_list_of_workflows_by_type</span><span class="p">(</span><span class="n">flow_type</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">workflow_names</span>
 </pre></div>
@@ -219,6 +472,375 @@
 
 <p>This utility was make specifically for the CLI where we print out all
 workflow names for the user.</p>
+</div>
+
+
+                </section>
+                <section id="get_workflow">
+                            <div class="attr function"><a class="headerlink" href="#get_workflow">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_workflow</span><span class="signature">(
+    workflow_name: str,
+    precheck_flow_exists: bool = False,
+    print_equivalent_import: bool = False
+) -&gt; <a href="../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_workflow</span><span class="p">(</span>
+    <span class="n">workflow_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">precheck_flow_exists</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">print_equivalent_import</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Workflow</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a utility for that grabs a workflow from the simmate workflows.</span>
+
+<span class="sd">    This is typically used when we need to dynamically import a workflow, such</span>
+<span class="sd">    as when calling a workflow through the command-line. We recommend avoiding</span>
+<span class="sd">    this function when possible, and instead directly import your workflow.</span>
+
+<span class="sd">    For example...</span>
+<span class="sd">    ``` python</span>
+<span class="sd">    from simmate.workflows.utilities import get_workflow</span>
+
+<span class="sd">    matproj_workflow = get_workflow(&quot;relaxation/matproj&quot;)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    ...does the same exact thing as...</span>
+<span class="sd">    ``` python</span>
+<span class="sd">    from simmate.workflows.relaxation import matproj_workflow</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Note the naming of workflows therefore follows the format:</span>
+<span class="sd">    ``` python</span>
+
+<span class="sd">    # an example import of some workflow</span>
+<span class="sd">    from simmate.workflows.example_module import example_flowtype_workflow</span>
+
+<span class="sd">    # an example of how what this workflows name would be</span>
+<span class="sd">    workflow_name = &quot;example-module/example-flowtype&quot;</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - `workflow_name`:</span>
+<span class="sd">        Name of the workflow to load. Examples include &quot;relaxation/matproj&quot;,</span>
+<span class="sd">        &quot;static-energy/quality01&quot;, and &quot;diffusion/all-paths&quot;</span>
+<span class="sd">    - `precheck_flow_exists`:</span>
+<span class="sd">        Whether to check if the workflow actually exists before attempting the</span>
+<span class="sd">        import. Note, this requires loading all other workflows in order to make</span>
+<span class="sd">        this check, so it slows down the function substansially. Defaults to false.</span>
+<span class="sd">    - `print_equivalent_import`:</span>
+<span class="sd">        Whether to print a message indicating the equivalent import for this</span>
+<span class="sd">        workflow. Typically this is only useful for beginners using the CLI.</span>
+<span class="sd">        Defaults to false.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># make sure we have a proper workflow name provided.</span>
+    <span class="c1"># This is optional because it is slow and loads all other workflows, rather</span>
+    <span class="c1"># than just the one we are interested in.</span>
+    <span class="k">if</span> <span class="n">precheck_flow_exists</span><span class="p">:</span>
+        <span class="n">allowed_workflows</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">workflow_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_workflows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
+                <span class="s2">&quot;The workflow you provided isn&#39;t known. Make sure you don&#39;t have any &quot;</span>
+                <span class="s2">&quot;typos! If you want a list of all available workflows, use the command &quot;</span>
+                <span class="s2">&quot;`simmate workflows list-all`. You can also interactively explore &quot;</span>
+                <span class="s2">&quot;workflows with `simmate workflows explore`&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># parse the workflow name. (e.g. static-energy/mit --&gt; static-energy + mit)</span>
+    <span class="n">type_name</span><span class="p">,</span> <span class="n">preset_name</span> <span class="o">=</span> <span class="n">workflow_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+    <span class="n">preset_name</span> <span class="o">=</span> <span class="n">preset_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+    <span class="c1"># The naming convention matches the import path, so we can load the workflow</span>
+    <span class="n">workflow_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># If requested, print a message indicating the import we are using</span>
+    <span class="k">if</span> <span class="n">print_equivalent_import</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Using... from simmate.workflows.</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2"> import </span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span>
+        <span class="p">)</span>
+    <span class="c1"># This line effectly does the same as...</span>
+    <span class="c1">#   from simmate.workflows.{type_name} import {preset_name}_workflow</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflow_module</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">preset_name</span><span class="si">}</span><span class="s2">_workflow&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">workflow</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is a utility for that grabs a workflow from the simmate workflows.</p>
+
+<p>This is typically used when we need to dynamically import a workflow, such
+as when calling a workflow through the command-line. We recommend avoiding
+this function when possible, and instead directly import your workflow.</p>
+
+<p>For example...</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="">simmate.workflows.utilities</a></span> <span class="kn">import</span> <span class="n">get_workflow</span>
+
+<span class="n">matproj_workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="s2">&quot;relaxation/matproj&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p>...does the same exact thing as...</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="relaxation.html">simmate.workflows.relaxation</a></span> <span class="kn">import</span> <span class="n">matproj_workflow</span>
+</code></pre></div>
+
+<p>Note the naming of workflows therefore follows the format:</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># an example import of some workflow</span>
+<span class="kn">from</span> <span class="nn"><a href="../workflows.html#example_module">simmate.workflows.example_module</a></span> <span class="kn">import</span> <span class="n">example_flowtype_workflow</span>
+
+<span class="c1"># an example of how what this workflows name would be</span>
+<span class="n">workflow_name</span> <span class="o">=</span> <span class="s2">&quot;example-module/example-flowtype&quot;</span>
+</code></pre></div>
+
+<h2 id="parameters">Parameters</h2>
+
+<ul>
+<li><code>workflow_name</code>:
+Name of the workflow to load. Examples include "relaxation/matproj",
+"static-energy/quality01", and "diffusion/all-paths"</li>
+<li><code>precheck_flow_exists</code>:
+Whether to check if the workflow actually exists before attempting the
+import. Note, this requires loading all other workflows in order to make
+this check, so it slows down the function substansially. Defaults to false.</li>
+<li><code>print_equivalent_import</code>:
+Whether to print a message indicating the equivalent import for this
+workflow. Typically this is only useful for beginners using the CLI.
+Defaults to false.</li>
+</ul>
+</div>
+
+
+                </section>
+                <section id="load_results_from_directories">
+                            <div class="attr function"><a class="headerlink" href="#load_results_from_directories">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">load_results_from_directories</span><span class="signature">(base_directory: str = &#39;.&#39;)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_results_from_directories</span><span class="p">(</span>
+    <span class="n">base_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Goes through a given directory and finds all &quot;simmate-task-&quot; folders and zip</span>
+<span class="sd">    archives present. The simmate_metadata.yaml file is used in each of these</span>
+<span class="sd">    to load results into the database. All folders will be converted to archives</span>
+<span class="sd">    once they&#39;ve been loaded.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - `base_directory`:</span>
+<span class="sd">        The main directory that will contain folders to archive. Defaults to the</span>
+<span class="sd">        working directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># load the full path to the desired directory</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">base_directory</span><span class="p">)</span>
+
+    <span class="c1"># grab all files/folders in this directory and then limit this list to those</span>
+    <span class="c1"># that are...</span>
+    <span class="c1">#   1. folders</span>
+    <span class="c1">#   2. start with &quot;simmate-task-&quot;</span>
+    <span class="c1">#   3. haven&#39;t been modified for at least time_cutoff</span>
+    <span class="n">foldernames</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;simmate-task-&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Now go through this list and archive the folders that met the criteria</span>
+    <span class="c1"># and load the data from each.</span>
+    <span class="k">for</span> <span class="n">foldername</span> <span class="ow">in</span> <span class="n">foldernames</span><span class="p">:</span>
+
+        <span class="c1"># Print message for monitoring progress.</span>
+        <span class="c1"># TODO: consider switching to tqdm</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading data from... </span><span class="se">\n\t</span><span class="si">{</span><span class="n">foldername</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If we have a zip file, we need to unpack it before we can read results</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">foldername</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span>
+                <span class="n">filename</span><span class="o">=</span><span class="n">foldername</span><span class="p">,</span>
+                <span class="n">extract_dir</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># remove the &quot;.zip&quot; ending for our folder</span>
+            <span class="n">foldername</span> <span class="o">=</span> <span class="n">foldername</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s2">&quot;.zip&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Grab the metadata file which tells us key information</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">foldername</span><span class="p">,</span> <span class="s2">&quot;simmate_metadata.yaml&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">full_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="c1"># see which workflow was used -- which also tells us the database table</span>
+        <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;workflow_name&quot;</span><span class="p">]</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span>
+
+        <span class="c1"># now load the data</span>
+        <span class="n">results_db</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="n">foldername</span><span class="p">)</span>
+
+        <span class="c1"># use the metadata to update the other fields</span>
+        <span class="n">results_db</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span>
+        <span class="n">results_db</span><span class="o">.</span><span class="n">prefect_flow_run_id</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">]</span>
+
+        <span class="c1"># note the directory might have been moved from when this was originally</span>
+        <span class="c1"># ran vs where it is now. Therefore, we update the folder location here.</span>
+        <span class="n">results_db</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">foldername</span>
+
+        <span class="c1"># Now save the results and convert the folder to an archive</span>
+        <span class="n">results_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">make_archive</span><span class="p">(</span><span class="n">foldername</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Goes through a given directory and finds all "simmate-task-" folders and zip
+archives present. The simmate_metadata.yaml file is used in each of these
+to load results into the database. All folders will be converted to archives
+once they've been loaded.</p>
+
+<h2 id="parameters">Parameters</h2>
+
+<ul>
+<li><code>base_directory</code>:
+The main directory that will contain folders to archive. Defaults to the
+working directory.</li>
+</ul>
+</div>
+
+
+                </section>
+                <section id="get_unique_parameters">
+                            <div class="attr function"><a class="headerlink" href="#get_unique_parameters">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_unique_parameters</span><span class="signature">() -&gt; List[str]</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_unique_parameters</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of all unique parameter names accross all workflows.</span>
+
+<span class="sd">    This utility is really just to help developers ensure they are covering</span>
+<span class="sd">    all cases when implementing new features, so this function isn&#39;t actually</span>
+<span class="sd">    called elsewhere.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">flownames</span> <span class="o">=</span> <span class="n">get_list_of_all_workflows</span><span class="p">()</span>
+    <span class="n">unique_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">flowname</span> <span class="ow">in</span> <span class="n">flownames</span><span class="p">:</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">flowname</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">workflow</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_parameters</span><span class="p">:</span>
+                <span class="n">unique_parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">unique_parameters</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Returns a list of all unique parameter names accross all workflows.</p>
+
+<p>This utility is really just to help developers ensure they are covering
+all cases when implementing new features, so this function isn't actually
+called elsewhere.</p>
+</div>
+
+
+                </section>
+                <section id="parse_parameters">
+                            <div class="attr function"><a class="headerlink" href="#parse_parameters">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">parse_parameters</span><span class="signature">(**kwargs) -&gt; dict</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">parse_parameters</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This utility is meant to take a dictionary of parameters for a workflow and</span>
+<span class="sd">    then convert them to proper python objects.</span>
+
+<span class="sd">    For example, a common input parameter for workflows is &quot;structure&quot;, which</span>
+<span class="sd">    can be provided a number of ways:</span>
+<span class="sd">        - a filename</span>
+<span class="sd">        - a json string</span>
+<span class="sd">        - a dictionary pointing to a database entry</span>
+<span class="sd">        - a toolkit Structure object</span>
+<span class="sd">        - etc...</span>
+
+<span class="sd">    Even though all of these inputs are accepts, `workflow.run` always expects</span>
+<span class="sd">    a</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># we don&#39;t want to pass arguments like command=None or structure=None if the</span>
+    <span class="c1"># user didn&#39;t provide this input parameter. Instead, we want the workflow to</span>
+    <span class="c1"># use its own default value. To do this, we first check if the parameter</span>
+    <span class="c1"># is set in our kwargs dictionary and making sure the value is NOT None.</span>
+    <span class="c1"># If it is None, then we remove it from our final list of kwargs. This</span>
+    <span class="c1"># is only done for command, directory, and structure inputs -- as these</span>
+    <span class="c1"># are the three that are typically assumed to be present (see the CLI).</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">structure</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">structure</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;structures&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">structure_filenames</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;structures&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;structures&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">structure_filenames</span>
+        <span class="p">]</span>
+
+    <span class="k">if</span> <span class="s2">&quot;migration_hop&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">migration_hop</span> <span class="o">=</span> <span class="n">MigrationHop</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">])</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;migration_hop&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">migration_hop</span>
+
+    <span class="k">if</span> <span class="s2">&quot;supercell_start&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_start&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="s2">&quot;supercell_end&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">kwargs</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This utility is meant to take a dictionary of parameters for a workflow and
+then convert them to proper python objects.</p>
+
+<p>For example, a common input parameter for workflows is "structure", which
+can be provided a number of ways:
+    - a filename
+    - a json string
+    - a dictionary pointing to a database entry
+    - a toolkit Structure object
+    - etc...</p>
+
+<p>Even though all of these inputs are accepts, <code>workflow.run</code> always expects
+a</p>
 </div>
 
 

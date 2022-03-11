@@ -466,10 +466,11 @@ structure object, use the <code><a href="#MITDiffusionAnalysis.to_toolkit">to_to
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -602,7 +603,13 @@ columns:
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -613,18 +620,43 @@ columns:
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -704,6 +736,7 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
             <div><dt><a href="../../../database/base_data_types/nudged_elastic_band.html#DiffusionAnalysis">simmate.database.base_data_types.nudged_elastic_band.DiffusionAnalysis</a></dt>
                                 <dd id="MITDiffusionAnalysis.Meta" class="class"><a href="../../../database/base_data_types/nudged_elastic_band.html#DiffusionAnalysis.Meta">Meta</a></dd>
                 <dd id="MITDiffusionAnalysis.from_toolkit" class="function"><a href="../../../database/base_data_types/nudged_elastic_band.html#DiffusionAnalysis.from_toolkit">from_toolkit</a></dd>
+                <dd id="MITDiffusionAnalysis.from_directory" class="function"><a href="../../../database/base_data_types/nudged_elastic_band.html#DiffusionAnalysis.from_directory">from_directory</a></dd>
                 <dd id="MITDiffusionAnalysis.create_subclasses" class="function"><a href="../../../database/base_data_types/nudged_elastic_band.html#DiffusionAnalysis.create_subclasses">create_subclasses</a></dd>
 
             </div>
@@ -943,7 +976,13 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Where the data came from. This could be a number of things, including...</p>
+            <div class="docstring"><blockquote>
+  <p>Note, this field is highly experimental at the moment and subject to
+  change.</p>
+</blockquote>
+
+<p>This column indicated the data came from, and it could be a number of things,
+including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -954,18 +993,43 @@ object the first time, the query is executed.</p>
 </ul>
 
 <p>By default, this is a JSON field to account for all scenarios, but some
-tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is a 
-constant and therefore overwritten as an attribute.</p>
+tables (such as those in <code><a href="../../../database/third_parties.html">simmate.database.third_parties</a></code>) this is value
+should be the same for ALL entries in the table and therefore the column is
+overwritten as an attribute.</p>
 
-<p>EXAMPLES: (source type --> source_id)</p>
+<p>For other tables where this is not a constant, here are some examples of
+values used in this column:</p>
 
-<ul>
-<li>MaterialsProject --> mp-123</li>
-<li>PyXtalStructure --> null</li>
-<li>AtomicPurmutation --> 123</li>
-<li>HereditaryMutation --> [123,124]</li>
-<li>user_submission --> null</li>
-</ul>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a random structure creator</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PyXtalStructure&quot;</span><span class="p">}</span>
+
+<span class="c1"># from a templated structure creator (e.g. substituition or prototypes)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;PrototypeStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;AFLOWPrototypes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># from a multi-structure transformation</span>
+<span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div>
 </div>
 
 
@@ -1066,6 +1130,8 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
             <div><dt><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationHop">simmate.database.base_data_types.nudged_elastic_band.MigrationHop</a></dt>
                                 <dd id="MITMigrationHop.Meta" class="class"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationHop.Meta">Meta</a></dd>
                 <dd id="MITMigrationHop.to_toolkit" class="function"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationHop.to_toolkit">to_toolkit</a></dd>
+                <dd id="MITMigrationHop.from_directory" class="function"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationHop.from_directory">from_directory</a></dd>
+                <dd id="MITMigrationHop.from_pymatgen" class="function"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationHop.from_pymatgen">from_pymatgen</a></dd>
                 <dd id="MITMigrationHop.create_subclasses_from_diffusion_analysis" class="function"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationHop.create_subclasses_from_diffusion_analysis">create_subclasses_from_diffusion_analysis</a></dd>
 
             </div>
@@ -1289,10 +1355,11 @@ structure object, use the <code><a href="#MITMigrationImage.to_toolkit">to_toolk
     
             <div class="docstring"><p>the base chemical system (ex: "Y-C-F")</p>
 
-<p>Note: be careful when searching for elements! Running chemical_system__includes="C"
+<p>Note: be careful when searching for elements! Running chemical_system__contains="C"
 on this field won't do what you expect -- because it will return structures
 containing Ca, Cs, Ce, Cl, and so on. If you want to search for structures
-that contain a specific element, use elements__contains="C" instead.</p>
+that contain a specific element, use elements__contains='"C"' instead. The
+odd use of quotes '"C"' is required here!</p>
 </div>
 
 
@@ -1499,7 +1566,6 @@ object the first time, the query is executed.</p>
                                 <dd id="MITMigrationImage.Meta" class="class"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationImage.Meta">Meta</a></dd>
                 <dd id="MITMigrationImage.base_info" class="variable"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationImage.base_info">base_info</a></dd>
                 <dd id="MITMigrationImage.source" class="variable"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationImage.source">source</a></dd>
-                <dd id="MITMigrationImage.update_many_from_analysis" class="function"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationImage.update_many_from_analysis">update_many_from_analysis</a></dd>
                 <dd id="MITMigrationImage.create_subclass_from_migration_hop" class="function"><a href="../../../database/base_data_types/nudged_elastic_band.html#MigrationImage.create_subclass_from_migration_hop">create_subclass_from_migration_hop</a></dd>
 
             </div>
