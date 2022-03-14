@@ -1,0 +1,28 @@
+<!-- Calculation Info -->
+<div class="container p-4">
+
+    <h3>Prefect Cloud:</h3>
+    {% if calculation.flow_run_view %}
+    <ul>
+        <li><b>Name:</b> {{ calculation.prefect_flow_run_name }}</li>
+        <li><b>ID:</b> {{ calculation.prefect_flow_run_id }}</li>
+        <li><b>Current State:</b> {{ calculation.prefect_state }}</li>
+    </ul>
+    <a role="button" class="btn btn-primary btn" href="{{ calculation.prefect_cloud_link }}" target="_blank">
+        Monitor on Prefect</a>
+    {% else %}
+    <a>This workflow run was ran locally and not through Prefect Cloud</a>
+    {% endif %}
+
+    </br>
+    </br>
+
+    <h3>Calculation Information:</h3>
+    <ul>
+        <li><b>File Location:</b> {{ calculation.directory }}</li>
+        <li><b>Created at:</b> {{ calculation.created_at }}</li>
+        <li><b>Last updated at:</b> {{ calculation.updated_at }}</li>
+        <li><b>Corrections Used:</b> {{ calculation.corrections }}</li>
+    </ul>
+
+</div>

@@ -325,24 +325,6 @@ class DatabaseTable(models.Model):
     """
 
     @classmethod
-    def show_columns(cls):
-        """
-        Prints a list of all the column names for this table and indicates which
-        columns are related to other tables. This is primarily used to help users
-        interactively view what data is available.
-        """
-        # Iterate through and grab the columns
-        column_names = [
-            column.name + f" (relation to {column.related_model.__name__})"
-            if column.is_relation
-            else column.name
-            for column in cls._meta.get_fields()
-        ]
-
-        # Then use yaml to make the printout pretty (no quotes and separate lines)
-        print(yaml.dump(column_names))
-
-    @classmethod
     def create_subclass(
         cls,
         name: str,
@@ -776,3 +758,90 @@ class DatabaseTable(models.Model):
             confirm_sqlite_parallel=True,  # we already confirmed this above
         )
         print("Done.\n")
+
+    @classmethod
+    def get_column_names(cls) -> List[str]:
+        """
+        Returns a list of all the column names for this table and indicates which
+        columns are related to other tables. This is primarily used to help
+        view what data is available.
+        """
+        return [column.name for column in cls._meta.get_fields()]
+
+    @classmethod
+    def show_columns(cls):
+        """
+        Prints a list of all the column names for this table and indicates which
+        columns are related to other tables. This is primarily used to help users
+        interactively view what data is available.
+        """
+        # Iterate through and grab the columns. Note we don't use get_column_names
+        # here because we are attaching relation data as well.
+        column_names = [
+            column.name + f" (relation to {column.related_model.__name__})"
+            if column.is_relation
+            else column.name
+            for column in cls._meta.get_fields()
+        ]
+
+        # Then use yaml to make the printout pretty (no quotes and separate lines)
+        print(yaml.dump(column_names))
+
+    @classmethod
+    def get_mixins(cls):
+        """
+        Grabs the mix-in Tables that were used to make this class. This will
+        be mix-ins like Structure, Forces, etc. from the
+        `simmate.database.base_data_types` module.
+        """
+        # this must be imported locally because it depends on all other classes
+        # from this module -- and will create circular import issues if outside
+        from simmate.database import base_data_types as simmate_mixins
+
+        return [
+            parent
+            for parent in cls.__bases__
+            if hasattr(simmate_mixins, parent.__name__)
+            and parent.__name__ != "DatabaseTable"
+        ]
+
+    @classmethod
+    def get_mixin_names(cls) -> List[str]:
+        return [mixin.__name__ for mixin in cls.get_mixins()]
+
+    @classmethod
+    def get_extra_columns(cls) -> List[str]:
+        """
+        Finds all columns that aren't covered by the supported Table mix-ins.
+
+        For example, a table made from...
+
+        ``` python
+        from simmate.database.base_data_types import (
+            table_column,
+            Structure,
+            Forces,
+        )
+
+        class ExampleTable(Structure, Forces):
+            custom_column1 = table_column.FloatField()
+            custom_column2 = table_column.FloatField()
+        ```
+
+        ... would return ...
+
+        ``` python
+        ["custom_column1", "custom_column2"]
+        ```
+        """
+
+        all_columns = cls.get_column_names()
+        columns_w_mixin = [
+            column for mixin in cls.get_mixins() for column in mixin.get_column_names()
+        ]
+        extra_columns = [
+            column
+            for column in all_columns
+            if column not in columns_w_mixin and column != "id"
+        ]
+        return extra_columns

@@ -44,10 +44,12 @@ Simmate
   <!-- Search Form -->
   {% load crispy_forms_tags %}
   <div class="container p-4">
-    <h2>Filter Search Results:</h2>
+    <h2>Filter Results:</h2>
+    <p>Table mix-ins: {{ filterset_mixins }}</p>
+    <p>Extra filters: {{ extra_filters }}</p>
     <form action="{% url 'workflow_detail' workflow.type workflow.name_short %}" method="get"
       enctype="multipart/form-data">
-      {{ filter.form | crispy }}
+      {{ filterset.form | crispy }}
       <button type="submit" class="btn btn-primary">Search</button>
     </form>
   </div>

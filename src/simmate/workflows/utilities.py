@@ -198,38 +198,49 @@ def load_results_from_directories(
         # TODO: consider switching to tqdm
         print(f"Loading data from... \n\t{foldername}")
 
-        # If we have a zip file, we need to unpack it before we can read results
-        if not os.path.isdir(foldername):
-            shutil.unpack_archive(
-                filename=foldername,
-                extract_dir=directory,
-            )
-            # remove the ".zip" ending for our folder
-            foldername = foldername.removesuffix(".zip")
+        # There may be many folders that contain failed or incomplete data.
+        # We don't want those to prevent others from being loaded so we put
+        # everything in a try/except.
+        try:
 
-        # Grab the metadata file which tells us key information
-        filename = os.path.join(foldername, "simmate_metadata.yaml")
-        with open(filename) as file:
-            metadata = yaml.full_load(file)
+            # If we have a zip file, we need to unpack it before we can read results
+            if not os.path.isdir(foldername):
+                shutil.unpack_archive(
+                    filename=foldername,
+                    extract_dir=directory,
+                )
+                # remove the ".zip" ending for our folder
+                foldername = foldername.removesuffix(".zip")
 
-        # see which workflow was used -- which also tells us the database table
-        workflow_name = metadata["workflow_name"]
-        workflow = get_workflow(workflow_name)
+            # Grab the metadata file which tells us key information
+            filename = os.path.join(foldername, "simmate_metadata.yaml")
+            with open(filename) as file:
+                metadata = yaml.full_load(file)
 
-        # now load the data
-        results_db = workflow.result_table.from_directory(foldername)
+            # see which workflow was used -- which also tells us the database table
+            workflow_name = metadata["workflow_name"]
+            workflow = get_workflow(workflow_name)
 
-        # use the metadata to update the other fields
-        results_db.source = metadata["source"]
-        results_db.prefect_flow_run_id = metadata["prefect_flow_run_id"]
+            # now load the data
+            results_db = workflow.result_table.from_directory(foldername)
 
-        # note the directory might have been moved from when this was originally
-        # ran vs where it is now. Therefore, we update the folder location here.
-        results_db.directory = foldername
+            # use the metadata to update the other fields
+            results_db.source = metadata["source"]
+            results_db.prefect_flow_run_id = metadata["prefect_flow_run_id"]
 
-        # Now save the results and convert the folder to an archive
-        results_db.save()
-        make_archive(foldername)
+            # note the directory might have been moved from when this was originally
+            # ran vs where it is now. Therefore, we update the folder location here.
+            results_db.directory = foldername
+
+            # Now save the results and convert the folder to an archive
+            results_db.save()
+            make_archive(foldername)
+
+            print("\tSuccessful.")
+
+        except:
+
+            print("\tFailed.")
 
 
 def get_unique_parameters() -> List[str]:
