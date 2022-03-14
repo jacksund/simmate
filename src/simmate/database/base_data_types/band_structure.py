@@ -8,8 +8,9 @@ import os
 
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.electronic_structure.bandstructure import (
-    BandStructure as ToolkitBandStructure,
+    BandStructureSymmLine as ToolkitBandStructure,
 )
+from pymatgen.electronic_structure.plotter import BSPlotter
 
 from simmate.database.base_data_types import (
     table_column,
@@ -72,6 +73,18 @@ class BandStructure(DatabaseTable):
 
     def to_toolkit_band_structure(self):
         return ToolkitBandStructure.from_dict(self.band_structure_data)
+
+    def get_bandstructure_plot(self):
+
+        # DEV NOTE: Pymatgen only implements matplotlib for their band-structures
+        # at the moment, but there are two scripts location elsewhere that can
+        # outline how this can be done with Plotly:
+        # https://plotly.com/python/v3/ipython-notebooks/density-of-states/
+        # https://github.com/materialsproject/crystaltoolkit/blob/main/crystal_toolkit/components/bandstructure.py
+
+        bs_plotter = BSPlotter(self.to_toolkit_band_structure())
+        plot = bs_plotter.get_plot()
+        return plot
 
 
 class BandStructureCalc(Structure, BandStructure, Calculation):

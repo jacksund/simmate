@@ -124,10 +124,18 @@ def render_from_table(
 
     NewFilterSet = DatabaseTableFilter.from_table(table)
 
+    # for the source dataset, not all tables have a "created_at" column, but
+    # when they do, we want to return results with the most recent additions first
+    if hasattr(table.objects, "created_at"):
+        intial_queryset = queryset = table.objects.order_by("-created_at").all()
+    else:
+        intial_queryset = queryset = table.objects.all()
+
     # TODO: consider using the following to dynamically name these classes
     #   NewClass = type(table.__name__, mixins, extra_attributes)
     class NewViewSet(SimmateAPIView):
-        queryset = table.objects.all()  # TODO: order_by("created_at") by default?
+        # we show the most recent calculations first
+        queryset = intial_queryset
         serializer_class = NewSerializer
         template_name = template
         extra_context = context

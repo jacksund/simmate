@@ -8,6 +8,7 @@ import os
 
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.electronic_structure.dos import CompleteDos
+from pymatgen.electronic_structure.plotter import DosPlotter
 
 from simmate.database.base_data_types import (
     table_column,
@@ -63,6 +64,33 @@ class DensityofStates(DatabaseTable):
 
     def to_toolkit_density_of_states(self):
         return CompleteDos.from_dict(self.density_of_states_data)
+
+    def get_densityofstates_plot(self):
+
+        # DEV NOTE: Pymatgen only implements matplotlib for their band-structures
+        # at the moment, but there are two scripts location elsewhere that can
+        # outline how this can be done with Plotly:
+        # https://plotly.com/python/v3/ipython-notebooks/density-of-states/
+        # https://github.com/materialsproject/crystaltoolkit/blob/main/crystal_toolkit/components/bandstructure.py
+
+        plotter = DosPlotter()
+        complete_dos = self.to_toolkit_density_of_states()
+
+        # Add the total density of States
+        plotter.add_dos("Total DOS", complete_dos)
+
+        # add element-projected density of states
+        plotter.add_dos_dict(complete_dos.get_element_dos())
+
+        # If I want plots for individual orbitals
+        # for site in vasprun.final_structure:
+        #     spd_dos = vasprun.complete_dos.get_site_spd_dos(site)
+        #     plotter.add_dos_dict(spd_dos)
+
+        # NOTE: get_dos_dict may be useful in the future
+
+        plot = plotter.get_plot()
+        return plot
 
 
 class DensityofStatesCalc(Structure, DensityofStates, Calculation):

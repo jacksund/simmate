@@ -29,6 +29,7 @@ Simmate
     </nav>
 
     <a>Table mix-ins: {{ table_mixins }}</a>
+    <a>Extra columns: {{ extra_columns }}</a>
 
     <!-- Iterate throuhg the possible mixins and pull the proper components. Is there a better way to do this as a django for-loop? -->
     {% if "Calculation" in table_mixins %}
@@ -79,10 +80,6 @@ Simmate
     {% include "workflows/base_data_types/forces.html"%}
     {% endif %}
     <!-- end of mix-ins -->
-
-    <a>Extra columns: {{ extra_columns }}</a>
-
-    {{ figure_convergence_html | safe }}
 
   </div>
 

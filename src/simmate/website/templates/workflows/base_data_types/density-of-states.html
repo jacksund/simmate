@@ -1,0 +1,15 @@
+<!-- Band-Structure Info -->
+<div class="container p-4">
+
+    <h3>Density of States:</h3>
+    <ul>
+        <li><b>Band gap:</b> {{ calculation.band_gap }}</li>
+        <li><b>Fermi energy:</b> {{ calculation.energy_fermi }}</li>
+        <li><b>Conduction band minimum:</b> {{ calculation.conduction_band_minimum }}</li>
+        <li><b>Valence band maximum:</b> {{ calculation.valence_band_maximum }}</li>
+    </ul>
+
+    {% load matplotlib_filter %}
+    {{ calculation.get_densityofstates_plot | matplotlib_figure }}
+
+</div>

@@ -1,0 +1,19 @@
+<!-- Band-Structure Info -->
+<div class="container p-4">
+
+    <h3>Band Structure:</h3>
+    <ul>
+        <li><b>Number of bands:</b> {{ calculation.nbands }}</li>
+        <li><b>Band gap:</b> {{ calculation.band_gap }}</li>
+        <li><b>Is gap direct:</b> {{ calculation.is_gap_direct }}</li>
+        <li><b>Direct band gap:</b> {{ calculation.band_gap_direct }}</li>
+        <li><b>Fermi energy:</b> {{ calculation.energy_fermi }}</li>
+        <li><b>Conduction band minimum:</b> {{ calculation.conduction_band_minimum }}</li>
+        <li><b>Valence band maximum:</b> {{ calculation.valence_band_maximum }}</li>
+        <li><b>Is metal:</b> {{ calculation.is_metal }}</li>
+    </ul>
+
+    {% load matplotlib_filter %}
+    {{ calculation.get_bandstructure_plot | matplotlib_figure }}
+
+</div>
