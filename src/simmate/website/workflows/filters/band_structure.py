@@ -13,9 +13,9 @@ class BandStructure(filters.FilterSet):
     class Meta:
         model = BandStructureTable
         fields = dict(
-            nbands=["exact", "range"],
-            band_gap=["exact", "range"],
-            band_gap_direct=["exact", "range"],
+            nbands=["range"],
+            band_gap=["range"],
+            band_gap_direct=["range"],
             is_gap_direct=["exact"],
             energy_fermi=["range"],
             conduction_band_minimum=["range"],

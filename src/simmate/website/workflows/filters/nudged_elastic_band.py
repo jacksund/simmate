@@ -16,9 +16,9 @@ class DiffusionAnalysis(Structure):
         fields = dict(
             migrating_specie=["exact"],
             vacancy_mode=["exact"],
-            atomic_fraction=["exact", "range"],
+            atomic_fraction=["range"],
             barrier_cell=["range"],
-            npaths_involved=["exact", "range"],
+            npaths_involved=["range"],
             **Structure.get_fields()
         )
 
@@ -27,13 +27,13 @@ class MigrationHop(filters.FilterSet):
     class Meta:
         model = MigrationHopTable
         fields = dict(
-            site_start=["exact", "range"],
-            site_end=["exact", "range"],
-            number=["exact", "range"],
-            length=["exact", "range"],
-            dimension_path=["exact", "range"],
-            dimension_host_lattice=["exact", "range"],
-            energy_barrier=["exact", "range"],
+            site_start=["exact"],
+            site_end=["exact"],
+            number=["range"],
+            length=["range"],
+            dimension_path=["range"],
+            dimension_host_lattice=["range"],
+            energy_barrier=["range"],
         )
 
 

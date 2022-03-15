@@ -51,8 +51,9 @@ class SimmateAPIView(GenericAPIView):
         if self._format_kwarg == "html":
             filterset = self.filterset_class(request.GET)
             data = {
-                "filterset": filterset,
+                # "filterset": filterset, # not used at the momemnt
                 "filterset_mixins": filterset.get_mixin_names(),
+                "form": filterset.form,
                 "extra_filters": filterset.get_extra_filters(),
                 "calculations": serializer.instance,  # return python objs, not dict
                 "ncalculations_possible": self.get_queryset().count(),
@@ -126,10 +127,13 @@ def render_from_table(
 
     # for the source dataset, not all tables have a "created_at" column, but
     # when they do, we want to return results with the most recent additions first
-    if hasattr(table.objects, "created_at"):
-        intial_queryset = queryset = table.objects.order_by("-created_at").all()
+    if hasattr(table, "created_at"):
+        intial_queryset = table.objects.order_by("-created_at").all()
     else:
-        intial_queryset = queryset = table.objects.all()
+        intial_queryset = table.objects.order_by("id").all()
+    # we also want to preload spacegroup for the structure mixin
+    if hasattr(table, "spacegroup"):
+        intial_queryset = intial_queryset.select_related("spacegroup")
 
     # TODO: consider using the following to dynamically name these classes
     #   NewClass = type(table.__name__, mixins, extra_attributes)

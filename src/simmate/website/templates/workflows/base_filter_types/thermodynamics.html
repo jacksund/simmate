@@ -1,0 +1,20 @@
+{% load crispy_forms_tags %}
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingThermoFilters">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseThermoFilters" aria-expanded="true" aria-controls="collapseThermoFilters">
+            <b>By Thermodynamic Info:</b>
+        </button>
+    </h2>
+    <div id="collapseThermoFilters" class="accordion-collapse collapse" aria-labelledby="headingThermoFilters">
+        <div class="accordion-body">
+            {{ form.energy__range | as_crispy_field }}
+            {{ form.energy_per_atom__range | as_crispy_field }}
+            {{ form.energy_above_hull__range | as_crispy_field }}
+            {{ form.is_stable | as_crispy_field }}
+            {{ form.formation_energy__range | as_crispy_field }}
+            {{ form.formation_energy__range | as_crispy_field }}
+        </div>
+    </div>
+</div>

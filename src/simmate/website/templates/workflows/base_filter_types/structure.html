@@ -1,0 +1,55 @@
+{% load crispy_forms_tags %}
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingCompFilters">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseCompFilters" aria-expanded="true" aria-controls="collapseCompFilters">
+            <b>By Composition Info:</b>
+        </button>
+    </h2>
+    <div id="collapseCompFilters" class="accordion-collapse collapse" aria-labelledby="headingCompFilters">
+        <div class="accordion-body">
+            {{ form.nelements__range | as_crispy_field }}
+            {{ form.formula_anonymous | as_crispy_field }}
+            {{ form.formula_full | as_crispy_field }}
+            {{ form.formula_reduced | as_crispy_field }}
+            {{ form.chemical_system | as_crispy_field }}
+            {{ form.include_subsystems | as_crispy_field }}
+        </div>
+    </div>
+</div>
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingStructFilters">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseStructFilters" aria-expanded="true" aria-controls="collapseStructFilters">
+            <b>By Structure Info:</b>
+        </button>
+    </h2>
+    <div id="collapseStructFilters" class="accordion-collapse collapse" aria-labelledby="headingStructFilters">
+        <div class="accordion-body">
+            {{ form.nsites__range | as_crispy_field }}
+            {{ form.density__range | as_crispy_field }}
+            {{ form.density_atomic__range | as_crispy_field }}
+            {{ form.volume__range | as_crispy_field }}
+            {{ form.volume_molar__range | as_crispy_field }}
+        </div>
+    </div>
+</div>
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingSymmFilters">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseSymmFilters" aria-expanded="true" aria-controls="collapseSymmFilters">
+            <b>By Symmetry Info:</b>
+        </button>
+    </h2>
+    <div id="collapseSymmFilters" class="accordion-collapse collapse" aria-labelledby="headingSymmFilters">
+        <div class="accordion-body">
+            {{ form.spacegroup__number | as_crispy_field }}
+            {{ form.spacegroup__symbol | as_crispy_field }}
+            {{ form.spacegroup__crystal_system | as_crispy_field }}
+            {{ form.spacegroup__point_group | as_crispy_field }}
+        </div>
+    </div>
+</div>

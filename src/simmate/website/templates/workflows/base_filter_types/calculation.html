@@ -1,0 +1,18 @@
+{% load crispy_forms_tags %}
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingCalcFilters">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseCalcFilters" aria-expanded="true" aria-controls="collapseCalcFilters">
+            <b>By Calculation Info:</b>
+        </button>
+    </h2>
+    <div id="collapseCalcFilters" class="accordion-collapse collapse" aria-labelledby="headingCalcFilters">
+        <div class="accordion-body">
+            {{ form.prefect_flow_run_id | as_crispy_field }}
+            {{ form.directory | as_crispy_field }}
+            {{ form.created_at__range | as_crispy_field }}
+            {{ form.updated_at__range | as_crispy_field }}
+        </div>
+    </div>
+</div>

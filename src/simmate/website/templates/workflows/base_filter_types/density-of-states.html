@@ -1,0 +1,20 @@
+{% load crispy_forms_tags %}
+
+{% load crispy_forms_tags %}
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingDOSFilters">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseDOSFilters" aria-expanded="true" aria-controls="collapseDOSFilters">
+        <b>By Density-of-States Info:</b>
+        </button>
+    </h2>
+    <div id="collapseDOSFilters" class="accordion-collapse collapse" aria-labelledby="headingDOSFilters">
+        <div class="accordion-body">
+            {{ form.band_gap__range | as_crispy_field }}
+            {{ form.energy_fermi__range | as_crispy_field }}
+            {{ form.conduction_band_minimum__range | as_crispy_field }}
+            {{ form.valence_band_maximum__range | as_crispy_field }}
+        </div>
+    </div>
+</div>

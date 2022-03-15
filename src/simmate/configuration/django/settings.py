@@ -189,17 +189,20 @@ INSTALLED_APPS = [
     "crispy_forms",  # django-crispy-forms
     "rest_framework",  # djangorestframework
     "django_filters",  # django-filter
-    "django_extensions",  # for development tools
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
     #   django-ratelimit
     #   dj-stripe
     #   django-allauth
-    #   django-debug-toolbar
     #   django-unicorn
     #   django-REST-framework
     #   django-graphene (+ GraphQL)
     #   django-redis
+    #
+    # These third-party tools are only to help with development and we should
+    # try to avoid adding these as installed apps by default.
+    #   "django_extensions",  # for development tools
+    #   "debug_toolbar",  # django-debug-toolbar  # for debuging and profile-time info
 ]
 
 # We also check if the user has a "applications.yaml" file. In this file, the

@@ -31,7 +31,7 @@ def matplotlib_to_html(plot):
     data = figdata.getvalue()
     data_decoded = base64.b64encode(data).decode("utf-8").replace("\n", "")
     html = f"""
-    <img id="ItemPreview" src="data:image/png;base64,{data_decoded}">
+    <img id="ItemPreview" class="img-fluid" src="data:image/png;base64,{data_decoded}">
     """
 
     # BUG: every time this filter is called, I recieve the following warning:
