@@ -156,16 +156,24 @@ Simmate
       <tbody>
         {% for calculation in calculations %}
         <tr>
-          <!-- This block is extremely slow bc it queries Prefect cloud a bunch -->
-          {% if calculation.flow_run_view %}
-          <td><a href="{{ calculation.prefect_cloud_link }}" target="_blank">
-              {{ calculation.prefect_flow_run_name }}</a></td>
-          <td>{{ calculation.prefect_state }}</td>
-          {% else %}
+          <!-- 
+            This block would query Prefect cloud a bunch using logic like...  
+
+                if calculation.flow_run_view:
+                  name = calculation.prefect_flow_run_name # and link to calculation.prefect_cloud_link
+                  state = calculation.prefect_state
+                else:
+                  name = None
+                  state = None
+
+            These queries are slow AND state should be dynamically updated -- Therefore this should be
+            done on the front-end. I don't yet know the Javascript needed for this, but I would use
+            a prefect api key from the User and use it to query their prefect cloud here.
+
+            For now, I simply leave the next two columns empty to prevent the slow-down.
+          -->
           <td>--</td>
           <td>--</td>
-          {% endif %}
-          <!-- end unoptimized -->
           <td><a href="{{ calculation.id }}">{{ calculation.id }}</a></td>
           <td>{{ calculation.structure_final.energy_per_atom | floatformat:3 }}</td>
           <td>{{ calculation.formula_full | chemical_formula }}</td>
