@@ -145,7 +145,7 @@ Simmate
     <table id="SearchResultsTable" class="table table-striped" style="width:100%">
       <thead>
         <tr>
-          <th>Prefect ID</th>
+          <th>Prefect Name</th>
           <th>Prefect State</th>
           <th>Simmate ID</th>
           <th>Final Energy (eV/atom)</th>
@@ -159,7 +159,7 @@ Simmate
           <!-- This block is extremely slow bc it queries Prefect cloud a bunch -->
           {% if calculation.flow_run_view %}
           <td><a href="{{ calculation.prefect_cloud_link }}" target="_blank">
-              </a></td>
+              {{ calculation.prefect_flow_run_name }}</a></td>
           <td>{{ calculation.prefect_state }}</td>
           {% else %}
           <td>--</td>
