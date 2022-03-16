@@ -11,7 +11,7 @@ class Thermodynamics(filters.FilterSet):
         fields = dict(
             energy=["range"],
             energy_per_atom=["range"],
-            energy_above_hull=["exact", "range"],
+            energy_above_hull=["range"],
             is_stable=["exact"],
             formation_energy=["range"],
             formation_energy_per_atom=["range"],

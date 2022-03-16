@@ -63,7 +63,7 @@
                     <td>{{ structure.nsites }}</td>
                     <td>{{ structure.spacegroup.number }}</td>
                     <td>{{ structure.density | floatformat:3 }}</td>
-                    <td>{{ structure.molar_volume | floatformat:3 }}</td>
+                    <td>{{ structure.volume_molar | floatformat:3 }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

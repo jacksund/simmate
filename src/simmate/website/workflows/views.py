@@ -129,13 +129,6 @@ def workflow_run_detail(
     workflow_name_full = workflow_type + "/" + workflow_name
     workflow = get_workflow(workflow_name_full)
 
-    # !!! this is old code that may be useful as I reimpliment detail views
-    # Make the convergence figure and convert it to an html div
-    # figure_convergence = calculation.get_convergence_plot()
-    # figure_convergence_html = figure_convergence.to_html(
-    #     full_html=False, include_plotlyjs=False
-    # )
-
     return render_from_table(
         request=request,
         request_kwargs={

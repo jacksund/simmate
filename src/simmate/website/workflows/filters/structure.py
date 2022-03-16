@@ -12,17 +12,20 @@ class Structure(filters.FilterSet):
     class Meta:
         model = StructureTable
         fields = dict(
-            nsites=["exact", "range"],
-            nelements=["exact", "range"],
+            nsites=["range"],
+            nelements=["range"],
             # elements=["contains"],
-            density=["exact", "range"],
-            density_atomic=["exact", "range"],
-            volume=["exact", "range"],
-            volume_molar=["exact"],
+            density=["range"],
+            density_atomic=["range"],
+            volume=["range"],
+            volume_molar=["range"],
             formula_full=["exact"],
             formula_reduced=["exact"],
             formula_anonymous=["exact"],
-            # spacegroup=Spacegroup.get_fields(),
+            spacegroup__number=["exact"],
+            spacegroup__symbol=["exact"],
+            spacegroup__crystal_system=["exact"],
+            spacegroup__point_group=["exact"],
         )
 
     include_subsystems = filters.BooleanFilter(

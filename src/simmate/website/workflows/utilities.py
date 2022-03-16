@@ -3,13 +3,10 @@
 from django.http import HttpRequest
 
 from rest_framework.generics import GenericAPIView
-from rest_framework.response import Response  # this is a sublcass of HttpResponse
-from rest_framework.serializers import (
-    Serializer,
-    ModelSerializer,
-)  # HyperlinkedModelSerializer
+from rest_framework.response import Response
+from rest_framework.serializers import ModelSerializer
 
-from simmate.website.workflows import filters
+from simmate.website.workflows.filters import DatabaseTableFilter
 from simmate.database.base_data_types import DatabaseTable
 
 
@@ -52,8 +49,12 @@ class SimmateAPIView(GenericAPIView):
         # ---------------------------------------------------
 
         if self._format_kwarg == "html":
+            filterset = self.filterset_class(request.GET)
             data = {
-                "filter": self.filterset_class(request.GET),
+                # "filterset": filterset, # not used at the momemnt
+                "filterset_mixins": filterset.get_mixin_names(),
+                "form": filterset.form,
+                "extra_filters": filterset.get_extra_filters(),
                 "calculations": serializer.instance,  # return python objs, not dict
                 "ncalculations_possible": self.get_queryset().count(),
                 **self.extra_context,
@@ -62,7 +63,7 @@ class SimmateAPIView(GenericAPIView):
         else:
             return Response(serializer.data)
 
-    def retrieve_view(self, request: HttpRequest, *args, **kwargs):
+    def retrieve_view(self, request: HttpRequest, *args, **kwargs) -> Response:
 
         # self.format_kwarg --> not sure why this always returns None, so I
         # grab the format from the request instead. If it isn't listed, then
@@ -78,8 +79,13 @@ class SimmateAPIView(GenericAPIView):
         # ---------------------------------------------------
 
         if self._format_kwarg == "html":
+            # we want to return a python object, not a serialized dictionary
+            # because the object has more attributes and methods attached to it.
+            calculation = serializer.instance
             data = {
-                "calculation": serializer.instance,  # return python obj, not dict
+                "calculation": calculation,
+                "table_mixins": calculation.get_mixin_names(),
+                "extra_columns": calculation.get_extra_columns(),
                 **self.extra_context,
             }
             return Response(data)
@@ -90,7 +96,7 @@ class SimmateAPIView(GenericAPIView):
 def render_from_table(
     request: HttpRequest,
     template: str,
-    context,
+    context: dict,
     table: DatabaseTable,
     view_type: str,
     request_kwargs: dict = {},
@@ -111,17 +117,29 @@ def render_from_table(
 
     # For all tables, we share all the data -- no columns are hidden. Therefore
     # the code for the Serializer is always the same.
+    # !!! consider switching to HyperlinkedModelSerializer
     class NewSerializer(ModelSerializer):
         class Meta:
             model = table
             fields = "__all__"
 
-    NewFilterSet = get_filterset_from_table(table)
+    NewFilterSet = DatabaseTableFilter.from_table(table)
+
+    # for the source dataset, not all tables have a "created_at" column, but
+    # when they do, we want to return results with the most recent additions first
+    if hasattr(table, "created_at"):
+        intial_queryset = table.objects.order_by("-created_at").all()
+    else:
+        intial_queryset = table.objects.order_by("id").all()
+    # we also want to preload spacegroup for the structure mixin
+    if hasattr(table, "spacegroup"):
+        intial_queryset = intial_queryset.select_related("spacegroup")
 
     # TODO: consider using the following to dynamically name these classes
     #   NewClass = type(table.__name__, mixins, extra_attributes)
     class NewViewSet(SimmateAPIView):
-        queryset = table.objects.all()  # TODO: order_by("created_at") by default?
+        # we show the most recent calculations first
+        queryset = intial_queryset
         serializer_class = NewSerializer
         template_name = template
         extra_context = context
@@ -134,82 +152,3 @@ def render_from_table(
     # now pull together the html response
     response = NewViewSet.as_view()(request, **request_kwargs)
     return response
-
-
-# TODO: move this to a classmethod for DatabaseTableFilter
-def get_filterset_from_table(table: DatabaseTable) -> filters.DatabaseTableFilter:
-    """
-    Dynamically creates a Django Filter from a Simmate database table.
-
-    For example, this function would take
-    `simmate.database.third_parties.MatProjStructure`
-    and automatically make the following filter:
-
-    ``` python
-    from simmate.website.workflows.filters import (
-        DatabaseTableFilter,
-        Structure,
-        Thermodynamics,
-    )
-
-
-    class MatProjStrucureFilter(
-        DatabaseTableFilter,
-        Structure,
-        Thermodynamics,
-    ):
-        class Meta:
-            model = MatProjStructure  # this is database table
-            fields = {...} # this combines the fields from Structure/Thermo mixins
-
-        # These attributes are set using the declared filters from Structure/Thermo mixins
-        declared_filter1 = ...
-        declared_filter1 = ...
-    ```
-    """
-
-    # First we need to grab the parent mixin classes of the table. For example,
-    # the MatProjStructure uses the database mixins ['Structure', 'Thermodynamics']
-    # while MatProjStaticEnergy uses ["StaticEnergy"].
-    mixin_names = [base.__name__ for base in table.__bases__]
-
-    # Because our Forms follow the same naming conventions as
-    # simmate.database.base_data_types, we can simply use these mixin names to
-    # load a Form mixin from the simmate.website.workflows.form module. We add
-    # these mixins onto the standard ModelForm class from django.
-    filter_mixins = [filters.DatabaseTableFilter]
-    filter_mixins += [
-        getattr(filters, name) for name in mixin_names if hasattr(filters, name)
-    ]
-
-    # combine the fields of each filter mixin. Note we use .get_fields instead
-    # of .fields to ensure we get a dictionary back
-    filter_fields = {
-        field: conditions
-        for mixin in filter_mixins
-        for field, conditions in mixin.get_fields().items()
-    }
-
-    # Also combine all declared filters from each mixin
-    filters_declared = {
-        name: filter_obj
-        for mixin in filter_mixins
-        for name, filter_obj in mixin.declared_filters.items()
-    }
-
-    # The FilterSet class requires that we set extra fields in the Meta class.
-    # We define those here. Note, we accept all fields by default and the
-    # excluded fields are only those defined by the supported form_mixins -
-    # and we skip the first mixin (which is always DatabaseTableFilter)
-    class Meta:
-        model = table
-        fields = filter_fields
-
-    extra_attributes = {"Meta": Meta, **filters_declared}
-    # BUG: __module__ may need to be set in the future, but we never import
-    # these forms elsewhere, so there's no need to set it now.
-
-    # Now we dynamically create a new form class that we can return.
-    NewClass = type(table.__name__, tuple(filter_mixins), extra_attributes)
-
-    return NewClass

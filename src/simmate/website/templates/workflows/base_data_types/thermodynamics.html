@@ -1,0 +1,16 @@
+<!-- Thermo Info -->
+<div class="container p-4">
+
+    <h3>Thermodynamics:</h3>
+    <ul>
+        <li><b>Final energy:</b> {{ calculation.energy }}</li>
+        <li><b>Final energy per atom:</b> {{ calculation.energy_per_atom }}</li>
+        <li><b>Energy above hull:</b> {{ calculation.energy_above_hull }}</li>
+        <li><b>Is thermodynamically stable?:</b> {{ calculation.is_stable }}</li>
+        <li><b>Decomposes to:</b> {{ calculation.decomposes_to }}</li>
+        <li><b>Formation energy</b> {{ calculation.formation_energy }}</li>
+        <li><b>Formation energy per atom:</b> {{ calculation.formation_energy_per_atom }}</li>
+    </ul>
+    <a><em><b>Note:</b> stabilities and hull energies are updated on a running schedule, so newer
+            materials may have these fields blank.</em></a>
+</div>

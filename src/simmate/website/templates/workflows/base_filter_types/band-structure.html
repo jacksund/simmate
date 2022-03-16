@@ -1,0 +1,22 @@
+{% load crispy_forms_tags %}
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingBandStructFilters">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseBandStructFilters" aria-expanded="true" aria-controls="collapseBandStructFilters">
+            <b>By Band-Structure Info:</b>
+        </button>
+    </h2>
+    <div id="collapseBandStructFilters" class="accordion-collapse collapse" aria-labelledby="headingBandStructFilters">
+        <div class="accordion-body">
+            {{ form.nbands__range | as_crispy_field }}
+            {{ form.band_gap__range | as_crispy_field }}
+            {{ form.band_gap_direct__range | as_crispy_field }}
+            {{ form.is_gap_direct | as_crispy_field }}
+            {{ form.energy_fermi__range | as_crispy_field }}
+            {{ form.conduction_band_minimum__range | as_crispy_field }}
+            {{ form.valence_band_maximum__range | as_crispy_field }}
+            {{ form.is_metal | as_crispy_field }}
+        </div>
+    </div>
+</div>

@@ -394,6 +394,15 @@ class Relaxation(Structure, Calculation):
         figure = self.get_convergence_plot()
         figure.show(renderer="browser")
 
+    def get_convergence_plot_html(self):
+        # Make the convergence figure and convert it to an html div
+        figure_convergence = self.get_convergence_plot()
+        figure_convergence_html = figure_convergence.to_html(
+            full_html=False,
+            include_plotlyjs=False,
+        )
+        return figure_convergence_html
+
 
 class IonicStep(Structure, Thermodynamics, Forces):
     """

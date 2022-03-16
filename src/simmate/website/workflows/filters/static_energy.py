@@ -20,7 +20,7 @@ class StaticEnergy(
     class Meta:
         model = StaticEnergyTable
         fields = dict(
-            band_gap=["exact", "range"],
+            band_gap=["range"],
             is_gap_direct=["exact"],
             energy_fermi=["range"],
             conduction_band_minimum=["range"],

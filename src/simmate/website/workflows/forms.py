@@ -105,22 +105,22 @@ class SubmitWorkflow(forms.Form):
 
         return structure
 
-    def clean_structure_start_json(self, field_name: str = None):
+    def clean_structure_start_json(self):
         return self.clean_structure_json("supercell_start_json")
 
-    def clean_structure_end_json(self, field_name: str = None):
+    def clean_structure_end_json(self):
         return self.clean_structure_json("supercell_end_json")
 
-    def clean_migration_images_json(self, field_name: str = None):
+    def clean_migration_images_json(self):
         return self.clean_structure_json("migration_images_json")
 
-    def clean_structure_start_file(self, field_name: str = None):
+    def clean_structure_start_file(self):
         return self.clean_structure_file("supercell_start_file")
 
-    def clean_structure_end_file(self, field_name: str = None):
+    def clean_structure_end_file(self):
         return self.clean_structure_file("supercell_end_file")
 
-    def clean_migration_images_file(self, field_name: str = None):
+    def clean_migration_images_file(self):
         return self.clean_structure_file("migration_images_file")
 
     def clean_labels(self):
@@ -185,7 +185,8 @@ class SubmitWorkflow(forms.Form):
         return NewClass
 
 
-# BUG: is there a way to dynamically inpsect types so that I don't need this?
+# TODO: is there a way to dynamically inpsect types so that I don't need this?
+# I need a way to accept filters from custom workflows as well.
 INPUT_MAPPINGS = {
     "json": [
         "source",

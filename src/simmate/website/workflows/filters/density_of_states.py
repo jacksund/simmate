@@ -13,7 +13,7 @@ class DensityofStates(filters.FilterSet):
     class Meta:
         model = DensityofStatesTable
         fields = dict(
-            band_gap=["exact", "range"],
+            band_gap=["range"],
             energy_fermi=["range"],
             conduction_band_minimum=["range"],
             valence_band_maximum=["range"],

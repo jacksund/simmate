@@ -1,0 +1,18 @@
+{% load crispy_forms_tags %}
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingForcesFilters">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseForcesFilters" aria-expanded="true" aria-controls="collapseForcesFilters">
+            <b>By Forces Info:</b>
+        </button>
+    </h2>
+    <div id="collapseForcesFilters" class="accordion-collapse collapse" aria-labelledby="headingForcesFilters">
+        <div class="accordion-body">
+            {{ form.site_force_norm_max__range | as_crispy_field }}
+            {{ form.site_forces_norm_per_atom__range | as_crispy_field }}
+            {{ form.lattice_stress_norm__range | as_crispy_field }}
+            {{ form.lattice_stress_norm_per_atom__range | as_crispy_field }}
+        </div>
+    </div>
+</div>
