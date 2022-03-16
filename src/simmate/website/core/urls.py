@@ -47,7 +47,4 @@ urlpatterns = [
         view=include("simmate.website.structure_viewer.urls"),
         name="structure_viewer",
     ),
-    #
-    # Add the django-debug-toolbar endpoint
-    path("__debug__/", include("debug_toolbar.urls")),
 ]
