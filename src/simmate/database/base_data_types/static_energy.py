@@ -31,21 +31,32 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         + Calculation.base_info
     )
 
-    # Note: we assume that only converged data is being stored! So there is no
-    # "converged_electronic" section here. ErrorHandlers and workups should
-    # ensure this.
+    # OPTIMIZE: should I include this electronic data?
 
-    # This data here is something we only get for the final structure, so it
-    # may make sense to move this data into the IonicStepStructure table (and
-    # allow null values for non-final steps). I instead keep this here because
-    # I don't want columns above that are largely empty.
-    # Note: all entries are optional because there is no guaruntee the calculation
-    # finishes successfully
     band_gap = table_column.FloatField(blank=True, null=True)
+    """
+    The band gap energy in eV.
+    """
+
     is_gap_direct = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the band gap is direct or indirect.
+    """
+
     energy_fermi = table_column.FloatField(blank=True, null=True)
+    """
+    The Fermi energy in eV.
+    """
+
     conduction_band_minimum = table_column.FloatField(blank=True, null=True)
+    """
+    The conduction band minimum in eV.
+    """
+
     valence_band_maximum = table_column.FloatField(blank=True, null=True)
+    """
+    The valence band maximum in eV.
+    """
 
     @classmethod
     def from_directory(cls, directory: str):

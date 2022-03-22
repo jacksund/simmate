@@ -1,4 +1,8 @@
-To guide this...
+This file outlines additional base_data_types that I can consider adding in the
+future. For now, we are not using any of these, so they remain at the planning stage.
+
+
+To guide organization and development of these...
 EMMENT gives a good starting point for models
 MAPIDOC gives the REST API for common endpoints (This repo is moving to API though)
     https://github.com/materialsproject/api/tree/f3a29e9faa5239d5b7642d1c295c4ff7b8d05885/src/mp_api/routes

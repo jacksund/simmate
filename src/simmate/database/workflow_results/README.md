@@ -15,7 +15,7 @@ from simmate.workflows.static_energy import mit_workflow
 status = mit_workflow.run(structure=...)
 
 # gives the DatabaseTable where ALL results are stored
-energy_mit.result_table
+mit_workflow.result_table
 ```
 
 You can also access a table directly with...

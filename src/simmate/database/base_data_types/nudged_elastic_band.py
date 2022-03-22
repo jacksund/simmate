@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This module is experimental and subject to change.
+WARNING: This module is experimental and subject to change.
 """
 
 import os
@@ -18,25 +18,47 @@ from simmate.database.base_data_types import (
     Structure,
 )
 
-
+# TODO: consider making a NestedCalculation
 class DiffusionAnalysis(Structure):
     class Meta:
         abstract = True
         app_label = "workflows"
 
-    # The element of the diffusion atom
     migrating_specie = table_column.CharField(max_length=4, blank=True, null=True)
+    """
+    The element of the diffusion atom (e.g. "Li")
+    """
 
-    # Whether vacancy or interstitial diffusion was used
     vacancy_mode = table_column.BooleanField(blank=True, null=True)
+    """
+    (if relevent) Whether vacancy or interstitial diffusion was used.
+    """
 
-    # atomic fraction of the diffusion ion
     atomic_fraction = table_column.FloatField(blank=True, null=True)
+    """
+    Atomic fraction of the diffusion ion in the bulk structure.
+    """
 
-    # Evaluates all MigrationHops to find the lowest-barrier percolation network
+    # NOTE: barrier_cell, paths_involved, and npaths_involved need to be updated
+    # by evaluating all MigrationHops.
+
     barrier_cell = table_column.FloatField(blank=True, null=True)
+    """
+    The energy barrier corresponding to the lowest-barrier percolation network
+    """
+
     paths_involved = table_column.CharField(max_length=100, blank=True, null=True)
+    """
+    The symmetrically-unqiue pathways involved in the lowest-barrier 
+    percolation network. This is given as a list of IDs.
+    """
+    # TODO: consider making this a relationship to MigrationPathways
+
     npaths_involved = table_column.IntegerField(blank=True, null=True)
+    """
+    The number of symmetrically-unqiue pathways involved in the lowest-barrier 
+    percolation network
+    """
 
     @classmethod
     def from_toolkit(
@@ -67,6 +89,11 @@ class DiffusionAnalysis(Structure):
 
     @classmethod
     def from_directory(cls, directory: str, **kwargs):
+        """
+        Creates a new database entry from a directory that holds diffusion analysis
+        results. For now, this assumes the directory holds vasp output files.
+        """
+
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
 
@@ -191,38 +218,74 @@ class MigrationHop(DatabaseTable):
         abstract = True
         app_label = "workflows"
 
-    # the initial, midpoint, and end site fractional coordinates
+    base_info = [
+        "site_start",
+        "site_end",
+        "index_start",
+        "index_end",
+        "number",
+    ]
+
+    # OPTIMIZE: site_start and site_end
     # Really, this is a list of float values, but I save it as a string.
-    # !!! for robustness, should I save cartesian coordinates and/or lattice as well?
-    # !!! Does the max length make sense here and below?
-    # !!! I could also store as JSON since it's a list of coords.
+    # For robustness, should I save cartesian coordinates and/or lattice as well?
+    # Does the max length make sense here and below?
+    # I could also store as JSON since it's a list of coords.
+
     site_start = table_column.CharField(max_length=100, blank=True, null=True)
+    """
+    The starting fractional coordinates of the diffusing site.
+    """
+
     site_end = table_column.CharField(max_length=100, blank=True, null=True)
+    """
+    The ending fractional coordinates of the diffusing site.
+    """
 
     # BUG: the init script for MigrationHop can't identify the site indexes
     # properly but they should be the same as before because it is a symmetrized
     # structure. Note that even if I'm wrong in some case -- this will have
     # no effect because iindex and eindex are only used in one portion of
     # the hash as well as for printing the __str__ of the object.
+
     index_start = table_column.IntegerField(blank=True, null=True)
+    """
+    The starting site index of the diffusing site.
+    """
+
     index_end = table_column.IntegerField(blank=True, null=True)
+    """
+    The ending site index of the diffusing site.
+    """
 
-    """ Query-helper Info """
-
-    # TODO:
-    # The expected index in DistinctPathFinder.get_paths. The shortest path is index 0
-    # and they are all ordered by increasing length.
     number = table_column.IntegerField(blank=True, null=True)
+    """
+    The expected index in DistinctPathFinder.get_paths. The shortest path is index 0
+    and they are all ordered by increasing length.
+    """
 
-    # The length/distance of the pathway from start to end (linear measurement)
     length = table_column.FloatField(blank=True, null=True)
+    """
+    The length/distance of the pathway from start to end. Note, this is 
+    linear measurement -- i.e. is it the length of the linear interpolated path.
+    """
 
-    # pathway dimensionality
     dimension_path = table_column.IntegerField(blank=True, null=True)
-    dimension_host_lattice = table_column.IntegerField(blank=True, null=True)
+    """
+    The pathway dimensionality using the Larson scoring parameter.
+    """
 
-    # Evaluates all MigrationImages to find the barriers
+    dimension_host_lattice = table_column.IntegerField(blank=True, null=True)
+    """
+    Ignoring all atoms of the diffusing species, this is the dimensionality
+    of the remaining atoms of the lattice using the Larson scoring parameter.
+    """
+
     energy_barrier = table_column.FloatField(blank=True, null=True)
+    """
+    The energy barrier in eV. This evaluates all images of the diffusion pathway
+    and find the difference between the maximum and minimum image energies.
+    """
 
     # TODO:
     # Distance of the pathway relative to the shortest pathway distance
@@ -244,10 +307,6 @@ class MigrationHop(DatabaseTable):
     # image_transition_state --> OneToOneField for specific MigrationHop
 
     # Just like Relaxation points to IonicSteps, NEB will point to MigrationImages
-
-    """ Model Methods """
-    # TODO: If I want a queryset to return a pymatgen-diffusion object(s) directly,
-    # then I need make a new Manager rather than adding methods here.
 
     @classmethod
     def _from_toolkit(
@@ -277,7 +336,7 @@ class MigrationHop(DatabaseTable):
     # is unable to identify equivalent sites. I opened an issue for this
     # with their team:
     #   https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion/issues/296
-    def to_toolkit(self):
+    def to_toolkit(self) -> ToolkitMigrationHop:
         """
         converts the database MigrationHop to a toolkit MigrationHop
         """
@@ -475,19 +534,32 @@ class MigrationImage(Structure):
         "energy",
     ]
 
-    # 0 = start, -1 = end.
     number = table_column.IntegerField()
+    """
+    The image number. Note, the starting image is always 0 and the ending
+    image is always -1. The choice of -1 is because we often add the ending
+    image to the database table before knowing how many midpoint images we
+    are going to create.
+    """
 
-    # Diffusion analysis given a tangent force, so we don't mix this up with the
-    # Force mix-in.
     force_tangent = table_column.FloatField(blank=True, null=True)
+    """
+    The tangent force of image. Not to be confused with forces from the Forces mix-in.
+    """
 
-    # For NEB, we only care about the total energy -- not the other fields that
-    # the Thermodynamics mix-in provides.
+    # Note, we only care about the total energy for NEB images -- not the other
+    # fields that the Thermodynamics mix-in provides. This is why we set this
+    # field directly, rather than using the mix-in.
     energy = table_column.FloatField(blank=True, null=True)
+    """
+    The calculated total energy. Units are in eV. 
+    """
 
-    # This measures the fingerprint distance of the image from the starting image
     structure_distance = table_column.FloatField(blank=True, null=True)
+    """
+    The fingerprint distance of the image from the starting image. A smaller
+    means the structures are more similar, with 0 being an exact match.
+    """
 
     # We don't need the source column for the MigrationImage class because we
     # instead stored the source on the DiffusionAnalysis object. This line

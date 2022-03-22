@@ -7,29 +7,30 @@ from typing import List
 
 class NestedCalculation(Calculation):
     """
-    A nested calculation is a workflow made up of other workflows. For example,
-    we may want to run a workflow that runs a series of relaxations. Or maybe
-    a relaxation, then energy, then bandstrucuture calculation. This table
-    is for keeping track of workflows ran in series like this.
+    A nested calculation is extremely similar to a calculation table, except here
+    the linked workflow is a NestedWorkflow -- meaning it is made of multiple
+    smaller workflows. For example, we may want to run a workflow that runs a
+    series of relaxations. Or maybe a relaxation, then energy, then band-strucuture
+    calculation. This table is for keeping track of workflows ran in series like
+    this.
 
     Typically, you'll use the `create_subclass_from_calcs` method to create a
-    subclass of this table.
+    subclass of this table, which handles making all the relationships for you.
     """
 
     class Meta:
         abstract = True
         app_label = "workflows"
 
-    # @abstractproperty
+    # TODO:
     # child_calculation_tables = [...]
 
     # TODO:
-    # corrections
     # should this be a list of all modifications? It could maybe be used to
     # carry fixes (such as smearing) accross different calcs.
     # Or maybe a method that just lists the corrections of each subcalc?
-    # For now I don't use this though. This line removes the field.
     corrections = None
+    # For now I delete this column. This line removes the field.
 
     @classmethod
     def create_subclass_from_calcs(
@@ -95,7 +96,7 @@ class NestedCalculation(Calculation):
 
         # BUG: I assume a workflow won't point to the save calculation table
         # more than once... What's a scenario where this isn't true?
-        # I can only think of mult-structure workflows (like EvolutionarySearch)
+        # I can only think of multi-structure workflows (like EvolutionarySearch)
         # which I don't give their own table for now.
         new_columns = {}
         for child_calc in child_calculation_tables:
@@ -121,9 +122,11 @@ class NestedCalculation(Calculation):
         # we now have a new child class and avoided writing some boilerplate code!
         return NewClass
 
-    # This is an experimental method that iterates through child workflow tables
-    # and links the results to the NestedCalculation
     # def update_calculation(self):
+    #     """
+    #     This is an experimental method that iterates through child workflow tables
+    #     and links the results to the NestedCalculation
+    #     """
     #     # BUG: This assumes we ran all calculations within the same directory,
     #     # which isn't true in all cases.
     #     for child_calc_table in self.child_calculation_tables:

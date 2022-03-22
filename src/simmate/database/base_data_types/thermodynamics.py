@@ -2,6 +2,7 @@
 
 from tqdm import tqdm
 
+from simmate.toolkit import Structure as ToolkitStructure
 from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.utilities import get_chemical_subsystems
 
@@ -73,10 +74,13 @@ class Thermodynamics(DatabaseTable):
     # type(GGA,GGAU,HF)
     # is_hubbard
 
-    # TODO: add a from_ionic_step method in the future when I have this class.
-
     @classmethod
-    def _from_toolkit(cls, structure, energy=None, as_dict=False):
+    def _from_toolkit(
+        cls,
+        structure: ToolkitStructure,
+        energy: float = None,
+        as_dict: bool = False,
+    ):
 
         # TODO: should structure be optional?
 
@@ -99,7 +103,7 @@ class Thermodynamics(DatabaseTable):
         return data if as_dict else cls(**data)
 
     @classmethod
-    def update_chemical_system_stabilities(cls, chemical_system):
+    def update_chemical_system_stabilities(cls, chemical_system: str):
 
         # NOTE: I assume we are using a Child(Structure, Thermodynamics)
 

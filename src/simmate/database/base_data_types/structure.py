@@ -132,7 +132,12 @@ class Structure(DatabaseTable):
     # SQL level
 
     @classmethod
-    def _from_toolkit(cls, structure, as_dict=False, **kwargs):
+    def _from_toolkit(
+        cls,
+        structure: ToolkitStructure,
+        as_dict: bool = False,
+        **kwargs,
+    ):
 
         # BUG: This is an old line and I can't remember why I have it. Once I
         # have implemented more unittests, consider deleting. This method is
@@ -186,42 +191,8 @@ class Structure(DatabaseTable):
         # return the dictionary
         return structure_dict if as_dict else cls(**structure_dict)
 
-    def to_toolkit(self):
+    def to_toolkit(self) -> ToolkitStructure:
         """
         Converts the database object to toolkit Structure object.
         """
         return ToolkitStructure.from_database_string(self.structure_string)
-
-
-# TODO:
-# Explore polymorphic relations instead of a JSON dictionary.
-# Making relationships to different tables makes things difficult to use, so
-# these columns are just standalone.
-#
-# This is will be very important for "source" and "parent_nested_calculations"
-# fields because I have no way to efficiently convert these fields to the objects
-# that they refer to. There's also no good way to access a structure's "children"
-# (i.e. structure where they are the source).
-#
-# I should investigate generic relations in django though:
-# https://docs.djangoproject.com/en/3.2/ref/contrib/contenttypes/#generic-relations
-#
-# Another option is using django-polymorphic.
-# https://django-polymorphic.readthedocs.io/en/latest/
-# This thread is really helpful on the subject:
-# https://stackoverflow.com/questions/30343212/
-
-# TODO:
-# Consider adding some methods to track the history of a structure. This
-# would be useful for things like evolutionary algorithms.
-# get_source_parent:
-#   this would iterate through sources until we find one in the same table
-#   as this one. Parent sources are often the most recent transformation
-#   or mutation applied to a structure, such as a MirrorMutation.
-# get_source_seed:
-#   this would iterate through sources until we hit a dead-end. So the seed
-#   source would be something like a third-party database, a method that
-#   randomly create structures, or a prototype.
-# Both of these get more complex when we consider transformation that have
-# multiple parents (and therefore multiple seeds too). An example of this
-# is the HereditaryMutation.

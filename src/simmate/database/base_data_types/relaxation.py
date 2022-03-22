@@ -86,39 +86,73 @@ class Relaxation(Structure, Calculation):
     IonicStep table which holds all of the structure/energy/forces for each
     ionic step.
 
-    WARNING: The Structure stored in this table here is the source structure!
-    If you want the final structure, be sure to grab it from the
-    `structure_final` attribute (which is the final IonicStep).
+    WARNING: The Structure stored in this table here is the source structure
+    until the calculation completes. After completed, the structure will
+    be updated to the final structure. If you wish to ensure you're accessing
+    the correct structure, use the `structure_final` attribute, which gives
+    the final IonicStep.
     """
 
     class Meta:
         abstract = True
         app_label = "workflows"
 
-    """Base Info"""
+    base_info = (
+        [
+            "band_gap",
+            "is_gap_direct",
+            "energy_fermi",
+            "conduction_band_minimum",
+            "valence_band_maximum",
+        ]
+        + Structure.base_info
+        + Calculation.base_info
+    )
 
+    # OPTIMIZE: should I include this electronic data?
     # This data here is something we only get for the final structure, so it
     # may make sense to move this data into the IonicStepStructure table (and
     # allow null values for non-final steps). I instead keep this here because
     # I don't want columns above that are largely empty.
     # Note: all entries are optional because there is no guaruntee the calculation
     # finishes successfully
+
     band_gap = table_column.FloatField(blank=True, null=True)
+    """
+    The band gap energy in eV.
+    """
+
     is_gap_direct = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the band gap is direct or indirect.
+    """
+
     energy_fermi = table_column.FloatField(blank=True, null=True)
+    """
+    The Fermi energy in eV.
+    """
+
     conduction_band_minimum = table_column.FloatField(blank=True, null=True)
+    """
+    The conduction band minimum in eV.
+    """
+
     valence_band_maximum = table_column.FloatField(blank=True, null=True)
-    # OPTIMIZE: should I include this data?
+    """
+    The valence band maximum in eV.
+    """
 
-    """ Query-helper Info """
-
-    # Volume Change (useful for checking if Pulay Stress may be significant)
-    # We store this as a ratio relative to the starting structure
-    #   (volume_final - volume_start) / volume_start
     volume_change = table_column.FloatField(blank=True, null=True)
+    """
+    The percent volume change during the relaxation. This is useful for checking
+    if Pulay Stress may be significant or if the structure was highly unreasonable.
+    We store this as a ratio relative to the starting structure:
+    ```
+    (volume_final - volume_start) / volume_start
+    ```
+    """
 
     """ Relationships """
-
     # structure_start --> points to first (0) IonicStep
     # structure_final --> points to final IonicStep
     # structures --> gives list of all IonicSteps
@@ -429,6 +463,10 @@ class IonicStep(Structure, Thermodynamics, Forces):
     # grab the associated ionic steps
     ionic_steps = relax.structures.all()
     ```
+
+    Note: we assume that only converged data is being stored! So there is no
+    "converged_electronic" column here. ErrorHandlers and workups should
+    ensure convergence.
     """
 
     class Meta:
@@ -439,12 +477,10 @@ class IonicStep(Structure, Thermodynamics, Forces):
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
     )
 
-    # Note: we assume that only converged data is being stored! So there is no
-    # "converged_electronic" section here. ErrorHandlers and workups should
-    # ensure this.
-
-    # This is ionic step number for the given relaxation. This starts counting from 0.
     number = table_column.IntegerField()
+    """
+    The ionic step number within the relaxation. This starts counting from 0.
+    """
 
     """ Relationships """
     # each of these will map to a Relaxation, so you should typically access this
