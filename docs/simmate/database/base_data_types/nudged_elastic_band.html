@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="pdoc 10.0.1"/>
+    <meta name="generator" content="pdoc 10.0.3"/>
     <title>simmate.database.base_data_types.nudged_elastic_band API documentation</title>
 
     <style>/*! * Bootstrap Reboot v5.0.0 (https://getbootstrap.com/) * Copyright 2011-2021 The Bootstrap Authors * Copyright 2011-2021 Twitter, Inc. * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE) * Forked from Normalize.css, licensed MIT (https://github.com/necolas/normalize.css/blob/master/LICENSE.md) */*,::after,::before{box-sizing:border-box}@media (prefers-reduced-motion:no-preference){:root{scroll-behavior:smooth}}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#fff;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}hr{margin:1rem 0;color:inherit;background-color:currentColor;border:0;opacity:.25}hr:not([size]){height:1px}h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}h1{font-size:calc(1.375rem + 1.5vw)}@media (min-width:1200px){h1{font-size:2.5rem}}h2{font-size:calc(1.325rem + .9vw)}@media (min-width:1200px){h2{font-size:2rem}}h3{font-size:calc(1.3rem + .6vw)}@media (min-width:1200px){h3{font-size:1.75rem}}h4{font-size:calc(1.275rem + .3vw)}@media (min-width:1200px){h4{font-size:1.5rem}}h5{font-size:1.25rem}h6{font-size:1rem}p{margin-top:0;margin-bottom:1rem}abbr[data-bs-original-title],abbr[title]{-webkit-text-decoration:underline dotted;text-decoration:underline dotted;cursor:help;-webkit-text-decoration-skip-ink:none;text-decoration-skip-ink:none}address{margin-bottom:1rem;font-style:normal;line-height:inherit}ol,ul{padding-left:2rem}dl,ol,ul{margin-top:0;margin-bottom:1rem}ol ol,ol ul,ul ol,ul ul{margin-bottom:0}dt{font-weight:700}dd{margin-bottom:.5rem;margin-left:0}blockquote{margin:0 0 1rem}b,strong{font-weight:bolder}small{font-size:.875em}mark{padding:.2em;background-color:#fcf8e3}sub,sup{position:relative;font-size:.75em;line-height:0;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}a{color:#0d6efd;text-decoration:underline}a:hover{color:#0a58ca}a:not([href]):not([class]),a:not([href]):not([class]):hover{color:inherit;text-decoration:none}code,kbd,pre,samp{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em;direction:ltr;unicode-bidi:bidi-override}pre{display:block;margin-top:0;margin-bottom:1rem;overflow:auto;font-size:.875em}pre code{font-size:inherit;color:inherit;word-break:normal}code{font-size:.875em;color:#d63384;word-wrap:break-word}a>code{color:inherit}kbd{padding:.2rem .4rem;font-size:.875em;color:#fff;background-color:#212529;border-radius:.2rem}kbd kbd{padding:0;font-size:1em;font-weight:700}figure{margin:0 0 1rem}img,svg{vertical-align:middle}table{caption-side:bottom;border-collapse:collapse}caption{padding-top:.5rem;padding-bottom:.5rem;color:#6c757d;text-align:left}th{text-align:inherit;text-align:-webkit-match-parent}tbody,td,tfoot,th,thead,tr{border-color:inherit;border-style:solid;border-width:0}label{display:inline-block}button{border-radius:0}button:focus:not(:focus-visible){outline:0}button,input,optgroup,select,textarea{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,select{text-transform:none}[role=button]{cursor:pointer}select{word-wrap:normal}select:disabled{opacity:1}[list]::-webkit-calendar-picker-indicator{display:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]:not(:disabled),[type=reset]:not(:disabled),[type=submit]:not(:disabled),button:not(:disabled){cursor:pointer}::-moz-focus-inner{padding:0;border-style:none}textarea{resize:vertical}fieldset{min-width:0;padding:0;margin:0;border:0}legend{float:left;width:100%;padding:0;margin-bottom:.5rem;font-size:calc(1.275rem + .3vw);line-height:inherit}@media (min-width:1200px){legend{font-size:1.5rem}}legend+*{clear:left}::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-text,::-webkit-datetime-edit-year-field{padding:0}::-webkit-inner-spin-button{height:auto}[type=search]{outline-offset:-2px;-webkit-appearance:textfield}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-color-swatch-wrapper{padding:0}::file-selector-button{font:inherit}::-webkit-file-upload-button{font:inherit;-webkit-appearance:button}output{display:inline-block}iframe{border:0}summary{display:list-item;cursor:pointer}progress{vertical-align:baseline}[hidden]{display:none!important}</style>
     <style>/*! syntax-highlighting.css */pre{line-height:125%;}span.linenos{color:inherit; background-color:transparent; padding-left:5px; padding-right:20px;}.pdoc-code .hll{background-color:#ffffcc}.pdoc-code{background:#f8f8f8;}.pdoc-code .c{color:#3D7B7B; font-style:italic}.pdoc-code .err{border:1px solid #FF0000}.pdoc-code .k{color:#008000; font-weight:bold}.pdoc-code .o{color:#666666}.pdoc-code .ch{color:#3D7B7B; font-style:italic}.pdoc-code .cm{color:#3D7B7B; font-style:italic}.pdoc-code .cp{color:#9C6500}.pdoc-code .cpf{color:#3D7B7B; font-style:italic}.pdoc-code .c1{color:#3D7B7B; font-style:italic}.pdoc-code .cs{color:#3D7B7B; font-style:italic}.pdoc-code .gd{color:#A00000}.pdoc-code .ge{font-style:italic}.pdoc-code .gr{color:#E40000}.pdoc-code .gh{color:#000080; font-weight:bold}.pdoc-code .gi{color:#008400}.pdoc-code .go{color:#717171}.pdoc-code .gp{color:#000080; font-weight:bold}.pdoc-code .gs{font-weight:bold}.pdoc-code .gu{color:#800080; font-weight:bold}.pdoc-code .gt{color:#0044DD}.pdoc-code .kc{color:#008000; font-weight:bold}.pdoc-code .kd{color:#008000; font-weight:bold}.pdoc-code .kn{color:#008000; font-weight:bold}.pdoc-code .kp{color:#008000}.pdoc-code .kr{color:#008000; font-weight:bold}.pdoc-code .kt{color:#B00040}.pdoc-code .m{color:#666666}.pdoc-code .s{color:#BA2121}.pdoc-code .na{color:#687822}.pdoc-code .nb{color:#008000}.pdoc-code .nc{color:#0000FF; font-weight:bold}.pdoc-code .no{color:#880000}.pdoc-code .nd{color:#AA22FF}.pdoc-code .ni{color:#717171; font-weight:bold}.pdoc-code .ne{color:#CB3F38; font-weight:bold}.pdoc-code .nf{color:#0000FF}.pdoc-code .nl{color:#767600}.pdoc-code .nn{color:#0000FF; font-weight:bold}.pdoc-code .nt{color:#008000; font-weight:bold}.pdoc-code .nv{color:#19177C}.pdoc-code .ow{color:#AA22FF; font-weight:bold}.pdoc-code .w{color:#bbbbbb}.pdoc-code .mb{color:#666666}.pdoc-code .mf{color:#666666}.pdoc-code .mh{color:#666666}.pdoc-code .mi{color:#666666}.pdoc-code .mo{color:#666666}.pdoc-code .sa{color:#BA2121}.pdoc-code .sb{color:#BA2121}.pdoc-code .sc{color:#BA2121}.pdoc-code .dl{color:#BA2121}.pdoc-code .sd{color:#BA2121; font-style:italic}.pdoc-code .s2{color:#BA2121}.pdoc-code .se{color:#AA5D1F; font-weight:bold}.pdoc-code .sh{color:#BA2121}.pdoc-code .si{color:#A45A77; font-weight:bold}.pdoc-code .sx{color:#008000}.pdoc-code .sr{color:#A45A77}.pdoc-code .s1{color:#BA2121}.pdoc-code .ss{color:#19177C}.pdoc-code .bp{color:#008000}.pdoc-code .fm{color:#0000FF}.pdoc-code .vc{color:#19177C}.pdoc-code .vg{color:#19177C}.pdoc-code .vi{color:#19177C}.pdoc-code .vm{color:#19177C}.pdoc-code .il{color:#666666}</style>
     <style>/*! theme.css */:root{--pdoc-background:#fff;}.pdoc{--text:#212529;--muted:#6c757d;--link:#3660a5;--link-hover:#1659c5;--code:#f8f8f8;--active:#fff598;--accent:#eee;--accent2:#c1c1c1;--nav-hover:rgba(255, 255, 255, 0.5);--name:#0066BB;--def:#008800;--annotation:#007020;}</style>
     <style>/*! layout.css */html, body{width:100%;height:100%;}html, main{scroll-behavior:smooth;}body{background-color:var(--pdoc-background);}@media (max-width:769px){#navtoggle{cursor:pointer;position:absolute;width:50px;height:40px;top:1rem;right:1rem;border-color:var(--text);color:var(--text);display:flex;opacity:0.8;}#navtoggle:hover{opacity:1;}#togglestate + div{display:none;}#togglestate:checked + div{display:inherit;}main, header{padding:2rem 3vw;}header + main{margin-top:-3rem;}.git-button{display:none !important;}nav input[type="search"]{max-width:77%;}nav input[type="search"]:first-child{margin-top:-6px;}nav input[type="search"]:valid ~ *{display:none !important;}}@media (min-width:770px){:root{--sidebar-width:clamp(12.5rem, 28vw, 22rem);}nav{position:fixed;overflow:auto;height:100vh;width:var(--sidebar-width);}main, header{padding:3rem 2rem 3rem calc(var(--sidebar-width) + 3rem);width:calc(54rem + var(--sidebar-width));max-width:100%;}header + main{margin-top:-4rem;}#navtoggle{display:none;}}#togglestate{position:absolute;height:0;}nav.pdoc{--pad:1.75rem;--indent:1.5rem;background-color:var(--accent);border-right:1px solid var(--accent2);box-shadow:0 0 20px rgba(50, 50, 50, .2) inset;padding:0 0 0 var(--pad);overflow-wrap:anywhere;scrollbar-width:thin; scrollbar-color:var(--accent2) transparent }nav.pdoc::-webkit-scrollbar{width:.4rem; }nav.pdoc::-webkit-scrollbar-thumb{background-color:var(--accent2); }nav.pdoc > div{padding:var(--pad) 0;}nav.pdoc .module-list-button{display:inline-flex;align-items:center;color:var(--text);border-color:var(--muted);margin-bottom:1rem;}nav.pdoc .module-list-button:hover{border-color:var(--text);}nav.pdoc input[type=search]{display:block;outline-offset:0;width:calc(100% - var(--pad));}nav.pdoc .logo{max-width:calc(100% - var(--pad));max-height:35vh;display:block;margin:0 auto 1rem;transform:translate(calc(-.5 * var(--pad)), 0);}nav.pdoc ul{list-style:none;padding-left:0;}nav.pdoc li{display:block;margin:0;padding:.2rem 0 .2rem var(--indent);transition:all 100ms;}nav.pdoc > div > ul > li{padding-left:0;}nav.pdoc li:hover{background-color:var(--nav-hover);}nav.pdoc a, nav.pdoc a:hover{color:var(--text);}nav.pdoc a{display:block;}nav.pdoc > h2:first-of-type{margin-top:1.5rem;}nav.pdoc .class:before{content:"class ";color:var(--muted);}nav.pdoc .function:after{content:"()";color:var(--muted);}nav.pdoc footer:before{content:"";display:block;width:calc(100% - var(--pad));border-top:solid var(--accent2) 1px;margin-top:1.5rem;padding-top:.5rem;}nav.pdoc footer{font-size:small;}</style>
-    <style>/*! content.css */.pdoc{color:var(--text);box-sizing:border-box;line-height:1.5;background:none;}.pdoc .pdoc-button{display:inline-block;border:solid black 1px;border-radius:2px;font-size:.75rem;padding:calc(0.5em - 1px) 1em;transition:100ms all;}.pdoc .visually-hidden{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border:0 !important;}.pdoc h1, .pdoc h2, .pdoc h3{font-weight:300;margin:.3em 0;padding:.2em 0;}.pdoc a{text-decoration:none;color:var(--link);}.pdoc a:hover{color:var(--link-hover);}.pdoc blockquote{margin-left:2rem;}.pdoc pre{border-top:1px solid var(--accent2);border-bottom:1px solid var(--accent2);margin-top:0;margin-bottom:1em;padding:.5rem 0 .5rem .5rem;overflow-x:auto;background-color:var(--code);}.pdoc code{color:var(--text);padding:.2em .4em;margin:0;font-size:85%;background-color:var(--code);border-radius:6px;}.pdoc a > code{color:inherit;}.pdoc pre > code{display:inline-block;font-size:inherit;background:none;border:none;padding:0;}.pdoc .modulename{margin-top:0;font-weight:bold;}.pdoc .modulename a{color:var(--link);transition:100ms all;}.pdoc .git-button{float:right;border:solid var(--link) 1px;}.pdoc .git-button:hover{background-color:var(--link);color:var(--pdoc-background);}.pdoc details{filter:opacity(1);}.pdoc details:not([open]){height:0;}.pdoc details > summary{position:absolute;top:-35px;right:0;font-size:.75rem;color:var(--muted);padding:0 .7em;user-select:none;cursor:pointer;}.pdoc details > summary:focus{outline:0;}.pdoc .docstring{margin-bottom:1.5rem;}.pdoc > section:first-of-type > .docstring{margin-bottom:2.5rem;}.pdoc .docstring .pdoc-code{margin-left:1em;margin-right:1em;}.pdoc h1:target,.pdoc h2:target,.pdoc h3:target,.pdoc h4:target,.pdoc h5:target,.pdoc h6:target{background-color:var(--active);box-shadow:-1rem 0 0 0 var(--active);}.pdoc div:target > .attr,.pdoc section:target > .attr,.pdoc dd:target > a{background-color:var(--active);}.pdoc .attr:hover{filter:contrast(0.95);}.pdoc .headerlink{position:absolute;width:0;margin-left:-1.5rem;line-height:1.4rem;font-size:1.5rem;font-weight:normal;transition:all 100ms ease-in-out;opacity:0;user-select:none;}.pdoc .attr > .headerlink{margin-left:-2.5rem;}.pdoc *:hover > .headerlink,.pdoc *:target > .attr > .headerlink{opacity:1;}.pdoc .attr{display:block;color:var(--text);margin:.5rem 0 .5rem;padding:.4rem 5rem .4rem 1rem;background-color:var(--accent);}.pdoc .classattr{margin-left:2rem;}.pdoc .name{color:var(--name);font-weight:bold;}.pdoc .def{color:var(--def);font-weight:bold;}.pdoc .signature{white-space:pre-wrap;}.pdoc .annotation{color:var(--annotation);}.pdoc .inherited{margin-left:2rem;}.pdoc .inherited dt{font-weight:700;}.pdoc .inherited dt, .pdoc .inherited dd{display:inline;margin-left:0;margin-bottom:.5rem;}.pdoc .inherited dd:not(:last-child):after{content:", ";}.pdoc .inherited .class:before{content:"class ";}.pdoc .inherited .function a:after{content:"()";}.pdoc .search-result .docstring{overflow:auto;max-height:25vh;}.pdoc .search-result.focused > .attr{background-color:var(--active);}.pdoc .attribution{margin-top:2rem;display:block;opacity:0.5;transition:all 200ms;filter:grayscale(100%);}.pdoc .attribution:hover{opacity:1;filter:grayscale(0%);}.pdoc .attribution img{margin-left:5px;height:35px;vertical-align:middle;width:70px;transition:all 200ms;}.pdoc table{display:block;width:max-content;max-width:100%;overflow:auto;margin-bottom:1rem;}.pdoc table th{font-weight:600;}.pdoc table th, .pdoc table td{padding:6px 13px;border:1px solid var(--accent2);}</style>
+    <style>/*! content.css */.pdoc{color:var(--text);box-sizing:border-box;line-height:1.5;background:none;}.pdoc .pdoc-button{display:inline-block;border:solid black 1px;border-radius:2px;font-size:.75rem;padding:calc(0.5em - 1px) 1em;transition:100ms all;}.pdoc .visually-hidden{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border:0 !important;}.pdoc h1, .pdoc h2, .pdoc h3{font-weight:300;margin:.3em 0;padding:.2em 0;}.pdoc a{text-decoration:none;color:var(--link);}.pdoc a:hover{color:var(--link-hover);}.pdoc blockquote{margin-left:2rem;}.pdoc pre{border-top:1px solid var(--accent2);border-bottom:1px solid var(--accent2);margin-top:0;margin-bottom:1em;padding:.5rem 0 .5rem .5rem;overflow-x:auto;background-color:var(--code);}.pdoc code{color:var(--text);padding:.2em .4em;margin:0;font-size:85%;background-color:var(--code);border-radius:6px;}.pdoc a > code{color:inherit;}.pdoc pre > code{display:inline-block;font-size:inherit;background:none;border:none;padding:0;}.pdoc section{margin-bottom:1.5rem;}.pdoc .modulename{margin-top:0;font-weight:bold;}.pdoc .modulename a{color:var(--link);transition:100ms all;}.pdoc .git-button{float:right;border:solid var(--link) 1px;}.pdoc .git-button:hover{background-color:var(--link);color:var(--pdoc-background);}.pdoc details{filter:opacity(1);}.pdoc details:not([open]){height:0;}.pdoc details > summary{position:absolute;top:-35px;right:0;font-size:.75rem;color:var(--muted);padding:0 .7em;user-select:none;cursor:pointer;}.pdoc details > summary:focus{outline:0;}.pdoc .docstring{margin-bottom:1.5rem;}.pdoc > section:first-of-type > .docstring{margin-bottom:2.5rem;}.pdoc .docstring .pdoc-code{margin-left:1em;margin-right:1em;}.pdoc h1:target,.pdoc h2:target,.pdoc h3:target,.pdoc h4:target,.pdoc h5:target,.pdoc h6:target{background-color:var(--active);box-shadow:-1rem 0 0 0 var(--active);}.pdoc div:target > .attr,.pdoc section:target > .attr,.pdoc dd:target > a{background-color:var(--active);}.pdoc .attr:hover{filter:contrast(0.95);}.pdoc .headerlink{position:absolute;width:0;margin-left:-1.5rem;line-height:1.4rem;font-size:1.5rem;font-weight:normal;transition:all 100ms ease-in-out;opacity:0;user-select:none;}.pdoc .attr > .headerlink{margin-left:-2.5rem;}.pdoc *:hover > .headerlink,.pdoc *:target > .attr > .headerlink{opacity:1;}.pdoc .attr{display:block;color:var(--text);margin:.5rem 0 .5rem;padding:.4rem 5rem .4rem 1rem;background-color:var(--accent);}.pdoc .classattr{margin-left:2rem;}.pdoc .name{color:var(--name);font-weight:bold;}.pdoc .def{color:var(--def);font-weight:bold;}.pdoc .signature{white-space:pre-wrap;}.pdoc .annotation{color:var(--annotation);}.pdoc .inherited{margin-left:2rem;}.pdoc .inherited dt{font-weight:700;}.pdoc .inherited dt, .pdoc .inherited dd{display:inline;margin-left:0;margin-bottom:.5rem;}.pdoc .inherited dd:not(:last-child):after{content:", ";}.pdoc .inherited .class:before{content:"class ";}.pdoc .inherited .function a:after{content:"()";}.pdoc .search-result .docstring{overflow:auto;max-height:25vh;}.pdoc .search-result.focused > .attr{background-color:var(--active);}.pdoc .attribution{margin-top:2rem;display:block;opacity:0.5;transition:all 200ms;filter:grayscale(100%);}.pdoc .attribution:hover{opacity:1;filter:grayscale(0%);}.pdoc .attribution img{margin-left:5px;height:35px;vertical-align:middle;width:70px;transition:all 200ms;}.pdoc table{display:block;width:max-content;max-width:100%;overflow:auto;margin-bottom:1rem;}.pdoc table th{font-weight:600;}.pdoc table th, .pdoc table td{padding:6px 13px;border:1px solid var(--accent2);}</style>
     <style>/*! custom.css */</style></head>
 <body>
     <nav class="pdoc">
@@ -141,6 +141,9 @@
                                     </li>
                             </ul>
 
+                        </li>
+                        <li>
+                                <a class="variable" href="#MigrationHop.base_info">base_info</a>
                         </li>
                         <li>
                                 <a class="function" href="#MigrationHop.site_start">site_start</a>
@@ -288,7 +291,7 @@
                     <h1 class="modulename">
 <a href="./../../../simmate.html">simmate</a><wbr>.<a href="./../../database.html">database</a><wbr>.<a href="./../base_data_types.html">base_data_types</a><wbr>.nudged_elastic_band    </h1>
 
-                        <div class="docstring"><p>This module is experimental and subject to change.</p>
+                        <div class="docstring"><p>WARNING: This module is experimental and subject to change.</p>
 </div>
 
                         <details>
@@ -296,7 +299,7 @@
             <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module is experimental and subject to change.</span>
+<span class="sd">WARNING: This module is experimental and subject to change.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -313,25 +316,47 @@
     <span class="n">Structure</span><span class="p">,</span>
 <span class="p">)</span>
 
-
+<span class="c1"># TODO: consider making a NestedCalculation</span>
 <span class="k">class</span> <span class="nc">DiffusionAnalysis</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
-    <span class="c1"># The element of the diffusion atom</span>
     <span class="n">migrating_specie</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The element of the diffusion atom (e.g. &quot;Li&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Whether vacancy or interstitial diffusion was used</span>
     <span class="n">vacancy_mode</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    (if relevent) Whether vacancy or interstitial diffusion was used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># atomic fraction of the diffusion ion</span>
     <span class="n">atomic_fraction</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Atomic fraction of the diffusion ion in the bulk structure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Evaluates all MigrationHops to find the lowest-barrier percolation network</span>
+    <span class="c1"># NOTE: barrier_cell, paths_involved, and npaths_involved need to be updated</span>
+    <span class="c1"># by evaluating all MigrationHops.</span>
+
     <span class="n">barrier_cell</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The energy barrier corresponding to the lowest-barrier percolation network</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">paths_involved</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The symmetrically-unqiue pathways involved in the lowest-barrier </span>
+<span class="sd">    percolation network. This is given as a list of IDs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: consider making this a relationship to MigrationPathways</span>
+
     <span class="n">npaths_involved</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The number of symmetrically-unqiue pathways involved in the lowest-barrier </span>
+<span class="sd">    percolation network</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_toolkit</span><span class="p">(</span>
@@ -362,6 +387,11 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new database entry from a directory that holds diffusion analysis</span>
+<span class="sd">        results. For now, this assumes the directory holds vasp output files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
         <span class="c1"># this when I begin adding new calculators.</span>
 
@@ -486,38 +516,74 @@
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
-    <span class="c1"># the initial, midpoint, and end site fractional coordinates</span>
+    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;site_start&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;site_end&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;index_start&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;index_end&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;number&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="c1"># OPTIMIZE: site_start and site_end</span>
     <span class="c1"># Really, this is a list of float values, but I save it as a string.</span>
-    <span class="c1"># !!! for robustness, should I save cartesian coordinates and/or lattice as well?</span>
-    <span class="c1"># !!! Does the max length make sense here and below?</span>
-    <span class="c1"># !!! I could also store as JSON since it&#39;s a list of coords.</span>
+    <span class="c1"># For robustness, should I save cartesian coordinates and/or lattice as well?</span>
+    <span class="c1"># Does the max length make sense here and below?</span>
+    <span class="c1"># I could also store as JSON since it&#39;s a list of coords.</span>
+
     <span class="n">site_start</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The starting fractional coordinates of the diffusing site.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">site_end</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The ending fractional coordinates of the diffusing site.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># BUG: the init script for MigrationHop can&#39;t identify the site indexes</span>
     <span class="c1"># properly but they should be the same as before because it is a symmetrized</span>
     <span class="c1"># structure. Note that even if I&#39;m wrong in some case -- this will have</span>
     <span class="c1"># no effect because iindex and eindex are only used in one portion of</span>
     <span class="c1"># the hash as well as for printing the __str__ of the object.</span>
+
     <span class="n">index_start</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The starting site index of the diffusing site.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">index_end</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The ending site index of the diffusing site.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="sd">&quot;&quot;&quot; Query-helper Info &quot;&quot;&quot;</span>
-
-    <span class="c1"># TODO:</span>
-    <span class="c1"># The expected index in DistinctPathFinder.get_paths. The shortest path is index 0</span>
-    <span class="c1"># and they are all ordered by increasing length.</span>
     <span class="n">number</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The expected index in DistinctPathFinder.get_paths. The shortest path is index 0</span>
+<span class="sd">    and they are all ordered by increasing length.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># The length/distance of the pathway from start to end (linear measurement)</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The length/distance of the pathway from start to end. Note, this is </span>
+<span class="sd">    linear measurement -- i.e. is it the length of the linear interpolated path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># pathway dimensionality</span>
     <span class="n">dimension_path</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">dimension_host_lattice</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The pathway dimensionality using the Larson scoring parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Evaluates all MigrationImages to find the barriers</span>
+    <span class="n">dimension_host_lattice</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ignoring all atoms of the diffusing species, this is the dimensionality</span>
+<span class="sd">    of the remaining atoms of the lattice using the Larson scoring parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">energy_barrier</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The energy barrier in eV. This evaluates all images of the diffusion pathway</span>
+<span class="sd">    and find the difference between the maximum and minimum image energies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># TODO:</span>
     <span class="c1"># Distance of the pathway relative to the shortest pathway distance</span>
@@ -539,10 +605,6 @@
     <span class="c1"># image_transition_state --&gt; OneToOneField for specific MigrationHop</span>
 
     <span class="c1"># Just like Relaxation points to IonicSteps, NEB will point to MigrationImages</span>
-
-    <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
-    <span class="c1"># TODO: If I want a queryset to return a pymatgen-diffusion object(s) directly,</span>
-    <span class="c1"># then I need make a new Manager rather than adding methods here.</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_from_toolkit</span><span class="p">(</span>
@@ -572,7 +634,7 @@
     <span class="c1"># is unable to identify equivalent sites. I opened an issue for this</span>
     <span class="c1"># with their team:</span>
     <span class="c1">#   https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion/issues/296</span>
-    <span class="k">def</span> <span class="nf">to_toolkit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_toolkit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolkitMigrationHop</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        converts the database MigrationHop to a toolkit MigrationHop</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -770,19 +832,32 @@
         <span class="s2">&quot;energy&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="c1"># 0 = start, -1 = end.</span>
     <span class="n">number</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The image number. Note, the starting image is always 0 and the ending</span>
+<span class="sd">    image is always -1. The choice of -1 is because we often add the ending</span>
+<span class="sd">    image to the database table before knowing how many midpoint images we</span>
+<span class="sd">    are going to create.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Diffusion analysis given a tangent force, so we don&#39;t mix this up with the</span>
-    <span class="c1"># Force mix-in.</span>
     <span class="n">force_tangent</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The tangent force of image. Not to be confused with forces from the Forces mix-in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># For NEB, we only care about the total energy -- not the other fields that</span>
-    <span class="c1"># the Thermodynamics mix-in provides.</span>
+    <span class="c1"># Note, we only care about the total energy for NEB images -- not the other</span>
+    <span class="c1"># fields that the Thermodynamics mix-in provides. This is why we set this</span>
+    <span class="c1"># field directly, rather than using the mix-in.</span>
     <span class="n">energy</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The calculated total energy. Units are in eV. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This measures the fingerprint distance of the image from the starting image</span>
     <span class="n">structure_distance</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The fingerprint distance of the image from the starting image. A smaller</span>
+<span class="sd">    means the structures are more similar, with 0 being an exact match.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># We don&#39;t need the source column for the MigrationImage class because we</span>
     <span class="c1"># instead stored the source on the DiffusionAnalysis object. This line</span>
@@ -858,19 +933,41 @@
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
-    <span class="c1"># The element of the diffusion atom</span>
     <span class="n">migrating_specie</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The element of the diffusion atom (e.g. &quot;Li&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Whether vacancy or interstitial diffusion was used</span>
     <span class="n">vacancy_mode</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    (if relevent) Whether vacancy or interstitial diffusion was used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># atomic fraction of the diffusion ion</span>
     <span class="n">atomic_fraction</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Atomic fraction of the diffusion ion in the bulk structure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Evaluates all MigrationHops to find the lowest-barrier percolation network</span>
+    <span class="c1"># NOTE: barrier_cell, paths_involved, and npaths_involved need to be updated</span>
+    <span class="c1"># by evaluating all MigrationHops.</span>
+
     <span class="n">barrier_cell</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The energy barrier corresponding to the lowest-barrier percolation network</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">paths_involved</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The symmetrically-unqiue pathways involved in the lowest-barrier </span>
+<span class="sd">    percolation network. This is given as a list of IDs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: consider making this a relationship to MigrationPathways</span>
+
     <span class="n">npaths_involved</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The number of symmetrically-unqiue pathways involved in the lowest-barrier </span>
+<span class="sd">    percolation network</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_toolkit</span><span class="p">(</span>
@@ -901,6 +998,11 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new database entry from a directory that holds diffusion analysis</span>
+<span class="sd">        results. For now, this assumes the directory holds vasp output files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
         <span class="c1"># this when I begin adding new calculators.</span>
 
@@ -1024,7 +1126,7 @@
 mixins inherit from this class.</p>
 
 <p>Usage is identical to
-<a href="https://docs.djangoproject.com/en/4.0/#the-model-layer">Models in Django</a>
+<a href="https://docs.djangoproject.com/en/4.0/#the-model-layer">models in Django</a>
 where this class only adds extra methods for convenience.</p>
 </div>
 
@@ -1038,8 +1140,7 @@ where this class only adds extra methods for convenience.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The element of the diffusion atom (e.g. "Li")</p>
 </div>
 
 
@@ -1053,8 +1154,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>(if relevent) Whether vacancy or interstitial diffusion was used.</p>
 </div>
 
 
@@ -1068,8 +1168,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Atomic fraction of the diffusion ion in the bulk structure.</p>
 </div>
 
 
@@ -1083,8 +1182,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The energy barrier corresponding to the lowest-barrier percolation network</p>
 </div>
 
 
@@ -1098,8 +1196,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The symmetrically-unqiue pathways involved in the lowest-barrier 
+percolation network. This is given as a list of IDs.</p>
 </div>
 
 
@@ -1113,8 +1211,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The number of symmetrically-unqiue pathways involved in the lowest-barrier 
+percolation network</p>
 </div>
 
 
@@ -1206,6 +1304,11 @@ a Thermodynamics table would require an energy.</li>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new database entry from a directory that holds diffusion analysis</span>
+<span class="sd">        results. For now, this assumes the directory holds vasp output files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># I assume the directory is from a vasp calculation, but I need to update</span>
         <span class="c1"># this when I begin adding new calculators.</span>
 
@@ -1252,7 +1355,10 @@ a Thermodynamics table would require an energy.</li>
 
         </details>
 
-    
+            <div class="docstring"><p>Creates a new database entry from a directory that holds diffusion analysis
+results. For now, this assumes the directory holds vasp output files.</p>
+</div>
+
 
                             </div>
                             <div id="DiffusionAnalysis.create_subclasses" class="classattr">
@@ -1601,8 +1707,8 @@ columns:
   change.</p>
 </blockquote>
 
-<p>This column indicated the data came from, and it could be a number of things,
-including...</p>
+<p>This column indicates where the data came from, and it could be a number 
+of things including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -1696,10 +1802,14 @@ values used in this column:</p>
                                 <dd id="DiffusionAnalysis.source_doi" class="variable"><a href="base.html#DatabaseTable.source_doi">source_doi</a></dd>
                 <dd id="DiffusionAnalysis.remote_archive_link" class="variable"><a href="base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
                 <dd id="DiffusionAnalysis.objects" class="function"><a href="base.html#DatabaseTable.objects">objects</a></dd>
-                <dd id="DiffusionAnalysis.show_columns" class="function"><a href="base.html#DatabaseTable.show_columns">show_columns</a></dd>
                 <dd id="DiffusionAnalysis.create_subclass" class="function"><a href="base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="DiffusionAnalysis.load_archive" class="function"><a href="base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="DiffusionAnalysis.load_remote_archive" class="function"><a href="base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
+                <dd id="DiffusionAnalysis.get_column_names" class="function"><a href="base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
+                <dd id="DiffusionAnalysis.show_columns" class="function"><a href="base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="DiffusionAnalysis.get_mixins" class="function"><a href="base.html#DatabaseTable.get_mixins">get_mixins</a></dd>
+                <dd id="DiffusionAnalysis.get_mixin_names" class="function"><a href="base.html#DatabaseTable.get_mixin_names">get_mixin_names</a></dd>
+                <dd id="DiffusionAnalysis.get_extra_columns" class="function"><a href="base.html#DatabaseTable.get_extra_columns">get_extra_columns</a></dd>
 
             </div>
                                 </dl>
@@ -1773,38 +1883,74 @@ values used in this column:</p>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;workflows&quot;</span>
 
-    <span class="c1"># the initial, midpoint, and end site fractional coordinates</span>
+    <span class="n">base_info</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;site_start&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;site_end&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;index_start&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;index_end&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;number&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="c1"># OPTIMIZE: site_start and site_end</span>
     <span class="c1"># Really, this is a list of float values, but I save it as a string.</span>
-    <span class="c1"># !!! for robustness, should I save cartesian coordinates and/or lattice as well?</span>
-    <span class="c1"># !!! Does the max length make sense here and below?</span>
-    <span class="c1"># !!! I could also store as JSON since it&#39;s a list of coords.</span>
+    <span class="c1"># For robustness, should I save cartesian coordinates and/or lattice as well?</span>
+    <span class="c1"># Does the max length make sense here and below?</span>
+    <span class="c1"># I could also store as JSON since it&#39;s a list of coords.</span>
+
     <span class="n">site_start</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The starting fractional coordinates of the diffusing site.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">site_end</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The ending fractional coordinates of the diffusing site.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># BUG: the init script for MigrationHop can&#39;t identify the site indexes</span>
     <span class="c1"># properly but they should be the same as before because it is a symmetrized</span>
     <span class="c1"># structure. Note that even if I&#39;m wrong in some case -- this will have</span>
     <span class="c1"># no effect because iindex and eindex are only used in one portion of</span>
     <span class="c1"># the hash as well as for printing the __str__ of the object.</span>
+
     <span class="n">index_start</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The starting site index of the diffusing site.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">index_end</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The ending site index of the diffusing site.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="sd">&quot;&quot;&quot; Query-helper Info &quot;&quot;&quot;</span>
-
-    <span class="c1"># TODO:</span>
-    <span class="c1"># The expected index in DistinctPathFinder.get_paths. The shortest path is index 0</span>
-    <span class="c1"># and they are all ordered by increasing length.</span>
     <span class="n">number</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The expected index in DistinctPathFinder.get_paths. The shortest path is index 0</span>
+<span class="sd">    and they are all ordered by increasing length.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># The length/distance of the pathway from start to end (linear measurement)</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The length/distance of the pathway from start to end. Note, this is </span>
+<span class="sd">    linear measurement -- i.e. is it the length of the linear interpolated path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># pathway dimensionality</span>
     <span class="n">dimension_path</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">dimension_host_lattice</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The pathway dimensionality using the Larson scoring parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Evaluates all MigrationImages to find the barriers</span>
+    <span class="n">dimension_host_lattice</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ignoring all atoms of the diffusing species, this is the dimensionality</span>
+<span class="sd">    of the remaining atoms of the lattice using the Larson scoring parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">energy_barrier</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The energy barrier in eV. This evaluates all images of the diffusion pathway</span>
+<span class="sd">    and find the difference between the maximum and minimum image energies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># TODO:</span>
     <span class="c1"># Distance of the pathway relative to the shortest pathway distance</span>
@@ -1826,10 +1972,6 @@ values used in this column:</p>
     <span class="c1"># image_transition_state --&gt; OneToOneField for specific MigrationHop</span>
 
     <span class="c1"># Just like Relaxation points to IonicSteps, NEB will point to MigrationImages</span>
-
-    <span class="sd">&quot;&quot;&quot; Model Methods &quot;&quot;&quot;</span>
-    <span class="c1"># TODO: If I want a queryset to return a pymatgen-diffusion object(s) directly,</span>
-    <span class="c1"># then I need make a new Manager rather than adding methods here.</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_from_toolkit</span><span class="p">(</span>
@@ -1859,7 +2001,7 @@ values used in this column:</p>
     <span class="c1"># is unable to identify equivalent sites. I opened an issue for this</span>
     <span class="c1"># with their team:</span>
     <span class="c1">#   https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion/issues/296</span>
-    <span class="k">def</span> <span class="nf">to_toolkit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_toolkit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolkitMigrationHop</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        converts the database MigrationHop to a toolkit MigrationHop</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2050,11 +2192,26 @@ values used in this column:</p>
 mixins inherit from this class.</p>
 
 <p>Usage is identical to
-<a href="https://docs.djangoproject.com/en/4.0/#the-model-layer">Models in Django</a>
+<a href="https://docs.djangoproject.com/en/4.0/#the-model-layer">models in Django</a>
 where this class only adds extra methods for convenience.</p>
 </div>
 
 
+                            <div id="MigrationHop.base_info" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MigrationHop.base_info">#&nbsp;&nbsp</a>
+
+        <span class="name">base_info</span><span class="annotation">: List[str]</span><span class="default_value"> = [&#39;site_start&#39;, &#39;site_end&#39;, &#39;index_start&#39;, &#39;index_end&#39;, &#39;number&#39;]</span>
+    </div>
+
+    
+            <div class="docstring"><p>The base information for this database table and only these fields are stored
+when the <code>to_archive</code> method is used. Using the columns in this list, all 
+other columns for this table can be calculated, so the columns in this list 
+are effectively the "raw data".</p>
+</div>
+
+
+                            </div>
                             <div id="MigrationHop.site_start" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#MigrationHop.site_start">#&nbsp;&nbsp</a>
 
@@ -2064,8 +2221,7 @@ where this class only adds extra methods for convenience.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The starting fractional coordinates of the diffusing site.</p>
 </div>
 
 
@@ -2079,8 +2235,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The ending fractional coordinates of the diffusing site.</p>
 </div>
 
 
@@ -2094,8 +2249,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The starting site index of the diffusing site.</p>
 </div>
 
 
@@ -2109,7 +2263,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Query-helper Info</p>
+            <div class="docstring"><p>The ending site index of the diffusing site.</p>
 </div>
 
 
@@ -2123,8 +2277,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The expected index in DistinctPathFinder.get_paths. The shortest path is index 0
+and they are all ordered by increasing length.</p>
 </div>
 
 
@@ -2138,8 +2292,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The length/distance of the pathway from start to end. Note, this is 
+linear measurement -- i.e. is it the length of the linear interpolated path.</p>
 </div>
 
 
@@ -2153,8 +2307,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The pathway dimensionality using the Larson scoring parameter.</p>
 </div>
 
 
@@ -2168,8 +2321,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>Ignoring all atoms of the diffusing species, this is the dimensionality
+of the remaining atoms of the lattice using the Larson scoring parameter.</p>
 </div>
 
 
@@ -2183,7 +2336,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>Relationships</p>
+            <div class="docstring"><p>The energy barrier in eV. This evaluates all images of the diffusion pathway
+and find the difference between the maximum and minimum image energies.</p>
 </div>
 
 
@@ -2193,12 +2347,12 @@ object the first time, the query is executed.</p>
 
         
             <span class="def">def</span>
-            <span class="name">to_toolkit</span><span class="signature">(self)</span>:
+            <span class="name">to_toolkit</span><span class="signature">(self) -&gt; <a href="../../toolkit/diffusion.html#MigrationHop">simmate.toolkit.diffusion.MigrationHop</a></span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">to_toolkit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">to_toolkit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolkitMigrationHop</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        converts the database MigrationHop to a toolkit MigrationHop</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2490,8 +2644,8 @@ A subclass of MigrationHop.</li>
   change.</p>
 </blockquote>
 
-<p>This column indicated the data came from, and it could be a number of things,
-including...</p>
+<p>This column indicates where the data came from, and it could be a number 
+of things including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -2567,15 +2721,18 @@ values used in this column:</p>
 
             </div>
             <div><dt><a href="base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
-                                <dd id="MigrationHop.base_info" class="variable"><a href="base.html#DatabaseTable.base_info">base_info</a></dd>
-                <dd id="MigrationHop.source_doi" class="variable"><a href="base.html#DatabaseTable.source_doi">source_doi</a></dd>
+                                <dd id="MigrationHop.source_doi" class="variable"><a href="base.html#DatabaseTable.source_doi">source_doi</a></dd>
                 <dd id="MigrationHop.remote_archive_link" class="variable"><a href="base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
                 <dd id="MigrationHop.objects" class="function"><a href="base.html#DatabaseTable.objects">objects</a></dd>
-                <dd id="MigrationHop.show_columns" class="function"><a href="base.html#DatabaseTable.show_columns">show_columns</a></dd>
                 <dd id="MigrationHop.create_subclass" class="function"><a href="base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="MigrationHop.from_toolkit" class="function"><a href="base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
                 <dd id="MigrationHop.load_archive" class="function"><a href="base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="MigrationHop.load_remote_archive" class="function"><a href="base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
+                <dd id="MigrationHop.get_column_names" class="function"><a href="base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
+                <dd id="MigrationHop.show_columns" class="function"><a href="base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="MigrationHop.get_mixins" class="function"><a href="base.html#DatabaseTable.get_mixins">get_mixins</a></dd>
+                <dd id="MigrationHop.get_mixin_names" class="function"><a href="base.html#DatabaseTable.get_mixin_names">get_mixin_names</a></dd>
+                <dd id="MigrationHop.get_extra_columns" class="function"><a href="base.html#DatabaseTable.get_extra_columns">get_extra_columns</a></dd>
 
             </div>
                                 </dl>
@@ -2657,19 +2814,32 @@ values used in this column:</p>
         <span class="s2">&quot;energy&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="c1"># 0 = start, -1 = end.</span>
     <span class="n">number</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The image number. Note, the starting image is always 0 and the ending</span>
+<span class="sd">    image is always -1. The choice of -1 is because we often add the ending</span>
+<span class="sd">    image to the database table before knowing how many midpoint images we</span>
+<span class="sd">    are going to create.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Diffusion analysis given a tangent force, so we don&#39;t mix this up with the</span>
-    <span class="c1"># Force mix-in.</span>
     <span class="n">force_tangent</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The tangent force of image. Not to be confused with forces from the Forces mix-in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># For NEB, we only care about the total energy -- not the other fields that</span>
-    <span class="c1"># the Thermodynamics mix-in provides.</span>
+    <span class="c1"># Note, we only care about the total energy for NEB images -- not the other</span>
+    <span class="c1"># fields that the Thermodynamics mix-in provides. This is why we set this</span>
+    <span class="c1"># field directly, rather than using the mix-in.</span>
     <span class="n">energy</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The calculated total energy. Units are in eV. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># This measures the fingerprint distance of the image from the starting image</span>
     <span class="n">structure_distance</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The fingerprint distance of the image from the starting image. A smaller</span>
+<span class="sd">    means the structures are more similar, with 0 being an exact match.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># We don&#39;t need the source column for the MigrationImage class because we</span>
     <span class="c1"># instead stored the source on the DiffusionAnalysis object. This line</span>
@@ -2732,7 +2902,7 @@ values used in this column:</p>
 mixins inherit from this class.</p>
 
 <p>Usage is identical to
-<a href="https://docs.djangoproject.com/en/4.0/#the-model-layer">Models in Django</a>
+<a href="https://docs.djangoproject.com/en/4.0/#the-model-layer">models in Django</a>
 where this class only adds extra methods for convenience.</p>
 </div>
 
@@ -2761,8 +2931,10 @@ are effectively the "raw data".</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The image number. Note, the starting image is always 0 and the ending
+image is always -1. The choice of -1 is because we often add the ending
+image to the database table before knowing how many midpoint images we
+are going to create.</p>
 </div>
 
 
@@ -2776,8 +2948,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The tangent force of image. Not to be confused with forces from the Forces mix-in.</p>
 </div>
 
 
@@ -2791,8 +2962,7 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
 </div>
 
 
@@ -2806,8 +2976,8 @@ object the first time, the query is executed.</p>
     </div>
 
     
-            <div class="docstring"><p>A wrapper for a deferred-loading field. When the value is read from this
-object the first time, the query is executed.</p>
+            <div class="docstring"><p>The fingerprint distance of the image from the starting image. A smaller
+means the structures are more similar, with 0 being an exact match.</p>
 </div>
 
 
@@ -2824,8 +2994,8 @@ object the first time, the query is executed.</p>
   change.</p>
 </blockquote>
 
-<p>This column indicated the data came from, and it could be a number of things,
-including...</p>
+<p>This column indicates where the data came from, and it could be a number 
+of things including...</p>
 
 <ul>
 <li>a third party id</li>
@@ -3216,11 +3386,15 @@ columns:
                                 <dd id="MigrationImage.source_doi" class="variable"><a href="base.html#DatabaseTable.source_doi">source_doi</a></dd>
                 <dd id="MigrationImage.remote_archive_link" class="variable"><a href="base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
                 <dd id="MigrationImage.objects" class="function"><a href="base.html#DatabaseTable.objects">objects</a></dd>
-                <dd id="MigrationImage.show_columns" class="function"><a href="base.html#DatabaseTable.show_columns">show_columns</a></dd>
                 <dd id="MigrationImage.create_subclass" class="function"><a href="base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="MigrationImage.from_toolkit" class="function"><a href="base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
                 <dd id="MigrationImage.load_archive" class="function"><a href="base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="MigrationImage.load_remote_archive" class="function"><a href="base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
+                <dd id="MigrationImage.get_column_names" class="function"><a href="base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
+                <dd id="MigrationImage.show_columns" class="function"><a href="base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="MigrationImage.get_mixins" class="function"><a href="base.html#DatabaseTable.get_mixins">get_mixins</a></dd>
+                <dd id="MigrationImage.get_mixin_names" class="function"><a href="base.html#DatabaseTable.get_mixin_names">get_mixin_names</a></dd>
+                <dd id="MigrationImage.get_extra_columns" class="function"><a href="base.html#DatabaseTable.get_extra_columns">get_extra_columns</a></dd>
 
             </div>
                                 </dl>
