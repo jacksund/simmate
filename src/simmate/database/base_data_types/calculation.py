@@ -7,12 +7,11 @@ from simmate.database.base_data_types import DatabaseTable, table_column
 
 class Calculation(DatabaseTable):
     """
-    A calculation is synonmyous with a Prefect "Flow-Run". This entire table together
-    can be viewed as the "Flow" which may have extra metadata. This could
-    include values such as...
-        - workflow_name
-        - simmate_version
-        - [[thirdparty]]_version (i.e. vasp_version="5.4.4")
+    A calculation is the result of a single `workflow.run()` call. Thus, a
+    calculation is synonmyous with a Prefect "Flow-Run". Becuase of this,
+    every table that inherits from this Calculation class will be directly
+    linked to a specific Workflow. You can access this workflow via the
+    `workflow` attribute.
     """
 
     class Meta:
@@ -69,68 +68,43 @@ class Calculation(DatabaseTable):
     any of those changes here.
     """
 
-    # EXPERIMENTAL
-    # Where this calculation plays a role within a "nested" workflow calculation.
-    # Becuase this structure can be reused by multiple workflows, we make this
-    # a list of source-like objects. For example, a relaxation could be part of
-    # a series of relaxations (like in StagedRelaxation) or it can be an initial
-    # step of a BandStructure calculation.
-    # parent_nested_calculations = table_column.JSONField(blank=True, null=True)
-
-    """Archived Data"""
-    # I may want to add these fields because Prefect doesn't store run stats
-    # indefinitely AND it doesn't give detail memory use, number of cores, etc.
-    # If all of these are too much, I could do a json field of "run_stats" instead
-
-    # average_memory (The average memory used in kb)
-    # max_memory (The maximum memory used in kb)
-    # elapsed_time (The real time elapsed in seconds)
-    # system_time(The system CPU time in seconds)
-    # user_time(The user CPU time spent by VASP in seconds)
-    # total_time (The total CPU time for this calculation)
-    # cores (The number of cores used by VASP (some clusters print `mpi-ranks` here))
-
-    # Here are some other Prefect fields too.
-    # agent_id
-    # auto_scheduled
-    # context
-    # created_by_user_id
-    # end_time
-    # flow_id
-    # labels
-    # name
-    # parameters
-    # scheduled_start_time
-    # start_time
-    # state
-    # tenant_id
-    # times_resurrected
-    # version
-
-    """ Relationships """
-    # While there are no base relations for this abstract class, the majority of
-    # calculations will link to a structure or alternatively a diffusion pathway
-    # or crystal surface. In such cases, you'll add a relationship like this:
-    #
-    #   structure = table_column.ForeignKey(
-    #       ExampleStructureModel,
-    #       on_delete=table_column.CASCADE,
-    #   )
-    #
-    # Note that this is a ForeignKey because we want to allow the user to attempt
-    # the same calculation multiple times. Otherwise it would be a OneToOneField.
-
-    """ Properties """
-
     @property
     def prefect_cloud_link(self) -> str:
         """
-        URL to this calculation (flow-run) in the Prefect Cloud webstite.
+        URL to this calculation (flow-run) in the Prefect Cloud website.
+
+        This assumes that the calculation was registered with prefect cloud and
+        doesn't check to confirm it's been registered. To actually confirm that,
+        use the `flow_run_view` attribute instead.
         """
         return f"https://cloud.prefect.io/simmate/flow-run/{self.prefect_flow_run_id}"
 
     @property
     def flow_run_view(self) -> FlowRunView:
+        """
+        Checks if the prefect_flow_run_id was registered with Prefect Cloud, and
+        if so, returns a
+        [FlowRunView](https://docs.prefect.io/orchestration/flow-runs/inspection.html)
+        that hold metadata such as the status. This metadata includes...
+            - agent_id
+            - auto_scheduled
+            - context
+            - created_by_user_id
+            - end_time
+            - flow_id
+            - labels
+            - name
+            - parameters
+            - scheduled_start_time
+            - start_time
+            - state
+            - tenant_id
+            - times_resurrected
+            - version
+
+        If Prefect Cloud is not configured or if the calculation was ran
+        locally, the None is returned.
+        """
         try:
             return FlowRunView.from_flow_run_id(self.prefect_flow_run_id)
         except:  # may fail if this is a local run or prefect api key not configured
@@ -138,14 +112,21 @@ class Calculation(DatabaseTable):
 
     @property
     def prefect_flow_run_name(self) -> str:
+        """
+        Gives the user-friendly name of this run if the prefect_flow_run_id
+        was registered with Prefect Cloud. (an example name is "friendly-bumblebee").
+        """
         flowrunview = self.flow_run_view
         return flowrunview.name if flowrunview else None
 
+    @property
     def prefect_state(self) -> str:
+        """
+        Gives the current state of this run if the prefect_flow_run_id
+        was registered with Prefect Cloud. (ex: "Scheduled" or "Successful")
+        """
         flowrunview = self.flow_run_view
         return flowrunview.state.__class__.__name__ if flowrunview else None
-
-    """ Model Methods """
 
     @classmethod
     def from_prefect_id(cls, id: str, **kwargs):
@@ -155,6 +136,7 @@ class Calculation(DatabaseTable):
         1. if it exists, load the database object with matching prefect_id
         2. if it doesn't exist, create a new database object using this ID and extra kwargs
 
+        It will then return the corresponding Calculation instance.
         """
 
         # Depending on how a workflow was submitted, there may be a calculation
@@ -173,3 +155,23 @@ class Calculation(DatabaseTable):
         calculation.save()
 
         return calculation
+
+    # TODO: Consider adding resource use metadata (e.g. from VASP)
+    # I may want to add these fields because Prefect doesn't store run stats
+    # indefinitely AND it doesn't give detail memory use, number of cores, etc.
+    # If all of these are too much, I could do a json field of "run_stats" instead
+    #   - average_memory (The average memory used in kb)
+    #   - max_memory (The maximum memory used in kb)
+    #   - elapsed_time (The real time elapsed in seconds)
+    #   - system_time(The system CPU time in seconds)
+    #   - user_time(The user CPU time spent by VASP in seconds)
+    #   - total_time (The total CPU time for this calculation)
+    #   - cores (The number of cores used by VASP (some clusters print `mpi-ranks` here))
+
+    # TODO: Consider linking to parent calculations for nested workflow runs
+    # Where this calculation plays a role within a "nested" workflow calculation.
+    # Becuase this structure can be reused by multiple workflows, we make this
+    # a list of source-like objects. For example, a relaxation could be part of
+    # a series of relaxations (like in StagedRelaxation) or it can be an initial
+    # step of a BandStructure calculation.
+    # parent_nested_calculations = table_column.JSONField(blank=True, null=True)

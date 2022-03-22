@@ -2,6 +2,7 @@
 
 import numpy
 
+from simmate.toolkit import Structure as ToolkitStructure
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 
@@ -63,7 +64,7 @@ class Forces(DatabaseTable):
     @classmethod
     def _from_toolkit(
         cls,
-        structure,
+        structure: ToolkitStructure,
         site_forces=None,
         lattice_stress=None,
         as_dict=False,

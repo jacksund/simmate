@@ -18,22 +18,40 @@ from pymatgen.io.vasp.outputs import Vasprun
 
 
 class DynamicsRun(Structure, Calculation):
+    """
+    Holds results from a dynamics simulations -- often referred to as a molecular
+    dynamics run.
+
+    In addition to the attributes listed, you can also access all ionic steps
+    of the run via the `structures` attribute. This attribute gives a list of
+    `DynamicsIonicSteps`.
+    """
+
     class Meta:
         abstract = True
         app_label = "workflows"
 
-    """Base Info"""
-
     temperature_start = table_column.IntegerField(blank=True, null=True)
+    """
+    The starting tempertature of the simulation in Kelvin.
+    """
+
     temperature_end = table_column.IntegerField(blank=True, null=True)
+    """
+    The ending tempertature of the simulation in Kelvin.
+    """
+
     time_step = table_column.FloatField(blank=True, null=True)
+    """
+    The time in picoseconds for each step in the simulation.
+    """
+
     nsteps = table_column.IntegerField(blank=True, null=True)
-
-    """ Query-helper Info """
-    # None
-
-    """ Relationships """
-    # structures --> gives list of all DynamicsIonicSteps
+    """
+    The total number of steps in the simulation. Note, this is the maximum cutoff
+    steps set. In some cases, there may be fewer steps when the simulation is 
+    stopped early.
+    """
 
     @classmethod
     def create_subclasses(cls, name: str, module: str, **extra_columns):
@@ -155,6 +173,14 @@ class DynamicsRun(Structure, Calculation):
 
 
 class DynamicsIonicStep(Structure, Thermodynamics, Forces):
+    """
+    Holds information for a single ionic step of a `DynamicsRun`.
+
+    Each entry will map to a `DynamicsRun`, so you should typically access this
+    data through that class. The exception to this is when you want all ionic
+    steps accross many relaxations for a machine learning input.
+    """
+
     class Meta:
         abstract = True
         app_label = "workflows"
@@ -163,30 +189,26 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
     )
 
-    """Base Info"""
-    # This is ionic step number for the given relaxation. This starts counting from 0.
     number = table_column.IntegerField()
+    """
+    This is ionic step number for the given relaxation. This starts counting from 0.
+    """
 
-    # Additional options from Vasprun.as_dict to consider adding
+    temperature = table_column.FloatField(blank=True, null=True)
+    """
+    Expected temperature based on the temperature_start/end and nsteps. Note
+    that in-practice some steps may not be at equilibrium temperatue. This could
+    be the 1st 100 steps of a run or alternatively when the thermostat component
+    is off-temperature.
+    """
+
+    # TODO: Additional options from Vasprun.as_dict to consider adding
     # e_0_energy
     # e_fr_energy
     # kinetic
     # lattice kinetic
     # nosekinetic
     # nosepot
-
-    """ Query-helper Info """
-
-    # note, temp can be inferred from temperature_start/end and nsteps
-    # also note that some steps may not be at equilibrium temp (e.g. the 1st 100 steps of a run)
-    temperature = table_column.FloatField(blank=True, null=True)
-
-    """ Relationships """
-    # each of these will map to a DynamicsRun, so you should typically access this
-    # data through that class. The exception to this is when you want all ionic
-    # steps accross many relaxations for a machine learning input.
-    # These relationship can be found via...
-    #   dynamics_run
 
     @classmethod
     def create_subclass_from_dynamics_run(

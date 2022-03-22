@@ -3,6 +3,9 @@
 """
 This module defines the lowest-level classes for database tables and their
 search results.
+
+See the `simmate.database.base_data_types` (which is the parent module of 
+this one) for example usage.
 """
 
 
@@ -21,7 +24,7 @@ from django.utils.timezone import datetime
 from typing import List
 
 # This line does NOTHING but rename a module. I have this because I want to use
-# "table_column.CharField(...)" instead of models.CharField(...) in my Models.
+# "table_column.CharField(...)" instead of "models.CharField(...)" in my Models.
 # This let's beginners read my higher level classes and instantly understand what
 # each thing represents -- without them needing to understand
 # that Django Model == Database Table. Experts may find this annoying, so I'm
@@ -58,7 +61,7 @@ class SearchResults(models.QuerySet):
         index: str = None,
         coerce_float: str = False,
         datetime_index: str = False,
-    ):
+    ) -> pandas.DataFrame:
         """
         Returns a Pandas DataFrame of the search results
 
@@ -98,7 +101,9 @@ class SearchResults(models.QuerySet):
             datetime_index=datetime_index,
         )
 
-    def to_toolkit(self):
+    def to_toolkit(
+        self,
+    ) -> list:  # type of object varies (e.g. Structure, BandStructure, etc.)
         """
         Converts your SearchResults to a list of pymatgen objects
         """
@@ -222,6 +227,7 @@ class SearchResults(models.QuerySet):
 
 # Copied this line from...
 # https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py
+# It simply converts this queryset class to a manager.
 DatabaseTableManager = models.Manager.from_queryset(SearchResults)
 
 
@@ -231,7 +237,7 @@ class DatabaseTable(models.Model):
     mixins inherit from this class.
 
     Usage is identical to
-    [Models in Django](https://docs.djangoproject.com/en/4.0/#the-model-layer)
+    [models in Django](https://docs.djangoproject.com/en/4.0/#the-model-layer)
     where this class only adds extra methods for convenience.
     """
 
@@ -251,8 +257,8 @@ class DatabaseTable(models.Model):
     > Note, this field is highly experimental at the moment and subject to
     change.
     
-    This column indicated the data came from, and it could be a number of things,
-    including...
+    This column indicates where the data came from, and it could be a number 
+    of things including...
      - a third party id
      - a structure from a different Simmate datbase table
      - a transformation of another structure
@@ -299,6 +305,36 @@ class DatabaseTable(models.Model):
     }
     ```
     """
+    # TODO: Explore polymorphic relations instead of a JSON dictionary.
+    # Making relationships to different tables makes things difficult to use, so
+    # these columns are just standalone.
+    #
+    # This is will be very important for "source" and "parent_nested_calculations"
+    # fields because I have no way to efficiently convert these fields to the objects
+    # that they refer to. There's also no good way to access a structure's "children"
+    # (i.e. structure where they are the source).
+    #
+    # I should investigate generic relations in django though:
+    # https://docs.djangoproject.com/en/3.2/ref/contrib/contenttypes/#generic-relations
+    #
+    # Another option is using django-polymorphic.
+    # https://django-polymorphic.readthedocs.io/en/latest/
+    # This thread is really helpful on the subject:
+    # https://stackoverflow.com/questions/30343212/
+    #
+    # TODO: Consider adding some methods to track the history of a structure.
+    #  This would be useful for things like evolutionary algorithms.
+    # get_source_parent:
+    #   this would iterate through sources until we find one in the same table
+    #   as this one. Parent sources are often the most recent transformation
+    #   or mutation applied to a structure, such as a MirrorMutation.
+    # get_source_seed:
+    #   this would iterate through sources until we hit a dead-end. So the seed
+    #   source would be something like a third-party database, a method that
+    #   randomly create structures, or a prototype.
+    # Both of these get more complex when we consider transformation that have
+    # multiple parents (and therefore multiple seeds too). An example of this
+    # is the HereditaryMutation.
 
     source_doi: str = None
     """
@@ -391,7 +427,7 @@ class DatabaseTable(models.Model):
         return NewClass
 
     @classmethod
-    def from_toolkit(cls, as_dict=False, **kwargs):
+    def from_toolkit(cls, as_dict: bool = False, **kwargs):
         """
         Given fundamental "base_info" and toolkit objects, this method will populate
         all relevant columns.
@@ -788,7 +824,7 @@ class DatabaseTable(models.Model):
         print(yaml.dump(column_names))
 
     @classmethod
-    def get_mixins(cls):
+    def get_mixins(cls) -> list:  # -> List[DatabaseTable]
         """
         Grabs the mix-in Tables that were used to make this class. This will
         be mix-ins like Structure, Forces, etc. from the
@@ -807,6 +843,10 @@ class DatabaseTable(models.Model):
 
     @classmethod
     def get_mixin_names(cls) -> List[str]:
+        """
+        Grabs the mix-in Tables that were used to make this class and returns
+        a list of their names.
+        """
         return [mixin.__name__ for mixin in cls.get_mixins()]
 
     @classmethod
