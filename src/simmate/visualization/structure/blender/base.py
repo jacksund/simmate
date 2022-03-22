@@ -26,10 +26,10 @@ def make_blender_structure(structure, filename="simmate_structure.blend"):
     sites = json.dumps(serialize_structure_sites(structure)).replace('"', "'")
     lattice = json.dumps(structure.lattice.matrix.tolist())
 
-    # The location of the make_structure.py is in the same directory as this file
+    # The location of the make_structure.py
     executable_directory = os.path.dirname(__file__)
     path_to_script = os.path.join(
-        executable_directory, "blender_scripts", "make_structure.py"
+        executable_directory, "scripts", "make_structure.py"
     )
 
     # Now build all of the our serialized structure data and settings together

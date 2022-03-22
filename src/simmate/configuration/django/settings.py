@@ -371,3 +371,6 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
 }
+
+# Allows the use of iFrames from within Simmate (such as the structure-viewer)
+X_FRAME_OPTIONS = 'SAMEORIGIN'

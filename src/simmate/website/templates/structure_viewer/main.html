@@ -26,8 +26,17 @@
     When rotating, I would like the light source to rotate with it. This will
     avoid unwanted shadows when viewing crystal structures from other angles.
     
+    Note, below I use STATIC_PREFIX because I am dynamically providing static
+    files. See django docs for more:
+    https://docs.djangoproject.com/en/4.0/ref/templates/builtins/#get-static-prefix
+    This is contronry to typical use that does... 
+        static 'structure_viewer/simmate_structure.glb' (not including template tags)
 	-->
-
+	
+	
+    {% load static %}
+    {% get_static_prefix as STATIC_PREFIX %}
+    
 	<script type="module">
 
 		// Find the latest version by visiting https://cdn.skypack.dev/three
@@ -58,8 +67,7 @@
 
 			// Now load the background image and the gltf file
 			const loader = new RGBELoader()
-			{% load static %}
-			loader.load('{% static 'structure_viewer / royal_esplanade_1k.hdr'%}', function (texture) {
+			loader.load('{% static 'structure_viewer/royal_esplanade_1k.hdr'%}', function (texture) {
 
 				texture.mapping = THREE.EquirectangularReflectionMapping;
 
@@ -77,8 +85,7 @@
 				const loader = new GLTFLoader();
 				loader.load(
 					// path to the file we're loading
-					{% load static %}
-    						'{% static 'structure_viewer / simmate_structure.glb'%}',
+    				'{{ STATIC_PREFIX }}{{ 3d_structure_filename }}',
 
 				// this function is called when the resource is loaded
 				function (gltf) {

@@ -8,6 +8,11 @@ urlpatterns = [
     path(
         route="",
         view=views.structure_viewer,
+        name="home",
+    ),
+    path(
+        route="test/",
+        view=views.test_viewer,
         name="test",
     ),
 ]
