@@ -44,7 +44,13 @@ urlpatterns = [
     # This app is for viewing crystal structures in a 3D viewport
     path(
         route="structure-viewer/",
-        view=include("simmate.website.structure_viewer.urls"),
+        view=include(
+            (
+                "simmate.website.structure_viewer.urls",
+                "simmate.website.structure_viewer",
+            ),
+            namespace="structure_viewer",
+        ),
         name="structure_viewer",
     ),
 ]

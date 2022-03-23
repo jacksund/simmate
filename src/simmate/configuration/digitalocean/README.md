@@ -152,6 +152,14 @@ PREFECT__CLOUD__API_KEY=your-prefect-api-key
 ```
 pip install gunicorn psycopg2; prefect backend cloud;
 ```
+
+<!-- Currently, I'm trying to install blender but running into issues...
+wget https://download.blender.org/release/Blender3.1/blender-3.1.0-linux-x64.tar.xz
+tar -xf blender-3.1.0-linux-x64.tar.xz
+rm blender-3.1.0-linux-x64.tar.xz
+./blender --version  (DOES NOT WORK)
+-->
+
 7. Change our "Run Command" to...
 ```
 gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi

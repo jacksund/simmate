@@ -28,9 +28,7 @@ def make_blender_structure(structure, filename="simmate_structure.blend"):
 
     # The location of the make_structure.py
     executable_directory = os.path.dirname(__file__)
-    path_to_script = os.path.join(
-        executable_directory, "scripts", "make_structure.py"
-    )
+    path_to_script = os.path.join(executable_directory, "scripts", "make_structure.py")
 
     # Now build all of the our serialized structure data and settings together
     # into the blender command that we will call via the command line

@@ -20,4 +20,8 @@
         <li><b>Pointgroup:</b> {{ calculation.spacegroup.point_group }}</li>
     </ul>
 
+    
+    {% load structure_serialize_filter %}
+    <iframe height="600" width="100%" src="{% url 'structure_viewer:home' %}?{{ calculation | structure_url }}" scrolling="no"></iframe>
+
 </div>

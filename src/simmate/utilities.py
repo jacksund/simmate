@@ -180,13 +180,15 @@ def archive_old_runs(
     #   1. folders
     #   2. start with "simmate-task-"
     #   3. haven't been modified for at least time_cutoff
-    foldernames = [
-        os.path.join(directory, f)
-        for f in os.listdir(directory)
-        if os.path.isdir(f)
-        and "simmate-task-" in os.path.basename(f)
-        and time.time() - os.path.getmtime(f) > time_cutoff
-    ]
+    foldernames = []
+    for foldername in os.listdir(directory):
+        foldername_full = os.path.join(directory, foldername)
+        if (
+            os.path.isdir(foldername_full)
+            and "simmate-task-" in foldername
+            and time.time() - os.path.getmtime(foldername_full) > time_cutoff
+        ):
+            foldernames.append(foldername_full)
 
     # now go through this list and archive the folders that met the criteria
     [make_archive(f) for f in foldernames]

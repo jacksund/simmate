@@ -85,7 +85,9 @@
 				const loader = new GLTFLoader();
 				loader.load(
 					// path to the file we're loading
-    				'{{ STATIC_PREFIX }}{{ 3d_structure_filename }}',
+    				'{% static 3d_structure_filename %}',
+    				// ALTERNATIVE FILE FOR TESTING: 
+    				// '{% static 'structure_viewer/simmate_structure.glb'%}',
 
 				// this function is called when the resource is loaded
 				function (gltf) {

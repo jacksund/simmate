@@ -315,7 +315,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(DJANGO_DIRECTORY, "static")
 # Extra places for collectstatic to find static files.
-STATICFILES_DIRS = [os.path.join(DJANGO_DIRECTORY, "static_files")]
+STATICFILES_DIRS = [
+    os.path.join(DJANGO_DIRECTORY, "static"),
+    os.path.join(DJANGO_DIRECTORY, "static_files"),
+]
 # BUG: djangorestframework's static files struggle to load and I'm not sure why.
 # I add these two lines to fix the bug and need to revisit this later.
 # Based on recommendation by...
@@ -373,4 +376,4 @@ REST_FRAMEWORK = {
 }
 
 # Allows the use of iFrames from within Simmate (such as the structure-viewer)
-X_FRAME_OPTIONS = 'SAMEORIGIN'
+X_FRAME_OPTIONS = "SAMEORIGIN"
