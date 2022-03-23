@@ -118,7 +118,7 @@ setup(
         "coverage>=6.2",
         #
         # These are from the MP stack and I want to phase them out over time
-        "pymatgen>=2022.1.9",
+        "pymatgen==2022.3.7",  # temporary fix bc of bug in 2022.3.22
         "pymatgen-analysis-diffusion>=2021.4.29",  # pymatgen-diffusion on conda
         "matminer>=0.7.6",
         #
