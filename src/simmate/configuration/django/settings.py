@@ -319,10 +319,10 @@ STATIC_ROOT = os.path.join(DJANGO_DIRECTORY, "static")
 STATICFILES_DIRS = [os.path.join(DJANGO_DIRECTORY, "static_files")]
 
 # For the dynamically-create structure files, we need to include the static
-# directory this to work during local testing. This is NOT allowed in a 
+# directory this to work during local testing. This is NOT allowed in a
 # production server, so we don't include it when DEBUG is set to False.
 if DEBUG:
-   STATICFILES_DIRS += [os.path.join(DJANGO_DIRECTORY, "static")]
+    STATICFILES_DIRS += [os.path.join(DJANGO_DIRECTORY, "static")]
 
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"

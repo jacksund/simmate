@@ -47,7 +47,7 @@ def make_blender_structure(structure, filename="simmate_structure.blend"):
 
 
 def serialize_structure_sites(structure):
-    # NOTE: You only need to call make_blender_structure() as it calls 
+    # NOTE: You only need to call make_blender_structure() as it calls
     # serialize_structure within it.
 
     # We collect all sites to draw here. Each one is this list will be a tuple
