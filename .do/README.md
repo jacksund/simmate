@@ -1,4 +1,11 @@
 
+<!-- 
+This link launches a new DigitalOcean server using the app template. For more
+info see...
+    https://docs.digitalocean.com/products/app-platform/how-to/add-deploy-do-button/
+-->
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jacksund/simmate/tree/update-web&refcode=8aeef2ea807c)
+
 # Setting up our DigitalOcean database and servers
 
 > :warning: You can avoid this tutorial if you choose to collaborate with Simmate! Make sure you have read through [our database tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/06_Use_a_cloud_database.md) before deciding to take on the work of managing your database.

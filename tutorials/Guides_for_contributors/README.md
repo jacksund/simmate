@@ -109,18 +109,54 @@ If you changed how a method significantly, you may need to find all places in Si
 ```
 4. Set `Search in` to the `src/simmate` directory so that you only search source code.
 
+
+### Git in the command-line
+
+While we recommand sticking with [GitKraken](https://www.gitkraken.com/), you may need to use the git command-line in some scenarios. Github has [extensive guides](https://docs.github.com/en/github/using-git/getting-started-with-git-and-github) on how to do this, but we outline the basics here.
+
+For configuring 2-factor-auth, we follow directions from [here](https://docs.github.com/en/github/authenticating-to-github/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication). To summarize:
+
+    1. Go to Profile >> Settings >> Account Security
+    2. Select "Enable two-factor" authentication
+    3. Follow the prompt to set up (I used SMS and save my codes to BitWarden)
+
+For configuring your API token, we follow directions from [here](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). To summarize:
+
+    1. Go to Profile >> Settings >> Developer Settings >> Personal Access tokens
+    2. Generate new token for 90 days and with the "repo" scope and "read:org"
+    3. You now use this token as your password when running git commands
+
+And to configure permissions with git on the command-line (using [this guide](https://docs.github.com/en/get-started/getting-started-with-git/caching-your-github-credentials-in-git)):
+
+    1. make sure github cli is installed (`conda install -c conda-forge gh`)
+    2. run `gh auth login` and follow prompts to paste in personal token from above
+
+
+Lastly, some common commands include...
+``` bash
+# to copy a remote directory to your local disk
+git clone <GITHUB-URL>
+
+# while in a git directory, this pulls a specific branch (main here)
+git pull origin main
+
+# To remove all changes and reset your branch
+git restore .
+```
+
 # For maintainers
 
 (currently this section is only relevant to @jacksund)
 
 To make a new release, you must follow these steps:
 
-1. **Create the new documentation.**:
+1. Create the new documentation:
 ``` bash
 # Before the new documentation can be produced, there are a number
 # of optional dependencies that need to be installed.
 conda install -n simmate_dev -c conda-forge fabric jarvis-tools aflow -y
 pip install qmpy_rester
+pip install pdoc
 
 # you can the change into the docs directory and run the make_docs.py
 cd docs/

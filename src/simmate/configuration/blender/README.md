@@ -1,7 +1,7 @@
 
 # Blender setup
 
-I spent a significant amount of trying to get blender working as a python module, but I don't know enough about make files to package this for general use. For now, it's actually easier to just install Blender manually and have Simmate call it from the command line. It sucks for the user who will just want to vizualize structures and never use Blender directly, but that's just how it is right now... In the future, I may want to just pay a Blender dev to begin supporting blender as bpy module -- even if its a minimal build specifically for Simmate.
+I spent a significant amount of trying to get blender working as a python module, but I don't know enough about make files to package this for general use. For now, it's actually easier to just install Blender manually and have Simmate call it from the command line. It's extra work for the user who will just want to vizualize structures and never use Blender directly, but that's just how it is right now... In the future, I may want to just pay a Blender dev to begin supporting blender as bpy module -- even if its a minimal build specifically for Simmate.
 
 
 # Past notes on making bpy from source

@@ -314,17 +314,15 @@ USE_TZ = True
 # collect by running 'python manage.py collectstatic'
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(DJANGO_DIRECTORY, "static")
+
 # Extra places for collectstatic to find static files.
-STATICFILES_DIRS = [
-    os.path.join(DJANGO_DIRECTORY, "static"),
-    os.path.join(DJANGO_DIRECTORY, "static_files"),
-]
-# BUG: djangorestframework's static files struggle to load and I'm not sure why.
-# I add these two lines to fix the bug and need to revisit this later.
-# Based on recommendation by...
-# https://stackoverflow.com/questions/35557129/css-not-loading-wrong-mime-type-django
-# import mimetypes
-# mimetypes.add_type("text/css", ".css", True)
+STATICFILES_DIRS = [os.path.join(DJANGO_DIRECTORY, "static_files")]
+
+# For the dynamically-create structure files, we need to include the static
+# directory this to work during local testing. This is NOT allowed in a 
+# production server, so we don't include it when DEBUG is set to False.
+if DEBUG:
+   STATICFILES_DIRS += [os.path.join(DJANGO_DIRECTORY, "static")]
 
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"
