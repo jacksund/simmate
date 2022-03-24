@@ -7,17 +7,16 @@ import subprocess
 
 import numpy
 
-from simmate.configuration.blender.setup import get_blender_command
-
-# NOTES for this file:
-# You only need to call make_blender_structure() here as it calls serialize_structure
-# within it.
-
-# load the base blender command for use in function calls below
-BLENDER_COMMAND = get_blender_command()
+from simmate.visualization.structure.blender.configuration import get_blender_command
 
 
 def make_blender_structure(structure, filename="simmate_structure.blend"):
+
+    # load the base blender command for use in function calls below
+    BLENDER_COMMAND = get_blender_command()
+    # OPTIMIZE: ideally I would load this outside the function so that it is only
+    # loaded once. Here, I read a yaml file repeatedly. There should be a better
+    # way to silently catch errors when blender isn't installed.
 
     # This function simply serializes a pymatgen structure object to json
     # and then calls a blender script (make_structure.py) that uses this data
@@ -48,6 +47,8 @@ def make_blender_structure(structure, filename="simmate_structure.blend"):
 
 
 def serialize_structure_sites(structure):
+    # NOTE: You only need to call make_blender_structure() as it calls 
+    # serialize_structure within it.
 
     # We collect all sites to draw here. Each one is this list will be a tuple
     # of... (element_symbol, radius, cartesian_coordinates)

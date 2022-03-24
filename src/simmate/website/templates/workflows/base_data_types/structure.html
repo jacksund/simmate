@@ -21,7 +21,13 @@
     </ul>
 
     
+    <!--
+    I currently remove the structure viewer because I have not yet figured out how to
+    install Blender on my DigitalOcean production server. Locally, however, the
+    code below works properly:
+
     {% load structure_serialize_filter %}
     <iframe height="600" width="100%" src="{% url 'structure_viewer:home' %}?{{ calculation | structure_url }}" scrolling="no"></iframe>
+    -->
 
 </div>

@@ -72,9 +72,6 @@ def find_blender_installation():
         # was installed.
         blender_command = "blender"
 
-        # now confirm we can call the blender command
-        test_blender_command(blender_command)
-
     # Windows -- we assume Windows 10 for now.
     elif operating_system == "Windows":
 
@@ -102,20 +99,10 @@ def find_blender_installation():
             # in the file path with forward slashes.
             blender_command = f'"{full_path_to_blender}"'.replace("\\", "/")
 
-            # now confirm we can call the blender command
-            test_blender_command(blender_command)
-
         # if this path doesn't exist, we need to tell the user to install
         # Blender before than can use any of this functionality.
         else:
-            raise Exception(
-                "Make sure you have Blender installed before trying to access "
-                "any of Simmate's 3D visualization features. If you have already "
-                "installed Blender and are seeing this message, then please contact "
-                "our team so we can help resolve the issue. If you are unfamiliar "
-                "with Blender, take a look at Simmate's tutorial on the topic: "
-                " <<TODO: insert link >>"
-            )
+            raise BlenderNotInstalledError
 
     # Mac -- I don't own a Mac so I haven't implemented this yet.
     elif operating_system == "Darwin":
@@ -124,6 +111,9 @@ def find_blender_installation():
             " We can add this right away if you'd like! Just post a request"
             " on our forum."
         )
+
+    # now confirm we can call the blender command
+    test_blender_command(blender_command)
 
     # We should now have our blender_command set from above. So that we don't need
     # to search for the Blender installation every time we call a visualization
@@ -149,4 +139,17 @@ def test_blender_command(blender_command):
     )
 
     # see if the command works, which means the return code is 0
-    assert result.returncode == 0
+    if result.returncode != 0:
+        raise BlenderNotInstalledError
+
+
+class BlenderNotInstalledError(Exception):
+    def __init__(self):
+        default_message = (
+            "Make sure you have Blender installed before trying to access "
+            "any of Simmate's 3D visualization features. If you have already "
+            "installed Blender and are seeing this message, then please contact "
+            "our team so we can help resolve the issue. You can download Blender "
+            "from their website: https://www.blender.org/download/"
+        )
+        super().__init__(default_message)

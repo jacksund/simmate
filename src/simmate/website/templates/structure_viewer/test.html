@@ -20,6 +20,6 @@ Simmate
 </section>
 
 {% load structure_serialize_filter %}
-<iframe src="{% url 'home' %}?{{ structure | structure_url }}" scrolling="no"></iframe>
+<iframe src="{% url 'structure_viewer:home' %}?{{ structure | structure_url }}" scrolling="no"></iframe>
 
 {% endblock %}
