@@ -1,0 +1,33 @@
+<!-- Structure Info -->
+<div class="container p-4">
+
+    <h3>Structure:</h3>
+    <ul>
+        <li><b>Number of sites:</b> {{ calculation.nsites }}</li>
+        <li><b>Number of elements:</b> {{ calculation.nelements }}</li>
+        <li><b>Element list:</b> {{ calculation.elements }}</li>
+        <li><b>Chemical System:</b> {{ calculation.chemical_system }}</li>
+        <li><b>Density:</b> {{ calculation.density }}</li>
+        <li><b>Atomic Density:</b> {{ calculation.density_atomic }}</li>
+        <li><b>Unit Cell Volume:</b> {{ calculation.volume }}</li>
+        <li><b>Molar Volume:</b> {{ calculation.volume_molar }}</li>
+        <li><b>Full Formula:</b> {{ calculation.formula_full }}</li>
+        <li><b>Reduced Formula:</b> {{ calculation.formula_reduced }}</li>
+        <li><b>Formula Anonymous:</b> {{ calculation.formula_anonymous }}</li>
+        <li><b>Spacegroup Number:</b> {{ calculation.spacegroup.number }}</li>
+        <li><b>Spacegroup Symbol:</b> {{ calculation.spacegroup.symbol }}</li>
+        <li><b>Crystal System:</b> {{ calculation.spacegroup.crystal_system }}</li>
+        <li><b>Pointgroup:</b> {{ calculation.spacegroup.point_group }}</li>
+    </ul>
+
+    
+    <!--
+    I currently remove the structure viewer because I have not yet figured out how to
+    install Blender on my DigitalOcean production server. Locally, however, the
+    code below works properly:
+
+    {% load structure_serialize_filter %}
+    <iframe height="600" width="100%" src="{% url 'core_components:structure_viewer' %}?{{ calculation | structure_url }}" scrolling="no"></iframe>
+    -->
+
+</div>

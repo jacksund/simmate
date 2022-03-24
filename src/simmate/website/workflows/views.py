@@ -12,7 +12,7 @@ from simmate.workflows.utilities import (
     parse_parameters,
 )
 from simmate.website.workflows.forms import SubmitWorkflow
-from simmate.website.workflows.utilities import render_from_table
+from simmate.website.core_components.utilities import render_from_table
 
 
 @login_required

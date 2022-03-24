@@ -41,16 +41,17 @@ urlpatterns = [
         name="workflows",
     ),
     #
-    # This app is for viewing crystal structures in a 3D viewport
+    # This app includes core functionality, such as views for crystal structures
+    # in a 3D viewport.
     path(
-        route="structure-viewer/",
+        route="core-components/",
         view=include(
             (
-                "simmate.website.structure_viewer.urls",
-                "simmate.website.structure_viewer",
+                "simmate.website.core_components.urls",
+                "simmate.website.core_components",
             ),
-            namespace="structure_viewer",
+            namespace="core_components",
         ),
-        name="structure_viewer",
+        name="core_components",
     ),
 ]

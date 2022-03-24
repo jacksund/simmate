@@ -1,0 +1,25 @@
+{% extends "core/site-base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<section class="pt-5 jumbotron text-center">
+  <div class="container">
+    <h1 class="jumbotron-heading">Test Structure Viewer iFrame</h1>
+    <p class="lead text-muted">This page is simply to for testing that iFrame for our structure viewer is working
+      properly.</p>
+  </div>
+</section>
+
+{% load structure_serialize_filter %}
+<iframe src="{% url 'core_components:structure_viewer' %}?{{ structure | structure_url }}" scrolling="no"></iframe>
+
+{% endblock %}

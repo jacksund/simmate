@@ -1,0 +1,25 @@
+<div class="container p-4">
+    <h2>Static Energy Results</h2>
+
+    {% include "core_components/base_data_types/calculation.html" %}
+    {% include "core_components/base_data_types/structure.html" %}
+    {% include "core_components/base_data_types/thermodynamics.html" %}
+    {% include "core_components/base_data_types/forces.html" %}
+
+    <!-- Electronic Info -->
+    <div class="container p-4">
+
+        <h3>Electronic:</h3>
+        <ul>
+            <li><b>Band gap:</b> {{ calculation.band_gap }}</li>
+            <li><b>Is gap direct:</b> {{ calculation.is_gap_direct }}</li>
+            <li><b>Fermi energy:</b> {{ calculation.energy_fermi }}</li>
+            <li><b>Conduction band minimum:</b> {{ calculation.conduction_band_minimum }}</li>
+            <li><b>Valence band maximum:</b> {{ calculation.valence_band_maximum }}</li>
+        </ul>
+        <a><em><b>WARNING:</b> even though some static energy calculations provide this information, these values are
+                very rough estimates. For accurate values, only use values from band structure or density of states
+                calculations.</em></a>
+    </div>
+
+</div>
