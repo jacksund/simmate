@@ -108,7 +108,7 @@ def render_from_table(
     #       from lower level workflows and their tables
     #   2. these views will be very inefficient if queried by a script
     # I chose dynamic creation over creating all endpoints on-startup to prevent
-    # the `from simmate.shortcuts import setup` method from taking too long --
+    # the `from simmate.database import connect` method from taking too long --
     # as that would require import all workflows on start-up. However, if the
     # (1) api spec or (2) speed of this method ever becomes an issue, I can
     # address these by either...

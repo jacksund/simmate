@@ -17,7 +17,7 @@ In this tutorial, you will learn how to explore your database as well as load da
 3. The table for Tutorial 2's results are located in the `MITStaticEnergy` datatable class, which can be loaded via either of these options:
 ```python
 # OPTION 1
-from simmate.shortcuts import setup  # this connects to our database
+from simmate.database import connect # this connects to our database
 from simmate.database.workflow_results import MITStaticEnergy
 
 # OPTION 2 (slower but recommended for convenience)
@@ -37,7 +37,7 @@ nacl_structure = single_relaxation.to_toolkit()
 ```
 8. For third-party data (like [Material Project](https://materialsproject.org/), [AFLOW](http://aflowlib.org/), [COD](http://www.crystallography.net/cod/), etc.) load the database table and then request to download all the available data:
 ```python
-from simmate.shortcuts import setup  # this connects to our database
+from simmate.database import connect  # this connects to our database
 from simmate.database.third_parties.jarvis import JarvisStructure
 
 # This only needs to ran once -- then data is stored locally.
@@ -235,7 +235,7 @@ In the previous section, we loaded our `DatabaseTable` from the workflow. But no
 
 ```python
 # This line MUST be ran before any tables can be loaded
-from simmate.shortcuts import setup  # this connects to our database
+from simmate.database import connect  # this connects to our database
 
 # This gives the result_table we were using in the previous section
 from simmate.database.workflow_results import MITRelaxation
@@ -244,7 +244,7 @@ from simmate.database.workflow_results import MITRelaxation
 from simmate.database.third_parties import JarvisStructure
 ```
 
-`result_table` above and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.shortcuts import setup`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! So don't forget to include `from simmate.shortcuts import setup`!
+`result_table` above and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.database import connect`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database! So don't forget to include `from simmate.database import connect`!
 
 Now that we have our datatable class (`JarvisStructure`) loaded, you'll notice it's empty to when you first access it. We can quickly load all of the data using the `load_remote_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database. This can take ~10 minutes because we are actually saving all these structures to your computer -- that way, you can rapidly load these structures in under 1 second in the future.
 
@@ -266,7 +266,7 @@ Calling `load_remote_archive` loads ALL data to your computer and saves it. This
 
 Now let's really test out our filtering ability with this new data:
 ```python
-from simmate.shortcuts import setup  # this connects to our database
+from simmate.database import connect  # this connects to our database
 from simmate.database.third_parties.jarvis import JarvisStructure
 
 # EXAMPLE 1: all structures that have less than 6 sites in their unitcell

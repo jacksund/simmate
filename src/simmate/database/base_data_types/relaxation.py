@@ -454,7 +454,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
     For example:
 
     ``` python
-    from simmate.shortcuts import setup
+    from simmate.database import connect
     from simmate.database.workflow_results import MITRelaxation
 
     # grab your desired relaxation

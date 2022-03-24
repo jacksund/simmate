@@ -338,7 +338,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "jacksundberg123@gmail.com"  # os.environ.get('EMAIL_USER')
 # !!! REMOVE IN PRODUCTION. Use this instead: os.environ.get('EMAIL_PASSWORD')
-EMAIL_HOST_PASSWORD = "lqurjxyttrjrlgcr"
+EMAIL_HOST_PASSWORD = "example-password-123"
 
 # These settings help configure djangorestframework and our REST API
 REST_FRAMEWORK = {
