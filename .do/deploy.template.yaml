@@ -36,10 +36,10 @@ spec:
   services:
     - name: simmate
       environment_slug: python
-      build_command: "pip install gunicorn psycopg2; prefect backend cloud"
+      build_command: "pip install gunicorn psycopg2; prefect backend cloud;"
       run_command: "gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi"
       github:
-        branch: update-web
+        branch: main
         deploy_on_push: true
         repo: jacksund/simmate
       envs:
@@ -73,7 +73,7 @@ spec:
   static_sites:
     - environment_slug: python
       github:
-        branch: update-web
+        branch: main
         deploy_on_push: true
         repo: jacksund/simmate
       name: simmate-static

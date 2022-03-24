@@ -30,14 +30,35 @@ If you have issues with this, please make sure that DigitalOcean is still actual
 
 ## Autotomically setting up our DigitalOcean database and servers
 
-This button below will launch a new DigitalOcean app (server+database) using a template from our team. Make sure you have already signed-in to your DigitalOcean account before opening the link. Once open, you can provide your Prefect API key (optional) and a [randomly generated](https://passwordsgenerator.net/) secret key for Django.
+This button below will launch a new DigitalOcean app (server+database) using a template from our team. Make sure you have already signed-in to your DigitalOcean account before opening the link. 
+
+Once open, you can provide your Prefect API key (optional) and a  secret key for Django.
+
+
+
 
 <!-- button that starts up DigitalOcean app -->
-<a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/jacksund/simmate/tree/update-web&refcode=8aeef2ea807c">
+<a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/jacksund/simmate/tree/main&refcode=8aeef2ea807c">
  <img src="https://www.deploytodo.com/do-btn-blue.svg" alt="Deploy to DO">
 </a>
 
 > :warning: Note to developers, if you fork this repository and want this button to work for your new repo, you must update the link for this button. For more information, see [here](https://docs.digitalocean.com/products/app-platform/how-to/add-deploy-do-button/)
+
+Steps to use Deploy on DigitalOcean:
+
+1. Make sure you created a DigitalOcean account (you can use your Github account) and are signed in
+2. Select the "Deploy to DigitalOcean" button above. On this new page, you'll see "Python Detected".
+3. Under "Environment Variables", update `DJANGO_SECRET_KEY` to a random password using only numbers and letters. You can use [this random-password site](https://passwordsgenerator.net/) to generate your random key.
+4. (if you'd like to use Prefect) Under "Environment Variables", update `PREFECT__CLOUD__API_KEY` to an API key from your [Prefect dashboard](https://cloud.prefect.io/team/service-accounts). You can also use your github account for Prefect.
+5. Move on to the next page, and complete the information as you see fit! When selecting server size, you can go as small as you'd like -- even the basic plan for 500MB + 1CPU will suffice. Note, the starter database is can be switched out later on.
+6. Once you launch your app, the first build can take 15-30 minutes. Once complete, you should be able to view your new Simmate website at the link shown.
+7. The website won't work properly right away. This is because we haven't built database tables. Go to the "Console" tab and initalize your database with...
+``` bash
+simmate database reset
+```
+8. Database connection details are found in the "Settings" tab -> "simmate-starter-database" component -> "Connection details". You can use the [connect-to-database section](#connecting-to-the-database) section below to connect to this server on your local computer and start submitting calculations!
+9. As your group grows, you may want to switch to a larger database than the starter one. To do this, you'll have to setup a managed database on DigitalOcean. To do this in your App, select "Actions" -> "Create/Attach Database".
+
 
 <br/>
 
