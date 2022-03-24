@@ -1,23 +1,17 @@
+# Setting up DigitalOcean database and website servers
 
-<!-- 
-This link launches a new DigitalOcean server using the app template. For more
-info see...
-    https://docs.digitalocean.com/products/app-platform/how-to/add-deploy-do-button/
--->
-[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jacksund/simmate/tree/update-web&refcode=8aeef2ea807c)
+> :warning: You can avoid this guide if you choose to collaborate with Simmate! Make sure you have read through [our database tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/06_Use_a_cloud_database.md) before deciding to take on the work of managing your own database and server.
 
-# Setting up our DigitalOcean database and servers
-
-> :warning: You can avoid this tutorial if you choose to collaborate with Simmate! Make sure you have read through [our database tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/06_Use_a_cloud_database.md) before deciding to take on the work of managing your database.
-
-In this tutorial, you will learn how to install Simmate with Anaconda. Beginners will also be introduced to the command-line.
+In this guide, you will learn how to setup a cloud database and webserver for Simmate using DigitalOcean.
 
 1. [Setting up an account](#setting-up-an-account)
-2. [Stage 1: Setting up our PostgreSQL Database](#stage-1-setting-up-our-postgresql-database)
+2. [Autotomic setup: DigitalOcean database and servers in a few clicks](#autotomically-setting-up-our-digitalocean-database-and-servers)
+2. [Manual setup (stage 1): Setting up our PostgreSQL Database](#stage-1-setting-up-our-postgresql-database)
     - [creating the cloud database](#creating-the-database-server)
     - [connecting to the database](#connecting-to-the-database)
     - [making a separate the database for testing (on the same server)](#making-a-separate-the-database-for-testing-on-the-same-server)
-3. [Stage 2: Setting up a Django Website Server](#stage-2-setting-up-a-django-website-server)
+3. [Manual setup (stage 2): Setting up a Django Website Server](#stage-2-setting-up-a-django-website-server)
+4. [Dockerfile-based build (developers-only)](#dockerfile-based-build)
 
 
 <br/><br/>
@@ -34,7 +28,20 @@ If you have issues with this, please make sure that DigitalOcean is still actual
 
 <br/>
 
-## Stage 1: Setting up our PostgreSQL Database
+## Autotomically setting up our DigitalOcean database and servers
+
+This button below will launch a new DigitalOcean app (server+database) using a template from our team. Make sure you have already signed-in to your DigitalOcean account before opening the link. Once open, you can provide your Prefect API key (optional) and a [randomly generated](https://passwordsgenerator.net/) secret key for Django.
+
+<!-- button that starts up DigitalOcean app -->
+<a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/jacksund/simmate/tree/update-web&refcode=8aeef2ea807c">
+ <img src="https://www.deploytodo.com/do-btn-blue.svg" alt="Deploy to DO">
+</a>
+
+> :warning: Note to developers, if you fork this repository and want this button to work for your new repo, you must update the link for this button. For more information, see [here](https://docs.digitalocean.com/products/app-platform/how-to/add-deploy-do-button/)
+
+<br/>
+
+## Manual setup (stage 1): Setting up our PostgreSQL Database
 
 First, we need to set up our Cloud database, tell Simmate how to connect to it, and build our tables.
 
@@ -126,7 +133,7 @@ simmate database reset
 
 <br/>
 
-## Stage 2: Setting up a Django Website Server
+## Manual setup (stage 2): Setting up a Django Website Server
 
 If you want to host your Simmate installation as website just for you team, you can use DigitalOcean to host a Django Website server.
 
@@ -203,3 +210,15 @@ For connecting this to DigitalOcean, I followed these guides: [1](https://docs.d
 6. The first page here is the Domain view where you should now add your new domain name
 7. Now switch back to our DigitalOcean App (from above) and go to settings
 8. Under "Domains", we want to edit and then add `simmate.org` (or your chosen name). Let DigitalOcean manages the DNS.
+
+<br/><br/>
+
+# Dockerfile-based build
+
+> :warning: this section holds notes for Simmate developers and will help implement future features. Users can ignore this section for now.
+
+This build fails at the moment, but I still include the `Dockerfile` and `deploy.template.Dockerfile.yaml` files future reference --  as I'd like to revisit Dockerfile-based builds. These would have the advantage of (1) installing everything using Anaconda and (2) installing extra programs such as Blender.
+
+Taha Fatima was trying help troubleshoot, but I dropped my attempt once I ran into "memory exceeded" errors during my build. Taha mentioned that this can be fixed using Github Actions, so the following links would be the  best place to give this another attempt:
+  - https://github.com/digitalocean/app_action
+  - https://github.com/tahafatimaDO/test-DOCR
