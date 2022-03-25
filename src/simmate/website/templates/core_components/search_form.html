@@ -1,0 +1,78 @@
+<!-- Search Form -->
+{% load crispy_forms_tags %}
+<div class="container p-4">
+  <h2>Filter Results:</h2>
+  <p>Filter mix-ins: {{ filterset_mixins }}</p>
+  <p>Extra filters: {{ extra_filters }}</p>
+  <form method="get" enctype="multipart/form-data">
+
+    {{ form.non_field_errors }}
+    <div class="accordion" id="accordionFilters">
+      <!-- Iterate throuhg the possible mixins and pull the proper components. Is there a better way to do this as a django for-loop? 
+      For rendering fields manually, see https://docs.djangoproject.com/en/4.0/topics/forms/#rendering-fields-manually -->
+      {% if "Calculation" in filterset_mixins %}
+      {% include "core_components/base_filter_types/calculation.html" %}
+      {% endif %}
+
+      {% if "Structure" in filterset_mixins %}
+      {% include "core_components/base_filter_types/structure.html" %}
+      {% endif %}
+
+      {% if "StaticEnergy" in filterset_mixins %}
+      {% include "core_components/base_filter_types/static-energy.html" %}
+      {% endif %}
+
+      {% if "DiffusionAnalysis" in filterset_mixins %}
+      {% include "core_components/base_filter_types/diffusion-analysis.html" %}
+      {% endif %}
+
+      {% if "DensityofStatesCalc" in filterset_mixins %}
+      {% include "core_components/base_filter_types/density-of-states-calc.html" %}
+      {% endif %}
+
+      {% if "DensityofStates" in filterset_mixins %}
+      {% include "core_components/base_filter_types/density-of-states.html" %}
+      {% endif %}
+
+      {% if "BandStructureCalc" in filterset_mixins %}
+      {% include "core_components/base_filter_types/band-structure-calc.html" %}
+      {% endif %}
+
+      {% if "BandStructure" in filterset_mixins %}
+      {% include "core_components/base_filter_types/band-structure.html" %}
+      {% endif %}
+
+      {% if "DynamicsRun" in filterset_mixins %}
+      {% include "core_components/base_filter_types/dynamics-run.html" %}
+      {% endif %}
+
+      {% if "Relaxation" in filterset_mixins %}
+      {% include "core_components/base_filter_types/relaxation.html" %}
+      {% endif %}
+
+      {% if "Thermodynamics" in filterset_mixins %}
+      {% include "core_components/base_filter_types/thermodynamics.html" %}
+      {% endif %}
+
+      {% if "Forces" in filterset_mixins %}
+      {% include "core_components/base_filter_types/forces.html" %}
+      {% endif %}
+    </div>
+    <!-- end of mix-ins -->
+
+    <!-- Add any extra fields using default crispy formatting -->
+    {% if extra_filters %}
+    <div class="container p-4">
+      <h4>By Extra Info:</h4>
+      {% for field in form %}
+      {% if field in extra_filters %}
+      {{ field | as_crispy_field }}
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+    <!-- end extra fields -->
+
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+</div>

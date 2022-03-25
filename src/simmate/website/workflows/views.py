@@ -143,6 +143,7 @@ def workflow_run_detail(
         },
         table=workflow.result_table,
         view_type="retrieve",
+        primary_key_url="workflow_run_id",
     )
 
 

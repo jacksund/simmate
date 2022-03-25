@@ -1,0 +1,32 @@
+{% extends "core/site-base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<!-- NOTE: for this section to work, be sure to read datatable.html -->
+
+<div class="container p-4 bg-light border" id="search-results">
+
+  <div class="container p-4">
+
+    <!-- Build views for the table entry's data -->
+    {% include "core_components/table_entry.html" %}
+
+  </div>
+
+</div>
+
+
+{% endblock %}
+
+{% block extrafooter %}
+{% include "core/datatable.html" %}
+{% endblock %}

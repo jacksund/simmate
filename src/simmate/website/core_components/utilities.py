@@ -4,7 +4,7 @@ from django.http import HttpRequest
 
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer  # , HyperlinkedModelSerializer
 
 from simmate.website.core_components.filters import DatabaseTableFilter
 from simmate.database.base_data_types import DatabaseTable
@@ -100,6 +100,8 @@ def render_from_table(
     table: DatabaseTable,
     view_type: str,
     request_kwargs: dict = {},
+    primary_key_field: str = "id",
+    primary_key_url: str = "id",
 ) -> Response:
 
     # NOTE: This dynamically creates a serializer and a view EVERY TIME a
@@ -118,6 +120,8 @@ def render_from_table(
     # For all tables, we share all the data -- no columns are hidden. Therefore
     # the code for the Serializer is always the same.
     # !!! consider switching to HyperlinkedModelSerializer
+    # !!! I may need to better understand this:
+    #   https://www.django-rest-framework.org/api-guide/serializers/#how-hyperlinked-views-are-determined
     class NewSerializer(ModelSerializer):
         class Meta:
             model = table
@@ -130,7 +134,7 @@ def render_from_table(
     if hasattr(table, "created_at"):
         intial_queryset = table.objects.order_by("-created_at").all()
     else:
-        intial_queryset = table.objects.order_by("id").all()
+        intial_queryset = table.objects.order_by(primary_key_field).all()
     # we also want to preload spacegroup for the structure mixin
     if hasattr(table, "spacegroup"):
         intial_queryset = intial_queryset.select_related("spacegroup")
@@ -146,8 +150,8 @@ def render_from_table(
         filterset_class = NewFilterSet
         viewset_type = view_type  # BUG: view_type = view_type throws an error
         # These two are only used for the view_type = "retrieve"
-        lookup_url_kwarg = "workflow_run_id"
-        lookup_field = "id"
+        lookup_url_kwarg = primary_key_url
+        lookup_field = primary_key_field
 
     # now pull together the html response
     response = NewViewSet.as_view()(request, **request_kwargs)

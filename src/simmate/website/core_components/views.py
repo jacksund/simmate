@@ -7,9 +7,38 @@ import time
 from django.shortcuts import render
 
 from simmate.toolkit import Structure
+from simmate.database.base_data_types import Spacegroup
 from simmate.visualization.structure import make_blender_structure
 from simmate.configuration.django import settings
 from simmate.utilities import get_directory
+from simmate.website.core_components.utilities import render_from_table
+
+
+def symmetry(request):
+    return render_from_table(
+        request=request,
+        template="core_components/symmetry.html",
+        context={"active_tab_id": "extras"},
+        table=Spacegroup,
+        view_type="list",
+        primary_key_field="number",
+    )
+
+
+def spacegroup(
+    request,
+    spacegroup_number: str,
+):
+    return render_from_table(
+        request=request,
+        request_kwargs={"spacegroup_number": spacegroup_number},
+        template="core_components/spacegroup.html",
+        context={"active_tab_id": "extras"},
+        table=Spacegroup,
+        view_type="retrieve",
+        primary_key_field="number",
+        primary_key_url="spacegroup_number",
+    )
 
 
 def structure_viewer(request):
@@ -59,7 +88,11 @@ def structure_viewer(request):
 
 def test_viewer(request):
 
-    structure = Structure.from_file("Documents/SpyderWD/Y2CF2.cif")
+    # TODO: switch to a test structure that is present in the source code
+    # from simmate.conftest import STRUCTURE_FILES
+    structure = Structure.from_file(
+        "/home/jacksund/Documents/spyder_wd/test_structures/SrSiN2_mp-4549_primitive.cif"
+    )
 
     context = {"structure": structure}
     template = "core_components/test.html"
