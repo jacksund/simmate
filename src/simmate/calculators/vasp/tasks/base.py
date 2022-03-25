@@ -5,6 +5,8 @@ from pathlib import Path
 
 import yaml
 
+from pymatgen.analysis.structure_matcher import StructureMatcher
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.toolkit import Structure
@@ -129,43 +131,80 @@ class VaspTask(S3Task):
 
     pre_standardize_structure: bool = False
     """
-    (experimental feature)
     In some cases, we may want to convert the structure to the standard primitive
     of a structure. For example, this is required when calculating band structures
     and ensuring we have a standardized high-symmetry path.
     """
-    # TODO: not implemented yet
 
-    def setup(self, structure: Structure, directory: str):
+    def _get_clean_structure(self, structure: Structure) -> Structure:
+        """
+        Uses the class attributes for `pre_sanitize_structure` and
+        `pre_standardize_structure`. If either of these are set to True, then
+        the structure unitcell is converted using the proper methods.
+
+        Note, this method is typically called within `setup` before any input
+        files are written. You should never have to call it directly.
+        """
+
+        # if both pre_standardize_structure and pre_sanitize_structure are set,
+        # we raise an error. I may want to change this in the future though
+        if self.pre_sanitize_structure and self.pre_standardize_structure:
+            raise Exception(
+                "For this VaspTask, only one of `pre_sanitize_structure` or "
+                " `pre_standardize_structure` can be set to True, not both."
+            )
 
         # If requested, we convert to the LLL-reduced unit cell, which aims to
         # be as cubic as possible.
         if self.pre_sanitize_structure:
-            structure = structure.copy(sanitize=True)
+            structure_cleaned = structure.copy(sanitize=True)
+            return structure_cleaned
+
+        # For band structures, we need to make sure the structure is in the
+        # standardized primitive form.
+        # We use the same SYMPREC from the INCAR, which is 1e-5 if not set.
+        if self.pre_standardize_structure:
+            sym_prec = self.incar.get("SYMPREC", 1e-5) if self.incar else 1e-5
+            sym_finder = SpacegroupAnalyzer(structure, symprec=sym_prec)
+            structure_cleaned = sym_finder.get_primitive_standard_structure(
+                international_monoclinic=False,
+            )
+            # check for pymatgen bugs here
+            check_for_standardization_bugs(structure, structure_cleaned)
+            return structure_cleaned
+
+        # if none of the flags above were used, then we just return the orignal
+        # input structure.
+        return structure
+
+    def setup(self, structure: Structure, directory: str):
+
+        # run cleaning and standardizing on structure (based on class attributes)
+        structure_cleaned = self._get_clean_structure(structure)
 
         # write the poscar file
-        Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
+        Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file
         incar = Incar(**self.incar) + Incar(**self.incar_parallel_settings)
         incar.to_file(
             filename=os.path.join(directory, "INCAR"),
-            structure=structure,
+            structure=structure_cleaned,
         )
 
         # if KSPACING is not provided in the incar AND kpoints is attached to this
         # class instance, then we write the KPOINTS file
         if self.kpoints and ("KSPACING" not in self.incar):
             Kpoints.to_file(
-                structure,
+                structure_cleaned,
                 self.kpoints,
                 os.path.join(directory, "KPOINTS"),
             )
 
         # write the POTCAR file
         Potcar.to_file_from_type(
-            structure.composition.elements,
+            structure_cleaned.composition.elements,
             self.functional,
             os.path.join(directory, "POTCAR"),
             self.potcar_mappings,
@@ -212,8 +251,6 @@ class VaspTask(S3Task):
 
     def _write_output_summary(self, directory: str, vasprun: Vasprun):
         """
-        This is an EXPERIMENTAL feature.
-
         This prints a "simmate_summary.yaml" file with key output information.
 
         This method should not be called directly as it used within workup().
@@ -256,3 +293,24 @@ class VaspTask(S3Task):
                 "potcar_mappings",
             ]
         }
+
+
+def check_for_standardization_bugs(structure_original, structure_new):
+
+    # In pymatgen, they include this code with the standardization of their
+    # structures because there were several bugs in the past and they want to
+    # double-check themselves. I'm still using their code to standardize
+    # my structures, so I should make this check too.
+
+    vpa_old = structure_original.volume / structure_original.num_sites
+    vpa_new = structure_new.volume / structure_new.num_sites
+
+    if abs(vpa_old - vpa_new) / vpa_old > 0.02:
+        raise ValueError(
+            "Standardizing failed! Volume-per-atom changed... "
+            f"old: {vpa_old}, new: {vpa_new}"
+        )
+
+    sm = StructureMatcher()
+    if not sm.fit(structure_original, structure_new):
+        raise ValueError("Standardizing failed! Old structure doesn't match new.")

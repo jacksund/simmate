@@ -3,8 +3,6 @@
 import os
 
 from pymatgen.io.vasp.inputs import Kpoints
-from pymatgen.analysis.structure_matcher import StructureMatcher
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 from pymatgen.electronic_structure.plotter import BSPlotter
 
@@ -49,6 +47,9 @@ class MatProjBandStructure(MatProjStaticEnergy):
     kpoints = None
     kpoints_line_density = 20
 
+    # For band-structures, unit cells should be in the standardized format
+    pre_standardize_structure = True
+
     def setup(self, structure, directory):
         """
         Writes input files for this calculation. This differs from the normal
@@ -56,30 +57,18 @@ class MatProjBandStructure(MatProjStaticEnergy):
         first and then writes a KPOINT file with using a highsym path.
         """
 
-        # If requested, we convert to the LLL-reduced unit cell, which aims to
-        # be as cubic as possible.
-        if self.pre_sanitize_structure:
-            structure = structure.copy(sanitize=True)
-
-        # For band structures, we need to make sure the structure is in the
-        # standardized primitive form. Note we assume that we are using the
-        # "interanational_monoclinc" in pymatgen.
-        # We use the same SYMPREC from the INCAR, which is 1e-5 if not set.
-        sym_prec = self.incar.get("SYMPREC", 1e-5) if self.incar else 1e-5
-        sym_finder = SpacegroupAnalyzer(structure, symprec=sym_prec)
-        structure_standardized = sym_finder.get_primitive_standard_structure()
-        # check for pymatgen bugs here
-        check_for_standardization_bugs(structure, structure_standardized)
+        # run cleaning and standardizing on structure (based on class attributes)
+        structure_cleaned = self._get_clean_structure(structure)
 
         # write the poscar file
-        Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
+        Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file
         incar = Incar(**self.incar) + Incar(**self.incar_parallel_settings)
         incar.to_file(
             filename=os.path.join(directory, "INCAR"),
-            structure=structure,
+            structure=structure_cleaned,
         )
 
         ##############
@@ -87,7 +76,8 @@ class MatProjBandStructure(MatProjStaticEnergy):
         # functionality will be moved to the KptPath class and then extended to
         # vasp.inputs.kpoints class. Until those classes are ready, we just use
         # pymatgen here.
-        kpath = HighSymmKpath(structure_standardized)
+        sym_prec = self.incar.get("SYMPREC", 1e-5) if self.incar else 1e-5
+        kpath = HighSymmKpath(structure_cleaned, symprec=sym_prec)
         frac_k_points, k_points_labels = kpath.get_kpoints(
             line_density=self.kpoints_line_density,
             coords_are_cartesian=False,
@@ -105,7 +95,7 @@ class MatProjBandStructure(MatProjStaticEnergy):
 
         # write the POTCAR file
         Potcar.to_file_from_type(
-            structure.composition.elements,
+            structure_cleaned.composition.elements,
             self.functional,
             os.path.join(directory, "POTCAR"),
             self.potcar_mappings,
@@ -124,24 +114,3 @@ class MatProjBandStructure(MatProjStaticEnergy):
         plot = bs_plotter.get_plot()
         plot_filename = os.path.join(directory, "band_structure.png")
         plot.savefig(plot_filename)
-
-
-def check_for_standardization_bugs(structure_original, structure_new):
-
-    # In pymatgen, they include this code with the standardization of their
-    # structures because there were several bugs in the past and they want to
-    # double-check themselves. I'm still using their code to standardize
-    # my structures, so I should make this check too.
-
-    vpa_old = structure_original.volume / structure_original.num_sites
-    vpa_new = structure_new.volume / structure_new.num_sites
-
-    if abs(vpa_old - vpa_new) / vpa_old > 0.02:
-        raise ValueError(
-            "Standardizing failed! Volume-per-atom changed... "
-            f"old: {vpa_old}, new: {vpa_new}"
-        )
-
-    sm = StructureMatcher()
-    if not sm.fit(structure_original, structure_new):
-        raise ValueError("Standardizing failed! Old structure doesn't match new.")
