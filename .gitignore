@@ -5,6 +5,9 @@
 # If there is a more up-to-date version of this file, it will be
 # located at: https://github.com/github/gitignore/blob/master/Python.gitignore
 
+# ignore all temporary 3d files make by the web UI
+tmp*.glb
+
 # ignore any Dask files created by workers
 dask-worker-space/
 

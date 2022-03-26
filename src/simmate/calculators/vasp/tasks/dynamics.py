@@ -82,13 +82,11 @@ class MITDynamicsTask(MITRelaxation):
         nsteps: int = 10000,
     ):
 
-        # If requested, we convert to the LLL-reduced unit cell, which aims to
-        # be as cubic as possible.
-        if self.pre_sanitize_structure:
-            structure = structure.copy(sanitize=True)
+        # run cleaning and standardizing on structure (based on class attributes)
+        structure_cleaned = self._get_clean_structure(structure)
 
         # write the poscar file
-        Poscar.to_file(structure, os.path.join(directory, "POSCAR"))
+        Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file. Note, we update the values of this incar,

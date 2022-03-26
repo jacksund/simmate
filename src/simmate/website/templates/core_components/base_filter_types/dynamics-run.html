@@ -1,0 +1,23 @@
+{% load crispy_forms_tags %}
+
+<!-- Dynamics Run Info -->
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingDynamFilters">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseDynamFilters" aria-expanded="true" aria-controls="collapseDynamFilters">
+            <b>By Dynamics Info:</b>
+        </button>
+    </h2>
+    <div id="collapseDynamFilters" class="accordion-collapse collapse" aria-labelledby="headingDynamFilters">
+        <div class="accordion-body">
+            {{ form.temperature_start__range | as_crispy_field }}
+            {{ form.temperature_end__range | as_crispy_field }}
+            {{ form.time_step__range | as_crispy_field }}
+            {{ form.nsteps__range | as_crispy_field }}
+        </div>
+    </div>
+</div>
+
+{% include "core_components/base_filter_types/calculation.html" %}
+{% include "core_components/base_filter_types/structure.html" %}

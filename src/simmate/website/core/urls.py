@@ -5,6 +5,7 @@ from django.urls import include, path
 
 from simmate.website.core import views
 
+
 urlpatterns = [
     #
     # This is the path to the homepage (just simmate.org)
@@ -41,10 +42,17 @@ urlpatterns = [
         name="workflows",
     ),
     #
-    # This app is for viewing crystal structures in a 3D viewport
+    # This app includes core functionality, such as views for crystal structures
+    # in a 3D viewport.
     path(
-        route="structure-viewer/",
-        view=include("simmate.website.structure_viewer.urls"),
-        name="structure_viewer",
+        route="core-components/",
+        view=include(
+            (
+                "simmate.website.core_components.urls",
+                "simmate.website.core_components",
+            ),
+            namespace="core_components",
+        ),
+        name="core_components",
     ),
 ]

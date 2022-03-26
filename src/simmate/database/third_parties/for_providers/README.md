@@ -69,8 +69,7 @@ How to add your data or a new provider
 
 The end goal for each provider is to allow a user do the following:
 ``` python
-from simmate.shortcuts import setup  # connects to database
-
+from simmate.database import connect
 from simmate.third_parties import ExampleProviderData
 
 ExampleProviderData.load_remote_archive()
@@ -176,8 +175,7 @@ simmate database reset
 ``` python
 # in python
 
-from simmate.shortcuts import setup  # connects to database
-
+from simmate.database import connect
 from simmate.third_parties import ExampleProviderData
 
 # This will show you all the columns for your table
@@ -275,8 +273,7 @@ Try running this on your dataset (or a subset of data if you want to quickly tes
 ``` python
 # in python
 
-from simmate.shortcuts import setup  # connects to database
-
+from simmate.database import connect
 from simmate.third_parties import ExampleProviderData
 
 # Check that the number of rows matches your source data.

@@ -1,0 +1,73 @@
+<div class="container p-4">
+  <h2>Search Results:</h2>
+  {% if calculations %}
+  {% load chemical_formula_filter %}
+
+  <div class="alert alert-success d-flex align-items-center p-2" role="alert">
+    <i class="bi bi-check-circle-fill fs-4"></i>
+    <div class="p-3">
+      This table includes <b>{{ calculations | length }}</b> out of <b>{{ ncalculations_matching }}</b> results
+      that match your search criteria. These results were filtered from the <b>{{ ncalculations_possible }}</b>
+      total possible results.
+    </div>
+  </div>
+
+  <table id="SearchResultsTable" class="table table-striped" style="width:100%">
+    <thead>
+      <tr>
+        <th>Prefect Name</th>
+        <th>Prefect State</th>
+        <th>Simmate ID</th>
+        <th>Full Formula</th>
+        <th>Spacegroup</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for calculation in calculations %}
+      <tr>
+        <!-- 
+          This block would query Prefect cloud a bunch using logic like...  
+
+              if calculation.flow_run_view:
+                name = calculation.prefect_flow_run_name # and link to calculation.prefect_cloud_link
+                state = calculation.prefect_state
+              else:
+                name = None
+                state = None
+
+          These queries are slow AND state should be dynamically updated -- Therefore this should be
+          done on the front-end. I don't yet know the Javascript needed for this, but I would use
+          a prefect api key from the User and use it to query their prefect cloud here.
+
+          For now, I simply leave the next two columns empty to prevent the slow-down.
+        -->
+        <td>--</td>
+        <td>--</td>
+        <td><a href="{{ calculation.id }}">{{ calculation.id }}</a></td>
+        <td>{{ calculation.formula_full | chemical_formula }}</td>
+        <td>{{ calculation.spacegroup.number }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+    <div class="p-3">
+      <b>No calculations found matching your search criteria!</b>
+      <br><br>
+      <i><small>
+          Make sure you don't have a typo in your search. If you are searching
+          for "Li-Co-O", common typos include searching "LiCoO" (missing hyphens),
+          "Li-Co-O-" (extra hyphen), or "li-co-o" (lowercase). We are working
+          to account for these common mistakes, but you'll have to fix these until then!
+          <br><br>
+          It is also possible that there just aren't any results for your search.
+          In cases such as this, please reach out to our team and we can start
+          exploring the system(s) you're interested in!
+        </small></i>
+    </div>
+  </div>
+  {% endif %}
+
+</div>

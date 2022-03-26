@@ -1,0 +1,83 @@
+# This yaml file configures DigitalOcean's app platform. It was made many
+# manually following along with the guide in the web interface (see the README)
+# and then copying over the resulting app-spec.
+# For details on the specification see... 
+#   https://docs.digitalocean.com/products/app-platform/references/app-specification-reference/
+
+# NOTE: Commented out lines are typically added after you complete your setup --
+# including connecting to a database and selecting payment plans.
+spec:
+  name: simmate
+
+    # alerts:
+    #     - rule: DEPLOYMENT_FAILED
+    #     - rule: DOMAIN_FAILED
+    
+  # This automatically creates a starter database for the user.
+  databases:
+    - name: simmate-starter-database
+  # Alternatively, they can link in their own production database.
+  # databases:
+  #     - cluster_name: db-postgresql-nyc3-57754
+  #       db_name: defaultdb
+  #       db_user: doadmin
+  #       engine: PG
+  #       name: db-postgresql-nyc3-57754
+  #       production: true
+  #       version: "14"
+
+  # region: nyc
+
+  # domains:
+  #   - domain: simmate.org
+  #     type: PRIMARY
+  #     zone: simmate.org
+
+  services:
+    - name: simmate
+      # ----- NOTE: THIS IS THE KEY DIFFERENCE FROM THE CURRENT TEMPLATE
+      dockerfile_path: ./.do/Dockerfile
+      # -----
+      github:
+        branch: main
+        deploy_on_push: true
+        repo: jacksund/simmate
+      envs:
+        - key: DJANGO_ALLOWED_HOSTS
+          scope: RUN_AND_BUILD_TIME
+          value: ${APP_DOMAIN}
+        - key: DEBUG
+          scope: RUN_AND_BUILD_TIME
+          value: "False"
+        - key: DJANGO_SECRET_KEY
+          scope: RUN_AND_BUILD_TIME
+          value: example-key-123
+          type: SECRET
+        - key: USE_LOCAL_DATABASE
+          scope: RUN_AND_BUILD_TIME
+          value: "False"
+        - key: PREFECT__CLOUD__API_KEY
+          scope: RUN_AND_BUILD_TIME
+          value: example-key-321
+          type: SECRET
+        - key: DATABASE_URL
+          scope: RUN_AND_BUILD_TIME
+          value: ${simmate-starter-database.DATABASE_URL}
+    # http_port: 8080
+    # instance_count: 1
+    # instance_size_slug: basic-xs
+    # routes:
+    #     - path: /
+    # source_dir: /
+
+  static_sites:
+    - environment_slug: python
+      github:
+        branch: main
+        deploy_on_push: true
+        repo: jacksund/simmate
+      name: simmate-static
+      output_dir: /src/simmate/website/static
+      routes:
+      - path: /static
+      # source_dir: /

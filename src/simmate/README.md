@@ -19,8 +19,7 @@ or are comfortable with python.
 - `workflow_engine` = tools and utilities that help submit calculations as well as handle errors
 - `workflows` = common analyses used in materials chemistry
 
-There are also three extra files…
+There are also two extra files…
 
-- `shortcuts` = let’s you import common functions with ease 
 - `utilities` = contains simple functions that are used throughout the other modules
 - `conftest` = this is for running Simmate tests and only for contributing devs

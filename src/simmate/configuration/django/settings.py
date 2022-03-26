@@ -166,11 +166,11 @@ INSTALLED_APPS = [
     #
     # These are all apps that are built by Simmate
     "simmate.website.accounts.apps.AccountsConfig",
+    "simmate.website.core_components.apps.CoreComponentsConfig",
     "simmate.website.third_parties.apps.ThirdPartyConfig",
     "simmate.website.workflows.apps.WorkflowsConfig",
     "simmate.website.workflow_execution.apps.WorkflowExecutionConfig",
     "simmate.website.prototypes.apps.PrototypesConfig",
-    "simmate.website.structure_viewer.apps.StructureViewerConfig",
     #
     # These are built-in django apps that we use for extra features
     "django.contrib.admin",
@@ -314,14 +314,15 @@ USE_TZ = True
 # collect by running 'python manage.py collectstatic'
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(DJANGO_DIRECTORY, "static")
+
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = [os.path.join(DJANGO_DIRECTORY, "static_files")]
-# BUG: djangorestframework's static files struggle to load and I'm not sure why.
-# I add these two lines to fix the bug and need to revisit this later.
-# Based on recommendation by...
-# https://stackoverflow.com/questions/35557129/css-not-loading-wrong-mime-type-django
-# import mimetypes
-# mimetypes.add_type("text/css", ".css", True)
+
+# For the dynamically-create structure files, we need to include the static
+# directory this to work during local testing. This is NOT allowed in a
+# production server, so we don't include it when DEBUG is set to False.
+if DEBUG:
+    STATICFILES_DIRS += [os.path.join(DJANGO_DIRECTORY, "static")]
 
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"
@@ -337,7 +338,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "jacksundberg123@gmail.com"  # os.environ.get('EMAIL_USER')
 # !!! REMOVE IN PRODUCTION. Use this instead: os.environ.get('EMAIL_PASSWORD')
-EMAIL_HOST_PASSWORD = "lqurjxyttrjrlgcr"
+EMAIL_HOST_PASSWORD = "example-password-123"
 
 # These settings help configure djangorestframework and our REST API
 REST_FRAMEWORK = {
@@ -371,3 +372,6 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
 }
+
+# Allows the use of iFrames from within Simmate (such as the structure-viewer)
+X_FRAME_OPTIONS = "SAMEORIGIN"

@@ -1,0 +1,58 @@
+<div class="container p-4">
+  <h2>Search Results:</h2>
+  {% if calculations %}
+  {% load chemical_formula_filter %}
+
+  <div class="alert alert-success d-flex align-items-center p-2" role="alert">
+    <i class="bi bi-check-circle-fill fs-4"></i>
+    <div class="p-3">
+      This table includes <b>{{ calculations | length }}</b> out of <b>{{ ncalculations_matching }}</b> results
+      that match your search criteria. These results were filtered from the <b>{{ ncalculations_possible }}</b>
+      total possible results.
+    </div>
+  </div>
+
+  <table id="SearchResultsTable" class="table table-striped" style="width:100%">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Dashboards</th>
+        <th>Full Formula</th>
+        <th>Spacegroup</th>
+        <th>Density</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for calculation in calculations %}
+      <tr>
+        <td>{{ calculation.id }}</td>
+        <td><a href="{{ calculation.id }}">simmate</a> / <a href="{{ calculation.external_link }}"
+            target="_blank">provider</a></td>
+        <td>{{ calculation.formula_full | chemical_formula }}</td>
+        <td>{{ calculation.spacegroup.number }}</td>
+        <td>{{ calculation.density | floatformat:3 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+    <div class="p-3">
+      <b>No calculations found matching your search criteria!</b>
+      <br><br>
+      <i><small>
+          Make sure you don't have a typo in your search. If you are searching
+          for "Li-Co-O", common typos include searching "LiCoO" (missing hyphens),
+          "Li-Co-O-" (extra hyphen), or "li-co-o" (lowercase). We are working
+          to account for these common mistakes, but you'll have to fix these until then!
+          <br><br>
+          It is also possible that there just aren't any results for your search.
+          In cases such as this, please reach out to our team and we can start
+          exploring the system(s) you're interested in!
+        </small></i>
+    </div>
+  </div>
+  {% endif %}
+
+</div>

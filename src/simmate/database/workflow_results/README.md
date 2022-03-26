@@ -21,7 +21,8 @@ mit_workflow.result_table
 You can also access a table directly with...
 
 ``` python
-from simmate.shortcuts import setup  # connects to database
+# connects to the database
+from simmate.database import connect
 
 from simmate.database.workflow_results import MITStaticEnergy
 

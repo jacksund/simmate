@@ -1,0 +1,38 @@
+{% extends "core/site-base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<section class="pt-5 jumbotron text-center">
+  <div class="container">
+    <h1 class="jumbotron-heading">Third-Party Data</h1>
+    <p class="lead text-muted">This page let's you explore all of the providers available with Simmate. By selecting a
+      provider, you can submit new calculations and view the results of all past runs.</p>
+  </div>
+</section>
+
+<div class="row row-cols-1 g-4">
+  {% for workflow_type, workflow_description in workflows_metadata.items %}
+  <div class="col">
+    <div class="card h-100" style="width: 30rem;">
+      <div class="card-body">
+        <h5 class="card-title">{{ workflow_type }}</h5>
+        <p class="card-text">
+          {{ workflow_description }}
+          </br></br>
+          <a role="button" class="btn btn-primary btn" href="{% url 'third_parties:provider' workflow_type %}">View All</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

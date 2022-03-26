@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Simmate - Structure Viewer</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+
+<body>
+
+	<!-- 
+	This code is adapted from...
+    	https://github.com/mrdoob/three.js/blob/dev/examples/webgl_loader_gltf.html
+    
+    The main difference right now is that I switched to CDN loading of resources
+    and also load static files.
+    
+    I don't really want the HDR but I also don't understand this code well
+    enough to change it.
+    
+    The controls are limited when rotating vertically, so I'll need to change
+    from orbital to trackball controls:
+    https://threejs.org/examples/?q=controls#misc_controls_trackball
+    
+    When rotating, I would like the light source to rotate with it. This will
+    avoid unwanted shadows when viewing crystal structures from other angles.
+    
+	-->
+	
+	
+    {% load static %}
+    {% get_static_prefix as STATIC_PREFIX %}
+    
+	<script type="module">
+
+		// Find the latest version by visiting https://cdn.skypack.dev/three
+		import * as THREE from 'https://cdn.skypack.dev/three@0.132.2';
+
+		import { OrbitControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js';
+		// I want trackball, but don't know how to implement it
+		// import { TrackballControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/TrackballControls.js';
+		import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/GLTFLoader.js';
+		import { RGBELoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/RGBELoader.js';
+		import { RoughnessMipmapper } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/utils/RoughnessMipmapper.js';
+
+		let camera, scene, renderer, light;
+
+		init();
+		animate();
+
+		function init() {
+
+			// first establish our scene which we will add everything else to
+			scene = new THREE.Scene();
+
+
+			// make camera
+			camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 2000);
+			camera.position.set(- 18, 6, 27);
+
+
+			// Now load the background image and the gltf file
+			const loader = new RGBELoader()
+			loader.load('{% static 'core_components/royal_esplanade_1k.hdr'%}', function (texture) {
+
+				texture.mapping = THREE.EquirectangularReflectionMapping;
+
+
+				scene.background = new THREE.Color('rgb(214, 241, 241)');
+				scene.environment = texture;
+
+				render();
+
+				// model
+
+				// use of RoughnessMipmapper is optional
+				const roughnessMipmapper = new RoughnessMipmapper(renderer);
+
+				const loader = new GLTFLoader();
+				loader.load(
+					// path to the file we're loading
+    				'{% static 3d_structure_filename %}',
+    				// ALTERNATIVE FILE FOR TESTING: 
+    				// '{% static 'core_components/simmate_structure.glb'%}',
+
+				// this function is called when the resource is loaded
+				function (gltf) {
+
+					// I'm not entirely sure what is happening here,
+					// but I believe we are just updating the object's
+					// material to a RoughnessMipmapper
+					gltf.scene.traverse(
+						function (child) {
+							if (child.isMesh) {
+								roughnessMipmapper.generateMipmaps(child.material);
+							}
+						});
+
+					scene.add(gltf.scene);
+					roughnessMipmapper.dispose();
+					render();
+				},
+
+				// this function is called while loading is progressing
+				function (xhr) {
+					// console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+				},
+
+				// this function is called when loading has errors
+				function (error) {
+					console.log('An error happened');
+				},
+			);
+
+		} );
+
+		// BUG: this isn't working and I don't know why...
+		// Add a point light to the scene
+		// const light = new THREE.PointLight();
+		// light.intensity = 100;
+		// light.position.set( 0, 0, 0 );
+		// scene.add( light );
+		// And have that light follow the camera with rotation
+		// camera.add( light );
+
+		// This builds the viewport and adds it to the html body
+		renderer = new THREE.WebGLRenderer({ antialias: true });
+		renderer.setPixelRatio(window.devicePixelRatio);
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		renderer.toneMappingExposure = 1;
+		renderer.outputEncoding = THREE.sRGBEncoding;
+		document.body.appendChild(renderer.domElement);
+
+
+		// Allow the user to control the viewport and rotate about the object
+		const controls = new OrbitControls(camera, renderer.domElement);
+		// controls.addEventListener( 'change', render ); // use this line if there is no animation loop
+		controls.zoomSpeed = 2;
+		//controls.minDistance = 2;
+		//controls.maxDistance = 15;
+		controls.update();
+
+		// Calls our function below every time the window size chages
+		window.addEventListener('resize', onWindowResize);
+
+			}
+
+
+		// updates render window and objects in it when the window changes size
+		function onWindowResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			render();
+		}
+
+
+		// How to render a single frame in the viewport. Note that this is
+		// called repeatedly by animate().
+		function render() {
+			// if you want to calculate something every loop, call it here
+			renderer.render(scene, camera);
+		}
+
+
+		// Calling this means this will loop repeatedly, so if you want to
+		// call a function over and over again, put it here!
+		function animate() {
+			requestAnimationFrame(animate);
+			render();
+		}
+
+	</script>
+
+</body>
+
+</html>

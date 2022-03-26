@@ -14,7 +14,7 @@ from pymatgen.symmetry.groups import SpaceGroup as PymatgenSpacegroup
 
 class Spacegroup(DatabaseTable):
     class Meta:
-        app_label = "workflows"  # TODO: move to a separate app
+        app_label = "core_components"
 
     source = None
     """

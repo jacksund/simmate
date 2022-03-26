@@ -12,6 +12,10 @@ Submodules include...
 - `prototypes` : tables of prototype structures
 - `third_parties` : loads data from external providers (such as Materials Project)
 
+And there is one extra file in this module:
+
+- `connect`: configures the database and installed apps (i.e. sets up Django)
+
 
 Usage Notes
 ============
@@ -28,7 +32,7 @@ The sections below will guide you on performing each of these steps. But to plac
 
 ``` python
 # Connect to your database
-from simmate.shortcuts import setup
+from simmate.database import connect
 
 # Load your database table
 from simmate.database.third_parties import MatProjStructure
@@ -54,7 +58,8 @@ for structure in structures:
 For interactive use, Django settings must be configured before any of these submodules can be imported. This can be done with...
 
 ``` python
-from simmate.shortcuts import setup  # configures Django
+# connect to the database
+from simmate.database import connect
 
 # and now you can import tables in this module
 from simmate.database.workflow_results import MITStaticEnergy
@@ -89,7 +94,7 @@ table = mit_workflow.result_table
 
 
 ######## METHOD 2 ########
-from simmate.shortcuts import setup  # configures Django
+from simmate.database import connect
 from simmate.database.workflow_results import MITStaticEnergy
 
 

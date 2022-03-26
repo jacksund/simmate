@@ -1,0 +1,32 @@
+{% extends "core/site-base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container p-4 bg-light border" id="search-results">
+
+  <!-- Workflow name and descriptoin header -->
+  <section class="pt-5 jumbotron text-center">
+    <div class="container">
+      <h1 class="jumbotron-heading">{{ provider.source }}</h1>
+      <p class="lead text-muted">{{ provider.source_doi }}</p>
+    </div>
+  </section>
+
+  <!-- Search Form -->
+  {% include "core_components/search_form.html" %}
+
+  <!-- Search Results -->
+  {% include "third_parties/search_results.html" %}
+  
+</div>
+
+{% endblock %}
