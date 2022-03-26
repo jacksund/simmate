@@ -336,17 +336,15 @@ LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "jacksundberg123@gmail.com"  # os.environ.get('EMAIL_USER')
+EMAIL_HOST_USER = "simmate.team@gmail.com"  # os.environ.get('EMAIL_USER')
 # !!! REMOVE IN PRODUCTION. Use this instead: os.environ.get('EMAIL_PASSWORD')
 EMAIL_HOST_PASSWORD = "example-password-123"
 
 # These settings help configure djangorestframework and our REST API
 REST_FRAMEWORK = {
-    # The default permission needed to access data is simply that the individual
-    # in signed into an account. In the future, consider using
-    # DjangoModelPermissionsOrAnonReadOnly as default because this will inherit
-    # user permissions we assign at the model level in django.
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    # The REST framework has both authentication AND permission classes. By
+    # default I allow anything, but may revisit these if the user-base ever grows:
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
     # Because we have a massive number of results for different endpoints,
     # we want to set results to be paginated by 25 results per page. This
     # way we don't have to set a page limit for every individual endpoint
@@ -361,7 +359,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "100/day", "user": "1000/day"},
+    "DEFAULT_THROTTLE_RATES": {"anon": "100/hour", "user": "1000/day"},
     # We use django-filter to automatically handle filtering from a REST url
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     # There are multiple ways to render the data, where we default to a nice HTML
