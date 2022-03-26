@@ -38,7 +38,7 @@ def provider(request, provider_name: str):
     return render_from_table(
         request=request,
         template="third_parties/provider.html",
-        context={"active_tab_id": "third_parties"},
+        context={"active_tab_id": "third_parties", "provider": provider_table},
         table=provider_table,
         view_type="list",
     )

@@ -6,9 +6,9 @@
   <div class="alert alert-success d-flex align-items-center p-2" role="alert">
     <i class="bi bi-check-circle-fill fs-4"></i>
     <div class="p-3">
-      This table includes <b>{{ calculations | length }}</b> results calculations
-       that match your search criteria. These results were filtered from the
-      <b>{{ ncalculations_possible }}</b> total possible results.
+      This table includes <b>{{ calculations | length }}</b> out of <b>{{ ncalculations_matching }}</b> results
+      that match your search criteria. These results were filtered from the <b>{{ ncalculations_possible }}</b>
+      total possible results.
     </div>
   </div>
 
@@ -18,7 +18,6 @@
         <th>Prefect Name</th>
         <th>Prefect State</th>
         <th>Simmate ID</th>
-        <th>Final Energy (eV/atom)</th>
         <th>Full Formula</th>
         <th>Spacegroup</th>
       </tr>
@@ -45,7 +44,6 @@
         <td>--</td>
         <td>--</td>
         <td><a href="{{ calculation.id }}">{{ calculation.id }}</a></td>
-        <td>{{ calculation.structure_final.energy_per_atom | floatformat:3 }}</td>
         <td>{{ calculation.formula_full | chemical_formula }}</td>
         <td>{{ calculation.spacegroup.number }}</td>
       </tr>

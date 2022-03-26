@@ -29,26 +29,34 @@ class SimmateAPIView(GenericAPIView):
 
     def list_view(self, request: HttpRequest, *args, **kwargs) -> Response:
 
+        # This code is modified from the ListModelMixin, where instead of returning
+        # a response, we perform additional introspection first.
+        # https://github.com/encode/django-rest-framework/blob/master/rest_framework/mixins.py#L33
+
         # self.format_kwarg --> not sure why this always returns None, so I
         # grab the format from the request instead. If it isn't listed, then
         # I'm using the default which is html.
         self._format_kwarg = request.GET.get("format", "html")
 
-        # ---------------------------------------------------
-        # This code is from the ListModelMixin, where instead of returning
-        # a response, we perform additional introspection first. I turn off
-        # pagination for now but need to revisit this.
         queryset = self.filter_queryset(self.get_queryset())
-        if self._format_kwarg != "html":  # <--- added this condition
-            page = self.paginate_queryset(queryset)
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        # return Response(serializer.data)  <--- removed from original
-        # ---------------------------------------------------
 
-        if self._format_kwarg == "html":
+        # attempt to paginate the results
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+
+        # If don't have the html format, we follow simple logic from the
+        # original ListModelMixin method
+        if self._format_kwarg != "html":
+            if page is not None:
+                return self.get_paginated_response(serializer.data)
+            else:
+                return Response(serializer.data)
+
+        # otherwise we assume the html format
+        else:
             filterset = self.filterset_class(request.GET)
             data = {
                 # "filterset": filterset, # not used at the momemnt
@@ -56,12 +64,11 @@ class SimmateAPIView(GenericAPIView):
                 "form": filterset.form,
                 "extra_filters": filterset.get_extra_filters(),
                 "calculations": serializer.instance,  # return python objs, not dict
+                "ncalculations_matching": queryset.count(),
                 "ncalculations_possible": self.get_queryset().count(),
                 **self.extra_context,
             }
             return Response(data)
-        else:
-            return Response(serializer.data)
 
     def retrieve_view(self, request: HttpRequest, *args, **kwargs) -> Response:
 
