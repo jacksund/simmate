@@ -15,7 +15,6 @@ from simmate.website.workflows.forms import SubmitWorkflow
 from simmate.website.core_components.utilities import render_from_table
 
 
-@login_required
 def workflows_all(request):
 
     # TODO: maybe instead load these descriptions from the simmate.{module}'s docstr
@@ -66,7 +65,6 @@ def workflows_all(request):
     return render(request, template, context)
 
 
-@login_required
 def workflows_by_type(request, workflow_type):
 
     workflow_names = get_list_of_workflows_by_type(workflow_type)
@@ -84,7 +82,6 @@ def workflows_by_type(request, workflow_type):
     return render(request, template, context)
 
 
-@login_required
 def workflow_detail(request, workflow_type, workflow_name):
     # note, workflow_name here is the workflow.name_short
 
@@ -118,7 +115,6 @@ def workflow_detail(request, workflow_type, workflow_name):
     )
 
 
-@login_required
 def workflow_run_detail(
     request,
     workflow_type: str,

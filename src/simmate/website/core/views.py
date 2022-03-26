@@ -2,7 +2,6 @@
 
 from django.shortcuts import render
 from django.db.models import F
-from django.contrib.auth.decorators import login_required
 
 from simmate.website.third_parties.forms import ChemicalSystemForm
 
@@ -15,7 +14,6 @@ from simmate.database.third_parties import (
 )
 
 
-@login_required
 def home(request):
 
     # The home page is also an html "form" because users submit queries from
@@ -97,7 +95,6 @@ def home(request):
     return render(request, template, context)
 
 
-@login_required
 def extras(request):
 
     # now let's put the data and template together to send the user
