@@ -5,8 +5,6 @@ from django_filters import rest_framework as filters
 from simmate.utilities import get_chemical_subsystems
 from simmate.database.base_data_types import Structure as StructureTable
 
-# from simmate.website.core_components.filters import Spacegroup
-
 
 class Structure(filters.FilterSet):
     class Meta:
@@ -31,13 +29,12 @@ class Structure(filters.FilterSet):
     include_subsystems = filters.BooleanFilter(
         field_name="include_subsystems",
         label="Include chemical subsystems in results?",
+        method="skip_filter",
     )
     """
     Whether to include subsystems of the given `chemical_system`. For example,
     the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..
     """
-    # Note: this attribute must be positioned BEFORE chemical_system to ensure
-    # it is present in self.cleaned_data before chemical_system is accessed.
 
     # include_suprasystems = forms.BooleanField(label="Include Subsytems", required=False)
     # TODO: Supra-systems would include all the elements listed AND more. For example,
@@ -48,34 +45,43 @@ class Structure(filters.FilterSet):
     The chemical system of the structure (e.g. "Y-C-F" or "Na-Cl")
     """
 
+    def skip_filter(self, queryset, name, value):
+        """
+        For filter fields that use this method, nothing is done to queryset. This
+        is because the filter is typically used within another field. For example,
+        the `include_subsystems` field is not applied to the queryset, but it
+        is used within the `filter_chemical_system` method.
+        """
+        return queryset
+
     def filter_chemical_system(self, queryset, name, value):
+        # name/value here are the key/value pair for chemical system
 
-        # Our database expects the chemical system to be given in alphabetical
-        # order, but we don't want users to recieve errors when they search for
-        # "Y-C-F" instead of "C-F-Y". Therefore, we fix that for them here! We
-        # also check if the user wants the chemical subsystems included.
-
-        # Grab what the user submitted
-        chemical_system = self.cleaned_data["chemical_system"]
+        # Grab the "include_subsystems" field from the filter form. Note, this
+        # value will be given as a string which we convert to a python boolean
+        include_subsystems = self.data.dict().get("include_subsystems", "false")
+        include_subsystems = True if include_subsystems == "true" else False
 
         # TODO:
         # Make sure that the chemical system is made of valid elements and
         # separated by hyphens
 
         # check if the user wants subsystems included (This will be True or False)
-        if self.cleaned_data["include_subsystems"]:
-            systems_cleaned = get_chemical_subsystems(chemical_system)
+        if include_subsystems:
+            systems_cleaned = get_chemical_subsystems(value)
 
         # otherwise just clean the single system
         else:
             # Convert the system to a list of elements
-            systems_cleaned = chemical_system.split("-")
+            systems_cleaned = value.split("-")
             # now recombine the list back into alphabetical order
             systems_cleaned = ["-".join(sorted(systems_cleaned))]
             # NOTE: we call this "systems_cleaned" and put it in a list so
             # that our other methods don't have to deal with multiple cases
             # when running a django filter.
 
+        filtered_queryset = queryset.filter(chemical_system__in=systems_cleaned)
+
         # now return the cleaned value. Note that this is now a list of
         # chemical systems, where all elements are in alphabetical order.
-        return systems_cleaned
+        return filtered_queryset
