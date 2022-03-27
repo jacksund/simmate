@@ -13,7 +13,7 @@ In this tutorial, you will learn how to switch from saving results locally to sa
 
 # The quick tutorial
 
-1. Consider collaborating! Simmate is built for sharing results, so email jacksundberg123@gmail.com to discuss joining our effort. This will let you avoid the complexities of managing your own database. If you decide to join, you'll only have to complete step 4 of this tutorial.
+1. Consider collaborating! Simmate is built for sharing results, so email simmate.team@gmail.com to discuss joining our effort. This will let you avoid the complexities of managing your own database. If you decide to join, you'll only have to complete step 4 of this tutorial.
 2. Set up a cloud database that is [supported by django](https://docs.djangoproject.com/en/4.0/ref/databases/#third-party-notes). We recommend using [Postgres](https://www.postgresql.org/) through [DigitalOcean](https://www.digitalocean.com/).
 3. Make sure you have extra database dependencies installed. For postgres, run the command:
 ```
@@ -43,7 +43,7 @@ default:
 
 A cloud database let's you save your results to a remote computer through an internet connection, and once a database is set up, you can add as many users and connections as you'd like. Therefore, if you are part of a team, you only need ONE person to setup and manage ONE cloud database. Anyone can collaborate if they have a username and password.
 
-So we could (theoretically) have the entire scientific community working together and sharing their results. To this end, our Simmate team tries to get as many labs collaborating as possible. If you would like join this effort, simply send an email to jacksundberg123@gmail.com and ask. Once you're on our team, you won't have to setup or manage any cloud database.
+So we could (theoretically) have the entire scientific community working together and sharing their results. To this end, our Simmate team tries to get as many labs collaborating as possible. If you would like join this effort, simply send an email to simmate.team@gmail.com and ask. Once you're on our team, you won't have to setup or manage any cloud database.
 
 > :bulb: Collaborating with our team is 100% free, and we hope to keep it that way. We take on the costs of the cloud database for now, but as our database and community grows, we may need help with funding. Until then, don't hesitate to ask for our status.
 
