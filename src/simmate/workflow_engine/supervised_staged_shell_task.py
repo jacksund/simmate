@@ -315,7 +315,7 @@ class S3Task(Task):
             # handler calls for us to do so). This isn't possible on Windows though.
             #
             # OPTIMIZE / BUG: preexec_fn adds about 0.02s overhead to the calculation
-            # so we may not want to always use it... Instead we could try to only 
+            # so we may not want to always use it... Instead we could try to only
             # use it when the command includes "mpirun". Though this may introduce
             # a bug if another is another parallel command used besides mpirun.
             # An example of this might be deepmd which automatically submits
