@@ -1,52 +1,60 @@
 # -*- coding: utf-8 -*-
 
+"""
+This script tests task running and monitoring. The benchmark looks at a `task.run()`
+which calls the command "echo dummy". We compare the following:
+    - a direct call to subprocess without any monitoring
+    - a task written with Simmate and 3 dummy error handlers
+    - a task written with Custodian and 3 dummy error handlers
+
+Note, Simmate is currently slower than Custodian, but this is entirely because
+Simmate carefully kills child Popen processes -- which takes 0.02s per task. When 
+this step is removed from all non-mpiruns, we see Simmate overhead is 
+significantly faster than Custodian. But I don't remove this out of fear of introducing
+a bug, which I detail in the execute method of the S3Task. This bug is actually
+present in Custodian for commands that spawn multiple processes/threads.
+"""
+
 import os
-
-# import time import sleep
 from timeit import default_timer as time
-
 from subprocess import Popen
-
-from custodian.custodian import Custodian, Job, ErrorHandler
-
-from simmate.workflow_engine.tasks.supervised_staged_shell_task import (
-    SupervisedStagedShellTask as SSSTask,
-)
-from simmate.workflow_engine.error_handler import ErrorHandler as ErrorHandlerS
 
 import pandas
 
 # the number total trials to run
-ntrials = 500
+ntrials = 1000
+
+
+def run_trials(fxn, ntrials, kwargs={}):
+    trial_times = []
+    for x in range(ntrials):
+        start = time()
+        fxn(**kwargs)
+        stop = time()
+        trial_times.append(stop - start)
+    return trial_times
+
 
 # ----------------------------------------------------------------------------
 
-# This tests the base time it takes to run a subprocess command without any
-# additional features. You can think of this as the absolute fastest we can
-# run commands in python.
+# a direct call to subprocess without any monitoring
 
-base_times = []
-for x in range(ntrials):
-    # start the timer
-    start = time()
-    # run dummy command and wait for it to finish
+
+def run_popen():
     popen = Popen("echo dummy", shell=True)
     popen.wait()
-    # stop the timer
-    stop = time()
-    # add time to db
-    base_times.append(stop - start)
+
+
+base_times = run_trials(run_popen, ntrials)
 
 # ----------------------------------------------------------------------------
 
-# This tests Simmate without any error handlers. This is the smallest amount
-# of penalty you can have on top of a subprocess if you don't want to use
-# any of Simmate's additional features.
+# a task written with Simmate and 3 dummy error handlers
 
-# I add an "S" at the end of each to separate from the Custodian handlers
+from simmate.workflow_engine import S3Task, ErrorHandler
 
 
-class AlwaysPassesHandlerS(ErrorHandlerS):
+class AlwaysPassesHandler(ErrorHandler):
     def check(self, dir):
         return None
 
@@ -55,37 +63,32 @@ class AlwaysPassesHandlerS(ErrorHandlerS):
         raise Exception
 
 
-class AlwaysPassesMonitorS(AlwaysPassesHandlerS):
+class AlwaysPassesMonitor(AlwaysPassesHandler):
     is_monitor = True
 
 
-class AlwaysPassesSpecialMonitorS(AlwaysPassesMonitorS):
+class AlwaysPassesSpecialMonitor(AlwaysPassesMonitor):
     is_terminating = False
 
 
-task = SSSTask(
-    command="echo dummy",
-    errorhandlers=[
-        AlwaysPassesHandlerS(),
-        AlwaysPassesMonitorS(),
-        AlwaysPassesSpecialMonitorS(),
-    ],
-    polling_timestep=0,
-    monitor_freq=1,
-)
+class DummyTask(S3Task):
+    command = "echo dummy"
+    error_handlers = [
+        AlwaysPassesHandler(),
+        AlwaysPassesMonitor(),
+        AlwaysPassesSpecialMonitor(),
+    ]
 
-simmate_times = []
-for x in range(ntrials):
-    # start the timer
-    start = time()
-    # run dummy command and wait for it to finish
-    result = task.run()
-    # stop the timer
-    stop = time()
-    # add time to db
-    simmate_times.append(stop - start)
+
+task = DummyTask(polling_timestep=0, monitor_freq=1, monitor=False)
+
+simmate_times = run_trials(task.run, ntrials, kwargs={"directory": "."})
 
 # ----------------------------------------------------------------------------
+
+# a task written with Custodian and 3 dummy error handlers
+
+from custodian.custodian import Custodian, Job, ErrorHandler
 
 
 class AlwaysPassesHandler(ErrorHandler):
@@ -115,6 +118,8 @@ class DummyJob(Job):
     def postprocess(self):
         pass
 
+
+# I can't use run_trials here...
 
 custodian_times = []
 for x in range(ntrials):

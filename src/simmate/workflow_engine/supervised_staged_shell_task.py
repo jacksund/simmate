@@ -305,17 +305,28 @@ class S3Task(Task):
             # launch the shelltask without waiting for it to complete. Also,
             # make sure to use common shell commands and to set the working
             # directory.
+            #
+            # Stderr keyword indicates that we should capture the error if one
+            # occurs so that we can report it to the user.
+            #
             # The preexec_fn keyword allows us to properly terminate jobs that
             # are launched with parallel processes (such as mpirun). This assigns
             # a parent id to it that we use when killing a job (if an error
             # handler calls for us to do so). This isn't possible on Windows though.
-            # Stderr keyword indicates that we should capture the error if one
-            # occurs so that we can report it to the user.
+            #
+            # OPTIMIZE / BUG: preexec_fn adds about 0.02s overhead to the calculation
+            # so we may not want to always use it... Instead we could try to only 
+            # use it when the command includes "mpirun". Though this may introduce
+            # a bug if another is another parallel command used besides mpirun.
+            # An example of this might be deepmd which automatically submits
+            # things in parallel without calling mpirun up-front.
             process = subprocess.Popen(
                 command,
                 cwd=directory,
                 shell=True,
-                preexec_fn=None if platform.system() == "Windows" else os.setsid,
+                preexec_fn=None if platform.system() == "Windows"
+                # or "mpirun" not in command  # See bug/optimize comment above
+                else os.setsid,
                 stderr=subprocess.PIPE,
             )
 
@@ -494,7 +505,7 @@ class S3Task(Task):
         # However this struggles to kill all "child" processes if we are using
         # something like mpirun to run things in parallel. Instead, we use the
         # os module to grab the parent id and send that the termination signal,
-        # which # is also passed on to all child processes.
+        # which is also passed on to all child processes.
         # This command also doesn not work on windows, so I need to address this
         # as well.
         if operating_system != "Windows":
