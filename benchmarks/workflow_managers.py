@@ -1,163 +1,153 @@
 # -*- coding: utf-8 -*-
 
-# -----------------------------------------------------------------------------
-
 """
-This tests workflow orchestration! Don't confuse this timetest with Executors.
-This code is messy at the moment, but will become much cleaner when I establish
-a WorkFlow class.
+This script tests workflow orchestration -- that is, the submission of workflows
+to arbitrary resources. For now, the benchmark looks at a `workflow.run()` which
+does nothing (using `pass`). We compare the following:
+    - a function written in python
+    - a workflow written with Simmate and ran locally
+
+These benchmarks have not been added yet due to extra setup required:
+    - a workflow written with Simmate and ran through Prefect Cloud + local Agent
+    - a workflow written in FireWorks and ran through a MongoDB Cloud + local Worker
 """
 
-# -----------------------------------------------------------------------------
+import pandas
+from timeit import default_timer as time
 
 # the number of dummy tasks to run in serial and number of total trials
 ntasks_range = range(1, 16, 2)
 ntrials = 50
 
+
+def run_trials(fxn, ntrials):
+    trial_times = []
+    for x in range(ntrials):
+        start = time()
+        fxn()
+        stop = time()
+        trial_times.append(stop - start)
+    return trial_times
+
+
+def write_to_csv(times, name):
+    df = pandas.DataFrame(times).transpose()
+    df.columns = [f"ntasks_{i}" for i in ntasks_range]
+    df.to_csv(f"{name}_times.csv")
+
+
 # -----------------------------------------------------------------------------
 
-# No Manager
+# a function written in python with no manager
+
 nomanager_times = []
 for ntasks in ntasks_range:
 
-    from pymatdisc.test.tasks import dummy
-
+    # build the dummy workflow that simply `passes` N times
     def flow_dummy():
         for n in range(ntasks):
-            dummy()
+            pass
 
     # now run the time test
-    from timeit import default_timer as time
-
-    trial_times = []
-    for x in range(ntrials):
-        # start the timer
-        start = time()
-        # run the flow locally
-        flow_dummy()
-        # stop the timer
-        stop = time()
-        # add time to db
-        trial_times.append(stop - start)
-
+    trial_times = run_trials(flow_dummy, ntrials)
     nomanager_times.append(trial_times)
 
-import pandas
-
-df_prefect = pandas.DataFrame(nomanager_times).transpose()
-df_prefect.columns = ["ntasks_{}".format(i) for i in ntasks_range]
-df_prefect.to_csv("nomanager_times.csv")
+write_to_csv(nomanager_times, name="nomanager")
 
 # -----------------------------------------------------------------------------
 
-# Prefect Local Testing (no local or cloud server)
-prefect_local_times = []
+# a workflow written with Simmate and ran locally
+
+from simmate.workflow_engine.workflow import Workflow, task
+
+simmate_local_times = []
 for ntasks in ntasks_range:
 
-    from prefect import Flow
-    from pymatdisc.test.tasks import dummy_task
+    # build the dummy workflow that simply `passes` N times
+    @task
+    def dummy_task():
+        pass
 
-    # flow = Flow("dummy-flow", tasks=[dummy_task]*ntasks) # this doesn't work. it only makes one task...
-    with Flow("dummy-flow") as flow:
+    with Workflow("dummy-flow") as flow:
         for n in range(ntasks):
             dummy_task()
 
     # now run the time test
-    from timeit import default_timer as time
+    trial_times = run_trials(flow.run, ntrials)
+    simmate_local_times.append(trial_times)
 
-    trial_times = []
-    for x in range(ntrials):
-        # start the timer
-        start = time()
-        # run the flow locally
-        flow.run()
-        # stop the timer
-        stop = time()
-        # add time to db
-        trial_times.append(stop - start)
-
-    prefect_local_times.append(trial_times)
-
-import pandas
-
-df_prefect = pandas.DataFrame(prefect_local_times).transpose()
-df_prefect.columns = ["ntasks_{}".format(i) for i in ntasks_range]
-df_prefect.to_csv("prefect_local_times.csv")
+write_to_csv(simmate_local_times, name="simmate_local")
 
 # -----------------------------------------------------------------------------
 
-# FireWorks Testing (MongoDB server)
-fireworks_times = []
-for ntasks in ntasks_range:
+# a workflow written with Simmate and ran through Prefect Cloud + local Agent
 
-    # Connect to launchpad database
-    from fireworks import LaunchPad
+# TODO
 
-    launchpad = LaunchPad.from_file("my_launchpad.yaml")
+# -----------------------------------------------------------------------------
 
-    # Establish the benchmark workflow for Dummy runs
-    from fireworks import Firework, Workflow
-    from pymatdisc.test.tasks import DummyTask
+# a workflow written in FireWorks and ran through a MongoDB Cloud + local Worker
 
-    # create the FireWorks and Workflow
-    fireworks = [Firework(DummyTask(), name="dummy") for n in range(ntasks)]
+# from fireworks.core.rocket_launcher import rapidfire
+# from fireworks import LaunchPad, FiretaskBase, Firework, Workflow
 
-    # create the FireWorks' links (for serial execution)
-    fireworks_links = {}
-    for i, fw in enumerate(fireworks[:-1]):
-        fireworks_links.update({fw: [fireworks[i + 1]]})
+# # BUG: This may need to be defined in a different module
+# from fireworks.utilities.fw_utilities import explicit_serialize
+# @explicit_serialize
+# class DummyTask(FiretaskBase):
+#     def run_task(self, fw_spec):
+#         pass
 
-    # create the workflow
-    workflow = Workflow(fireworks, fireworks_links, name="dummy workflow")
+# fireworks_times = []
+# for ntasks in ntasks_range:
 
-    # reset the database before time testing
-    launchpad.reset("", require_password=False)
+#     # Connect to launchpad database
+#     launchpad = LaunchPad.from_file("fireworks_server.yaml")
+#     launchpad.reset("", require_password=False)
 
-    # now run the time test
-    from fireworks.core.rocket_launcher import rapidfire
-    from timeit import default_timer as time
+#     # create the FireWorks and Workflow
+#     fireworks = [Firework(DummyTask(), name="dummy") for n in range(ntasks)]
 
-    trial_times = []
-    for x in range(ntrials):
-        # start the timer
-        start = time()
-        # add the workflow to the database
-        launchpad.add_wf(workflow)
-        # run the workflow locally
-        rapidfire(launchpad)  # strm_lvl='ERROR'
-        # delete the wf so database doesn't overflow
-        launchpad.delete_wf(
-            workflow.fws[0].fw_id
-        )  # I need to delete via a FireWork id...
-        # stop the timer
-        stop = time()
-        # add time to db
-        trial_times.append(stop - start)
+#     # create the FireWorks' links (for serial execution)
+#     fireworks_links = {}
+#     for i, fw in enumerate(fireworks[:-1]):
+#         fireworks_links.update({fw: [fireworks[i + 1]]})
 
-    fireworks_times.append(trial_times)
+#     # create the workflow
+#     workflow = Workflow(fireworks, fireworks_links, name="dummy workflow")
 
-import pandas
+#     # reset the database before time testing
+#     launchpad.reset("", require_password=False)
 
-df_fireworks = pandas.DataFrame(fireworks_times).transpose()
-df_fireworks.columns = ["ntasks_{}".format(i) for i in ntasks_range]
-df_fireworks.to_csv("fireworks_times.csv")
+#     def run_flow():
+#         # add the workflow to the database
+#         launchpad.add_wf(workflow)
+#         # run the workflow locally
+#         rapidfire(launchpad)  # strm_lvl='ERROR'
+#         # delete the wf so database doesn't overflow
+#         launchpad.delete_wf(
+#             workflow.fws[0].fw_id
+#         )  # NOTE: This adds extra time to the benchmark
+
+#     # now run the time test
+#     trial_times = run_trials(run_flow, ntrials)
+#     fireworks_times.append(trial_times)
+
+# write_to_csv(nomanager_times, name="fireworks")
 
 # -----------------------------------------------------------------------------
 
 # PLOT RESULTS
 
-mapping = ["nomanager", "prefect_local", "fireworks"]
+import plotly.graph_objects as go
+from plotly.offline import plot
 
-import pandas
+mapping = ["nomanager", "prefect_local"]  # , "fireworks"
 
 dfs = []
 for name in mapping:
     df = pandas.read_csv("{}_times.csv".format(name), index_col=0)
     dfs.append(df)
-
-
-import plotly.graph_objects as go
-from plotly.offline import plot
 
 composition_strs = ["ntasks_{}".format(i) for i in ntasks_range]
 

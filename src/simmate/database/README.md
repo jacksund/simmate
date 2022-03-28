@@ -135,13 +135,14 @@ An example query with conditional filters:
 ``` python
 MITStaticEnergy.objects.filter(
     nsites__gte=3,  # greater or equal to 3 sites
-    energy__isnull=False,  # the structure DOES have a energy
+    energy__isnull=False,  # the structure DOES have an energy
     density__range=(1,5),  # density is between 1 and 5
-    elements__contains='"C"',  # the structure includes the element Carbon
+    elements__icontains='"C"',  # the structure includes the element Carbon
+    spacegroup__number=167,  # the spacegroup number is 167
 ).all()
 ```
 
-Note, for the final filtering condition (`elements__contains`), we used some odd quotations: we wrote '"C"' usingquotes inside single quotes. This is not a typo! The quotes ensure we don't accidentally grab Ca, Cs, Ce, Cl, and so on. This is an issue with our filtering logic that we are currently working to fix.
+Note, for the filtering condition `elements__icontains`, we used some odd quotations when querying for carbon: `'"C"'`. This is not a typo! The quotes ensure we don't accidentally grab Ca, Cs, Ce, Cl, and so on. This is an issue when you are using SQLite (the default datbase backend). If you are using Postgres, this line can change to the cleaner version `elements__contains="C"`.
 
 ## Convert data to desired format
 

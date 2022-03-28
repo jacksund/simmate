@@ -4,6 +4,9 @@
 This file establishes the info needed to install simmate via pip and also how to
 upload it to PyPI. This file was copied and editted from the following source:
     https://github.com/pypa/sampleproject
+
+For the details on conda-forge installation see:
+    https://github.com/conda-forge/simmate-feedstock
 """
 
 import os
@@ -15,7 +18,12 @@ import pathlib
 here = pathlib.Path(__file__).parent.resolve()
 
 # Get the long description from the README file
-long_description = (here / "README.md").read_text(encoding="utf-8")
+# long_description = (here / "README.md").read_text(encoding="utf-8")
+# NOTE: I remove the long description and just have users move directly to github
+long_description = (
+    "Please visit our [github page](https://github.com/jacksund/simmate)"
+    " for more information."
+)
 
 
 def get_package_data(base_dir):
@@ -65,7 +73,7 @@ setup(
     name="simmate",
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
-    version="0.0.0.dev18",
+    version="0.0.0",
     # a quick summary and then README
     description="Simmate is a toolbox for computational materials research.",
     long_description=long_description,

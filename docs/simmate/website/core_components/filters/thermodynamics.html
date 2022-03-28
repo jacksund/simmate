@@ -367,16 +367,20 @@
             <span class="n">entry</span><span class="o">.</span><span class="n">formation_energy_per_atom</span> <span class="o">=</span> <span class="n">phase_diagram</span><span class="o">.</span><span class="n">get_form_energy_per_atom</span><span class="p">(</span>
                 <span class="n">entry_pmg</span>
             <span class="p">)</span>
+
         <span class="c1"># Now that we updated our objects, we want to collectively update them</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">bulk_update</span><span class="p">(</span>
-            <span class="n">entries</span><span class="p">,</span>
-            <span class="p">[</span>
+            <span class="n">objs</span><span class="o">=</span><span class="n">entries</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
                 <span class="s2">&quot;energy_above_hull&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;is_stable&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;decomposes_to&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;formation_energy&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;formation_energy_per_atom&quot;</span><span class="p">,</span>
             <span class="p">],</span>
+            <span class="c1"># updating extremely large systems (&gt;3k structures) can cause this</span>
+            <span class="c1"># to time-out and crash. We therefore update in batches of 500</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
@@ -388,7 +392,6 @@
         <span class="p">)</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
 
         <span class="c1"># Now  go through each and run the analysis.</span>
-        <span class="c1"># This takes a long time so we use tqdm to monitor progress</span>
         <span class="c1"># OPTIMIZE: Some systems will be analyzed multiple times. For example,</span>
         <span class="c1"># C would be repeatedly updated through C, C-O, Y-C-F, etc.</span>
         <span class="k">for</span> <span class="n">chemical_system</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">chemical_systems</span><span class="p">):</span>
@@ -396,6 +399,18 @@
                 <span class="bp">cls</span><span class="o">.</span><span class="n">update_chemical_system_stabilities</span><span class="p">(</span><span class="n">chemical_system</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed for </span><span class="si">{</span><span class="n">chemical_system</span><span class="si">}</span><span class="s2"> with error: </span><span class="si">{</span><span class="n">exception</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># BUG: can&#39;t use parallel=True as an input</span>
+        <span class="c1"># Because different systems may need to update a single one at the same</span>
+        <span class="c1"># time, errors will be thrown due to row locking. For example, Y-C and</span>
+        <span class="c1"># Sc-C system might both try to update a C structure at the same time</span>
+        <span class="c1"># and one will throw an error.</span>
+        <span class="c1">#</span>
+        <span class="c1"># dask_batch_submit(</span>
+        <span class="c1">#     function=cls.update_chemical_system_stabilities,</span>
+        <span class="c1">#     args_list=chemical_systems,</span>
+        <span class="c1">#     batch_size=1000,</span>
+        <span class="c1"># )</span>
 </pre></div>
 
         </details>
