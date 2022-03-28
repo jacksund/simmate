@@ -412,17 +412,28 @@
             <span class="c1"># launch the shelltask without waiting for it to complete. Also,</span>
             <span class="c1"># make sure to use common shell commands and to set the working</span>
             <span class="c1"># directory.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Stderr keyword indicates that we should capture the error if one</span>
+            <span class="c1"># occurs so that we can report it to the user.</span>
+            <span class="c1">#</span>
             <span class="c1"># The preexec_fn keyword allows us to properly terminate jobs that</span>
             <span class="c1"># are launched with parallel processes (such as mpirun). This assigns</span>
             <span class="c1"># a parent id to it that we use when killing a job (if an error</span>
             <span class="c1"># handler calls for us to do so). This isn&#39;t possible on Windows though.</span>
-            <span class="c1"># Stderr keyword indicates that we should capture the error if one</span>
-            <span class="c1"># occurs so that we can report it to the user.</span>
+            <span class="c1">#</span>
+            <span class="c1"># OPTIMIZE / BUG: preexec_fn adds about 0.02s overhead to the calculation</span>
+            <span class="c1"># so we may not want to always use it... Instead we could try to only </span>
+            <span class="c1"># use it when the command includes &quot;mpirun&quot;. Though this may introduce</span>
+            <span class="c1"># a bug if another is another parallel command used besides mpirun.</span>
+            <span class="c1"># An example of this might be deepmd which automatically submits</span>
+            <span class="c1"># things in parallel without calling mpirun up-front.</span>
             <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
                 <span class="n">command</span><span class="p">,</span>
                 <span class="n">cwd</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
                 <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">preexec_fn</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">setsid</span><span class="p">,</span>
+                <span class="n">preexec_fn</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span>
+                <span class="c1"># or &quot;mpirun&quot; not in command  # See bug/optimize comment above</span>
+                <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">setsid</span><span class="p">,</span>
                 <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -601,7 +612,7 @@
         <span class="c1"># However this struggles to kill all &quot;child&quot; processes if we are using</span>
         <span class="c1"># something like mpirun to run things in parallel. Instead, we use the</span>
         <span class="c1"># os module to grab the parent id and send that the termination signal,</span>
-        <span class="c1"># which # is also passed on to all child processes.</span>
+        <span class="c1"># which is also passed on to all child processes.</span>
         <span class="c1"># This command also doesn not work on windows, so I need to address this</span>
         <span class="c1"># as well.</span>
         <span class="k">if</span> <span class="n">operating_system</span> <span class="o">!=</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
@@ -1049,17 +1060,28 @@
             <span class="c1"># launch the shelltask without waiting for it to complete. Also,</span>
             <span class="c1"># make sure to use common shell commands and to set the working</span>
             <span class="c1"># directory.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Stderr keyword indicates that we should capture the error if one</span>
+            <span class="c1"># occurs so that we can report it to the user.</span>
+            <span class="c1">#</span>
             <span class="c1"># The preexec_fn keyword allows us to properly terminate jobs that</span>
             <span class="c1"># are launched with parallel processes (such as mpirun). This assigns</span>
             <span class="c1"># a parent id to it that we use when killing a job (if an error</span>
             <span class="c1"># handler calls for us to do so). This isn&#39;t possible on Windows though.</span>
-            <span class="c1"># Stderr keyword indicates that we should capture the error if one</span>
-            <span class="c1"># occurs so that we can report it to the user.</span>
+            <span class="c1">#</span>
+            <span class="c1"># OPTIMIZE / BUG: preexec_fn adds about 0.02s overhead to the calculation</span>
+            <span class="c1"># so we may not want to always use it... Instead we could try to only </span>
+            <span class="c1"># use it when the command includes &quot;mpirun&quot;. Though this may introduce</span>
+            <span class="c1"># a bug if another is another parallel command used besides mpirun.</span>
+            <span class="c1"># An example of this might be deepmd which automatically submits</span>
+            <span class="c1"># things in parallel without calling mpirun up-front.</span>
             <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
                 <span class="n">command</span><span class="p">,</span>
                 <span class="n">cwd</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
                 <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">preexec_fn</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">setsid</span><span class="p">,</span>
+                <span class="n">preexec_fn</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span>
+                <span class="c1"># or &quot;mpirun&quot; not in command  # See bug/optimize comment above</span>
+                <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">setsid</span><span class="p">,</span>
                 <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -1238,7 +1260,7 @@
         <span class="c1"># However this struggles to kill all &quot;child&quot; processes if we are using</span>
         <span class="c1"># something like mpirun to run things in parallel. Instead, we use the</span>
         <span class="c1"># os module to grab the parent id and send that the termination signal,</span>
-        <span class="c1"># which # is also passed on to all child processes.</span>
+        <span class="c1"># which is also passed on to all child processes.</span>
         <span class="c1"># This command also doesn not work on windows, so I need to address this</span>
         <span class="c1"># as well.</span>
         <span class="k">if</span> <span class="n">operating_system</span> <span class="o">!=</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
@@ -1793,17 +1815,28 @@ writing a setup method.</li>
             <span class="c1"># launch the shelltask without waiting for it to complete. Also,</span>
             <span class="c1"># make sure to use common shell commands and to set the working</span>
             <span class="c1"># directory.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Stderr keyword indicates that we should capture the error if one</span>
+            <span class="c1"># occurs so that we can report it to the user.</span>
+            <span class="c1">#</span>
             <span class="c1"># The preexec_fn keyword allows us to properly terminate jobs that</span>
             <span class="c1"># are launched with parallel processes (such as mpirun). This assigns</span>
             <span class="c1"># a parent id to it that we use when killing a job (if an error</span>
             <span class="c1"># handler calls for us to do so). This isn&#39;t possible on Windows though.</span>
-            <span class="c1"># Stderr keyword indicates that we should capture the error if one</span>
-            <span class="c1"># occurs so that we can report it to the user.</span>
+            <span class="c1">#</span>
+            <span class="c1"># OPTIMIZE / BUG: preexec_fn adds about 0.02s overhead to the calculation</span>
+            <span class="c1"># so we may not want to always use it... Instead we could try to only </span>
+            <span class="c1"># use it when the command includes &quot;mpirun&quot;. Though this may introduce</span>
+            <span class="c1"># a bug if another is another parallel command used besides mpirun.</span>
+            <span class="c1"># An example of this might be deepmd which automatically submits</span>
+            <span class="c1"># things in parallel without calling mpirun up-front.</span>
             <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
                 <span class="n">command</span><span class="p">,</span>
                 <span class="n">cwd</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
                 <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">preexec_fn</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">setsid</span><span class="p">,</span>
+                <span class="n">preexec_fn</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span>
+                <span class="c1"># or &quot;mpirun&quot; not in command  # See bug/optimize comment above</span>
+                <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">setsid</span><span class="p">,</span>
                 <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
             <span class="p">)</span>
 

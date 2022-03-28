@@ -202,13 +202,14 @@
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="n">MITStaticEnergy</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
     <span class="n">nsites__gte</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>  <span class="c1"># greater or equal to 3 sites</span>
-    <span class="n">energy__isnull</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># the structure DOES have a energy</span>
+    <span class="n">energy__isnull</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># the structure DOES have an energy</span>
     <span class="n">density__range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>  <span class="c1"># density is between 1 and 5</span>
-    <span class="n">elements__contains</span><span class="o">=</span><span class="s1">&#39;&quot;C&quot;&#39;</span><span class="p">,</span>  <span class="c1"># the structure includes the element Carbon</span>
+    <span class="n">elements__icontains</span><span class="o">=</span><span class="s1">&#39;&quot;C&quot;&#39;</span><span class="p">,</span>  <span class="c1"># the structure includes the element Carbon</span>
+    <span class="n">spacegroup__number</span><span class="o">=</span><span class="mi">167</span><span class="p">,</span>  <span class="c1"># the spacegroup number is 167</span>
 <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </code></pre></div>
 
-<p>Note, for the final filtering condition (<code>elements__contains</code>), we used some odd quotations: we wrote '"C"' usingquotes inside single quotes. This is not a typo! The quotes ensure we don't accidentally grab Ca, Cs, Ce, Cl, and so on. This is an issue with our filtering logic that we are currently working to fix.</p>
+<p>Note, for the filtering condition <code>elements__icontains</code>, we used some odd quotations when querying for carbon: <code>'"C"'</code>. This is not a typo! The quotes ensure we don't accidentally grab Ca, Cs, Ce, Cl, and so on. This is an issue when you are using SQLite (the default datbase backend). If you are using Postgres, this line can change to the cleaner version <code>elements__contains="C"</code>.</p>
 
 <h2 id="convert-data-to-desired-format">Convert data to desired format</h2>
 
