@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.database.base_data_types import DatabaseTable, table_column
-from simmate.utilities import get_chemical_subsystems
+from simmate.utilities import get_chemical_subsystems  # , dask_batch_submit
 
 from pymatgen.analysis.phase_diagram import PDEntry
 from pymatgen.analysis.phase_diagram import PhaseDiagram
@@ -143,16 +143,20 @@ class Thermodynamics(DatabaseTable):
             entry.formation_energy_per_atom = phase_diagram.get_form_energy_per_atom(
                 entry_pmg
             )
+
         # Now that we updated our objects, we want to collectively update them
         cls.objects.bulk_update(
-            entries,
-            [
+            objs=entries,
+            fields=[
                 "energy_above_hull",
                 "is_stable",
                 "decomposes_to",
                 "formation_energy",
                 "formation_energy_per_atom",
             ],
+            # updating extremely large systems (>3k structures) can cause this
+            # to time-out and crash. We therefore update in batches of 500
+            batch_size=500,
         )
 
     @classmethod
@@ -164,7 +168,6 @@ class Thermodynamics(DatabaseTable):
         ).distinct()
 
         # Now  go through each and run the analysis.
-        # This takes a long time so we use tqdm to monitor progress
         # OPTIMIZE: Some systems will be analyzed multiple times. For example,
         # C would be repeatedly updated through C, C-O, Y-C-F, etc.
         for chemical_system in tqdm(chemical_systems):
@@ -172,3 +175,15 @@ class Thermodynamics(DatabaseTable):
                 cls.update_chemical_system_stabilities(chemical_system)
             except ValueError as exception:
                 print(f"Failed for {chemical_system} with error: {exception}")
+
+        # BUG: can't use parallel=True as an input
+        # Because different systems may need to update a single one at the same
+        # time, errors will be thrown due to row locking. For example, Y-C and
+        # Sc-C system might both try to update a C structure at the same time
+        # and one will throw an error.
+        #
+        # dask_batch_submit(
+        #     function=cls.update_chemical_system_stabilities,
+        #     args_list=chemical_systems,
+        #     batch_size=1000,
+        # )

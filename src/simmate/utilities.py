@@ -314,7 +314,7 @@ def dask_batch_submit(
     ----------
     - `function`:
         Function that each kwargs entry should be called with.
-    - `kwargs_list`:
+    - `args_list`:
         A list of parameters that will each be submitted to function via
         function(*args).
     - `batch_size`:
