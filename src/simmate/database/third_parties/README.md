@@ -68,6 +68,7 @@ Alternatives
 
 This module can be viewed as an alternative to and/or an extension of the following codes:
 
+- [MPContribs](https://github.com/materialsproject/MPContribs)
 - [matminer.data_retrieval](https://matminer.readthedocs.io/en/latest/matminer.data_retrieval.html)
 - [pymatgen.ext](https://pymatgen.org/pymatgen.ext.html)
 - [OPTIMADE APIs](http://www.optimade.org/)
