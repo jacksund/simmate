@@ -39,6 +39,10 @@ class TestCalculation(Calculation):
     pass
 
 
+class TestStructureCalculation(Structure, Calculation):
+    pass
+
+
 # Forces is always used with the Structure mix-in
 class TestForces(Structure, Forces):
     pass

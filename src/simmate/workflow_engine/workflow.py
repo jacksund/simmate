@@ -9,8 +9,11 @@ from prefect import Client
 from prefect import Flow as PrefectFlow, Parameter, task, Task
 from prefect.storage import Module as ModuleStorage
 from prefect.utilities.graphql import with_args
+from prefect.backend import FlowRunView, FlowView
 
-from prefect.backend.flow_run import FlowRunView, FlowView, watch_flow_run
+# This import below is used to grab `watch_flow_run`, but we don't grab it directly
+# in order to support "mocking" this function in unit tests
+from prefect.backend import flow_run as flow_run_module
 
 from typing import List
 from simmate.workflow_engine.supervised_staged_shell_task import S3Task
@@ -171,8 +174,6 @@ class Workflow(PrefectFlow):
         # submitted.
         # BUG: Will there be a race condition here? What if the workflow finishes
         # and tries writing to the databse before this is done?
-        # BUG: When registering a calc, will I ever need anything besides id
-        # and structure? What else should I add here?
         register_kwargs = {
             key: kwargs[key] for key in kwargs if key in self.register_kwargs
         }
@@ -198,15 +199,13 @@ class Workflow(PrefectFlow):
         run_cloud() method.
         """
         # If there's no calculation database table in Simmate for this workflow,
-        # just skip this step.
-        if not hasattr(self, "calculation_table"):
-            return
-        # otherwise save/load the calculation to our table
-        calculation = self.calculation_table.from_prefect_id(
-            id=flow_run_id,
-            **kwargs,
-        )
-        return calculation
+        # just skip this step. Otherwise save/load the calculation to our table
+        if self.calculation_table:
+            calculation = self.calculation_table.from_prefect_id(
+                id=flow_run_id,
+                **kwargs,
+            )
+            return calculation
 
     def wait_for_flow_run(self, flow_run_id: str):
         """
@@ -220,7 +219,7 @@ class Workflow(PrefectFlow):
 
         flow_run = FlowRunView.from_flow_run_id(flow_run_id)
 
-        for log in watch_flow_run(flow_run_id):
+        for log in flow_run_module.watch_flow_run(flow_run_id):
             message = f"Flow {flow_run.name}: {log.message}"
             prefect.context.logger.log(log.level, message)
         # Return the final view of the flow run
@@ -256,7 +255,7 @@ class Workflow(PrefectFlow):
                 if hasattr(parameter_value, "as_dict"):
                     parameter_value = parameter_value.as_dict()
                 elif hasattr(parameter_value, "to_dict"):
-                    parameter_value = parameter_value.as_dict()
+                    parameter_value = parameter_value.to_dict()
                 else:
                     parameter_value = cloudpickle.dumps(parameter_value)
             parameters_serialized[parameter_key] = parameter_value

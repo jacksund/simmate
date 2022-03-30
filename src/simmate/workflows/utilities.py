@@ -239,7 +239,6 @@ def load_results_from_directories(
             print("\tSuccessful.")
 
         except:
-
             print("\tFailed.")
 
 
@@ -259,6 +258,9 @@ def get_unique_parameters() -> List[str]:
         for parameter in workflow.parameters():
             if parameter.name not in unique_parameters:
                 unique_parameters.append(parameter.name)
+
+    # for consistency, we sort these alphabetically
+    unique_parameters.sort()
 
     return unique_parameters
 
