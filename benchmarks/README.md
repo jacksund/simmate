@@ -36,7 +36,7 @@ Third-party Data | [mpcontribs](https://github.com/materialsproject/MPContribs) 
 
 There are more comparisons that can be made between this orangization and Simmate, but this table gets to the major analogies between the two.
 
-Also, in addition the Materials Project, there are many other organizations (the AFLOW and AiiDA ecosystems) that have analogous components to those in Simmate. A detailed comparison to each of these is beyond the scope of this page, but overall, we can say that the biggest differences are...
+In addition to the Materials Project, there are many other organizations (the AFLOW and AiiDA ecosystems) that have analogous components to those in Simmate. A detailed comparison to each of these is beyond the scope of this page, but overall, we can say that the biggest differences are...
 
 1. Simmate is an all-in-one package while others break-up their components
     - This is much more beginner-friendly and helps non-coders understand advanced features without jumping between several github repos and api pages.
@@ -50,7 +50,7 @@ Also, in addition the Materials Project, there are many other organizations (the
     - The python ecosystem has grown substanially over time, and we can easily take advantage of new softwares and packages, whereas other ecosystems are often tied to outdated practices or packages.
     - Other ecosystems have built up massive libraries and toolkits, where we are catching up on the diverse set of functionality (though we are catching up quickly!).
     - Because we still have a small user-base, our team will be able to prioritize your work if you post a question or need hands-on helps.
-    - Our test suite is not as encompossing as other ecosystems, but we are slowly building up functionality over time.
+    - Our test suite is not as encompassing as other ecosystems, but we are slowly building up functionality over time.
 
 
 </br></br>
