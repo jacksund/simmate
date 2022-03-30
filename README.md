@@ -54,14 +54,14 @@ Even if you consider yourself an experimentalist and have little-to-no coding ex
 
 <!-- REMOVED FOR NOW: Also, be sure attend [our monthly virtual workshop]() if you need help getting started. -->
 
-At the other end of the spectrum, we provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we opperate under a very different coding philosphy. **Here, usability and readability are our top priortities.** We therefore distribute Simmate as an "all-in-one" package rather than many separate programs. This includes a core material science toolkit, workflow management, database orm, and a website interface. **Simmate also focuses heavily on cloud-based storage**, which enables large scale collaborations and avoids researchers repeating calculations. To learn more about the different design choices made in Simmate compared to competing codes, read through our [comparisons and benchmarks page](https://github.com/jacksund/simmate/tree/main/benchmarks).
+At the other end of the spectrum, we provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we operate under a very different coding philosphy. **Here, usability and readability are our top priorities.** We therefore distribute Simmate as an "all-in-one" package rather than many separate programs. This includes a core material science toolkit, workflow management, database orm, and a website interface. **Simmate also focuses heavily on cloud-based storage**, which enables large scale collaborations and avoids researchers repeating calculations. To learn more about the different design choices made in Simmate compared to competing codes, read through our [comparisons and benchmarks page](https://github.com/jacksund/simmate/tree/main/benchmarks).
 
 
 ## Installation
 
-**Don't panic** if your new to coding and Python. When you're ready, head to our [tutorials](https://github.com/jacksund/simmate/tree/main/tutorials) where we teach you everything from the beginning.
+**Don't panic** if you're new to coding and Python. When you're ready, head to our [tutorials](https://github.com/jacksund/simmate/tree/main/tutorials) where we teach you everything from the beginning.
 
-If you're confortable with Python, you can install Simmate with...
+If you're comfortable with Python, you can install Simmate with...
 ```
 conda install -c conda-forge simmate
 ```
@@ -99,7 +99,7 @@ status = matproj_workflow.run(structure=my_structure)
 ```
 
 
-2. _**A Full-Feature Database.**_ Using all the data on our official site along with your own private data, you can take advantage of Simmate's extremely powerful database that is built off of [Django ORM](https://github.com/django/django). Simmate also brings together third-party databases and their data -- including those like the COD, Materials Project, JARVIS, and others. With so much data, being able to easily download and navigate it is critial:
+2. _**A Full-Feature Database.**_ Using all the data on our official site along with your own private data, you can take advantage of Simmate's extremely powerful database that is built off of [Django ORM](https://github.com/django/django). Simmate also brings together third-party databases and their data -- including those like the COD, Materials Project, JARVIS, and others. With so much data, being able to easily download and navigate it is critical:
 
 ```python
 # Be sure to follow the database tutorial where we build our 
