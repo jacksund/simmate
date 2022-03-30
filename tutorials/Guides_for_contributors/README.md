@@ -99,7 +99,7 @@ pytest
 # Extra notes and tips
 
 ### Searching the source code
-If you changed how a method significantly, you may need to find all places in Simmate that it is used. You can easily search for these using Spyders `Find` window. Use these steps to set up this window:
+If you changed a method significantly, you may need to find all places in Simmate that it is used. You can easily search for these using Spyders `Find` window. Use these steps to set up this window:
 
 1. In Spyder, go to the `View` tab (top of window) > `Panes` > check `Find`
 2. In the top-right window of spyder, you should now see the `Find` option. This will share a window with your `Help` window and `Variable Explorer`
