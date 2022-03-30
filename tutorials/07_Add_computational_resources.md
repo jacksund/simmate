@@ -94,7 +94,7 @@ agent.start()
 
 # --------------------------------------------------------------------------------------
 ```
-8. Test out your cluster by running `simmate workflows run-cloud relaxation_mit POSCAR` in a separate terminal (submit this a bunch if you'd like too). If you'd like to limit how many workflows of a given tag (e.g. "WarWulf" above) run in parallel, set the concurrency limit in Prefect cloud [here](https://cloud.prefect.io/team/flow-concurrency).
+8. Test out your cluster by running `simmate workflows run-cloud relaxation_mit POSCAR` in a separate terminal (submit this a bunch if you'd like to). If you'd like to limit how many workflows of a given tag (e.g. "WarWulf" above) run in parallel, set the concurrency limit in Prefect cloud [here](https://cloud.prefect.io/team/flow-concurrency).
 9. To let others use your cluster, simply add them to your Prefect Cloud and give them an API key. They just need to do the following:
     - set your Prefect backend with the command `prefect backend cloud`
     - tell Prefect your key with the command `prefect auth login --key example_key_h123j2jfk`
