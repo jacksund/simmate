@@ -89,14 +89,14 @@ class Brmix(ErrorHandler):
         elif error_counts["brmix"] == 2 and current_kgamma == True:
             # switch to Monkhorst and turn off Kerker mixing (IMIX=1)
             incar["KGAMMA"] = False
-            incar.pop("IMIX")
+            incar.pop("IMIX", None)
             correction = "removed any IMIX tag and switched KGAMMA to False"
             error_counts["brmix"] += 1
 
         elif error_counts["brmix"] in [2, 3] and current_kgamma == False:
             # switch to Gamma and turn off Kerker mixing (IMIX=1)
             incar["KGAMMA"] = True
-            incar.pop("IMIX")
+            incar.pop("IMIX", None)
             correction = "removed any IMIX tag and switched KGAMMA to True"
             error_counts["brmix"] += 1
 
@@ -128,7 +128,7 @@ class Brmix(ErrorHandler):
             if current_icharg < 10:
                 os.remove(os.path.join(directory, "CHGCAR"))
                 os.remove(os.path.join(directory, "WAVECAR"))
-            correction = "deleted CHGCAR and WAVECAR"
+                correction += " and deleted CHGCAR and WAVECAR"
             # BUG: why doesn't custodian add an attempt here?
             # error_counts["brmix"] += 1
 

@@ -264,6 +264,7 @@ class Incar(dict):
             "ADDGRID",
             "LSORBIT",
             "LNONCOLLINEAR",
+            "KGAMMA",
         )
         float_keys = (
             "EDIFF",
@@ -307,6 +308,8 @@ class Incar(dict):
             "IVDW",
             "ISTART",
             "NELMDL",
+            "IMIX",
+            "ISYM",
         )
 
         # If the value is not a string, then assume we are already in the

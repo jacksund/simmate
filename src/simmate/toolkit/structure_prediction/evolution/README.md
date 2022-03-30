@@ -1,4 +1,10 @@
 
+:warning::warning::warning:
+This module is still at the planning stage and should not be used at the moment.
+:warning::warning::warning:
+
+
+# To-do list
 visualization / plotting / workup
 
 search exits when I hit the structure limit -- I should wait until all submitted structures finish
@@ -22,4 +28,3 @@ update prefect workflow to multistep
 
 multistep workflow have cutoffs as in input parameter...? This would be much 
 easier than making a query - maybe future version can do that.
-

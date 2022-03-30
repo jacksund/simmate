@@ -50,7 +50,8 @@ from simmate.calculators.vasp.database.dynamics import (
     MITDynamicsIonicStep,
 )
 
-from simmate.toolkit.structure_prediction.evolution.database import (
-    EvolutionarySearch,
-    StructureSource,
-)
+# This module is still under early development
+# from simmate.toolkit.structure_prediction.evolution.database import (
+#     EvolutionarySearch,
+#     StructureSource,
+# )
