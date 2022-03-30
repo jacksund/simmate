@@ -73,7 +73,7 @@ class Zpotrf(ErrorHandler):
         if current_icharg < 10:
             os.remove(os.path.join(directory, "CHGCAR"))
             os.remove(os.path.join(directory, "WAVECAR"))
-            correction += "and deleted CHGCAR and WAVECAR"
+            correction += " and deleted CHGCAR and WAVECAR"
 
         # rewrite the INCAR with new settings
         incar.to_file(incar_filename)
