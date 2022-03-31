@@ -11,22 +11,34 @@ Simmate
 
 {% block body %}
 
-<div class="container p-4 bg-light border" id="search-results">
-
-  <!-- Workflow name and descriptoin header -->
-  <section class="pt-5 jumbotron text-center">
-    <div class="container">
-      <h1 class="jumbotron-heading">{{ provider.source }}</h1>
-      <p class="lead text-muted">{{ provider.source_doi }}</p>
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box">
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item"><a href="{% url 'third_parties:home' %}">Third-Parties</a></li>
+          <li class="breadcrumb-item active">{{ provider.get_table_name }}</li>
+        </ol>
+      </div>
+      <h4 class="page-title">Workflow Type</h4>
     </div>
-  </section>
-
-  <!-- Search Form -->
-  {% include "core_components/search_form.html" %}
-
-  <!-- Search Results -->
-  {% include "third_parties/search_results.html" %}
-  
+  </div>
 </div>
+<!-- end page title -->
+
+<!-- Workflow name and descriptoin header -->
+<section class="pt-5 jumbotron text-center">
+  <div class="container">
+    <h1 class="jumbotron-heading">{{ provider.source }}</h1>
+    <p class="lead text-muted">{{ provider.source_doi }}</p>
+  </div>
+</section>
+
+<!-- Search Form -->
+{% include "core_components/search_form.html" %}
+
+<!-- Search Results -->
+{% include "third_parties/search_results.html" %}
 
 {% endblock %}

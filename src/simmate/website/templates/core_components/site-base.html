@@ -35,15 +35,31 @@
 
 <body class="loading" data-layout-color="light" data-layout="detached" data-rightbar-onstart="true">
 
+    {% block preloader %}
+    <!-- Pre-loader -->
+    <div id="preloader">
+        <div id="status">
+            <div class="bouncing-loader">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+    <!-- End Preloader-->
+    {% endblock %}
+
     <!-- The navigation bar is the same for every webpage, and it is stored in this template -->
     {% include "core_components/navbar.html" %}
 
-    <!-- This is the main portion of the webpage, which I put in a single padded row. The sidebar is always present, and the remainder of the page varies. -->
+    <!-- This is the main portion of the webpage. The sidebar and footbar are always present, and the remainder of the page varies. -->
     <div class="container-fluid">
         <div class="wrapper">
             {% include "core_components/sidebar.html" %}
             <div class="content-page">
-                {% block body %}{% endblock %}
+                <div class="container-fluid">
+                    {% block body %}{% endblock %}
+                </div>
                 {% include "core_components/footerbar.html" %}
             </div>
         </div>

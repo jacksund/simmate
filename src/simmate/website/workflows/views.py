@@ -125,6 +125,7 @@ def workflow_run_detail(
         request_kwargs={
             "workflow_type": workflow_type,
             "workflow_name": workflow_name,
+            "workflow_run_id": workflow_run_id,
         },
         template="workflows/detail_run.html",
         context={

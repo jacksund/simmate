@@ -11,26 +11,26 @@ Simmate
 
 {% block body %}
 
-<div class="container p-4 bg-light border" id="search-results">
-
-  <div class="container p-4">
-
-    <!-- Breadcrumb links -->
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'workflows' %}">workflows</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.type %}">{{ workflow.type }}</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.type workflow.name_short %}">
-            {{ workflow.name_short }}</a></li>
-        <li class="breadcrumb-item active">{{ calculation.id }}</li>
-      </ol>
-    </nav>
-    
-    <!-- Build views for the table entry's data -->
-    {% include "core_components/table_entry.html" %}
-
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box">
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item"><a href="{% url 'workflows' %}">workflows</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.type %}">{{ workflow.type }}</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.type workflow.name_short %}">
+              {{ workflow.name_short }}</a></li>
+          <li class="breadcrumb-item active">{{ calculation.id }}</li>
+        </ol>
+      </div>
+      <h4 class="page-title">Entry Data</h4>
+    </div>
   </div>
-
 </div>
+<!-- end page title -->
+
+<!-- Build views for the table entry's data -->
+{% include "core_components/table_entry.html" %}
 
 {% endblock %}
