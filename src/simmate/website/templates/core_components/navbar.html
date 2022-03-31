@@ -1,14 +1,14 @@
-<!-- Topbar Start -->
+{% load static %}
 <div class="navbar-custom topnav-navbar">
     <div class="container-fluid">
 
         <!-- LOGO -->
         <a href="{% url 'home' %}" class="topnav-logo">
             <span class="topnav-logo-lg">
-                <img src="/static/images/simmate-logo.svg" alt="" height="36">
+                <img src="{% static 'images/simmate-logo.svg' %}" alt="" height="36">
             </span>
             <span class="topnav-logo-sm">
-                <img src="/static/images/simmate-icon.svg" alt="" height="36">
+                <img src="{% static 'images/simmate-icon.svg' %}" alt="" height="36">
             </span>
         </a>
 
@@ -25,19 +25,19 @@
                         <div class="row g-0">
                             <div class="col">
                                 <a class="dropdown-icon-item" href="https://github.com/jacksund/simmate" target="_blank">
-                                    <img src="static/images/github-icon.svg" alt="github" style="height:36px">
+                                    <img src="{% static 'images/github-icon.svg' %}" alt="github" style="height:36px">
                                     <span><b>GitHub</b></span>
                                 </a>
                             </div>
                             <div class="col">
                                 <a class="dropdown-icon-item" href="https://jacksund.github.io/simmate/simmate.html" target="_blank">
-                                    <img src="static/images/simmate-icon.svg" alt="apidocs" style="height:36px"> 
+                                    <img src="{% static 'images/simmate-icon.svg' %}" alt="apidocs" style="height:36px"> 
                                     <span><b>API Docs</b></span>
                                 </a>
                             </div>
                             <div class="col">
                                 <a class="dropdown-icon-item" href="https://docs.djangoproject.com/en/4.0/" target="_blank">
-                                    <img src="static/images/django-icon.svg" alt="django" style="height:36px">
+                                    <img src="{% static 'images/django-icon.svg' %}" alt="django" style="height:36px">
                                     <span><b>Django</b></span>
                                 </a>
                             </div>
@@ -46,19 +46,19 @@
                         <div class="row g-0">
                             <div class="col">
                                 <a class="dropdown-icon-item" href="https://cloud.prefect.io/" target="_blank">
-                                    <img src="static/images/prefect-icon.svg" alt="prefect" style="height:36px">
+                                    <img src="{% static 'images/prefect-icon.svg' %}" alt="prefect" style="height:36px">
                                     <span><b>Prefect</b></span>
                                 </a>
                             </div>
                             <div class="col">
                                 <a class="dropdown-icon-item" href="https://docs.dask.org/en/stable/futures.html" target="_blank">
-                                    <img src="static/images/dask-icon.svg" alt="dask" style="height:40px">
+                                    <img src="{% static 'images/dask-icon.svg' %}" alt="dask" style="height:40px">
                                     <span><b>Dask</b></span>
                                 </a>
                             </div>
                             <div class="col">
                                 <a class="dropdown-icon-item" href="https://cloud.digitalocean.com/" target="_blank">
-                                    <img src="static/images/digitalocean-icon.svg" alt="digitalocean" style="height:36px">
+                                    <img src="{% static 'images/digitalocean-icon.svg' %}" alt="digitalocean" style="height:36px">
                                     <span><b>DigitalOcean</b></span>
                                 </a>
                             </div>
@@ -161,4 +161,3 @@
         </a>
     </div>
 </div>
-<!-- end Topbar -->

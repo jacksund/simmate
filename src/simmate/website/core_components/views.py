@@ -18,7 +18,7 @@ def symmetry(request):
     return render_from_table(
         request=request,
         template="core_components/symmetry.html",
-        context={"active_tab_id": "extras"},
+        context={},
         table=Spacegroup,
         view_type="list",
         primary_key_field="number",
@@ -33,7 +33,7 @@ def spacegroup(
         request=request,
         request_kwargs={"spacegroup_number": spacegroup_number},
         template="core_components/spacegroup.html",
-        context={"active_tab_id": "extras"},
+        context={},
         table=Spacegroup,
         view_type="retrieve",
         primary_key_field="number",

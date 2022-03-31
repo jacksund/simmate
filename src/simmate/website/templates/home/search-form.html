@@ -1,23 +1,22 @@
-
 <!-- Workflow name and descriptoin header -->
 <section class="pt-5 jumbotron text-center">
-  <div class="container">
-    <h1 class="jumbotron-heading">Searching Third-Party Databases</h1>
-    <p class="lead text-muted">Explore some of the most popular material databases and immediately jump to the provider's website for more data</p>
-  </div>
+    <div class="container">
+        <h1 class="jumbotron-heading">Searching Third-Party Databases</h1>
+        <p class="lead text-muted">Explore some of the most popular material databases and immediately jump to the
+            provider's website for more data</p>
+    </div>
 </section>
 
 <div class="container p-4">
     <form action="{% url 'home' %}#search-results" method="post">
         {% csrf_token %}
 
-        <!-- 
-     To customize the order of fields as well as how they render, we manually
+        <!-- To customize the order of fields as well as how they render, we manually
      write out this form. If I were to change anything for the form, I would
      need to look at the formatting here again. To gauge what the form should
      look like (without Bootstrap), this line is all you need:
-     {{ chemical_system_form }}
-     -->
+     { chemical_system_form } -->
+
 
         {{ chemical_system_form.non_field_errors }}
         <div class="fieldWrapper">
@@ -79,43 +78,5 @@
         <button class="btn btn-outline-success" type="submit">Search</button>
 
     </form>
-
-
-    <!--
-<div class="input-group mb-3">
-    <select class="selectpicker" data-live-search="true" data-width="auto" data-size="15" data-style="btn-primary">
-      <optgroup label="Composition">
-        <option>Number of Sites</option>
-        <option>Number of Elements</option>
-        <option data-subtext="Li-Co-O">Chemical System</option>
-        <option data-subtext="Li1 Co1 O2">Full Formula</option>
-        <option data-subtext="LiCoO2">Reduced Formula</option>
-        <option data-subtext="ABC2">Anonymous Formula</option>
-      </optgroup>
-      <optgroup label="Symmetry">
-        <option>Spacegroup Number</option>
-        <option>Prototype Name</option>
-      </optgroup>
-      <optgroup label="Structural Properties">
-        <option data-subtext="g/cm^3">Density</option>
-        <option data-subtext="cm^3/mol">Molar Volume</option>
-      </optgroup>
-    </select>
-</div>
-<div class="input-group mb-3">
-    <select class="selectpicker" data-live-search="true" data-width="auto" data-size="15" data-style="btn-primary">
-        <optgroup label="General">
-            <option>is exactly</option>
-            <option data-subtext="(exists)">is available</option>
-            <option data-subtext="(word searches only)">contains</option>
-        </optgroup>
-        <optgroup label="Numerical Comparisons">
-            <option>is greater than</option>
-            <option>is less than</option>
-            <option>is between</option>
-        </optgroup>
-    </select>
-</div>
--->
 
 </div>

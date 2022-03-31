@@ -21,10 +21,7 @@ def providers_all(request):
     }
 
     # now let's put the data and template together to send the user
-    context = {
-        "active_tab_id": "third_parties",
-        "workflows_metadata": workflows_metadata,
-    }
+    context = {"workflows_metadata": workflows_metadata}
     template = "third_parties/providers_all.html"
     return render(request, template, context)
 
@@ -38,7 +35,7 @@ def provider(request, provider_name: str):
     return render_from_table(
         request=request,
         template="third_parties/provider.html",
-        context={"active_tab_id": "third_parties", "provider": provider_table},
+        context={"provider": provider_table},
         table=provider_table,
         view_type="list",
     )
@@ -61,7 +58,7 @@ def entry_detail(
             "entry_id": entry_id,
         },
         template="third_parties/entry_detail.html",
-        context={"active_tab_id": "extras"},
+        context={},
         table=provider_table,
         view_type="retrieve",
         primary_key_url="entry_id",

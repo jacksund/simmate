@@ -23,10 +23,7 @@ def register(request):
     else:
         usercreation_form = UserCreationForm()
 
-    context = {
-        "usercreation_form": usercreation_form,
-        "active_tab_id": "profile",
-    }
+    context = {"usercreation_form": usercreation_form}
     template = "registration/register.html"
     return render(request, template, context)
 
@@ -36,13 +33,13 @@ def profile(request):
     # !!! For future reference, you can grab user-associated data via...
     # data = request.user.relateddata.all()
 
-    context = {"active_tab_id": "profile"}
+    context = {}
     template = "registration/profile.html"
     return render(request, template, context)
 
 
 def loginstatus(request):
-    context = {"active_tab_id": "profile"}  # we just want the premade template
+    context = {}
     template = "registration/loginstatus.html"
     return render(request, template, context)
 
