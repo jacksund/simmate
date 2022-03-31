@@ -30,6 +30,21 @@ For options 1 and 2, just send us an email at `simmate.team@gmail.com`.
 For option 3, we have [a guide for setting a server up on DigitalOcean](https://github.com/jacksund/simmate/tree/main/.do). In addition to this guide, make sure you complete the base simmate tutorials -- and pay particular attention to the tutorials on [setting up a cloud database](https://github.com/jacksund/simmate/blob/main/tutorials/06_Use_a_cloud_database.md) and [setting up computational resources](https://github.com/jacksund/simmate/blob/main/tutorials/07_Add_computational_resources.md).
 
 
+## CSS and JS assets
+
+Simmate does not distribute the majority of source CSS and JavaScript files because we use assets from a third-party vendor and redistribution is not allowed under their licensing. Specifically, we use the [Hyper theme](https://themes.getbootstrap.com/product/hyper-responsive-admin-dashboard-template/) from the [CoderThemes team](https://coderthemes.com/). Using the subpages and guides available on their [Modern Dashboard template](https://coderthemes.com/hyper/modern/index.html), you'll be able to contribute to Simmate's website without needing to access any of the assets. Within our templates, you'll note we always load assets from a Simmate CDN:
+
+``` html
+<!-- How an asset is normally loaded when distributed with source code -->
+<link href="assets/css/vendor/fullcalendar.min.css" rel="stylesheet" type="text/css" />
+
+<!-- How assets are loaded for Simmate using our CDN -->
+<link href="https://archives.simmate.org/assets/fullcalendar.min.css" rel="stylesheet" type="text/css" />
+```
+
+If you ever need to alter the CSS or JS, please reach out to our team so we can discuss the best way to approach this.
+
+
 ## The REST API
 
 **This is only for experts! If you are trying to pull data from Simmate, then you should instead  use our python client that is introduced in [the database tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md). Grabbing data directly from our REST API is really only for teams that can't use python or Simmate's code but still want to pull data. Also note that grabbing data via our REST API is heavily throttled, so this is not a good way to grab large amounts of data.**

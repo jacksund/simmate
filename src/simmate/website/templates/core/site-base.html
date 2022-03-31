@@ -15,7 +15,7 @@
 
 </head>
 
-<body>
+<body class="loading" data-layout-color="light" data-layout="detached" data-rightbar-onstart="true">
 
     <!-- The navigation bar is the same for every webpage, and it is stored in this template -->
     {% include "core/navbar.html" %}
@@ -36,7 +36,6 @@
 
     <!-- Sometimes I need to load extra javascript at the bottom of the page -->
     {% block extrafooter %}{% endblock %}
-
 
 </body>
 

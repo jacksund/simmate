@@ -1,91 +1,164 @@
-<!-- This is the collapsable header w. contact information. Not showing at start -->
-<div class="bg-light collapse" id="navbarHeader">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-8 col-md-7 py-4">
-                <h4 class="text-primary">Welcome to Simmate!</h4>
-                <p class="text-muted">
-                    </br>
-                    The Simulated Materials Ecosystem (<b>Simmate</b>) is a toolbox and framework for materials science
-                    research. It lets you explore various crystal databases, predict new materials, and quickly
-                    calculate properties -- electronic, elastic, thermodynamic, and more.
-                    </br> </br>
-                    All our software is free and open-source, so making an account is 100% optional. If you'd like to
-                    download Simmate's framework and access some advanced tools, take a look at <a
-                        href="https://github.com/jacksund/simmate" target="_blank">our github page</a>.
-                </p>
-            </div>
-            <div class="col-sm-4 offset-md-1 py-4">
-                <h4 class="text-primary">Contact</h4>
-                <ul class="list-unstyled">
-                    <li><a href="#">simmate.team@gmail.com</a></li>
-                    <li><a href="#">jacksund@live.unc.edu</a></li>
-                    <li><a href="#">scw@live.unc.edu</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Topbar Start -->
+<div class="navbar-custom topnav-navbar">
+    <div class="container-fluid">
 
-<!-- Add navigation bar that sticks at the top when scrolling -->
-<nav class="navbar navbar-expand-sm sticky-top shadow navbar-light bg-light">
-
-    <div class="container">
-
-        <!-- Add brandname w. link -->
-        <a class="navbar-brand" href="{% url 'home' %}">
-            <img src="/static/images/simmate-logo.svg" height="30" alt="">
+        <!-- LOGO -->
+        <a href="{% url 'home' %}" class="topnav-logo">
+            <span class="topnav-logo-lg">
+                <img src="/static/images/simmate-logo.svg" alt="" height="36">
+            </span>
+            <span class="topnav-logo-sm">
+                <img src="/static/images/simmate-icon.svg" alt="" height="36">
+            </span>
         </a>
 
-        <!-- Setup collapse button for when screen is small-->
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <ul class="list-unstyled topbar-menu float-end mb-0">
 
-        <!-- Setup collapsable links -->
-        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <li class="dropdown notification-list d-none d-sm-inline-block">
+                <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button"
+                    aria-haspopup="false" aria-expanded="false">
+                    <i class="dripicons-view-apps noti-icon"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg p-0">
 
-            <!-- start list of links -->
-            <ul class="navbar-nav ms-auto">
+                    <div class="p-2">
+                        <div class="row g-0">
+                            <div class="col">
+                                <a class="dropdown-icon-item" href="https://github.com/jacksund/simmate" target="_blank">
+                                    <img src="static/images/github-icon.svg" alt="github" style="height:36px">
+                                    <span><b>GitHub</b></span>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="dropdown-icon-item" href="https://jacksund.github.io/simmate/simmate.html" target="_blank">
+                                    <img src="static/images/simmate-icon.svg" alt="apidocs" style="height:36px"> 
+                                    <span><b>API Docs</b></span>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="dropdown-icon-item" href="https://docs.djangoproject.com/en/4.0/" target="_blank">
+                                    <img src="static/images/django-icon.svg" alt="django" style="height:36px">
+                                    <span><b>Django</b></span>
+                                </a>
+                            </div>
+                        </div>
 
-                <!-- Links shown will depend on whether the user is signed in or not -->
-                {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'profile' %}">
-                        Profile
+                        <div class="row g-0">
+                            <div class="col">
+                                <a class="dropdown-icon-item" href="https://cloud.prefect.io/" target="_blank">
+                                    <img src="static/images/prefect-icon.svg" alt="prefect" style="height:36px">
+                                    <span><b>Prefect</b></span>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="dropdown-icon-item" href="https://docs.dask.org/en/stable/futures.html" target="_blank">
+                                    <img src="static/images/dask-icon.svg" alt="dask" style="height:40px">
+                                    <span><b>Dask</b></span>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="dropdown-icon-item" href="https://cloud.digitalocean.com/" target="_blank">
+                                    <img src="static/images/digitalocean-icon.svg" alt="digitalocean" style="height:36px">
+                                    <span><b>DigitalOcean</b></span>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+
+            <!-- start Account Login -->
+            {% if user.is_authenticated %}
+            <li class="dropdown notification-list">
+                <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown"
+                    id="topbar-userdrop" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                    <span class="account-user-avatar">
+                        <img src="/static/images/simmate-icon.svg" alt="user-image" class="rounded-circle">
+                    </span>
+
+                    <span>
+                        <span class="account-user-name">{{ user.username }}</span>
+                        <span class="account-position">{{ user.email }}</span>
+                    </span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown"
+                    aria-labelledby="topbar-userdrop">
+
+                    <!-- item-->
+                    <a href="{% url 'profile' %}" class="dropdown-item notify-item">
+                        <i class="mdi mdi-account-circle me-1"></i>
+                        <span>My Account</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">
-                        Logout
-                    </a>
-                </li>
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">
-                        Login
-                    </a>
-                </li>
-                <!-- This is removed until we officially release the website
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">
-                        Register
-                    </a>
-                </li>
-                -->
-                {% endif %}
 
-                <!-- These links will always be shown, regardless of login stats -->
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#navbarHeader" role="button">
-                        About
+                    <!-- item-->
+                    <a href="#" class="dropdown-item notify-item">
+                        <i class="mdi mdi-account-edit me-1"></i>
+                        <span>Settings</span>
                     </a>
-                </li>
 
-            </ul>
+                    <!-- item-->
+                    <a href="#" class="dropdown-item notify-item">
+                        <i class="mdi mdi-email me-1"></i>
+                        <span>Contact Us</span>
+                    </a>
 
-        </div>
+                    <!-- item-->
+                    <a href="{% url 'logout' %}" class="dropdown-item notify-item">
+                        <i class="mdi mdi-logout me-1"></i>
+                        <span>Logout</span>
+                    </a>
 
+                </div>
+            </li>
+            {% else %}
+            <li class="dropdown notification-list">
+                <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown"
+                    id="topbar-userdrop" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                    <span class="account-user-avatar">
+                        <img src="/static/images/simmate-icon.svg" alt="user-image" class="rounded-circle">
+                    </span>
+
+                    <span>
+                        <span class="account-user-name">Anonymous</span>
+                        <span class="account-position">exploring w/o an account</span>
+                    </span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown"
+                    aria-labelledby="topbar-userdrop">
+
+                    <!-- item-->
+                    <a href="{% url 'login' %}" class="dropdown-item notify-item">
+                        <i class="mdi mdi-account-circle me-1"></i>
+                        <span>Sign In</span>
+                    </a>
+
+                    <!-- item-->
+                    <a href="{% url 'register' %}" class="dropdown-item notify-item">
+                        <i class="mdi mdi-account-plus me-1"></i>
+                        <span>Create Account</span>
+                    </a>
+
+                    <!-- item-->
+                    <a href="#" class="dropdown-item notify-item">
+                        <i class="mdi mdi-email me-1"></i>
+                        <span>Contact Us</span>
+                    </a>
+
+                </div>
+            </li>
+            {% endif %}
+            <!-- end Account Login -->
+
+        </ul>
+        <a class="button-menu-mobile disable-btn">
+            <div class="lines">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </a>
     </div>
-
-</nav>
+</div>
+<!-- end Topbar -->
