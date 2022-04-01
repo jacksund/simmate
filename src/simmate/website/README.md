@@ -119,6 +119,19 @@ Note that we specify our conditions by adding a question mark (`?`) at the end o
 Note, our python client for accessing data is MUCH more powerful for filtering through results, so we recommend accessing data using the `simmate.database` module in complex/advanced cases.
 
 
+### Paginating results
+
+To protect our servers from overuse, Simmate currently returns a maximum of 12 results at a time. Pagination is handled automitically using the `page=...` keyword in the URL. In the HTML, API, and JSON views, you should always have the link to the next page of results available. For example in the JSON view, the returned data includes `next` and `previous` URLs.
+
+
+### Ordering results
+
+For API and JSON formats, you can manually set the ordering of returned data by adding `ordering=example_column` to your URL. You can also reverse the ordering with `ordering=-example_column` (note the `-` symbol before the column name). For example:
+
+```
+http://simmate.org/third-parties/MatProjStructure/?ordering=density_atomic
+```
+
 ### The API for experts
 
 We build Simmate's REST API using the [django-rest-framework](https://www.django-rest-framework.org/) python package, and implement filtering using [django-filter](https://django-filter.readthedocs.io/en/stable/). 

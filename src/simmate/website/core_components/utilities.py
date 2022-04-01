@@ -55,7 +55,7 @@ class SimmateAPIView(GenericAPIView):
             else:
                 return Response(serializer.data)
 
-        # otherwise we assume the html format
+        # otherwise we assume the html format.
         else:
             filterset = self.filterset_class(request.GET)
             data = {
@@ -66,6 +66,7 @@ class SimmateAPIView(GenericAPIView):
                 "calculations": serializer.instance,  # return python objs, not dict
                 "ncalculations_matching": queryset.count(),
                 "ncalculations_possible": self.get_queryset().count(),
+                **self.paginator.get_html_context(),
                 **self.extra_context,
             }
             return Response(data)
@@ -136,13 +137,16 @@ def render_from_table(
 
     NewFilterSet = DatabaseTableFilter.from_table(table)
 
-    # for the source dataset, not all tables have a "created_at" column, but
+    # For the source dataset, not all tables have a "created_at" column, but
     # when they do, we want to return results with the most recent additions first
-    if hasattr(table, "created_at"):
-        intial_queryset = table.objects.order_by("-created_at").all()
-    else:
-        intial_queryset = table.objects.order_by(primary_key_field).all()
+    # by default. Ordering can also be overwritten by passing "ordering=..."
+    # to the URL.
+    default_ordering_field = (
+        "-created_at" if hasattr(table, "created_at") else primary_key_field
+    )
+
     # we also want to preload spacegroup for the structure mixin
+    intial_queryset = table.objects.all()
     if hasattr(table, "spacegroup"):
         intial_queryset = intial_queryset.select_related("spacegroup")
 
@@ -159,6 +163,9 @@ def render_from_table(
         # These two are only used for the view_type = "retrieve"
         lookup_url_kwarg = primary_key_url
         lookup_field = primary_key_field
+        # These arguments handle the "ordering" tag passed to the url
+        ordering_fields = "__all__"
+        ordering = [default_ordering_field]
 
     # now pull together the html response
     response = NewViewSet.as_view()(request, **request_kwargs)

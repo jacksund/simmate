@@ -1,0 +1,52 @@
+<ul class="pagination pagination-rounded">
+
+    {% if previous_url %}
+    <li class="paginate_button page-item previous" id="basic-datatable_previous">
+        <a href="{{ previous_url }}" aria-controls="basic-datatable" data-dt-idx="0" tabindex="0" class="page-link"><i
+                class="mdi mdi-chevron-left"></i></a>
+    </li>
+    {% else %}
+    <li class="paginate_button page-item previous disabled" id="basic-datatable_previous">
+        <a href="#" aria-controls="basic-datatable" data-dt-idx="0" tabindex="0" class="page-link">
+            <i class="mdi mdi-chevron-left"></i>
+        </a>
+    </li>
+    {% endif %}
+
+    {% for page_link in page_links %}
+    {% if page_link.is_break %}
+    <li class="paginate_button page-item disabled">
+        <a href="#" aria-controls="basic-datatable" aria-hidden="true" data-dt-idx="{{ page_link.number }}" tabindex="0"
+            class="page-link">
+            <i class="mdi mdi-dots-horizontal"></i></a>
+        </a>
+    </li>
+    {% else %}
+    {% if page_link.is_active %}
+    <li class="paginate_button page-item active">
+        <a href="{{ page_link.url }}" aria-controls="basic-datatable" data-dt-idx="{{ page_link.number }}" tabindex="0"
+            class="page-link">{{ page_link.number }}</a>
+    </li>
+    {% else %}
+    <li class="paginate_button page-item">
+        <a href="{{ page_link.url }}" aria-controls="basic-datatable" data-dt-idx="{{ page_link.number }}" tabindex="0"
+            class="page-link">{{ page_link.number }}</a>
+    </li>
+    {% endif %}
+    {% endif %}
+    {% endfor %}
+
+    {% if next_url %}
+    <li class="paginate_button page-item next" id="basic-datatable_next">
+        <a href="{{ next_url }}" aria-controls="basic-datatable" data-dt-idx="7" tabindex="0" class="page-link">
+            <i class="mdi mdi-chevron-right"></i></a>
+    </li>
+    {% else %}
+    <li class="paginate_button page-item next disabled" id="basic-datatable_next">
+        <a href="#" aria-controls="basic-datatable" data-dt-idx="0" tabindex="0" class="page-link">
+            <i class="mdi mdi-chevron-right"></i></a>
+        </a>
+    </li>
+    {% endif %}
+
+</ul>
