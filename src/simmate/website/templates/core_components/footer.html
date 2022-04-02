@@ -1,0 +1,26 @@
+<!-- bundle -->
+<script src="https://archives.simmate.org/assets/js/vendor.min.js"></script>
+<script src="https://archives.simmate.org/assets/js/app.min.js"></script>
+
+<!-- Load Javascript for Slider -->
+<script src="https://archives.simmate.org/assets/js/vendor/ion.rangeSlider.min.js"></script>
+<script src="https://archives.simmate.org/assets/js/ui/component.range-slider.js"></script>
+
+
+<!-- This script removes extra fields from API forms on GET method. 
+  Code is from https://stackoverflow.com/questions/5904437/
+  Where I found this link from https://stackoverflow.com/questions/46834539/
+  -->
+<script>
+  $(function () {
+    var form = $('form')[0];
+    $(form).submit(function () {
+      $('input, select').each(function () {
+        if ($(this).val().length === 0) {
+          $(this).prop('disabled', true);
+          $(this).next().prop('disabled', true);
+        }
+      });
+    });
+  });
+</script>

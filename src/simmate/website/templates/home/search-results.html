@@ -9,34 +9,24 @@
         {% elif structures %}
         {% load chemical_formula_filter %}
 
-        <div class="alert alert-success d-flex align-items-center p-2" role="alert">
-            <i class="bi bi-check-circle-fill fs-4"></i>
-            <div class="p-3">
-                This table includes <b>{{ structures | length }}</b> out of
-                <b>{{ nstructures_possible }}</b> structures that match your search criteria.
-                <br>
-                <i><small>
-                        Search results are limited to the 50 most stable structures for
-                        each database.
-                        In cases where >50 structures are found, please either
-                        refine your search criteria or use the Simmate's python client to access
-                        all structures (see our <a href="#">Github page</a> for more info).
-                    </small></i>
-            </div>
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading"><i class="dripicons-checkmark me-2"></i>This table includes
+                {{ structures | length }} out of {{ nstructures_possible }} structures that
+                match your search criteria.</h4>
+            <p>Search results are limited to the 50 most stable structures for
+                each database.
+                In cases where >50 structures are found, please either
+                refine your search criteria or use the Simmate's <a
+                    href="https://jacksund.github.io/simmate/simmate/database.html">python client</a> to access
+                all structures.</p>
         </div>
 
-        <div class="alert alert-warning d-flex align-items-center p-2" role="alert">
-            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
-            <div class="p-3">
-                <b>Don't compare energies across different databases!</b>
-
-                <br>
-                <i><small>
-                        Each database provider uses different settings for their
-                        calculations AND they have a different pool of structures. To learn more
-                        about hull energies, <a href="#">read here</a>.
-                    </small></i>
-            </div>
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading"><i class="dripicons-warning me-2"></i>
+                Don't compare energies across different databases!
+            </h4>
+            <p>Each database provider uses different settings for their
+                calculations AND they have a different pool of structures.</p>
         </div>
 
         <table id="SearchResultsTable" class="table table-striped" style="width:100%">

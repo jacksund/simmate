@@ -86,18 +86,17 @@ def home(request):
 
     # now let's put the data and template together to send the user
     context = {
-        "active_tab_id": "home",
         "chemical_system_form": form,
         "structures": structures,
         "nstructures_possible": nstructures_possible,
     }
-    template = "core/home.html"
+    template = "home/home.html"
     return render(request, template, context)
 
 
 def extras(request):
 
     # now let's put the data and template together to send the user
-    context = {"active_tab_id": "extras"}
-    template = "core/extras.html"
+    context = {}
+    template = "core_components/extras.html"
     return render(request, template, context)

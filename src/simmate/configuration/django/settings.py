@@ -347,9 +347,13 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [],
     # Because we have a massive number of results for different endpoints,
     # we want to set results to be paginated by 25 results per page. This
-    # way we don't have to set a page limit for every individual endpoint
+    # way we don't have to set a page limit for every individual endpoint. Note
+    # I can consider switching to LimitOffsetPagination in the future, which
+    # allows the number of results per page to vary, but I don't do this
+    # for now because there's no easy way to set paginator.max_limit in the
+    # settings here.
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 25,
+    "PAGE_SIZE": 12,
     # To prevent users from querying too much and bringing down our servers,
     # we set a throttle rate on each user. Here, "anon" represents an anonymous
     # user (not signed-in) while signed-in users have access to higher download
@@ -359,9 +363,12 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "100/hour", "user": "1000/day"},
+    "DEFAULT_THROTTLE_RATES": {"anon": "100/hour", "user": "1000/hr"},
     # We use django-filter to automatically handle filtering from a REST url
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter",
+    ],
     # There are multiple ways to render the data, where we default to a nice HTML
     # view, but also support pure JSON or using Django-REST's interactive API
     "DEFAULT_RENDERER_CLASSES": [

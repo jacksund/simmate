@@ -1,0 +1,100 @@
+<!-- 
+
+DataTables CDN downloads 
+
+To update this file, visit https://datatables.net/download/
+Currently we select...
+    Step 1: Bootstrap 5
+    Step 2: Datatables
+    Step 3: FixedHeader, Responsive, Buttons (HTML5 export, JSZip, pdfmake)
+    Step 4: CDN
+
+-->
+<link rel="stylesheet" type="text/css"
+    href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.css" />
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript"
+    src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.js"></script>
+
+
+
+
+<!-- 
+    This code activates the DataTable scripts and formatting for your table.
+    Make sure you include the following for your table to actually work:
+
+    (1) The table should be inside of a div tag that has the following classes: 
+        <div class="table table-striped table-bordered">
+
+    (2) The table itself should be assigned the following class:
+        <table class="datatable">
+
+    (3) The cdn downloads need to be place AFTER the footer (where jQuery is loaded).
+-->
+<script>
+    $(document).ready(function () {
+        $('#SearchResultsTable').DataTable({
+            // Adapt table width with the screensize
+            responsive: true,
+            // This is for objects around table (then B is for buttons)
+            // For help see: https://datatables.net/examples/basic_init/dom.html
+            dom: '<fB<t>lp>',
+            buttons: ['copy', 'csv', 'excel', 'pdf'],
+            // Keep header in view while scrolling
+            fixedHeader: { header: true },
+            // Order by the 4th column, then 3rd, then 5th
+            order: [[3, "asc"], [2, "asc"], [4, "asc"]],
+            // Allow different pagination
+            lengthMenu: [[12, 25, 50, -1], [12, 25, 50, "All"]],
+            // Specify how each column should be aligned.
+            // This doesn't seem to work with Bootstrap though.
+            // columnDefs: [{targets: 3, className: 'text-right'}],
+        });
+    });
+</script>
+
+<!-- Example Code from Hyper
+
+I'll need to  integrate this via... 
+https://datatables.net/examples/server_side/
+
+# HEADER
+<link href="css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+<link href="css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+<link href="css/vendor/buttons.bootstrap5.css" rel="stylesheet" type="text/css" />
+<link href="css/vendor/select.bootstrap5.css" rel="stylesheet" type="text/css" />
+<link href="css/vendor/fixedHeader.bootstrap5.css" rel="stylesheet" type="text/css" />
+<link href="css/vendor/fixedColumns.bootstrap5.css" rel="stylesheet" type="text/css" />
+
+# FOOTER
+<script src="js/vendor/jquery.dataTables.min.js"></script>
+<script src="js/vendor/dataTables.bootstrap5.js"></script>
+<script src="js/vendor/dataTables.responsive.min.js"></script>
+<script src="js/vendor/responsive.bootstrap5.min.js"></script>
+<script src="js/vendor/dataTables.buttons.min.js"></script>
+<script src="js/vendor/buttons.bootstrap5.min.js"></script>
+<script src="js/vendor/buttons.html5.min.js"></script>
+<script src="js/vendor/buttons.flash.min.js"></script>
+<script src="js/vendor/buttons.print.min.js"></script>
+<script src="js/vendor/dataTables.keyTable.min.js"></script>
+<script src="js/vendor/dataTables.select.min.js"></script>
+<script src="js/vendor/fixedColumns.bootstrap5.min.js"></script>
+<script src="js/vendor/fixedHeader.bootstrap5.min.js"></script>
+
+# FOOTER JS
+$(document).ready(function () {
+    "use strict";
+    $("#basic-datatable").DataTable({
+        keys: !0, language: {
+            paginate: {
+                previous: "<i class='mdi mdi-chevron-left'>",
+                next: "<i class='mdi mdi-chevron-right'>"
+            }
+        },
+        drawCallback: function () {
+            $(".dataTables_paginate > .pagination").addClass("pagination-rounded")
+        }
+    });
+-->

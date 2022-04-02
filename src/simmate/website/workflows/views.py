@@ -57,10 +57,7 @@ def workflows_all(request):
     }
 
     # now let's put the data and template together to send the user
-    context = {
-        "active_tab_id": "workflows",
-        "workflows_metadata": workflows_metadata,
-    }
+    context = {"workflows_metadata": workflows_metadata}
     template = "workflows/all.html"
     return render(request, template, context)
 
@@ -74,7 +71,6 @@ def workflows_by_type(request, workflow_type):
 
     # now let's put the data and template together to send the user
     context = {
-        "active_tab_id": "workflows",
         "workflow_type": workflow_type,
         "workflows": workflows,
     }
@@ -105,7 +101,6 @@ def workflow_detail(request, workflow_type, workflow_name):
         request=request,
         template="workflows/detail.html",
         context={
-            "active_tab_id": "workflows",
             "workflow": workflow,
             "flow_id": flow_id,
             "nflows_submitted": nflows_submitted,
@@ -177,7 +172,6 @@ def workflow_submit(
         submission_form = FormClass()
     # now let's put the data and template together to send the user
     context = {
-        "active_tab_id": "workflows",
         "workflow": workflow,
         "submission_form": submission_form,
     }

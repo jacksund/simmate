@@ -1,0 +1,40 @@
+{% extends "core_components/site_base.html" %}
+
+{% block tabtitle %}
+Simmate | 404 error
+{% endblock %}
+
+{% block body %}
+<!-- start page title -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item active">404 Error</li>
+                </ol>
+            </div>
+            <h4 class="page-title">404 Error</h4>
+        </div>
+    </div>
+</div>
+<!-- end page title -->
+
+<div class="row justify-content-center">
+    <div class="col-lg-4">
+        <div class="text-center">
+            <h1 class="text-error mt-4">404</h1>
+            <h4 class="text-uppercase text-danger mt-3">Page Not Found</h4>
+            <p class="text-muted mt-3">
+                It looks like this page or result does not exist. If you believe this is a
+                mistake on our part, please let us know!
+            </p>
+
+            <a class="btn btn-info btn-sm uil-home-alt" href="{% url 'home' %}"> Return Home</a>
+            <a class="btn btn-danger btn-sm uil-github-alt" href="https://github.com/jacksund/simmate/issues"> Report
+                Issue</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -15,6 +15,9 @@ def test_database_table():
     x = TestDatabaseTable(column1=True, column2=3.14)
     x.save()
 
+    # check name
+    assert x.get_table_name() == x.__class__.__name__
+
 
 @pytest.mark.django_db
 def test_create_subclass():

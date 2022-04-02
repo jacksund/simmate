@@ -1,32 +1,34 @@
-{% extends "core/site-base.html" %}
+{% extends "core_components/site_base.html" %}
 
 {% block tabtitle %}
 Simmate
 {% endblock %}
 
 {% block banner %}
-{% include "core/header.html"%}
+{% include "core_components/header.html"%}
 {% endblock %}
 
 
 {% block body %}
 
-<!-- NOTE: for this section to work, be sure to read datatable.html -->
-
-<div class="container p-4 bg-light border" id="search-results">
-
-  <div class="container p-4">
-
-    <!-- Build views for the table entry's data -->
-    {% include "core_components/table_entry.html" %}
-
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box">
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item"><a href="{% url 'third_parties:home' %}">Third-Parties</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'third_parties:provider' calculation.get_table_name %}">{{ calculation.get_table_name }}</a></li>
+          <li class="breadcrumb-item active">{{ calculation.id }}</li>
+        </ol>
+      </div>
+      <h4 class="page-title">Entry Data</h4>
+    </div>
   </div>
-
 </div>
+<!-- end page title -->
 
+<!-- Build views for the table entry's data -->
+{% include "core_components/table_entry.html" %}
 
-{% endblock %}
-
-{% block extrafooter %}
-{% include "core/datatable.html" %}
 {% endblock %}

@@ -1,0 +1,15 @@
+{% extends "core_components/site_base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block body %}
+{% include "home/search-form.html" %}
+{% include "home/search-results.html" %}
+{% endblock %}
+
+
+{% block extrafooter %}
+{% include "core_components/datatable.html" %}
+{% endblock %}

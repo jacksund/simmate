@@ -3,13 +3,13 @@
   {% if calculations %}
   {% load chemical_formula_filter %}
 
-  <div class="alert alert-success d-flex align-items-center p-2" role="alert">
-    <i class="bi bi-check-circle-fill fs-4"></i>
-    <div class="p-3">
-      This table includes <b>{{ calculations | length }}</b> out of <b>{{ ncalculations_matching }}</b> results
-      that match your search criteria. These results were filtered from the <b>{{ ncalculations_possible }}</b>
-      total possible results.
-    </div>
+
+
+  <div class="alert alert-success" role="alert">
+    <i class="dripicons-checkmark me-2"></i>
+    This table includes <b>{{ calculations | length }}</b> out of <b>{{ ncalculations_matching }}</b> results
+    that match your search criteria. These results were filtered from the <b>{{ ncalculations_possible }}</b>
+    total possible results.
   </div>
 
   <table id="SearchResultsTable" class="table table-striped" style="width:100%">

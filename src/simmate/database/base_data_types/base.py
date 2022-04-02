@@ -361,6 +361,15 @@ class DatabaseTable(models.Model):
     """
 
     @classmethod
+    def get_table_name(cls) -> str:
+        """
+        Returns the name of this database table, which will simply match the
+        class name. Using `Table.__name__` is often easier. This method simply
+        makes the name accessible in Django Templates.
+        """
+        return cls.__name__
+
+    @classmethod
     def create_subclass(
         cls,
         name: str,

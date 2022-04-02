@@ -9,6 +9,20 @@
     </h2>
     <div id="collapseCompFilters" class="accordion-collapse collapse" aria-labelledby="headingCompFilters">
         <div class="accordion-body">
+
+            <!-- number of elements
+            <div id="div_id_nelements__range" class="form-group">
+                {{ form.nelements__range.errors }}
+                <label for="{{ form.nelements__range.id_for_label }}" class="">
+                    Number of Elements:
+                </label>
+                <input type="text" name="{{ form.nelements__range.html_name }}" id="{{ form.nelements__range.html_name }}" data-plugin="range-slider" 
+                    data-min="1" data-max="10" data-input-values-separator="," data-max_postfix="+"
+                    data-from="{% if form.nelements__range.value %} {{ form.nelements__range.value.0 }} {% else %} 1 {% endif %}"
+                    data-to="{% if form.nelements__range.value %} {{ form.nelements__range.value.1 }} {% else %} 10 {% endif %}"
+                    data-type="double" data-grid="true">
+            </div>
+            -->
             {{ form.nelements__range | as_crispy_field }}
             {{ form.formula_anonymous | as_crispy_field }}
             {{ form.formula_full | as_crispy_field }}

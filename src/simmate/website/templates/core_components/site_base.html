@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <!-- Indicate which Character Encoding set the browser should use -->
+    <meta charset="utf-8">
+
+    <!--Title of the page (located in the tab header) -->
+    <title>{% block tabtitle %}{% endblock %}</title>
+
+    <!-- Set the icons to use in the tab header -->
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'images/simmate-icon.svg' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/simmate-icon.svg' %}">
+
+    <!-- Set meta data for responsive viewport scaling/size (i.e. phone vs monitor) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="A toolkit and framework for materials science" name="description" />
+    <meta content="The Simmate Team" name="author" />
+
+    <!-- Load CSS -->
+    <link href="https://archives.simmate.org/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://archives.simmate.org/assets/css/app-modern.min.css" rel="stylesheet" type="text/css"
+        id="app-style" />
+
+    <!-- Load Plotly Javascript (this is needed in the header, not the footer!)-->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- Some pages may require extra lines in the header such as loading extra libraries -->
+    {% block extraheader %}{% endblock %}
+
+</head>
+
+<body class="loading" data-layout-color="light" data-layout="detached" data-rightbar-onstart="true">
+
+    {% block preloader %}
+    <!-- Pre-loader -->
+    <div id="preloader">
+        <div id="status">
+            <div class="bouncing-loader">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+    <!-- End Preloader-->
+    {% endblock %}
+
+    <!-- The navigation bar is the same for every webpage, and it is stored in this template -->
+    {% include "core_components/navbar.html" %}
+
+    <!-- This is the main portion of the webpage. The sidebar and footbar are always present, and the remainder of the page varies. -->
+    <div class="container-fluid">
+        <div class="wrapper">
+            {% include "core_components/sidebar.html" %}
+            <div class="content-page">
+                <div class="container-fluid">
+                    {% block body %}{% endblock %}
+                </div>
+                {% include "core_components/footerbar.html" %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Many packages for JS libraries should be loaded last -->
+    {% include "core_components/footer.html" %}
+
+    <!-- Sometimes I need to load extra javascript at the bottom of the page -->
+    {% block extrafooter %}{% endblock %}
+
+</body>
+
+</html>
