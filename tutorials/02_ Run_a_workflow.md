@@ -11,6 +11,7 @@ In this tutorial, you will use the command line to view all available workflows 
     - [Viewing available workflows](#viewing-available-workflows)
     - [Viewing a workflow's settings and inputs](#viewing-a-workflows-settings-and-inputs)
     - [Finally running your workflow!](#finally-running-our-workflow)
+    - [Running a workflow using a settings file](#running-a-workflow-using-settings-file)
     - [Switching to a remote cluster](#switching-to-a-remote-cluster)
     - [Viewing the workflow's results](#viewing-the-workflows-results)
 
@@ -56,10 +57,54 @@ simmate/
             ├── potpaw_GGA
             └── potUSPP_GGA
 ```
-7. View the input files with `simmate workflows setup-only static-energy/mit POSCAR`
-8. Run a workflow with `simmate workflows run static-energy/mit -s POSCAR` (run = configure + schedule + execute + save). This command should be submitted via a SLURM/PBS job script on HPC clusters.
-9. You will see a file named `simmate_summary.yaml` which contains some quick information for you. Other workflows (such as `band-structure` calculations) will also write out plots for you.
-10. While the plots and summary files are nice for quick testing, much more useful information is stored in our database. We will cover how to access your database in a later tutorial (05).
+
+7. With everything configured, there are now three ways you can submit your workflow. Try out each to better understand the differences:
+
+- OPTION 1: Define all settings directly in the command line (best for quick submitting and testing)
+``` bash
+simmate workflows run static-energy/mit -s POSCAR
+
+# OR
+
+simmate workflows run static-energy/mit -s POSCAR --command "mpirun -n 5 vasp_std > vasp.out"
+```
+
+- OPTION 2: Run from a settings file in yaml format (best for complex settings)
+``` yaml
+# In a file named "my_example.yaml".
+# Note, different workflows accept different settings here.
+workflow_name: static-energy/mit
+structure: POSCAR
+command: mpirun -n 5 vasp_std > vasp.out  # OPTIONAL
+directory: my_new_folder  # OPTIONAL
+```
+
+``` bash
+# now run our workflow from the settings file above
+simmate workflows run-yaml my_example.yaml
+```
+
+
+- OPTION 3: Write input files and manually submit (best for using custom settings)
+``` bash
+# This simply writes input files
+simmate workflows setup-only static-energy/mit POSCAR
+
+# access your files in the new directory
+cd MIT_Static_Energy_inputs
+
+# Customize input files as you see fit.
+# For example, you may want to edit INCAR settings
+nano INCAR
+
+# You can then submit VASP manually. Note, this will not use
+# simmate at all! So there is no error handling and no results
+# will be saved to your database.
+vasp_std > vasp.out
+```
+
+8. Once the workflow completes, you will see files named `simmate_metadata.yaml` and `simmate_summary.yaml` which contains some quick information for you. Other workflows (such as `band-structure` calculations) will also write out plots for you.
+9. While the plots and summary files are nice for quick testing, much more useful information is stored in our database. We will cover how to access your database in a later tutorial (05).
 
 <br/><br/>
 
@@ -358,6 +403,33 @@ simmate workflows run static-energy/mit -s POSCAR -c "mpirun -n 4 vasp_std > vas
 
 
 If any errors come up, please let our team know by [posting a question](https://github.com/jacksund/simmate/discussions/categories/q-a). If not, congrats :partying_face: :partying_face: :partying_face: !!! You now know how to run workflows with a single command and understand what Simmate is doing behind the scenes.
+
+<br/> <!-- add empty line -->
+
+## Running a workflow using a settings file
+
+In the last section, you probably noticed that our `simmate workflows run` command was getting extremely long and will therefore be difficult to remember. Instead of writing out this long command every time, we can make a settings file that contains all of this information. Here, we will write our settings into a `YAML` file, which is just a simple text file. The name our settings file doesn't matter, so here we'll just use `my_settings.yaml`. To create this file, complete the following:
+
+``` bash
+nano my_settings.yaml
+```
+
+... and write in the following information ...
+
+``` yaml
+workflow_name: static-energy/mit
+structure: POSCAR
+command: mpirun -n 4 vasp_std > vasp.out  # OPTIONAL
+directory: my_custom_folder  # OPTIONAL
+```
+
+Note that this file contains all of the information that was in our `simmate workflows run` command from above! But now we have it stored in a file that we can read/edit later on if we need to. To submit this file, we simply run...
+
+``` bash
+simmate workflows run-yaml my_settings.yaml
+```
+
+And your workflow will run the same as before! Note, it is entirely up to you whether workflows are ran submit using a yaml file or using the longer command.
 
 <br/> <!-- add empty line -->
 

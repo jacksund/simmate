@@ -1,6 +1,6 @@
 # Installation
 
-In this tutorial, you will learn how to install Simmate with Anaconda. Beginners will also be introduced to the command-line.
+In this tutorial, you will learn how to install Simmate with Anaconda and start up a local server. Beginners will also be introduced to the command-line.
 
 1. [The quick tutorial](#the-quick-tutorial)
 2. [The full tutorial](#the-full-tutorial)
@@ -10,6 +10,7 @@ In this tutorial, you will learn how to install Simmate with Anaconda. Beginners
     - [Switching to the Command-line](#switching-to-the-command-line)
     - [Creating our environment and installing Simmate](#creating-our-environment-and-installing-simmate)
     - [Exploring Simmate's command-line](#exploring-simmates-command-line)
+    - [Starting your local test server](#starting-your-local-test-server)
     - [Extra Resources](#extra-resources)
 
 <br/><br/>
@@ -27,6 +28,11 @@ conda install -n my_env -c conda-forge spyder  # optional but recommended
 conda activate my_env
 ```
 3. Run the `simmate` command to make sure it's installed correctly
+4. For first-time setup, initialize your local database with `simmate database reset`
+5. Run the command `simmate run-server` (and leave this command running)
+6. Go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/) and you'll see you local server!
+
+Note, this server is only accessible on your local computer. For a production-ready server, see our [website documentation](https://jacksund.github.io/simmate/simmate/website.html#running-a-production-ready-server).
 
 <br/><br/>
 
@@ -41,7 +47,7 @@ As you read through our tutorials, we try to explain many of the python terms an
 - `package`: a package is, essentially, a software program written in python.  Simmate is a package.
 - `package manager`: this manages the installation of python and its packages.  It automatically installs the correct version of packages to ensure that different packages are compatible with each other. Anaconda is our package manager.
 - `channel`: python packages are downloaded from a specific channel on the internet. For Simmate, we tell Anaconda to use conda-forge as its main channel.
-- `environment`: python packages are installed into a specific environment on your computer.  Within that environment, all packages are compatible with each other.  A single computer can have many environments.  In this tutorial, "my_env" is the name of our environment and Simmate is installed in it.
+- `environment`: python packages are installed into a specific environment on your computer. An environment is (effectively) a folder containing many installed packages that are each compatible each other. A single computer can have many environments, where you only ever use one at a time.  In this tutorial, "my_env" is the name of our environment and Simmate is installed in it (along with many other packages such as pymatgen).
 - `module`: A python package is made from modules.  Each module provides a related set of functions. For example, "simmate.database" is a module that holds all of the code used to run our database.
 - `IDE`: the program we write and run python code in. Microsoft Word would be an IDE for writing essays. Spyder is our IDE for python. IDE is short for integrated development environment.
 
@@ -197,14 +203,51 @@ Options:
 Commands:
   database         A group of commands for managing your database.
   run-server       This runs a website test server locally for Simmate.
-  start-project    This creates creates a new folder and fills it with an...
+  start-project    This creates a new folder and fills it with an example...
   workflow-engine  A group of commands for starting up Prefect Agents and...
   workflows        A group of commands for running workflows or viewing...
 ```
 
 You can see there are many other commands like `simmate database` and `simmate workflows` that we will explore in other tutorials. 
 
-But we're now ready to start using the code! Spend some time with the extra resources (next section) and then continue on to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md).
+<br/>
+
+## Starting your local test server
+
+On our official website, you are able to explore all results from past workflows that we've ran. Even though you haven't ran any yet, you can do the same thing on your local computer too. All that's required are two simple commands.
+
+First, we need to setup our database. We'll explain what this is doing in the next tutorial, but for now, think of this as building an empty excel spreadsheet that we can later fill with data. This is done with...
+
+``` bash
+# confirm that you want to reset/delete your "old" database when prompted
+simmate database reset
+```
+
+> :bulb: Unless you want to remove all of your data and start from scratch, you'll never have to run that command again.
+
+And then as our second step, we simply tell Simmate to start the server:
+
+``` bash
+simmate run-server
+```
+
+... and after a few seconds, you should see the output ...
+
+``` bash
+Watching for file changes with StatReloader
+April 05, 2022 - 00:06:54
+Django version 4.0.2, using settings 'simmate.configuration.django.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CTRL-BREAK.
+```
+
+Leave this command running in your terminal and open up the link [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your preferred browser (Chrome, Firefox, etc.). You should see what looks like the simmate.org website! This website, however, is running on your local computer and won't contain any data yet. No one can access it outside of your own computer, and as soon as your close your terminal running the `simmate run-server`, this site will stop working too.
+
+If you reaaally wanted to, you could stop going through our tutorials and just interact with your local server. But where Simmate becomes especially powerful is when we switch to a server that accessible through the internet -- that way, you can share results and computational resources with your entire team. To do this, you'll have to keep reading our tutorials! 
+
+Additionally, an important thing to keep in mind is that Simmate is MUCH more powerful when you start interacting with our code -- rather than just using the web interface. By learning to interact with Simmate's code using the command-line and Python, you can quickly submit 1000s of calculations and access advanced functionality that isn't yet available in the interface (and there's a lot of it). Keep this in mind as you continue through our other tutorials! We'll teach you how to interact with our code so that you can take full advantage of Simmate.
+
+As a final note, spend some time with the extra resources (below) and then continue on to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md) where we'll learn how to run workflows.
 
 <br/>
 
