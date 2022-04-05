@@ -30,7 +30,7 @@ if __name__ == "__main__":
             "simmate": "https://github.com/jacksund/simmate/tree/main/src/simmate/"
         },
         footer_text="",
-        logo="https://github.com/jacksund/simmate/blob/main/logo/simmate.svg?raw=true",
+        logo="https://github.com/jacksund/simmate/blob/main/src/simmate/website/static_files/images/simmate-logo.svg?raw=true",
         logo_link="https://github.com/jacksund/simmate",
         math=False,
         search=True,
