@@ -11,7 +11,18 @@ Simmate
 
 {% block body %}
 
-<div class="container p-4 bg-light border">
+<!-- Header -->
+<section class="pt-5 jumbotron text-center">
+  <div class="container">
+    <h1 class="jumbotron-heading">Extras</h1>
+    <p class="lead text-muted">Additional features that Simmate currently supports. Many more features and utilities can also be found on our Github page.</p>
+  </div>
+</section>
+
+<div class="row">
+
+    <!-- REST API card -->
+    <div class="col-md-4">
     <div class="card" style="width: 25rem;">
         <div class="card-body">
             <h5 class="card-title">REST API</h5>
@@ -39,6 +50,8 @@ Simmate
                 View an example!</a>
         </div>
     </div>
+    </div>
+
 </div>
 
 {% endblock %}

@@ -21,7 +21,8 @@ here = pathlib.Path(__file__).parent.resolve()
 # long_description = (here / "README.md").read_text(encoding="utf-8")
 # NOTE: I remove the long description and just have users move directly to github
 long_description = (
-    "Please visit our [github page](https://github.com/jacksund/simmate)"
+    "Please do NOT install Simmate with pip. We recommend conda instead."
+    " Visit our [github page](https://github.com/jacksund/simmate)"
     " for more information."
 )
 
@@ -48,6 +49,7 @@ def get_package_data(base_dir):
         "**/*.csv",
         "**/*.yaml",
         "**/*.html",
+        "**/*.svg",
     ]
     # add the base directory to the start of each query
     # we also add the source directory
@@ -73,7 +75,7 @@ setup(
     name="simmate",
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
-    version="0.0.0",
+    version="0.1.0",
     # a quick summary and then README
     description="Simmate is a toolbox for computational materials research.",
     long_description=long_description,
