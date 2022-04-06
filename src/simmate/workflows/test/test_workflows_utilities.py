@@ -3,6 +3,7 @@
 import os
 import pytest
 
+from simmate.conftest import copy_test_files
 from simmate.workflows.utilities import (
     get_list_of_all_workflows,
     get_list_of_workflows_by_type,
@@ -81,9 +82,15 @@ def test_get_unique_paramters():
 
 
 @pytest.mark.django_db
-def test_load_results_from_directories():
-    directory = os.path.dirname(__file__)
-    load_results_from_directories(base_directory=directory)
+def test_load_results_from_directories(tmpdir):
+
+    copy_test_files(
+        tmpdir,
+        test_directory=__file__,
+        test_folder="",  # copy over the entire folder
+    )
+
+    load_results_from_directories(base_directory=tmpdir)
 
 
 def test_parse_parameters(mocker):
