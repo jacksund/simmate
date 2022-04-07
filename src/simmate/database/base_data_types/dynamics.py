@@ -70,8 +70,8 @@ class DynamicsRun(Structure, Calculation):
         )
         ```
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `name` :
             The prefix name of the subclasses that are output. "DynamicsRun" and
             "DynamicsIonicStep" will be attached to the end of this prefix.
@@ -121,8 +121,8 @@ class DynamicsRun(Structure, Calculation):
         Given a Vasprun object from a finished dynamics run, this will update the
         DynamicsRun table entry and the corresponding DynamicsIonicStep entries.
 
-        Parameters
-        ----------
+        #### Parameters
+
         vasprun :
             The final Vasprun object from the dynamics run outputs.
         corrections :
@@ -225,8 +225,8 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
         This method should NOT be called directly because it is instead used by
         `DynamicsRun.create_subclasses`.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `name` :
             Name of the subclass that is output.
         - `dynamics_run` :

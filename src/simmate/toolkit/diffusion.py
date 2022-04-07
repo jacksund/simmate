@@ -111,8 +111,7 @@ class MigrationImages(list):
         that are overlapping here, the output structure may cause programs
         like VESTA to crash.
 
-        Parameters
-        ----------
+        #### Parameters
 
         - `tolerance`:
             the angle and distance tolerance to consider fractional coordinates
@@ -165,8 +164,7 @@ class MigrationImages(list):
         not called directly. The other classmethods of MigrationImages call
         this for you.
 
-        Parameters
-        ----------
+        #### Parameters
 
         - `pathway_length`:
             The length of the pathway.
@@ -215,8 +213,7 @@ class MigrationImages(list):
         """
         Creates a MigrationImages object from a MigrationHop object
 
-        Parameters
-        ----------
+        #### Parameters
 
         - `migration_hop`:
             The MigrationHop object that should be converted.
@@ -271,8 +268,7 @@ class MigrationImages(list):
         You do not need to specify the diffusing atom(s) as all sites are
         linearly interpolated and then relaxed by IDPP.
 
-        Parameters
-        ----------
+        #### Parameters
 
         - `structure_start`:
             The starting supercell of the diffusion pathway.
@@ -318,8 +314,8 @@ class MigrationImages(list):
         Note, this method just creates a MigrationHop and then uses the
         `from_migration_hop` method to make a MigrationImages object.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `structure`:
             The bulk crystal structure (NOT the supercell).
 
@@ -348,8 +344,7 @@ class MigrationImages(list):
         Given a bulk crystal structure, this will find all symmetrically
         unique pathways and return them as list of MigrationImages objects.
 
-        Parameters
-        ----------
+        #### Parameters
 
         - `structure`:
             The bulk crystal structure (NOT the supercell).

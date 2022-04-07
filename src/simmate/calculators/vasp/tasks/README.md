@@ -1,0 +1,4 @@
+VASP Task Library
+--------------------
+
+This module defines settings for common VASP calculations. It is a fork and refactor of classes used by [PyMatGen](https://github.com/materialsproject/pymatgen/) and [Atomate](https://github.com/hackingmaterials/atomate). Specifically, this is a direct alternative to the [`pymatgen.io.vasp.sets`](https://github.com/materialsproject/pymatgen/blob/master/pymatgen/io/vasp/sets.py) module as well as the [`atomate.vasp.fireworks`](https://github.com/hackingmaterials/atomate/tree/main/atomate/vasp/fireworks) module. Rather than build these tasks from many lower-level functions, we condense these classes down into a single `Task` class that is easier to interact with. Note, these tasks do not save and results to the database. For fully database saving features, you should instead see the `simmate.calculators.vasp.workflows` module. 

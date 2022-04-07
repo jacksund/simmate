@@ -75,7 +75,7 @@ setup(
     name="simmate",
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
-    version="0.1.0",
+    version="0.1.1",
     # a quick summary and then README
     description="Simmate is a toolbox for computational materials research.",
     long_description=long_description,
@@ -88,12 +88,15 @@ setup(
     # Classifiers help users find your project by categorizing it.
     # For a list of valid classifiers, see https://pypi.org/classifiers/
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: BSD License",
     ],
-    # Keywords
-    keywords="sample, setuptools, development",
+    # Keywords -- Removed for now. Below are PyMatgen's keywors for future reference
+    # keywords=(
+    #     "VASP, gaussian, ABINIT, nwchem, qchem, materials, science, project, "
+    #     "electronic, structure, analysis, phase, diagrams, crystal"
+    # ),
     # Indicate which directory the source coude is in
     package_dir={"": "src"},
     packages=find_packages(where="src"),

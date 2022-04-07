@@ -23,13 +23,13 @@ def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
       - `str`:
           makes the directory if it doesnt exist and then returns the path
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `directory`:
         Either None, a path to the directory, or a tempdir. The default is None.
 
-    Returns
-    -------
+    #### Returns
+
     - `directory`:
         The path to the initialized directory as a string
     """
@@ -66,8 +66,8 @@ def make_archive(directory: str):
     Compresses the directory to a zip file of the same name. After compressing,
     it then deletes the original directory.
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `directory`:
         Path to the folder that should be archived
     """
@@ -99,8 +99,8 @@ def archive_old_runs(
     are older than a given time cutoff. Each of these folders is then compressed
     to a zip file and then the original folder is removed.
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `directory`:
         base directory that will contain folders to archive. Defaults to the
         working directory.
@@ -137,8 +137,8 @@ def empty_directory(directory: str, files_to_keep: List[str] = []):
     Deletes all files and folders within a directory, except for those provided
     to the files_to_keep parameter.
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `directory`:
         base directory that should be emptied
     - `files_to_keep`:

@@ -5,18 +5,16 @@ import os
 import django
 from django.conf import settings
 
-# BUG: import the settings raises an error in spyder. Should I moving this import
-# inside of the setup_django_full() function?
 
-# NOTE -- connecting just the Django database ORM has only a 0.05 second advantage
-# on the initial import and then only 1.8e-7 second advantage after. Based on
-# that, there really isn't much to gain from running the reduced setup. Even
-# in ETL methods, I believe the bottleneck will still be the internet connection
-# and not the django_setup. Having users always setup all of django can solve
-# a lot of potential headaches at roughly the same speed.
+def setup_full():
+    """
+    Configures django settings. This method does not need to be called directly
+    because importing this module does so automatically.
 
-
-def setup_full():  # Wall time: 250 ms first call and 175 ns after
+    The first time this function is used can take >1 seconds because many things
+    are imported from the start. Thereafter, testing shows that only <200 ns
+    are used when settings are already configured.
+    """
 
     # OPTIMIZE: this function will take longer than 250ms when other imports
     # get involved. For example, simmate.database.diffusion has some pymatgen
@@ -42,7 +40,6 @@ def setup_full():  # Wall time: 250 ms first call and 175 ns after
     # BUG: I believe this is just for use within Spyder and Jupyter, which I think
     # are examples of async enviornments. In production (non-dev), I believe I should
     # turn this off though.
-    # !!! REMOVE IN PRODUCTION
     os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 

@@ -67,13 +67,13 @@ def get_chemical_subsystems(chemical_system: str):
     list has elements of a given system in alphabetical order (i.e. it gives
     "C-Y" and not "Y-C")
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `chemical_system`:
         A chemical system of elements. Elements must be separated by dashes (-)
 
-    Returns
-    -------
+    #### Returns
+
     - `subsystems`:
         A list of chemical systems that make up the input chemical system.
     """

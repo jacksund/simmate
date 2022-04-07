@@ -39,8 +39,7 @@ def parse_multi_command(command: str, commands_out: List[int]) -> dict:
     simmate workflows run diffusion/example_neb -c "vasp_std > vasp.out"
     ```
 
-    Parameters
-    ----------
+    #### Parameters
 
     - `command`:
         The command or list of commands that should be separated into a list.

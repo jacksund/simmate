@@ -151,8 +151,8 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
         This method is typically not called directly. Instead, users should
         use the `run` method which calls setup within it.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `structure`:
             This parameter does NOTHING! NEB is a special-case workflow that
             accepts a list of structures instead of a single one. Therefore, it
@@ -240,8 +240,8 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
         Works up data from a NEB run, including confirming convergence and
         writing summary output files (structures, data, and plots).
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `directory`:
             Name of the base folder where all results are located.
         """

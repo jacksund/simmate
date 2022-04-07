@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from simmate.utilities import get_doc_from_readme
+
+__doc__ = get_doc_from_readme(__file__)
+
 import os
 
 # First we need to load the default configuration for Dask. This is located
@@ -11,3 +15,6 @@ os.environ.setdefault(
     os.path.join(os.path.expanduser("~"), "simmate", "dask_cluster.yaml"),
 )
 # TODO: I need to update this to allow for other directories
+
+from .client import get_dask_client
+from .submit import batch_submit

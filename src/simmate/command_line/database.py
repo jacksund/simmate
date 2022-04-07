@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""
+This defines commands for managing your Simmate database. All commands are 
+accessible through the "simmate database" command.
+"""
+
 import click
 
 
@@ -96,3 +101,7 @@ def loaddata(filename):
     click.echo(
         f"Success! You now have all the data from {filename} available in your database."
     )
+
+
+# explicitly list functions so that pdoc doesn't skip them
+__all__ = ["database", "reset", "update", "dumpdata", "loaddata"]

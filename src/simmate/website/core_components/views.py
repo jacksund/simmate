@@ -104,8 +104,8 @@ def detete_old_3d_files(time_cutoff: float = 60):
     Goes through the static directory and finds all "tmp***.glb" files that
     are older than a given time cutoff. Each of these files is then deleted.
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `time_cutoff`:
         The time (in seconds) required to determine whether a file is old or not.
         The default is 60 seconds.

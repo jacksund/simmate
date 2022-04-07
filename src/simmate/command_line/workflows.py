@@ -24,13 +24,13 @@ def list_options(options: List) -> int:
         (03) item3
     ```
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `options`:
         a list of strings to choose from
 
-    Returns
-    --------
+    #### Returns
+
     - `selected_index`:
         The integer value of the choice selected. This will follw python indexing
         so the index of the options list. (e.g. if item1 was selected, 0 would be
@@ -403,3 +403,18 @@ def run_yaml(filename):
     # Let the user know everything succeeded
     if result.is_successful():
         click.echo("Success! All results are also stored in your database.")
+
+
+# explicitly list functions so that pdoc doesn't skip them
+__all__ = [
+    "workflows",
+    "explore",
+    "list_all",
+    "show_config",
+    "setup_only",
+    "run",
+    "run_cloud",
+    "run_yaml",
+    "list_options",
+    "parse_parameters",
+]

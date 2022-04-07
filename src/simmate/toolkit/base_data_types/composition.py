@@ -23,14 +23,14 @@ class Composition(PymatgenComposition):
         """
         Gives the reported radii for each element in the composition.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `radius_method` :
             Options are atomic; atomic_calculated; van_der_waals; metallic; ionic.
             The default is "ionic".
 
-        Returns
-        -------
+        #### Returns
+
         - `radii` :
             A list of radii in the same order as composition.elements
         """
@@ -94,8 +94,8 @@ class Composition(PymatgenComposition):
         Gives a predicted lattice volume using the reported radii for each
         element in the composition.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `radius_method` :
             Options are atomic; atomic_calculated; van_der_waals; metallic; ionic.
             The default is "ionic".
@@ -105,8 +105,8 @@ class Composition(PymatgenComposition):
             of all spheres. Larger values will give smaller volumes. The
             default is 1.35, which is 74% packing efficiency (hexagonal packing).
 
-        Returns
-        -------
+        #### Returns
+
         - `total_volume` :
             the estimated volume for a unitcell of this composition
         """
@@ -143,8 +143,8 @@ class Composition(PymatgenComposition):
         | O  | 1.05 | 0.6  | 0.55 |
         | F  | 1.   | 0.55 | 0.5  |
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `radius_method` :
             Options are atomic; atomic_calculated; van_der_waals; metallic; ionic.
             The default is "ionic".
@@ -155,8 +155,8 @@ class Composition(PymatgenComposition):
             method is commonly used to define minimum possible distances for
             random structure creation, we make the default 0.5.
 
-        Returns
-        -------
+        #### Returns
+
         - `element_distance_matrix` :
             A matrix of element-element distances
         """

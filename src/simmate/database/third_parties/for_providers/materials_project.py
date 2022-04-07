@@ -32,8 +32,8 @@ def load_all_structures(
     Loads all structures directly for the Material Project database into the
     local Simmate database.
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `api_key`:
         Your Materials Project API key.
     - `criteria`:

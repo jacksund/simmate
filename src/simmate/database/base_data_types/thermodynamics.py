@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.database.base_data_types import DatabaseTable, table_column
-from simmate.utilities import get_chemical_subsystems  # , dask_batch_submit
+from simmate.utilities import get_chemical_subsystems
 
 from pymatgen.analysis.phase_diagram import PDEntry
 from pymatgen.analysis.phase_diagram import PhaseDiagram
@@ -182,7 +182,9 @@ class Thermodynamics(DatabaseTable):
         # Sc-C system might both try to update a C structure at the same time
         # and one will throw an error.
         #
-        # dask_batch_submit(
+        # from simmate.configuration.dask import batch_submit
+        #
+        # batch_submit(
         #     function=cls.update_chemical_system_stabilities,
         #     args_list=chemical_systems,
         #     batch_size=1000,

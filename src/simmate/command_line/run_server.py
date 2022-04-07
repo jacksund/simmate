@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+This defines the command for running a test-server locally.
+"""
+
 import click
 
 
@@ -18,3 +22,7 @@ def run_server():
     from django.core.management import call_command
 
     call_command("runserver")
+
+
+# explicitly list functions so that pdoc doesn't skip them
+__all__ = ["run_server"]

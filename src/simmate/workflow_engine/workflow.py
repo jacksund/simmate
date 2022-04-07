@@ -107,8 +107,7 @@ class Workflow(PrefectFlow):
         """
         This schedules the workflow to run remotely on Prefect Cloud.
 
-        Parameters
-        ----------
+        #### Parameters
 
         - `labels`:
             a list of labels to schedule the workflow with
@@ -120,14 +119,12 @@ class Workflow(PrefectFlow):
         - `**kwargs`:
             all options that are normally passed to the workflow.run() method
 
-        Returns
-        -------
+        #### Returns
 
         - The flow run id that was used in prefect cloud.
 
 
-        Usage
-        -----
+        #### Usage
 
         Make sure you have Prefect properly configured and have registered your
         workflow with the backend.
