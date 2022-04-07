@@ -1,0 +1,106 @@
+{% extends "core_components/site_base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core_components/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<!-- start page title -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Simmate</a></li>
+                    <li class="breadcrumb-item active">Contact</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Contact Us</h4>
+        </div>
+    </div>
+</div>
+<!-- end page title -->
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="text-center">
+            <h3 class="">Contact & FAQs</h3>
+            <p class="text-muted mt-3"> If you run into any issues, there are serveral ways to
+                contact us. The easiest way is to send an email to simmate.team@gmail.com</p>
+
+            <button onclick="copyContactEmail()" class="btn btn-primary btn-sm uil-envelope mt-2"
+                data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom"
+                data-bs-content="Click to copy"> Email us your question</button>
+            <a href="https://github.com/jacksund/simmate/issues" class="btn btn-primary btn-sm uil-github-alt mt-2"
+                target="_blank">
+                Open an issue on Github</a>
+        </div>
+    </div>
+</div>
+
+<div class="row pt-5">
+    <div class="col-lg-5 offset-lg-1">
+        <!-- Question/Answer -->
+        <div>
+            <div class="faq-question-q-box">Q.</div>
+            <h4 class="faq-question" data-wow-delay=".1s">How much does Simmate cost?</h4>
+            <p class="faq-answer mb-4">Simmate is completely free. If you decide to download and host your own server,
+                your team may want to use a cloud provider like DigitalOcean. These extra cloud-hosting features are
+                100% optional because every component for Simmate is built on free and open-source software. </p>
+        </div>
+
+        <!-- Question/Answer -->
+        <div>
+            <div class="faq-question-q-box">Q.</div>
+            <h4 class="faq-question">License &amp; Copyright</h4>
+            <p class="faq-answer mb-4">Simmate is open-sourced under the BSD-3 License. This permits commercial use,
+                modification, distribution, and private use - but still has limitations. Read the specifics
+                <a href="https://github.com/jacksund/simmate/blob/main/LICENSE" target="_blank">here</a>.
+            </p>
+        </div>
+
+    </div>
+    <!--/col-md-5 -->
+
+    <div class="col-lg-5">
+        <!-- Question/Answer -->
+        <div>
+            <div class="faq-question-q-box">Q.</div>
+            <h4 class="faq-question">How do I sumbit my own workflows?</h4>
+            <p class="faq-answer mb-4">The easiest way is to download and run Simmate on your own computer. Because our
+                team consists of a single lab, our computational resources are limited and can't be shared at this time
+                -- meaning submissions through our website won't run unless we manually approve them.</p>
+        </div>
+
+        <!-- Question/Answer -->
+        <div>
+            <div class="faq-question-q-box">Q.</div>
+            <h4 class="faq-question">Can I request a new feature?</h4>
+            <p class="faq-answer mb-4">Yes, please send suggestions! Send us an email or make a post on Github. Any
+                feedback is welcome, and we'll do our best to prioritize new components.</p>
+        </div>
+
+    </div>
+    <!--/col-md-5-->
+</div>
+<!-- end row -->
+
+{% endblock %}
+
+{% block extrafooter %}
+<!-- Extra javascript that enables copy-to-clipboard for the email -->
+<script>
+    function copyContactEmail() {
+        /* Get the text field */
+        var copyText = "simmate.team@gmail.com";
+        /* Copy the text inside the text field */
+        navigator.clipboard.writeText(copyText);
+    }
+</script>
+{% endblock %}

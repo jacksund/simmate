@@ -22,9 +22,6 @@ urlpatterns = [
     ),
     #
     #
-    path(route="extras/", view=views.extras, name="extras"),
-    #
-    #
     path(
         route="third-parties/",
         view=include(
@@ -55,4 +52,9 @@ urlpatterns = [
         ),
         name="core_components",
     ),
+    #
+    # And extra one-page views
+    path(route="extras/", view=views.extras, name="extras"),
+    path(route="contact/", view=views.contact, name="contact"),
+    path(route="about/", view=views.about, name="about"),
 ]

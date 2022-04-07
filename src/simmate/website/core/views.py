@@ -95,8 +95,18 @@ def home(request):
 
 
 def extras(request):
-
-    # now let's put the data and template together to send the user
     context = {}
     template = "core_components/extras.html"
+    return render(request, template, context)
+
+
+def contact(request):
+    context = {}
+    template = "core_components/contact.html"
+    return render(request, template, context)
+
+
+def about(request):
+    context = {}
+    template = "core_components/about.html"
     return render(request, template, context)
