@@ -1,6 +1,9 @@
 
-# These settings initialize pytest and django-pytest. We prefer this file over 
-# pytest.ini because pyproject.toml has more uses that we may need in the future.
+# This file configures settings for utilities like pytest and coverage. We prefer 
+# to use this file over files like "pytest.ini" because pyproject.toml has 
+# more uses that we may need in the future (i.e. it can use other modules)
+
+# These settings initialize pytest and django-pytest.
 [tool.pytest.ini_options]
 
 # Tell django-pytest settings for a dummy database and also website interaction.
@@ -29,3 +32,17 @@ filterwarnings = [
     "ignore:Maximum iteration number is reached*:Warning",
     # "ignore:*is an unconverged VASP run*:Warning", BUG: why won't this regex work?
 ]
+
+# These settings initialize the python coverage module. With this file, you can
+# just use "coverage run" in the  base directory without configuring any
+# other settings in the command.
+[tool.coverage.run]
+
+# all tests are written using pytest, so we always need this module set
+command_line = "-m pytest"
+
+# when testing coverage, we want to ignore the test files themselves.
+omit = ["*/test_*", "*/conftest.py", "*/*_test.py"]
+
+# consider adding for coverage of templates
+# plugins = django_coverage_plugin  
