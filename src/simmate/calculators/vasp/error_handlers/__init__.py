@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from simmate.utilities import get_doc_from_readme
+
+__doc__ = get_doc_from_readme(__file__)
+
 from .incorrect_smearing import IncorrectSmearing
 from .mesh_symmetry import MeshSymmetry
 from .unconverged import Unconverged

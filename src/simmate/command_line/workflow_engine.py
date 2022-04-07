@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""
+This defines commands for managing your Simmate workflow engine. All commands are 
+accessible through the "simmate workflow-engine" command.
+"""
+
 import click
 
 
@@ -194,3 +199,13 @@ def run_cluster(
         walltime=walltime_per_job,
         **agent_kwargs,
     )
+
+
+# explicitly list functions so that pdoc doesn't skip them
+__all__ = [
+    "workflow_engine",
+    "setup_cloud",
+    "delete_cloud",
+    "start_worker",
+    "run_cluster",
+]

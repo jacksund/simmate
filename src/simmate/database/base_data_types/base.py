@@ -133,8 +133,7 @@ class SearchResults(models.QuerySet):
         To load this database dump into a new database, use the class's
         `from_archive` method.
 
-        Parameters
-        -----------
+        #### Parameters
 
         - `filename`:
             The filename to write the zip file to. By defualt, None will make
@@ -446,8 +445,8 @@ class DatabaseTable(models.Model):
         Therefore, you must view this method for each mix-ins to determine which
         kwargs must be passed.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `as_dict` :
             Whether to return the populated data as a dictionary or to initialize
             it as a database object. Defaults to False.
@@ -599,8 +598,7 @@ class DatabaseTable(models.Model):
         `load_remote_archive` method, which handles downloading the archive
         file from the Simmate website for you.
 
-        Parameters
-        -----------
+        #### Parameters
 
         - `filename`:
             The filename to write the zip file to. By defualt, None will try to
@@ -707,9 +705,9 @@ class DatabaseTable(models.Model):
         # otherwise we use dask to submit these in batches!
         else:
 
-            from simmate.utilities import dask_batch_submit
+            from simmate.configuration.dask import batch_submit
 
-            dask_batch_submit(
+            batch_submit(
                 function=load_single_entry,
                 args_list=entries,
                 batch_size=15000,
@@ -736,8 +734,8 @@ class DatabaseTable(models.Model):
         empty database. After this call, all data will be stored locally and
         you don't need to call this method again (even accross python sessions).
 
-        Parameters
-        -----------
+        #### Parameters
+
         - `remote_archive_link`:
             The URL for that the archive will be downloaded from. If not supplied,
             it will default to the table's remote_archive_link attribute.

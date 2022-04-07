@@ -32,7 +32,7 @@ import os
 
 from pymatgen.io.cif import CifParser
 
-from simmate.utilities import dask_batch_submit
+from simmate.configuration.dask import batch_submit
 from simmate.database.third_parties import CodStructure
 
 
@@ -105,7 +105,7 @@ def load_all_structures(
     # point, cancel any remaining. 30 min is plenty for a batch of
     # 15,000 cifs. If this limit is ever hit, it's typically because a
     # single cif is taking >15min and is problematic.
-    dask_batch_submit(
+    batch_submit(
         function=load_single_cif,
         args_list=all_cifs,
         batch_size=batch_size,

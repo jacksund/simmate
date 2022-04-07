@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+This defines the base "simmate" command that all other commands stem from.
+"""
+
 import click
 
 from simmate.command_line.database import database
@@ -33,3 +37,6 @@ simmate.add_command(workflows)
 simmate.add_command(workflow_engine)
 simmate.add_command(run_server)
 simmate.add_command(start_project)
+
+# explicitly list functions so that pdoc doesn't skip them
+__all__ = ["simmate"]

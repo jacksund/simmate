@@ -42,8 +42,7 @@ class BuildDiffusionAnalysisTask(Task):
         also create all relevent database entries for this struture and its
         migration hops.
 
-        Parameters
-        ----------
+        #### Parameters
 
         - `structure`:
             bulk crystal structure to be analyzed. Can be in any format supported

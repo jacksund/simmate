@@ -113,8 +113,8 @@ def get_workflow(
     workflow_name = "example-module/example-flowtype"
     ```
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `workflow_name`:
         Name of the workflow to load. Examples include "relaxation/matproj",
         "static-energy/quality01", and "diffusion/all-paths"
@@ -170,8 +170,8 @@ def load_results_from_directories(
     to load results into the database. All folders will be converted to archives
     once they've been loaded.
 
-    Parameters
-    ----------
+    #### Parameters
+
     - `base_directory`:
         The main directory that will contain folders to archive. Defaults to the
         working directory.

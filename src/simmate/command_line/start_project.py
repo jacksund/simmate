@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""
+This defines the command for starting new custom project.
+
+NOTE: Project integration is still under early development and subject to change.
+"""
+
 import click
 
 
@@ -50,3 +56,7 @@ def start_project(project_name):
         "Need help? Take a look at our tutorial for making custom apps or post\n"
         "your question in our forum."
     )
+
+
+# explicitly list functions so that pdoc doesn't skip them
+__all__ = ["start_project"]

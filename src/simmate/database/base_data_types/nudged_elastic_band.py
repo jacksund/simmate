@@ -165,8 +165,8 @@ class DiffusionAnalysis(Structure):
         )
         ```
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `name` :
             The prefix name of the subclasses that are output. "Relaxation" and
             "IonicStep" will be attached to the end of this prefix.
@@ -180,8 +180,8 @@ class DiffusionAnalysis(Structure):
             column name and the value should match django options
             (e.g. table_column.FloatField())
 
-        Returns
-        -------
+        #### Returns
+
         - `NewDiffusionAnalysisClass` :
             A subclass of DiffusionAnalysis.
         - `NewMigrationHopClass`:
@@ -478,8 +478,8 @@ class MigrationHop(DatabaseTable):
         This method should NOT be called directly because it is instead used by
         `DiffusionAnalysis.create_subclasses`.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `name` :
             Name of the subclass that is output.
         - `diffusion_analysis` :
@@ -492,8 +492,8 @@ class MigrationHop(DatabaseTable):
             column name and the value should match django options
             (e.g. table_column.FloatField())
 
-        Returns
-        -------
+        #### Returns
+
         - `NewMigrationHopClass`:
             A subclass of MigrationHop.
         - `NewMigrationHopClass`:
@@ -581,8 +581,8 @@ class MigrationImage(Structure):
         This method should NOT be called directly because it is instead used by
         `DiffusionAnalysis.create_subclasses`.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `name` :
             Name of the subclass that is output.
         - `migration_hop` :
@@ -595,8 +595,8 @@ class MigrationImage(Structure):
             column name and the value should match django options
             (e.g. table_column.FloatField())
 
-        Returns
-        -------
+        #### Returns
+
         - `NewClass` :
             A subclass of MigrationImage.
 

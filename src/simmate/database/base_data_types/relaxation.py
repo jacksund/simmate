@@ -174,8 +174,8 @@ class Relaxation(Structure, Calculation):
         )
         ```
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `name` :
             The prefix name of the subclasses that are output. "Relaxation" and
             "IonicStep" will be attached to the end of this prefix.
@@ -187,8 +187,8 @@ class Relaxation(Structure, Calculation):
             column name and the value should match django options
             (e.g. table_column.FloatField())
 
-        Returns
-        -------
+        #### Returns
+
         - `NewRelaxationClass` :
             A subclass of Relaxation.
         - `NewIonicStepClass`:
@@ -303,8 +303,8 @@ class Relaxation(Structure, Calculation):
         Given a Vasprun object from a finished relaxation, this will update the
         Relaxation table entry and the corresponding IonicStep entries.
 
-        Parameters
-        ----------
+        #### Parameters
+
         vasprun :
             The final Vasprun object from the relaxation outputs.
         corrections :
@@ -506,8 +506,8 @@ class IonicStep(Structure, Thermodynamics, Forces):
         This method should NOT be called directly because it is instead used by
         `Relaxation.create_subclasses`.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `name` :
             Name of the subclass that is output.
         - `relaxation` :

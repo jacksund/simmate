@@ -72,8 +72,8 @@ class NestedCalculation(Calculation):
         )
         ```
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `name` :
             Name of the subclass that is output.
         - `child_calculation_tables` :
@@ -87,8 +87,8 @@ class NestedCalculation(Calculation):
             column name and the value should match django options
             (e.g. table_column.FloatField())
 
-        Returns
-        -------
+        #### Returns
+
         NewClass :
             A subclass of NestedCalculation.
 

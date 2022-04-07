@@ -72,7 +72,7 @@ class WorkflowTask(Task):
         should be ran when task.run() is called.
 
         Parameters
-        ----------
+
         - `workflow`:
             The full workflow to run.
         - `return_result`:
@@ -147,10 +147,10 @@ class WorkflowTask(Task):
         **parameters,
     ):
         """
+        Runs the workflow as as task.
 
+        #### Parameters
 
-        Parameters
-        ----------
         - `executor_type`:
             How the workflow should be scheduled and ran. The options are either
             local or prefect (i.e. prefect cloud).
@@ -167,8 +167,8 @@ class WorkflowTask(Task):
         - `**parameters`:
             All options to pass the workflow.run() method.
 
-        Returns
-        -------
+        #### Returns
+
         str
             The flow-run-id if submitted with prefect OR the prefect state if
             the workflow was ran locally

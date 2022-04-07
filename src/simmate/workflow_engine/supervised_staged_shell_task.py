@@ -179,8 +179,8 @@ class S3Task(Task):
         is_monitor=True. These handlers run while the shelltask itself is also
         running. Read more about ErrorHandlers for more info.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `max_corrections`:
             The maximum number of times we can apply a correction and retry the shell
             command. The maximum number of times that corrections will be made (and
@@ -240,8 +240,8 @@ class S3Task(Task):
         Some tasks don't require a setup() method, so by default, this method
         doesn't nothing but "pass".
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `structure`:
             The structure to use for the task, if one is required.
         - `directory`:
@@ -267,15 +267,15 @@ class S3Task(Task):
         Some tasks don't require a setup() method, so by default, this method
         does nothing but "pass".
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `directory`:
             The directory to run everything in.
         - `command`:
             The command that will be called during execution.
 
-        Returns
-        -------
+        #### Returns
+
         - `corrections`
             A list of tuples where each entry is a error identified and the
             correction applied. Ex: [("ExampleError", "ExampleCorrection")]
@@ -483,8 +483,8 @@ class S3Task(Task):
         Users should never call this directly becuase this is instead applied
         within the execute() method.
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `process`:
             The process object that will be terminated.
         - `command`:
@@ -540,8 +540,8 @@ class S3Task(Task):
         Some tasks don't require a workup() method, so by default, this method
         does nothing but "pass".
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `directory`:
             The directory to run everything in.
 
@@ -573,8 +573,8 @@ class S3Task(Task):
         my_result = my_task.run(structure=my_structure, command=my_command)
         ```
 
-        Parameters
-        ----------
+        #### Parameters
+
         - `structure`:
             The structure to use for the task, if one is required.
         - `command`:
