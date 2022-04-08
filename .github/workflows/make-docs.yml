@@ -40,9 +40,10 @@ jobs:
             conda update -n base -c defaults conda
             conda env update -f tutorials/Guides_for_contributors/environment.yaml -n base
             pip install -e .
+            pip install pdoc
 
       - name: Run pdoc            
-        run: .github/make_docs.py
+        run: docs/make_docs.py
       
       # make results accessible to github via artifacts
       - run: tar --directory docs/ -hcf artifact.tar .

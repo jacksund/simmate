@@ -5,7 +5,8 @@ This file generates our html documentation using pdoc.
 
 This does not need to be called directly because this script is automatically
 ran by the `.github/workflows/make-docs.yml` workflow every time a Simmate
-release is made.
+release is made. The exception to this is if you'd like to host documentation
+locally for offline-access.
 """
 
 import os
