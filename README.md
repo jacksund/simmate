@@ -62,7 +62,7 @@ At the other end of the spectrum, we provide an extremely powerful toolbox and A
 **Don't panic** if you're new to coding and Python. When you're ready, head to our [tutorials](https://github.com/jacksund/simmate/tree/main/tutorials) where we teach you everything from the beginning.
 
 If you're comfortable with Python, you can install Simmate with...
-```
+``` bash
 conda install -c conda-forge simmate
 ```
 
@@ -70,7 +70,7 @@ conda install -c conda-forge simmate
 
 Once installed, running a local test server is as simple as...
 
-``` python
+``` bash
 # on first-time setup, you must intialize an empty database
 simmate database reset
 
@@ -95,13 +95,13 @@ Again, take a look at [our main website](https://simmate.org/) if you'd like to 
 <img src="https://raw.githubusercontent.com/PrefectHQ/prefect/master/docs/.vuepress/public/orchestration/ui/dashboard-overview2.png"  height=440 style="max-height: 440px;">
 </p>
 
-``` shell
+``` bash
 # The command line let's you quickly run a workflow
 # from a structure file (CIF or POSCAR)
 simmate workflows run relaxation/matproj -s NaCl.cif
 ```
 
-```python
+``` python
 # Python let's you run workflows within scripts and
 # it also enables advanced setting configurations
 
@@ -150,7 +150,7 @@ structures = structures.to_toolkit()
 <!-- REMOVED FOR NOW: Our core functions and classes are largely inspired from the [PyMatGen](https://github.com/materialsproject/pymatgen) and [ASE](https://gitlab.com/ase/ase) codes, where we decided to write our own version for speed, readability, and usability: :warning: Our core toolkit is still dependent on pymatgen at the moment. Our reliance on pymatgen will fade over time, but it is important to acknowledge how their software has helped in getting our project off the ground. So thank you to the pymatgen community! -->
 
 
-```python
+``` python
 # Load the structure file you'd like to use
 from simmate.toolkit import Structure
 structure = Structure.from_file('NaCl.cif')
