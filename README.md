@@ -66,6 +66,22 @@ If you're comfortable with Python, you can install Simmate with...
 conda install -c conda-forge simmate
 ```
 
+## Running a Server
+
+Once installed, running a local test server is as simple as...
+
+``` python
+# on first-time setup, you must intialize an empty database
+simmate database reset
+
+# then start the server!
+simmate run-server
+```
+
+After a few seconds, you can open http://127.0.0.1:8000/ in your browser to view your local server!
+
+> :bulb: Read our [website documentation](https://jacksund.github.io/simmate/simmate/website.html) and [tutorials](https://github.com/jacksund/simmate/tree/main/tutorials) in order to switch to a production-ready server that's accessible through the internet and can be shared among a team.
+
 
 ## A Sneak-Peak of Features
 
