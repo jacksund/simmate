@@ -36,7 +36,7 @@ class MatProjBandStructure(MatProjStaticEnergy):
     # non-selfconsistent (non-SCF) calculation.
     incar = MatProjStaticEnergy.incar.copy()
     incar.update(
-        ICHARGE=11,
+        ICHARG=11,
         ISMEAR=0,
         SIGMA=0.01,
     )
