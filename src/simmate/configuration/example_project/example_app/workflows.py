@@ -1,71 +1,35 @@
 # -*- coding: utf-8 -*-
 
-import prefect  # base import is required for prefect context
-from prefect import task, Flow, Parameter
-from prefect.storage import Module
+"""
+Build a workflow in Simmate involves piecing together our Tasks and Database 
+tables. So before you start editting this file, make sure you have gone through
+and editted the `models.py` and `tasks.py` files. 
+"""
 
-from simmate.calculators.vasp.tasks.relaxation.third_party.mit import MITRelaxationTask
-from simmate.workflow_engine.common_tasks import load_input
+# This function is what we use to automatically built simple one-task workflows
+from simmate.workflow_engine import s3task_to_workflow
 
-from simmate.configuration.django import setup_full  # sets database connection
-from simmate.database.workflow_results import (
-    MITIonicStep,
-    MITRelaxation,
+# Import our tables and tasks from the other files.
+# Note, the format `import <name> as <newname>` simply renames the class so
+# that the table/task classes don't have the same name in this file.
+from .models import ExampleRelaxation as ExampleRelaxationTable
+from .tasks import ExampleRelaxation as ExampleRelaxationTask
+
+# Now build our
+example_workflow = s3task_to_workflow(
+    # The naming convention here follows how you would import this workflow.
+    # We would do this with `from example_app import example_workflow`, so
+    # this import corresponds to the following name:
+    name="example_app/example_workflow",
+    # This line is always the same and should be left unchanged
+    module=__name__,
+    # Set the name where you want this to show up in prefect cloud
+    project_name="Simmate-Relaxation",
+    # Simply set these two variables to your Task and DatabaseTable classes!
+    s3task=ExampleRelaxationTable,
+    calculation_table=ExampleRelaxationTable,
+    # this sets what should be saved to the database BEFORE the calculation
+    # is actually started. This helps you search your database for calculations
+    # that have not completed yet.
+    register_kwargs=["prefect_flow_run_id", "structure", "source"],
 )
-
-
-# --------------------------------------------------------------------------------------
-
-# THIS SECTION SETS UP OUR TASKS
-
-# we initialize the task here so we can use it in the Prefect flow below
-relax_structure = MITRelaxationTask()
-
-
-@task
-def save_results(result_and_corrections):
-
-    # split our results and corrections (which are given as a tuple) into
-    # separate variables
-    vasprun, corrections = result_and_corrections
-
-    # initialize the MITRelaxation with the Prefect run info
-    calculation = MITRelaxation.from_prefect_context(prefect.context)
-    calculation.save()
-
-    # now update the calculation entry with our results
-    calculation.update_from_vasp_run(vasprun, corrections, MITIonicStep)
-
-    return calculation.id
-
-
-# --------------------------------------------------------------------------------------
-
-# THIS SECTION PUTS OUR TASKS TOGETHER TO MAKE A WORKFLOW
-
-# now make the overall workflow
-with Flow("MIT Relaxation") as workflow:
-
-    # These are the input parameters for the overall workflow
-    structure = Parameter("structure")
-    vasp_command = Parameter("vasp_command", default="vasp_std > vasp.out")
-
-    # load the structure to a pymatgen object
-    structure_pmg = load_input(structure)
-
-    # Run the calculation after we have saved the input
-    result_and_corrections = relax_structure(
-        structure=structure_pmg,
-        command=vasp_command,
-    )
-
-    # pass these results and corrections into our final task which saves
-    # everything to the database
-    calculation_id = save_results(result_and_corrections)
-
-# For when this workflow is registered with Prefect Cloud, we indicate that
-# it can be imported from a python module. Note __name__ provides the path
-# to this module.
-workflow.storage = Module(__name__)
-
-# --------------------------------------------------------------------------------------

@@ -16,9 +16,9 @@ To see how this setup.py file can grow, you can take a look at other example fil
 from setuptools import setup, find_packages
 
 setup(
-    name="{{ project_name }}",  # Pick some thing unique here!
+    name="{{ project_name }}",
     version="0.0.0",
     python_requires=">=3.5, <4",
     packages=find_packages(where="."),
-    install_requires=[],
+    install_requires=["simmate"],
 )
