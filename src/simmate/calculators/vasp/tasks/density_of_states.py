@@ -26,7 +26,7 @@ class MatProjDensityOfStates(MatProjStaticEnergy):
     # Settings are based off of pymatgen's NonSCFSet in uniform mode
     incar = MatProjStaticEnergy.incar.copy()
     incar.update(
-        ICHARGE=11,
+        ICHARG=11,
         ISYM=2,
         NEDOS=2001,
     )
