@@ -30,6 +30,12 @@
         <h2>Contents</h2>
         <ul>
   <li><a href="#the-simmate-workflow-engine">The Simmate Workflow Engine</a></li>
+  <li><a href="#overview-of-classes">Overview of classes</a>
+  <ul>
+    <li><a href="#what-is-an-s3task">What is an <code>S3Task</code>?</a></li>
+    <li><a href="#what-is-a-workflow">What is a <code>Workflow</code>?</a></li>
+    <li><a href="#what-is-a-nestedworkflow">What is a <code>NestedWorkflow</code>?</a></li>
+  </ul></li>
 </ul>
 
 
@@ -61,9 +67,51 @@
 
                         <div class="docstring"><h1 id="the-simmate-workflow-engine">The Simmate Workflow Engine</h1>
 
-<p>This module defines common workflow tasks, error handling, and job restarts. It is ment for users that want to create custom workflows from scratch. Use of this module is closely tied with <a href="https://github.com/jacksund/simmate/tree/main/tutorials">Tutorials 08 and 09</a>.</p>
+<p>This module defines common workflow tasks, error handling, and job restarts. It is ment for users that want to create custom workflows from scratch. Use of this module is closely tied with <a href="https://github.com/jacksund/simmate/tree/main/tutorials">Tutorials 08</a>.</p>
 
 <p>This module is only meant for advanced users. Beginners should instead start by checking if there is already a workflow built for them (in <code><a href="workflows.html">simmate.workflows</a></code>) or by checking if there are common tasks already built for the program they are using in <code><a href="calculators.html">simmate.calculators</a></code>. For example, VASP users can check <code><a href="calculators/vasp.html">simmate.calculators.vasp</a></code>.</p>
+
+<h1 id="overview-of-classes">Overview of classes</h1>
+
+<p>Here we try to give a birds-eye view of how Simmate <code>Tasks</code>, <code>DatabaseTables</code>, and <code>Workflows</code> fit together. This section is not meant to be an encompassing guide. Instead, beginners should refer to our tutorials and class-level API docs.</p>
+
+<h2 id="what-is-an-s3task">What is an <code>S3Task</code>?</h2>
+
+<p>A single calculator run is carried out by a <code>StagedSupervisedShellTask</code> or a "<code>S3Task</code>". There is some history behind why it's named this way, but here is how the name breaks down:</p>
+
+<ul>
+<li><code>Staged</code>: the overall calculation is made of three stages (each is a class method)
+<ol>
+<li><code>setup</code> = write input files</li>
+<li><code>execution</code> = the actual running &amp; monitoring of the program  &lt;--- <code>Supervised</code> and <code>Shell</code> help describe this stage</li>
+<li><code>workup</code> = reading the output files</li>
+</ol></li>
+<li><code>Shell</code>: the calculator is called through the command-line</li>
+<li><code>Supervised</code>: once the shell command is started, Simmate runs in the background to monitor it for errors</li>
+</ul>
+
+<p>All stages of an <code>S3Task</code> are done through the <code>run</code> method. That is... <code>S3Task.run</code> = <code>S3Task.setup</code> + <code>S3Task.execute</code> + <code>S3Task.workup</code></p>
+
+<h2 id="what-is-a-workflow">What is a <code>Workflow</code>?</h2>
+
+<p>Recall from Simmate's <a href="">tutorial 2</a>, that a <code>Workflow</code> is made up of 4 stages. These stages can be thought of linking a <code>S3Task</code> and a <code>DatabaseTable</code>:</p>
+
+<ul>
+<li><code>configure</code>: default settings are attached to <code>S3Task</code>'s attribute</li>
+<li><code>schedule</code>: decides when and where <code>S3Task.run</code> is called</li>
+<li><code>execute</code>: calls <code>S3Task.run</code> which does setup (<code>S3Task.run</code> = <code>S3Task.setup</code> + <code>S3Task.execute</code> + <code>S3Task.workup</code>)</li>
+<li><code>save</code>: takes the output of <code>S3Task</code> and saves it to the <code>DatabaseTable</code></li>
+</ul>
+
+<p>All stages of a <code>Workflow</code> are done through the <code>run</code> method. That is... <code>Workflow.run</code> = <code>configure</code> + <code>schedule</code> + <code>execute</code> + <code>save</code>.</p>
+
+<h2 id="what-is-a-nestedworkflow">What is a <code>NestedWorkflow</code>?</h2>
+
+<p>Some workflows are "nested", which means it's a workflow made up other multiple other workflows. An example of this is the <code>relaxation_staged</code> workflow, which involves a series of relaxations of increasing quality and then a final energy calculation.</p>
+
+<ol>
+<li>Feel free to add a calculator for a new program if you don't see it in <a href="https://github.com/jacksund/simmate/tree/main/src/simmate/calculators">the available list</a>!</li>
+</ol>
 </div>
 
                         <details>
@@ -86,7 +134,7 @@
 <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># sets database connection</span>
 
 <span class="kn">from</span> <span class="nn">.workflow_task</span> <span class="kn">import</span> <span class="n">WorkflowTask</span>
-<span class="kn">from</span> <span class="nn">.workflow</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ModuleStorage</span>
+<span class="kn">from</span> <span class="nn">.workflow</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ModuleStorage</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">Task</span>
 <span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="n">s3task_to_workflow</span>
 </pre></div>
 

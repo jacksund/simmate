@@ -75,8 +75,10 @@
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">Spacegroup</span>
 
 <span class="c1"># Lists off which apps to update/create. By default, I do all apps that are installed</span>
-<span class="c1"># so this list is grabbed directly from django</span>
+<span class="c1"># so this list is grabbed directly from django. I also grab the CUSTOM_APPS to</span>
+<span class="c1"># check for user-installed applications.</span>
 <span class="kn">from</span> <span class="nn">django.apps</span> <span class="kn">import</span> <span class="n">apps</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
 
 <span class="n">APPS_TO_MIGRATE</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">apps</span><span class="o">.</span><span class="n">app_configs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
@@ -105,12 +107,17 @@
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_filename</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">db_filename</span><span class="p">)</span>
 
-    <span class="c1"># go through each listed directory in the base directory</span>
-    <span class="c1"># and delete all folders named &#39;migrations&#39;</span>
-    <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">apps_to_migrate</span><span class="p">:</span>
-        <span class="n">migration_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DJANGO_DIRECTORY</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="s2">&quot;migrations&quot;</span><span class="p">)</span>
+    <span class="c1"># go through each app directory and delete all folders named &#39;migrations&#39;</span>
+    <span class="k">for</span> <span class="n">app_name</span><span class="p">,</span> <span class="n">app_config</span> <span class="ow">in</span> <span class="n">apps</span><span class="o">.</span><span class="n">app_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="c1"># Skip if the app was not requested</span>
+        <span class="k">if</span> <span class="n">app_config</span><span class="o">.</span><span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">apps_to_migrate</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">migration_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app_config</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;migrations&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">migration_dir</span><span class="p">):</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">migration_dir</span><span class="p">)</span>
+            <span class="k">continue</span>
 
     <span class="c1"># now update the database based on the registered models</span>
     <span class="n">update_database</span><span class="p">(</span><span class="n">apps_to_migrate</span><span class="p">)</span>
@@ -207,12 +214,17 @@
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_filename</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">db_filename</span><span class="p">)</span>
 
-    <span class="c1"># go through each listed directory in the base directory</span>
-    <span class="c1"># and delete all folders named &#39;migrations&#39;</span>
-    <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">apps_to_migrate</span><span class="p">:</span>
-        <span class="n">migration_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DJANGO_DIRECTORY</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="s2">&quot;migrations&quot;</span><span class="p">)</span>
+    <span class="c1"># go through each app directory and delete all folders named &#39;migrations&#39;</span>
+    <span class="k">for</span> <span class="n">app_name</span><span class="p">,</span> <span class="n">app_config</span> <span class="ow">in</span> <span class="n">apps</span><span class="o">.</span><span class="n">app_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="c1"># Skip if the app was not requested</span>
+        <span class="k">if</span> <span class="n">app_config</span><span class="o">.</span><span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">apps_to_migrate</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">migration_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app_config</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;migrations&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">migration_dir</span><span class="p">):</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">migration_dir</span><span class="p">)</span>
+            <span class="k">continue</span>
 
     <span class="c1"># now update the database based on the registered models</span>
     <span class="n">update_database</span><span class="p">(</span><span class="n">apps_to_migrate</span><span class="p">)</span>

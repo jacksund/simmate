@@ -211,6 +211,31 @@
 
             <div class="docstring"><p>Abstract base class for an ErrorHandler. These handlers should be used in
 combination with S3Tasks.</p>
+
+<p>As an example of creating a custom error handler for your tasks:</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../../workflow_engine.html">simmate.workflow_engine</a></span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
+
+<span class="k">class</span> <span class="nc">ExampleHandler</span><span class="p">(</span><span class="n">ErrorHandler</span><span class="p">):</span>
+
+    <span class="n">filename_to_check</span> <span class="o">=</span> <span class="s2">&quot;output.txt&quot;</span>
+    <span class="n">possible_error_messages</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;There&#39;s an error here!&quot;</span><span class="p">]</span>
+
+    <span class="c1"># By default, the check method looks for error messages in a file. If you</span>
+    <span class="c1"># want a different kind of check, you can override this method.</span>
+    <span class="c1">#</span>
+    <span class="c1"># def check(self, directory):</span>
+    <span class="c1">#     ... do some check and return true if there&#39;s an error</span>
+    <span class="c1">#     return True</span>
+
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="n">output_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;output.txt&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;We fixed the error!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;we found the example error&quot;</span>
+</code></pre></div>
 </div>
 
 
