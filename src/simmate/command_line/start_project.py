@@ -2,15 +2,16 @@
 
 """
 This defines the command for starting new custom project.
-
-NOTE: Project integration is still under early development and subject to change.
 """
 
 import click
 
 
 @click.command()
-@click.argument("project_name", type=click.Path(exists=False))
+@click.argument(
+    "project_name",
+    type=click.Path(exists=False),
+)
 def start_project(project_name):
     """
     This creates a new folder and fills it with an example project to
@@ -48,13 +49,10 @@ def start_project(project_name):
     # we create a new file and add the line!
     with open(apps_yaml, "a+") as file:
         file.write(new_line)
-
     # Let the user know what we did and how to continue.
     click.echo(
-        f"Successfully made a new project! You'll find it at {new_project_directory}\n\n"
-        "Be sure to go through the README file in your new project.\n\n"
-        "Need help? Take a look at our tutorial for making custom apps or post\n"
-        "your question in our forum."
+        f"\n\tSuccessfully made a new project! You'll find it at {new_project_directory}\n\n"
+        "\tBe sure to go through the README file in your new project.\n"
     )
 
 

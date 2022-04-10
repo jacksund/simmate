@@ -9,6 +9,31 @@ class ErrorHandler(ABC):
     """
     Abstract base class for an ErrorHandler. These handlers should be used in
     combination with S3Tasks.
+
+    As an example of creating a custom error handler for your tasks:
+    ``` python
+    from simmate.workflow_engine import ErrorHandler
+
+    class ExampleHandler(ErrorHandler):
+
+        filename_to_check = "output.txt"
+        possible_error_messages = ["There's an error here!"]
+
+        # By default, the check method looks for error messages in a file. If you
+        # want a different kind of check, you can override this method.
+        #
+        # def check(self, directory):
+        #     ... do some check and return true if there's an error
+        #     return True
+
+        def correct(self, directory: str) -> str:
+
+            output_filename = os.path.join(directory, "output.txt")
+
+            with open(output_filename, "w") as file:
+                file.write("We fixed the error!")
+            return "we found the example error"
+    ```
     """
 
     is_monitor = False

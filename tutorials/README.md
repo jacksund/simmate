@@ -10,6 +10,6 @@ If anything is unclear, don't hesitate to [post a question on our forum](https:/
 
 ## Expected duration
 
-If you are comfortable with python, tutorials 01-05 should take under **1 hour in total**. Tutorials 06-09 will take **2-3 hours in total** but are optional.
+If you are comfortable with python, tutorials 01-05 should take under **1 hour in total**. Tutorials 06-08 will take **2-3 hours in total** but are optional.
 
-If you are new to coding, we recommend you complete **one tutorial per day (1-2 hrs each)** to fully understand each. This includes exploring extra resources in each tutorial. Keep in mind that tutorials 06-09 are advanced topics but also completely optional.
+If you are new to coding, we recommend you complete **one tutorial per day (1-2 hrs)** to fully understand each. This includes exploring extra resources in each tutorial. Keep in mind that tutorials 06-08 are advanced topics but also completely optional.

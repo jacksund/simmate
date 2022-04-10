@@ -52,8 +52,6 @@
 <a href="./../../simmate.html">simmate</a><wbr>.<a href="./../command_line.html">command_line</a><wbr>.start_project    </h1>
 
                         <div class="docstring"><p>This defines the command for starting new custom project.</p>
-
-<p>NOTE: Project integration is still under early development and subject to change.</p>
 </div>
 
                         <details>
@@ -62,15 +60,16 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This defines the command for starting new custom project.</span>
-
-<span class="sd">NOTE: Project integration is still under early development and subject to change.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">click</span>
 
 
 <span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;project_name&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span>
+    <span class="s2">&quot;project_name&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+<span class="p">)</span>
 <span class="k">def</span> <span class="nf">start_project</span><span class="p">(</span><span class="n">project_name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This creates a new folder and fills it with an example project to</span>
@@ -108,13 +107,10 @@
     <span class="c1"># we create a new file and add the line!</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">apps_yaml</span><span class="p">,</span> <span class="s2">&quot;a+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
         <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">new_line</span><span class="p">)</span>
-
     <span class="c1"># Let the user know what we did and how to continue.</span>
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Successfully made a new project! You&#39;ll find it at </span><span class="si">{</span><span class="n">new_project_directory</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;Be sure to go through the README file in your new project.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;Need help? Take a look at our tutorial for making custom apps or post</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;your question in our forum.&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Successfully made a new project! You&#39;ll find it at </span><span class="si">{</span><span class="n">new_project_directory</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Be sure to go through the README file in your new project.</span><span class="se">\n</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
 
