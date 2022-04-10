@@ -10,8 +10,10 @@ from simmate.configuration.django.settings import DJANGO_DIRECTORY, DATABASES
 from simmate.database.base_data_types import Spacegroup
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
-# so this list is grabbed directly from django
+# so this list is grabbed directly from django. I also grab the CUSTOM_APPS to
+# check for user-installed applications.
 from django.apps import apps
+from django.conf import settings
 
 APPS_TO_MIGRATE = list(apps.app_configs.keys())
 
@@ -40,12 +42,17 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE):
     if os.path.exists(db_filename):
         os.remove(db_filename)
 
-    # go through each listed directory in the base directory
-    # and delete all folders named 'migrations'
-    for app in apps_to_migrate:
-        migration_dir = os.path.join(DJANGO_DIRECTORY, app, "migrations")
+    # go through each app directory and delete all folders named 'migrations'
+    for app_name, app_config in apps.app_configs.items():
+
+        # Skip if the app was not requested
+        if app_config.label not in apps_to_migrate:
+            continue
+
+        migration_dir = os.path.join(app_config.path, "migrations")
         if os.path.exists(migration_dir):
             shutil.rmtree(migration_dir)
+            continue
 
     # now update the database based on the registered models
     update_database(apps_to_migrate)
