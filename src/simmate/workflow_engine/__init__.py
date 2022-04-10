@@ -16,5 +16,5 @@ from .supervised_staged_shell_task import S3Task
 from simmate.configuration.django import setup_full  # sets database connection
 
 from .workflow_task import WorkflowTask
-from .workflow import Workflow, Parameter, ModuleStorage
+from .workflow import Workflow, Parameter, ModuleStorage, task, Task
 from .utilities import s3task_to_workflow

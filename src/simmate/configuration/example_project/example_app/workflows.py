@@ -15,7 +15,7 @@ from simmate.workflow_engine import s3task_to_workflow
 from .models import ExampleRelaxation as ExampleRelaxationTable
 from .tasks import ExampleRelaxation as ExampleRelaxationTask
 
-# Now build our
+# Now build our workflow
 example_workflow = s3task_to_workflow(
     # The naming convention here follows how you would import this workflow.
     # We would do this with `from example_app import example_workflow`, so
