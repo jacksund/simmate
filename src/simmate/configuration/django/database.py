@@ -6,14 +6,13 @@ import shutil
 from django.core.management import call_command
 
 from simmate.configuration.django import setup_full  # sets database connection
-from simmate.configuration.django.settings import DJANGO_DIRECTORY, DATABASES
+from simmate.configuration.django.settings import DATABASES
 from simmate.database.base_data_types import Spacegroup
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
 # so this list is grabbed directly from django. I also grab the CUSTOM_APPS to
 # check for user-installed applications.
 from django.apps import apps
-from django.conf import settings
 
 APPS_TO_MIGRATE = list(apps.app_configs.keys())
 

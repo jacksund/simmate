@@ -28,8 +28,8 @@ class SubmitWorkflow(forms.Form):
         actual_fields = self.base_fields.keys()
         for possible_field in INPUT_MAPPINGS["file-or-json"]:
             if f"{possible_field}_file" in actual_fields:
-                file_input = cleaned_data.pop(f"{possible_field}_file")
-                json_input = cleaned_data.pop(f"{possible_field}_json")
+                file_input = cleaned_data.pop(f"{possible_field}_file", None)
+                json_input = cleaned_data.pop(f"{possible_field}_json", None)
 
                 if not file_input and not json_input:
                     raise ValidationError(
