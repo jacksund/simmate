@@ -24,7 +24,7 @@ def test_spacegroup_views(client):
 def test_dummy_view(client):
     response = client.get("/core-components/test/")
     assert response.status_code == 200
-    assertTemplateUsed("core_components/test.html")
+    assertTemplateUsed(response, "core_components/test.html")
 
 
 @pytest.mark.blender
@@ -32,4 +32,4 @@ def test_structure_viewer_view(client, structure):
     url_data = structure_to_url(structure)
     response = client.get(f"/core-components/structure-viewer/?{url_data}")
     assert response.status_code == 200
-    assertTemplateUsed("core_components/structure_viewer.html")
+    assertTemplateUsed(response, "core_components/structure_viewer.html")
