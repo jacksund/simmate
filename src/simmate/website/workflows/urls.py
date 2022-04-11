@@ -29,14 +29,14 @@ urlpatterns = [
         name="workflow_detail",
     ),
     #
-    # Views in results for an individual  calculation
+    # Views results for an individual calculation
     path(
         route="<workflow_type>/<workflow_name>/<int:workflow_run_id>",
         view=views.workflow_run_detail,
         name="workflow_run_detail",
     ),
     #
-    # Views in results for an individual  calculation
+    # Submit a new calculation
     path(
         route="<workflow_type>/<workflow_name>/submit",
         view=views.workflow_submit,

@@ -88,11 +88,17 @@ def structure_viewer(request):
 
 def test_viewer(request):
 
-    # TODO: switch to a test structure that is present in the source code
-    # from simmate.conftest import STRUCTURE_FILES
-    structure = Structure.from_file(
-        "/home/jacksund/Documents/spyder_wd/test_structures/SrSiN2_mp-4549_primitive.cif"
+    # grab cif filenames to test with
+    from simmate.toolkit import base_data_types
+
+    structure_dir = os.path.join(
+        os.path.dirname(base_data_types.__file__),
+        "test",
+        "test_structures",
     )
+    cif_filenames = [os.path.join(structure_dir, f) for f in os.listdir(structure_dir)]
+
+    structure = Structure.from_file(cif_filenames[0])
 
     context = {"structure": structure}
     template = "core_components/test.html"

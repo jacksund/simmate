@@ -153,7 +153,12 @@ def workflow_submit(
 
     if request.method == "POST":
         submission_form = FormClass(request.POST, request.FILES)
+
+        # raise Exception(str(submission_form.errors))
+
         if submission_form.is_valid():
+
+            # raise Exception("TEST123")
 
             parameters = parse_parameters(**submission_form.cleaned_data)
 

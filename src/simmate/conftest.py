@@ -18,6 +18,7 @@ import os
 import shutil
 import pytest
 from click.testing import CliRunner
+from django.contrib.auth.models import User
 
 from simmate.utilities import get_directory
 from simmate.toolkit import base_data_types
@@ -160,12 +161,25 @@ def sample_structures():
 
 
 @pytest.fixture(scope="package")
-def django_db_setup(django_db_setup, django_db_blocker, sample_structures):
+def django_db_setup(
+    django_db_setup,
+    django_db_blocker,
+    sample_structures,
+    # django_user_model,
+):
     """
     This fixture loads test data into the database that can be queried accross
-    all other tests. For now, we only add Spacegroups and 10 sample structures.
+    all other tests. For now, we only add Spacegroups, 10 sample structures,
+    and a user.
     """
     with django_db_blocker.unblock():
+
+        # add a user
+        User.objects.create_user(
+            username="test_user",
+            password="test_password",
+        )
+
         # populate spacegroup data
         Spacegroup._load_database_from_toolkit()
 
