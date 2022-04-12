@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# For adding new filters to django, look at...
-# https://docs.djangoproject.com/en/3.2/howto/custom-template-tags/
-
 from django import template
 from django.utils.safestring import mark_safe
 
