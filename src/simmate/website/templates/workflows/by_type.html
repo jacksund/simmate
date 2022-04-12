@@ -11,6 +11,8 @@ Simmate
 
 {% block body %}
 
+{% load markdown_filter %}
+
 <!-- start page title -->
 <div class="row">
   <div class="col-12">
@@ -42,7 +44,8 @@ Simmate
       <div class="card border-primary border">
           <div class="card-body">
               <h5 class="card-title text-primary">{{ workflow.name_short }}</h5>
-              <p class="card-text">{{ workflow.description_doc }}</p>
+              <!-- should I wrap the markdown in <p class="card-text"></p> ? -->
+              {{ workflow.description_doc | markdown }}
               <a href="{% url 'workflow_detail' workflow_type workflow.name_short %}" class="btn btn-primary btn-sm">About</a>
           </div>
       </div>
