@@ -73,8 +73,8 @@ http://simmate.org/third-parties/MatProjStructure/?format=json
 
 The same can be done for individual entries too! For example, if we wanted all the data for the structure with id `mp-1`, then we can do...
 ```
-http://127.0.0.1:8000/third-parties/MatProjStructure/mp-1/?format=api
-http://127.0.0.1:8000/third-parties/MatProjStructure/mp-1/?format=json
+http://simmate.org/third-parties/MatProjStructure/mp-1/?format=api
+http://simmate.org/third-parties/MatProjStructure/mp-1/?format=json
 ```
 
 For these, you should see an output similar too...
@@ -109,12 +109,12 @@ This is super useful because we can grab data from any programming language we'd
 
 ### Filtering results
 
-Our URLs also support complex filtering using the URL too. As an example, let's make a search where we want all structures that have the spacegroup 229 and also are in the Cr-N chemcial system. When you make this search in the normal webpage, you'll notice the URL becomes...
+Our URLs also support complex filtering too. As an example, let's make a search where we want all structures that have the spacegroup 229 and also are in the Cr-N chemcial system. When you make this search in the normal webpage, you'll notice the URL becomes...
 ```
 http://simmate.org/third-parties/MatProjStructure/?chemical_system=Cr-N&spacegroup__number=229
 ```
 
-Note that we specify our conditions by adding a question mark (`?`) at the end of the URL and then adding `example_key=desired_value` after that. As we add new conditions, we separate them with `&` -- which results `key1=value1&key2=value2&key3=value3` and so on. You can also add `format=api` at the end of this too!
+We specify our conditions by adding a question mark (`?`) at the end of the URL and then adding `example_key=desired_value` after that. As we add new conditions, we separate them with `&` -- which results in `key1=value1&key2=value2&key3=value3` and so on. You can also add `format=api` at the end of this too!
 
 Note, our python client for accessing data is MUCH more powerful for filtering through results, so we recommend accessing data using the `simmate.database` module in complex/advanced cases.
 
@@ -126,7 +126,7 @@ To protect our servers from overuse, Simmate currently returns a maximum of 12 r
 
 ### Ordering results
 
-For API and JSON formats, you can manually set the ordering of returned data by adding `ordering=example_column` to your URL. You can also reverse the ordering with `ordering=-example_column` (note the `-` symbol before the column name). For example:
+For API and JSON formats, you can manually set the ordering of returned data by adding `ordering=example_column` to your URL. You can also reverse the ordering with `ordering=-example_column` (note the "`-`" symbol before the column name). For example:
 
 ```
 http://simmate.org/third-parties/MatProjStructure/?ordering=density_atomic
