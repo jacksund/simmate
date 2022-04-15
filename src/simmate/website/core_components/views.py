@@ -11,34 +11,13 @@ from simmate.database.base_data_types import Spacegroup
 from simmate.visualization.structure import make_blender_structure
 from simmate.configuration.django import settings
 from simmate.utilities import get_directory
-from simmate.website.core_components.utilities import render_from_table
+from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 
 
-def symmetry(request):
-    return render_from_table(
-        request=request,
-        template="core_components/symmetry.html",
-        context={},
-        table=Spacegroup,
-        view_type="list",
-        primary_key_field="number",
-    )
-
-
-def spacegroup(
-    request,
-    spacegroup_number: str,
-):
-    return render_from_table(
-        request=request,
-        request_kwargs={"spacegroup_number": spacegroup_number},
-        template="core_components/spacegroup.html",
-        context={},
-        table=Spacegroup,
-        view_type="retrieve",
-        primary_key_field="number",
-        primary_key_url="spacegroup_number",
-    )
+class SymmetryViewSet(SimmateAPIViewSet):
+    table = Spacegroup
+    template_list = "core_components/symmetry.html"
+    template_retrieve = "core_components/spacegroup.html"
 
 
 def structure_viewer(request):

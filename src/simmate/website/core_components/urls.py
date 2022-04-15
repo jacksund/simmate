@@ -16,12 +16,12 @@ urlpatterns = [
     # 230 spacegroups while "spacegroup" is for a single one.
     path(
         route="symmetry/",
-        view=views.symmetry,
+        view=views.SymmetryViewSet.list_view,
         name="symmetry",
     ),
     path(
-        route="symmetry/<spacegroup_number>/",
-        view=views.spacegroup,
+        route="symmetry/<pk>/",
+        view=views.SymmetryViewSet.retrieve_view,
         name="spacegroup",
     ),
     #

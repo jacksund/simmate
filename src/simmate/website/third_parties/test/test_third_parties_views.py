@@ -39,7 +39,7 @@ def test_workflows_by_type_view(client, provider_name):
         "third_parties:entry-detail",
         kwargs={
             "provider_name": provider_name,
-            "entry_id": 999,
+            "pk": 999,
         },
     )
 
