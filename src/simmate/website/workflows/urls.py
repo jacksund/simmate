@@ -25,14 +25,14 @@ urlpatterns = [
     # new flow runs.
     path(
         route="<workflow_type>/<workflow_name>/",
-        view=views.workflow_detail,
+        view=views.WorkflowAPIViewSet.dynamic_list_view,
         name="workflow_detail",
     ),
     #
     # Views results for an individual calculation
     path(
-        route="<workflow_type>/<workflow_name>/<int:workflow_run_id>",
-        view=views.workflow_run_detail,
+        route="<workflow_type>/<workflow_name>/<int:pk>",
+        view=views.WorkflowAPIViewSet.dynamic_retrieve_view,
         name="workflow_run_detail",
     ),
     #

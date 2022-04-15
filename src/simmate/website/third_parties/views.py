@@ -3,7 +3,8 @@
 from django.shortcuts import render
 
 from simmate.database import third_parties
-from simmate.website.core_components.utilities import render_from_table
+from simmate.database.base_data_types import DatabaseTable
+from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 
 
 def providers_all(request):
@@ -26,40 +27,43 @@ def providers_all(request):
     return render(request, template, context)
 
 
-def provider(request, provider_name: str):
+class ProviderAPIViewSet(SimmateAPIViewSet):
 
-    # using the provider name (which is really just the table name), load
-    # the corresponding database table
-    provider_table = getattr(third_parties, provider_name)
+    template_list = "third_parties/provider.html"
+    template_retrieve = "third_parties/entry_detail.html"
 
-    return render_from_table(
-        request=request,
-        template="third_parties/provider.html",
-        context={"provider": provider_table},
-        table=provider_table,
-        view_type="list",
-    )
+    @classmethod
+    def get_table(
+        cls,
+        request,
+        provider_name,
+        pk=None,
+    ) -> DatabaseTable:
+        """
+        grabs the relevant database table using the URL request
+        """
+        # using the provider name (which is really just the table name), load
+        # the corresponding database table
+        provider_table = getattr(third_parties, provider_name)
+        return provider_table
 
+    def get_list_context(
+        self,
+        request,
+        provider_name,
+    ) -> dict:
 
-def entry_detail(
-    request,
-    provider_name: str,
-    entry_id: int,
-):
+        provider_table = getattr(third_parties, provider_name)
+        return {"provider": provider_table}
 
-    # using the provider name (which is really just the table name), load
-    # the corresponding database table
-    provider_table = getattr(third_parties, provider_name)
+    def get_retrieve_context(
+        self,
+        request,
+        provider_name,
+        pk,
+    ) -> dict:
 
-    return render_from_table(
-        request=request,
-        request_kwargs={
+        return {
             "provider_name": provider_name,
-            "entry_id": entry_id,
-        },
-        template="third_parties/entry_detail.html",
-        context={},
-        table=provider_table,
-        view_type="retrieve",
-        primary_key_url="entry_id",
-    )
+            "entry_id": pk,
+        }

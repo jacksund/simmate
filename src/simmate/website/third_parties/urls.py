@@ -12,12 +12,12 @@ urlpatterns = [
     ),
     path(
         route="<provider_name>/",
-        view=views.provider,
+        view=views.ProviderAPIViewSet.dynamic_list_view,
         name="provider",
     ),
     path(
-        route="<provider_name>/<entry_id>/",
-        view=views.entry_detail,
+        route="<provider_name>/<pk>/",
+        view=views.ProviderAPIViewSet.dynamic_retrieve_view,
         name="entry-detail",
     ),
 ]

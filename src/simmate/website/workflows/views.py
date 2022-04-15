@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 
 from prefect.backend.flow_run import FlowView
 
+from simmate.database.base_data_types import DatabaseTable
 from simmate.workflows.utilities import (
     # WORKFLOW_TYPES,
     get_workflow,
@@ -12,7 +13,7 @@ from simmate.workflows.utilities import (
     parse_parameters,
 )
 from simmate.website.workflows.forms import SubmitWorkflow
-from simmate.website.core_components.utilities import render_from_table
+from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 
 
 def workflows_all(request):
@@ -78,64 +79,67 @@ def workflows_by_type(request, workflow_type):
     return render(request, template, context)
 
 
-def workflow_detail(request, workflow_type, workflow_name):
-    # note, workflow_name here is the workflow.name_short
+class WorkflowAPIViewSet(SimmateAPIViewSet):
 
-    workflow_name_full = workflow_type + "/" + workflow_name
-    workflow = get_workflow(workflow_name_full)
+    template_list = "workflows/detail.html"
+    template_retrieve = "workflows/detail_run.html"
 
-    # In order to make links to the monitoring pages for each of these, we need
-    # to grab the prefect id
-    # If no flow exists in Prefect cloud, a ValueError is raised, so I can't
-    # share this info
-    try:
-        flow_id = FlowView.from_flow_name(workflow_name_full).flow_id
-        nflows_submitted = workflow.nflows_submitted
-    except:  # ValueError is no query result. Need to test what error is if no API key.
-        flow_id = None
-        nflows_submitted = None
-    # TODO: grab some metadata about this calc. For example...
-    # ncalculations = MITRelaxation.objects.count()
+    @classmethod
+    def get_table(
+        cls,
+        request,
+        workflow_type,
+        workflow_name,
+        pk=None,
+    ) -> DatabaseTable:
+        """
+        grabs the relevant database table using the URL request
+        """
+        workflow_name_full = workflow_type + "/" + workflow_name
+        workflow = get_workflow(workflow_name_full)
+        return workflow.result_table
 
-    return render_from_table(
-        request=request,
-        template="workflows/detail.html",
-        context={
+    def get_list_context(
+        self,
+        request,
+        workflow_type,
+        workflow_name,
+    ) -> dict:
+
+        workflow_name_full = workflow_type + "/" + workflow_name
+        workflow = get_workflow(workflow_name_full)
+
+        # In order to make links to the monitoring pages for each of these, we need
+        # to grab the prefect id
+        # If no flow exists in Prefect cloud, a ValueError is raised, so I can't
+        # share this info
+        try:
+            flow_id = FlowView.from_flow_name(workflow_name_full).flow_id
+            nflows_submitted = workflow.nflows_submitted
+        except:  # ValueError is no query result. Need to test what error is if no API key.
+            flow_id = None
+            nflows_submitted = None
+        # TODO: grab some metadata about this calc. For example...
+        # ncalculations = MITRelaxation.objects.count()
+
+        return {
             "workflow": workflow,
             "flow_id": flow_id,
             "nflows_submitted": nflows_submitted,
-        },
-        table=workflow.result_table,
-        view_type="list",
-    )
+        }
 
+    def get_retrieve_context(
+        self,
+        request,
+        workflow_type,
+        workflow_name,
+        pk,
+    ) -> dict:
 
-def workflow_run_detail(
-    request,
-    workflow_type: str,
-    workflow_name: str,
-    workflow_run_id: str,
-):
+        workflow_name_full = workflow_type + "/" + workflow_name
+        workflow = get_workflow(workflow_name_full)
 
-    workflow_name_full = workflow_type + "/" + workflow_name
-    workflow = get_workflow(workflow_name_full)
-
-    return render_from_table(
-        request=request,
-        request_kwargs={
-            "workflow_type": workflow_type,
-            "workflow_name": workflow_name,
-            "workflow_run_id": workflow_run_id,
-        },
-        template="workflows/detail_run.html",
-        context={
-            "active_tab_id": "workflows",
-            "workflow": workflow,
-        },
-        table=workflow.result_table,
-        view_type="retrieve",
-        primary_key_url="workflow_run_id",
-    )
+        return {"workflow": workflow}
 
 
 @login_required

@@ -65,7 +65,7 @@ def test_workflow_detail_view(client, workflow_name):
         kwargs={
             "workflow_type": workflow.type,
             "workflow_name": workflow.name_short,
-            "workflow_run_id": 999,
+            "pk": 999,
         },
     )
 
