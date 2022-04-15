@@ -27,6 +27,10 @@ def get_dask_client(**kwargs) -> Client:
             preload="simmate.configuration.dask.connect_to_database",
             **kwargs,
         )
+        # TODO: To all default job-queue clusters, consider using...
+        # from simmate.configuration.dask.setup_cluster import run_cluster
+        # cluster = run_cluster(...)
+        # client = Client(cluster.scheduler.address)
 
     # OPTIMIZE: I'm not sure if there's a better way to do implement this.
     # If this gives issues, I can alternatively try...

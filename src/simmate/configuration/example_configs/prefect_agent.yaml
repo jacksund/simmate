@@ -1,4 +1,22 @@
+# This is an example of how to setup Prefect settings for a cloud agent. In this
+# example, we want Prefect agent that submits jobs to a Dask cluster that submits 
+# jobs through SLURM. Note, the job settings for the Dask cluster (and also 
+# the SLURM jobs) are set in the `dask_cluster.yaml` file.
+# 
+# Note, make sure you have properly configured Prefect to connect to cloud.
+#
+# For more information, see Prefect's guides:
+# https://docs.prefect.io/orchestration/
+# https://docs.prefect.io/orchestration/agents/overview.html
 
+# A general name that will show up in Prefect Cloud. This can be anything. Here
+# we use the name of the Warren Lab's HPC cluster
 agent_name: WarWulf
+
+# Labels that this cluster should pick up from cloud. Remove this if you
+# want the agent to grab all non-labeled workflows.
 agent_labels: [DESKTOP-PVN50G5, digital-storm]
+
+# The type of cluster your want workers submitted through. See the
+# `dask_cluster.yaml` file for more information.
 dask_cluster_type: SLURM

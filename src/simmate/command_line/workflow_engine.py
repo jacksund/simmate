@@ -131,39 +131,39 @@ def start_singletask_worker():
     multiple=True,
 )
 @click.option(
-    "--njobs",
-    "-j",
-    help="the number of separate slurm jobs to submit",
+    "--n_workers",
+    "-w",
+    help="the number of separate workers to run/submit",
     type=int,
 )
 @click.option(
-    "--cpus_per_job",
+    "--cpus_per_worker",
     "-c",
-    help="the number of cpus that each slurm job will request",
+    help="the number of cpus that each worker will request",
     type=int,
 )
 @click.option(
-    "--memory_per_job",
+    "--memory_per_worker",
     "-m",
-    help="the amount of memory that each slurm job will request",
+    help="the amount of memory that each worker will request",
 )
 @click.option(
-    "--walltime_per_job",
+    "--walltime_per_worker",
     "-t",
-    help="the timelimit set for each slurm job",
+    help="the timelimit set for each worker",
 )
 def run_cluster(
     agent_name,
     agent_labels,
-    njobs,
-    cpus_per_job,
-    memory_per_job,
-    walltime_per_job,
+    n_workers,
+    cpus_per_worker,
+    memory_per_worker,
+    walltime_per_worker,
 ):
     """
     This starts up a Dask cluster and a Prefect Agent in order to run Simmate jobs.
 
-    This convenience command is really only meant for testing purposes, as Dask
+    This convenience command is really only meant for basic purposes, as Dask
     and Prefect teams offer their own commands with much more control. For
     example, this command uses Prefect's LocalAgent, but there are other
     advanced types available such as DockerAgent which may be better for your
@@ -176,29 +176,29 @@ def run_cluster(
     you'll now need to find the running process and kill it. Use something like
     "ps -aef | grep simmate" to find the running process and grab its ID. Then
     kill that process id with "kill 123" (if the id was 123).
-
-    For more help on managing your computational resources, see here:
-        <<TODO: insert link>>
-
     """
+
+    # All input arguments are optional. Therefore, I go through all of them and
+    # remove the ones that weren't set. This prevents overwritting default settings
+    # at a lower level. Note, I also rename several parameters (e.g. "cpus_per_worker").
+    # These different names for the CLI only exist to make things easier for beginners.
+    agent_kwargs = locals()  # grabs all input parameters as a dict
+    possible_kwargs = list(agent_kwargs.keys())  # because we will be deleting keys
+    for key in possible_kwargs:
+        if not agent_kwargs[key]:
+            agent_kwargs.pop(key)
+            continue
+        # renaming several parameters...
+        if key == "cpus_per_worker":
+            agent_kwargs["job_cpu"] = agent_kwargs.pop(key)
+        elif key == "memory_per_worker":
+            agent_kwargs["job_mem"] = agent_kwargs.pop(key)
+        elif key == "walltime_per_job":
+            agent_kwargs["walltime"] = agent_kwargs.pop(key)
 
     from simmate.configuration.prefect.setup_resources import run_cluster_and_agent
 
-    # agent_name and agent_labels are optional. We want them to grab the config defaults
-    # if they weren't passed, so check if they were set here.
-    agent_kwargs = {}
-    if agent_name:
-        agent_kwargs["agent_name"] = agent_name
-    if agent_labels:
-        agent_kwargs["agent_labels"] = agent_labels
-
-    run_cluster_and_agent(
-        njobs=njobs,
-        job_cpu=cpus_per_job,
-        job_mem=memory_per_job,
-        walltime=walltime_per_job,
-        **agent_kwargs,
-    )
+    run_cluster_and_agent(**agent_kwargs)
 
 
 # explicitly list functions so that pdoc doesn't skip them
