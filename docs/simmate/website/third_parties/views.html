@@ -35,10 +35,25 @@
                     <a class="function" href="#providers_all">providers_all</a>
             </li>
             <li>
-                    <a class="function" href="#provider">provider</a>
-            </li>
-            <li>
-                    <a class="function" href="#entry_detail">entry_detail</a>
+                    <a class="class" href="#ProviderAPIViewSet">ProviderAPIViewSet</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#ProviderAPIViewSet.template_list">template_list</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#ProviderAPIViewSet.template_retrieve">template_retrieve</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ProviderAPIViewSet.get_table">get_table</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ProviderAPIViewSet.get_list_context">get_list_context</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ProviderAPIViewSet.get_retrieve_context">get_retrieve_context</a>
+                        </li>
+                </ul>
+
             </li>
     </ul>
 
@@ -65,7 +80,8 @@
 <span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
 
 <span class="kn">from</span> <span class="nn">simmate.database</span> <span class="kn">import</span> <span class="n">third_parties</span>
-<span class="kn">from</span> <span class="nn">simmate.website.core_components.utilities</span> <span class="kn">import</span> <span class="n">render_from_table</span>
+<span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">DatabaseTable</span>
+<span class="kn">from</span> <span class="nn">simmate.website.core_components.base_api_view</span> <span class="kn">import</span> <span class="n">SimmateAPIViewSet</span>
 
 
 <span class="k">def</span> <span class="nf">providers_all</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
@@ -88,43 +104,46 @@
     <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">provider</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ProviderAPIViewSet</span><span class="p">(</span><span class="n">SimmateAPIViewSet</span><span class="p">):</span>
 
-    <span class="c1"># using the provider name (which is really just the table name), load</span>
-    <span class="c1"># the corresponding database table</span>
-    <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
+    <span class="n">template_list</span> <span class="o">=</span> <span class="s2">&quot;third_parties/provider.html&quot;</span>
+    <span class="n">template_retrieve</span> <span class="o">=</span> <span class="s2">&quot;third_parties/entry_detail.html&quot;</span>
 
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;third_parties/provider.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="n">provider_table</span><span class="p">},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">provider_table</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_table</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">provider_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatabaseTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        grabs the relevant database table using the URL request</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># using the provider name (which is really just the table name), load</span>
+        <span class="c1"># the corresponding database table</span>
+        <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">provider_table</span>
 
+    <span class="k">def</span> <span class="nf">get_list_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">provider_name</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 
-<span class="k">def</span> <span class="nf">entry_detail</span><span class="p">(</span>
-    <span class="n">request</span><span class="p">,</span>
-    <span class="n">provider_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">entry_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<span class="p">):</span>
+        <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="n">provider_table</span><span class="p">}</span>
 
-    <span class="c1"># using the provider name (which is really just the table name), load</span>
-    <span class="c1"># the corresponding database table</span>
-    <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_retrieve_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">provider_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">request_kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;provider_name&quot;</span><span class="p">:</span> <span class="n">provider_name</span><span class="p">,</span>
-            <span class="s2">&quot;entry_id&quot;</span><span class="p">:</span> <span class="n">entry_id</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;third_parties/entry_detail.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">provider_table</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;retrieve&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_url</span><span class="o">=</span><span class="s2">&quot;entry_id&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+            <span class="s2">&quot;entry_id&quot;</span><span class="p">:</span> <span class="n">pk</span><span class="p">,</span>
+        <span class="p">}</span>
 </pre></div>
 
         </details>
@@ -165,74 +184,296 @@
     
 
                 </section>
-                <section id="provider">
-                            <div class="attr function"><a class="headerlink" href="#provider">#&nbsp;&nbsp</a>
+                <section id="ProviderAPIViewSet">
+                                <div class="attr class">
+        <a class="headerlink" href="#ProviderAPIViewSet">#&nbsp;&nbsp</a>
 
         
-            <span class="def">def</span>
-            <span class="name">provider</span><span class="signature">(request, provider_name: str)</span>:
+        <span class="def">class</span>
+        <span class="name">ProviderAPIViewSet</span><wbr>(<span class="base"><a href="../core_components/base_api_view.html#SimmateAPIViewSet">simmate.website.core_components.base_api_view.SimmateAPIViewSet</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">provider</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ProviderAPIViewSet</span><span class="p">(</span><span class="n">SimmateAPIViewSet</span><span class="p">):</span>
 
-    <span class="c1"># using the provider name (which is really just the table name), load</span>
-    <span class="c1"># the corresponding database table</span>
-    <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
+    <span class="n">template_list</span> <span class="o">=</span> <span class="s2">&quot;third_parties/provider.html&quot;</span>
+    <span class="n">template_retrieve</span> <span class="o">=</span> <span class="s2">&quot;third_parties/entry_detail.html&quot;</span>
 
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;third_parties/provider.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="n">provider_table</span><span class="p">},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">provider_table</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-</pre></div>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_table</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">provider_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatabaseTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        grabs the relevant database table using the URL request</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># using the provider name (which is really just the table name), load</span>
+        <span class="c1"># the corresponding database table</span>
+        <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">provider_table</span>
 
-        </details>
+    <span class="k">def</span> <span class="nf">get_list_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">provider_name</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 
-    
+        <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="n">provider_table</span><span class="p">}</span>
 
-                </section>
-                <section id="entry_detail">
-                            <div class="attr function"><a class="headerlink" href="#entry_detail">#&nbsp;&nbsp</a>
+    <span class="k">def</span> <span class="nf">get_retrieve_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">provider_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 
-        
-            <span class="def">def</span>
-            <span class="name">entry_detail</span><span class="signature">(request, provider_name: str, entry_id: int)</span>:
-    </div>
-
-            <details>
-            <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">entry_detail</span><span class="p">(</span>
-    <span class="n">request</span><span class="p">,</span>
-    <span class="n">provider_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">entry_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<span class="p">):</span>
-
-    <span class="c1"># using the provider name (which is really just the table name), load</span>
-    <span class="c1"># the corresponding database table</span>
-    <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">request_kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;provider_name&quot;</span><span class="p">:</span> <span class="n">provider_name</span><span class="p">,</span>
-            <span class="s2">&quot;entry_id&quot;</span><span class="p">:</span> <span class="n">entry_id</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;third_parties/entry_detail.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">provider_table</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;retrieve&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_url</span><span class="o">=</span><span class="s2">&quot;entry_id&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+            <span class="s2">&quot;entry_id&quot;</span><span class="p">:</span> <span class="n">pk</span><span class="p">,</span>
+        <span class="p">}</span>
 </pre></div>
 
         </details>
 
+            <div class="docstring"><p>Example use:</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># in views.py</span>
+<span class="k">class</span> <span class="nc">ExampleTableViewSet</span><span class="p">(</span><span class="n">SimmateAPIViewSet</span><span class="p">):</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">ExampleTable</span>
+    <span class="n">template_list</span> <span class="o">=</span> <span class="s2">&quot;custom_app/list.html&quot;</span>
+    <span class="n">template_retrieve</span> <span class="o">=</span> <span class="s2">&quot;custom_app/retrieve.html&quot;</span>
+
+<span class="c1"># in urls.py</span>
+<span class="n">path</span><span class="p">(</span>
+    <span class="n">route</span><span class="o">=</span><span class="s2">&quot;example-table&quot;</span><span class="p">,</span>
+    <span class="n">view</span><span class="o">=</span><span class="n">ExampleTableViewSet</span><span class="o">.</span><span class="n">list_view</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example-list&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">path</span><span class="p">(</span>
+    <span class="n">route</span><span class="o">=</span><span class="s2">&quot;example-table/&lt;int:id&gt;&quot;</span><span class="p">,</span>
+    <span class="n">view</span><span class="o">=</span><span class="n">ExampleTableViewSet</span><span class="o">.</span><span class="n">retrieve_view</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example-retrieve&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+
+
+                            <div id="ProviderAPIViewSet.template_list" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#ProviderAPIViewSet.template_list">#&nbsp;&nbsp</a>
+
+        <span class="name">template_list</span><span class="annotation">: str</span><span class="default_value"> = &#39;third_parties/provider.html&#39;</span>
+    </div>
+
+    
     
 
+                            </div>
+                            <div id="ProviderAPIViewSet.template_retrieve" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#ProviderAPIViewSet.template_retrieve">#&nbsp;&nbsp</a>
+
+        <span class="name">template_retrieve</span><span class="annotation">: str</span><span class="default_value"> = &#39;third_parties/entry_detail.html&#39;</span>
+    </div>
+
+    
+    
+
+                            </div>
+                            <div id="ProviderAPIViewSet.get_table" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#ProviderAPIViewSet.get_table">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">get_table</span><span class="signature">(
+    cls,
+    request,
+    provider_name,
+    pk=None
+) -&gt; <a href="../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_table</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">provider_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatabaseTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        grabs the relevant database table using the URL request</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># using the provider name (which is really just the table name), load</span>
+        <span class="c1"># the corresponding database table</span>
+        <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">provider_table</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>grabs the relevant database table using the URL request</p>
+</div>
+
+
+                            </div>
+                            <div id="ProviderAPIViewSet.get_list_context" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#ProviderAPIViewSet.get_list_context">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_list_context</span><span class="signature">(self, request, provider_name) -&gt; dict</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_list_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">provider_name</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="n">provider_table</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">third_parties</span><span class="p">,</span> <span class="n">provider_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="n">provider_table</span><span class="p">}</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This defines extra context that should be passed to the template when
+using format=html when a list-view is requested. By default, no extra
+context is returned.</p>
+</div>
+
+
+                            </div>
+                            <div id="ProviderAPIViewSet.get_retrieve_context" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#ProviderAPIViewSet.get_retrieve_context">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_retrieve_context</span><span class="signature">(self, request, provider_name, pk) -&gt; dict</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_retrieve_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">provider_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;provider_name&quot;</span><span class="p">:</span> <span class="n">provider_name</span><span class="p">,</span>
+            <span class="s2">&quot;entry_id&quot;</span><span class="p">:</span> <span class="n">pk</span><span class="p">,</span>
+        <span class="p">}</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This defines extra context that should be passed to the template when
+using format=html when a retrieve-view is requested. By default, no extra
+context is returned.</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>django.views.generic.base.View</dt>
+                                <dd id="ProviderAPIViewSet.__init__" class="function">View</dd>
+                <dd id="ProviderAPIViewSet.http_method_names" class="variable">http_method_names</dd>
+                <dd id="ProviderAPIViewSet.setup" class="function">setup</dd>
+
+            </div>
+            <div><dt><a href="../core_components/base_api_view.html#SimmateAPIViewSet">simmate.website.core_components.base_api_view.SimmateAPIViewSet</a></dt>
+                                <dd id="ProviderAPIViewSet.table" class="variable"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.table">table</a></dd>
+                <dd id="ProviderAPIViewSet.get_list_response" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.get_list_response">get_list_response</a></dd>
+                <dd id="ProviderAPIViewSet.get_retrieve_response" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.get_retrieve_response">get_retrieve_response</a></dd>
+                <dd id="ProviderAPIViewSet.from_table" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.from_table">from_table</a></dd>
+                <dd id="ProviderAPIViewSet.list_view" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.list_view">list_view</a></dd>
+                <dd id="ProviderAPIViewSet.retrieve_view" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.retrieve_view">retrieve_view</a></dd>
+                <dd id="ProviderAPIViewSet.dynamic_list_view" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.dynamic_list_view">dynamic_list_view</a></dd>
+                <dd id="ProviderAPIViewSet.dynamic_retrieve_view" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.dynamic_retrieve_view">dynamic_retrieve_view</a></dd>
+
+            </div>
+            <div><dt>rest_framework.viewsets.ViewSetMixin</dt>
+                                <dd id="ProviderAPIViewSet.as_view" class="function">as_view</dd>
+                <dd id="ProviderAPIViewSet.initialize_request" class="function">initialize_request</dd>
+                <dd id="ProviderAPIViewSet.reverse_action" class="function">reverse_action</dd>
+                <dd id="ProviderAPIViewSet.get_extra_actions" class="function">get_extra_actions</dd>
+                <dd id="ProviderAPIViewSet.get_extra_action_url_map" class="function">get_extra_action_url_map</dd>
+
+            </div>
+            <div><dt>rest_framework.generics.GenericAPIView</dt>
+                                <dd id="ProviderAPIViewSet.queryset" class="variable">queryset</dd>
+                <dd id="ProviderAPIViewSet.serializer_class" class="variable">serializer_class</dd>
+                <dd id="ProviderAPIViewSet.lookup_field" class="variable">lookup_field</dd>
+                <dd id="ProviderAPIViewSet.lookup_url_kwarg" class="variable">lookup_url_kwarg</dd>
+                <dd id="ProviderAPIViewSet.filter_backends" class="variable">filter_backends</dd>
+                <dd id="ProviderAPIViewSet.pagination_class" class="class">pagination_class</dd>
+                <dd id="ProviderAPIViewSet.get_queryset" class="function">get_queryset</dd>
+                <dd id="ProviderAPIViewSet.get_object" class="function">get_object</dd>
+                <dd id="ProviderAPIViewSet.get_serializer" class="function">get_serializer</dd>
+                <dd id="ProviderAPIViewSet.get_serializer_class" class="function">get_serializer_class</dd>
+                <dd id="ProviderAPIViewSet.get_serializer_context" class="function">get_serializer_context</dd>
+                <dd id="ProviderAPIViewSet.filter_queryset" class="function">filter_queryset</dd>
+                <dd id="ProviderAPIViewSet.paginator" class="variable">paginator</dd>
+                <dd id="ProviderAPIViewSet.paginate_queryset" class="function">paginate_queryset</dd>
+                <dd id="ProviderAPIViewSet.get_paginated_response" class="function">get_paginated_response</dd>
+
+            </div>
+            <div><dt>rest_framework.views.APIView</dt>
+                                <dd id="ProviderAPIViewSet.renderer_classes" class="variable">renderer_classes</dd>
+                <dd id="ProviderAPIViewSet.parser_classes" class="variable">parser_classes</dd>
+                <dd id="ProviderAPIViewSet.authentication_classes" class="variable">authentication_classes</dd>
+                <dd id="ProviderAPIViewSet.throttle_classes" class="variable">throttle_classes</dd>
+                <dd id="ProviderAPIViewSet.permission_classes" class="variable">permission_classes</dd>
+                <dd id="ProviderAPIViewSet.content_negotiation_class" class="class">content_negotiation_class</dd>
+                <dd id="ProviderAPIViewSet.metadata_class" class="class">metadata_class</dd>
+                <dd id="ProviderAPIViewSet.versioning_class" class="variable">versioning_class</dd>
+                <dd id="ProviderAPIViewSet.settings" class="variable">settings</dd>
+                <dd id="ProviderAPIViewSet.schema" class="variable">schema</dd>
+                <dd id="ProviderAPIViewSet.allowed_methods" class="variable">allowed_methods</dd>
+                <dd id="ProviderAPIViewSet.default_response_headers" class="variable">default_response_headers</dd>
+                <dd id="ProviderAPIViewSet.http_method_not_allowed" class="function">http_method_not_allowed</dd>
+                <dd id="ProviderAPIViewSet.permission_denied" class="function">permission_denied</dd>
+                <dd id="ProviderAPIViewSet.throttled" class="function">throttled</dd>
+                <dd id="ProviderAPIViewSet.get_authenticate_header" class="function">get_authenticate_header</dd>
+                <dd id="ProviderAPIViewSet.get_parser_context" class="function">get_parser_context</dd>
+                <dd id="ProviderAPIViewSet.get_renderer_context" class="function">get_renderer_context</dd>
+                <dd id="ProviderAPIViewSet.get_exception_handler_context" class="function">get_exception_handler_context</dd>
+                <dd id="ProviderAPIViewSet.get_view_name" class="function">get_view_name</dd>
+                <dd id="ProviderAPIViewSet.get_view_description" class="function">get_view_description</dd>
+                <dd id="ProviderAPIViewSet.get_format_suffix" class="function">get_format_suffix</dd>
+                <dd id="ProviderAPIViewSet.get_renderers" class="function">get_renderers</dd>
+                <dd id="ProviderAPIViewSet.get_parsers" class="function">get_parsers</dd>
+                <dd id="ProviderAPIViewSet.get_authenticators" class="function">get_authenticators</dd>
+                <dd id="ProviderAPIViewSet.get_permissions" class="function">get_permissions</dd>
+                <dd id="ProviderAPIViewSet.get_throttles" class="function">get_throttles</dd>
+                <dd id="ProviderAPIViewSet.get_content_negotiator" class="function">get_content_negotiator</dd>
+                <dd id="ProviderAPIViewSet.get_exception_handler" class="function">get_exception_handler</dd>
+                <dd id="ProviderAPIViewSet.perform_content_negotiation" class="function">perform_content_negotiation</dd>
+                <dd id="ProviderAPIViewSet.perform_authentication" class="function">perform_authentication</dd>
+                <dd id="ProviderAPIViewSet.check_permissions" class="function">check_permissions</dd>
+                <dd id="ProviderAPIViewSet.check_object_permissions" class="function">check_object_permissions</dd>
+                <dd id="ProviderAPIViewSet.check_throttles" class="function">check_throttles</dd>
+                <dd id="ProviderAPIViewSet.determine_version" class="function">determine_version</dd>
+                <dd id="ProviderAPIViewSet.initial" class="function">initial</dd>
+                <dd id="ProviderAPIViewSet.finalize_response" class="function">finalize_response</dd>
+                <dd id="ProviderAPIViewSet.handle_exception" class="function">handle_exception</dd>
+                <dd id="ProviderAPIViewSet.raise_uncaught_exception" class="function">raise_uncaught_exception</dd>
+                <dd id="ProviderAPIViewSet.dispatch" class="function">dispatch</dd>
+                <dd id="ProviderAPIViewSet.options" class="function">options</dd>
+
+            </div>
+                                </dl>
+                            </div>
                 </section>
     </main>
 <script>

@@ -29,6 +29,28 @@
 
 
 
+        <h2>API Documentation</h2>
+            <ul class="memberlist">
+            <li>
+                    <a class="class" href="#AseAtomsAdaptor">AseAtomsAdaptor</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#AseAtomsAdaptor.__init__">AseAtomsAdaptor</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#AseAtomsAdaptor.get_atoms">get_atoms</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#AseAtomsAdaptor.get_structure">get_structure</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#AseAtomsAdaptor.get_molecule">get_molecule</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
+
 
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev">
@@ -44,9 +66,619 @@
                     <h1 class="modulename">
 <a href="./../../../simmate.html">simmate</a><wbr>.<a href="./../../file_converters.html">file_converters</a><wbr>.<a href="./../structure.html">structure</a><wbr>.ase    </h1>
 
-                
-                
+                        <div class="docstring"><p>This converter simply imports a pymatgen class. With this you can quickly
+convert between Simmate.toolkit and ASE.atoms objects.</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../toolkit.html">simmate.toolkit</a></span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn"><a href="">simmate.file_converters.structure.ase</a></span> <span class="kn">import</span> <span class="n">AseAtomsAdaptor</span>
+
+
+<span class="n">initial_structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;example.cif&quot;</span><span class="p">)</span>
+
+<span class="c1"># convert to ASE</span>
+<span class="n">new_ase_object</span> <span class="o">=</span> <span class="n">AseAtomsAdaptor</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
+<span class="c1"># convert back to PyMatgen/Simmate</span>
+<span class="n">new_toolkit_object</span> <span class="o">=</span> <span class="n">AseAtomsAdaptor</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="n">new_ase_object</span><span class="p">)</span>
+
+<span class="c1"># alternatively, you can convert back to PyMatgen Molecule</span>
+<span class="n">new_molecule_object</span> <span class="o">=</span> <span class="n">AseAtomsAdaptor</span><span class="o">.</span><span class="n">get_molecule</span><span class="p">(</span><span class="n">new_ase_object</span><span class="p">)</span>
+</code></pre></div>
+</div>
+
+                        <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This converter simply imports a pymatgen class. With this you can quickly</span>
+<span class="sd">convert between Simmate.toolkit and ASE.atoms objects.</span>
+
+<span class="sd">``` python</span>
+
+<span class="sd">from simmate.toolkit import Structure</span>
+<span class="sd">from simmate.file_converters.structure.ase import AseAtomsAdaptor</span>
+
+
+<span class="sd">initial_structure = Structure.from_file(&quot;example.cif&quot;)</span>
+
+<span class="sd"># convert to ASE</span>
+<span class="sd">new_ase_object = AseAtomsAdaptor.get_atoms(structure)</span>
+
+<span class="sd"># convert back to PyMatgen/Simmate</span>
+<span class="sd">new_toolkit_object = AseAtomsAdaptor.get_structure(new_ase_object)</span>
+
+<span class="sd"># alternatively, you can convert back to PyMatgen Molecule</span>
+<span class="sd">new_molecule_object = AseAtomsAdaptor.get_molecule(new_ase_object)</span>
+<span class="sd">```</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">pymatgen.io.ase</span> <span class="kn">import</span> <span class="n">AseAtomsAdaptor</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;AseAtomsAdaptor&quot;</span><span class="p">]</span>
+</pre></div>
+
+        </details>
+
             </section>
+                <section id="AseAtomsAdaptor">
+                                <div class="attr class">
+        <a class="headerlink" href="#AseAtomsAdaptor">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">AseAtomsAdaptor</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">AseAtomsAdaptor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adaptor serves as a bridge between ASE Atoms and pymatgen objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_atoms</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns ASE Atoms object from pymatgen structure or molecule.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            structure: pymatgen.core.structure.Structure or pymatgen.core.structure.Molecule</span>
+<span class="sd">            **kwargs: other keyword args to pass into the ASE Atoms constructor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ASE Atoms object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">structure</span><span class="o">.</span><span class="n">is_ordered</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ASE Atoms only supports ordered structures&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_loaded</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;AseAtomsAdaptor requires the ASE package.</span><span class="se">\n</span><span class="s2">Use `pip install ase` or `conda install ase -c conda-forge`&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Construct the base ASE Atoms object</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="s2">&quot;lattice&quot;</span><span class="p">):</span>
+            <span class="n">cell</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">matrix</span>
+            <span class="n">pbc</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cell</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">pbc</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="n">pbc</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Set the site magmoms in the ASE Atoms object</span>
+        <span class="c1"># Note: ASE distinguishes between initial and converged</span>
+        <span class="c1"># magnetic moment site properties, whereas pymatgen does not. Therefore, we</span>
+        <span class="c1"># have to distinguish between these two when constructing the Structure/Molecule.</span>
+        <span class="c1"># The mapping selected here is:</span>
+        <span class="c1"># ASE initial magmom &lt;--&gt; Pymatgen &quot;magmom&quot;</span>
+        <span class="c1"># ASE final magmom &lt;--&gt; Pymatgen &quot;final_magmom&quot;</span>
+        <span class="c1"># ASE initial charge &lt;--&gt; Pymatgen &quot;charge&quot;</span>
+        <span class="c1"># ASE final charge &lt;--&gt; Pymatgen &quot;final_charge&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;magmom&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">initial_magmoms</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="s2">&quot;magmom&quot;</span><span class="p">]</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">set_initial_magnetic_moments</span><span class="p">(</span><span class="n">initial_magmoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;charge&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">initial_charges</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="s2">&quot;charge&quot;</span><span class="p">]</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">set_initial_charges</span><span class="p">(</span><span class="n">initial_charges</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;final_magmom&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">magmoms</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="s2">&quot;final_magmom&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">magmoms</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;final_charge&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="s2">&quot;final_charge&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">magmoms</span> <span class="ow">or</span> <span class="n">charges</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">magmoms</span> <span class="ow">and</span> <span class="n">charges</span><span class="p">:</span>
+                <span class="n">calc</span> <span class="o">=</span> <span class="n">SinglePointDFTCalculator</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;magmoms&quot;</span><span class="p">:</span> <span class="n">magmoms</span><span class="p">,</span> <span class="s2">&quot;charges&quot;</span><span class="p">:</span> <span class="n">charges</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="n">magmoms</span><span class="p">:</span>
+                <span class="n">calc</span> <span class="o">=</span> <span class="n">SinglePointDFTCalculator</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;magmoms&quot;</span><span class="p">:</span> <span class="n">magmoms</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="n">charges</span><span class="p">:</span>
+                <span class="n">calc</span> <span class="o">=</span> <span class="n">SinglePointDFTCalculator</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;charges&quot;</span><span class="p">:</span> <span class="n">charges</span><span class="p">})</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">calc</span>
+
+        <span class="c1"># Get the oxidation states from the structure</span>
+        <span class="n">oxi_states</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">,</span> <span class="s2">&quot;oxi_state&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+
+        <span class="c1"># Read in selective dynamics if present. Note that the ASE FixAtoms class fixes (x,y,z), so</span>
+        <span class="c1"># here we make sure that [False, False, False] or [True, True, True] is set for the site selective</span>
+        <span class="c1"># dynamics property. As a consequence, if only a subset of dimensions are fixed, this won&#39;t get passed to ASE.</span>
+        <span class="k">if</span> <span class="s2">&quot;selective_dynamics&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">fix_atoms</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">:</span>
+                <span class="n">site_prop</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;selective_dynamics&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">site_prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]]:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;ASE FixAtoms constraint does not support selective dynamics in only some dimensions.&quot;</span>
+                        <span class="s2">&quot;Remove the selective dynamics and try again if you do not need them.&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">is_fixed</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;selective_dynamics&quot;</span><span class="p">]))</span>
+                <span class="n">fix_atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_fixed</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fix_atoms</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Set the selective dynamics with the FixAtoms class.</span>
+        <span class="k">if</span> <span class="n">fix_atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">set_constraint</span><span class="p">(</span><span class="n">FixAtoms</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">fix_atoms</span><span class="p">))</span>
+
+        <span class="c1"># Add any remaining site properties to the ASE Atoms object</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;magmom&quot;</span><span class="p">,</span> <span class="s2">&quot;charge&quot;</span><span class="p">,</span> <span class="s2">&quot;final_magmom&quot;</span><span class="p">,</span> <span class="s2">&quot;final_charge&quot;</span><span class="p">,</span> <span class="s2">&quot;selective_dynamics&quot;</span><span class="p">]:</span>
+                <span class="n">atoms</span><span class="o">.</span><span class="n">set_array</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="n">prop</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">oxi_states</span><span class="p">):</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">set_array</span><span class="p">(</span><span class="s2">&quot;oxi_states&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">oxi_states</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">atoms</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns pymatgen structure from ASE Atoms.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            atoms: ASE Atoms object</span>
+<span class="sd">            cls: The Structure class to instantiate (defaults to pymatgen structure)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Equivalent pymatgen.core.structure.Structure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">Structure</span> <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">cls</span>
+
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_symbols</span><span class="p">()</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
+
+        <span class="c1"># Get the site magmoms from the ASE Atoms objects.</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="s2">&quot;calc&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">magmoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;magmoms&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">magmoms</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">atoms</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">&quot;initial_magmoms&quot;</span><span class="p">):</span>
+            <span class="n">initial_magmoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_initial_magnetic_moments</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">initial_magmoms</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">atoms</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">&quot;initial_charges&quot;</span><span class="p">):</span>
+            <span class="n">initial_charges</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_initial_charges</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">initial_charges</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">atoms</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">&quot;oxi_states&quot;</span><span class="p">):</span>
+            <span class="n">oxi_states</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="s2">&quot;oxi_states&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">oxi_states</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># If the ASE Atoms object has constraints, make sure that they are of the</span>
+        <span class="c1"># kind FixAtoms, which are the only ones that can be supported in Pymatgen.</span>
+        <span class="c1"># By default, FixAtoms fixes all three (x, y, z) dimensions.</span>
+        <span class="k">if</span> <span class="n">atoms</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="n">unsupported_constraint_type</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">constraint_indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">atoms</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span> <span class="n">FixAtoms</span><span class="p">):</span>
+                    <span class="n">constraint_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">constraint</span><span class="o">.</span><span class="n">get_indices</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">unsupported_constraint_type</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">unsupported_constraint_type</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Only FixAtoms is supported by Pymatgen. Other constraints will not be set.&quot;</span><span class="p">)</span>
+            <span class="n">sel_dyn</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">index</span> <span class="ow">in</span> <span class="n">constraint_indices</span> <span class="k">else</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sel_dyn</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Return a Molecule object if that was specifically requested;</span>
+        <span class="c1"># otherwise return a Structure object as expected</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="n">Molecule</span><span class="p">:</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Set the site magmoms in the Pymatgen structure object</span>
+        <span class="c1"># Note: ASE distinguishes between initial and converged</span>
+        <span class="c1"># magnetic moment site properties, whereas pymatgen does not. Therefore, we</span>
+        <span class="c1"># have to distinguish between these two when constructing the Structure/Molecule.</span>
+        <span class="c1"># The mapping selected here is:</span>
+        <span class="c1"># ASE initial magmom &lt;--&gt; Pymatgen &quot;magmom&quot;</span>
+        <span class="c1"># ASE final magmom &lt;--&gt; Pymatgen &quot;final_magmom&quot;</span>
+        <span class="c1"># ASE initial charge &lt;--&gt; Pymatgen &quot;charge&quot;</span>
+        <span class="c1"># ASE final charge &lt;--&gt; Pymatgen &quot;final_charge&quot;</span>
+        <span class="k">if</span> <span class="n">magmoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;final_magmom&quot;</span><span class="p">,</span> <span class="n">magmoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initial_magmoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;magmom&quot;</span><span class="p">,</span> <span class="n">initial_magmoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">charges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;final_charge&quot;</span><span class="p">,</span> <span class="n">charges</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initial_charges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;charge&quot;</span><span class="p">,</span> <span class="n">initial_charges</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sel_dyn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">sel_dyn</span><span class="p">):</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;selective_dynamics&quot;</span><span class="p">,</span> <span class="n">sel_dyn</span><span class="p">)</span>
+
+        <span class="c1"># Add oxidation states by site</span>
+        <span class="k">if</span> <span class="n">oxi_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_oxidation_state_by_site</span><span class="p">(</span><span class="n">oxi_states</span><span class="p">)</span>
+
+        <span class="c1"># Add any remaining site properties to the Pymatgen structure object</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">atoms</span><span class="o">.</span><span class="n">arrays</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s2">&quot;numbers&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;positions&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;magmom&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;final_magmom&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;charge&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;final_charge&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;oxi_states&quot;</span><span class="p">,</span>
+            <span class="p">]:</span>
+                <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">structure</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_molecule</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns pymatgen molecule from ASE Atoms.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            atoms: ASE Atoms object</span>
+<span class="sd">            cls: The Molecule class to instantiate (defaults to pymatgen molecule)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Equivalent pymatgen.core.structure.Molecule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">Molecule</span> <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">cls</span>
+        <span class="n">molecule</span> <span class="o">=</span> <span class="n">AseAtomsAdaptor</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">molecule</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_initial_charges</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_initial_magnetic_moments</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">molecule</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Adaptor serves as a bridge between ASE Atoms and pymatgen objects.</p>
+</div>
+
+
+                            <div id="AseAtomsAdaptor.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#AseAtomsAdaptor.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">AseAtomsAdaptor</span><span class="signature">()</span>
+    </div>
+
+    
+    
+
+                            </div>
+                            <div id="AseAtomsAdaptor.get_atoms" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#AseAtomsAdaptor.get_atoms">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">get_atoms</span><span class="signature">(structure, **kwargs)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_atoms</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns ASE Atoms object from pymatgen structure or molecule.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            structure: pymatgen.core.structure.Structure or pymatgen.core.structure.Molecule</span>
+<span class="sd">            **kwargs: other keyword args to pass into the ASE Atoms constructor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ASE Atoms object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">structure</span><span class="o">.</span><span class="n">is_ordered</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ASE Atoms only supports ordered structures&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_loaded</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;AseAtomsAdaptor requires the ASE package.</span><span class="se">\n</span><span class="s2">Use `pip install ase` or `conda install ase -c conda-forge`&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Construct the base ASE Atoms object</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="s2">&quot;lattice&quot;</span><span class="p">):</span>
+            <span class="n">cell</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">matrix</span>
+            <span class="n">pbc</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cell</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">pbc</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="n">pbc</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Set the site magmoms in the ASE Atoms object</span>
+        <span class="c1"># Note: ASE distinguishes between initial and converged</span>
+        <span class="c1"># magnetic moment site properties, whereas pymatgen does not. Therefore, we</span>
+        <span class="c1"># have to distinguish between these two when constructing the Structure/Molecule.</span>
+        <span class="c1"># The mapping selected here is:</span>
+        <span class="c1"># ASE initial magmom &lt;--&gt; Pymatgen &quot;magmom&quot;</span>
+        <span class="c1"># ASE final magmom &lt;--&gt; Pymatgen &quot;final_magmom&quot;</span>
+        <span class="c1"># ASE initial charge &lt;--&gt; Pymatgen &quot;charge&quot;</span>
+        <span class="c1"># ASE final charge &lt;--&gt; Pymatgen &quot;final_charge&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;magmom&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">initial_magmoms</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="s2">&quot;magmom&quot;</span><span class="p">]</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">set_initial_magnetic_moments</span><span class="p">(</span><span class="n">initial_magmoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;charge&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">initial_charges</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="s2">&quot;charge&quot;</span><span class="p">]</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">set_initial_charges</span><span class="p">(</span><span class="n">initial_charges</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;final_magmom&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">magmoms</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="s2">&quot;final_magmom&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">magmoms</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;final_charge&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="s2">&quot;final_charge&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">magmoms</span> <span class="ow">or</span> <span class="n">charges</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">magmoms</span> <span class="ow">and</span> <span class="n">charges</span><span class="p">:</span>
+                <span class="n">calc</span> <span class="o">=</span> <span class="n">SinglePointDFTCalculator</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;magmoms&quot;</span><span class="p">:</span> <span class="n">magmoms</span><span class="p">,</span> <span class="s2">&quot;charges&quot;</span><span class="p">:</span> <span class="n">charges</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="n">magmoms</span><span class="p">:</span>
+                <span class="n">calc</span> <span class="o">=</span> <span class="n">SinglePointDFTCalculator</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;magmoms&quot;</span><span class="p">:</span> <span class="n">magmoms</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="n">charges</span><span class="p">:</span>
+                <span class="n">calc</span> <span class="o">=</span> <span class="n">SinglePointDFTCalculator</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;charges&quot;</span><span class="p">:</span> <span class="n">charges</span><span class="p">})</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">calc</span>
+
+        <span class="c1"># Get the oxidation states from the structure</span>
+        <span class="n">oxi_states</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">,</span> <span class="s2">&quot;oxi_state&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+
+        <span class="c1"># Read in selective dynamics if present. Note that the ASE FixAtoms class fixes (x,y,z), so</span>
+        <span class="c1"># here we make sure that [False, False, False] or [True, True, True] is set for the site selective</span>
+        <span class="c1"># dynamics property. As a consequence, if only a subset of dimensions are fixed, this won&#39;t get passed to ASE.</span>
+        <span class="k">if</span> <span class="s2">&quot;selective_dynamics&quot;</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="n">fix_atoms</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">:</span>
+                <span class="n">site_prop</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;selective_dynamics&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">site_prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]]:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;ASE FixAtoms constraint does not support selective dynamics in only some dimensions.&quot;</span>
+                        <span class="s2">&quot;Remove the selective dynamics and try again if you do not need them.&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">is_fixed</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;selective_dynamics&quot;</span><span class="p">]))</span>
+                <span class="n">fix_atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_fixed</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fix_atoms</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Set the selective dynamics with the FixAtoms class.</span>
+        <span class="k">if</span> <span class="n">fix_atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">set_constraint</span><span class="p">(</span><span class="n">FixAtoms</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">fix_atoms</span><span class="p">))</span>
+
+        <span class="c1"># Add any remaining site properties to the ASE Atoms object</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;magmom&quot;</span><span class="p">,</span> <span class="s2">&quot;charge&quot;</span><span class="p">,</span> <span class="s2">&quot;final_magmom&quot;</span><span class="p">,</span> <span class="s2">&quot;final_charge&quot;</span><span class="p">,</span> <span class="s2">&quot;selective_dynamics&quot;</span><span class="p">]:</span>
+                <span class="n">atoms</span><span class="o">.</span><span class="n">set_array</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">site_properties</span><span class="p">[</span><span class="n">prop</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">oxi_states</span><span class="p">):</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">set_array</span><span class="p">(</span><span class="s2">&quot;oxi_states&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">oxi_states</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">atoms</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Returns ASE Atoms object from pymatgen structure or molecule.</p>
+
+<p>Args:
+    structure: pymatgen.core.structure.Structure or pymatgen.core.structure.Molecule
+    **kwargs: other keyword args to pass into the ASE Atoms constructor</p>
+
+<p>Returns:
+    ASE Atoms object</p>
+</div>
+
+
+                            </div>
+                            <div id="AseAtomsAdaptor.get_structure" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#AseAtomsAdaptor.get_structure">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">get_structure</span><span class="signature">(atoms, cls=None)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns pymatgen structure from ASE Atoms.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            atoms: ASE Atoms object</span>
+<span class="sd">            cls: The Structure class to instantiate (defaults to pymatgen structure)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Equivalent pymatgen.core.structure.Structure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">Structure</span> <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">cls</span>
+
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_symbols</span><span class="p">()</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
+
+        <span class="c1"># Get the site magmoms from the ASE Atoms objects.</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="s2">&quot;calc&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">magmoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;magmoms&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">magmoms</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">atoms</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">&quot;initial_magmoms&quot;</span><span class="p">):</span>
+            <span class="n">initial_magmoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_initial_magnetic_moments</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">initial_magmoms</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">atoms</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">&quot;initial_charges&quot;</span><span class="p">):</span>
+            <span class="n">initial_charges</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_initial_charges</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">initial_charges</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">atoms</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">&quot;oxi_states&quot;</span><span class="p">):</span>
+            <span class="n">oxi_states</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="s2">&quot;oxi_states&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">oxi_states</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># If the ASE Atoms object has constraints, make sure that they are of the</span>
+        <span class="c1"># kind FixAtoms, which are the only ones that can be supported in Pymatgen.</span>
+        <span class="c1"># By default, FixAtoms fixes all three (x, y, z) dimensions.</span>
+        <span class="k">if</span> <span class="n">atoms</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="n">unsupported_constraint_type</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">constraint_indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">atoms</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span> <span class="n">FixAtoms</span><span class="p">):</span>
+                    <span class="n">constraint_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">constraint</span><span class="o">.</span><span class="n">get_indices</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">unsupported_constraint_type</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">unsupported_constraint_type</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Only FixAtoms is supported by Pymatgen. Other constraints will not be set.&quot;</span><span class="p">)</span>
+            <span class="n">sel_dyn</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">index</span> <span class="ow">in</span> <span class="n">constraint_indices</span> <span class="k">else</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sel_dyn</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Return a Molecule object if that was specifically requested;</span>
+        <span class="c1"># otherwise return a Structure object as expected</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="n">Molecule</span><span class="p">:</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Set the site magmoms in the Pymatgen structure object</span>
+        <span class="c1"># Note: ASE distinguishes between initial and converged</span>
+        <span class="c1"># magnetic moment site properties, whereas pymatgen does not. Therefore, we</span>
+        <span class="c1"># have to distinguish between these two when constructing the Structure/Molecule.</span>
+        <span class="c1"># The mapping selected here is:</span>
+        <span class="c1"># ASE initial magmom &lt;--&gt; Pymatgen &quot;magmom&quot;</span>
+        <span class="c1"># ASE final magmom &lt;--&gt; Pymatgen &quot;final_magmom&quot;</span>
+        <span class="c1"># ASE initial charge &lt;--&gt; Pymatgen &quot;charge&quot;</span>
+        <span class="c1"># ASE final charge &lt;--&gt; Pymatgen &quot;final_charge&quot;</span>
+        <span class="k">if</span> <span class="n">magmoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;final_magmom&quot;</span><span class="p">,</span> <span class="n">magmoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initial_magmoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;magmom&quot;</span><span class="p">,</span> <span class="n">initial_magmoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">charges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;final_charge&quot;</span><span class="p">,</span> <span class="n">charges</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initial_charges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;charge&quot;</span><span class="p">,</span> <span class="n">initial_charges</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sel_dyn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">sel_dyn</span><span class="p">):</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="s2">&quot;selective_dynamics&quot;</span><span class="p">,</span> <span class="n">sel_dyn</span><span class="p">)</span>
+
+        <span class="c1"># Add oxidation states by site</span>
+        <span class="k">if</span> <span class="n">oxi_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">add_oxidation_state_by_site</span><span class="p">(</span><span class="n">oxi_states</span><span class="p">)</span>
+
+        <span class="c1"># Add any remaining site properties to the Pymatgen structure object</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">atoms</span><span class="o">.</span><span class="n">arrays</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s2">&quot;numbers&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;positions&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;magmom&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;final_magmom&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;charge&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;final_charge&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;oxi_states&quot;</span><span class="p">,</span>
+            <span class="p">]:</span>
+                <span class="n">structure</span><span class="o">.</span><span class="n">add_site_property</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_array</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">structure</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Returns pymatgen structure from ASE Atoms.</p>
+
+<p>Args:
+    atoms: ASE Atoms object
+    cls: The Structure class to instantiate (defaults to pymatgen structure)</p>
+
+<p>Returns:
+    Equivalent pymatgen.core.structure.Structure</p>
+</div>
+
+
+                            </div>
+                            <div id="AseAtomsAdaptor.get_molecule" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#AseAtomsAdaptor.get_molecule">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">get_molecule</span><span class="signature">(atoms, cls=None)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_molecule</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns pymatgen molecule from ASE Atoms.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            atoms: ASE Atoms object</span>
+<span class="sd">            cls: The Molecule class to instantiate (defaults to pymatgen molecule)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Equivalent pymatgen.core.structure.Molecule</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">Molecule</span> <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">cls</span>
+        <span class="n">molecule</span> <span class="o">=</span> <span class="n">AseAtomsAdaptor</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">molecule</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_initial_charges</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_initial_magnetic_moments</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">molecule</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Returns pymatgen molecule from ASE Atoms.</p>
+
+<p>Args:
+    atoms: ASE Atoms object
+    cls: The Molecule class to instantiate (defaults to pymatgen molecule)</p>
+
+<p>Returns:
+    Equivalent pymatgen.core.structure.Molecule</p>
+</div>
+
+
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

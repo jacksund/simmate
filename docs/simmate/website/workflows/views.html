@@ -38,10 +38,25 @@
                     <a class="function" href="#workflows_by_type">workflows_by_type</a>
             </li>
             <li>
-                    <a class="function" href="#workflow_detail">workflow_detail</a>
-            </li>
-            <li>
-                    <a class="function" href="#workflow_run_detail">workflow_run_detail</a>
+                    <a class="class" href="#WorkflowAPIViewSet">WorkflowAPIViewSet</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#WorkflowAPIViewSet.template_list">template_list</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#WorkflowAPIViewSet.template_retrieve">template_retrieve</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WorkflowAPIViewSet.get_table">get_table</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WorkflowAPIViewSet.get_list_context">get_list_context</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WorkflowAPIViewSet.get_retrieve_context">get_retrieve_context</a>
+                        </li>
+                </ul>
+
             </li>
             <li>
                     <a class="function" href="#workflow_submit">workflow_submit</a>
@@ -73,6 +88,7 @@
 
 <span class="kn">from</span> <span class="nn">prefect.backend.flow_run</span> <span class="kn">import</span> <span class="n">FlowView</span>
 
+<span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">DatabaseTable</span>
 <span class="kn">from</span> <span class="nn">simmate.workflows.utilities</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="c1"># WORKFLOW_TYPES,</span>
     <span class="n">get_workflow</span><span class="p">,</span>
@@ -80,7 +96,7 @@
     <span class="n">parse_parameters</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">simmate.website.workflows.forms</span> <span class="kn">import</span> <span class="n">SubmitWorkflow</span>
-<span class="kn">from</span> <span class="nn">simmate.website.core_components.utilities</span> <span class="kn">import</span> <span class="n">render_from_table</span>
+<span class="kn">from</span> <span class="nn">simmate.website.core_components.base_api_view</span> <span class="kn">import</span> <span class="n">SimmateAPIViewSet</span>
 
 
 <span class="k">def</span> <span class="nf">workflows_all</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
@@ -146,64 +162,67 @@
     <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">workflow_detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">workflow_type</span><span class="p">,</span> <span class="n">workflow_name</span><span class="p">):</span>
-    <span class="c1"># note, workflow_name here is the workflow.name_short</span>
+<span class="k">class</span> <span class="nc">WorkflowAPIViewSet</span><span class="p">(</span><span class="n">SimmateAPIViewSet</span><span class="p">):</span>
 
-    <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+    <span class="n">template_list</span> <span class="o">=</span> <span class="s2">&quot;workflows/detail.html&quot;</span>
+    <span class="n">template_retrieve</span> <span class="o">=</span> <span class="s2">&quot;workflows/detail_run.html&quot;</span>
 
-    <span class="c1"># In order to make links to the monitoring pages for each of these, we need</span>
-    <span class="c1"># to grab the prefect id</span>
-    <span class="c1"># If no flow exists in Prefect cloud, a ValueError is raised, so I can&#39;t</span>
-    <span class="c1"># share this info</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">flow_id</span> <span class="o">=</span> <span class="n">FlowView</span><span class="o">.</span><span class="n">from_flow_name</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span><span class="o">.</span><span class="n">flow_id</span>
-        <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">nflows_submitted</span>
-    <span class="k">except</span><span class="p">:</span>  <span class="c1"># ValueError is no query result. Need to test what error is if no API key.</span>
-        <span class="n">flow_id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># TODO: grab some metadata about this calc. For example...</span>
-    <span class="c1"># ncalculations = MITRelaxation.objects.count()</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_table</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">workflow_type</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatabaseTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        grabs the relevant database table using the URL request</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span>
 
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;workflows/detail.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{</span>
+    <span class="k">def</span> <span class="nf">get_list_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">workflow_type</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+
+        <span class="c1"># In order to make links to the monitoring pages for each of these, we need</span>
+        <span class="c1"># to grab the prefect id</span>
+        <span class="c1"># If no flow exists in Prefect cloud, a ValueError is raised, so I can&#39;t</span>
+        <span class="c1"># share this info</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">flow_id</span> <span class="o">=</span> <span class="n">FlowView</span><span class="o">.</span><span class="n">from_flow_name</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span><span class="o">.</span><span class="n">flow_id</span>
+            <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">nflows_submitted</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># ValueError is no query result. Need to test what error is if no API key.</span>
+            <span class="n">flow_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># TODO: grab some metadata about this calc. For example...</span>
+        <span class="c1"># ncalculations = MITRelaxation.objects.count()</span>
+
+        <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="n">workflow</span><span class="p">,</span>
             <span class="s2">&quot;flow_id&quot;</span><span class="p">:</span> <span class="n">flow_id</span><span class="p">,</span>
             <span class="s2">&quot;nflows_submitted&quot;</span><span class="p">:</span> <span class="n">nflows_submitted</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="p">}</span>
 
+    <span class="k">def</span> <span class="nf">get_retrieve_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">workflow_type</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 
-<span class="k">def</span> <span class="nf">workflow_run_detail</span><span class="p">(</span>
-    <span class="n">request</span><span class="p">,</span>
-    <span class="n">workflow_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">workflow_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">workflow_run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">):</span>
+        <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
 
-    <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">request_kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;workflow_type&quot;</span><span class="p">:</span> <span class="n">workflow_type</span><span class="p">,</span>
-            <span class="s2">&quot;workflow_name&quot;</span><span class="p">:</span> <span class="n">workflow_name</span><span class="p">,</span>
-            <span class="s2">&quot;workflow_run_id&quot;</span><span class="p">:</span> <span class="n">workflow_run_id</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;workflows/detail_run.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;active_tab_id&quot;</span><span class="p">:</span> <span class="s2">&quot;workflows&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="n">workflow</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;retrieve&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_url</span><span class="o">=</span><span class="s2">&quot;workflow_run_id&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="n">workflow</span><span class="p">}</span>
 
 
 <span class="nd">@login_required</span>
@@ -348,100 +367,339 @@
     
 
                 </section>
-                <section id="workflow_detail">
-                            <div class="attr function"><a class="headerlink" href="#workflow_detail">#&nbsp;&nbsp</a>
+                <section id="WorkflowAPIViewSet">
+                                <div class="attr class">
+        <a class="headerlink" href="#WorkflowAPIViewSet">#&nbsp;&nbsp</a>
 
         
-            <span class="def">def</span>
-            <span class="name">workflow_detail</span><span class="signature">(request, workflow_type, workflow_name)</span>:
+        <span class="def">class</span>
+        <span class="name">WorkflowAPIViewSet</span><wbr>(<span class="base"><a href="../core_components/base_api_view.html#SimmateAPIViewSet">simmate.website.core_components.base_api_view.SimmateAPIViewSet</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">workflow_detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">workflow_type</span><span class="p">,</span> <span class="n">workflow_name</span><span class="p">):</span>
-    <span class="c1"># note, workflow_name here is the workflow.name_short</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">WorkflowAPIViewSet</span><span class="p">(</span><span class="n">SimmateAPIViewSet</span><span class="p">):</span>
 
-    <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+    <span class="n">template_list</span> <span class="o">=</span> <span class="s2">&quot;workflows/detail.html&quot;</span>
+    <span class="n">template_retrieve</span> <span class="o">=</span> <span class="s2">&quot;workflows/detail_run.html&quot;</span>
 
-    <span class="c1"># In order to make links to the monitoring pages for each of these, we need</span>
-    <span class="c1"># to grab the prefect id</span>
-    <span class="c1"># If no flow exists in Prefect cloud, a ValueError is raised, so I can&#39;t</span>
-    <span class="c1"># share this info</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">flow_id</span> <span class="o">=</span> <span class="n">FlowView</span><span class="o">.</span><span class="n">from_flow_name</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span><span class="o">.</span><span class="n">flow_id</span>
-        <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">nflows_submitted</span>
-    <span class="k">except</span><span class="p">:</span>  <span class="c1"># ValueError is no query result. Need to test what error is if no API key.</span>
-        <span class="n">flow_id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># TODO: grab some metadata about this calc. For example...</span>
-    <span class="c1"># ncalculations = MITRelaxation.objects.count()</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_table</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">workflow_type</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatabaseTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        grabs the relevant database table using the URL request</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span>
 
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;workflows/detail.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{</span>
+    <span class="k">def</span> <span class="nf">get_list_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">workflow_type</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+
+        <span class="c1"># In order to make links to the monitoring pages for each of these, we need</span>
+        <span class="c1"># to grab the prefect id</span>
+        <span class="c1"># If no flow exists in Prefect cloud, a ValueError is raised, so I can&#39;t</span>
+        <span class="c1"># share this info</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">flow_id</span> <span class="o">=</span> <span class="n">FlowView</span><span class="o">.</span><span class="n">from_flow_name</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span><span class="o">.</span><span class="n">flow_id</span>
+            <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">nflows_submitted</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># ValueError is no query result. Need to test what error is if no API key.</span>
+            <span class="n">flow_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># TODO: grab some metadata about this calc. For example...</span>
+        <span class="c1"># ncalculations = MITRelaxation.objects.count()</span>
+
+        <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="n">workflow</span><span class="p">,</span>
             <span class="s2">&quot;flow_id&quot;</span><span class="p">:</span> <span class="n">flow_id</span><span class="p">,</span>
             <span class="s2">&quot;nflows_submitted&quot;</span><span class="p">:</span> <span class="n">nflows_submitted</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">get_retrieve_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">workflow_type</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="n">workflow</span><span class="p">}</span>
 </pre></div>
 
         </details>
 
+            <div class="docstring"><p>Example use:</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># in views.py</span>
+<span class="k">class</span> <span class="nc">ExampleTableViewSet</span><span class="p">(</span><span class="n">SimmateAPIViewSet</span><span class="p">):</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">ExampleTable</span>
+    <span class="n">template_list</span> <span class="o">=</span> <span class="s2">&quot;custom_app/list.html&quot;</span>
+    <span class="n">template_retrieve</span> <span class="o">=</span> <span class="s2">&quot;custom_app/retrieve.html&quot;</span>
+
+<span class="c1"># in urls.py</span>
+<span class="n">path</span><span class="p">(</span>
+    <span class="n">route</span><span class="o">=</span><span class="s2">&quot;example-table&quot;</span><span class="p">,</span>
+    <span class="n">view</span><span class="o">=</span><span class="n">ExampleTableViewSet</span><span class="o">.</span><span class="n">list_view</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example-list&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">path</span><span class="p">(</span>
+    <span class="n">route</span><span class="o">=</span><span class="s2">&quot;example-table/&lt;int:id&gt;&quot;</span><span class="p">,</span>
+    <span class="n">view</span><span class="o">=</span><span class="n">ExampleTableViewSet</span><span class="o">.</span><span class="n">retrieve_view</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example-retrieve&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+
+
+                            <div id="WorkflowAPIViewSet.template_list" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#WorkflowAPIViewSet.template_list">#&nbsp;&nbsp</a>
+
+        <span class="name">template_list</span><span class="annotation">: str</span><span class="default_value"> = &#39;workflows/detail.html&#39;</span>
+    </div>
+
+    
     
 
-                </section>
-                <section id="workflow_run_detail">
-                            <div class="attr function"><a class="headerlink" href="#workflow_run_detail">#&nbsp;&nbsp</a>
+                            </div>
+                            <div id="WorkflowAPIViewSet.template_retrieve" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#WorkflowAPIViewSet.template_retrieve">#&nbsp;&nbsp</a>
 
-        
+        <span class="name">template_retrieve</span><span class="annotation">: str</span><span class="default_value"> = &#39;workflows/detail_run.html&#39;</span>
+    </div>
+
+    
+    
+
+                            </div>
+                            <div id="WorkflowAPIViewSet.get_table" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WorkflowAPIViewSet.get_table">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
             <span class="def">def</span>
-            <span class="name">workflow_run_detail</span><span class="signature">(
+            <span class="name">get_table</span><span class="signature">(
+    cls,
     request,
-    workflow_type: str,
-    workflow_name: str,
-    workflow_run_id: str
-)</span>:
+    workflow_type,
+    workflow_name,
+    pk=None
+) -&gt; <a href="../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">workflow_run_detail</span><span class="p">(</span>
-    <span class="n">request</span><span class="p">,</span>
-    <span class="n">workflow_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">workflow_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">workflow_run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">):</span>
-
-    <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
-    <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">request_kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;workflow_type&quot;</span><span class="p">:</span> <span class="n">workflow_type</span><span class="p">,</span>
-            <span class="s2">&quot;workflow_name&quot;</span><span class="p">:</span> <span class="n">workflow_name</span><span class="p">,</span>
-            <span class="s2">&quot;workflow_run_id&quot;</span><span class="p">:</span> <span class="n">workflow_run_id</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;workflows/detail_run.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;active_tab_id&quot;</span><span class="p">:</span> <span class="s2">&quot;workflows&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="n">workflow</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;retrieve&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_url</span><span class="o">=</span><span class="s2">&quot;workflow_run_id&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_table</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">workflow_type</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatabaseTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        grabs the relevant database table using the URL request</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>grabs the relevant database table using the URL request</p>
+</div>
 
+
+                            </div>
+                            <div id="WorkflowAPIViewSet.get_list_context" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WorkflowAPIViewSet.get_list_context">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_list_context</span><span class="signature">(self, request, workflow_type, workflow_name) -&gt; dict</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_list_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">workflow_type</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+
+        <span class="c1"># In order to make links to the monitoring pages for each of these, we need</span>
+        <span class="c1"># to grab the prefect id</span>
+        <span class="c1"># If no flow exists in Prefect cloud, a ValueError is raised, so I can&#39;t</span>
+        <span class="c1"># share this info</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">flow_id</span> <span class="o">=</span> <span class="n">FlowView</span><span class="o">.</span><span class="n">from_flow_name</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span><span class="o">.</span><span class="n">flow_id</span>
+            <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">nflows_submitted</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># ValueError is no query result. Need to test what error is if no API key.</span>
+            <span class="n">flow_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">nflows_submitted</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># TODO: grab some metadata about this calc. For example...</span>
+        <span class="c1"># ncalculations = MITRelaxation.objects.count()</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="n">workflow</span><span class="p">,</span>
+            <span class="s2">&quot;flow_id&quot;</span><span class="p">:</span> <span class="n">flow_id</span><span class="p">,</span>
+            <span class="s2">&quot;nflows_submitted&quot;</span><span class="p">:</span> <span class="n">nflows_submitted</span><span class="p">,</span>
+        <span class="p">}</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This defines extra context that should be passed to the template when
+using format=html when a list-view is requested. By default, no extra
+context is returned.</p>
+</div>
+
+
+                            </div>
+                            <div id="WorkflowAPIViewSet.get_retrieve_context" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WorkflowAPIViewSet.get_retrieve_context">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_retrieve_context</span><span class="signature">(self, request, workflow_type, workflow_name, pk) -&gt; dict</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_retrieve_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">workflow_type</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">pk</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="n">workflow_name_full</span> <span class="o">=</span> <span class="n">workflow_type</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">workflow_name</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">workflow_name_full</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="n">workflow</span><span class="p">}</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This defines extra context that should be passed to the template when
+using format=html when a retrieve-view is requested. By default, no extra
+context is returned.</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>django.views.generic.base.View</dt>
+                                <dd id="WorkflowAPIViewSet.__init__" class="function">View</dd>
+                <dd id="WorkflowAPIViewSet.http_method_names" class="variable">http_method_names</dd>
+                <dd id="WorkflowAPIViewSet.setup" class="function">setup</dd>
+
+            </div>
+            <div><dt><a href="../core_components/base_api_view.html#SimmateAPIViewSet">simmate.website.core_components.base_api_view.SimmateAPIViewSet</a></dt>
+                                <dd id="WorkflowAPIViewSet.table" class="variable"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.table">table</a></dd>
+                <dd id="WorkflowAPIViewSet.get_list_response" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.get_list_response">get_list_response</a></dd>
+                <dd id="WorkflowAPIViewSet.get_retrieve_response" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.get_retrieve_response">get_retrieve_response</a></dd>
+                <dd id="WorkflowAPIViewSet.from_table" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.from_table">from_table</a></dd>
+                <dd id="WorkflowAPIViewSet.list_view" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.list_view">list_view</a></dd>
+                <dd id="WorkflowAPIViewSet.retrieve_view" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.retrieve_view">retrieve_view</a></dd>
+                <dd id="WorkflowAPIViewSet.dynamic_list_view" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.dynamic_list_view">dynamic_list_view</a></dd>
+                <dd id="WorkflowAPIViewSet.dynamic_retrieve_view" class="function"><a href="../core_components/base_api_view.html#SimmateAPIViewSet.dynamic_retrieve_view">dynamic_retrieve_view</a></dd>
+
+            </div>
+            <div><dt>rest_framework.viewsets.ViewSetMixin</dt>
+                                <dd id="WorkflowAPIViewSet.as_view" class="function">as_view</dd>
+                <dd id="WorkflowAPIViewSet.initialize_request" class="function">initialize_request</dd>
+                <dd id="WorkflowAPIViewSet.reverse_action" class="function">reverse_action</dd>
+                <dd id="WorkflowAPIViewSet.get_extra_actions" class="function">get_extra_actions</dd>
+                <dd id="WorkflowAPIViewSet.get_extra_action_url_map" class="function">get_extra_action_url_map</dd>
+
+            </div>
+            <div><dt>rest_framework.generics.GenericAPIView</dt>
+                                <dd id="WorkflowAPIViewSet.queryset" class="variable">queryset</dd>
+                <dd id="WorkflowAPIViewSet.serializer_class" class="variable">serializer_class</dd>
+                <dd id="WorkflowAPIViewSet.lookup_field" class="variable">lookup_field</dd>
+                <dd id="WorkflowAPIViewSet.lookup_url_kwarg" class="variable">lookup_url_kwarg</dd>
+                <dd id="WorkflowAPIViewSet.filter_backends" class="variable">filter_backends</dd>
+                <dd id="WorkflowAPIViewSet.pagination_class" class="class">pagination_class</dd>
+                <dd id="WorkflowAPIViewSet.get_queryset" class="function">get_queryset</dd>
+                <dd id="WorkflowAPIViewSet.get_object" class="function">get_object</dd>
+                <dd id="WorkflowAPIViewSet.get_serializer" class="function">get_serializer</dd>
+                <dd id="WorkflowAPIViewSet.get_serializer_class" class="function">get_serializer_class</dd>
+                <dd id="WorkflowAPIViewSet.get_serializer_context" class="function">get_serializer_context</dd>
+                <dd id="WorkflowAPIViewSet.filter_queryset" class="function">filter_queryset</dd>
+                <dd id="WorkflowAPIViewSet.paginator" class="variable">paginator</dd>
+                <dd id="WorkflowAPIViewSet.paginate_queryset" class="function">paginate_queryset</dd>
+                <dd id="WorkflowAPIViewSet.get_paginated_response" class="function">get_paginated_response</dd>
+
+            </div>
+            <div><dt>rest_framework.views.APIView</dt>
+                                <dd id="WorkflowAPIViewSet.renderer_classes" class="variable">renderer_classes</dd>
+                <dd id="WorkflowAPIViewSet.parser_classes" class="variable">parser_classes</dd>
+                <dd id="WorkflowAPIViewSet.authentication_classes" class="variable">authentication_classes</dd>
+                <dd id="WorkflowAPIViewSet.throttle_classes" class="variable">throttle_classes</dd>
+                <dd id="WorkflowAPIViewSet.permission_classes" class="variable">permission_classes</dd>
+                <dd id="WorkflowAPIViewSet.content_negotiation_class" class="class">content_negotiation_class</dd>
+                <dd id="WorkflowAPIViewSet.metadata_class" class="class">metadata_class</dd>
+                <dd id="WorkflowAPIViewSet.versioning_class" class="variable">versioning_class</dd>
+                <dd id="WorkflowAPIViewSet.settings" class="variable">settings</dd>
+                <dd id="WorkflowAPIViewSet.schema" class="variable">schema</dd>
+                <dd id="WorkflowAPIViewSet.allowed_methods" class="variable">allowed_methods</dd>
+                <dd id="WorkflowAPIViewSet.default_response_headers" class="variable">default_response_headers</dd>
+                <dd id="WorkflowAPIViewSet.http_method_not_allowed" class="function">http_method_not_allowed</dd>
+                <dd id="WorkflowAPIViewSet.permission_denied" class="function">permission_denied</dd>
+                <dd id="WorkflowAPIViewSet.throttled" class="function">throttled</dd>
+                <dd id="WorkflowAPIViewSet.get_authenticate_header" class="function">get_authenticate_header</dd>
+                <dd id="WorkflowAPIViewSet.get_parser_context" class="function">get_parser_context</dd>
+                <dd id="WorkflowAPIViewSet.get_renderer_context" class="function">get_renderer_context</dd>
+                <dd id="WorkflowAPIViewSet.get_exception_handler_context" class="function">get_exception_handler_context</dd>
+                <dd id="WorkflowAPIViewSet.get_view_name" class="function">get_view_name</dd>
+                <dd id="WorkflowAPIViewSet.get_view_description" class="function">get_view_description</dd>
+                <dd id="WorkflowAPIViewSet.get_format_suffix" class="function">get_format_suffix</dd>
+                <dd id="WorkflowAPIViewSet.get_renderers" class="function">get_renderers</dd>
+                <dd id="WorkflowAPIViewSet.get_parsers" class="function">get_parsers</dd>
+                <dd id="WorkflowAPIViewSet.get_authenticators" class="function">get_authenticators</dd>
+                <dd id="WorkflowAPIViewSet.get_permissions" class="function">get_permissions</dd>
+                <dd id="WorkflowAPIViewSet.get_throttles" class="function">get_throttles</dd>
+                <dd id="WorkflowAPIViewSet.get_content_negotiator" class="function">get_content_negotiator</dd>
+                <dd id="WorkflowAPIViewSet.get_exception_handler" class="function">get_exception_handler</dd>
+                <dd id="WorkflowAPIViewSet.perform_content_negotiation" class="function">perform_content_negotiation</dd>
+                <dd id="WorkflowAPIViewSet.perform_authentication" class="function">perform_authentication</dd>
+                <dd id="WorkflowAPIViewSet.check_permissions" class="function">check_permissions</dd>
+                <dd id="WorkflowAPIViewSet.check_object_permissions" class="function">check_object_permissions</dd>
+                <dd id="WorkflowAPIViewSet.check_throttles" class="function">check_throttles</dd>
+                <dd id="WorkflowAPIViewSet.determine_version" class="function">determine_version</dd>
+                <dd id="WorkflowAPIViewSet.initial" class="function">initial</dd>
+                <dd id="WorkflowAPIViewSet.finalize_response" class="function">finalize_response</dd>
+                <dd id="WorkflowAPIViewSet.handle_exception" class="function">handle_exception</dd>
+                <dd id="WorkflowAPIViewSet.raise_uncaught_exception" class="function">raise_uncaught_exception</dd>
+                <dd id="WorkflowAPIViewSet.dispatch" class="function">dispatch</dd>
+                <dd id="WorkflowAPIViewSet.options" class="function">options</dd>
+
+            </div>
+                                </dl>
+                            </div>
                 </section>
                 <section id="workflow_submit">
                             <div class="attr function"><a class="headerlink" href="#workflow_submit">#&nbsp;&nbsp</a>

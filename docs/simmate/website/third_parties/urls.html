@@ -61,12 +61,12 @@
     <span class="p">),</span>
     <span class="n">path</span><span class="p">(</span>
         <span class="n">route</span><span class="o">=</span><span class="s2">&quot;&lt;provider_name&gt;/&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">provider</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">ProviderAPIViewSet</span><span class="o">.</span><span class="n">dynamic_list_view</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;provider&quot;</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="n">path</span><span class="p">(</span>
-        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;&lt;provider_name&gt;/&lt;entry_id&gt;/&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">entry_detail</span><span class="p">,</span>
+        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;&lt;provider_name&gt;/&lt;pk&gt;/&quot;</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">ProviderAPIViewSet</span><span class="o">.</span><span class="n">dynamic_retrieve_view</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;entry-detail&quot;</span><span class="p">,</span>
     <span class="p">),</span>
 <span class="p">]</span>

@@ -29,6 +29,25 @@
 
 
 
+        <h2>API Documentation</h2>
+            <ul class="memberlist">
+            <li>
+                    <a class="class" href="#PyMatGenAdapter">PyMatGenAdapter</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#PyMatGenAdapter.__init__">PyMatGenAdapter</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#PyMatGenAdapter.get_pymatgen">get_pymatgen</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#PyMatGenAdapter.get_toolkit">get_toolkit</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
+
 
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev">
@@ -44,9 +63,187 @@
                     <h1 class="modulename">
 <a href="./../../../simmate.html">simmate</a><wbr>.<a href="./../../file_converters.html">file_converters</a><wbr>.<a href="./../structure.html">structure</a><wbr>.pymatgen    </h1>
 
-                
-                
+                        <div class="docstring"><p>This module provides conversion between the Simmate ToolkitStructure object and 
+pymatgen Structure objects. Because our toolkit class inherits from pymatgen,
+this feature should rarely (if ever) be used.</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../toolkit.html">simmate.toolkit</a></span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn"><a href="">simmate.file_converters.structure.pymatgen</a></span> <span class="kn">import</span> <span class="n">PyMatGenAdapter</span>
+
+
+<span class="n">initial_structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;example.cif&quot;</span><span class="p">)</span>
+
+<span class="c1"># convert to PyMatgen</span>
+<span class="n">new_pmg_object</span> <span class="o">=</span> <span class="n">PyMatGenAdapter</span><span class="o">.</span><span class="n">get_pymatgen</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
+<span class="c1"># convert back to PyMatgen/Simmate</span>
+<span class="n">new_toolkit_object</span> <span class="o">=</span> <span class="n">PyMatGenAdapter</span><span class="o">.</span><span class="n">get_toolkit</span><span class="p">(</span><span class="n">new_pmg_object</span><span class="p">)</span>
+</code></pre></div>
+</div>
+
+                        <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module provides conversion between the Simmate ToolkitStructure object and </span>
+<span class="sd">pymatgen Structure objects. Because our toolkit class inherits from pymatgen,</span>
+<span class="sd">this feature should rarely (if ever) be used.</span>
+
+<span class="sd">``` python</span>
+<span class="sd">from simmate.toolkit import Structure</span>
+<span class="sd">from simmate.file_converters.structure.pymatgen import PyMatGenAdapter</span>
+
+
+<span class="sd">initial_structure = Structure.from_file(&quot;example.cif&quot;)</span>
+
+<span class="sd"># convert to PyMatgen</span>
+<span class="sd">new_pmg_object = PyMatGenAdapter.get_pymatgen(structure)</span>
+
+<span class="sd"># convert back to PyMatgen/Simmate</span>
+<span class="sd">new_toolkit_object = PyMatGenAdapter.get_toolkit(new_pmg_object)</span>
+<span class="sd">```</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span> <span class="k">as</span> <span class="n">ToolkitStructure</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span> <span class="k">as</span> <span class="n">PyMatGenStructure</span>
+
+
+<span class="k">class</span> <span class="nc">PyMatGenAdapter</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adaptor for conversion between the Simmate ToolkitStructure object and</span>
+<span class="sd">    pymatgen Structure objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_pymatgen</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">ToolkitStructure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PyMatGenStructure</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns PyMatGen Structure object from Simmate Structure object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">PyMatGenStructure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_toolkit</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">PyMatGenStructure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolkitStructure</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns PyMatGen Structure object from Simmate Structure object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
             </section>
+                <section id="PyMatGenAdapter">
+                                <div class="attr class">
+        <a class="headerlink" href="#PyMatGenAdapter">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">PyMatGenAdapter</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PyMatGenAdapter</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adaptor for conversion between the Simmate ToolkitStructure object and</span>
+<span class="sd">    pymatgen Structure objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_pymatgen</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">ToolkitStructure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PyMatGenStructure</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns PyMatGen Structure object from Simmate Structure object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">PyMatGenStructure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_toolkit</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">PyMatGenStructure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolkitStructure</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns PyMatGen Structure object from Simmate Structure object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Adaptor for conversion between the Simmate ToolkitStructure object and
+pymatgen Structure objects.</p>
+</div>
+
+
+                            <div id="PyMatGenAdapter.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#PyMatGenAdapter.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">PyMatGenAdapter</span><span class="signature">()</span>
+    </div>
+
+    
+    
+
+                            </div>
+                            <div id="PyMatGenAdapter.get_pymatgen" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#PyMatGenAdapter.get_pymatgen">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">get_pymatgen</span><span class="signature">(
+    structure: <a href="../../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a>
+) -&gt; pymatgen.core.structure.Structure</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_pymatgen</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">ToolkitStructure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PyMatGenStructure</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns PyMatGen Structure object from Simmate Structure object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">PyMatGenStructure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Returns PyMatGen Structure object from Simmate Structure object.</p>
+</div>
+
+
+                            </div>
+                            <div id="PyMatGenAdapter.get_toolkit" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#PyMatGenAdapter.get_toolkit">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">get_toolkit</span><span class="signature">(
+    structure: pymatgen.core.structure.Structure
+) -&gt; <a href="../../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a></span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_toolkit</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">PyMatGenStructure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolkitStructure</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns PyMatGen Structure object from Simmate Structure object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ToolkitStructure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Returns PyMatGen Structure object from Simmate Structure object.</p>
+</div>
+
+
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

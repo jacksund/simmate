@@ -27,15 +27,20 @@
             <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                    pattern=".+" required>
 
+        <h2>Contents</h2>
+        <ul>
+  <li><a href="#structure-converters">Structure Converters</a></li>
+  <li><a href="#other-converters">Other Converters</a></li>
+</ul>
+
 
         <h2>Submodules</h2>
         <ul>
                 <li><a href="structure/ase.html">simmate.file_converters.structure.ase</a></li>
                 <li><a href="structure/cif.html">simmate.file_converters.structure.cif</a></li>
+                <li><a href="structure/database.html">simmate.file_converters.structure.database</a></li>
                 <li><a href="structure/jarvis.html">simmate.file_converters.structure.jarvis</a></li>
-                <li><a href="structure/others.html">simmate.file_converters.structure.others</a></li>
                 <li><a href="structure/pymatgen.html">simmate.file_converters.structure.pymatgen</a></li>
-                <li><a href="structure/simmate_database.html">simmate.file_converters.structure.simmate_database</a></li>
         </ul>
 
 
@@ -53,8 +58,54 @@
                     <h1 class="modulename">
 <a href="./../../simmate.html">simmate</a><wbr>.<a href="./../file_converters.html">file_converters</a><wbr>.structure    </h1>
 
-                
-                
+                        <div class="docstring"><h2 id="structure-converters">Structure Converters</h2>
+
+<p>This module hosts converter classes for common structure file and object formats. All converters are linked directly for conversion into the <code><a href="../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a></code> class. Note, in the majority of cases, you can have Simmate attempt to figure out the file/object format you have. Using these converters directly is really only needed for advanced use or speed optimization:</p>
+
+<p>Example dynamic use:</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../toolkit.html">simmate.toolkit</a></span> <span class="kn">import</span> <span class="n">Structure</span>
+
+<span class="n">structure1</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="s2">&quot;example.cif&quot;</span><span class="p">)</span>
+
+<span class="n">structure2</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span>
+
+<span class="n">structure3</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span>
+    <span class="p">{</span><span class="s2">&quot;calculation_table&quot;</span><span class="p">:</span> <span class="s2">&quot;MITStaticEnergy&quot;</span><span class="p">,</span> <span class="s2">&quot;calculation_id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p>If you'd like to convert between formats (such as CIF --> POSCAR), you should treat this a two-step process:</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../toolkit.html">simmate.toolkit</a></span> <span class="kn">import</span> <span class="n">Structure</span>
+
+<span class="c1"># STEP 1: convert to simmate</span>
+<span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="s2">&quot;example.cif&quot;</span><span class="p">)</span>
+
+<span class="c1"># STEP 2: convert to desired format</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;poscar&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<h2 id="other-converters">Other Converters</h2>
+
+<p>This module does not host all file-converters that Simmate has. Others can be found in the <code>calculators</code> module, where they are associated with a specific program. For example, the converter for POSCAR files is directly from the VASP software -- therefore, you can find the POSCAR converter in the <code>vasp.inputs.poscar</code> module. Here is a list of other structure converters for reference: </p>
+
+<ul>
+<li>POSCAR (<code><a href="../calculators/vasp/inputs/poscar.html">simmate.calculators.vasp.inputs.poscar</a></code>)</li>
+</ul>
+</div>
+
+                        <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_doc_from_readme</span>
+
+<span class="vm">__doc__</span> <span class="o">=</span> <span class="n">get_doc_from_readme</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
             </section>
     </main>
 <script>

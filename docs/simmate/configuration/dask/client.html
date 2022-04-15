@@ -83,6 +83,10 @@
             <span class="n">preload</span><span class="o">=</span><span class="s2">&quot;simmate.configuration.dask.connect_to_database&quot;</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># TODO: To all default job-queue clusters, consider using...</span>
+        <span class="c1"># from simmate.configuration.dask.setup_cluster import run_cluster</span>
+        <span class="c1"># cluster = run_cluster(...)</span>
+        <span class="c1"># client = Client(cluster.scheduler.address)</span>
 
     <span class="c1"># OPTIMIZE: I&#39;m not sure if there&#39;s a better way to do implement this.</span>
     <span class="c1"># If this gives issues, I can alternatively try...</span>
@@ -130,6 +134,10 @@
             <span class="n">preload</span><span class="o">=</span><span class="s2">&quot;simmate.configuration.dask.connect_to_database&quot;</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># TODO: To all default job-queue clusters, consider using...</span>
+        <span class="c1"># from simmate.configuration.dask.setup_cluster import run_cluster</span>
+        <span class="c1"># cluster = run_cluster(...)</span>
+        <span class="c1"># client = Client(cluster.scheduler.address)</span>
 
     <span class="c1"># OPTIMIZE: I&#39;m not sure if there&#39;s a better way to do implement this.</span>
     <span class="c1"># If this gives issues, I can alternatively try...</span>

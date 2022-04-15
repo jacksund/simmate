@@ -420,18 +420,18 @@ from the "Coordinates" column. Therefore, this function generates the
             <span class="name">findValidWyckoffCombos</span><span class="signature">(
     stoich,
     spacegroup,
-    wy_data=      SpaceGroup  MultiplicityConventional  ...  Coordinates Availability
-0              1                         1  ...        x,y,z          inf
-1              2                         2  ...        x,y,z          inf
-2              2                         1  ...  1/2,1/2,1/2          1.0
-3              2                         1  ...    0,1/2,1/2          1.0
-4              2                         1  ...    1/2,0,1/2          1.0
-...          ...                       ...  ...          ...          ...
-1726         230                        32  ...        x,x,x          inf
-1727         230                        24  ...    3/8,0,1/4          1.0
-1728         230                        24  ...    1/8,0,1/4          1.0
-1729         230                        16  ...  1/8,1/8,1/8          1.0
-1730         230                        16  ...        0,0,0          1.0
+    wy_data=      SpaceGroup  MultiplicityConventional  MultiplicityPrimitive  ... Sitesymmetry  Coordinates Availability
+0              1                         1                    1.0  ...            1        x,y,z          inf
+1              2                         2                    2.0  ...            1        x,y,z          inf
+2              2                         1                    1.0  ...           -1  1/2,1/2,1/2          1.0
+3              2                         1                    1.0  ...           -1    0,1/2,1/2          1.0
+4              2                         1                    1.0  ...           -1    1/2,0,1/2          1.0
+...          ...                       ...                    ...  ...          ...          ...          ...
+1726         230                        32                   16.0  ...          .3.        x,x,x          inf
+1727         230                        24                   12.0  ...         -4..    3/8,0,1/4          1.0
+1728         230                        24                   12.0  ...         2.22    1/8,0,1/4          1.0
+1729         230                        16                    8.0  ...          .32  1/8,1/8,1/8          1.0
+1730         230                        16                    8.0  ...         .-3.        0,0,0          1.0
 
 [1731 rows x 7 columns]
 )</span>:

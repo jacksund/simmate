@@ -32,10 +32,19 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="function" href="#symmetry">symmetry</a>
-            </li>
-            <li>
-                    <a class="function" href="#spacegroup">spacegroup</a>
+                    <a class="class" href="#SymmetryViewSet">SymmetryViewSet</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="class" href="#SymmetryViewSet.table">SymmetryViewSet.table</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#SymmetryViewSet.template_list">template_list</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#SymmetryViewSet.template_retrieve">template_retrieve</a>
+                        </li>
+                </ul>
+
             </li>
             <li>
                     <a class="function" href="#structure_viewer">structure_viewer</a>
@@ -79,34 +88,13 @@
 <span class="kn">from</span> <span class="nn">simmate.visualization.structure</span> <span class="kn">import</span> <span class="n">make_blender_structure</span>
 <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">settings</span>
 <span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_directory</span>
-<span class="kn">from</span> <span class="nn">simmate.website.core_components.utilities</span> <span class="kn">import</span> <span class="n">render_from_table</span>
+<span class="kn">from</span> <span class="nn">simmate.website.core_components.base_api_view</span> <span class="kn">import</span> <span class="n">SimmateAPIViewSet</span>
 
 
-<span class="k">def</span> <span class="nf">symmetry</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;core_components/symmetry.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">Spacegroup</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_field</span><span class="o">=</span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">spacegroup</span><span class="p">(</span>
-    <span class="n">request</span><span class="p">,</span>
-    <span class="n">spacegroup_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">):</span>
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">request_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;spacegroup_number&quot;</span><span class="p">:</span> <span class="n">spacegroup_number</span><span class="p">},</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;core_components/spacegroup.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">Spacegroup</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;retrieve&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_field</span><span class="o">=</span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_url</span><span class="o">=</span><span class="s2">&quot;spacegroup_number&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+<span class="k">class</span> <span class="nc">SymmetryViewSet</span><span class="p">(</span><span class="n">SimmateAPIViewSet</span><span class="p">):</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">Spacegroup</span>
+    <span class="n">template_list</span> <span class="o">=</span> <span class="s2">&quot;core_components/symmetry.html&quot;</span>
+    <span class="n">template_retrieve</span> <span class="o">=</span> <span class="s2">&quot;core_components/spacegroup.html&quot;</span>
 
 
 <span class="k">def</span> <span class="nf">structure_viewer</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
@@ -216,62 +204,335 @@
         </details>
 
             </section>
-                <section id="symmetry">
-                            <div class="attr function"><a class="headerlink" href="#symmetry">#&nbsp;&nbsp</a>
+                <section id="SymmetryViewSet">
+                                <div class="attr class">
+        <a class="headerlink" href="#SymmetryViewSet">#&nbsp;&nbsp</a>
 
         
-            <span class="def">def</span>
-            <span class="name">symmetry</span><span class="signature">(request)</span>:
+        <span class="def">class</span>
+        <span class="name">SymmetryViewSet</span><wbr>(<span class="base"><a href="base_api_view.html#SimmateAPIViewSet">simmate.website.core_components.base_api_view.SimmateAPIViewSet</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">symmetry</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;core_components/symmetry.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">Spacegroup</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_field</span><span class="o">=</span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SymmetryViewSet</span><span class="p">(</span><span class="n">SimmateAPIViewSet</span><span class="p">):</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">Spacegroup</span>
+    <span class="n">template_list</span> <span class="o">=</span> <span class="s2">&quot;core_components/symmetry.html&quot;</span>
+    <span class="n">template_retrieve</span> <span class="o">=</span> <span class="s2">&quot;core_components/spacegroup.html&quot;</span>
 </pre></div>
 
         </details>
 
+            <div class="docstring"><p>Example use:</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># in views.py</span>
+<span class="k">class</span> <span class="nc">ExampleTableViewSet</span><span class="p">(</span><span class="n">SimmateAPIViewSet</span><span class="p">):</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">ExampleTable</span>
+    <span class="n">template_list</span> <span class="o">=</span> <span class="s2">&quot;custom_app/list.html&quot;</span>
+    <span class="n">template_retrieve</span> <span class="o">=</span> <span class="s2">&quot;custom_app/retrieve.html&quot;</span>
+
+<span class="c1"># in urls.py</span>
+<span class="n">path</span><span class="p">(</span>
+    <span class="n">route</span><span class="o">=</span><span class="s2">&quot;example-table&quot;</span><span class="p">,</span>
+    <span class="n">view</span><span class="o">=</span><span class="n">ExampleTableViewSet</span><span class="o">.</span><span class="n">list_view</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example-list&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">path</span><span class="p">(</span>
+    <span class="n">route</span><span class="o">=</span><span class="s2">&quot;example-table/&lt;int:id&gt;&quot;</span><span class="p">,</span>
+    <span class="n">view</span><span class="o">=</span><span class="n">ExampleTableViewSet</span><span class="o">.</span><span class="n">retrieve_view</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example-retrieve&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+
+
+                            <div id="SymmetryViewSet.template_list" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#SymmetryViewSet.template_list">#&nbsp;&nbsp</a>
+
+        <span class="name">template_list</span><span class="annotation">: str</span><span class="default_value"> = &#39;core_components/symmetry.html&#39;</span>
+    </div>
+
+    
     
 
+                            </div>
+                            <div id="SymmetryViewSet.template_retrieve" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#SymmetryViewSet.template_retrieve">#&nbsp;&nbsp</a>
+
+        <span class="name">template_retrieve</span><span class="annotation">: str</span><span class="default_value"> = &#39;core_components/spacegroup.html&#39;</span>
+    </div>
+
+    
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>django.views.generic.base.View</dt>
+                                <dd id="SymmetryViewSet.__init__" class="function">View</dd>
+                <dd id="SymmetryViewSet.http_method_names" class="variable">http_method_names</dd>
+                <dd id="SymmetryViewSet.setup" class="function">setup</dd>
+
+            </div>
+            <div><dt><a href="base_api_view.html#SimmateAPIViewSet">simmate.website.core_components.base_api_view.SimmateAPIViewSet</a></dt>
+                                <dd id="SymmetryViewSet.get_list_response" class="function"><a href="base_api_view.html#SimmateAPIViewSet.get_list_response">get_list_response</a></dd>
+                <dd id="SymmetryViewSet.get_retrieve_response" class="function"><a href="base_api_view.html#SimmateAPIViewSet.get_retrieve_response">get_retrieve_response</a></dd>
+                <dd id="SymmetryViewSet.from_table" class="function"><a href="base_api_view.html#SimmateAPIViewSet.from_table">from_table</a></dd>
+                <dd id="SymmetryViewSet.list_view" class="function"><a href="base_api_view.html#SimmateAPIViewSet.list_view">list_view</a></dd>
+                <dd id="SymmetryViewSet.retrieve_view" class="function"><a href="base_api_view.html#SimmateAPIViewSet.retrieve_view">retrieve_view</a></dd>
+                <dd id="SymmetryViewSet.get_table" class="function"><a href="base_api_view.html#SimmateAPIViewSet.get_table">get_table</a></dd>
+                <dd id="SymmetryViewSet.dynamic_list_view" class="function"><a href="base_api_view.html#SimmateAPIViewSet.dynamic_list_view">dynamic_list_view</a></dd>
+                <dd id="SymmetryViewSet.dynamic_retrieve_view" class="function"><a href="base_api_view.html#SimmateAPIViewSet.dynamic_retrieve_view">dynamic_retrieve_view</a></dd>
+                <dd id="SymmetryViewSet.get_list_context" class="function"><a href="base_api_view.html#SimmateAPIViewSet.get_list_context">get_list_context</a></dd>
+                <dd id="SymmetryViewSet.get_retrieve_context" class="function"><a href="base_api_view.html#SimmateAPIViewSet.get_retrieve_context">get_retrieve_context</a></dd>
+
+            </div>
+            <div><dt>rest_framework.viewsets.ViewSetMixin</dt>
+                                <dd id="SymmetryViewSet.as_view" class="function">as_view</dd>
+                <dd id="SymmetryViewSet.initialize_request" class="function">initialize_request</dd>
+                <dd id="SymmetryViewSet.reverse_action" class="function">reverse_action</dd>
+                <dd id="SymmetryViewSet.get_extra_actions" class="function">get_extra_actions</dd>
+                <dd id="SymmetryViewSet.get_extra_action_url_map" class="function">get_extra_action_url_map</dd>
+
+            </div>
+            <div><dt>rest_framework.generics.GenericAPIView</dt>
+                                <dd id="SymmetryViewSet.queryset" class="variable">queryset</dd>
+                <dd id="SymmetryViewSet.serializer_class" class="variable">serializer_class</dd>
+                <dd id="SymmetryViewSet.lookup_field" class="variable">lookup_field</dd>
+                <dd id="SymmetryViewSet.lookup_url_kwarg" class="variable">lookup_url_kwarg</dd>
+                <dd id="SymmetryViewSet.filter_backends" class="variable">filter_backends</dd>
+                <dd id="SymmetryViewSet.pagination_class" class="class">pagination_class</dd>
+                <dd id="SymmetryViewSet.get_queryset" class="function">get_queryset</dd>
+                <dd id="SymmetryViewSet.get_object" class="function">get_object</dd>
+                <dd id="SymmetryViewSet.get_serializer" class="function">get_serializer</dd>
+                <dd id="SymmetryViewSet.get_serializer_class" class="function">get_serializer_class</dd>
+                <dd id="SymmetryViewSet.get_serializer_context" class="function">get_serializer_context</dd>
+                <dd id="SymmetryViewSet.filter_queryset" class="function">filter_queryset</dd>
+                <dd id="SymmetryViewSet.paginator" class="variable">paginator</dd>
+                <dd id="SymmetryViewSet.paginate_queryset" class="function">paginate_queryset</dd>
+                <dd id="SymmetryViewSet.get_paginated_response" class="function">get_paginated_response</dd>
+
+            </div>
+            <div><dt>rest_framework.views.APIView</dt>
+                                <dd id="SymmetryViewSet.renderer_classes" class="variable">renderer_classes</dd>
+                <dd id="SymmetryViewSet.parser_classes" class="variable">parser_classes</dd>
+                <dd id="SymmetryViewSet.authentication_classes" class="variable">authentication_classes</dd>
+                <dd id="SymmetryViewSet.throttle_classes" class="variable">throttle_classes</dd>
+                <dd id="SymmetryViewSet.permission_classes" class="variable">permission_classes</dd>
+                <dd id="SymmetryViewSet.content_negotiation_class" class="class">content_negotiation_class</dd>
+                <dd id="SymmetryViewSet.metadata_class" class="class">metadata_class</dd>
+                <dd id="SymmetryViewSet.versioning_class" class="variable">versioning_class</dd>
+                <dd id="SymmetryViewSet.settings" class="variable">settings</dd>
+                <dd id="SymmetryViewSet.schema" class="variable">schema</dd>
+                <dd id="SymmetryViewSet.allowed_methods" class="variable">allowed_methods</dd>
+                <dd id="SymmetryViewSet.default_response_headers" class="variable">default_response_headers</dd>
+                <dd id="SymmetryViewSet.http_method_not_allowed" class="function">http_method_not_allowed</dd>
+                <dd id="SymmetryViewSet.permission_denied" class="function">permission_denied</dd>
+                <dd id="SymmetryViewSet.throttled" class="function">throttled</dd>
+                <dd id="SymmetryViewSet.get_authenticate_header" class="function">get_authenticate_header</dd>
+                <dd id="SymmetryViewSet.get_parser_context" class="function">get_parser_context</dd>
+                <dd id="SymmetryViewSet.get_renderer_context" class="function">get_renderer_context</dd>
+                <dd id="SymmetryViewSet.get_exception_handler_context" class="function">get_exception_handler_context</dd>
+                <dd id="SymmetryViewSet.get_view_name" class="function">get_view_name</dd>
+                <dd id="SymmetryViewSet.get_view_description" class="function">get_view_description</dd>
+                <dd id="SymmetryViewSet.get_format_suffix" class="function">get_format_suffix</dd>
+                <dd id="SymmetryViewSet.get_renderers" class="function">get_renderers</dd>
+                <dd id="SymmetryViewSet.get_parsers" class="function">get_parsers</dd>
+                <dd id="SymmetryViewSet.get_authenticators" class="function">get_authenticators</dd>
+                <dd id="SymmetryViewSet.get_permissions" class="function">get_permissions</dd>
+                <dd id="SymmetryViewSet.get_throttles" class="function">get_throttles</dd>
+                <dd id="SymmetryViewSet.get_content_negotiator" class="function">get_content_negotiator</dd>
+                <dd id="SymmetryViewSet.get_exception_handler" class="function">get_exception_handler</dd>
+                <dd id="SymmetryViewSet.perform_content_negotiation" class="function">perform_content_negotiation</dd>
+                <dd id="SymmetryViewSet.perform_authentication" class="function">perform_authentication</dd>
+                <dd id="SymmetryViewSet.check_permissions" class="function">check_permissions</dd>
+                <dd id="SymmetryViewSet.check_object_permissions" class="function">check_object_permissions</dd>
+                <dd id="SymmetryViewSet.check_throttles" class="function">check_throttles</dd>
+                <dd id="SymmetryViewSet.determine_version" class="function">determine_version</dd>
+                <dd id="SymmetryViewSet.initial" class="function">initial</dd>
+                <dd id="SymmetryViewSet.finalize_response" class="function">finalize_response</dd>
+                <dd id="SymmetryViewSet.handle_exception" class="function">handle_exception</dd>
+                <dd id="SymmetryViewSet.raise_uncaught_exception" class="function">raise_uncaught_exception</dd>
+                <dd id="SymmetryViewSet.dispatch" class="function">dispatch</dd>
+                <dd id="SymmetryViewSet.options" class="function">options</dd>
+
+            </div>
+                                </dl>
+                            </div>
                 </section>
-                <section id="spacegroup">
-                            <div class="attr function"><a class="headerlink" href="#spacegroup">#&nbsp;&nbsp</a>
+                <section id="SymmetryViewSet.table">
+                                <div class="attr class">
+        <a class="headerlink" href="#SymmetryViewSet.table">#&nbsp;&nbsp</a>
 
         
-            <span class="def">def</span>
-            <span class="name">spacegroup</span><span class="signature">(request, spacegroup_number: str)</span>:
+        <span class="def">class</span>
+        <span class="name">SymmetryViewSet.table</span><wbr>(<span class="base"><a href="../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">spacegroup</span><span class="p">(</span>
-    <span class="n">request</span><span class="p">,</span>
-    <span class="n">spacegroup_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">):</span>
-    <span class="k">return</span> <span class="n">render_from_table</span><span class="p">(</span>
-        <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">,</span>
-        <span class="n">request_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;spacegroup_number&quot;</span><span class="p">:</span> <span class="n">spacegroup_number</span><span class="p">},</span>
-        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;core_components/spacegroup.html&quot;</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">table</span><span class="o">=</span><span class="n">Spacegroup</span><span class="p">,</span>
-        <span class="n">view_type</span><span class="o">=</span><span class="s2">&quot;retrieve&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_field</span><span class="o">=</span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
-        <span class="n">primary_key_url</span><span class="o">=</span><span class="s2">&quot;spacegroup_number&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Spacegroup</span><span class="p">(</span><span class="n">DatabaseTable</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">app_label</span> <span class="o">=</span> <span class="s2">&quot;core_components&quot;</span>
+
+    <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The source column is disabled for this table because this is common</span>
+<span class="sd">    information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># NOTE: International spacegroup info is also known as Hermann-Mauguin</span>
+
+    <span class="n">number</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    International space group number</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">symbol</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Full international symbol</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">crystal_system</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The crystal system (don&#39;t confused with crystal family or lattice family)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">point_group</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Point group symbol</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_load_database_from_toolkit</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads spacegroup data into the database table.</span>
+
+<span class="sd">        This should never be called by the user. This method is automatically</span>
+<span class="sd">        called when you first set up your database and should never be called</span>
+<span class="sd">        after that.</span>
+
+<span class="sd">        See simmate.configuration.django.database.reset_database</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">):</span>
+
+            <span class="c1"># load the pymatgen object that we can easily grab data from</span>
+            <span class="n">spacegroup</span> <span class="o">=</span> <span class="n">PymatgenSpacegroup</span><span class="o">.</span><span class="n">from_int_number</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+
+            <span class="c1"># load the data into this django model</span>
+            <span class="n">spacegroup_db</span> <span class="o">=</span> <span class="n">Spacegroup</span><span class="p">(</span>
+                <span class="n">number</span><span class="o">=</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">int_number</span><span class="p">,</span>
+                <span class="n">symbol</span><span class="o">=</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span>
+                <span class="n">crystal_system</span><span class="o">=</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">crystal_system</span><span class="p">,</span>
+                <span class="n">point_group</span><span class="o">=</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">point_group</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># now save this information to the database</span>
+            <span class="n">spacegroup_db</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Spacegroup(number, symbol, crystal_system, point_group)</p>
+</div>
 
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>django.db.models.base.Model</dt>
+                                <dd id="SymmetryViewSet.table.__init__" class="function">Model</dd>
+                <dd id="SymmetryViewSet.table.from_db" class="function">from_db</dd>
+                <dd id="SymmetryViewSet.table.pk" class="variable">pk</dd>
+                <dd id="SymmetryViewSet.table.get_deferred_fields" class="function">get_deferred_fields</dd>
+                <dd id="SymmetryViewSet.table.refresh_from_db" class="function">refresh_from_db</dd>
+                <dd id="SymmetryViewSet.table.serializable_value" class="function">serializable_value</dd>
+                <dd id="SymmetryViewSet.table.save" class="function">save</dd>
+                <dd id="SymmetryViewSet.table.save_base" class="function">save_base</dd>
+                <dd id="SymmetryViewSet.table.delete" class="function">delete</dd>
+                <dd id="SymmetryViewSet.table.prepare_database_save" class="function">prepare_database_save</dd>
+                <dd id="SymmetryViewSet.table.clean" class="function">clean</dd>
+                <dd id="SymmetryViewSet.table.validate_unique" class="function">validate_unique</dd>
+                <dd id="SymmetryViewSet.table.date_error_message" class="function">date_error_message</dd>
+                <dd id="SymmetryViewSet.table.unique_error_message" class="function">unique_error_message</dd>
+                <dd id="SymmetryViewSet.table.full_clean" class="function">full_clean</dd>
+                <dd id="SymmetryViewSet.table.clean_fields" class="function">clean_fields</dd>
+                <dd id="SymmetryViewSet.table.check" class="function">check</dd>
+
+            </div>
+            <div><dt><a href="../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
+                                <dd id="SymmetryViewSet.table.Meta" class="class"><a href="../../database/base_data_types/base.html#DatabaseTable.Meta">Meta</a></dd>
+                <dd id="SymmetryViewSet.table.base_info" class="variable"><a href="../../database/base_data_types/base.html#DatabaseTable.base_info">base_info</a></dd>
+                <dd id="SymmetryViewSet.table.source_doi" class="variable"><a href="../../database/base_data_types/base.html#DatabaseTable.source_doi">source_doi</a></dd>
+                <dd id="SymmetryViewSet.table.remote_archive_link" class="variable"><a href="../../database/base_data_types/base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
+                <dd id="SymmetryViewSet.table.objects" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                <dd id="SymmetryViewSet.table.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
+                <dd id="SymmetryViewSet.table.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
+                <dd id="SymmetryViewSet.table.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="SymmetryViewSet.table.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
+                <dd id="SymmetryViewSet.table.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
+                <dd id="SymmetryViewSet.table.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
+                <dd id="SymmetryViewSet.table.show_columns" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="SymmetryViewSet.table.get_mixins" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_mixins">get_mixins</a></dd>
+                <dd id="SymmetryViewSet.table.get_mixin_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_mixin_names">get_mixin_names</a></dd>
+                <dd id="SymmetryViewSet.table.get_extra_columns" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_extra_columns">get_extra_columns</a></dd>
+
+            </div>
+            <div><dt><a href="../../database/base_data_types/symmetry.html#Spacegroup">simmate.database.base_data_types.symmetry.Spacegroup</a></dt>
+                                <dd id="SymmetryViewSet.table.source" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.source">source</a></dd>
+                <dd id="SymmetryViewSet.table.number" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.number">number</a></dd>
+                <dd id="SymmetryViewSet.table.symbol" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.symbol">symbol</a></dd>
+                <dd id="SymmetryViewSet.table.crystal_system" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.crystal_system">crystal_system</a></dd>
+                <dd id="SymmetryViewSet.table.point_group" class="function"><a href="../../database/base_data_types/symmetry.html#Spacegroup.point_group">point_group</a></dd>
+                <dd id="SymmetryViewSet.table.DoesNotExist" class="class"><a href="../../database/base_data_types/symmetry.html#Spacegroup.DoesNotExist">DoesNotExist</a></dd>
+                <dd id="SymmetryViewSet.table.MultipleObjectsReturned" class="class"><a href="../../database/base_data_types/symmetry.html#Spacegroup.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
+                <dd id="SymmetryViewSet.table.aflowstructure_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.aflowstructure_set">aflowstructure_set</a></dd>
+                <dd id="SymmetryViewSet.table.codstructure_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.codstructure_set">codstructure_set</a></dd>
+                <dd id="SymmetryViewSet.table.jarvisstructure_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.jarvisstructure_set">jarvisstructure_set</a></dd>
+                <dd id="SymmetryViewSet.table.matprojstructure_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.matprojstructure_set">matprojstructure_set</a></dd>
+                <dd id="SymmetryViewSet.table.oqmdstructure_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.oqmdstructure_set">oqmdstructure_set</a></dd>
+                <dd id="SymmetryViewSet.table.mitrelaxation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.mitrelaxation_set">mitrelaxation_set</a></dd>
+                <dd id="SymmetryViewSet.table.mitionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.mitionicstep_set">mitionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.matprojrelaxation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.matprojrelaxation_set">matprojrelaxation_set</a></dd>
+                <dd id="SymmetryViewSet.table.matprojionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.matprojionicstep_set">matprojionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.nebendpointrelaxation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.nebendpointrelaxation_set">nebendpointrelaxation_set</a></dd>
+                <dd id="SymmetryViewSet.table.nebendpointionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.nebendpointionicstep_set">nebendpointionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality00relaxation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality00relaxation_set">quality00relaxation_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality00ionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality00ionicstep_set">quality00ionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality01relaxation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality01relaxation_set">quality01relaxation_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality01ionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality01ionicstep_set">quality01ionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality02relaxation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality02relaxation_set">quality02relaxation_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality02ionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality02ionicstep_set">quality02ionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality03relaxation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality03relaxation_set">quality03relaxation_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality03ionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality03ionicstep_set">quality03ionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality04relaxation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality04relaxation_set">quality04relaxation_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality04ionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality04ionicstep_set">quality04ionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.mitstaticenergy_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.mitstaticenergy_set">mitstaticenergy_set</a></dd>
+                <dd id="SymmetryViewSet.table.matprojstaticenergy_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.matprojstaticenergy_set">matprojstaticenergy_set</a></dd>
+                <dd id="SymmetryViewSet.table.nebendpointstaticenergy_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.nebendpointstaticenergy_set">nebendpointstaticenergy_set</a></dd>
+                <dd id="SymmetryViewSet.table.quality04staticenergy_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.quality04staticenergy_set">quality04staticenergy_set</a></dd>
+                <dd id="SymmetryViewSet.table.matprojbandstructure_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.matprojbandstructure_set">matprojbandstructure_set</a></dd>
+                <dd id="SymmetryViewSet.table.matprojdensityofstates_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.matprojdensityofstates_set">matprojdensityofstates_set</a></dd>
+                <dd id="SymmetryViewSet.table.mitdiffusionanalysis_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.mitdiffusionanalysis_set">mitdiffusionanalysis_set</a></dd>
+                <dd id="SymmetryViewSet.table.mitmigrationimage_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.mitmigrationimage_set">mitmigrationimage_set</a></dd>
+                <dd id="SymmetryViewSet.table.mitdynamicsrun_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.mitdynamicsrun_set">mitdynamicsrun_set</a></dd>
+                <dd id="SymmetryViewSet.table.mitdynamicsionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.mitdynamicsionicstep_set">mitdynamicsionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.aflowprototype_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.aflowprototype_set">aflowprototype_set</a></dd>
+                <dd id="SymmetryViewSet.table.teststructure_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.teststructure_set">teststructure_set</a></dd>
+                <dd id="SymmetryViewSet.table.teststructurecalculation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.teststructurecalculation_set">teststructurecalculation_set</a></dd>
+                <dd id="SymmetryViewSet.table.testforces_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.testforces_set">testforces_set</a></dd>
+                <dd id="SymmetryViewSet.table.testthermodynamics_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.testthermodynamics_set">testthermodynamics_set</a></dd>
+                <dd id="SymmetryViewSet.table.teststaticenergy_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.teststaticenergy_set">teststaticenergy_set</a></dd>
+                <dd id="SymmetryViewSet.table.testrelaxation_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.testrelaxation_set">testrelaxation_set</a></dd>
+                <dd id="SymmetryViewSet.table.testionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.testionicstep_set">testionicstep_set</a></dd>
+                <dd id="SymmetryViewSet.table.testdynamicsrun_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.testdynamicsrun_set">testdynamicsrun_set</a></dd>
+                <dd id="SymmetryViewSet.table.testdynamicsionicstep_set" class="variable"><a href="../../database/base_data_types/symmetry.html#Spacegroup.testdynamicsionicstep_set">testdynamicsionicstep_set</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
                 </section>
                 <section id="structure_viewer">
                             <div class="attr function"><a class="headerlink" href="#structure_viewer">#&nbsp;&nbsp</a>

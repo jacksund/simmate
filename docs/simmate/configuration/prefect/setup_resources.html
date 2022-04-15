@@ -61,41 +61,21 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-
 <span class="kn">import</span> <span class="nn">yaml</span>
-
-<span class="c1"># This must be done BEFORE importing any other dask modules</span>
-<span class="kn">from</span> <span class="nn">simmate.configuration</span> <span class="kn">import</span> <span class="n">dask</span>  <span class="c1"># loads default cluster settings</span>
-
-<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">LocalCluster</span>
-<span class="kn">import</span> <span class="nn">dask_jobqueue</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">prefect.agent.local</span> <span class="kn">import</span> <span class="n">LocalAgent</span>
 
 <span class="kn">from</span> <span class="nn">simmate.configuration.prefect.connect_to_dask</span> <span class="kn">import</span> <span class="n">set_default_executor</span>
+<span class="kn">from</span> <span class="nn">simmate.configuration.dask.setup_cluster</span> <span class="kn">import</span> <span class="n">run_cluster</span>
 
-<span class="n">ALLOWED_CLUSTER_TYPES</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;Local&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;PBS&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;SLURM&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;SGE&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;HTCondor&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;LSF&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Moab&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;OAR&quot;</span><span class="p">,</span>
-<span class="p">]</span>
 
-<span class="n">HEADER_ART</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2"> ____            _       ____ _           _</span>
-<span class="s2">|  _ \  __ _ ___| | __  / ___| |_   _ ___| |_ ___ _ __</span>
-<span class="s2">| | | |/ _` / __| |/ / | |   | | | | / __| __/ _ \ &#39;__|</span>
-<span class="s2">| |_| | (_| \__ \   &lt;  | |___| | |_| \__ \ ||  __/ |</span>
-<span class="s2">|____/ \__,_|___/_|\_\  \____|_|\__,_|___/\__\___|_|</span>
+<span class="k">def</span> <span class="nf">load_agent_settings</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load our default cluster type, agent name, and agent labels. This is loaded</span>
+<span class="sd">    from the file `prefect_agent.yaml`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<span class="s2">&quot;&quot;&quot;</span>
-
-<span class="c1"># Load our default cluster type, agent name, and agent labels</span>
-<span class="k">def</span> <span class="nf">load_agent_settings</span><span class="p">():</span>
     <span class="n">SIMMATE_DIRECTORY</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">(),</span> <span class="s2">&quot;simmate&quot;</span><span class="p">)</span>
     <span class="n">AGENT_YAML</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SIMMATE_DIRECTORY</span><span class="p">,</span> <span class="s2">&quot;prefect_agent.yaml&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">AGENT_YAML</span><span class="p">):</span>
@@ -104,7 +84,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">settings</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="c1"># update each entry if it&#39;s not set in the yaml file</span>
+    <span class="c1"># update each of these entries if it&#39;s not set in the yaml file</span>
     <span class="n">default_values</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;agent_name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="s2">&quot;agent_labels&quot;</span><span class="p">:</span> <span class="p">[],</span>
@@ -114,76 +94,24 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
             <span class="n">settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
 
-    <span class="c1"># make sure we have a legal cluster type</span>
-    <span class="k">if</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;dask_cluster_type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALLOWED_CLUSTER_TYPES</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;dask_cluster_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not an allowed cluster type.&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Please choose one of the following: </span><span class="si">{</span><span class="n">ALLOWED_CLUSTER_TYPES</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-
     <span class="k">return</span> <span class="n">settings</span>
 
 
-<span class="n">default_agent_settings</span> <span class="o">=</span> <span class="n">load_agent_settings</span><span class="p">()</span>
+<span class="n">DEFAULT_AGENT_SETTINGS</span> <span class="o">=</span> <span class="n">load_agent_settings</span><span class="p">()</span>
 
-<span class="c1"># NOTE: if you are using a jobqueue cluster, this function assumes you have</span>
-<span class="c1"># default values set in a Dask config file.</span>
+
 <span class="k">def</span> <span class="nf">run_cluster_and_agent</span><span class="p">(</span>
-    <span class="n">cluster_type</span><span class="o">=</span><span class="n">default_agent_settings</span><span class="p">[</span><span class="s2">&quot;dask_cluster_type&quot;</span><span class="p">],</span>
-    <span class="n">agent_name</span><span class="o">=</span><span class="n">default_agent_settings</span><span class="p">[</span><span class="s2">&quot;agent_name&quot;</span><span class="p">],</span>
-    <span class="n">agent_labels</span><span class="o">=</span><span class="n">default_agent_settings</span><span class="p">[</span><span class="s2">&quot;agent_labels&quot;</span><span class="p">],</span>
-    <span class="n">njobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Required for jobqueue-based clusters</span>
-    <span class="c1"># I include these three options because they are commonly overwritten when</span>
-    <span class="c1"># setting up clusters. I need to revist this in the future though and consider</span>
-    <span class="c1"># adding more or just accpeting a general **cluster_kwargs for input</span>
-    <span class="n">job_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">job_mem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">walltime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">cluster_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_AGENT_SETTINGS</span><span class="p">[</span><span class="s2">&quot;dask_cluster_type&quot;</span><span class="p">],</span>
+    <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_AGENT_SETTINGS</span><span class="p">[</span><span class="s2">&quot;agent_name&quot;</span><span class="p">],</span>
+    <span class="n">agent_labels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_AGENT_SETTINGS</span><span class="p">[</span><span class="s2">&quot;agent_labels&quot;</span><span class="p">],</span>
+    <span class="o">**</span><span class="n">cluster_kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 
-    <span class="c1">################# STEP 1: Configure our Dask Cluster. #################</span>
-
-    <span class="c1"># check if the user wants to override default settings for the SLURM jobs.</span>
-    <span class="c1"># Each of these will only be passed to Cluster() if they are set</span>
-    <span class="n">cluster_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">job_cpu</span><span class="p">:</span>
-        <span class="n">cluster_kwargs</span><span class="p">[</span><span class="s2">&quot;job_cpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job_cpu</span>
-    <span class="k">if</span> <span class="n">job_mem</span><span class="p">:</span>
-        <span class="n">cluster_kwargs</span><span class="p">[</span><span class="s2">&quot;job_mem&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job_mem</span>
-    <span class="k">if</span> <span class="n">walltime</span><span class="p">:</span>
-        <span class="n">cluster_kwargs</span><span class="p">[</span><span class="s2">&quot;walltime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">walltime</span>
-
-    <span class="c1"># Start a local cluster with default settings if requested</span>
-    <span class="k">if</span> <span class="n">cluster_type</span> <span class="o">==</span> <span class="s2">&quot;Local&quot;</span><span class="p">:</span>
-        <span class="n">cluster</span> <span class="o">=</span> <span class="n">LocalCluster</span><span class="p">(</span><span class="n">n_workers</span><span class="o">=</span><span class="n">njobs</span><span class="p">)</span>
-
-    <span class="c1"># otherwise we have a jobqueue cluster</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># grab the class from the module. It will be named something like PBSCluster</span>
-        <span class="n">ClusterClass</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">dask_jobqueue</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cluster_type</span><span class="si">}</span><span class="s2">Cluster&quot;</span><span class="p">)</span>
-        <span class="c1"># Now initialize the cluster using the default Dask config.</span>
-        <span class="n">cluster</span> <span class="o">=</span> <span class="n">ClusterClass</span><span class="p">(</span><span class="o">**</span><span class="n">cluster_kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">njobs</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;You must provide nworkers when using a JobQueue cluster&quot;</span><span class="p">)</span>
-        <span class="n">cluster</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">njobs</span><span class="p">)</span>
-
-    <span class="c1"># print some info about the cluster for the user</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">HEADER_ART</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scheduler is located at </span><span class="si">{</span><span class="n">cluster</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">address</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dashboard is located at </span><span class="si">{</span><span class="n">cluster</span><span class="o">.</span><span class="n">dashboard_link</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">&quot;To view the dashboard via ssh, use the command... </span><span class="se">\n\t</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;ssh -N -L 8787:warwulf.net:8787 WarrenLab@warwulf.net&quot;</span>  <span class="c1"># TODO: make more general</span>
+    <span class="c1"># start our dask cluster</span>
+    <span class="n">cluster</span> <span class="o">=</span> <span class="n">run_cluster</span><span class="p">(</span>
+        <span class="n">cluster_type</span><span class="o">=</span><span class="n">cluster_type</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">cluster_kwargs</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1"># Also if we have a jobqueue, we can display the submit script being used.</span>
-    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">dask_jobqueue</span><span class="o">.</span><span class="n">JobQueueCluster</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workers are submitted to SLURM with the following submit.sh...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">job_script</span><span class="p">())</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workers are all ran on the local machine.&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="c1">################# STEP 2: Configure our Dask Cluster. #################</span>
 
     <span class="c1"># We want Prefect to use our Dask Cluster to run all of the workflow tasks. To</span>
     <span class="c1"># tell Prefect to do this, we wrote a helper function (set_default_executor) that</span>
@@ -200,8 +128,6 @@
     <span class="c1"># submit them to our Dask cluster.</span>
     <span class="n">agent</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="c1"># NOTE: this line will run endlessly unless you set a timelimit in the LocalAgent above</span>
-
-    <span class="c1">#######################################################################</span>
 </pre></div>
 
         </details>
@@ -212,12 +138,17 @@
 
         
             <span class="def">def</span>
-            <span class="name">load_agent_settings</span><span class="signature">()</span>:
+            <span class="name">load_agent_settings</span><span class="signature">() -&gt; dict</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_agent_settings</span><span class="p">():</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load_agent_settings</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load our default cluster type, agent name, and agent labels. This is loaded</span>
+<span class="sd">    from the file `prefect_agent.yaml`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">SIMMATE_DIRECTORY</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">(),</span> <span class="s2">&quot;simmate&quot;</span><span class="p">)</span>
     <span class="n">AGENT_YAML</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SIMMATE_DIRECTORY</span><span class="p">,</span> <span class="s2">&quot;prefect_agent.yaml&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">AGENT_YAML</span><span class="p">):</span>
@@ -226,7 +157,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">settings</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="c1"># update each entry if it&#39;s not set in the yaml file</span>
+    <span class="c1"># update each of these entries if it&#39;s not set in the yaml file</span>
     <span class="n">default_values</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;agent_name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="s2">&quot;agent_labels&quot;</span><span class="p">:</span> <span class="p">[],</span>
@@ -236,19 +167,15 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
             <span class="n">settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
 
-    <span class="c1"># make sure we have a legal cluster type</span>
-    <span class="k">if</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;dask_cluster_type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALLOWED_CLUSTER_TYPES</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;dask_cluster_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not an allowed cluster type.&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Please choose one of the following: </span><span class="si">{</span><span class="n">ALLOWED_CLUSTER_TYPES</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-
     <span class="k">return</span> <span class="n">settings</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Load our default cluster type, agent name, and agent labels. This is loaded
+from the file <code>prefect_agent.yaml</code>.</p>
+</div>
+
 
                 </section>
                 <section id="run_cluster_and_agent">
@@ -257,74 +184,27 @@
         
             <span class="def">def</span>
             <span class="name">run_cluster_and_agent</span><span class="signature">(
-    cluster_type=&#39;Local&#39;,
-    agent_name=&#39;LabDesktop&#39;,
-    agent_labels=[&#39;DESKTOP-PVN50G5&#39;],
-    njobs=None,
-    job_cpu=None,
-    job_mem=None,
-    walltime=None
+    cluster_type: str = &#39;Local&#39;,
+    agent_name: str = None,
+    agent_labels: List[str] = [],
+    **cluster_kwargs
 )</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">run_cluster_and_agent</span><span class="p">(</span>
-    <span class="n">cluster_type</span><span class="o">=</span><span class="n">default_agent_settings</span><span class="p">[</span><span class="s2">&quot;dask_cluster_type&quot;</span><span class="p">],</span>
-    <span class="n">agent_name</span><span class="o">=</span><span class="n">default_agent_settings</span><span class="p">[</span><span class="s2">&quot;agent_name&quot;</span><span class="p">],</span>
-    <span class="n">agent_labels</span><span class="o">=</span><span class="n">default_agent_settings</span><span class="p">[</span><span class="s2">&quot;agent_labels&quot;</span><span class="p">],</span>
-    <span class="n">njobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Required for jobqueue-based clusters</span>
-    <span class="c1"># I include these three options because they are commonly overwritten when</span>
-    <span class="c1"># setting up clusters. I need to revist this in the future though and consider</span>
-    <span class="c1"># adding more or just accpeting a general **cluster_kwargs for input</span>
-    <span class="n">job_cpu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">job_mem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">walltime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">cluster_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_AGENT_SETTINGS</span><span class="p">[</span><span class="s2">&quot;dask_cluster_type&quot;</span><span class="p">],</span>
+    <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_AGENT_SETTINGS</span><span class="p">[</span><span class="s2">&quot;agent_name&quot;</span><span class="p">],</span>
+    <span class="n">agent_labels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_AGENT_SETTINGS</span><span class="p">[</span><span class="s2">&quot;agent_labels&quot;</span><span class="p">],</span>
+    <span class="o">**</span><span class="n">cluster_kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 
-    <span class="c1">################# STEP 1: Configure our Dask Cluster. #################</span>
-
-    <span class="c1"># check if the user wants to override default settings for the SLURM jobs.</span>
-    <span class="c1"># Each of these will only be passed to Cluster() if they are set</span>
-    <span class="n">cluster_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">job_cpu</span><span class="p">:</span>
-        <span class="n">cluster_kwargs</span><span class="p">[</span><span class="s2">&quot;job_cpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job_cpu</span>
-    <span class="k">if</span> <span class="n">job_mem</span><span class="p">:</span>
-        <span class="n">cluster_kwargs</span><span class="p">[</span><span class="s2">&quot;job_mem&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job_mem</span>
-    <span class="k">if</span> <span class="n">walltime</span><span class="p">:</span>
-        <span class="n">cluster_kwargs</span><span class="p">[</span><span class="s2">&quot;walltime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">walltime</span>
-
-    <span class="c1"># Start a local cluster with default settings if requested</span>
-    <span class="k">if</span> <span class="n">cluster_type</span> <span class="o">==</span> <span class="s2">&quot;Local&quot;</span><span class="p">:</span>
-        <span class="n">cluster</span> <span class="o">=</span> <span class="n">LocalCluster</span><span class="p">(</span><span class="n">n_workers</span><span class="o">=</span><span class="n">njobs</span><span class="p">)</span>
-
-    <span class="c1"># otherwise we have a jobqueue cluster</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># grab the class from the module. It will be named something like PBSCluster</span>
-        <span class="n">ClusterClass</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">dask_jobqueue</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cluster_type</span><span class="si">}</span><span class="s2">Cluster&quot;</span><span class="p">)</span>
-        <span class="c1"># Now initialize the cluster using the default Dask config.</span>
-        <span class="n">cluster</span> <span class="o">=</span> <span class="n">ClusterClass</span><span class="p">(</span><span class="o">**</span><span class="n">cluster_kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">njobs</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;You must provide nworkers when using a JobQueue cluster&quot;</span><span class="p">)</span>
-        <span class="n">cluster</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">njobs</span><span class="p">)</span>
-
-    <span class="c1"># print some info about the cluster for the user</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">HEADER_ART</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scheduler is located at </span><span class="si">{</span><span class="n">cluster</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">address</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dashboard is located at </span><span class="si">{</span><span class="n">cluster</span><span class="o">.</span><span class="n">dashboard_link</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">&quot;To view the dashboard via ssh, use the command... </span><span class="se">\n\t</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;ssh -N -L 8787:warwulf.net:8787 WarrenLab@warwulf.net&quot;</span>  <span class="c1"># TODO: make more general</span>
+    <span class="c1"># start our dask cluster</span>
+    <span class="n">cluster</span> <span class="o">=</span> <span class="n">run_cluster</span><span class="p">(</span>
+        <span class="n">cluster_type</span><span class="o">=</span><span class="n">cluster_type</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">cluster_kwargs</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1"># Also if we have a jobqueue, we can display the submit script being used.</span>
-    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">dask_jobqueue</span><span class="o">.</span><span class="n">JobQueueCluster</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workers are submitted to SLURM with the following submit.sh...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">job_script</span><span class="p">())</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workers are all ran on the local machine.&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="c1">################# STEP 2: Configure our Dask Cluster. #################</span>
 
     <span class="c1"># We want Prefect to use our Dask Cluster to run all of the workflow tasks. To</span>
     <span class="c1"># tell Prefect to do this, we wrote a helper function (set_default_executor) that</span>
@@ -341,8 +221,6 @@
     <span class="c1"># submit them to our Dask cluster.</span>
     <span class="n">agent</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="c1"># NOTE: this line will run endlessly unless you set a timelimit in the LocalAgent above</span>
-
-    <span class="c1">#######################################################################</span>
 </pre></div>
 
         </details>
