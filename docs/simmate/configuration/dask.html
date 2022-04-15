@@ -37,6 +37,8 @@
         <ul>
                 <li><a href="dask/client.html">simmate.configuration.dask.client</a></li>
                 <li><a href="dask/connect_to_database.html">simmate.configuration.dask.connect_to_database</a></li>
+                <li><a href="dask/settings.html">simmate.configuration.dask.settings</a></li>
+                <li><a href="dask/setup_cluster.html">simmate.configuration.dask.setup_cluster</a></li>
                 <li><a href="dask/submit.html">simmate.configuration.dask.submit</a></li>
         </ul>
 
@@ -70,16 +72,7 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="c1"># First we need to load the default configuration for Dask. This is located</span>
-<span class="c1"># in the simmate configuration directory under the name dask_cluster.yaml.</span>
-<span class="c1"># This needs to be done BEFORE we import any dask modules, which is why this is</span>
-<span class="c1"># in the init.</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-    <span class="s2">&quot;DASK_CONFIG&quot;</span><span class="p">,</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">),</span> <span class="s2">&quot;simmate&quot;</span><span class="p">,</span> <span class="s2">&quot;dask_cluster.yaml&quot;</span><span class="p">),</span>
-<span class="p">)</span>
-<span class="c1"># TODO: I need to update this to allow for other directories</span>
-
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">settings</span>  <span class="c1"># configures settings but has no functionality</span>
 <span class="kn">from</span> <span class="nn">.client</span> <span class="kn">import</span> <span class="n">get_dask_client</span>
 <span class="kn">from</span> <span class="nn">.submit</span> <span class="kn">import</span> <span class="n">batch_submit</span>
 </pre></div>

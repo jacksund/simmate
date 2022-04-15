@@ -10,14 +10,19 @@ There is one key exception to the rules above -- and that is with MAJOR=0 releas
 
 </br></br>
 
-# Unreleased
+# Upcoming Release
+
+- None
+
+# v0.2.0
+
 - start the CHANGELOG!
 - refactor API views and add `SimmateAPIViewSet` class
 - refactor `simmate start-project` command and underlying methods
 - refactor `simmate workflow-engine run-cluster` command and underlying methods
+- continue outlining `file_converters` module
 
-
-# Simmate v0.0.0 - v0.1.4
+# v0.0.0 - v0.1.4
 - initial release
 - web interface styling
 - minor bug fixes

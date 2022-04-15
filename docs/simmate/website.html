@@ -137,8 +137,8 @@ simmate run-server
 
 <p>The same can be done for individual entries too! For example, if we wanted all the data for the structure with id <code>mp-1</code>, then we can do...</p>
 
-<pre><code>http://127.0.0.1:8000/third-parties/MatProjStructure/mp-1/?format=api
-http://127.0.0.1:8000/third-parties/MatProjStructure/mp-1/?format=json
+<pre><code>http://simmate.org/third-parties/MatProjStructure/mp-1/?format=api
+http://simmate.org/third-parties/MatProjStructure/mp-1/?format=json
 </code></pre>
 
 <p>For these, you should see an output similar too...</p>
@@ -172,12 +172,12 @@ http://127.0.0.1:8000/third-parties/MatProjStructure/mp-1/?format=json
 
 <h3 id="filtering-results">Filtering results</h3>
 
-<p>Our URLs also support complex filtering using the URL too. As an example, let's make a search where we want all structures that have the spacegroup 229 and also are in the Cr-N chemcial system. When you make this search in the normal webpage, you'll notice the URL becomes...</p>
+<p>Our URLs also support complex filtering too. As an example, let's make a search where we want all structures that have the spacegroup 229 and also are in the Cr-N chemcial system. When you make this search in the normal webpage, you'll notice the URL becomes...</p>
 
 <pre><code>http://simmate.org/third-parties/MatProjStructure/?chemical_system=Cr-N&amp;spacegroup__number=229
 </code></pre>
 
-<p>Note that we specify our conditions by adding a question mark (<code>?</code>) at the end of the URL and then adding <code>example_key=desired_value</code> after that. As we add new conditions, we separate them with <code>&amp;</code> -- which results <code>key1=value1&amp;key2=value2&amp;key3=value3</code> and so on. You can also add <code>format=api</code> at the end of this too!</p>
+<p>We specify our conditions by adding a question mark (<code>?</code>) at the end of the URL and then adding <code>example_key=desired_value</code> after that. As we add new conditions, we separate them with <code>&amp;</code> -- which results in <code>key1=value1&amp;key2=value2&amp;key3=value3</code> and so on. You can also add <code>format=api</code> at the end of this too!</p>
 
 <p>Note, our python client for accessing data is MUCH more powerful for filtering through results, so we recommend accessing data using the <code><a href="database.html">simmate.database</a></code> module in complex/advanced cases.</p>
 
@@ -187,7 +187,7 @@ http://127.0.0.1:8000/third-parties/MatProjStructure/mp-1/?format=json
 
 <h3 id="ordering-results">Ordering results</h3>
 
-<p>For API and JSON formats, you can manually set the ordering of returned data by adding <code>ordering=example_column</code> to your URL. You can also reverse the ordering with <code>ordering=-example_column</code> (note the <code>-</code> symbol before the column name). For example:</p>
+<p>For API and JSON formats, you can manually set the ordering of returned data by adding <code>ordering=example_column</code> to your URL. You can also reverse the ordering with <code>ordering=-example_column</code> (note the "<code>-</code>" symbol before the column name). For example:</p>
 
 <pre><code>http://simmate.org/third-parties/MatProjStructure/?ordering=density_atomic
 </code></pre>
@@ -196,7 +196,7 @@ http://127.0.0.1:8000/third-parties/MatProjStructure/mp-1/?format=json
 
 <p>We build Simmate's REST API using the <a href="https://www.django-rest-framework.org/">django-rest-framework</a> python package, and implement filtering using <a href="https://django-filter.readthedocs.io/en/stable/">django-filter</a>. </p>
 
-<p>Our endpoints are NOT fixed but are instead dynamically created for each request. This is thanks to our <code>render_from_table</code> utility in the <code><a href="website/core_components.html">simmate.website.core_components</a></code> module, which takes a Simmate database table and automatically renders an API endpoint for us. The backend implementation of dynamic APIs is still experimental because we are exploring the pros and cons the approach -- for example, this enables quick start-up times for configuring Django, but also comes at the cost of more CPU time per web request.</p>
+<p>Our endpoints are NOT fixed but are instead dynamically created for each request. This is thanks to our <code>SimmateAPIViewset</code> class in the <code><a href="website/core_components.html">simmate.website.core_components</a></code> module, which takes a Simmate database table and automatically renders an API endpoint for us. The backend implementation of dynamic APIs is still experimental because we are exploring the pros and cons the approach -- for example, this enables quick start-up times for configuring Django, but also comes at the cost of more CPU time per web request.</p>
 </div>
 
                         <details>

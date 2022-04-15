@@ -74,14 +74,14 @@
     <span class="c1"># new flow runs.</span>
     <span class="n">path</span><span class="p">(</span>
         <span class="n">route</span><span class="o">=</span><span class="s2">&quot;&lt;workflow_type&gt;/&lt;workflow_name&gt;/&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">workflow_detail</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">WorkflowAPIViewSet</span><span class="o">.</span><span class="n">dynamic_list_view</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;workflow_detail&quot;</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1">#</span>
     <span class="c1"># Views results for an individual calculation</span>
     <span class="n">path</span><span class="p">(</span>
-        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;&lt;workflow_type&gt;/&lt;workflow_name&gt;/&lt;int:workflow_run_id&gt;&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">workflow_run_detail</span><span class="p">,</span>
+        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;&lt;workflow_type&gt;/&lt;workflow_name&gt;/&lt;int:pk&gt;&quot;</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">WorkflowAPIViewSet</span><span class="o">.</span><span class="n">dynamic_retrieve_view</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;workflow_run_detail&quot;</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1">#</span>

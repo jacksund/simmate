@@ -181,112 +181,27 @@ a few extra methods and does not change any other usage.</p>
 
         <span class="k">return</span> <span class="n">structure_cleaned</span>
 
+    <span class="c1"># -------------------------------------------------------------------------</span>
+
+    <span class="c1"># All methods below wrap converters from the `simmate.file_converters.structure`</span>
+    <span class="c1"># module. To keep this class modular (from the database and optional deps),</span>
+    <span class="c1"># imports are done lazily. This means we import the relevant convert once</span>
+    <span class="c1"># the method is called -- rather than when this module is initially loaded.</span>
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This is an experimental feature.</span>
+        <span class="kn">from</span> <span class="nn">simmate.file_converters.structure.database</span> <span class="kn">import</span> <span class="n">DatabaseAdapter</span>
 
-<span class="sd">        Loads a structure from the Simmate database.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># because the structure is in the database, we need to setup django and</span>
-        <span class="c1"># make sure we can access the tables. This import break the modularity</span>
-        <span class="c1"># of this toolkit, so we therefore keep import within this function.</span>
-        <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># connects to database</span>
-        <span class="kn">from</span> <span class="nn">simmate.website.workflows</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
-        <span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="kn">import</span> <span class="n">import_string</span>
-
-        <span class="c1"># start by loading the datbase table, which is given as a module path</span>
-        <span class="n">datatable_str</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;calculation_table&quot;</span><span class="p">]</span>
-
-        <span class="c1"># Import the datatable class -- how this is done depends on if it</span>
-        <span class="c1"># is from a simmate supplied class or if the user supplied a full</span>
-        <span class="c1"># path to the class</span>
-        <span class="c1"># OPTIMIZE: is there a better way to do this?</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">):</span>
-            <span class="n">datatable</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">datatable</span> <span class="o">=</span> <span class="n">import_string</span><span class="p">(</span><span class="n">datatable_str</span><span class="p">)</span>
-
-        <span class="c1"># These attributes tells us which structure to grab from our datatable.</span>
-        <span class="c1"># The user should have only provided one -- if they gave more, we just</span>
-        <span class="c1"># use whichever one comes first.</span>
-        <span class="n">prefect_flow_run_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">)</span>
-        <span class="n">calculation_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;calculation_id&quot;</span><span class="p">)</span>
-        <span class="n">directory_old</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">)</span>
-
-        <span class="c1"># we must have either a prefect_flow_run_id or calculation_id</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">prefect_flow_run_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">calculation_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">directory_old</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                <span class="s2">&quot;You must have either a prefect_flow_run_id, calculation_id, &quot;</span>
-                <span class="s2">&quot;or directory provided if you want to load a structure from &quot;</span>
-                <span class="s2">&quot;a previous calculation.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># now query the datable with which whichever was provided. Each of these</span>
-        <span class="c1"># are unique so all three should return a single calculation.</span>
-        <span class="k">if</span> <span class="n">calculation_id</span><span class="p">:</span>
-            <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">calculation_id</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">prefect_flow_run_id</span><span class="p">:</span>
-            <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="n">prefect_flow_run_id</span><span class="o">=</span><span class="n">prefect_flow_run_id</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">directory_old</span><span class="p">:</span>
-            <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory_old</span><span class="p">)</span>
-
-        <span class="c1"># In some cases, the structure we want is not within the calculation table.</span>
-        <span class="c1"># For example, in relaxations the final structure is attached via</span>
-        <span class="c1"># the table.structure_final attribute</span>
-        <span class="n">structure_field</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;structure_field&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">structure_field</span><span class="p">:</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">calculation</span><span class="p">,</span> <span class="n">structure_field</span><span class="p">)</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-        <span class="c1"># if there&#39;s no structure field, that means we already have the correct entry</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">calculation</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-
-        <span class="c1"># For ease of access, we also link the calculation database entry</span>
-        <span class="n">structure_cleaned</span><span class="o">.</span><span class="n">calculation</span> <span class="o">=</span> <span class="n">calculation</span>
-
-        <span class="k">return</span> <span class="n">structure_cleaned</span>
+        <span class="k">return</span> <span class="n">DatabaseAdapter</span><span class="o">.</span><span class="n">get_toolkit_from_database_dict</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_database_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads a toolkit structure from a string -- specifically strings that</span>
-<span class="sd">        are stored in the structure_string column for</span>
-<span class="sd">        simmate.database.base_data_types.Structure.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Dev note: this method should be merged with the Toolkit.from_str method.</span>
-        <span class="c1"># I only have this separate for now because pymatgen&#39;s from_str doesn&#39;t</span>
-        <span class="c1"># dynamically determine format from the string alone.</span>
+        <span class="kn">from</span> <span class="nn">simmate.file_converters.structure.database</span> <span class="kn">import</span> <span class="n">DatabaseAdapter</span>
 
-        <span class="c1"># convert the stored string to python dictionary.</span>
-        <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">structure_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
-        <span class="c1"># OPTIMIZE: see my comment on storing strings in the from_toolkit method above.</span>
-        <span class="c1"># For now, I need to figure out if I used &quot;CIF&quot; or &quot;POSCAR&quot; and read the structure</span>
-        <span class="c1"># accordingly. In the future, I can just assume my new format.</span>
-        <span class="c1"># If the string starts with &quot;#&quot;, then I know that I stored it as a &quot;CIF&quot;.</span>
+        <span class="k">return</span> <span class="n">DatabaseAdapter</span><span class="o">.</span><span class="n">get_toolkit_from_database_string</span><span class="p">(</span><span class="n">structure_string</span><span class="p">)</span>
 
-        <span class="c1"># convert the string to pymatgen Structure object</span>
-        <span class="k">if</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">:</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
-                <span class="n">structure_string</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="c1"># BUG: for cod structures we need to set the tolerance to &quot;inf&quot;, which</span>
-        <span class="c1"># isn&#39;t possible with the toolkit.from_str method. Instead we need to</span>
-        <span class="c1"># call the CifParser directly</span>
-        <span class="k">elif</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;CIF&quot;</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">pymatgen.io.cif</span> <span class="kn">import</span> <span class="n">CifParser</span>
-
-            <span class="n">parser</span> <span class="o">=</span> <span class="n">CifParser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span>
-                <span class="n">structure_string</span><span class="p">,</span>
-                <span class="n">occupancy_tolerance</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_structures</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">structure</span>
+    <span class="c1"># TODO: from_cif, from_poscar, from_ase, from_jarvis, etc.</span>
+    <span class="c1"># TODO: to_cif, to_poscar, to_ase, to_jarvis, etc.</span>
 </pre></div>
 
         </details>
@@ -396,112 +311,27 @@ a few extra methods and does not change any other usage.</p>
 
         <span class="k">return</span> <span class="n">structure_cleaned</span>
 
+    <span class="c1"># -------------------------------------------------------------------------</span>
+
+    <span class="c1"># All methods below wrap converters from the `simmate.file_converters.structure`</span>
+    <span class="c1"># module. To keep this class modular (from the database and optional deps),</span>
+    <span class="c1"># imports are done lazily. This means we import the relevant convert once</span>
+    <span class="c1"># the method is called -- rather than when this module is initially loaded.</span>
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This is an experimental feature.</span>
+        <span class="kn">from</span> <span class="nn">simmate.file_converters.structure.database</span> <span class="kn">import</span> <span class="n">DatabaseAdapter</span>
 
-<span class="sd">        Loads a structure from the Simmate database.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># because the structure is in the database, we need to setup django and</span>
-        <span class="c1"># make sure we can access the tables. This import break the modularity</span>
-        <span class="c1"># of this toolkit, so we therefore keep import within this function.</span>
-        <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># connects to database</span>
-        <span class="kn">from</span> <span class="nn">simmate.website.workflows</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
-        <span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="kn">import</span> <span class="n">import_string</span>
-
-        <span class="c1"># start by loading the datbase table, which is given as a module path</span>
-        <span class="n">datatable_str</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;calculation_table&quot;</span><span class="p">]</span>
-
-        <span class="c1"># Import the datatable class -- how this is done depends on if it</span>
-        <span class="c1"># is from a simmate supplied class or if the user supplied a full</span>
-        <span class="c1"># path to the class</span>
-        <span class="c1"># OPTIMIZE: is there a better way to do this?</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">):</span>
-            <span class="n">datatable</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">datatable</span> <span class="o">=</span> <span class="n">import_string</span><span class="p">(</span><span class="n">datatable_str</span><span class="p">)</span>
-
-        <span class="c1"># These attributes tells us which structure to grab from our datatable.</span>
-        <span class="c1"># The user should have only provided one -- if they gave more, we just</span>
-        <span class="c1"># use whichever one comes first.</span>
-        <span class="n">prefect_flow_run_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">)</span>
-        <span class="n">calculation_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;calculation_id&quot;</span><span class="p">)</span>
-        <span class="n">directory_old</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">)</span>
-
-        <span class="c1"># we must have either a prefect_flow_run_id or calculation_id</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">prefect_flow_run_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">calculation_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">directory_old</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                <span class="s2">&quot;You must have either a prefect_flow_run_id, calculation_id, &quot;</span>
-                <span class="s2">&quot;or directory provided if you want to load a structure from &quot;</span>
-                <span class="s2">&quot;a previous calculation.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># now query the datable with which whichever was provided. Each of these</span>
-        <span class="c1"># are unique so all three should return a single calculation.</span>
-        <span class="k">if</span> <span class="n">calculation_id</span><span class="p">:</span>
-            <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">calculation_id</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">prefect_flow_run_id</span><span class="p">:</span>
-            <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="n">prefect_flow_run_id</span><span class="o">=</span><span class="n">prefect_flow_run_id</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">directory_old</span><span class="p">:</span>
-            <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory_old</span><span class="p">)</span>
-
-        <span class="c1"># In some cases, the structure we want is not within the calculation table.</span>
-        <span class="c1"># For example, in relaxations the final structure is attached via</span>
-        <span class="c1"># the table.structure_final attribute</span>
-        <span class="n">structure_field</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;structure_field&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">structure_field</span><span class="p">:</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">calculation</span><span class="p">,</span> <span class="n">structure_field</span><span class="p">)</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-        <span class="c1"># if there&#39;s no structure field, that means we already have the correct entry</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">calculation</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-
-        <span class="c1"># For ease of access, we also link the calculation database entry</span>
-        <span class="n">structure_cleaned</span><span class="o">.</span><span class="n">calculation</span> <span class="o">=</span> <span class="n">calculation</span>
-
-        <span class="k">return</span> <span class="n">structure_cleaned</span>
+        <span class="k">return</span> <span class="n">DatabaseAdapter</span><span class="o">.</span><span class="n">get_toolkit_from_database_dict</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_database_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads a toolkit structure from a string -- specifically strings that</span>
-<span class="sd">        are stored in the structure_string column for</span>
-<span class="sd">        simmate.database.base_data_types.Structure.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Dev note: this method should be merged with the Toolkit.from_str method.</span>
-        <span class="c1"># I only have this separate for now because pymatgen&#39;s from_str doesn&#39;t</span>
-        <span class="c1"># dynamically determine format from the string alone.</span>
+        <span class="kn">from</span> <span class="nn">simmate.file_converters.structure.database</span> <span class="kn">import</span> <span class="n">DatabaseAdapter</span>
 
-        <span class="c1"># convert the stored string to python dictionary.</span>
-        <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">structure_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
-        <span class="c1"># OPTIMIZE: see my comment on storing strings in the from_toolkit method above.</span>
-        <span class="c1"># For now, I need to figure out if I used &quot;CIF&quot; or &quot;POSCAR&quot; and read the structure</span>
-        <span class="c1"># accordingly. In the future, I can just assume my new format.</span>
-        <span class="c1"># If the string starts with &quot;#&quot;, then I know that I stored it as a &quot;CIF&quot;.</span>
+        <span class="k">return</span> <span class="n">DatabaseAdapter</span><span class="o">.</span><span class="n">get_toolkit_from_database_string</span><span class="p">(</span><span class="n">structure_string</span><span class="p">)</span>
 
-        <span class="c1"># convert the string to pymatgen Structure object</span>
-        <span class="k">if</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">:</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
-                <span class="n">structure_string</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="c1"># BUG: for cod structures we need to set the tolerance to &quot;inf&quot;, which</span>
-        <span class="c1"># isn&#39;t possible with the toolkit.from_str method. Instead we need to</span>
-        <span class="c1"># call the CifParser directly</span>
-        <span class="k">elif</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;CIF&quot;</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">pymatgen.io.cif</span> <span class="kn">import</span> <span class="n">CifParser</span>
-
-            <span class="n">parser</span> <span class="o">=</span> <span class="n">CifParser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span>
-                <span class="n">structure_string</span><span class="p">,</span>
-                <span class="n">occupancy_tolerance</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_structures</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">structure</span>
+    <span class="c1"># TODO: from_cif, from_poscar, from_ase, from_jarvis, etc.</span>
+    <span class="c1"># TODO: to_cif, to_poscar, to_ase, to_jarvis, etc.</span>
 </pre></div>
 
         </details>
@@ -666,80 +496,14 @@ a few extra methods and does not change any other usage.</p>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This is an experimental feature.</span>
+        <span class="kn">from</span> <span class="nn">simmate.file_converters.structure.database</span> <span class="kn">import</span> <span class="n">DatabaseAdapter</span>
 
-<span class="sd">        Loads a structure from the Simmate database.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># because the structure is in the database, we need to setup django and</span>
-        <span class="c1"># make sure we can access the tables. This import break the modularity</span>
-        <span class="c1"># of this toolkit, so we therefore keep import within this function.</span>
-        <span class="kn">from</span> <span class="nn">simmate.configuration.django</span> <span class="kn">import</span> <span class="n">setup_full</span>  <span class="c1"># connects to database</span>
-        <span class="kn">from</span> <span class="nn">simmate.website.workflows</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">all_datatables</span>
-        <span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="kn">import</span> <span class="n">import_string</span>
-
-        <span class="c1"># start by loading the datbase table, which is given as a module path</span>
-        <span class="n">datatable_str</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;calculation_table&quot;</span><span class="p">]</span>
-
-        <span class="c1"># Import the datatable class -- how this is done depends on if it</span>
-        <span class="c1"># is from a simmate supplied class or if the user supplied a full</span>
-        <span class="c1"># path to the class</span>
-        <span class="c1"># OPTIMIZE: is there a better way to do this?</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">):</span>
-            <span class="n">datatable</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">all_datatables</span><span class="p">,</span> <span class="n">datatable_str</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">datatable</span> <span class="o">=</span> <span class="n">import_string</span><span class="p">(</span><span class="n">datatable_str</span><span class="p">)</span>
-
-        <span class="c1"># These attributes tells us which structure to grab from our datatable.</span>
-        <span class="c1"># The user should have only provided one -- if they gave more, we just</span>
-        <span class="c1"># use whichever one comes first.</span>
-        <span class="n">prefect_flow_run_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">)</span>
-        <span class="n">calculation_id</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;calculation_id&quot;</span><span class="p">)</span>
-        <span class="n">directory_old</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">)</span>
-
-        <span class="c1"># we must have either a prefect_flow_run_id or calculation_id</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">prefect_flow_run_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">calculation_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">directory_old</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                <span class="s2">&quot;You must have either a prefect_flow_run_id, calculation_id, &quot;</span>
-                <span class="s2">&quot;or directory provided if you want to load a structure from &quot;</span>
-                <span class="s2">&quot;a previous calculation.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># now query the datable with which whichever was provided. Each of these</span>
-        <span class="c1"># are unique so all three should return a single calculation.</span>
-        <span class="k">if</span> <span class="n">calculation_id</span><span class="p">:</span>
-            <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">calculation_id</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">prefect_flow_run_id</span><span class="p">:</span>
-            <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="n">prefect_flow_run_id</span><span class="o">=</span><span class="n">prefect_flow_run_id</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">directory_old</span><span class="p">:</span>
-            <span class="n">calculation</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory_old</span><span class="p">)</span>
-
-        <span class="c1"># In some cases, the structure we want is not within the calculation table.</span>
-        <span class="c1"># For example, in relaxations the final structure is attached via</span>
-        <span class="c1"># the table.structure_final attribute</span>
-        <span class="n">structure_field</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;structure_field&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">structure_field</span><span class="p">:</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">calculation</span><span class="p">,</span> <span class="n">structure_field</span><span class="p">)</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-        <span class="c1"># if there&#39;s no structure field, that means we already have the correct entry</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="n">calculation</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-
-        <span class="c1"># For ease of access, we also link the calculation database entry</span>
-        <span class="n">structure_cleaned</span><span class="o">.</span><span class="n">calculation</span> <span class="o">=</span> <span class="n">calculation</span>
-
-        <span class="k">return</span> <span class="n">structure_cleaned</span>
+        <span class="k">return</span> <span class="n">DatabaseAdapter</span><span class="o">.</span><span class="n">get_toolkit_from_database_dict</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>This is an experimental feature.</p>
-
-<p>Loads a structure from the Simmate database.</p>
-</div>
-
+    
 
                             </div>
                             <div id="Structure.from_database_string" class="classattr">
@@ -755,51 +519,14 @@ a few extra methods and does not change any other usage.</p>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_database_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">structure_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads a toolkit structure from a string -- specifically strings that</span>
-<span class="sd">        are stored in the structure_string column for</span>
-<span class="sd">        simmate.database.base_data_types.Structure.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Dev note: this method should be merged with the Toolkit.from_str method.</span>
-        <span class="c1"># I only have this separate for now because pymatgen&#39;s from_str doesn&#39;t</span>
-        <span class="c1"># dynamically determine format from the string alone.</span>
+        <span class="kn">from</span> <span class="nn">simmate.file_converters.structure.database</span> <span class="kn">import</span> <span class="n">DatabaseAdapter</span>
 
-        <span class="c1"># convert the stored string to python dictionary.</span>
-        <span class="n">storage_format</span> <span class="o">=</span> <span class="s2">&quot;CIF&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">structure_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;POSCAR&quot;</span>
-        <span class="c1"># OPTIMIZE: see my comment on storing strings in the from_toolkit method above.</span>
-        <span class="c1"># For now, I need to figure out if I used &quot;CIF&quot; or &quot;POSCAR&quot; and read the structure</span>
-        <span class="c1"># accordingly. In the future, I can just assume my new format.</span>
-        <span class="c1"># If the string starts with &quot;#&quot;, then I know that I stored it as a &quot;CIF&quot;.</span>
-
-        <span class="c1"># convert the string to pymatgen Structure object</span>
-        <span class="k">if</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">:</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span>
-                <span class="n">structure_string</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">=</span><span class="n">storage_format</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="c1"># BUG: for cod structures we need to set the tolerance to &quot;inf&quot;, which</span>
-        <span class="c1"># isn&#39;t possible with the toolkit.from_str method. Instead we need to</span>
-        <span class="c1"># call the CifParser directly</span>
-        <span class="k">elif</span> <span class="n">storage_format</span> <span class="o">==</span> <span class="s2">&quot;CIF&quot;</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">pymatgen.io.cif</span> <span class="kn">import</span> <span class="n">CifParser</span>
-
-            <span class="n">parser</span> <span class="o">=</span> <span class="n">CifParser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span>
-                <span class="n">structure_string</span><span class="p">,</span>
-                <span class="n">occupancy_tolerance</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_structures</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">structure</span>
+        <span class="k">return</span> <span class="n">DatabaseAdapter</span><span class="o">.</span><span class="n">get_toolkit_from_database_string</span><span class="p">(</span><span class="n">structure_string</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Loads a toolkit structure from a string -- specifically strings that
-are stored in the structure_string column for
-simmate.database.base_data_types.Structure.</p>
-</div>
-
+    
 
                             </div>
                             <div class="inherited">

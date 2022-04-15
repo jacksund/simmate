@@ -65,12 +65,12 @@
     <span class="c1"># 230 spacegroups while &quot;spacegroup&quot; is for a single one.</span>
     <span class="n">path</span><span class="p">(</span>
         <span class="n">route</span><span class="o">=</span><span class="s2">&quot;symmetry/&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">symmetry</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">SymmetryViewSet</span><span class="o">.</span><span class="n">list_view</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;symmetry&quot;</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="n">path</span><span class="p">(</span>
-        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;symmetry/&lt;spacegroup_number&gt;/&quot;</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">spacegroup</span><span class="p">,</span>
+        <span class="n">route</span><span class="o">=</span><span class="s2">&quot;symmetry/&lt;pk&gt;/&quot;</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="n">views</span><span class="o">.</span><span class="n">SymmetryViewSet</span><span class="o">.</span><span class="n">retrieve_view</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;spacegroup&quot;</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1">#</span>

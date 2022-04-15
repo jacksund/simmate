@@ -29,6 +29,25 @@
 
 
 
+        <h2>API Documentation</h2>
+            <ul class="memberlist">
+            <li>
+                    <a class="class" href="#JarvisAtomsAdaptor">JarvisAtomsAdaptor</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#JarvisAtomsAdaptor.__init__">JarvisAtomsAdaptor</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#JarvisAtomsAdaptor.get_atoms">get_atoms</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#JarvisAtomsAdaptor.get_structure">get_structure</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
+
 
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev">
@@ -44,9 +63,230 @@
                     <h1 class="modulename">
 <a href="./../../../simmate.html">simmate</a><wbr>.<a href="./../../file_converters.html">file_converters</a><wbr>.<a href="./../structure.html">structure</a><wbr>.jarvis    </h1>
 
-                
-                
+                        <div class="docstring"><p>This converter simply imports a pymatgen class. With this you can quickly
+convert between Simmate.toolkit and JARVIS.atoms objects.</p>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../toolkit.html">simmate.toolkit</a></span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn"><a href="">simmate.file_converters.structure.jarvis</a></span> <span class="kn">import</span> <span class="n">JarvisAtomsAdaptor</span>
+
+
+<span class="n">initial_structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;example.cif&quot;</span><span class="p">)</span>
+
+<span class="c1"># convert to JARVIS</span>
+<span class="n">new_jarvis_object</span> <span class="o">=</span> <span class="n">JarvisAtomsAdaptor</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
+<span class="c1"># convert back to PyMatgen/Simmate</span>
+<span class="n">new_toolkit_object</span> <span class="o">=</span> <span class="n">JarvisAtomsAdaptor</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="n">new_jarvis_object</span><span class="p">)</span>
+
+<span class="c1"># alternatively, you can convert back to PyMatgen Molecule</span>
+<span class="n">new_molecule_object</span> <span class="o">=</span> <span class="n">JarvisAtomsAdaptor</span><span class="o">.</span><span class="n">get_molecule</span><span class="p">(</span><span class="n">new_jarvis_object</span><span class="p">)</span>
+</code></pre></div>
+</div>
+
+                        <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This converter simply imports a pymatgen class. With this you can quickly</span>
+<span class="sd">convert between Simmate.toolkit and JARVIS.atoms objects.</span>
+
+<span class="sd">``` python</span>
+<span class="sd">from simmate.toolkit import Structure</span>
+<span class="sd">from simmate.file_converters.structure.jarvis import JarvisAtomsAdaptor</span>
+
+
+<span class="sd">initial_structure = Structure.from_file(&quot;example.cif&quot;)</span>
+
+<span class="sd"># convert to JARVIS</span>
+<span class="sd">new_jarvis_object = JarvisAtomsAdaptor.get_atoms(structure)</span>
+
+<span class="sd"># convert back to PyMatgen/Simmate</span>
+<span class="sd">new_toolkit_object = JarvisAtomsAdaptor.get_structure(new_jarvis_object)</span>
+
+<span class="sd"># alternatively, you can convert back to PyMatgen Molecule</span>
+<span class="sd">new_molecule_object = JarvisAtomsAdaptor.get_molecule(new_jarvis_object)</span>
+<span class="sd">```</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">pymatgen.io.jarvis</span> <span class="kn">import</span> <span class="n">JarvisAtomsAdaptor</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;JarvisAtomsAdaptor&quot;</span><span class="p">]</span>
+</pre></div>
+
+        </details>
+
             </section>
+                <section id="JarvisAtomsAdaptor">
+                                <div class="attr class">
+        <a class="headerlink" href="#JarvisAtomsAdaptor">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">JarvisAtomsAdaptor</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">JarvisAtomsAdaptor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adaptor serves as a bridge between JARVIS Atoms and pymatgen objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_atoms</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns JARVIS Atoms object from pymatgen structure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            structure: pymatgen.core.structure.Structure</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            JARVIS Atoms object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">structure</span><span class="o">.</span><span class="n">is_ordered</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;JARVIS Atoms only supports ordered structures&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">jarvis_loaded</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;JarvisAtomsAdaptor requires jarvis-tools package.</span><span class="se">\n</span><span class="s2">Use `pip install -U jarvis-tools`&quot;</span><span class="p">)</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">frac_coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+        <span class="n">lattice_mat</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">matrix</span>
+        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span>
+            <span class="n">lattice_mat</span><span class="o">=</span><span class="n">lattice_mat</span><span class="p">,</span>
+            <span class="n">elements</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
+            <span class="n">cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns pymatgen structure from JARVIS Atoms.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            atoms: JARVIS Atoms object</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Equivalent pymatgen.core.structure.Structure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">elements</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">frac_coords</span>
+        <span class="n">lattice_mat</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">lattice_mat</span>
+
+        <span class="k">return</span> <span class="n">Structure</span><span class="p">(</span><span class="n">lattice_mat</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Adaptor serves as a bridge between JARVIS Atoms and pymatgen objects.</p>
+</div>
+
+
+                            <div id="JarvisAtomsAdaptor.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#JarvisAtomsAdaptor.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">JarvisAtomsAdaptor</span><span class="signature">()</span>
+    </div>
+
+    
+    
+
+                            </div>
+                            <div id="JarvisAtomsAdaptor.get_atoms" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#JarvisAtomsAdaptor.get_atoms">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">get_atoms</span><span class="signature">(structure)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_atoms</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns JARVIS Atoms object from pymatgen structure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            structure: pymatgen.core.structure.Structure</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            JARVIS Atoms object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">structure</span><span class="o">.</span><span class="n">is_ordered</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;JARVIS Atoms only supports ordered structures&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">jarvis_loaded</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;JarvisAtomsAdaptor requires jarvis-tools package.</span><span class="se">\n</span><span class="s2">Use `pip install -U jarvis-tools`&quot;</span><span class="p">)</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">frac_coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">]</span>
+        <span class="n">lattice_mat</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">matrix</span>
+        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span>
+            <span class="n">lattice_mat</span><span class="o">=</span><span class="n">lattice_mat</span><span class="p">,</span>
+            <span class="n">elements</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
+            <span class="n">cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Returns JARVIS Atoms object from pymatgen structure.</p>
+
+<p>Args:
+    structure: pymatgen.core.structure.Structure</p>
+
+<p>Returns:
+    JARVIS Atoms object</p>
+</div>
+
+
+                            </div>
+                            <div id="JarvisAtomsAdaptor.get_structure" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#JarvisAtomsAdaptor.get_structure">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">get_structure</span><span class="signature">(atoms)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns pymatgen structure from JARVIS Atoms.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            atoms: JARVIS Atoms object</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Equivalent pymatgen.core.structure.Structure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">elements</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">frac_coords</span>
+        <span class="n">lattice_mat</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">lattice_mat</span>
+
+        <span class="k">return</span> <span class="n">Structure</span><span class="p">(</span><span class="n">lattice_mat</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Returns pymatgen structure from JARVIS Atoms.</p>
+
+<p>Args:
+    atoms: JARVIS Atoms object</p>
+
+<p>Returns:
+    Equivalent pymatgen.core.structure.Structure</p>
+</div>
+
+
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {
