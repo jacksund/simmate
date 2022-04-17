@@ -112,7 +112,7 @@ This file helps share fixtures accross files as described
 <span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
 
 <span class="kn">from</span> <span class="nn">simmate.utilities</span> <span class="kn">import</span> <span class="n">get_directory</span>
-<span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">base_data_types</span>
+<span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">Composition</span><span class="p">,</span> <span class="n">base_data_types</span>
 <span class="kn">from</span> <span class="nn">simmate.database.base_data_types</span> <span class="kn">import</span> <span class="n">Spacegroup</span>
 <span class="kn">from</span> <span class="nn">simmate.website.test_app.models</span> <span class="kn">import</span> <span class="n">TestStructure</span>
 
@@ -166,7 +166,7 @@ This file helps share fixtures accross files as described
 <span class="sd">        assert composition</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">base_data_types</span><span class="o">.</span><span class="n">Composition</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">param</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Composition</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">param</span><span class="p">)</span>
 
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;package&quot;</span><span class="p">)</span>
@@ -189,7 +189,7 @@ This file helps share fixtures accross files as described
 <span class="sd">        assert composition == Composition(&quot;Si2&quot;)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">base_data_types</span><span class="o">.</span><span class="n">Composition</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">COMPOSITIONS_STRS</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">Composition</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">COMPOSITIONS_STRS</span><span class="p">}</span>
 
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;package&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">STRUCTURE_FILES</span><span class="p">)</span>
@@ -210,7 +210,7 @@ This file helps share fixtures accross files as described
 <span class="sd">        assert structure</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">base_data_types</span><span class="o">.</span><span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">param</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">param</span><span class="p">)</span>
 
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;package&quot;</span><span class="p">)</span>
@@ -242,9 +242,7 @@ This file helps share fixtures accross files as described
     <span class="c1"># Now load all of the structures. This is a dictionary that where you</span>
     <span class="c1"># can access structures with keys like &quot;SiO2_mp-7029_primitive&quot;</span>
     <span class="n">structures</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span>
-            <span class="s2">&quot;.cif&quot;</span>
-        <span class="p">):</span> <span class="n">base_data_types</span><span class="o">.</span><span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;.cif&quot;</span><span class="p">):</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">STRUCTURE_FILES</span>
     <span class="p">}</span>
 
@@ -414,7 +412,7 @@ This file helps share fixtures accross files as described
 <span class="sd">        assert composition</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">base_data_types</span><span class="o">.</span><span class="n">Composition</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">param</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Composition</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">param</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -467,7 +465,7 @@ one at a time. For example, you would run a test like...</p>
 <span class="sd">        assert composition == Composition(&quot;Si2&quot;)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">base_data_types</span><span class="o">.</span><span class="n">Composition</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">COMPOSITIONS_STRS</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">Composition</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">COMPOSITIONS_STRS</span><span class="p">}</span>
 </pre></div>
 
         </details>
@@ -520,7 +518,7 @@ For example, you would run a test like...</p>
 <span class="sd">        assert structure</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">base_data_types</span><span class="o">.</span><span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">param</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">param</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -582,9 +580,7 @@ one at a time. For example, you would run a test like...</p>
     <span class="c1"># Now load all of the structures. This is a dictionary that where you</span>
     <span class="c1"># can access structures with keys like &quot;SiO2_mp-7029_primitive&quot;</span>
     <span class="n">structures</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span>
-            <span class="s2">&quot;.cif&quot;</span>
-        <span class="p">):</span> <span class="n">base_data_types</span><span class="o">.</span><span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;.cif&quot;</span><span class="p">):</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">STRUCTURE_FILES</span>
     <span class="p">}</span>
 

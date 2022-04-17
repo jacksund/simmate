@@ -6,8 +6,7 @@ from tqdm import tqdm
 from django.utils import timezone
 
 from matminer.featurizers.site import CrystalNNFingerprint
-
-from simmate.toolkit.featurizers.fingerprint import PartialsSiteStatsFingerprint
+from matminer.featurizers.structure.sites import PartialsSiteStatsFingerprint
 
 # TODO: what if we want to add to the structure_pool list later on? Should this
 # be integrated with the Simmate database tables? An example use-case is with

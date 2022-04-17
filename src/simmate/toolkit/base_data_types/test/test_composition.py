@@ -37,3 +37,57 @@ def test_volume_estimate(composition, radius_method):
 @pytest.mark.parametrize("radius_method", RADIUS_METHODS)
 def test_distance_matrix_estimate(composition, radius_method):
     composition.distance_matrix_estimate(radius_method)
+
+
+def test_chemical_subsystems(sample_compositions):
+
+    composition = sample_compositions["Fe1"]
+    assert composition.chemical_subsystems == ["Fe"]
+
+    composition = sample_compositions["Si2"]
+    assert composition.chemical_subsystems == ["Si"]
+
+    composition = sample_compositions["C4"]
+    assert composition.chemical_subsystems == ["C"]
+
+    composition = sample_compositions["Ti2O4"]
+    assert composition.chemical_subsystems == ["O", "Ti", "O-Ti"]
+
+    composition = sample_compositions["Al4O6"]
+    assert composition.chemical_subsystems == ["Al", "O", "Al-O"]
+
+    composition = sample_compositions["Si4N4O2"]
+    assert composition.chemical_subsystems == [
+        "N",
+        "O",
+        "Si",
+        "N-O",
+        "N-Si",
+        "O-Si",
+        "N-O-Si",
+    ]
+
+    composition = sample_compositions["Si4O8"]
+    assert composition.chemical_subsystems == ["O", "Si", "O-Si"]
+
+    composition = sample_compositions["Sr4Si4N8"]
+    assert composition.chemical_subsystems == [
+        "N",
+        "Si",
+        "Sr",
+        "N-Si",
+        "N-Sr",
+        "Si-Sr",
+        "N-Si-Sr",
+    ]
+
+    composition = sample_compositions["Mg4Si4O12"]
+    assert composition.chemical_subsystems == [
+        "Mg",
+        "O",
+        "Si",
+        "Mg-O",
+        "Mg-Si",
+        "O-Si",
+        "Mg-O-Si",
+    ]
