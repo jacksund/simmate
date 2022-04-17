@@ -1,18 +1,18 @@
 # Release History
 
-Simmate releases follow [semantic versioning](https://semver.org/). This means versions numbers (e.g. v1.2.3) correspond to MAJOR.MINOR.PATCH:
+Our releases follow [semantic versioning](https://semver.org/). This means versions numbers (e.g. `v1.2.3`) correspond to `MAJOR.MINOR.PATCH`. Each version number increases after the following changes:
 
-  - MAJOR version when you make incompatible API changes
-  - MINOR version when you add functionality in a backwards compatible manner
-  - PATCH version when you make backwards compatible bug fixes
+  - `MAJOR` = incompatible API changes
+  - `MINOR` = new functionality is added (w/o API changes)
+  - `PATCH` = bug fixes and documentation updates (w/o API changes)
 
-There is one key exception to the rules above -- and that is with MAJOR=0 releases. Any v0.x.y release is considered developmental where APIs are subject to change and should not be considered stable. *(This is consistent with the semantic version spec. See [point 4](https://semver.org/#spec-item-4).)*
+There is one key exception to the rules above -- and that is with `MAJOR`=0 releases. Any v0.x.y release is considered developmental where APIs are subject to change and should not be considered stable. This is consistent with the semantic version spec (see [point 4](https://semver.org/#spec-item-4)).
 
 </br></br>
 
 # Upcoming Release
 
-- Update module readmes and point out experimental features
+- Update module readmes to warn of experimental features
 - Reorganize `toolkit` module
 
 # v0.2.0
