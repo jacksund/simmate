@@ -1,0 +1,36 @@
+
+  GRID BASED BADER ANALYSIS  (Version 1.04 02/08/20)
+
+  OPEN ... CHGCAR              
+  VASP5-STYLE INPUT FILE
+  DENSITY-GRID:   84 x  84 x  84
+  CLOSE ... CHGCAR              
+  RUN TIME:    0.10 SECONDS
+
+  OPEN ... CHGCAR_sum          
+  VASP5-STYLE INPUT FILE
+  DENSITY-GRID:   84 x  84 x  84
+  CLOSE ... CHGCAR_sum          
+  RUN TIME:    0.10 SECONDS
+
+  SORTING CHARGE VALUES ... DONE
+  CALCULATING FLUX ... DONE
+
+  INTEGRATING CHARGES
+                 0  10  25  50  75  100
+  PERCENT DONE:  ******
+  RUN TIME:       0.28 SECONDS
+
+  CALCULATING MINIMUM DISTANCES TO ATOMS
+                 0  10  25  50  75  100
+  PERCENT DONE:  **********************
+  RUN TIME:    0.16 SECONDS
+
+  WRITING BADER ATOMIC CHARGES TO ACF.dat
+  WRITING BADER VOLUME CHARGES TO BCF.dat
+
+  NUMBER OF BADER MAXIMA FOUND:              2
+      SIGNIFICANT MAXIMA FOUND:              2
+                 VACUUM CHARGE:         0.0000
+           NUMBER OF ELECTRONS:       14.00000
+ 
