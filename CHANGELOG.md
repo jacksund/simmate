@@ -1,6 +1,6 @@
 # Release History
 
-Our releases follow [semantic versioning](https://semver.org/). This means versions numbers (e.g. `v1.2.3`) correspond to `MAJOR.MINOR.PATCH`. Each version number increases after the following changes:
+Our releases follow [semantic versioning](https://semver.org/). This means versions (e.g. `v1.2.3`) correspond to `MAJOR.MINOR.PATCH`. Each version number increases after the following changes:
 
   - `MAJOR` = incompatible API changes
   - `MINOR` = new functionality is added (w/o API changes)
