@@ -43,6 +43,9 @@
                         <li>
                                 <a class="function" href="#Composition.distance_matrix_estimate">distance_matrix_estimate</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#Composition.chemical_subsystems">chemical_subsystems</a>
+                        </li>
                 </ul>
 
             </li>
@@ -85,6 +88,8 @@ Structure.composition will still return a pymatgen composition object.</p>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span>
 
@@ -260,6 +265,42 @@ Structure.composition will still return a pymatgen composition object.</p>
         <span class="c1"># convert the result matrix of list matrix to a numpy array before returning</span>
         <span class="n">element_distance_matrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">element_distance_matrix</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">chemical_subsystems</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns all chemical systems of this composition&#39;s chemical system.</span>
+
+<span class="sd">        For example, Y2C has the chemical system &quot;Y-C&quot; and would return</span>
+<span class="sd">        [&quot;Y&quot;, &quot;C&quot;, &quot;C-Y&quot;]. Note that the returned list has elements of a given</span>
+<span class="sd">        system in alphabetical order (i.e. it gives &quot;C-Y&quot; and not &quot;Y-C&quot;)</span>
+
+<span class="sd">        #### Returns</span>
+
+<span class="sd">        - `subsystems`:</span>
+<span class="sd">            A list of chemical systems that make up the input chemical system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: this will may be better located elsewhere. Maybe even as a method for</span>
+        <span class="c1"># the Composition class.</span>
+
+        <span class="c1"># Convert the system to a list of elements</span>
+        <span class="n">system_cleaned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemical_system</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Now generate all unique combinations of these elements. Because we also</span>
+        <span class="c1"># want combinations of different sizes (nelements = 1, 2, ... N), then we</span>
+        <span class="c1"># put this in a for-loop.</span>
+        <span class="n">subsystems</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">system_cleaned</span><span class="p">)):</span>
+            <span class="c1"># i is the size of combination we want. We now ask for each unique combo</span>
+            <span class="c1"># of elements at this given size.</span>
+            <span class="k">for</span> <span class="n">combo</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">system_cleaned</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># Combo will be a tuple of elements that we then convert back to a</span>
+                <span class="c1"># chemical system. We also sort this alphabetically.</span>
+                <span class="c1">#   ex: (&quot;Y&quot;, &quot;C&quot;, &quot;F&quot;) ---&gt; &quot;C-F-Y&quot;</span>
+                <span class="n">subsystem</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">combo</span><span class="p">))</span>
+                <span class="n">subsystems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subsystem</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">subsystems</span>
 </pre></div>
 
         </details>
@@ -445,6 +486,42 @@ Structure.composition will still return a pymatgen composition object.</p>
         <span class="c1"># convert the result matrix of list matrix to a numpy array before returning</span>
         <span class="n">element_distance_matrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">element_distance_matrix</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">chemical_subsystems</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns all chemical systems of this composition&#39;s chemical system.</span>
+
+<span class="sd">        For example, Y2C has the chemical system &quot;Y-C&quot; and would return</span>
+<span class="sd">        [&quot;Y&quot;, &quot;C&quot;, &quot;C-Y&quot;]. Note that the returned list has elements of a given</span>
+<span class="sd">        system in alphabetical order (i.e. it gives &quot;C-Y&quot; and not &quot;Y-C&quot;)</span>
+
+<span class="sd">        #### Returns</span>
+
+<span class="sd">        - `subsystems`:</span>
+<span class="sd">            A list of chemical systems that make up the input chemical system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: this will may be better located elsewhere. Maybe even as a method for</span>
+        <span class="c1"># the Composition class.</span>
+
+        <span class="c1"># Convert the system to a list of elements</span>
+        <span class="n">system_cleaned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemical_system</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Now generate all unique combinations of these elements. Because we also</span>
+        <span class="c1"># want combinations of different sizes (nelements = 1, 2, ... N), then we</span>
+        <span class="c1"># put this in a for-loop.</span>
+        <span class="n">subsystems</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">system_cleaned</span><span class="p">)):</span>
+            <span class="c1"># i is the size of combination we want. We now ask for each unique combo</span>
+            <span class="c1"># of elements at this given size.</span>
+            <span class="k">for</span> <span class="n">combo</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">system_cleaned</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># Combo will be a tuple of elements that we then convert back to a</span>
+                <span class="c1"># chemical system. We also sort this alphabetically.</span>
+                <span class="c1">#   ex: (&quot;Y&quot;, &quot;C&quot;, &quot;F&quot;) ---&gt; &quot;C-F-Y&quot;</span>
+                <span class="n">subsystem</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">combo</span><span class="p">))</span>
+                <span class="n">subsystems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subsystem</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">subsystems</span>
 </pre></div>
 
         </details>
@@ -769,6 +846,29 @@ random structure creation, we make the default 0.5.</li>
 <ul>
 <li><code>element_distance_matrix</code> :
 A matrix of element-element distances</li>
+</ul>
+</div>
+
+
+                            </div>
+                            <div id="Composition.chemical_subsystems" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Composition.chemical_subsystems">#&nbsp;&nbsp</a>
+
+        <span class="name">chemical_subsystems</span><span class="annotation">: List[str]</span>
+    </div>
+
+    
+            <div class="docstring"><p>Returns all chemical systems of this composition's chemical system.</p>
+
+<p>For example, Y2C has the chemical system "Y-C" and would return
+["Y", "C", "C-Y"]. Note that the returned list has elements of a given
+system in alphabetical order (i.e. it gives "C-Y" and not "Y-C")</p>
+
+<h4 id="returns">Returns</h4>
+
+<ul>
+<li><code>subsystems</code>:
+A list of chemical systems that make up the input chemical system.</li>
 </ul>
 </div>
 
