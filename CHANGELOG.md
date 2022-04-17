@@ -12,7 +12,8 @@ There is one key exception to the rules above -- and that is with MAJOR=0 releas
 
 # Upcoming Release
 
-- None
+- Update module readmes and point out experimental features
+- Reorganize `toolkit` module
 
 # v0.2.0
 
