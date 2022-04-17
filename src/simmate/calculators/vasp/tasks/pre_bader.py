@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.energy.materials_project import MatProjStaticEnergy
+from simmate.calculators.vasp.tasks.static_energy.materials_project import (
+    MatProjStaticEnergy,
+)
 
 
 class MatProjPreBaderTask(MatProjStaticEnergy):

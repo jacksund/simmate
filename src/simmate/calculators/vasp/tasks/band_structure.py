@@ -7,7 +7,7 @@ from pymatgen.symmetry.bandstructure import HighSymmKpath
 from pymatgen.electronic_structure.plotter import BSPlotter
 
 from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
-from simmate.calculators.vasp.tasks.energy.materials_project import (
+from simmate.calculators.vasp.tasks.static_energy.materials_project import (
     MatProjStaticEnergy,
 )
 

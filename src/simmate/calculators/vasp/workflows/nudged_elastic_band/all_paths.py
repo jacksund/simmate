@@ -42,7 +42,7 @@ from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
 from simmate.calculators.vasp.workflows.relaxation import (
     mit_workflow as relaxation_mit_workflow,
 )
-from simmate.calculators.vasp.workflows.energy import (
+from simmate.calculators.vasp.workflows.static_energy import (
     mit_workflow as energy_mit_workflow,
 )
 from simmate.calculators.vasp.workflows.nudged_elastic_band.single_path import (

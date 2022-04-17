@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.workflow_engine import s3task_to_workflow
-from simmate.calculators.vasp.tasks.energy import (
+from simmate.calculators.vasp.tasks.static_energy import (
     NEBEndpointStaticEnergy as NEBEndpointStaticEnergyTask,
 )
 from simmate.calculators.vasp.database.energy import (
