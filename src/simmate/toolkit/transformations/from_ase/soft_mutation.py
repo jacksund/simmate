@@ -3,7 +3,7 @@
 from simmate.toolkit.transformations.base import Transformation
 
 
-class SoftMutationASE(Transformation):
+class SoftMutation(Transformation):
 
     # construct a dynamical matrix based on bond hardness and mutate site coords along the softest mode
     # https://uspex-team.org/static/file/USPEX-LargeComplexSystems-2010.pdf

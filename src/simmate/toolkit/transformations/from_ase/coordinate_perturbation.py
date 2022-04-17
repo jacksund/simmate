@@ -3,9 +3,9 @@
 from simmate.toolkit.transformations.base import Transformation
 
 
-class RotationalMutationASE(Transformation):
+class CoordinatePerturbation(Transformation):
 
-    # known as RotationalMutation in ase.ga
+    # known as RattleMutation in ase.ga
     # https://gitlab.com/ase/ase/-/blob/master/ase/ga/standardmutations.py
 
     io_scale = "one_to_one"
@@ -20,7 +20,6 @@ class RotationalMutationASE(Transformation):
 
         # we can assume the user has ASE installed because it is a dependency of PyMatgen
         #!!! it looks like the ase.ga module is actively changing so version may introduce errors
-
         from ase.ga.utilities import closest_distances_generator
 
         # the closest_distances_generator is exactly the same as an element-dependent distance matrix
@@ -40,35 +39,27 @@ class RotationalMutationASE(Transformation):
 
     def apply_transformation(self, structure):
 
-        ### CHECK FOR BUGS
-
-        #!!! TO-DO. In many cases, you can perform this operation and simply
-        # get back the original structure. I should check and make sure
-        # that I'm actually returning a new structure!
-
-        ### RUN
-
         # first I need to convert the structures to an ASE atoms object
         structure_ase = self.adaptor.get_atoms(structure)
 
         # now we can make the generator
-        from ase.ga.standardmutations import RotationalMutation
+        from ase.ga.standardmutations import RattleMutation
 
-        rotate = RotationalMutation(
+        self.rattle = RattleMutation(
             blmin=self.element_distance_matrix,  # distance cutoff matrix
             n_top=int(
                 structure.composition.num_atoms
-            ),  # number of atoms to optimize. I set this to all
-            # fraction=0.33,
-            # tags=None,
-            # min_angle=1.57,
+            ),  # number of atoms to optimize. I set this to all,
+            # rattle_strength=0.8, # strength of rattling
+            # rattle_prop=0.4, # propobility that atom is rattled
             # test_dist_to_slab=True,
-            # rng=np.random,
-            # verbose=False
+            # use_tags=False,
+            # verbose=False,
+            # rng=np.random
         )
 
         #!!! Their code suggests the use of .get_new_individual() but I think .mutate() is what we'd like
-        new_structure_ase = rotate.mutate(structure_ase)
+        new_structure_ase = self.rattle.mutate(structure_ase)
 
         # if the mutation fails, None is return
         if not new_structure_ase:

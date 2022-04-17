@@ -3,7 +3,7 @@
 from simmate.toolkit.transformations.base import Transformation
 
 
-class AtomicPermutationASE(Transformation):
+class AtomicPermutation(Transformation):
 
     # known as PermutationMutation in ase.ga
     # https://gitlab.com/ase/ase/-/blob/master/ase/ga/standardmutations.py

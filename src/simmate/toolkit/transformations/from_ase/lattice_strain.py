@@ -3,9 +3,9 @@
 from simmate.toolkit.transformations.base import Transformation
 
 
-class CoordinatePerturbationASE(Transformation):
+class LatticeStrain(Transformation):
 
-    # known as RattleMutation in ase.ga
+    # known as StrainMutation in ase.ga
     # https://gitlab.com/ase/ase/-/blob/master/ase/ga/standardmutations.py
 
     io_scale = "one_to_one"
@@ -20,6 +20,7 @@ class CoordinatePerturbationASE(Transformation):
 
         # we can assume the user has ASE installed because it is a dependency of PyMatgen
         #!!! it looks like the ase.ga module is actively changing so version may introduce errors
+        from ase.ga.standardmutations import StrainMutation
         from ase.ga.utilities import closest_distances_generator
 
         # the closest_distances_generator is exactly the same as an element-dependent distance matrix
@@ -27,8 +28,32 @@ class CoordinatePerturbationASE(Transformation):
         # the function requires a list of element integers
         element_ints = [element.number for element in composition]
         # the default of the ratio of covalent radii (0.1) is based on the ASE tutorial of this function
-        self.element_distance_matrix = closest_distances_generator(
+        element_distance_matrix = closest_distances_generator(
             element_ints, ratio_of_covalent_radii
+        )
+
+        # boundry limits on the lattice
+        # I only do angle limits for now but I should introduce vector length limits
+        from ase.ga.utilities import CellBounds
+
+        cellbounds = CellBounds(
+            bounds={
+                "phi": [35, 145],
+                "chi": [35, 145],
+                "psi": [35, 145],
+            }
+        )
+        #'a': [3, 50], 'b': [3, 50], 'c': [3, 50]})
+
+        # now we can make the generator
+        self.strain = StrainMutation(
+            blmin=element_distance_matrix,  # distance cutoff matrix
+            cellbounds=cellbounds,
+            # stddev=0.7,
+            number_of_variable_cell_vectors=3,
+            # use_tags=False,
+            # rng=np.random,
+            # verbose=False
         )
 
         # we also need to convert pymatgen Structures to ase Atoms below
@@ -42,24 +67,8 @@ class CoordinatePerturbationASE(Transformation):
         # first I need to convert the structures to an ASE atoms object
         structure_ase = self.adaptor.get_atoms(structure)
 
-        # now we can make the generator
-        from ase.ga.standardmutations import RattleMutation
-
-        self.rattle = RattleMutation(
-            blmin=self.element_distance_matrix,  # distance cutoff matrix
-            n_top=int(
-                structure.composition.num_atoms
-            ),  # number of atoms to optimize. I set this to all,
-            # rattle_strength=0.8, # strength of rattling
-            # rattle_prop=0.4, # propobility that atom is rattled
-            # test_dist_to_slab=True,
-            # use_tags=False,
-            # verbose=False,
-            # rng=np.random
-        )
-
         #!!! Their code suggests the use of .get_new_individual() but I think .mutate() is what we'd like
-        new_structure_ase = self.rattle.mutate(structure_ase)
+        new_structure_ase = self.strain.mutate(structure_ase)
 
         # if the mutation fails, None is return
         if not new_structure_ase:

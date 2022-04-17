@@ -10,6 +10,8 @@ Structure.composition will still return a pymatgen composition object.
 """
 
 import warnings
+import itertools
+from typing import List
 
 import numpy
 
@@ -185,3 +187,39 @@ class Composition(PymatgenComposition):
         # convert the result matrix of list matrix to a numpy array before returning
         element_distance_matrix = numpy.array(matrix)
         return element_distance_matrix
+
+    @property
+    def chemical_subsystems(self) -> List[str]:
+        """
+        Returns all chemical systems of this composition's chemical system.
+
+        For example, Y2C has the chemical system "Y-C" and would return
+        ["Y", "C", "C-Y"]. Note that the returned list has elements of a given
+        system in alphabetical order (i.e. it gives "C-Y" and not "Y-C")
+
+        #### Returns
+
+        - `subsystems`:
+            A list of chemical systems that make up the input chemical system.
+        """
+
+        # TODO: this will may be better located elsewhere. Maybe even as a method for
+        # the Composition class.
+
+        # Convert the system to a list of elements
+        system_cleaned = self.chemical_system.split("-")
+
+        # Now generate all unique combinations of these elements. Because we also
+        # want combinations of different sizes (nelements = 1, 2, ... N), then we
+        # put this in a for-loop.
+        subsystems = []
+        for i in range(len(system_cleaned)):
+            # i is the size of combination we want. We now ask for each unique combo
+            # of elements at this given size.
+            for combo in itertools.combinations(system_cleaned, i + 1):
+                # Combo will be a tuple of elements that we then convert back to a
+                # chemical system. We also sort this alphabetically.
+                #   ex: ("Y", "C", "F") ---> "C-F-Y"
+                subsystem = "-".join(sorted(combo))
+                subsystems.append(subsystem)
+        return subsystems

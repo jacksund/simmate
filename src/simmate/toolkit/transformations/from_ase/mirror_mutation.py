@@ -3,7 +3,7 @@
 from simmate.toolkit.transformations.base import Transformation
 
 
-class MirrorMutationASE(Transformation):
+class MirrorMutation(Transformation):
 
     # known as MirrorMutation in ase.ga
     # https://gitlab.com/ase/ase/-/blob/master/ase/ga/standardmutations.py

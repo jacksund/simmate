@@ -21,7 +21,7 @@ from click.testing import CliRunner
 from django.contrib.auth.models import User
 
 from simmate.utilities import get_directory
-from simmate.toolkit import base_data_types
+from simmate.toolkit import Structure, Composition, base_data_types
 from simmate.database.base_data_types import Spacegroup
 from simmate.website.test_app.models import TestStructure
 
@@ -75,7 +75,7 @@ def composition(request):
         assert composition
     ```
     """
-    return base_data_types.Composition(request.param)
+    return Composition(request.param)
 
 
 @pytest.fixture(scope="package")
@@ -98,7 +98,7 @@ def sample_compositions():
         assert composition == Composition("Si2")
     ```
     """
-    return {c: base_data_types.Composition(c) for c in COMPOSITIONS_STRS}
+    return {c: Composition(c) for c in COMPOSITIONS_STRS}
 
 
 @pytest.fixture(scope="package", params=STRUCTURE_FILES)
@@ -119,7 +119,7 @@ def structure(request):
         assert structure
     ```
     """
-    return base_data_types.Structure.from_file(request.param)
+    return Structure.from_file(request.param)
 
 
 @pytest.fixture(scope="package")
@@ -151,9 +151,7 @@ def sample_structures():
     # Now load all of the structures. This is a dictionary that where you
     # can access structures with keys like "SiO2_mp-7029_primitive"
     structures = {
-        filename.split(os.path.sep)[-1].strip(
-            ".cif"
-        ): base_data_types.Structure.from_file(filename)
+        filename.split(os.path.sep)[-1].strip(".cif"): Structure.from_file(filename)
         for filename in STRUCTURE_FILES
     }
 

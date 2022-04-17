@@ -8,8 +8,7 @@ from matminer.featurizers.site import CrystalNNFingerprint as cnnf
 from matminer.featurizers.structure import SiteStatsFingerprint as ssf
 from matminer.featurizers.structure import RadialDistributionFunction as rdf
 from matminer.featurizers.structure import PartialRadialDistributionFunction as prdf
-
-from pymatdisc.core.featurizers.fingerprint import PartialsSiteStatsFingerprint
+from matminer.featurizers.structure.sites import PartialsSiteStatsFingerprint
 
 from scipy.spatial.distance import cosine
 

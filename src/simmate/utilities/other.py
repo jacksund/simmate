@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import itertools
 import sys
 
 
@@ -78,23 +77,13 @@ def get_chemical_subsystems(chemical_system: str):
         A list of chemical systems that make up the input chemical system.
     """
 
-    # TODO: this will may be better located elsewhere. Maybe even as a method for
-    # the Composition class.
+    # TODO: this code may be better located elsewhere. Maybe even as a method for
+    # the Composition class or alternatively as a ChemicalSystem class.
 
-    # Convert the system to a list of elements
-    system_cleaned = chemical_system.split("-")
+    # I convert the system to a composition where the number of atoms dont
+    # apply here. (e.g. "Ca-N" --> "Ca1 N1")
+    from simmate.toolkit import Composition
 
-    # Now generate all unique combinations of these elements. Because we also
-    # want combinations of different sizes (nelements = 1, 2, ... N), then we
-    # put this in a for-loop.
-    subsystems = []
-    for i in range(len(system_cleaned)):
-        # i is the size of combination we want. We now ask for each unique combo
-        # of elements at this given size.
-        for combo in itertools.combinations(system_cleaned, i + 1):
-            # Combo will be a tuple of elements that we then convert back to a
-            # chemical system. We also sort this alphabetically.
-            #   ex: ("Y", "C", "F") ---> "C-F-Y"
-            subsystem = "-".join(sorted(combo))
-            subsystems.append(subsystem)
-    return subsystems
+    composition = Composition(chemical_system.replace("-", ""))
+
+    return composition.chemical_subsystems

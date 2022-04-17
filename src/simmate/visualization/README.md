@@ -1,4 +1,9 @@
+
 Simmate Visualization
 ---------------------
 
-:warning: This module is at the planning stage. We plan for it to be be extremely similar to pymatgen.vis's module. It will have classes for plotting and 3d modeling. Currently, it can only create a minimal structure using Blender.
+This module helpd create plots and 3D models for visualizing data and structures. This ment to be an extension of the `pymatgen.ext` module.
+
+NOTE: Currently, this module only creates 3D models for `Structure` objects usings [Blender](https://www.blender.org/), whereas other functionality is still under planning/development.
+
+Until these tools are more mature, we recommend using either [VESTA](https://jp-minerals.org/vesta/en/) or [OVITO](https://www.ovito.org/) to visualize your crystal structures.

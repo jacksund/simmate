@@ -8,7 +8,7 @@ from simmate.toolkit.transformations.base import Transformation
 #!!! I need to figure out how to implement more than two structures
 
 
-class HeredityASE(Transformation):
+class Heredity(Transformation):
 
     # known as CutAndSplicePairing in ase.ga
     # https://gitlab.com/ase/ase/-/blob/master/ase/ga/cutandsplicepairing.py
