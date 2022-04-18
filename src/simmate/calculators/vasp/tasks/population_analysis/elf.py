@@ -15,4 +15,6 @@ class MatProjELF(MatProjStaticEnergy):
     incar.update(
         LELF=True,  # writes ELFCAR
         NPAR=1,  # must be set if LELF is set to True
+        # BUG: if NPAR conflicts with INCAR_parallel_settings config this
+        # fails and tells the user to specify a setting
     )

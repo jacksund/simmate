@@ -15,3 +15,7 @@ class MatProjBaderAnalysis(StaticEnergy):
     given back as a list of float values in the same order as sites in the
     source structure.
     """
+
+
+class MatProjELF(StaticEnergy):
+    pass
