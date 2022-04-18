@@ -11,7 +11,7 @@ from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 # TODO: add MVLNPTMDSet and MPMDSet
 
 
-class MITDynamicsTask(MITRelaxation):
+class MITDynamics(MITRelaxation):
     """
     Runs a molecular dynamics simulation using MIT Project settings. The lattice
     will remain fixed during the run.

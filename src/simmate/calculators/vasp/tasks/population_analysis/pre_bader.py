@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.energy.materials_project import MatProjStaticEnergy
+from simmate.calculators.vasp.tasks.static_energy.materials_project import (
+    MatProjStaticEnergy,
+)
 
 
-class MatProjPreBaderTask(MatProjStaticEnergy):
+class MatProjPreBader(MatProjStaticEnergy):
     """
     Runs a static energy calculation with a high-density FFT grid under settings
     from the Materials Project. Results can be used for Bader analysis.
@@ -22,4 +24,5 @@ class MatProjPreBaderTask(MatProjStaticEnergy):
         NGXF__density_a=20,
         NGYF__density_b=20,
         NGZF__density_c=20,
+        LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
     )

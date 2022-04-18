@@ -2,7 +2,7 @@
 
 # TODO: when I add more calculators, I can do something like this...
 # if "simmate.calculators.vasp" in installed_apps:
-from simmate.calculators.vasp.workflows.energy import (
+from simmate.calculators.vasp.workflows.static_energy import (
     mit_workflow,
     quality04_workflow,
     matproj_workflow,

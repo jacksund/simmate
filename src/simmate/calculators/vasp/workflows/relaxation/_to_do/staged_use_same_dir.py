@@ -22,7 +22,7 @@ from simmate.calculators.vasp.workflows.relaxation.quality_03 import (
 from simmate.calculators.vasp.workflows.relaxation.quality_04 import (
     workflow as relaxation_quality04,
 )
-from simmate.calculators.vasp.workflows.energy.quality_04 import (
+from simmate.calculators.vasp.workflows.static_energy.quality_04 import (
     workflow as energy_quality04,
 )
 

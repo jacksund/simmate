@@ -30,6 +30,8 @@ def test_list_of_all_workflows():
         "relaxation/quality03",
         "relaxation/quality04",
         "relaxation/staged",
+        "population-analysis/bader-matproj",
+        "population-analysis/elf-matproj",
         "band-structure/matproj",
         "density-of-states/matproj",
         "dynamics/mit",

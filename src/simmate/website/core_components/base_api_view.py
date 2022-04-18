@@ -12,11 +12,6 @@ from simmate.website.core_components.filters import DatabaseTableFilter
 from simmate.database.base_data_types import DatabaseTable
 
 
-# Consider inheriting from GenericViewSet in the future:
-# https://www.django-rest-framework.org/api-guide/viewsets/
-# https://github.com/encode/django-rest-framework/blob/master/rest_framework/viewsets.py
-
-
 class SimmateAPIViewSet(GenericViewSet):
     """
     Example use:

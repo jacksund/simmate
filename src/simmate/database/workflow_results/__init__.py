@@ -50,6 +50,10 @@ from simmate.calculators.vasp.database.dynamics import (
     MITDynamicsIonicStep,
 )
 
+from simmate.calculators.vasp.database.population_analysis import (
+    MatProjBaderAnalysis,
+)
+
 # This module is still under early development
 # from simmate.toolkit.structure_prediction.evolution.database import (
 #     EvolutionarySearch,

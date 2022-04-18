@@ -1,48 +1,74 @@
 # -*- coding: utf-8 -*-
 
 import os
+import yaml
+from pandas import DataFrame
 
-from prefect.utilities.tasks import defaults_from_attrs
-
-from simmate.workflow_engine import S3Task
-
-from simmate.calculators.bader.outputs import ACF
 from pymatgen.io.vasp.outputs import Chgcar
 from pymatgen.io.vasp import Potcar
 
-# TODO -- I should replace the chgsum.pl script with a simple python function
+from simmate.toolkit import Structure
+from simmate.workflow_engine import S3Task
+from simmate.calculators.bader.outputs import ACF
+
+
+# TODO: The chgsum.pl script will be replaced with a simple python function
 # that just sums the two files. It might not be as fast but it removes one
-# executable file from having to be in the user's path.
+# executable file from having to be in the user's path. So in the future, this
+# Task will be depreciated/removed.
+class CombineCHGCARs(S3Task):
+    """
+    This tasks simply sums two charge density files into a new file. It uses
+    a script from the Henkleman group.
+    """
+
+    command = "chgsum.pl AECCAR0 AECCAR2 > chgsum.out"
 
 
-class CombineCHGCARsTask(S3Task):
-    command = "./chgsum.pl AECCAR0 AECCAR2 > chgsum.out"
+class BaderAnalysis(S3Task):
 
+    command = "bader CHGCAR -ref CHGCAR_sum -b weight > bader.out"
+    """
+    The command to call the executable, which is typically bader. Note we
+    use the `-b weight` by default, which means we apply the weight method for
+    partitioning from of 
+    [Yu and Trinkle](http://theory.cm.utexas.edu/henkelman/code/bader/download/yu11_064111.pdf).
+    """
 
-class BaderAnalysisTask(S3Task):
-    command = "./bader CHGCAR -ref CHGCAR_sum -b weight > bader.out"
+    def setup(self, structure: Structure, directory: str):
+        """
+        Bader analysis requires that a static-energy calculation be ran beforehand
+        - typically using VASP. This setup therefore just involves ensuring that
+        the proper files are present.
+        """
 
-    @defaults_from_attrs("dir")
-    def setup(self, dir=None):
-
-        # Make sure that there are CHGCAR, AECCAR0, AECCAR2 files from a VASP calc
-        files = ["CHGCAR", "AECCAR0", "AECCAR2"]
-        filenames = [os.path.join(dir, file) for file in files]
-        assert all(os.path.exists(filename) for filename in filenames)
+        # Make sure that there are the proper output files from a VASP calc
+        files = ["CHGCAR", "AECCAR0", "AECCAR2", "POTCAR"]
+        filenames = [os.path.join(directory, file) for file in files]
+        if not all(os.path.exists(filename) for filename in filenames):
+            raise Exception(
+                "A static energy calculation is required before running Bader "
+                "analysis. The following files must exist in the directory where "
+                f"this task is ran: {files}"
+            )
 
         # Make the CHGCAR_sum file using Bader's helper script
-        CombineCHGCARsTask().run(dir=dir)
+        CombineCHGCARs().run(directory=directory)
 
-    @defaults_from_attrs("dir")
-    def postprocess(self, dir=None):
+    def workup(self, directory: str):
+        """
+        A basic workup process that reads Bader analysis results from the ACF.dat
+        file and calculates the corresponding oxidation states with the existing
+        POTCAR files.
+        """
 
         # load the ACF.dat file
-        acf_filename = os.path.join(dir, "ACF.dat")
+        acf_filename = os.path.join(directory, "ACF.dat")
         dataframe, extra_data = ACF(filename=acf_filename)
 
         # load the electron counts used by VASP from the POTCAR files
-        # OPTIMIZE this can be much faster if I have a reference file
-        potcar_filename = os.path.join(dir, "POTCAR")
+        # OPTIMIZE: this can be much faster if I have a reference file
+        potcar_filename = os.path.join(directory, "POTCAR")
         potcars = Potcar.from_file(potcar_filename)
         nelectron_data = {}
         # the result is a list because there can be multiple element potcars
@@ -51,8 +77,10 @@ class BaderAnalysisTask(S3Task):
             nelectron_data.update({potcar.element: potcar.nelectrons})
 
         # grab the structure from the CHGCAR
-        # OPTIMIZE I should just grab from the POSCAR or CONTCAR for speed
-        chgcar = Chgcar.from_file("CHGCAR")
+        # OPTIMIZE: I should just grab from the POSCAR or CONTCAR for speed.
+        # The reason I don't at the moment is because there may be empty atoms.
+        chgcar_filename = os.path.join(directory, "CHGCAR")
+        chgcar = Chgcar.from_file(chgcar_filename)
         structure = chgcar.structure
 
         # Calculate the oxidation state of each site where it is simply the
@@ -67,13 +95,39 @@ class BaderAnalysisTask(S3Task):
             oxi_state_data.append(oxi_state)
 
         # add the new column to the dataframe
-        # !!! There are multiple ways to do this, but I don't know which is best
-        # dataframe["oxidation_state"] = pandas.Series(
-        #     oxi_state_data, index=dataframe.index)
         dataframe = dataframe.assign(
             oxidation_state=oxi_state_data,
             element=elements,
         )
+        # !!! There are multiple ways to do this, but I don't know which is best
+        # dataframe["oxidation_state"] = pandas.Series(
+        #     oxi_state_data, index=dataframe.index)
+
+        # write output files/plots for the user to quickly reference
+        self._write_output_summary(directory, dataframe, extra_data)
 
         # return all of our results
         return dataframe, extra_data
+
+    def _write_output_summary(
+        self, directory: str, dataframe: DataFrame, extra_data: dict
+    ):
+        """
+        This prints a "simmate_summary.yaml" file with key output information.
+
+        This method should not be called directly as it used within workup().
+        """
+
+        # write output of the dataframe
+        summary_csv_filename = os.path.join(directory, "simmate_summary_bader.csv")
+        dataframe.to_csv(summary_csv_filename)
+
+        summary = {
+            "notes": "view simmate_summary_bader.csv for more information",
+            **extra_data,
+        }
+
+        summary_filename = os.path.join(directory, "simmate_summary.yaml")
+        with open(summary_filename, "w") as file:
+            content = yaml.dump(summary)
+            file.write(content)
