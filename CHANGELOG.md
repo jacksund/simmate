@@ -12,6 +12,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 # Upcoming Release
 
+- Add Bader analysis and ELF workflows
 - Update module readmes to warn of experimental features
 - Reorganize `toolkit` module
 
