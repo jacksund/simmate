@@ -10,19 +10,21 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 </br></br>
 
-# Upcoming Release
 
-- Add Bader analysis and ELF workflows
-- Update module readmes to warn of experimental features
-- Reorganize `toolkit` module
+# Upcoming Release
+- add highly customizable VASP workflow
+- add Bader analysis and ELF workflows
+- update module readmes to warn of experimental features
+- reorganize `toolkit` module
+
 
 # v0.2.0
-
 - start the CHANGELOG!
 - refactor API views and add `SimmateAPIViewSet` class
 - refactor `simmate start-project` command and underlying methods
 - refactor `simmate workflow-engine run-cluster` command and underlying methods
 - continue outlining `file_converters` module
+
 
 # v0.0.0 - v0.1.4
 - initial release

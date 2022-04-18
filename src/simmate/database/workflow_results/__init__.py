@@ -54,6 +54,10 @@ from simmate.calculators.vasp.database.population_analysis import (
     MatProjBaderAnalysis,
 )
 
+from simmate.calculators.vasp.database.customized import (
+    CustomizedVASPCalculation,
+)
+
 # This module is still under early development
 # from simmate.toolkit.structure_prediction.evolution.database import (
 #     EvolutionarySearch,
