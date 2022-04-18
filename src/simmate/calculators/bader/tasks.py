@@ -119,7 +119,8 @@ class BaderAnalysis(S3Task):
         """
 
         # write output of the dataframe
-        dataframe.to_csv("simmate_summary_bader.csv")
+        summary_csv_filename = os.path.join(directory, "simmate_summary_bader.csv")
+        dataframe.to_csv(summary_csv_filename)
 
         summary = {
             "notes": "view simmate_summary_bader.csv for more information",
