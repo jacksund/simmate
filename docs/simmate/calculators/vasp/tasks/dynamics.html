@@ -32,16 +32,16 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#MITDynamicsTask">MITDynamicsTask</a>
+                    <a class="class" href="#MITDynamics">MITDynamics</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#MITDynamicsTask.incar">incar</a>
+                                <a class="variable" href="#MITDynamics.incar">incar</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MITDynamicsTask.error_handlers">error_handlers</a>
+                                <a class="variable" href="#MITDynamics.error_handlers">error_handlers</a>
                         </li>
                         <li>
-                                <a class="function" href="#MITDynamicsTask.setup">setup</a>
+                                <a class="function" href="#MITDynamics.setup">setup</a>
                         </li>
                 </ul>
 
@@ -79,7 +79,7 @@
 <span class="c1"># TODO: add MVLNPTMDSet and MPMDSet</span>
 
 
-<span class="k">class</span> <span class="nc">MITDynamicsTask</span><span class="p">(</span><span class="n">MITRelaxation</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MITDynamics</span><span class="p">(</span><span class="n">MITRelaxation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Runs a molecular dynamics simulation using MIT Project settings. The lattice</span>
 <span class="sd">    will remain fixed during the run.</span>
@@ -191,18 +191,18 @@
         </details>
 
             </section>
-                <section id="MITDynamicsTask">
+                <section id="MITDynamics">
                                 <div class="attr class">
-        <a class="headerlink" href="#MITDynamicsTask">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#MITDynamics">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">MITDynamicsTask</span><wbr>(<span class="base"><a href="relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></span>):
+        <span class="name">MITDynamics</span><wbr>(<span class="base"><a href="relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MITDynamicsTask</span><span class="p">(</span><span class="n">MITRelaxation</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MITDynamics</span><span class="p">(</span><span class="n">MITRelaxation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Runs a molecular dynamics simulation using MIT Project settings. The lattice</span>
 <span class="sd">    will remain fixed during the run.</span>
@@ -328,8 +328,8 @@ calculation does not modify your input structure.</p>
 </div>
 
 
-                            <div id="MITDynamicsTask.incar" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MITDynamicsTask.incar">#&nbsp;&nbsp</a>
+                            <div id="MITDynamics.incar" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MITDynamics.incar">#&nbsp;&nbsp</a>
 
         <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: 0, &#39;ICHARG&#39;: 1, &#39;ISIF&#39;: 0, &#39;ISPIN&#39;: 2, &#39;ISYM&#39;: 0, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: True, &#39;LWAVE&#39;: True, &#39;NELM&#39;: 500, &#39;NELMIN&#39;: 4, &#39;NSW&#39;: &#39;Defaults to 10,000 but can be set by the user&#39;, &#39;PREC&#39;: &#39;Low&#39;, &#39;KSPACING&#39;: 0.5, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;TEBEG&#39;: &#39;Defaults to 300 but can be set by the user&#39;, &#39;TEEND&#39;: &#39;Defaults to 1200 but can be set by the user&#39;, &#39;POTIM&#39;: &#39;Defaults to 2 but can be set by the user&#39;, &#39;EDIFF__per_atom&#39;: 1e-06, &#39;LSCALU&#39;: False, &#39;LCHARG&#39;: False, &#39;LPLANE&#39;: False, &#39;ISMEAR&#39;: 0, &#39;BMIX&#39;: 1, &#39;MAXMIX&#39;: 20, &#39;KBLOCK&#39;: 100, &#39;SMASS&#39;: 0}</span>
     </div>
@@ -344,8 +344,8 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
 
 
                             </div>
-                            <div id="MITDynamicsTask.error_handlers" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#MITDynamicsTask.error_handlers">#&nbsp;&nbsp</a>
+                            <div id="MITDynamics.error_handlers" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#MITDynamics.error_handlers">#&nbsp;&nbsp</a>
 
         <span class="name">error_handlers</span><span class="annotation">: List[<a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a>]</span><span class="default_value"> = []</span>
     </div>
@@ -358,8 +358,8 @@ applied and none of the following handlers will be checked.</p>
 
 
                             </div>
-                            <div id="MITDynamicsTask.setup" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#MITDynamicsTask.setup">#&nbsp;&nbsp</a>
+                            <div id="MITDynamics.setup" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#MITDynamics.setup">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
@@ -457,43 +457,43 @@ writing a setup method.</li>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MITDynamicsTask.__init__" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MITDynamicsTask.execute" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MITDynamicsTask.run" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MITDynamicsTask.print_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                <dd id="MITDynamics.__init__" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
+                <dd id="MITDynamics.execute" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MITDynamics.run" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MITDynamics.print_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
             <div><dt><a href="relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></dt>
-                                <dd id="MITDynamicsTask.functional" class="variable"><a href="relaxation/mit.html#MITRelaxation.functional">functional</a></dd>
-                <dd id="MITDynamicsTask.potcar_mappings" class="variable"><a href="relaxation/mit.html#MITRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                                <dd id="MITDynamics.functional" class="variable"><a href="relaxation/mit.html#MITRelaxation.functional">functional</a></dd>
+                <dd id="MITDynamics.potcar_mappings" class="variable"><a href="relaxation/mit.html#MITRelaxation.potcar_mappings">potcar_mappings</a></dd>
 
             </div>
             <div><dt><a href="base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MITDynamicsTask.requires_structure" class="variable"><a href="base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="MITDynamicsTask.command" class="variable"><a href="base.html#VaspTask.command">command</a></dd>
-                <dd id="MITDynamicsTask.incar_parallel_settings" class="variable"><a href="base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
-                <dd id="MITDynamicsTask.kpoints" class="variable"><a href="base.html#VaspTask.kpoints">kpoints</a></dd>
-                <dd id="MITDynamicsTask.confirm_convergence" class="variable"><a href="base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
-                <dd id="MITDynamicsTask.pre_sanitize_structure" class="variable"><a href="base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
-                <dd id="MITDynamicsTask.pre_standardize_structure" class="variable"><a href="base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
-                <dd id="MITDynamicsTask.workup" class="function"><a href="base.html#VaspTask.workup">workup</a></dd>
-                <dd id="MITDynamicsTask.get_config" class="function"><a href="base.html#VaspTask.get_config">get_config</a></dd>
+                                <dd id="MITDynamics.requires_structure" class="variable"><a href="base.html#VaspTask.requires_structure">requires_structure</a></dd>
+                <dd id="MITDynamics.command" class="variable"><a href="base.html#VaspTask.command">command</a></dd>
+                <dd id="MITDynamics.incar_parallel_settings" class="variable"><a href="base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="MITDynamics.kpoints" class="variable"><a href="base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="MITDynamics.confirm_convergence" class="variable"><a href="base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="MITDynamics.pre_sanitize_structure" class="variable"><a href="base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="MITDynamics.pre_standardize_structure" class="variable"><a href="base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="MITDynamics.workup" class="function"><a href="base.html#VaspTask.workup">workup</a></dd>
+                <dd id="MITDynamics.get_config" class="function"><a href="base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
             <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MITDynamicsTask.copy" class="function">copy</dd>
-                <dd id="MITDynamicsTask.bind" class="function">bind</dd>
-                <dd id="MITDynamicsTask.map" class="function">map</dd>
-                <dd id="MITDynamicsTask.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MITDynamicsTask.set_upstream" class="function">set_upstream</dd>
-                <dd id="MITDynamicsTask.set_downstream" class="function">set_downstream</dd>
-                <dd id="MITDynamicsTask.inputs" class="function">inputs</dd>
-                <dd id="MITDynamicsTask.outputs" class="function">outputs</dd>
-                <dd id="MITDynamicsTask.serialize" class="function">serialize</dd>
-                <dd id="MITDynamicsTask.is_equal" class="function">is_equal</dd>
-                <dd id="MITDynamicsTask.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MITDynamicsTask.not_" class="function">not_</dd>
-                <dd id="MITDynamicsTask.or_" class="function">or_</dd>
+                                <dd id="MITDynamics.copy" class="function">copy</dd>
+                <dd id="MITDynamics.bind" class="function">bind</dd>
+                <dd id="MITDynamics.map" class="function">map</dd>
+                <dd id="MITDynamics.set_dependencies" class="function">set_dependencies</dd>
+                <dd id="MITDynamics.set_upstream" class="function">set_upstream</dd>
+                <dd id="MITDynamics.set_downstream" class="function">set_downstream</dd>
+                <dd id="MITDynamics.inputs" class="function">inputs</dd>
+                <dd id="MITDynamics.outputs" class="function">outputs</dd>
+                <dd id="MITDynamics.serialize" class="function">serialize</dd>
+                <dd id="MITDynamics.is_equal" class="function">is_equal</dd>
+                <dd id="MITDynamics.is_not_equal" class="function">is_not_equal</dd>
+                <dd id="MITDynamics.not_" class="function">not_</dd>
+                <dd id="MITDynamics.or_" class="function">or_</dd>
 
             </div>
                                 </dl>

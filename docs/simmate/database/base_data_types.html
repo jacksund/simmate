@@ -40,6 +40,7 @@
                 <li><a href="base_data_types/band_structure.html">simmate.database.base_data_types.band_structure</a></li>
                 <li><a href="base_data_types/base.html">simmate.database.base_data_types.base</a></li>
                 <li><a href="base_data_types/calculation.html">simmate.database.base_data_types.calculation</a></li>
+                <li><a href="base_data_types/calculation_customized.html">simmate.database.base_data_types.calculation_customized</a></li>
                 <li><a href="base_data_types/calculation_nested.html">simmate.database.base_data_types.calculation_nested</a></li>
                 <li><a href="base_data_types/density_of_states.html">simmate.database.base_data_types.density_of_states</a></li>
                 <li><a href="base_data_types/dynamics.html">simmate.database.base_data_types.dynamics</a></li>
@@ -101,6 +102,7 @@
 <li><code>nudged_elastic_band</code> : holds all results from trajectory calculations</li>
 <li><code>dynamics</code> : holds all steps of a molecular dynamics simmulation</li>
 <li><code>calculation_nested</code> : a special type of calculation that involves running a workflow made of smaller workflows</li>
+<li><code>calculation_customized</code> : calculation that involves running a workflow with user-customized settings</li>
 </ul>
 
 <h1 id="usage-guide">Usage Guide</h1>
@@ -210,6 +212,7 @@
 <span class="kn">from</span> <span class="nn">.relaxation</span> <span class="kn">import</span> <span class="n">Relaxation</span>
 <span class="kn">from</span> <span class="nn">.dynamics</span> <span class="kn">import</span> <span class="n">DynamicsRun</span>
 <span class="kn">from</span> <span class="nn">.calculation_nested</span> <span class="kn">import</span> <span class="n">NestedCalculation</span>
+<span class="kn">from</span> <span class="nn">.calculation_customized</span> <span class="kn">import</span> <span class="n">CustomizedCalculation</span>
 <span class="kn">from</span> <span class="nn">.band_structure</span> <span class="kn">import</span> <span class="n">BandStructure</span><span class="p">,</span> <span class="n">BandStructureCalc</span>
 <span class="kn">from</span> <span class="nn">.density_of_states</span> <span class="kn">import</span> <span class="n">DensityofStates</span><span class="p">,</span> <span class="n">DensityofStatesCalc</span>
 

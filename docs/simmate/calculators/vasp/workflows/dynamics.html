@@ -55,12 +55,12 @@
     <span class="n">ModuleStorage</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">simmate.workflow_engine.common_tasks</span> <span class="kn">import</span> <span class="n">LoadInputAndRegister</span><span class="p">,</span> <span class="n">SaveOutputTask</span>
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.dynamics</span> <span class="kn">import</span> <span class="n">MITDynamicsTask</span>
+<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.dynamics</span> <span class="kn">import</span> <span class="n">MITDynamics</span>
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.database.dynamics</span> <span class="kn">import</span> <span class="n">MITDynamicsRun</span>
 
 <span class="n">WORKFLOW_NAME</span> <span class="o">=</span> <span class="s2">&quot;dynamics/mit&quot;</span>
 
-<span class="n">s3task_obj</span> <span class="o">=</span> <span class="n">MITDynamicsTask</span><span class="p">()</span>
+<span class="n">s3task_obj</span> <span class="o">=</span> <span class="n">MITDynamics</span><span class="p">()</span>
 <span class="n">load_input_and_register</span> <span class="o">=</span> <span class="n">LoadInputAndRegister</span><span class="p">(</span><span class="n">MITDynamicsRun</span><span class="p">)</span>
 <span class="n">load_input_and_register</span> <span class="o">=</span> <span class="n">LoadInputAndRegister</span><span class="p">(</span>
     <span class="n">workflow_name</span><span class="o">=</span><span class="n">WORKFLOW_NAME</span><span class="p">,</span>
@@ -110,10 +110,10 @@
 <span class="n">workflow</span><span class="o">.</span><span class="n">result_table</span> <span class="o">=</span> <span class="n">MITDynamicsRun</span>
 <span class="n">workflow</span><span class="o">.</span><span class="n">register_kwargs</span> <span class="o">=</span> <span class="p">([</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">,</span> <span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">],)</span>
 <span class="n">workflow</span><span class="o">.</span><span class="n">result_task</span> <span class="o">=</span> <span class="n">output</span>
-<span class="n">workflow</span><span class="o">.</span><span class="n">s3task</span> <span class="o">=</span> <span class="n">MITDynamicsTask</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">s3task</span> <span class="o">=</span> <span class="n">MITDynamics</span>
 
 <span class="c1"># by default we just copy the docstring of the S3task to the workflow</span>
-<span class="n">workflow</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">MITDynamicsTask</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="n">workflow</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">MITDynamics</span><span class="o">.</span><span class="vm">__doc__</span>
 </pre></div>
 
         </details>

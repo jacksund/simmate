@@ -10,8 +10,11 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 </br></br>
 
-
 # Upcoming Release
+- No new features merged into `main` yet
+
+
+# v0.3.0
 - add highly customizable VASP workflow
 - add Bader analysis and ELF workflows
 - update module readmes to warn of experimental features
