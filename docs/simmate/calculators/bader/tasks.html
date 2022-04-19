@@ -32,25 +32,25 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#CombineCHGCARsTask">CombineCHGCARsTask</a>
+                    <a class="class" href="#CombineCHGCARs">CombineCHGCARs</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#CombineCHGCARsTask.command">command</a>
+                                <a class="variable" href="#CombineCHGCARs.command">command</a>
                         </li>
                 </ul>
 
             </li>
             <li>
-                    <a class="class" href="#BaderAnalysisTask">BaderAnalysisTask</a>
+                    <a class="class" href="#BaderAnalysis">BaderAnalysis</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#BaderAnalysisTask.command">command</a>
+                                <a class="variable" href="#BaderAnalysis.command">command</a>
                         </li>
                         <li>
-                                <a class="function" href="#BaderAnalysisTask.setup">setup</a>
+                                <a class="function" href="#BaderAnalysis.setup">setup</a>
                         </li>
                         <li>
-                                <a class="function" href="#BaderAnalysisTask.postprocess">postprocess</a>
+                                <a class="function" href="#BaderAnalysis.workup">workup</a>
                         </li>
                 </ul>
 
@@ -78,48 +78,74 @@
             <div class="pdoc-code codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
 
-<span class="kn">from</span> <span class="nn">prefect.utilities.tasks</span> <span class="kn">import</span> <span class="n">defaults_from_attrs</span>
-
-<span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">S3Task</span>
-
-<span class="kn">from</span> <span class="nn">simmate.calculators.bader.outputs</span> <span class="kn">import</span> <span class="n">ACF</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">Chgcar</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Potcar</span>
 
-<span class="c1"># TODO -- I should replace the chgsum.pl script with a simple python function</span>
+<span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">S3Task</span>
+<span class="kn">from</span> <span class="nn">simmate.calculators.bader.outputs</span> <span class="kn">import</span> <span class="n">ACF</span>
+
+
+<span class="c1"># TODO: The chgsum.pl script will be replaced with a simple python function</span>
 <span class="c1"># that just sums the two files. It might not be as fast but it removes one</span>
-<span class="c1"># executable file from having to be in the user&#39;s path.</span>
+<span class="c1"># executable file from having to be in the user&#39;s path. So in the future, this</span>
+<span class="c1"># Task will be depreciated/removed.</span>
+<span class="k">class</span> <span class="nc">CombineCHGCARs</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This tasks simply sums two charge density files into a new file. It uses</span>
+<span class="sd">    a script from the Henkleman group.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;chgsum.pl AECCAR0 AECCAR2 &gt; chgsum.out&quot;</span>
 
 
-<span class="k">class</span> <span class="nc">CombineCHGCARsTask</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
-    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;./chgsum.pl AECCAR0 AECCAR2 &gt; chgsum.out&quot;</span>
+<span class="k">class</span> <span class="nc">BaderAnalysis</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
 
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;bader CHGCAR -ref CHGCAR_sum -b weight &gt; bader.out&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The command to call the executable, which is typically bader. Note we</span>
+<span class="sd">    use the `-b weight` by default, which means we apply the weight method for</span>
+<span class="sd">    partitioning from of </span>
+<span class="sd">    [Yu and Trinkle](http://theory.cm.utexas.edu/henkelman/code/bader/download/yu11_064111.pdf).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<span class="k">class</span> <span class="nc">BaderAnalysisTask</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
-    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;./bader CHGCAR -ref CHGCAR_sum -b weight &gt; bader.out&quot;</span>
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
+<span class="sd">        - typically using VASP. This setup therefore just involves ensuring that</span>
+<span class="sd">        the proper files are present.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-    <span class="nd">@defaults_from_attrs</span><span class="p">(</span><span class="s2">&quot;dir&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="c1"># Make sure that there are CHGCAR, AECCAR0, AECCAR2 files from a VASP calc</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">]</span>
-        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">)</span>
+        <span class="c1"># Make sure that there are the proper output files from a VASP calc</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">]</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;A static energy calculation is required before running Bader &quot;</span>
+                <span class="s2">&quot;analysis. The following files must exist in the directory where &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;this task is ran: </span><span class="si">{</span><span class="n">files</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Make the CHGCAR_sum file using Bader&#39;s helper script</span>
-        <span class="n">CombineCHGCARsTask</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="n">CombineCHGCARs</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
 
-    <span class="nd">@defaults_from_attrs</span><span class="p">(</span><span class="s2">&quot;dir&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A basic workup process that reads Bader analysis results from the ACF.dat</span>
+<span class="sd">        file and calculates the corresponding oxidation states with the existing</span>
+<span class="sd">        POTCAR files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># load the ACF.dat file</span>
-        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
+        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
         <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">ACF</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">acf_filename</span><span class="p">)</span>
 
         <span class="c1"># load the electron counts used by VASP from the POTCAR files</span>
-        <span class="c1"># OPTIMIZE this can be much faster if I have a reference file</span>
-        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
+        <span class="c1"># OPTIMIZE: this can be much faster if I have a reference file</span>
+        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
         <span class="n">potcars</span> <span class="o">=</span> <span class="n">Potcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">potcar_filename</span><span class="p">)</span>
         <span class="n">nelectron_data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># the result is a list because there can be multiple element potcars</span>
@@ -128,8 +154,10 @@
             <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">potcar</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">potcar</span><span class="o">.</span><span class="n">nelectrons</span><span class="p">})</span>
 
         <span class="c1"># grab the structure from the CHGCAR</span>
-        <span class="c1"># OPTIMIZE I should just grab from the POSCAR or CONTCAR for speed</span>
-        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+        <span class="c1"># OPTIMIZE: I should just grab from the POSCAR or CONTCAR for speed.</span>
+        <span class="c1"># The reason I don&#39;t at the moment is because there may be empty atoms.</span>
+        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
         <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
 
         <span class="c1"># Calculate the oxidation state of each site where it is simply the</span>
@@ -144,143 +172,78 @@
             <span class="n">oxi_state_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxi_state</span><span class="p">)</span>
 
         <span class="c1"># add the new column to the dataframe</span>
-        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
-        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
-        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
             <span class="n">oxidation_state</span><span class="o">=</span><span class="n">oxi_state_data</span><span class="p">,</span>
             <span class="n">element</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
+        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
+        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
+
+        <span class="c1"># write output files/plots for the user to quickly reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">)</span>
 
         <span class="c1"># return all of our results</span>
         <span class="k">return</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span>
+
+    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This prints a &quot;simmate_summary.yaml&quot; file with key output information.</span>
+
+<span class="sd">        This method should not be called directly as it used within workup().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># write output of the dataframe</span>
+        <span class="n">summary_csv_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary_bader.csv&quot;</span><span class="p">)</span>
+        <span class="n">dataframe</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">summary_csv_filename</span><span class="p">)</span>
+
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="s2">&quot;view simmate_summary_bader.csv for more information&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">extra_data</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">summary_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary.yaml&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
             </section>
-                <section id="CombineCHGCARsTask">
+                <section id="CombineCHGCARs">
                                 <div class="attr class">
-        <a class="headerlink" href="#CombineCHGCARsTask">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#CombineCHGCARs">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">CombineCHGCARsTask</span><wbr>(<span class="base"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></span>):
+        <span class="name">CombineCHGCARs</span><wbr>(<span class="base"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">CombineCHGCARsTask</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
-    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;./chgsum.pl AECCAR0 AECCAR2 &gt; chgsum.out&quot;</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">CombineCHGCARs</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This tasks simply sums two charge density files into a new file. It uses</span>
+<span class="sd">    a script from the Henkleman group.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;chgsum.pl AECCAR0 AECCAR2 &gt; chgsum.out&quot;</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><h2 id="the-supervised-staged-shell-task-aka-s3task">The Supervised-Staged-Shell Task (aka "S3Task")</h2>
-
-<p>This class contains the core functionality to <strong>supervise</strong> a <strong>staged</strong> task
-involving some <strong>shell</strong> command.</p>
-
-<p>Let's breakdown what this means...</p>
-
-<p>A <em>shell</em> command is a single call to some external program. For example,
-VASP requires that we call the "vasp_std &gt; vasp.out" command in order to run a
-calculation. We consider calling external programs a <em>staged</em> task made
-up of three steps:</p>
-
-<ul>
-<li>setup = writing any input files required for the program</li>
-<li>execution = actually calling the command and running our program</li>
-<li>workup = loading data from output files back into python</li>
-</ul>
-
-<p>And for <em>supervising</em> the task, this means we monitor the program while the
-execution stage is running. So once a program is started, Simmate can check
-output files for common errors/issues. If an error is found, we stop the
-program, fix the issue, and then restart it. Any fixes that were made are
-written to "simmate_corrections.csv".</p>
-
-<!--
-TODO: Make a simple diagram to visualize the overall process and add it here.
-It will be similar to Custodian's, but we don't have a list of jobs here.
-https://materialsproject.github.io/custodian/index.html#usage
-The steps are...
-
-- Write Input Files based on custom+defualt settings
-- Run the calculation by calling the program
-- Load ouput files
-- check for errors
-- [correct them, rerun]
-- postprocess/analysis
--->
-
-<p>This entire process (the different stages and monitoring) is carried out
-using the <code><a href="#CombineCHGCARsTask.run">run()</a></code> method. You rarely use this class directly. Instead,
-you typically use a subclass of it. As a user, you really just need to do
-something like this:</p>
-
-<div class="pdoc-code codehilite"><pre><span></span><code>   <span class="kn">from</span> <span class="nn">simmate.calculator.example.tasks</span> <span class="kn">import</span> <span class="n">ExampleTask</span>
-
-   <span class="n">my_task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
-   <span class="n">my_result</span> <span class="o">=</span> <span class="n">my_task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-
-<p>And that's it!</p>
-
-<p>For experts, this class can be viewed as a combination of prefect's ShellTask,
-a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
-functionality of pymatgen.io.vasp.sets too. By merging all of these together
-into one class, we make things much easier for users and creating new Tasks.</p>
-
-<h2 id="inheriting-from-this-class">Inheriting from this class</h2>
-
-<p>This class is commonly used to make tasks for our calculator modules, so you
-will likely want to subclass this. Here is a basic example of inheriting
-and then running a task:</p>
-
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../workflow_engine.html">simmate.workflow_engine</a></span> <span class="kn">import</span> <span class="n">S3Task</span>
-<span class="kn">from</span> <span class="nn">example.error_handlers</span> <span class="kn">import</span> <span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span>
-
-
-<span class="k">class</span> <span class="nc">ExampleTask</span><span class="p">(</span><span class="n">SSSTask</span><span class="p">):</span>
-
-    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;echo example&quot;</span>  <span class="c1"># just prints out &quot;example&quot;</span>
-    <span class="n">max_corrections</span> <span class="o">=</span> <span class="mi">7</span>
-    <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span><span class="p">]</span>
-    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mf">0.1</span>
-    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">10</span>
-    <span class="n">some_new_setting</span> <span class="o">=</span> <span class="mi">123</span>
-
-    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have these two args</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m setting things up!&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;My new setting is </span><span class="si">{</span><span class="n">some_new_setting</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have this arg</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m working things up!&quot;</span><span class="p">)</span>
-
-
-<span class="n">task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-
-<p>There are a couple things to note here:</p>
-
-<ul>
-<li>It's optional to set/overwrite attributes. You can also add new ones too.</li>
-<li>It's optional to write a new __init__, setup, or workup methods</li>
-<li>make sure you include the structure/directory inputs, even if you don't use them.</li>
-<li>Don't add new kwargs to methods. Instead handle these options through attributes.</li>
-</ul>
-
-<p>For a full (and advanced) example, of a subclass take a look at
-<code><a href="../vasp/tasks/base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></code>.</p>
+            <div class="docstring"><p>This tasks simply sums two charge density files into a new file. It uses
+a script from the Henkleman group.</p>
 </div>
 
 
-                            <div id="CombineCHGCARsTask.command" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#CombineCHGCARsTask.command">#&nbsp;&nbsp</a>
+                            <div id="CombineCHGCARs.command" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#CombineCHGCARs.command">#&nbsp;&nbsp</a>
 
-        <span class="name">command</span><span class="annotation">: str</span><span class="default_value"> = &#39;./chgsum.pl AECCAR0 AECCAR2 &gt; chgsum.out&#39;</span>
+        <span class="name">command</span><span class="annotation">: str</span><span class="default_value"> = &#39;chgsum.pl AECCAR0 AECCAR2 &gt; chgsum.out&#39;</span>
     </div>
 
     
@@ -293,71 +256,91 @@ and then running a task:</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="CombineCHGCARsTask.__init__" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="CombineCHGCARsTask.requires_structure" class="variable"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.requires_structure">requires_structure</a></dd>
-                <dd id="CombineCHGCARsTask.error_handlers" class="variable"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
-                <dd id="CombineCHGCARsTask.setup" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.setup">setup</a></dd>
-                <dd id="CombineCHGCARsTask.execute" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="CombineCHGCARsTask.workup" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.workup">workup</a></dd>
-                <dd id="CombineCHGCARsTask.run" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="CombineCHGCARsTask.get_config" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.get_config">get_config</a></dd>
-                <dd id="CombineCHGCARsTask.print_config" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                <dd id="CombineCHGCARs.__init__" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
+                <dd id="CombineCHGCARs.requires_structure" class="variable"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.requires_structure">requires_structure</a></dd>
+                <dd id="CombineCHGCARs.error_handlers" class="variable"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                <dd id="CombineCHGCARs.setup" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.setup">setup</a></dd>
+                <dd id="CombineCHGCARs.execute" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="CombineCHGCARs.workup" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.workup">workup</a></dd>
+                <dd id="CombineCHGCARs.run" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="CombineCHGCARs.get_config" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.get_config">get_config</a></dd>
+                <dd id="CombineCHGCARs.print_config" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
             <div><dt>prefect.core.task.Task</dt>
-                                <dd id="CombineCHGCARsTask.copy" class="function">copy</dd>
-                <dd id="CombineCHGCARsTask.bind" class="function">bind</dd>
-                <dd id="CombineCHGCARsTask.map" class="function">map</dd>
-                <dd id="CombineCHGCARsTask.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="CombineCHGCARsTask.set_upstream" class="function">set_upstream</dd>
-                <dd id="CombineCHGCARsTask.set_downstream" class="function">set_downstream</dd>
-                <dd id="CombineCHGCARsTask.inputs" class="function">inputs</dd>
-                <dd id="CombineCHGCARsTask.outputs" class="function">outputs</dd>
-                <dd id="CombineCHGCARsTask.serialize" class="function">serialize</dd>
-                <dd id="CombineCHGCARsTask.is_equal" class="function">is_equal</dd>
-                <dd id="CombineCHGCARsTask.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="CombineCHGCARsTask.not_" class="function">not_</dd>
-                <dd id="CombineCHGCARsTask.or_" class="function">or_</dd>
+                                <dd id="CombineCHGCARs.copy" class="function">copy</dd>
+                <dd id="CombineCHGCARs.bind" class="function">bind</dd>
+                <dd id="CombineCHGCARs.map" class="function">map</dd>
+                <dd id="CombineCHGCARs.set_dependencies" class="function">set_dependencies</dd>
+                <dd id="CombineCHGCARs.set_upstream" class="function">set_upstream</dd>
+                <dd id="CombineCHGCARs.set_downstream" class="function">set_downstream</dd>
+                <dd id="CombineCHGCARs.inputs" class="function">inputs</dd>
+                <dd id="CombineCHGCARs.outputs" class="function">outputs</dd>
+                <dd id="CombineCHGCARs.serialize" class="function">serialize</dd>
+                <dd id="CombineCHGCARs.is_equal" class="function">is_equal</dd>
+                <dd id="CombineCHGCARs.is_not_equal" class="function">is_not_equal</dd>
+                <dd id="CombineCHGCARs.not_" class="function">not_</dd>
+                <dd id="CombineCHGCARs.or_" class="function">or_</dd>
 
             </div>
                                 </dl>
                             </div>
                 </section>
-                <section id="BaderAnalysisTask">
+                <section id="BaderAnalysis">
                                 <div class="attr class">
-        <a class="headerlink" href="#BaderAnalysisTask">#&nbsp;&nbsp</a>
+        <a class="headerlink" href="#BaderAnalysis">#&nbsp;&nbsp</a>
 
         
         <span class="def">class</span>
-        <span class="name">BaderAnalysisTask</span><wbr>(<span class="base"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></span>):
+        <span class="name">BaderAnalysis</span><wbr>(<span class="base"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></span>):
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">BaderAnalysisTask</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
-    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;./bader CHGCAR -ref CHGCAR_sum -b weight &gt; bader.out&quot;</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">BaderAnalysis</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
 
-    <span class="nd">@defaults_from_attrs</span><span class="p">(</span><span class="s2">&quot;dir&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;bader CHGCAR -ref CHGCAR_sum -b weight &gt; bader.out&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The command to call the executable, which is typically bader. Note we</span>
+<span class="sd">    use the `-b weight` by default, which means we apply the weight method for</span>
+<span class="sd">    partitioning from of </span>
+<span class="sd">    [Yu and Trinkle](http://theory.cm.utexas.edu/henkelman/code/bader/download/yu11_064111.pdf).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-        <span class="c1"># Make sure that there are CHGCAR, AECCAR0, AECCAR2 files from a VASP calc</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">]</span>
-        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
+<span class="sd">        - typically using VASP. This setup therefore just involves ensuring that</span>
+<span class="sd">        the proper files are present.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Make sure that there are the proper output files from a VASP calc</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">]</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;A static energy calculation is required before running Bader &quot;</span>
+                <span class="s2">&quot;analysis. The following files must exist in the directory where &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;this task is ran: </span><span class="si">{</span><span class="n">files</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Make the CHGCAR_sum file using Bader&#39;s helper script</span>
-        <span class="n">CombineCHGCARsTask</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="n">CombineCHGCARs</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
 
-    <span class="nd">@defaults_from_attrs</span><span class="p">(</span><span class="s2">&quot;dir&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A basic workup process that reads Bader analysis results from the ACF.dat</span>
+<span class="sd">        file and calculates the corresponding oxidation states with the existing</span>
+<span class="sd">        POTCAR files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># load the ACF.dat file</span>
-        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
+        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
         <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">ACF</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">acf_filename</span><span class="p">)</span>
 
         <span class="c1"># load the electron counts used by VASP from the POTCAR files</span>
-        <span class="c1"># OPTIMIZE this can be much faster if I have a reference file</span>
-        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
+        <span class="c1"># OPTIMIZE: this can be much faster if I have a reference file</span>
+        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
         <span class="n">potcars</span> <span class="o">=</span> <span class="n">Potcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">potcar_filename</span><span class="p">)</span>
         <span class="n">nelectron_data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># the result is a list because there can be multiple element potcars</span>
@@ -366,8 +349,10 @@ and then running a task:</p>
             <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">potcar</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">potcar</span><span class="o">.</span><span class="n">nelectrons</span><span class="p">})</span>
 
         <span class="c1"># grab the structure from the CHGCAR</span>
-        <span class="c1"># OPTIMIZE I should just grab from the POSCAR or CONTCAR for speed</span>
-        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+        <span class="c1"># OPTIMIZE: I should just grab from the POSCAR or CONTCAR for speed.</span>
+        <span class="c1"># The reason I don&#39;t at the moment is because there may be empty atoms.</span>
+        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
         <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
 
         <span class="c1"># Calculate the oxidation state of each site where it is simply the</span>
@@ -382,16 +367,42 @@ and then running a task:</p>
             <span class="n">oxi_state_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxi_state</span><span class="p">)</span>
 
         <span class="c1"># add the new column to the dataframe</span>
-        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
-        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
-        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
             <span class="n">oxidation_state</span><span class="o">=</span><span class="n">oxi_state_data</span><span class="p">,</span>
             <span class="n">element</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
+        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
+        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
+
+        <span class="c1"># write output files/plots for the user to quickly reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">)</span>
 
         <span class="c1"># return all of our results</span>
         <span class="k">return</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span>
+
+    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This prints a &quot;simmate_summary.yaml&quot; file with key output information.</span>
+
+<span class="sd">        This method should not be called directly as it used within workup().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># write output of the dataframe</span>
+        <span class="n">summary_csv_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary_bader.csv&quot;</span><span class="p">)</span>
+        <span class="n">dataframe</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">summary_csv_filename</span><span class="p">)</span>
+
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="s2">&quot;view simmate_summary_bader.csv for more information&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">extra_data</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">summary_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary.yaml&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -435,7 +446,7 @@ The steps are...
 -->
 
 <p>This entire process (the different stages and monitoring) is carried out
-using the <code><a href="#BaderAnalysisTask.run">run()</a></code> method. You rarely use this class directly. Instead,
+using the <code><a href="#BaderAnalysis.run">run()</a></code> method. You rarely use this class directly. Instead,
 you typically use a subclass of it. As a user, you really just need to do
 something like this:</p>
 
@@ -497,91 +508,92 @@ and then running a task:</p>
 </div>
 
 
-                            <div id="BaderAnalysisTask.command" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#BaderAnalysisTask.command">#&nbsp;&nbsp</a>
+                            <div id="BaderAnalysis.command" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaderAnalysis.command">#&nbsp;&nbsp</a>
 
-        <span class="name">command</span><span class="annotation">: str</span><span class="default_value"> = &#39;./bader CHGCAR -ref CHGCAR_sum -b weight &gt; bader.out&#39;</span>
+        <span class="name">command</span><span class="annotation">: str</span><span class="default_value"> = &#39;bader CHGCAR -ref CHGCAR_sum -b weight &gt; bader.out&#39;</span>
     </div>
 
     
-            <div class="docstring"><p>The defualt shell command to use.</p>
+            <div class="docstring"><p>The command to call the executable, which is typically bader. Note we
+use the <code>-b weight</code> by default, which means we apply the weight method for
+partitioning from of 
+<a href="http://theory.cm.utexas.edu/henkelman/code/bader/download/yu11_064111.pdf">Yu and Trinkle</a>.</p>
 </div>
 
 
                             </div>
-                            <div id="BaderAnalysisTask.setup" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#BaderAnalysisTask.setup">#&nbsp;&nbsp</a>
+                            <div id="BaderAnalysis.setup" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaderAnalysis.setup">#&nbsp;&nbsp</a>
 
-                <div class="decorator">@defaults_from_attrs(&#39;dir&#39;)</div>
-
+        
             <span class="def">def</span>
-            <span class="name">setup</span><span class="signature">(self, dir=None)</span>:
+            <span class="name">setup</span><span class="signature">(
+    self,
+    structure: <a href="../../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a>,
+    directory: str
+)</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@defaults_from_attrs</span><span class="p">(</span><span class="s2">&quot;dir&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
+<span class="sd">        - typically using VASP. This setup therefore just involves ensuring that</span>
+<span class="sd">        the proper files are present.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Make sure that there are CHGCAR, AECCAR0, AECCAR2 files from a VASP calc</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">]</span>
-        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">)</span>
+        <span class="c1"># Make sure that there are the proper output files from a VASP calc</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">]</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;A static energy calculation is required before running Bader &quot;</span>
+                <span class="s2">&quot;analysis. The following files must exist in the directory where &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;this task is ran: </span><span class="si">{</span><span class="n">files</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Make the CHGCAR_sum file using Bader&#39;s helper script</span>
-        <span class="n">CombineCHGCARsTask</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="n">CombineCHGCARs</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>This abstract method is ran before the command is actually executed. This
-allows for some pre-processing, such as writing input files or any other
-analysis.</p>
-
-<p>You should never call this method directly unless you are debugging. This
-is becuase setup() is normally called within the run() method.</p>
-
-<p>Some tasks don't require a setup() method, so by default, this method
-doesn't nothing but "pass".</p>
-
-<h4 id="parameters">Parameters</h4>
+            <div class="docstring"><p>Bader analysis requires that a static-energy calculation be ran beforehand</p>
 
 <ul>
-<li><code>structure</code>:
-The structure to use for the task, if one is required.</li>
-<li><code>directory</code>:
-The directory to run everything in. Must exist already.</li>
-<li><code>**kwargs</code>:
-Extra kwargs that may be passed to some function within. Because
-Simmate prefers fixed settings for their workflows, this is typically
-not used, but instead, keywords should be explicitly defined when
-writing a setup method.</li>
+<li>typically using VASP. This setup therefore just involves ensuring that
+the proper files are present.</li>
 </ul>
 </div>
 
 
                             </div>
-                            <div id="BaderAnalysisTask.postprocess" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#BaderAnalysisTask.postprocess">#&nbsp;&nbsp</a>
+                            <div id="BaderAnalysis.workup" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaderAnalysis.workup">#&nbsp;&nbsp</a>
 
-                <div class="decorator">@defaults_from_attrs(&#39;dir&#39;)</div>
-
+        
             <span class="def">def</span>
-            <span class="name">postprocess</span><span class="signature">(self, dir=None)</span>:
+            <span class="name">workup</span><span class="signature">(self, directory: str)</span>:
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@defaults_from_attrs</span><span class="p">(</span><span class="s2">&quot;dir&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A basic workup process that reads Bader analysis results from the ACF.dat</span>
+<span class="sd">        file and calculates the corresponding oxidation states with the existing</span>
+<span class="sd">        POTCAR files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># load the ACF.dat file</span>
-        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
+        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
         <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">ACF</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">acf_filename</span><span class="p">)</span>
 
         <span class="c1"># load the electron counts used by VASP from the POTCAR files</span>
-        <span class="c1"># OPTIMIZE this can be much faster if I have a reference file</span>
-        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
+        <span class="c1"># OPTIMIZE: this can be much faster if I have a reference file</span>
+        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
         <span class="n">potcars</span> <span class="o">=</span> <span class="n">Potcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">potcar_filename</span><span class="p">)</span>
         <span class="n">nelectron_data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># the result is a list because there can be multiple element potcars</span>
@@ -590,8 +602,10 @@ writing a setup method.</li>
             <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">potcar</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">potcar</span><span class="o">.</span><span class="n">nelectrons</span><span class="p">})</span>
 
         <span class="c1"># grab the structure from the CHGCAR</span>
-        <span class="c1"># OPTIMIZE I should just grab from the POSCAR or CONTCAR for speed</span>
-        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+        <span class="c1"># OPTIMIZE: I should just grab from the POSCAR or CONTCAR for speed.</span>
+        <span class="c1"># The reason I don&#39;t at the moment is because there may be empty atoms.</span>
+        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
         <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
 
         <span class="c1"># Calculate the oxidation state of each site where it is simply the</span>
@@ -606,13 +620,16 @@ writing a setup method.</li>
             <span class="n">oxi_state_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxi_state</span><span class="p">)</span>
 
         <span class="c1"># add the new column to the dataframe</span>
-        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
-        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
-        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
             <span class="n">oxidation_state</span><span class="o">=</span><span class="n">oxi_state_data</span><span class="p">,</span>
             <span class="n">element</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
+        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
+        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
+
+        <span class="c1"># write output files/plots for the user to quickly reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">)</span>
 
         <span class="c1"># return all of our results</span>
         <span class="k">return</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span>
@@ -620,37 +637,40 @@ writing a setup method.</li>
 
         </details>
 
-    
+            <div class="docstring"><p>A basic workup process that reads Bader analysis results from the ACF.dat
+file and calculates the corresponding oxidation states with the existing
+POTCAR files.</p>
+</div>
+
 
                             </div>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="BaderAnalysisTask.__init__" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="BaderAnalysisTask.requires_structure" class="variable"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.requires_structure">requires_structure</a></dd>
-                <dd id="BaderAnalysisTask.error_handlers" class="variable"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
-                <dd id="BaderAnalysisTask.execute" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="BaderAnalysisTask.workup" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.workup">workup</a></dd>
-                <dd id="BaderAnalysisTask.run" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="BaderAnalysisTask.get_config" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.get_config">get_config</a></dd>
-                <dd id="BaderAnalysisTask.print_config" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                <dd id="BaderAnalysis.__init__" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
+                <dd id="BaderAnalysis.requires_structure" class="variable"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.requires_structure">requires_structure</a></dd>
+                <dd id="BaderAnalysis.error_handlers" class="variable"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                <dd id="BaderAnalysis.execute" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="BaderAnalysis.run" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="BaderAnalysis.get_config" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.get_config">get_config</a></dd>
+                <dd id="BaderAnalysis.print_config" class="function"><a href="../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
             <div><dt>prefect.core.task.Task</dt>
-                                <dd id="BaderAnalysisTask.copy" class="function">copy</dd>
-                <dd id="BaderAnalysisTask.bind" class="function">bind</dd>
-                <dd id="BaderAnalysisTask.map" class="function">map</dd>
-                <dd id="BaderAnalysisTask.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="BaderAnalysisTask.set_upstream" class="function">set_upstream</dd>
-                <dd id="BaderAnalysisTask.set_downstream" class="function">set_downstream</dd>
-                <dd id="BaderAnalysisTask.inputs" class="function">inputs</dd>
-                <dd id="BaderAnalysisTask.outputs" class="function">outputs</dd>
-                <dd id="BaderAnalysisTask.serialize" class="function">serialize</dd>
-                <dd id="BaderAnalysisTask.is_equal" class="function">is_equal</dd>
-                <dd id="BaderAnalysisTask.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="BaderAnalysisTask.not_" class="function">not_</dd>
-                <dd id="BaderAnalysisTask.or_" class="function">or_</dd>
+                                <dd id="BaderAnalysis.copy" class="function">copy</dd>
+                <dd id="BaderAnalysis.bind" class="function">bind</dd>
+                <dd id="BaderAnalysis.map" class="function">map</dd>
+                <dd id="BaderAnalysis.set_dependencies" class="function">set_dependencies</dd>
+                <dd id="BaderAnalysis.set_upstream" class="function">set_upstream</dd>
+                <dd id="BaderAnalysis.set_downstream" class="function">set_downstream</dd>
+                <dd id="BaderAnalysis.inputs" class="function">inputs</dd>
+                <dd id="BaderAnalysis.outputs" class="function">outputs</dd>
+                <dd id="BaderAnalysis.serialize" class="function">serialize</dd>
+                <dd id="BaderAnalysis.is_equal" class="function">is_equal</dd>
+                <dd id="BaderAnalysis.is_not_equal" class="function">is_not_equal</dd>
+                <dd id="BaderAnalysis.not_" class="function">not_</dd>
+                <dd id="BaderAnalysis.or_" class="function">or_</dd>
 
             </div>
                                 </dl>

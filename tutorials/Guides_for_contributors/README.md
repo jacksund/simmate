@@ -6,7 +6,8 @@ In this guide, you will learn how to contribute new features to Simmate's code.
 1. [Learning about core dependencies](#learning-about-core-dependencies)
 2. [First-time Setup](#first-time-setup)
 3. [Creating and submitting changes](#creating-and-submitting-changes)
-3. [Extra notes and tips](#extra-notes-and-tips)
+4. [Extra notes and tips](#extra-notes-and-tips)
+5. [For maintainers](#for-maintainers)
 
 <br/><br/>
 
@@ -95,6 +96,7 @@ pytest
 
 10. Now [open a pull-request](https://support.gitkraken.com/working-with-repositories/pull-requests/) to merge your changes into our main code (currently at `jacksund/simmate`). We will review your changes and merge them if they pass all of our checks.
 
+<br/><br/>
 
 # Extra notes and tips
 
@@ -144,6 +146,8 @@ git pull origin main
 git restore .
 ```
 
+<br/><br/>
+
 # For maintainers
 
 (currently this section is only relevant to @jacksund)
@@ -158,20 +162,32 @@ conda install -n simmate_dev -c conda-forge fabric jarvis-tools aflow -y
 pip install qmpy_rester
 pip install pdoc
 
-# you can the change into the docs directory and run the make_docs.py
+# You can the change into the docs directory and run the make_docs.py.
+# Note we also delete existing docs to ensure a clean setup.
 cd docs/
+rm -r simmate/ index.html search.js simmate.html
 python make_docs.py
+
+# NOTE: for api changes or new modules, you may need to delete existing
 ```
 
 2. Update the Simmate version number in `setup.py` [link](https://github.com/jacksund/simmate/blob/main/setup.py)
 
 3. Make a [release](https://github.com/jacksund/simmate/releases/new) on Github (which will automatically release to pypi)
 
-4. Use [grayskull](https://www.marcelotrevisani.com/grayskull) to help update the version number, sha256, and dependencies of the [simmate feedstock](https://github.com/conda-forge/simmate-feedstock).
+4. Wait for the autotick bot to open a pull request for the [simmate feedstock](https://github.com/conda-forge/simmate-feedstock). This can take up to 24hrs, but you can check the status [here](https://conda-forge.org/status/#version_updates) (under "Queued").
 
-5. If this a dev release, you can test the conda install with:
+5. Make sure the autotick bot made the proper changes before merging. If there were any major changes, you can use [grayskull](https://www.marcelotrevisani.com/grayskull) to help update the version number, sha256, and dependencies.
+
+6. After merging, it takes the conda-forge channels 30min or so to update their indexes. Afterwards, you can test the conda install with:
 ``` bash
+# for a normal release
+conda create -n my_env -c conda-forge simmate -y
+
+# for a dev release
 conda create -n my_env -c conda-forge python=3.10 -y
 conda install -n my_env -c conda-forge -c conda-forge/label/simmate_dev simmate -y
+
+# as an extra, make sure spyder can also be installed in the same env
 conda install -n my_env -c conda-forge spyder -y
 ```

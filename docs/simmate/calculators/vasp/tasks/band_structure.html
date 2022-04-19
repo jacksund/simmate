@@ -81,7 +81,7 @@
 <span class="kn">from</span> <span class="nn">pymatgen.electronic_structure.plotter</span> <span class="kn">import</span> <span class="n">BSPlotter</span>
 
 <span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs</span> <span class="kn">import</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">Potcar</span>
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MatProjStaticEnergy</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -199,7 +199,7 @@
 
         
         <span class="def">class</span>
-        <span class="name">MatProjBandStructure</span><wbr>(<span class="base"><a href="energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.energy.materials_project.MatProjStaticEnergy</a></span>):
+        <span class="name">MatProjBandStructure</span><wbr>(<span class="base"><a href="static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></span>):
     </div>
 
             <details>
@@ -329,7 +329,7 @@ energy calculation for you. This S3Task is only the final step of that workflow.
                             <div id="MatProjBandStructure.incar" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MatProjBandStructure.incar">#&nbsp;&nbsp</a>
 
-        <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: 0, &#39;ISPIN&#39;: 2, &#39;ISYM&#39;: 0, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;SIGMA&#39;: 0.01, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LMAXMIX__auto&#39;: True, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;ICHARG&#39;: 11}</span>
+        <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: 0, &#39;ISPIN&#39;: 2, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;SIGMA&#39;: 0.01, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LMAXMIX__auto&#39;: True, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;ICHARG&#39;: 11}</span>
     </div>
 
     
@@ -463,8 +463,8 @@ first and then writes a KPOINT file with using a highsym path.</p>
                 <dd id="MatProjBandStructure.print_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
-            <div><dt><a href="energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.energy.materials_project.MatProjStaticEnergy</a></dt>
-                                <dd id="MatProjBandStructure.error_handlers" class="variable"><a href="energy/materials_project.html#MatProjStaticEnergy.error_handlers">error_handlers</a></dd>
+            <div><dt><a href="static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></dt>
+                                <dd id="MatProjBandStructure.error_handlers" class="variable"><a href="static_energy/materials_project.html#MatProjStaticEnergy.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>

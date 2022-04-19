@@ -93,6 +93,7 @@
     <span class="s2">&quot;density-of-states&quot;</span><span class="p">,</span>
     <span class="s2">&quot;dynamics&quot;</span><span class="p">,</span>
     <span class="s2">&quot;diffusion&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;customized&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -352,8 +353,8 @@
 <span class="sd">        - a toolkit Structure object</span>
 <span class="sd">        - etc...</span>
 
-<span class="sd">    Even though all of these inputs are accepts, `workflow.run` always expects</span>
-<span class="sd">    a</span>
+<span class="sd">    Even though all of these inputs are accepted, `workflow.run` always expects</span>
+<span class="sd">    python objects, so this utility converts them.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># we don&#39;t want to pass arguments like command=None or structure=None if the</span>
@@ -391,6 +392,27 @@
 
     <span class="k">if</span> <span class="s2">&quot;supercell_end&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">])</span>
+
+    <span class="c1"># lastly, for customized workflows, we need to completely change the format</span>
+    <span class="c1"># that we provide the parameters. Customized workflows expect parameters</span>
+    <span class="c1"># broken into a dictionary of</span>
+    <span class="c1">#   {&quot;workflow_base&quot;: ..., &quot;input_parameters&quot;:..., &quot;updated_settings&quot;: ...}</span>
+    <span class="c1"># The</span>
+    <span class="k">if</span> <span class="s2">&quot;workflow_base&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;workflow_base&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;workflow_base&quot;</span><span class="p">])</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;input_parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;updated_settings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">update_values</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;workflow_base&quot;</span><span class="p">,</span> <span class="s2">&quot;input_parameters&quot;</span><span class="p">,</span> <span class="s2">&quot;updated_settings&quot;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;custom__&quot;</span><span class="p">):</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;input_parameters&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="c1"># Otherwise remove the prefix and add it to the custom settings.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">key_cleaned</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;custom__&quot;</span><span class="p">)</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;updated_settings&quot;</span><span class="p">][</span><span class="n">key_cleaned</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">kwargs</span>
 </pre></div>
@@ -809,8 +831,8 @@ called elsewhere.</p>
 <span class="sd">        - a toolkit Structure object</span>
 <span class="sd">        - etc...</span>
 
-<span class="sd">    Even though all of these inputs are accepts, `workflow.run` always expects</span>
-<span class="sd">    a</span>
+<span class="sd">    Even though all of these inputs are accepted, `workflow.run` always expects</span>
+<span class="sd">    python objects, so this utility converts them.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># we don&#39;t want to pass arguments like command=None or structure=None if the</span>
@@ -849,6 +871,27 @@ called elsewhere.</p>
     <span class="k">if</span> <span class="s2">&quot;supercell_end&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;supercell_end&quot;</span><span class="p">])</span>
 
+    <span class="c1"># lastly, for customized workflows, we need to completely change the format</span>
+    <span class="c1"># that we provide the parameters. Customized workflows expect parameters</span>
+    <span class="c1"># broken into a dictionary of</span>
+    <span class="c1">#   {&quot;workflow_base&quot;: ..., &quot;input_parameters&quot;:..., &quot;updated_settings&quot;: ...}</span>
+    <span class="c1"># The</span>
+    <span class="k">if</span> <span class="s2">&quot;workflow_base&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;workflow_base&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_workflow</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;workflow_base&quot;</span><span class="p">])</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;input_parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;updated_settings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">update_values</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;workflow_base&quot;</span><span class="p">,</span> <span class="s2">&quot;input_parameters&quot;</span><span class="p">,</span> <span class="s2">&quot;updated_settings&quot;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;custom__&quot;</span><span class="p">):</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;input_parameters&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="c1"># Otherwise remove the prefix and add it to the custom settings.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">key_cleaned</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;custom__&quot;</span><span class="p">)</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;updated_settings&quot;</span><span class="p">][</span><span class="n">key_cleaned</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">kwargs</span>
 </pre></div>
 
@@ -865,8 +908,8 @@ can be provided a number of ways:
     - a toolkit Structure object
     - etc...</p>
 
-<p>Even though all of these inputs are accepts, <code>workflow.run</code> always expects
-a</p>
+<p>Even though all of these inputs are accepted, <code>workflow.run</code> always expects
+python objects, so this utility converts them.</p>
 </div>
 
 

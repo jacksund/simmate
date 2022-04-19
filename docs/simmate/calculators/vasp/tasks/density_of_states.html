@@ -66,7 +66,7 @@
 
 <span class="kn">from</span> <span class="nn">pymatgen.electronic_structure.plotter</span> <span class="kn">import</span> <span class="n">DosPlotter</span>
 
-<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MatProjStaticEnergy</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -132,7 +132,7 @@
 
         
         <span class="def">class</span>
-        <span class="name">MatProjDensityOfStates</span><wbr>(<span class="base"><a href="energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.energy.materials_project.MatProjStaticEnergy</a></span>):
+        <span class="name">MatProjDensityOfStates</span><wbr>(<span class="base"><a href="static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></span>):
     </div>
 
             <details>
@@ -207,7 +207,7 @@ energy calculation for you. This S3Task is only the final step of that workflow.
                             <div id="MatProjDensityOfStates.incar" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MatProjDensityOfStates.incar">#&nbsp;&nbsp</a>
 
-        <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: -5, &#39;ISPIN&#39;: 2, &#39;ISYM&#39;: 2, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;SIGMA&#39;: 0.05, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LMAXMIX__auto&#39;: True, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;ICHARG&#39;: 11, &#39;NEDOS&#39;: 2001}</span>
+        <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: -5, &#39;ISPIN&#39;: 2, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;SIGMA&#39;: 0.05, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LMAXMIX__auto&#39;: True, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;ICHARG&#39;: 11, &#39;ISYM&#39;: 2, &#39;NEDOS&#39;: 2001}</span>
     </div>
 
     
@@ -230,8 +230,8 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                 <dd id="MatProjDensityOfStates.print_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
-            <div><dt><a href="energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.energy.materials_project.MatProjStaticEnergy</a></dt>
-                                <dd id="MatProjDensityOfStates.error_handlers" class="variable"><a href="energy/materials_project.html#MatProjStaticEnergy.error_handlers">error_handlers</a></dd>
+            <div><dt><a href="static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></dt>
+                                <dd id="MatProjDensityOfStates.error_handlers" class="variable"><a href="static_energy/materials_project.html#MatProjStaticEnergy.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
