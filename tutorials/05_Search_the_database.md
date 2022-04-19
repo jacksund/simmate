@@ -288,4 +288,4 @@ df_2 = structures_2.to_dataframe()
 
 There are many ways to search through your tables, and we only covered the basics here. Advanced users will benefit from knowing that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a long time to master, so we only recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) if you plan on joining our team or are a fully computational student. Beginners can just ask for help. Figuring out the correct filter can take new users hours while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/categories/q-a).
 
-Up next, we can start sharing results with others! Continue to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/06_Use_a_cloud_database.md) when you're ready.
+When you're ready, you can advance to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/06_Building_custom_workflows), which can be completed on your local computer.
