@@ -5,6 +5,7 @@ Example use:
 ``` python
 from simmate.toolkit import Structure
 from simmate.workflows.static_energy import mit_workflow
+from simmate.workflows.customized import vasp_workflow
 
 s = Structure(
     lattice=[
@@ -26,9 +27,39 @@ vasp_workflow.run(
 ```
 """
 
-from simmate.workflow_engine import Workflow, Parameter, ModuleStorage
+import prefect
+
+from simmate.utilities import get_directory
+from simmate.workflow_engine import Workflow, Parameter, ModuleStorage, task
 from simmate.workflow_engine.common_tasks import run_customized_s3task, SaveOutputTask
 from simmate.calculators.vasp.database.customized import CustomizedVASPCalculation
+
+
+@task
+def register_calc(workflow_base, input_parameters, updated_settings, source, directory):
+    # !!! This code is copied and modified from the LoadInputAndRegister task.
+    # I need to merge these functions in the future.
+
+    directory_cleaned = get_directory(directory)
+    input_parameters["directory"] = directory_cleaned
+
+    prefect_flow_run_id = prefect.context.flow_run_id
+
+    # HACK FIX: I need to make sure everything is JSON serailizable, and I use
+    # a static method from the Workflow class to do this. This may be a good
+    # sign that this method should become a utility instead.
+    inputs_cleaned = Workflow._serialize_parameters(input_parameters)
+
+    calculation = CustomizedVASPCalculation.from_prefect_id(
+        id=prefect_flow_run_id,
+        source=source or None,
+        directory=directory_cleaned,
+        workflow_base=workflow_base.name,
+        input_parameters=inputs_cleaned,
+        updated_settings=updated_settings,
+    )
+
+    return input_parameters
 
 
 save_results = SaveOutputTask(CustomizedVASPCalculation)
@@ -38,13 +69,20 @@ with Workflow("customized/vasp") as vasp_workflow:
     workflow_base = Parameter("workflow_base")
     input_parameters = Parameter("input_parameters", default={})
     updated_settings = Parameter("updated_settings", default={})
+    source = Parameter("source", default=None)
+    directory = Parameter("directory", default=None)
 
-    # NOTE: these runs are not stored in the database unless they complete
-    # successfully. I may add a register() task in the future though.
+    inputs_cleaned = register_calc(
+        workflow_base=workflow_base,
+        input_parameters=input_parameters,
+        updated_settings=updated_settings,
+        source=source,
+        directory=directory,
+    )
 
     result = run_customized_s3task(
         workflow_base=workflow_base,
-        input_parameters=input_parameters,
+        input_parameters=inputs_cleaned,
         updated_settings=updated_settings,
     )
 
