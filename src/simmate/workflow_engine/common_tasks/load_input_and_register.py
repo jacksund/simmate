@@ -54,7 +54,7 @@ class LoadInputAndRegister(Task):
         previous calculation. If use_previous_directory=True, then the directory
         parameter is ignored.
 
-        **kwargs is anything extra that you want saved to simmate_input.yaml
+        **kwargs is anything extra that you want saved to simmate_metadata.yaml
         """
 
         # -------------------------------------------------------------------------

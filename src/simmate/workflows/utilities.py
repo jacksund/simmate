@@ -22,6 +22,7 @@ WORKFLOW_TYPES = [
     "density-of-states",
     "dynamics",
     "diffusion",
+    "customized",
 ]
 
 
@@ -281,8 +282,8 @@ def parse_parameters(**kwargs) -> dict:
         - a toolkit Structure object
         - etc...
 
-    Even though all of these inputs are accepts, `workflow.run` always expects
-    a
+    Even though all of these inputs are accepted, `workflow.run` always expects
+    python objects, so this utility converts them.
     """
 
     # we don't want to pass arguments like command=None or structure=None if the
@@ -320,5 +321,26 @@ def parse_parameters(**kwargs) -> dict:
 
     if "supercell_end" in kwargs.keys():
         kwargs["supercell_end"] = Structure.from_dynamic(kwargs["supercell_end"])
+
+    # lastly, for customized workflows, we need to completely change the format
+    # that we provide the parameters. Customized workflows expect parameters
+    # broken into a dictionary of
+    #   {"workflow_base": ..., "input_parameters":..., "updated_settings": ...}
+    # The
+    if "workflow_base" in kwargs.keys():
+
+        kwargs["workflow_base"] = get_workflow(kwargs["workflow_base"])
+        kwargs["input_parameters"] = {}
+        kwargs["updated_settings"] = {}
+
+        for key, update_values in list(kwargs.items()):
+            if key in ["workflow_base", "input_parameters", "updated_settings"]:
+                continue
+            elif not key.startswith("custom__"):
+                kwargs["input_parameters"][key] = kwargs.pop(key)
+            # Otherwise remove the prefix and add it to the custom settings.
+            else:
+                key_cleaned = key.removeprefix("custom__")
+                kwargs["updated_settings"][key_cleaned] = kwargs.pop(key)
 
     return kwargs

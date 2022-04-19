@@ -58,9 +58,9 @@ simmate/
             └── potUSPP_GGA
 ```
 
-7. With everything configured, there are now three ways you can submit your workflow. Try out each to better understand the differences:
+7. With everything configured, there are now two ways you can submit your workflow using the command-line:
 
-- OPTION 1: Define all settings directly in the command line (best for quick submitting and testing)
+- **OPTION 1**: Define all settings directly in the command line (best for quick submitting and testing)
 ``` bash
 simmate workflows run static-energy/mit -s POSCAR
 
@@ -69,7 +69,7 @@ simmate workflows run static-energy/mit -s POSCAR
 simmate workflows run static-energy/mit -s POSCAR --command "mpirun -n 5 vasp_std > vasp.out"
 ```
 
-- OPTION 2: Run from a settings file in yaml format (best for complex settings)
+- **OPTION 2**: Run from a settings file in yaml format (best for complex settings)
 ``` yaml
 # In a file named "my_example.yaml".
 # Note, different workflows accept different settings here.
@@ -84,24 +84,7 @@ directory: my_new_folder  # OPTIONAL
 simmate workflows run-yaml my_example.yaml
 ```
 
-
-- OPTION 3: Write input files and manually submit (best for using custom settings)
-``` bash
-# This simply writes input files
-simmate workflows setup-only static-energy/mit POSCAR
-
-# access your files in the new directory
-cd MIT_Static_Energy_inputs
-
-# Customize input files as you see fit.
-# For example, you may want to edit INCAR settings
-nano INCAR
-
-# You can then submit VASP manually. Note, this will not use
-# simmate at all! So there is no error handling and no results
-# will be saved to your database.
-vasp_std > vasp.out
-```
+> :bulb: Want to customize a specific setting (e.g. set ENCUT to a custom value)? Customizing workflow settings is covered in tutorial 6. However, try to resist jumping ahead! There are still several important steps to learn before customizing workflows.
 
 8. Once the workflow completes, you will see files named `simmate_metadata.yaml` and `simmate_summary.yaml` which contains some quick information for you. Other workflows (such as `band-structure` calculations) will also write out plots for you.
 9. While the plots and summary files are nice for quick testing, much more useful information is stored in our database. We will cover how to access your database in a later tutorial (05).
@@ -430,6 +413,8 @@ simmate workflows run-yaml my_settings.yaml
 ```
 
 And your workflow will run the same as before! Note, it is entirely up to you whether workflows are ran submit using a yaml file or using the longer command.
+
+> :bulb: Want to customize a specific setting (e.g. set ENCUT to a custom value)? Customizing workflow settings is covered in tutorial 6. However, try to resist jumping ahead! There are still several important steps to learn before customizing workflows.
 
 <br/> <!-- add empty line -->
 

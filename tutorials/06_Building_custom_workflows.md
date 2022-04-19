@@ -3,9 +3,10 @@
 
 > :warning: This tutorial isn't required for beginners to use Simmate. There is currently no "quick tutorial" for this topic as this is only for advanced users with complex use-cases.
 
-In this tutorial, you will learn how to build customized workflows. This involves an introduction to underlying caculators and workflow engine.
+In this tutorial, you will learn how to build customized workflows. This involves an introduction to underlying calculators and workflow engine features.
 
 1. [Why isn't there a `custom_settings` option?](#why-isnt-there-a-custom_settings-option)
+2. [Update settings for an existing workflow](#update-settings-for-an-existing-workflow)
 2. [Create new & advanced workflows](#create-new-&-advanced-workflows)
 3. [Creating a Project for our workflow](#creating-a-project-for-our-workflow)
 
@@ -13,11 +14,17 @@ In this tutorial, you will learn how to build customized workflows. This involve
 
 ## Why isn't there a `custom_settings` option?
 
-> :bulb: we are testing out a "high customizable" workflow where you can change any settings via a `custom_settings` option in your input. Here, results will always be saved to the database, regardless of what you change. This is still in early testing though, so if you are interested in this feature, please reach out to our team.
+We intentionally avoid the use of `workflow.run(custom_settings=...)`. **This will NOT work.** Simmate does this because we do not want to store results from customized settings in the same results table -- as this would (a) complicate analysis of many structuers/systems and (b) make navigating results extremely difficult for beginners. For example, reducing the `ENCUT` or changing the dispersion correction of a VASP calculation makes it so energies cannot be compared between all materials in the table, and thus, features like calculated hull energies would become inaccruate.
 
-We intentionally avoid the use of `workflow.run(custom_settings=...)`. **This will NOT work.** Simmate does this because we do not want to store results from customized settings in the same results table -- as storing results from customized runs would (a) complicate analysis of many structuers/systems and (b) make navigating results extremely difficult for beginners. For example, reducing the `ENCUT` of a VASP calculation makes it so energies cannot be compared between all materials in the table, and thus, features like calculated hull energies would become inaccruate. Instead, Simmate encourages the creation of new workflows and result tables when you want to customize settings. This puts Simmate's emphasis on "scaling up" workflows (i.e. running a fixed workflow on thousands on materials) as opposed to "scaling out" workflows (i.e. a flexible workflow that changes on a structure-by-structure basis). 
+Instead, Simmate encourages the creation of new workflows and result tables when you want to customize settings. This puts Simmate's emphasis on "scaling up" workflows (i.e. running a fixed workflow on thousands on materials) as opposed to "scaling out" workflows (i.e. a flexible workflow that changes on a structure-by-structure basis).
 
-If you wish to customize settings for a few calculations, we recommend using this approach:
+</br>
+
+## Update settings for an existing workflow
+
+For very quick testing, it is still useful to customize a workflow's settings without having to create a new workflow altogether. There are two approaches you can take to edit your settings:
+
+**OPTION 1:** Writing input files and manually submitting a separate program
 
 ``` bash
 # This simply writes input files
@@ -36,7 +43,37 @@ nano INCAR
 vasp_std > vasp.out
 ```
 
-If you are submitting many calculations (>20) and this process doesn't suit your needs, keep reading!
+**OPTION 2:** Using the "customized" workflow for a calculator (e.g. `customized/vasp`)
+
+``` yaml
+# In a file named "my_example.yaml".
+
+# Indicates we want to change the settings, using a specific workflow as a starting-point
+workflow_name: customized/vasp
+workflow_base: static-energy/mit
+
+# The parameters starting with "custom__" indicates we are updating some class 
+# attribute. These fundamentally change the settings of a workflow.
+# Currently, only updating dictionary-based attributes are supported
+custom__incar: 
+    ENCUT: 600
+    KPOINTS: 0.25
+custom__potcar_mappings:
+    Y: Y_sv
+
+# Then the remaining inputs are the same as the base_workflow
+structure: POSCAR
+command: mpirun -n 5 vasp_std > vasp.out
+```
+
+``` bash
+# Now run our workflow from the settings file above.
+# Results will be stored in a separate table from the
+# base workflow's results.
+simmate workflows run-yaml my_example.yaml
+```
+
+Both of these approaches are only suitable for customizing settings for a few calculations -- and also you lose some key Simmate features. If you are submitting many calculations (>20) and this process doesn't suit your needs, keep reading!
 
 </br>
 
@@ -212,3 +249,5 @@ cd my_new_project
 For expert python users, you may notice that you are building the start of a new python package here. In fact our "start-project" command is really just a cookie-cutter template! This hand huge implications for sharing research and code. With a fully-functional and published Simmate app, you can upload your project for other labs to use via github and PyPi! Then the entire Simmate community can install and use your custom workflows with Simmate. For them, it'd be as easy as doing (i) `pip install my_new_project` and (ii) adding `example_app.apps.ExampleAppConfig` to their `~/simmate/applications.yaml`. Alternatively, you can request that your app be merged into our simmate repository, so that it is installed by default for all users. Whichever route you choose, your hard work should be much more accessible to the community and new users!
 
 > :warning: In the future, we hope to have a page that lists off apps available for download, but because Simmate is brand new, there currently aren't any existing apps outside of Simmate itself. Reach out to our team if you're interesting in kickstarting a downloads page!
+
+Up next, we will start sharing results with others! Continue to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/07_Use_a_cloud_database.md) when you're ready.

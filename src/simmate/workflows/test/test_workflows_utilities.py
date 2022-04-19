@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import pytest
 
 from simmate.conftest import copy_test_files
@@ -39,6 +38,7 @@ def test_list_of_all_workflows():
         "diffusion/from-endpoints",
         "diffusion/from-images",
         "diffusion/single-path",
+        "customized/vasp",
     ]
 
 
@@ -67,6 +67,7 @@ def test_get_unique_paramters():
         "command",
         "diffusion_analysis_id",
         "directory",
+        "input_parameters",
         "migrating_specie",
         "migration_hop",
         "migration_hop_id",
@@ -79,7 +80,9 @@ def test_get_unique_paramters():
         "temperature_end",
         "temperature_start",
         "time_step",
+        "updated_settings",
         "use_previous_directory",
+        "workflow_base",
     ]
 
 

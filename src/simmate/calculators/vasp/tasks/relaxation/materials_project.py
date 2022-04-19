@@ -70,7 +70,6 @@ class MatProjRelaxation(VaspTask):
         ISIF=3,
         ISMEAR=-5,
         ISPIN=2,
-        ISYM=0,
         KSPACING=0.4,  # !!! This is where we are different from pymatgen right now
         LASPH=True,
         LORBIT=11,
