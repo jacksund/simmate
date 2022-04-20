@@ -11,7 +11,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 </br></br>
 
 # Upcoming Release
-- No new features merged into `main` yet
+- archive directory as `simmate_attempt_01.zip ` whenever an error handler is triggered
 
 
 # v0.3.0
