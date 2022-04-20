@@ -13,7 +13,7 @@ from .supervised_staged_shell_task import S3Task
 # All imports below this point depend on the simmate.database module and therefore
 # need a database connection. This line sets up the database connection so
 # that models can be imported.
-from simmate.configuration.django import setup_full  # sets database connection
+from simmate.database import connect
 
 from .workflow_task import WorkflowTask
 from .workflow import Workflow, Parameter, ModuleStorage, task, Task

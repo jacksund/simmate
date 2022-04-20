@@ -214,6 +214,6 @@ INPUT_MAPPINGS = {
         "time_step",
     ],
     "boolean": [
-        "use_previous_directory",
+        "copy_previous_directory",
     ],
 }

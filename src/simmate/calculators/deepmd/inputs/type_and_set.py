@@ -65,7 +65,7 @@ class DeepmdDataset:
     # Structure object. So for the moment, the ionic_step_structures can be
     # provide like so:
     #
-    # from simmate.configuration.django import setup_full  # sets database connection
+    # from simmate.database import connect
     # from simmate.database.workflow_results import MITRelaxationStructure
     # ionic_step_structures = MITRelaxationStructure.objects.filter(
     #     energy__isnull=False, site_forces__isnull=False

@@ -72,7 +72,7 @@ with Workflow("relaxation/staged") as workflow:
             "structure_field": "structure_final",
         },
         command=command,
-        use_previous_directory=True,
+        copy_previous_directory=True,
         upstream_tasks=[run_id_00],
     )
 
@@ -84,7 +84,7 @@ with Workflow("relaxation/staged") as workflow:
             "structure_field": "structure_final",
         },
         command=command,
-        use_previous_directory=True,
+        copy_previous_directory=True,
         upstream_tasks=[run_id_01],
     )
 
@@ -96,7 +96,7 @@ with Workflow("relaxation/staged") as workflow:
             "structure_field": "structure_final",
         },
         command=command,
-        use_previous_directory=True,
+        copy_previous_directory=True,
         upstream_tasks=[run_id_02],
     )
 
@@ -108,7 +108,7 @@ with Workflow("relaxation/staged") as workflow:
             "structure_field": "structure_final",
         },
         command=command,
-        use_previous_directory=True,
+        copy_previous_directory=True,
         upstream_tasks=[run_id_03],
     )
 
@@ -120,7 +120,7 @@ with Workflow("relaxation/staged") as workflow:
             "structure_field": "structure_final",
         },
         command=command,
-        use_previous_directory=True,
+        copy_previous_directory=True,
         upstream_tasks=[run_id_04],
     )
 

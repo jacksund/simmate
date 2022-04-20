@@ -35,7 +35,7 @@ class LoadInputAndRegister(Task):
         input_class: Any = Structure,
         source: dict = None,
         directory: str = None,
-        use_previous_directory: bool = False,
+        copy_previous_directory: bool = False,
         **kwargs: Any,
     ) -> Tuple[Structure, str]:
         """
@@ -50,8 +50,8 @@ class LoadInputAndRegister(Task):
 
         directory is optional
 
-        use_previous_directory is only used when we are pulling a structure from a
-        previous calculation. If use_previous_directory=True, then the directory
+        copy_previous_directory is only used when we are pulling a structure from a
+        previous calculation. If copy_previous_directory=True, then the directory
         parameter is ignored.
 
         **kwargs is anything extra that you want saved to simmate_metadata.yaml
@@ -68,13 +68,13 @@ class LoadInputAndRegister(Task):
         # Now let's load the directory
 
         # if the user requested, we grab the previous directory as well
-        if use_previous_directory and input_cleaned.is_from_past_calc:
+        if copy_previous_directory and input_cleaned.is_from_past_calc:
             # this variable will only be set if the above conditions are met. In
             # this case we can grab the directory name for the simmate database entry
             directory_cleaned = input_cleaned.calculation.directory
 
         # catch incorrect use of this function
-        elif use_previous_directory and not input_cleaned.is_from_past_calc:
+        elif copy_previous_directory and not input_cleaned.is_from_past_calc:
             raise Exception(
                 "There isn't a previous directory available! Your source structure "
                 "must point to a past calculation to use this feature."
@@ -90,7 +90,7 @@ class LoadInputAndRegister(Task):
         # This guards against incorrect use of the function too. We don't want
         # users asking to use a previous directory while also giving a brand
         # new directory.
-        if use_previous_directory and directory:
+        if copy_previous_directory and directory:
             assert directory_cleaned == directory
 
         # -------------------------------------------------------------------------

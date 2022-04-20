@@ -2,7 +2,7 @@
 
 import itertools
 
-from simmate.configuration.django import setup_full  # sets database connection
+from simmate.database import connect
 from simmate.database.prototypes.aflow import AflowPrototype
 
 # from simmate.utilities import get_sanitized_structure, estimate_volume

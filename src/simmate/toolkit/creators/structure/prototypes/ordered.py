@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.configuration.django import setup_full  # sets database connection
+from simmate.database import connect
 from simmate.database.prototypes.aflow import AflowPrototype
 
 from django_pandas.io import read_frame

@@ -47,7 +47,7 @@ with Workflow(WORKFLOW_NAME) as workflow:
     command = Parameter("command", default="vasp_std > vasp.out")
     source = Parameter("source", default=None)
     directory = Parameter("directory", default=None)
-    # assume use_previous_directory=False for now
+    # assume copy_previous_directory=False for now
 
     # These parameters link to higher-level tables.
     diffusion_analysis_id = Parameter("diffusion_analysis_id", default=None)

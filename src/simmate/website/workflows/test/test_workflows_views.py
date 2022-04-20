@@ -120,6 +120,6 @@ def test_workflow_submit_view(client, sample_structures, mocker):
         structure=structure,
         labels=["test_label1"],
         source=None,
-        use_previous_directory=False,
+        copy_previous_directory=False,
         wait_for_run=False,
     )

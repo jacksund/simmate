@@ -128,7 +128,7 @@ with Workflow(workflow_name) as workflow:
     migrating_specie = Parameter("migrating_specie")
     source = Parameter("source", default=None)
     directory = Parameter("directory", default=None)
-    # assume use_previous_directory=False for this flow
+    # assume copy_previous_directory=False for this flow
 
     # I separate these out because each calculation is a very different scale.
     # For example, you may want to run the bulk relaxation on 10 cores, the

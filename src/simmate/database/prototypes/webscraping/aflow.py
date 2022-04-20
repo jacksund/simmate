@@ -22,7 +22,7 @@ from django.db import transaction
 from pymatgen.analysis.prototypes import AFLOW_PROTOTYPE_LIBRARY
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.configuration.django import setup_full  # connect to database
+from simmate.database import connect
 from simmate.database.prototypes.aflow import AflowPrototype
 
 

@@ -65,6 +65,7 @@ def test_get_workflow():
 def test_get_unique_paramters():
     assert get_unique_parameters() == [
         "command",
+        "copy_previous_directory",
         "diffusion_analysis_id",
         "directory",
         "input_parameters",
@@ -81,7 +82,6 @@ def test_get_unique_paramters():
         "temperature_start",
         "time_step",
         "updated_settings",
-        "use_previous_directory",
         "workflow_base",
     ]
 
