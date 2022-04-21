@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import shutil
 import yaml
 
 import prefect
@@ -67,31 +68,66 @@ class LoadInputAndRegister(Task):
 
         # Now let's load the directory
 
+        # Start by creating a new directory or grabbing the one given. We create
+        # this directly immediately (rather than just passing the name to the
+        # S3Task). We do this because NestedWorkflows often use a parent directory
+        # to organize results.
+        directory_cleaned = get_directory(directory)
+
         # if the user requested, we grab the previous directory as well
-        if copy_previous_directory and input_cleaned.is_from_past_calc:
-            # this variable will only be set if the above conditions are met. In
-            # this case we can grab the directory name for the simmate database entry
-            directory_cleaned = input_cleaned.calculation.directory
+        if copy_previous_directory:
 
-        # catch incorrect use of this function
-        elif copy_previous_directory and not input_cleaned.is_from_past_calc:
-            raise Exception(
-                "There isn't a previous directory available! Your source structure "
-                "must point to a past calculation to use this feature."
-            )
+            # catch incorrect use of this function
+            if not input_cleaned.is_from_past_calc:
+                raise Exception(
+                    "There isn't a previous directory available! Your source "
+                    "structure must point to a past calculation to use this feature."
+                )
 
-        # otherwise use the directory that was given. We create this directly
-        # immediately (rather than just passing the name to the S3Task). We
-        # do this because NestedWorkflows often use a parent directory to
-        # organize results.
-        else:
-            directory_cleaned = get_directory(directory)
+            # the past directory should be stored on the input object
+            previous_directory = input_cleaned.calculation.directory
 
-        # This guards against incorrect use of the function too. We don't want
-        # users asking to use a previous directory while also giving a brand
-        # new directory.
-        if copy_previous_directory and directory:
-            assert directory_cleaned == directory
+            # First check if the previous directory exists. There are several
+            # possibilities that we need to check for:
+            #   1. directory exists on the same file system and can be found
+            #   2. directory exists on the same file system but is now an archive
+            #   3. directory/archive is on another file system (requires ssh to access)
+            #   4. directory was deleted and unavailable
+            # When copying over the directory, we ignore any `simmate_` files
+            # that correspond to metadata/results/corrections/etc.
+            if os.path.exists(previous_directory):
+                # copy the old directory to the new one
+                shutil.copytree(
+                    src=previous_directory,
+                    dst=directory_cleaned,
+                    ignore=shutil.ignore_patterns("simmate_*"),
+                    dirs_exist_ok=True,
+                )
+            elif os.path.exists(f"{previous_directory}.zip"):
+                # unpack the old archive
+                shutil.unpack_archive(
+                    filename=f"{previous_directory}.zip",
+                    extract_dir=os.path.dirname(previous_directory),
+                )
+                # copy the old directory to the new one
+                shutil.copytree(
+                    src=previous_directory,
+                    dst=directory_cleaned,
+                    ignore=shutil.ignore_patterns("simmate_*"),
+                    dirs_exist_ok=True,
+                )
+                # Then remove the unpacked archive now that we copied it.
+                # This leaves the original archive behind and unaltered too.
+                shutil.rmtree(previous_directory)
+            else:
+                raise Exception(
+                    "Unable to locate the previous calculation to copy. Make sure the "
+                    "past directory is located on the same file system. Directory that "
+                    f"couldn't be found was... {previous_directory}"
+                )
+            # TODO: for possibility 3, I could implement automatic copying with
+            # the "fabric" python package (uses ssh). I'd also need to store
+            # filesystem names (e.g. "WarWulf") to know where to connect.
 
         # -------------------------------------------------------------------------
 
