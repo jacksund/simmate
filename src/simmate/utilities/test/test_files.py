@@ -8,6 +8,7 @@ from simmate.conftest import copy_test_files
 from simmate.utilities.files import (
     get_directory,
     # make_archive,
+    make_error_archive,
     archive_old_runs,
     empty_directory,
 )
@@ -42,6 +43,21 @@ def test_make_archive(tmpdir):
     archive_old_runs(tmpdir, time_cutoff=0)
     assert os.path.exists(os.path.join(tmpdir, "simmate-task-1.zip"))
     assert os.path.exists(os.path.join(tmpdir, "simmate-task-2.zip"))
+
+
+def test_make_error_archive(tmpdir):
+
+    copy_test_files(
+        tmpdir,
+        test_directory=__file__,
+        test_folder="to_archive",
+    )
+
+    make_error_archive(tmpdir)
+    assert os.path.exists(os.path.join(tmpdir, "simmate_attempt_01.zip"))
+
+    make_error_archive(tmpdir)
+    assert os.path.exists(os.path.join(tmpdir, "simmate_attempt_02.zip"))
 
 
 def test_empty_directory(tmpdir):

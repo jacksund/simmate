@@ -25,7 +25,7 @@ with Workflow(WORKFLOW_NAME) as workflow:
     command = Parameter("command", default="vasp_std > vasp.out")
     source = Parameter("source", default=None)
     directory = Parameter("directory", default=None)
-    use_previous_directory = Parameter("use_previous_directory", default=False)
+    copy_previous_directory = Parameter("copy_previous_directory", default=False)
 
     # extra parameters unique to molecular dynamics runs
     temperature_start = Parameter("temperature_start", default=300)
@@ -38,7 +38,7 @@ with Workflow(WORKFLOW_NAME) as workflow:
         source=source,
         directory=directory,
         command=command,
-        use_previous_directory=use_previous_directory,
+        copy_previous_directory=copy_previous_directory,
         temperature_start=temperature_start,
         temperature_end=temperature_end,
         time_step=time_step,

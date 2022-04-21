@@ -6,6 +6,7 @@ import time
 import signal
 import subprocess
 import yaml
+from typing import List, Any
 
 import pandas
 
@@ -13,11 +14,9 @@ import prefect
 from prefect.core.task import Task
 from prefect.utilities.tasks import defaults_from_attrs
 
-from simmate.utilities import get_directory, make_archive
-
-from typing import List, Any
 from simmate.toolkit import Structure
-from simmate.workflow_engine.error_handler import ErrorHandler
+from simmate.workflow_engine import ErrorHandler
+from simmate.utilities import get_directory, make_archive, make_error_archive
 
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
 # reset the working directory between task retries -- in some cases we may
@@ -378,6 +377,9 @@ class S3Task(Task):
                                 # about in my notes, where we really want to
                                 # end the shelltask right away.
                                 else:
+                                    # make a copy of the directory contents and
+                                    # store as an archive within the same directory
+                                    make_error_archive(directory)
                                     # apply the fix now
                                     correction = error_handler.correct(directory)
                                     # record what's been changed
@@ -424,6 +426,9 @@ class S3Task(Task):
                 if error:
                     # record the error in case it wasn't done so above
                     has_error = True
+                    # make a copy of the directory contents and
+                    # store as an archive within the same directory
+                    make_error_archive(directory)
                     # And apply the proper correction if there is one.
                     # Some error_handlers will even raise an error here signaling
                     # that the stagedtask is unrecoverable and a lost cause.

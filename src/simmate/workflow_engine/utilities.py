@@ -49,14 +49,14 @@ def s3task_to_workflow(
         command = Parameter("command", default="vasp_std > vasp.out")
         source = Parameter("source", default=None)
         directory = Parameter("directory", default=None)
-        use_previous_directory = Parameter("use_previous_directory", default=False)
+        copy_previous_directory = Parameter("copy_previous_directory", default=False)
 
         structure_toolkit, directory_cleaned = load_input_and_register(
             input_obj=structure,
             command=command,
             source=source,
             directory=directory,
-            use_previous_directory=use_previous_directory,
+            copy_previous_directory=copy_previous_directory,
         )
         output = s3task_obj(
             structure=structure_toolkit,

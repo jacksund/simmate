@@ -23,7 +23,7 @@ client = get_dask_client()
 
 
 # First setup django settings for simmate
-from simmate.configuration.django import setup_full  # ensures setup
+from simmate.database import connect
 
 # The settings (including the database) are all set up now, but django doesn't
 # actually connect to the database until a query is made. So here, we do a
@@ -94,7 +94,7 @@ ContentType.objects.count()
 #         print("PRELOADING DJANGO TO DASK WORKER")
 
 #         # First setup django settings for simmate
-#         from simmate.configuration.django import setup_full  # ensures setup
+#         from simmate.database import connect  # ensures setup
 
 #         # The settings (including the database) are all set up now, but django doesn't
 #         # actually connect to the database until a query is made. So here, we do a

@@ -73,12 +73,12 @@ def make_archive(directory: str):
     """
     # This wraps shutil.make_archive to change the default parameters. Normally,
     # it writes the archive in the working directory, but we update it to use the
-    # the same directory that the folder being archived. The format is also set
-    # to zip
+    # the same directory as the folder being archived. The format is also set
+    # to zip.
     shutil.make_archive(
         # By default I choose within the current directory and save
         # it as the same name of the directory (+ zip ending)
-        base_name=os.path.join(os.path.abspath(directory)),
+        base_name=os.path.abspath(directory),
         # format to use switch to gztar after testing
         format="zip",
         # full path to up tp directory that will be archived
@@ -88,6 +88,44 @@ def make_archive(directory: str):
     )
     # now remove the directory we just archived
     shutil.rmtree(directory)
+
+
+def make_error_archive(directory: str):
+    """
+    Compresses the directory to a zip file and stores the new archive within the
+    original. This utility is meant for creating archives within the directory
+    of a failed calculation, so the new archive will be named something like
+    `simmate_attempt_01.zip`, where the number is automatically determined. When
+    archiving the folder, all "simmate_*" files within the directory are ignore
+    (this is includes earlier simmate_attempt_*.zip archives).
+
+    #### Parameters
+
+    - `directory`:
+        Path to the folder that should be archived
+    """
+
+    full_path = os.path.abspath(directory)
+
+    # check the directory and see how many other "simmate_attempt_*.zip" files
+    # already exist. Our archive number will be based off of this.
+    count = (
+        len([f for f in os.listdir(full_path) if f.startswith("simmate_attempt_")]) + 1
+    )
+    count_str = str(count).zfill(2)
+    base_name = os.path.join(full_path, f"simmate_attempt_{count_str}")
+
+    # Before we make the archive, we want to avoid also storing other simmate
+    # archives and files within this new archive. We therefore copy all files
+    # that do NOT start with "simmate_" over into a folder and then archive it.
+    shutil.copytree(
+        src=full_path,
+        dst=base_name,
+        ignore=shutil.ignore_patterns("simmate_*"),
+    )
+
+    # now convert the copied files to a new archive
+    make_archive(base_name)
 
 
 def archive_old_runs(

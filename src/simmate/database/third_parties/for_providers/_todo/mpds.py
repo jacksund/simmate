@@ -21,7 +21,7 @@ from tqdm import tqdm
 from simmate.toolkit import Structure
 from mpds_client import MPDSDataRetrieval, MPDSDataTypes
 
-from simmate.configuration.django import setup_full  # sets up database
+from simmate.database import connect
 
 from simmate.database.third_parties.mpds import MpdsStructure
 
