@@ -2,9 +2,9 @@
 
 from django.shortcuts import render
 from django.db.models import F
+from django.contrib.auth.decorators import login_required
 
 from simmate.website.third_parties.forms import ChemicalSystemForm
-
 from simmate.database.third_parties import (
     AflowStructure,
     CodStructure,
@@ -12,6 +12,22 @@ from simmate.database.third_parties import (
     MatProjStructure,
     OqmdStructure,
 )
+
+
+@login_required
+def profile(request):
+    # !!! For future reference, you can grab user-associated data via...
+    # data = request.user.relateddata.all()
+
+    context = {}
+    template = "account/profile.html"
+    return render(request, template, context)
+
+
+def loginstatus(request):
+    context = {}
+    template = "account/loginstatus.html"
+    return render(request, template, context)
 
 
 def home(request):

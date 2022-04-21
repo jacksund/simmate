@@ -160,7 +160,6 @@ elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
 INSTALLED_APPS = [
     #
     # These are all apps that are built by Simmate
-    "simmate.website.accounts.apps.AccountsConfig",
     "simmate.website.core_components.apps.CoreComponentsConfig",
     "simmate.website.third_parties.apps.ThirdPartyConfig",
     "simmate.website.workflows.apps.WorkflowsConfig",
@@ -174,6 +173,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     # Other apps installed with Django to consider
     #   "django.contrib.humanize",
     #   "django.contrib.postgres",
@@ -184,6 +184,14 @@ INSTALLED_APPS = [
     "crispy_forms",  # django-crispy-forms
     "rest_framework",  # djangorestframework
     "django_filters",  # django-filter
+    #
+    # Apps for django-allauth that allow sign-on using external accounts
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    # note: there are extra apps installed based on configuration. See the
+    # allauth section at the bottom of this page for more.
+    #
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
     #   django-ratelimit
@@ -313,7 +321,7 @@ STATIC_ROOT = os.path.join(DJANGO_DIRECTORY, "static")
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = [os.path.join(DJANGO_DIRECTORY, "static_files")]
 
-# For the dynamically-create structure files, we need to include the static
+# For the dynamically-created structure files, we need to include the static
 # directory this to work during local testing. This is NOT allowed in a
 # production server, so we don't include it when DEBUG is set to False.
 if DEBUG:
@@ -321,10 +329,6 @@ if DEBUG:
 
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"
-
-# options for login/logoff
-# LOGIN_REDIRECT_URL = "/accounts/profile/"  # this is the default
-LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
 
 # Settings for sending emails with my gmail account
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # this is the default
@@ -375,3 +379,49 @@ REST_FRAMEWORK = {
 
 # Allows the use of iFrames from within Simmate (such as the structure-viewer)
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+# -----------------------------------------------------------------------------
+
+# Extra settings for django-allauth
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+# simple setting required by allauth. not sure what it does...
+SITE_ID = 1
+
+# We start with the providers as an empty dictionary and only fill them
+# if client_id and secrets are supplied in as env variables. We do this
+# because we don't want broken links when users first start their server.
+SOCIALACCOUNT_PROVIDERS = {}
+# Other authentication plugins to consider
+# "allauth.socialaccount.providers.digitalocean"
+# "allauth.socialaccount.providers.orcid"
+
+# Sign-in via Google accounts
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", None)
+GOOGLE_SECRET = os.getenv("GOOGLE_SECRET", None)
+if GOOGLE_CLIENT_ID and GOOGLE_SECRET:
+    INSTALLED_APPS.append("allauth.socialaccount.providers.google")
+    SOCIALACCOUNT_PROVIDERS["google"] = {
+        "APP": {"client_id": GOOGLE_CLIENT_ID, "secret": GOOGLE_SECRET}
+    }
+
+# Sign-in via Github accounts
+GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", None)
+GITHUB_SECRET = os.getenv("GITHUB_SECRET", None)
+if GITHUB_CLIENT_ID and GITHUB_SECRET:
+    INSTALLED_APPS.append("allauth.socialaccount.providers.github")
+    SOCIALACCOUNT_PROVIDERS["github"] = {
+        "APP": {"client_id": GITHUB_CLIENT_ID, "secret": GITHUB_SECRET}
+    }
+
+# options for login/logoff views
+LOGIN_REDIRECT_URL = "/accounts/profile/"  # this is already the default
+LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
+
+# -----------------------------------------------------------------------------

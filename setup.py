@@ -112,6 +112,7 @@ setup(
         "dask>=2021.12.0",
         "click>=8.0.3",
         # Extra (smaller) dependencies & utilities
+        "django-allauth>=0.50.0",  # for website accounts and google/github sign-ins
         "django-crispy-forms>=1.13.0",  # for formatting of online forms
         "django-pandas>=0.6.6",  # for converting QuerySets to PandasDataFrames
         "dask-jobqueue>=0.7.3",  # for submitting on clusters

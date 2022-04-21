@@ -33,9 +33,9 @@ Simmate | Login
                             <h4 class="text-dark-50 text-center mt-0 fw-bold">Free Sign Up</h4>
                         </div>
 
-                        <form id="signup_form" method="post" action="{% url 'register' %}" novalidate>
+                        <form id="signup_form" method="post" action="{% url 'account_signup' %}" novalidate>
                             {% csrf_token %}
-                            {{ usercreation_form | crispy }}
+                            {{ form | crispy }}
                             {% if next %}
                             <input type="hidden" name="next" value="{{ next }}" />
                             {% endif %}
@@ -51,7 +51,7 @@ Simmate | Login
 
                 <div class="row mt-3">
                     <div class="col-12 text-center">
-                        <p class="text-muted">Already have account? <a href="{% url 'login' %}"
+                        <p class="text-muted">Already have account? <a href="{% url 'account_login' %}"
                                 class="text-muted ms-1"><b>Log
                                     In</b></a></p>
                     </div> <!-- end col-->
