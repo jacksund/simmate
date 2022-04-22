@@ -38,6 +38,4 @@ All stages of a `Workflow` are done through the `run` method. That is... `Workfl
 
 ## What is a `NestedWorkflow`?
 
-Some workflows are "nested", which means it's a workflow made up other multiple other workflows. An example of this is the `relaxation_staged` workflow, which involves a series of relaxations of increasing quality and then a final energy calculation.
-
-6. Feel free to add a calculator for a new program if you don't see it in [the available list](https://github.com/jacksund/simmate/tree/main/src/simmate/calculators)!
+Some workflows are "nested", which means it's a workflow made up multiple other workflows. An example of this is the `relaxation_staged` workflow, which involves a series of relaxations of increasing quality and then a final energy calculation.
