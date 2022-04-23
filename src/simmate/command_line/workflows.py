@@ -155,6 +155,9 @@ def explore():
 
     click.echo(workflow.__doc__)
 
+    click.echo("Parameters:")
+    workflow.show_parameters()
+
     click.echo("==================================================================")
 
 

@@ -117,3 +117,11 @@ def test_serialize_parameters():
         b=TestParameter2(),
     )
     Workflow._serialize_parameters(parameters)
+
+
+def test_parameter_names():
+
+    assert DUMMY_FLOW.parameter_names == ["structure", "source"]
+
+    # simply prints out content so there's nothing to check here
+    DUMMY_FLOW.show_parameters()
