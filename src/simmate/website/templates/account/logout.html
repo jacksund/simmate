@@ -1,0 +1,55 @@
+{% extends "core_components/site_base.html" %}
+
+{% block tabtitle %}
+Simmate | Login
+{% endblock %}
+
+{% block banner %}
+{% include "core_components/header.html"%}
+{% endblock %}
+
+{% block body %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+{% load account socialaccount %}
+
+<div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xxl-4 col-lg-5">
+                <div class="card border border-dark">
+
+                    <!-- Logo -->
+                    <div class="card-header pt-3 pb-3 text-center bg-light">
+                        <a href="#">
+                            <span><img src="{% static 'images/simmate-geometries.svg' %}" height="60"></span>
+                        </a>
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        <div class="text-center w-75 m-auto">
+                            <h4 class="text-dark-50 text-center pb-0 fw-bold">Are you sure you want to sign out?</h4>
+                        </div>
+
+                        <form method="post" class="text-center m-3" action="{% url 'account_logout' %}">
+                            {% csrf_token %}
+                            {% if redirect_field_value %}
+                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary text-center">Confirm Sign Out</button>
+                        </form>
+
+                        <p class="text-center"><small>This logout confirmation exists for <a
+                                    href="https://django-allauth.readthedocs.io/en/latest/views.html#logout-account-logout">security
+                                    reasons</a></small></p>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

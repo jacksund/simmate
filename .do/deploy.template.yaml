@@ -58,11 +58,26 @@ spec:
           value: "False"
         - key: PREFECT__CLOUD__API_KEY
           scope: RUN_AND_BUILD_TIME
-          value: example-key-321
+          value: example-key-321 (optional, delete if unknown)
           type: SECRET
         - key: DATABASE_URL
           scope: RUN_AND_BUILD_TIME
           value: ${simmate-starter-database.DATABASE_URL}
+        - key: GITHUB_CLIENT_ID
+          scope: RUN_AND_BUILD_TIME
+          value: example-id-123 (optional, delete if unknown)
+        - key: GITHUB_SECRET
+          scope: RUN_AND_BUILD_TIME
+          value: example-key-123 (optional, delete if unknown)
+          type: SECRET
+        - key: GOOGLE_CLIENT_ID
+          scope: RUN_AND_BUILD_TIME
+          value: example-id-123 (optional, delete if unknown)
+        - key: GOOGLE_SECRET
+          scope: RUN_AND_BUILD_TIME
+          value: example-key-123 (optional, delete if unknown)
+          type: SECRET
+
     # http_port: 8080
     # instance_count: 1
     # instance_size_slug: basic-xs

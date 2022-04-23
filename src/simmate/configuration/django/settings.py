@@ -420,6 +420,11 @@ if GITHUB_CLIENT_ID and GITHUB_SECRET:
         "APP": {"client_id": GITHUB_CLIENT_ID, "secret": GITHUB_SECRET}
     }
 
+# Initiate social login immediately -- rather than jumping to a separate
+# page and then posting.
+# SECURITY: consider removing per django-allauth's recommendation
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
 # options for login/logoff views
 LOGIN_REDIRECT_URL = "/accounts/profile/"  # this is already the default
 LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
