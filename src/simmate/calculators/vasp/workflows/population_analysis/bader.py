@@ -22,6 +22,7 @@ prebader_workflow = s3task_to_workflow(
     s3task=MPPreBaderTask,
     calculation_table=MPBaderResults,
     register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    description_doc_short="uses Materials Project settings with denser FFT grid",
 )
 
 prebader_task = prebader_workflow.to_workflow_task()

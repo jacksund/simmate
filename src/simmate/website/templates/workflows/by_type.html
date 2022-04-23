@@ -11,8 +11,6 @@ Simmate
 
 {% block body %}
 
-{% load markdown_filter %}
-
 <!-- start page title -->
 <div class="row">
   <div class="col-12">
@@ -33,7 +31,7 @@ Simmate
 <section class="pt-5 jumbotron text-center">
   <div class="container">
     <h1 class="jumbotron-heading">{{ workflow_type }}</h1>
-    <p class="lead text-muted">(to-do) a short description of this workflow type</p>
+    <p class="lead text-muted">{{ workflow_type_description_short }}</p>
   </div>
 </section>
 
@@ -41,14 +39,15 @@ Simmate
 <div class="row">
   {% for workflow in workflows %}
   <div class="col-md-4">
-      <div class="card border-primary border">
-          <div class="card-body">
-              <h5 class="card-title text-primary">{{ workflow.name_short }}</h5>
-              <!-- should I wrap the markdown in <p class="card-text"></p> ? -->
-              {{ workflow.description_doc | markdown }}
-              <a href="{% url 'workflow_detail' workflow_type workflow.name_short %}" class="btn btn-primary btn-sm">About</a>
-          </div>
+    <div class="card border-primary border">
+      <div class="card-body">
+        <h5 class="card-title text-primary">{{ workflow.name_short }}</h5>
+        <!-- should I wrap the markdown in <p class="card-text"></p> ? -->
+        {{ workflow.description_doc_short }}
+        <br><br>
+        <a href="{% url 'workflow_detail' workflow_type workflow.name_short %}" class="btn btn-primary btn-sm">About</a>
       </div>
+    </div>
   </div>
   {% endfor %}
 </div>

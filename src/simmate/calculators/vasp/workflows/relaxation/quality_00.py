@@ -15,4 +15,5 @@ workflow = s3task_to_workflow(
     s3task=Quality00RelaxationTask,
     calculation_table=Quality00RelaxationResults,
     register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    description_doc_short="bare minimum settings meant for highly unreasonable structures. lattice volume kept fixed",
 )

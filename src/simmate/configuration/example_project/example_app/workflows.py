@@ -32,4 +32,6 @@ example_workflow = s3task_to_workflow(
     # is actually started. This helps you search your database for calculations
     # that have not completed yet.
     register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    # Quick description that will be used in the website interface
+    description_doc_short="This is my new fancy workflow!",
 )

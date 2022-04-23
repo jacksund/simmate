@@ -71,6 +71,12 @@ class Workflow(PrefectFlow):
     `simmate.database.base_data_types.DatabaseTable`
     """
 
+    description_doc_short: str = None
+    """
+    A quick description for this workflow. This will be shown in the website UI
+    in the list-view of all different workflow presets.
+    """
+
     @property
     def type(self) -> str:
         """

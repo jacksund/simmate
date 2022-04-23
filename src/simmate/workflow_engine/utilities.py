@@ -18,6 +18,7 @@ def s3task_to_workflow(
     s3task: S3Task,
     calculation_table: Calculation,
     register_kwargs: List[str],
+    description_doc_short: str = None,
 ):
     """
     Builds a workflow from a S3Task and it's corresponding database table.
@@ -72,6 +73,7 @@ def s3task_to_workflow(
     workflow.register_kwargs = register_kwargs
     workflow.result_task = output
     workflow.s3task = s3task
+    workflow.description_doc_short = description_doc_short
 
     # by default we just copy the docstring of the S3task to the workflow
     workflow.__doc__ = s3task.__doc__

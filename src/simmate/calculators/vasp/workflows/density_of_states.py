@@ -15,4 +15,5 @@ workflow = s3task_to_workflow(
     s3task=MatProjDensityOfStatesTask,
     calculation_table=MatProjDensityOfStatesResults,
     register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    description_doc_short="uses Materials Project settings (PBE)",
 )

@@ -15,4 +15,5 @@ workflow = s3task_to_workflow(
     s3task=MITRelaxationTask,
     calculation_table=MITRelaxationResults,
     register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    description_doc_short="uses MIT Project settings",
 )

@@ -38,6 +38,11 @@ Simmate
 </section>
 
 <div class="container p-4">
+    <h2>Short Description:</h2>
+    {{ workflow.description_doc_short }}
+</div>
+
+<div class="container p-4">
     <h2>Description:</h2>
     {{ workflow.description_doc | markdown }}
 </div>
