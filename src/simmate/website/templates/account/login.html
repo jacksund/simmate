@@ -12,6 +12,7 @@ Simmate | Login
 
 {% load crispy_forms_tags %}
 {% load static %}
+{% load account socialaccount %}
 
 <div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
     <div class="container">
@@ -30,21 +31,44 @@ Simmate | Login
 
                         <div class="text-center w-75 m-auto">
                             <h4 class="text-dark-50 text-center pb-0 fw-bold">Sign In</h4>
-                            <p class="text-muted mb-4">
+                            <p class="text-muted mb-2">
                                 {% if next %}
                                 {% if user.is_authenticated %}
                                 Your account doesn't have access to this page. To proceed,
                                 please login with an account that has access.
                                 {% else %}
-                                Please login to see this page
+                                Please login to see this page.
                                 {% endif %}
                                 {% else %}
-                                Please login to access extra features
+                                Please login to access extra features.
                                 {% endif %}
                             </p>
                         </div>
 
-                        <form method="POST" action="{% url 'login' %}" novalidate>
+                        <!-- Third-party sign-in buttons -->
+                        {% get_providers as socialaccount_providers %}
+                        {% if socialaccount_providers %}
+                        <div class="text-center pb-2">
+                            {% for provider in socialaccount_providers %}
+                            <div class="m-1">
+                                {% if provider.id == "google" %}
+
+                                <a class="btn btn-outline-danger"
+                                    href="{% provider_login_url provider.id process='login' scope=scope auth_params=auth_params %}"><i
+                                        class="mdi mdi-google"></i> Log in using Google</a>
+                                {% endif %}
+                                {% if provider.id == "github" %}
+                                <a class="btn btn-outline-secondary"
+                                    href="{% provider_login_url provider.id process='login' scope=scope auth_params=auth_params %}"><i
+                                        class="mdi mdi-github"></i> Log in using Github</a>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Regular sign-in -->
+                        <form method="POST" action="{% url 'account_login' %}" novalidate>
                             {% csrf_token %}
                             {{ form | crispy }}
                             {% if next %}
@@ -58,13 +82,14 @@ Simmate | Login
                                 <button class="primaryAction btn btn-primary" type="submit"> Log In </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
 
                 <div class="row mt-3">
                     <div class="col-12 text-center">
                         <p class="text-muted">Don't have an account?
-                            <a href="{% url 'register' %}" class="text-muted ms-1"><b>Sign Up</b></a>
+                            <a href="{% url 'account_signup' %}" class="text-muted ms-1"><b>Sign Up</b></a>
                         </p>
                     </div>
                 </div>

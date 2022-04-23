@@ -17,9 +17,15 @@ urlpatterns = [
     # This is profile system with login/logout
     path(
         route="accounts/",
-        view=include("simmate.website.accounts.urls"),
+        view=include("allauth.urls"),
         name="accounts",
     ),
+    # On login success, you will be pointed to /accounts/profile by default.
+    # If you want to change this defualt, then set LOGIN_REDIRECT_URL in
+    # the settings.py file
+    path(route="accounts/profile/", view=views.profile, name="profile"),
+    # When you sign out, you are sent to LOGOUT_REDIRECT_URL (set in settings.py)
+    path(route="accounts/loginstatus/", view=views.loginstatus, name="loginstatus"),
     #
     #
     path(
