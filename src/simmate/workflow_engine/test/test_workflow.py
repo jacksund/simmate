@@ -121,7 +121,7 @@ def test_serialize_parameters():
 
 def test_parameter_names():
 
-    assert DUMMY_FLOW.parameter_names == ["structure", "source"]
+    assert DUMMY_FLOW.parameter_names == ["source", "structure"]
 
     # simply prints out content so there's nothing to check here
     DUMMY_FLOW.show_parameters()
