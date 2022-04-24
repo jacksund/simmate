@@ -111,8 +111,10 @@ class Workflow(PrefectFlow):
         Prints a list of all the parameter names for this workflow.
         """
         # Iterate through and grab the columns. Note we don't use get_column_names
-        # here because we are attaching relation data as well.
+        # here because we are attaching relation data as well. We also
+        # sort them alphabetically for consistent results.
         parameter_names = [parameter.name for parameter in self.parameters()]
+        parameter_names.sort()
         return parameter_names
 
     def show_parameters(self):
