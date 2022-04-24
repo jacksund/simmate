@@ -138,3 +138,4 @@ workflow.__doc__ = """
     large supercells. More precise relaxations+energy calcs should be done 
     afterwards because ettings are still below MIT and Materials Project quality.
 """
+workflow.description_doc_short = "runs a series of relaxations (00-04 quality)"

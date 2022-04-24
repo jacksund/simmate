@@ -2,6 +2,7 @@
 
 import json
 import cloudpickle
+import yaml
 
 # note: extra modules are imported from prefect for convenience imports elsewhere
 import prefect
@@ -71,6 +72,12 @@ class Workflow(PrefectFlow):
     `simmate.database.base_data_types.DatabaseTable`
     """
 
+    description_doc_short: str = None
+    """
+    A quick description for this workflow. This will be shown in the website UI
+    in the list-view of all different workflow presets.
+    """
+
     @property
     def type(self) -> str:
         """
@@ -97,6 +104,23 @@ class Workflow(PrefectFlow):
         to python and for use in django templates for the website interface.
         """
         return self.__doc__
+
+    @property
+    def parameter_names(self):
+        """
+        Prints a list of all the parameter names for this workflow.
+        """
+        # Iterate through and grab the columns. Note we don't use get_column_names
+        # here because we are attaching relation data as well.
+        parameter_names = [parameter.name for parameter in self.parameters()]
+        return parameter_names
+
+    def show_parameters(self):
+        """
+        Prints a list of all the parameter names for this workflow.
+        """
+        # use yaml to make the printout pretty (no quotes and separate lines)
+        print(yaml.dump(self.parameter_names))
 
     def run_cloud(
         self,

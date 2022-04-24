@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""
+This module hosts common utilities for Simmate's workflow library. This includes
+functions for grabbing all available workflows as well as dynamically loading
+a workflow using its name.
+"""
+
 import os
 import yaml
 import shutil

@@ -15,4 +15,5 @@ workflow = s3task_to_workflow(
     s3task=Quality04EnergyTask,
     calculation_table=Quality04StaticEnergyResults,
     register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    description_doc_short="low-quality settings meant for highly unreasonable structures",
 )

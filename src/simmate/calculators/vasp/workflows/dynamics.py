@@ -65,3 +65,4 @@ workflow.s3task = MITDynamics
 
 # by default we just copy the docstring of the S3task to the workflow
 workflow.__doc__ = MITDynamics.__doc__
+workflow.description_doc_short = "uses MIT Project settings"

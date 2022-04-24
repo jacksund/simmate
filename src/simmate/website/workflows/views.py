@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from prefect.backend.flow_run import FlowView
 
 from simmate.database.base_data_types import DatabaseTable
+from simmate import workflows as workflow_module
 from simmate.workflows.utilities import (
     # WORKFLOW_TYPES,
     get_workflow,
@@ -67,12 +68,15 @@ def workflows_by_type(request, workflow_type):
 
     workflow_names = get_list_of_workflows_by_type(workflow_type)
 
+    workflow_type_module = getattr(workflow_module, workflow_type.replace("-", "_"))
+
     # pull the information together for each individual flow
     workflows = [get_workflow(n) for n in workflow_names]
 
     # now let's put the data and template together to send the user
     context = {
         "workflow_type": workflow_type,
+        "workflow_type_description_short": workflow_type_module.__doc__,
         "workflows": workflows,
     }
     template = "workflows/by_type.html"

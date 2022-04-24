@@ -16,4 +16,5 @@ workflow = s3task_to_workflow(
     s3task=MPPreBaderTask,
     calculation_table=MPELFResults,
     register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    description_doc_short="uses Materials Project settings",
 )
