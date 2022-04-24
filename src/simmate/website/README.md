@@ -139,13 +139,13 @@ Simmate does not distribute the majority of source CSS and JavaScript files beca
 If you ever need to alter the CSS or JS, please reach out to our team so we can discuss the best way to approach this.
 
 
-# Third-party sign ins
+## Third-party sign ins
 
 Simmate supports signing into the website via third-party accounts such as Google and Github. This functionality is thanks to the [`django-allauth`](https://github.com/pennersr/django-allauth) package.
 
 By default, servers will not display these sign-in buttons, so if you wish to configure logins for third-party accounts, you must do this manually. While there are many types of accounts that can be used with `django-allauth` (see their [full list](https://django-allauth.readthedocs.io/en/latest/providers.html)), Simmate only supports Github and Google at the moment. We give guides on how to set these up below.
 
-## Github OAuth
+### Github OAuth
 
 1. Create a new OAuth application with [this link](https://github.com/settings/applications/new) and the following information (note we are using `http://127.0.0.1:8000`, which is your local test server. Replace this with the link to your cloud server if it's available.):
     - application name = My New Simmate Server (edit if you'd like)
@@ -159,7 +159,7 @@ By default, servers will not display these sign-in buttons, so if you wish to co
     - GITHUB_CLIENT_ID = exampleid1234 (value is listed on github as "Client ID")
 
 
-## Google OAuth
+### Google OAuth
 
 1. Follow steps from django-allauth ([here](https://django-allauth.readthedocs.io/en/latest/providers.html#google)) to configure the Google API application
 2. On your local computer (or production-ready server), set the environment variables:
