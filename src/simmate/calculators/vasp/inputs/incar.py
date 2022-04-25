@@ -551,8 +551,9 @@ class Incar(dict):
     def keyword_modifier_smart_ldau(structure, ldau_config):
         """
         This modifier handles a series of keyword arguments that are associated
-        with LDAU, including LDAUJ, LDAUL, LDAUTYPE, LDAUU, LDAUPRINT, and LMAXMIX.
-        Therefore, a complex dictionary is passed to this. The format looks like this...
+        with LDAU, including LDAUJ, LDAUL, LDAUTYPE, LDAUU, and LDAUPRINT.
+        Therefore, a complex dictionary is passed to this. The format looks
+        like this...
             LDAU__multiple_keywords__smart_ldau = dict(
                 LDAU__auto=True,
                 LDAUTYPE=2,
@@ -560,7 +561,6 @@ class Incar(dict):
                 LDAUJ={...},
                 LDAUL={...},
                 LDAUU={...},
-                LMAXMIX__auto=True,
                 )
         The LDAUJ, LDAUL, and LDAUU values can be a dictionary of elements to
         value, or (most commonly) a nested dictionary. For example...

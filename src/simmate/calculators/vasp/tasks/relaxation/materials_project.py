@@ -114,6 +114,8 @@ class MatProjRelaxation(VaspTask):
             "W": 5,
             "Yb3+": 1,
         },
+        # Changing limits of mixing for larger atoms
+        LMAXMIX__smart_lmaxmix=True,
         # We run LDA+U for certain compositions. This is a complex configuration
         # so be sure to read the "__smart_ldau" modifier for more information.
         # But as an example for how the mappings work...
@@ -123,7 +125,6 @@ class MatProjRelaxation(VaspTask):
             LDAU__auto=True,
             LDAUTYPE=2,
             LDAUPRINT=1,
-            LMAXMIX__auto=True,
             LDAUJ={},  # pymatgen sets these, but they're all default values anyways
             LDAUL={
                 "F": {
