@@ -11,6 +11,10 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 </br></br>
 
 # Upcoming Release
+- no changes merged yet
+
+
+# v0.4.0
 - add `description_doc_short` + `show_parameters` to workflows and use these to update the UI
 - add django-allauth dependency for account management and google/github sign-ins
 - archive directory as `simmate_attempt_01.zip` whenever an error handler is triggered
