@@ -52,6 +52,20 @@ class Frozen(ErrorHandler):
         incar_filename = os.path.join(directory, "INCAR")
         incar = Incar.from_file(incar_filename)
 
+        #########
+        # UNIQUE TO SIMMATE (i.e. changed from original custodian FrozenHandler)
+        # if Kerker mixing is present (IMIX=1), then this error was likely caused
+        # by the Brmix handler. We therefore delete this setting and retry.
+        # See https://github.com/jacksund/simmate/issues/159
+        if incar.get("IMIX", None) == 1:
+            # delete the CHGCAR and WAVECAR to ensure the next run is a clean start.
+            os.remove(os.path.join(directory, "CHGCAR"))
+            os.remove(os.path.join(directory, "WAVECAR"))
+            incar.pop("IMIX")
+            incar.to_file(incar_filename)
+            return "Removed IMIX=1 and deleted CHGCAR and WAVECAR"
+        #########
+
         # check what the current ALGO is. If it's not set, that means it's using
         # the default which is "Normal".
         current_algo = incar.get("ALGO", "Normal")
