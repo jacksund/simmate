@@ -9,28 +9,14 @@ from simmate.calculators.vasp.tasks.static_energy.materials_project import (
 )
 
 
-class MatProjDensityOfStates(MatProjStaticEnergy):
+class VaspDensityOfStates(MatProjStaticEnergy):
     """
-    Calculates the density of states using Materials Project settings.
+    A base class for density of states (DOS) calculations. This is not meant
+    to be used directly but instead should be inherited from.
 
-    This is a non self-consistent field (non-SCF) calculation and thus uses
+    This is also a non self-consistent field (non-SCF) calculation and thus uses
     the a fixed charge density from a previous static energy calculation.
-
-    We do NOT recommend running this calculation on its own. Instead, you should
-    use the full workflow, which handles the preliminary relaxation and SCF
-    energy calculation for you. This S3Task is only the final step of that workflow.
-
-    See `vasp.workflows.density_of_states`.
     """
-
-    # Settings are based off of pymatgen's NonSCFSet in uniform mode
-    incar = MatProjStaticEnergy.incar.copy()
-    incar.update(
-        ICHARG=11,
-        ISYM=2,
-        NEDOS=2001,
-    )
-    incar.pop("MAGMOM__smart_magmom")
 
     def _write_output_summary(self, directory, vasprun):
         """
@@ -41,6 +27,7 @@ class MatProjDensityOfStates(MatProjStaticEnergy):
         # run the normal output
         super()._write_output_summary(directory, vasprun)
 
+        # and then generate a DOS plot
         plotter = DosPlotter()
 
         # Add the total density of States

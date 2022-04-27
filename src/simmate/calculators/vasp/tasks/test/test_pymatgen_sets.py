@@ -24,20 +24,55 @@ from pymatgen.io.vasp.sets import MITMDSet
 from simmate.calculators.vasp.tasks.dynamics import MatProjDynamics
 from pymatgen.io.vasp.sets import MPMDSet
 
+from simmate.calculators.vasp.tasks.relaxation import MatProjHSERelaxation
+from pymatgen.io.vasp.sets import MPHSERelaxSet
+
+from simmate.calculators.vasp.tasks.band_structure import MatProjHSEBandStructure
+from simmate.calculators.vasp.tasks.density_of_states import MatProjHSEDensityOfStates
+from pymatgen.io.vasp.sets import MPHSEBSSet
+
+from simmate.calculators.vasp.tasks.band_structure import MatProjBandStructure
+from simmate.calculators.vasp.tasks.density_of_states import MatProjDensityOfStates
+from pymatgen.io.vasp.sets import MPNonSCFSet
+
+from simmate.calculators.vasp.tasks.relaxation import MatProjMetalRelaxation
+from pymatgen.io.vasp.sets import MPMetalRelaxSet
+
 # -----------------------------------------------------------------------------
+
+MD_KWARGS = {
+    "start_temp": 300,
+    "end_temp": 1200,
+    "nsteps": 10000,
+}
 
 
 @pytest.mark.pymatgen
 @pytest.mark.parametrize(
-    "simmate_task, pymatgen_set",
+    "simmate_task, pymatgen_set, pymatgen_kwargs",
     [
-        (MatProjRelaxation, MPRelaxSet),
-        (MITRelaxation, MITRelaxSet),
-        (MITRelaxation, MITRelaxSet),
-        (MatProjStaticEnergy, MPStaticSet),
+        (MatProjRelaxation, MPRelaxSet, {}),
+        (MITRelaxation, MITRelaxSet, {}),
+        (MITRelaxation, MITRelaxSet, {}),
+        (MatProjStaticEnergy, MPStaticSet, {}),
+        (MatProjHSERelaxation, MPHSERelaxSet, {}),
+        (MatProjMetalRelaxation, MPMetalRelaxSet, {}),
+        (MITDynamics, MITMDSet, MD_KWARGS),
+        (MatProjDynamics, MPMDSet, MD_KWARGS),
+        (MatProjHSEBandStructure, MPHSEBSSet, {"mode": "line"}),
+        (MatProjBandStructure, MPNonSCFSet, {"mode": "line"}),
+        (MatProjDensityOfStates, MPNonSCFSet, {"mode": "uniform"}),
+        (MatProjHSEDensityOfStates, MPHSEBSSet, {"mode": "uniform"}),
     ],
 )
-def test_pymatgen_input_sets(structure, tmpdir, mocker, simmate_task, pymatgen_set):
+def test_pymatgen_input_sets(
+    structure,
+    tmpdir,
+    mocker,
+    simmate_task,
+    pymatgen_set,
+    pymatgen_kwargs,
+):
     """
     Many of the presets implemented are ported directly from pymatgen, so these
     tests simply confirm that the inputs give the same INCAR results.
@@ -58,7 +93,7 @@ def test_pymatgen_input_sets(structure, tmpdir, mocker, simmate_task, pymatgen_s
 
     # write both inputs
     simmate_task().setup(structure=structure, directory=tmpdir)
-    pymatgen_set(structure).incar.write_file(incar_pymatgen_name)
+    pymatgen_set(structure, **pymatgen_kwargs).incar.write_file(incar_pymatgen_name)
 
     # load incar
     incar_simmate = Incar.from_file(incar_simmate_name)
@@ -66,57 +101,6 @@ def test_pymatgen_input_sets(structure, tmpdir, mocker, simmate_task, pymatgen_s
 
     # compare
     diff = incar_simmate.compare_incars(incar_pymatgen)["Different"]
-    # ignore kpoints input for now
-    diff.pop("KSPACING", None)
-
-    # ensure incars are the same (there are no differences)
-    assert diff == {}
-
-
-@pytest.mark.pymatgen
-@pytest.mark.parametrize(
-    "simmate_task, pymatgen_set",
-    [
-        (MITDynamics, MITMDSet),
-        (MatProjDynamics, MPMDSet),
-    ],
-)
-def test_pymatgen_input_sets_md(structure, tmpdir, mocker, simmate_task, pymatgen_set):
-    """
-    Just like tests in `test_pymatgen_input_sets`, this test ensures settings
-    match. For these MD sets, extra inputs are required (such as temperature)
-    so we set these here.
-    """
-
-    # set filenames
-    incar_simmate_name = os.path.join(tmpdir, "INCAR")
-    incar_pymatgen_name = os.path.join(tmpdir, "INCAR_pmg")
-
-    # Because we won't have POTCARs accessible, we need to cover this function
-    # call -- specifically have it pretend to make a file
-    potcar_filename = os.path.join(tmpdir, "POTCAR")
-    mocker.patch.object(
-        Potcar,
-        "to_file_from_type",
-        return_value=make_dummy_files(potcar_filename),
-    )
-
-    # write both inputs
-    simmate_task().setup(structure=structure, directory=tmpdir)
-    pymatgen_set(
-        structure,
-        start_temp=300,
-        end_temp=1200,
-        nsteps=10000,
-    ).incar.write_file(incar_pymatgen_name)
-
-    # load incar
-    incar_simmate = Incar.from_file(incar_simmate_name)
-    incar_pymatgen = Incar.from_file(incar_pymatgen_name)
-
-    # generate comparison
-    diff = incar_simmate.compare_incars(incar_pymatgen)["Different"]
-
     # ignore kpoints input for now
     diff.pop("KSPACING", None)
 

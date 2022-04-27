@@ -5,6 +5,9 @@ from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 
 class MatVirtualLabCINEBEndpointRelaxation(MITRelaxation):
     """
+    This task is a reimplementation of pymatgen's
+    [MVLCINEBEndPointSet](http://guide.materialsvirtuallab.org/pymatgen-analysis-diffusion/pymatgen.analysis.diffusion.neb.io.html#pymatgen.analysis.diffusion.neb.io.MVLCINEBEndPointSet).
+
     Runs a VASP relaxation calculation using MIT Project settings, where some
     settings are adjusted to accomodate large supercells with defects. Most
     notably, the lattice remains fixed and symmetry is turned off for this
@@ -16,9 +19,6 @@ class MatVirtualLabCINEBEndpointRelaxation(MITRelaxation):
     You typically shouldn't use this workflow directly, but instead use the
     higher-level NEB workflows (e.g. diffusion/neb_all_paths or
     diffusion/neb_from_endpoints), which call this workflow for you.
-
-    This task is a reimplementation of pymatgen's
-    [MVLCINEBEndPointSet](http://guide.materialsvirtuallab.org/pymatgen-analysis-diffusion/pymatgen.analysis.diffusion.neb.io.html#pymatgen.analysis.diffusion.neb.io.MVLCINEBEndPointSet).
     """
 
     # The settings used for this calculation are based on the MITRelaxation, but

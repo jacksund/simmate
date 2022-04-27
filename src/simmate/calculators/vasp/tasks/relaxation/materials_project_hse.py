@@ -43,10 +43,10 @@ from simmate.calculators.vasp.error_handlers import (
 
 class MatProjHSERelaxation(VaspTask):
     """
-    Runs a VASP relaxation calculation using Materials Project HSE settings.
-
     This task is a reimplementation of pymatgen's
     [MPHSERelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPHSERelaxSet).
+
+    Runs a VASP relaxation calculation using Materials Project HSE settings.
     """
 
     functional = "PBE"
@@ -64,7 +64,7 @@ class MatProjHSERelaxation(VaspTask):
         ISPIN=2,
         LHFCALC=True,
         LORBIT=11,
-        LREAL="AUTO",
+        LREAL="Auto",
         LWAVE=False,
         NELM=100,
         NSW=99,
