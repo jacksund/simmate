@@ -16,10 +16,6 @@ class Incar(dict):
     modifiers like multiple_keywords__smart_ldau which signals that our
     "smart_ldau" modifier introduces more than one new setting to the INCAR, such
     as LDAUJ, LDAUU, LDAUL, LDAUTYPE, and LDAUPRINT.
-
-    TODO: In the future, I want to allow modifiers like __relative_to_previous
-    and __use_previous to string settings accross tasks.
-
     """
 
     def __init__(self, **kwargs):
@@ -127,6 +123,14 @@ class Incar(dict):
                 # now that we have the modifier function, let's use it to update
                 # our value for this keyword.
                 value = modifier_fxn(structure, value)
+
+                # sometimes the modifer returns None. In this case we don't
+                # set anything in the INCAR, but leave it to the programs
+                # default value.
+                if not value:
+                    continue
+                # BUG: Are there cases where None is return but we still want
+                # to write it to the INCAR? If so, it'd be skipped here.
 
                 # if the "parameter" is actually "multiple_keywords", then we
                 # have our actually parameters as a dictionary. We need to
@@ -356,7 +360,19 @@ class Incar(dict):
 
         # if the parameter is in float_list_keys
         elif parameter in float_list_keys:
-            return [float(item) for item in value.split()]
+            final_list = []
+            for item in value.split():
+                # Sometimes, the values are given as "3*0.1 2*0.5" where the "*"
+                # means to include that value that many times. For example, this
+                # input would be the same as "0.1 0.1 0.1 0.5 0.5". We need to
+                # account for this when parsing.
+                if "*" in item:
+                    nsubitems, subitem = item.split("*")
+                    for n in range(int(nsubitems)):
+                        final_list.append(float(subitem))
+                else:
+                    final_list.append(float(item))
+            return final_list
 
         # if the parameter is in int_list_keys
         elif parameter in int_list_keys:
@@ -545,7 +561,7 @@ class Incar(dict):
             return 4
         # otherwise use the default for VASP
         else:
-            return 2
+            return None  # default is 2, but we don't set it
 
     @staticmethod
     def keyword_modifier_smart_ldau(structure, ldau_config):
@@ -658,6 +674,9 @@ class Incar(dict):
 
         return ismear_settings
 
+
+# TODO: In the future, I want to allow modifiers like __relative_to_previous
+# and __use_previous to string settings accross tasks.
 
 # To introduce other modifiers that pymatgen uses...
 # https://github.com/materialsproject/pymatgen/blob/b789d74639aa851d7e5ee427a765d9fd5a8d1079/pymatgen/io/vasp/sets.py#L500

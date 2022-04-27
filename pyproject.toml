@@ -17,6 +17,7 @@ DJANGO_SETTINGS_MODULE = "simmate.configuration.django.settings_test"
 markers = [
     "slow: mark test as slow.",  # not used at the moment
     "blender: mark test as requiring blender.",
+    "pymatgen: mark test as pymatgen-compatibility test",
 ]
 
 # By default, we only want to run unmarked tests. The simplest way to do this

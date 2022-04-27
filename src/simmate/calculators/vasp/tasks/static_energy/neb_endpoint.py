@@ -1,14 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.relaxation.neb_endpoint import (
-    NEBEndpointRelaxation,
-)
-
-from simmate.calculators.vasp.error_handlers import (
-    TetrahedronMesh,
-    Eddrmm,
-    NonConverging,
-)
+from simmate.calculators.vasp.tasks.relaxation import NEBEndpointRelaxation
 
 
 class NEBEndpointStaticEnergy(NEBEndpointRelaxation):
@@ -32,11 +24,3 @@ class NEBEndpointStaticEnergy(NEBEndpointRelaxation):
             NSW=0,  # this is the main static energy setting
         )
     )
-
-    # We reduce the number of error handlers used on dynamics because many
-    # error handlers are based on finding the global minimum & converging
-    error_handlers = [
-        TetrahedronMesh(),
-        Eddrmm(),
-        NonConverging(),
-    ]
