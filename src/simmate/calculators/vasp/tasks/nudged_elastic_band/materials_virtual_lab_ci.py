@@ -3,8 +3,11 @@
 from simmate.calculators.vasp.tasks.nudged_elastic_band.mit import MITNudgedElasticBand
 
 
-class MatVirtualLabCINEB(MITNudgedElasticBand):
+class MatVirtualLabClimbingImageNudgedElasticBand(MITNudgedElasticBand):
     """
+    This task is a reimplementation of pymatgen's
+    [MVLCINEBSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITNEBSet).
+
     Runs a NEB relaxation on a list of structures (aka images) using MIT Project
     settings. The lattice remains fixed and symmetry is turned off for this
     relaxation.
@@ -17,11 +20,10 @@ class MatVirtualLabCINEB(MITNudgedElasticBand):
     Henkelman group. See http://theory.cm.utexas.edu/vtsttools/
     """
 
-    # The settings used for this calculation are based on the MITRelaxation, but
-    # we are updating/adding new settings here.
     incar = MITNudgedElasticBand.incar.copy()
     incar.update(
         dict(
+            EDIFF=5e-5,
             EDIFFG=-0.02,
             IBRION=3,
             ICHAIN=0,
