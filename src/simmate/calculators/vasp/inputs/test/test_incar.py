@@ -89,7 +89,6 @@ def test_incar(tmpdir, structure):
             LDAU__auto=True,
             LDAUTYPE=2,
             LDAUPRINT=1,
-            LMAXMIX__auto=True,
             LDAUJ={},
             LDAUL={
                 "F": {
@@ -203,7 +202,6 @@ def test_incar(tmpdir, structure):
             LDAU__auto=True,
             LDAUTYPE=2,
             LDAUPRINT=1,
-            LMAXMIX__auto=True,
             LDAUJ={},
             LDAUL={
                 "F": {

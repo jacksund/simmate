@@ -3,8 +3,11 @@
 from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
 
 
-class NEBEndpointRelaxation(MITRelaxation):
+class MatVirtualLabCINEBEndpointRelaxation(MITRelaxation):
     """
+    This task is a reimplementation of pymatgen's
+    [MVLCINEBEndPointSet](http://guide.materialsvirtuallab.org/pymatgen-analysis-diffusion/pymatgen.analysis.diffusion.neb.io.html#pymatgen.analysis.diffusion.neb.io.MVLCINEBEndPointSet).
+
     Runs a VASP relaxation calculation using MIT Project settings, where some
     settings are adjusted to accomodate large supercells with defects. Most
     notably, the lattice remains fixed and symmetry is turned off for this
@@ -20,8 +23,6 @@ class NEBEndpointRelaxation(MITRelaxation):
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.
-    # These settings are based off of pymatgen's MVLCINEBEndPointSet
-    # http://guide.materialsvirtuallab.org/pymatgen-analysis-diffusion/pymatgen.analysis.diffusion.neb.io.html
     incar = MITRelaxation.incar.copy()
     incar.update(
         dict(
@@ -29,11 +30,10 @@ class NEBEndpointRelaxation(MITRelaxation):
             EDIFFG=-0.02,
             ISMEAR=0,
             ISYM=0,
+            LCHARG=False,
             LDAU=False,
             NELMIN=4,
         )
     )
-    # We set ISMEAR=0 and SIGMA above, so we no longer need smart_ismear
-    incar.pop("multiple_keywords__smart_ismear")
     # LDA+U is turned off
     incar.pop("multiple_keywords__smart_ldau")

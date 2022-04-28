@@ -9,24 +9,15 @@ from pymatgen.analysis.transition_state import NEBAnalysis
 
 from simmate.toolkit.diffusion import MigrationImages
 from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
-from simmate.calculators.vasp.tasks.relaxation.neb_endpoint import NEBEndpointRelaxation
+from simmate.calculators.vasp.tasks.base import VaspTask
 
 
-class MITNudgedElasticBand(NEBEndpointRelaxation):
+class VaspNudgedElasticBandTask(VaspTask):
     """
-    Runs a NEB relaxation on a list of structures (aka images) using MIT Project
-    settings. The lattice remains fixed and symmetry is turned off for this
-    relaxation.
+    A base class for Nudged Elastic Band (NEB) calculations. This is not meant
+    to be used directly but instead should be inherited from.
 
-    You shouldn't use this workflow directly, but instead use the higher-level
-    NEB workflows (e.g. diffusion/neb_all_paths or diffusion/neb_from_endpoints),
-    which call this workflow for you.
-
-
-    Developer Notes
-    ----------------
-
-    This NEB task is very different from all other VASP tasks!
+    Note, NEB tasks are very different from all other VASP tasks!
 
     The first big difference is that it takes a list of structures instead of
     just one structure. This means that instead of "structure=...", you should
@@ -40,26 +31,11 @@ class MITNudgedElasticBand(NEBEndpointRelaxation):
     may be useful if you'd like to make your own variation of this class.
     """
 
-    # The settings used for this calculation are based on the MITRelaxation, but
-    # we are updating/adding new settings here.
-    # These settings are based off of pymatgen's MVLCINEBSet, which inherts from
-    # the MITNEBSet.
-    # http://guide.materialsvirtuallab.org/pymatgen-analysis-diffusion/pymatgen.analysis.diffusion.neb.io.html
-    # https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITNEBSet
-    incar = NEBEndpointRelaxation.incar.copy()
-    incar.update(
-        dict(
-            IBRION=1,
-            # IMAGES is a special case where logic is in this file, rather than
-            # handled by the INCAR class. It is set to len(structures)-2
-            IMAGES__auto=True,
-        )
-    )
-
     requires_structure = False
     """
-    This is a unique case for VASP calculations because the input is NOT a 
-    single structure, but instead a list of structures -- spefically a list
+    `structure` is not a required parameter for the `run` method. This is a 
+    unique case for VASP calculations because the input is NOT a single 
+    structure, but instead a list of structures -- spefically a list
     supercell images along the diffusion pathway.
     """
 
