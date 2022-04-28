@@ -15,3 +15,5 @@ from .materials_project_metal import MatProjMetalRelaxation
 from .materials_virtual_lab_endpoint import (
     MatVirtualLabCINEBEndpointRelaxation as NEBEndpointRelaxation,
 )
+from .materials_virtual_lab_grain_boundary import MatVirtualLabGrainBoundaryRelaxation
+from .materials_virtual_lab_slab import MatVirtualLabSlabRelaxation

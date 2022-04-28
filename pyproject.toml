@@ -26,7 +26,7 @@ markers = [
 # migration folders.
 # I manually remove -m when testing coverage, but am unsure if there's a better
 # way to do this.
-addopts = "--no-migrations -m 'not slow and not blender'"
+addopts = "--no-migrations -m 'not slow and not blender and not pymatgen'"
 
 # There are a number of warnings that are expected when running our tests.
 # We remove these from our output for clarity.

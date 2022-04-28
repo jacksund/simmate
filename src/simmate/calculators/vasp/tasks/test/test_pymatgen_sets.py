@@ -38,6 +38,21 @@ from pymatgen.io.vasp.sets import MPNonSCFSet
 from simmate.calculators.vasp.tasks.relaxation import MatProjMetalRelaxation
 from pymatgen.io.vasp.sets import MPMetalRelaxSet
 
+from simmate.calculators.vasp.tasks.nuclear_magnetic_resonance import (
+    MatProjNMRChemicalShifts,
+    MatProjNMRElectricFieldGradiant,
+)
+from pymatgen.io.vasp.sets import MPNMRSet
+
+from simmate.calculators.vasp.tasks.elastic import MatVirtualLabElastic
+from pymatgen.io.vasp.sets import MVLElasticSet
+
+from simmate.calculators.vasp.tasks.relaxation import (
+    MatVirtualLabGrainBoundaryRelaxation,
+    MatVirtualLabSlabRelaxation,
+)
+from pymatgen.io.vasp.sets import MVLGBSet
+
 # -----------------------------------------------------------------------------
 
 MD_KWARGS = {
@@ -63,6 +78,12 @@ MD_KWARGS = {
         (MatProjBandStructure, MPNonSCFSet, {"mode": "line"}),
         (MatProjDensityOfStates, MPNonSCFSet, {"mode": "uniform"}),
         (MatProjHSEDensityOfStates, MPHSEBSSet, {"mode": "uniform"}),
+        (MatProjNMRChemicalShifts, MPNMRSet, {"mode": "cs"}),
+        # (MatProjNMRElectricFieldGradiant, MPNMRSet, {"mode": "efg"}),
+        # MPNMRSet is bugged at the moment: https://github.com/materialsproject/pymatgen/pull/2509
+        (MatVirtualLabElastic, MVLElasticSet, {}),
+        (MatVirtualLabGrainBoundaryRelaxation, MVLGBSet, {"slab_mode": False}),
+        (MatVirtualLabSlabRelaxation, MVLGBSet, {"slab_mode": True}),
     ],
 )
 def test_pymatgen_input_sets(

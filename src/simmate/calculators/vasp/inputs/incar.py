@@ -674,6 +674,38 @@ class Incar(dict):
 
         return ismear_settings
 
+    @staticmethod
+    def keyword_modifier_smart_quad_efg(structure, quad_efg_config):
+        """
+        When running NMR (nuclear magnetic resonance) calculations that evaluate
+        the electric field gradient, we need to set quadrapole moments for
+        each species in our structure.
+
+        NOTE: this modifier may be converted to a workflow parameter in the
+        future.
+        """
+        # This code is copy/pasted from pymatgen (with minor edits)
+        # See..
+        # https://github.com/materialsproject/pymatgen/blob/1b6d1d2212dcf3a559cb2c489dd25e9754f9f788/pymatgen/io/vasp/sets.py#L1940-L1942
+        from pymatgen.core import Species
+
+        # TODO: maybe use quad_efg_config to set this for different isotopes.
+        # For now, I just use the VASP default
+        isotopes = []
+
+        isotopes = {ist.split("-")[0]: ist for ist in isotopes}
+        quad_efg = [
+            Species(element.symbol).get_nmr_quadrupole_moment(
+                isotopes.get(element.symbol, None)
+            )
+            for element in structure.composition.elements
+        ]
+
+        # there is a unit (mbarn) attached to each so we clear these
+        quad_efg = [float(q) for q in quad_efg]
+
+        return quad_efg
+
 
 # TODO: In the future, I want to allow modifiers like __relative_to_previous
 # and __use_previous to string settings accross tasks.
