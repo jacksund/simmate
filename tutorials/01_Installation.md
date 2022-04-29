@@ -20,7 +20,7 @@ In this tutorial, you will learn how to install Simmate with Anaconda and start 
 > :warning: In this tutorial and others, beginners should skip the **quick tutorial** section and jump straight to the **full tutorial**. The critical steps in each are exactly the same, but the full tutorial includes extra exploration of the software and how to use it. So be sure to read the full tutorials if you don't have coding experience!
 
 
-1. Install [anaconda](https://www.anaconda.com/products/individual-d)
+1. Install [anaconda](https://www.anaconda.com/products/distribution)
 2. Create a conda environment, install Simmate in it, and activate it. *(note: Spyder is our recommended IDE but optional)*
 ``` shell
 conda create -n my_env -c conda-forge python=3.10 simmate
@@ -65,7 +65,7 @@ Ideally, you could download Simmate like any desktop app and then be good to go.
 1. Simmate version 1.0, which requires python version 3.10 or greater
 2. Numpy version 1.15, which requires python version 2.7
 
-The conflicting versions of python creates a problem. To solve this, we use [Anaconda](https://www.anaconda.com/products/individual-d). Anaconda installs python and all of our extra packages, including Simmate. To make sure nothing ever breaks, it separates each of our installations into folders known as "environments". So using our example programs, we could have two environments: one named "simmate_env" and another named "numpy_env" (these can be named anything). The two different python versions and codes would be installed into separate folders so that they don't interact.
+The conflicting versions of python creates a problem. To solve this, we use [Anaconda](https://www.anaconda.com/products/). Anaconda installs python and all of our extra packages, including Simmate. To make sure nothing ever breaks, it separates each of our installations into folders known as "environments". So using our example programs, we could have two environments: one named "simmate_env" and another named "numpy_env" (these can be named anything). The two different python versions and codes would be installed into separate folders so that they don't interact.
 
 Package versions can also conflict with each other. For example, Simmate requires the package Django (version >3.2), so if you installed Django 2.0, it would break your Simmate installation. Therefore, Anaconda prevents you from installing conflicting versions within a single environment.
 
@@ -75,7 +75,7 @@ Package versions can also conflict with each other. For example, Simmate require
 
 For this tutorial, we'll install Anaconda to your local desktop/laptop. Even if you'll be using a university supercomputer (or some other remote computer system) to run workflows, stick to your local computer. We'll switch to your remote supercomputer near the end of tutorial 02.
 
-To install Anaconda, you don't need to make an account on their website. Just use [their download page](https://www.anaconda.com/products/individual-d) and install Anaconda (individual edition). Use all of the default options when installing. Open the application when you're done! The application will be called "Anaconda Navigator".
+To install Anaconda, you don't need to make an account on their website. Just use [their download page](https://www.anaconda.com/products/distribution) and install Anaconda (individual edition). Use all of the default options when installing. Open the application when you're done! The application will be called "Anaconda Navigator".
 
 On the homescreen, you'll see several IDEs, such as Orange3, Jupyter Notebook, Spyder, and others. These IDEs are for you to write your own python code. Just like how there is Microsoft Word, Google Docs, LibreOffice, and others for writing papers, all of these IDEs are different ways to write python. Our prefered IDE is [Spyder](https://www.spyder-ide.org/), which we will introduce in tutorial 03.
 
