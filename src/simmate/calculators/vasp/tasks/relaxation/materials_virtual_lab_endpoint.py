@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
+from simmate.calculators.vasp.tasks.relaxation import MITRelaxation
 
 
 class MatVirtualLabCINEBEndpointRelaxation(MITRelaxation):
@@ -21,19 +21,17 @@ class MatVirtualLabCINEBEndpointRelaxation(MITRelaxation):
     diffusion/neb_from_endpoints), which call this workflow for you.
     """
 
-    # The settings used for this calculation are based on the MITRelaxation, but
-    # we are updating/adding new settings here.
     incar = MITRelaxation.incar.copy()
     incar.update(
         dict(
+            EDIFF=5e-5,
             ISIF=2,  # hold lattice volume and shape constant
             EDIFFG=-0.02,
             ISMEAR=0,
             ISYM=0,
             LCHARG=False,
-            LDAU=False,
+            # LDAU=False,
             NELMIN=4,
         )
     )
-    # LDA+U is turned off
     incar.pop("multiple_keywords__smart_ldau")

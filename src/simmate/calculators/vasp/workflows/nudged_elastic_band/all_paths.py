@@ -203,6 +203,7 @@ workflow.s3tasks = [
     energy_mit_workflow.s3task,
 ] + neb_workflow.s3tasks
 
+workflow.description_doc_short = "runs NEB for all symmetrically unique paths"
 workflow.__doc__ = """
     Runs a full diffusion analysis on a bulk crystal structure using NEB.
     

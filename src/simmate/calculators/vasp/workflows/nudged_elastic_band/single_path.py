@@ -97,12 +97,12 @@ with Workflow(WORKFLOW_NAME) as workflow:
 
     images = get_migration_images_from_endpoints(
         supercell_start={
-            "calculation_table": "NEBEndpointRelaxation",
+            "calculation_table": "MatVirtualLabCINEBEndpointRelaxation",
             "directory": run_id_00["directory"],
             "structure_field": "structure_final",
         },
         supercell_end={
-            "calculation_table": "NEBEndpointRelaxation",
+            "calculation_table": "MatVirtualLabCINEBEndpointRelaxation",
             "directory": run_id_01["directory"],
             "structure_field": "structure_final",
         },
@@ -129,6 +129,7 @@ workflow.s3tasks = [
     neb_from_images.s3task,
 ]
 
+workflow.description_doc_short = "runs NEB using a MigrationHop object as input"
 workflow.__doc__ = """
     Runs a full diffusion analysis on a single migration hop using NEB.
     

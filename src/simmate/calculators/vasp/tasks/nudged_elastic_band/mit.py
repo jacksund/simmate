@@ -3,7 +3,7 @@
 from simmate.calculators.vasp.tasks.nudged_elastic_band.base import (
     VaspNudgedElasticBandTask,
 )
-from simmate.calculators.vasp.tasks.relaxation.mit import MITRelaxation
+from simmate.calculators.vasp.tasks.relaxation import MITRelaxation
 
 
 class MITNudgedElasticBand(VaspNudgedElasticBandTask, MITRelaxation):
@@ -20,17 +20,13 @@ class MITNudgedElasticBand(VaspNudgedElasticBandTask, MITRelaxation):
     which call this workflow for you.
     """
 
-    # The settings used for this calculation are based on the MITRelaxation, but
-    # we are updating/adding new settings here.
     incar = MITRelaxation.incar.copy()
     incar.update(
         dict(
             IBRION=1,
             ISYM=0,
             LCHARG=False,
-            LDAU=False,
             IMAGES__auto=True,
         )
     )
-    # LDA+U is turned off
     incar.pop("multiple_keywords__smart_ldau")

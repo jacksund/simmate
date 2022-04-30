@@ -6,7 +6,7 @@ from simmate.calculators.vasp.tasks.relaxation import MatProjRelaxation
 class MatProjStaticEnergy(MatProjRelaxation):
     """
     This task is a reimplementation of pymatgen's
-    [MITStaticSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPStaticSet).
+    [MPStaticSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPStaticSet).
 
     Runs a VASP static energy calculation using Materials Project settings.
 
