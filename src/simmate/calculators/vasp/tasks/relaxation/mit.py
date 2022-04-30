@@ -83,7 +83,7 @@ class MITRelaxation(VaspTask):
         SIGMA=0.05,
         KSPACING=0.5,  # !!! This is where we are different from pymatgen right now
         MAGMOM__smart_magmom={
-            "default": 0.6,
+            "default": 0.6,  # note this is different from the VASP default
             "Ce": 5,
             "Ce3+": 1,
             "Co": 0.6,

@@ -296,8 +296,36 @@ def test_incar(tmpdir, structure):
         structure=structure,
     )
 
-    # TODO: assert equal to ....
+    # simply check that we can reload. Checking for values and logic should be
+    # done with individual keyword modifiers
     incar4 = Incar.from_file(os.path.join(tmpdir, "INCAR"))
 
     # TODO: assert equal to ....
-    incar1.compare_incars(incar2)
+    diff = incar1.compare_incars(incar2)
+
+
+def test_custom_keyword_modifier(tmpdir, sample_structures):
+
+    structure = sample_structures["C_mp-48_primitive"]
+
+    incar_filename = os.path.join(tmpdir, "INCAR")
+
+    # make a dummy modifier that just multiplies input by 2
+    def keyword_modifier_dummy(structure, value):
+        return value * 2
+
+    Incar.add_keyword_modifer(keyword_modifier_dummy)
+
+    # simple tests to confirm method is registered
+    assert hasattr(Incar, "keyword_modifier_dummy")
+    assert Incar.keyword_modifier_dummy(None, 4) == 8
+
+    # now test out logic with keyword
+    incar = Incar(ENCUT__dummy=4)
+    incar.to_file(
+        filename=incar_filename,
+        structure=structure,
+    )
+
+    incar2 = Incar.from_file(incar_filename)
+    assert incar2.get("ENCUT", None) == 8

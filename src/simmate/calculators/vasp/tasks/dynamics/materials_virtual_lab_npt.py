@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from simmate.toolkit import Structure
+from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.tasks.dynamics import MITDynamics
 
 
@@ -23,3 +25,16 @@ class MatVirtualLabNPTDynamics(MITDynamics):
             ENCUT=450,  # pymatgen sets to 1.5 * max of all potcars
         )
     )
+
+
+def keyword_modifier_smart_langevin(
+    structure: Structure,
+    langevin_config: bool = True,  # not required
+):
+    """
+    Expands LANGEVIN_GAMMA setting based on number of species present
+    """
+    return [10] * structure.ntypesp
+
+
+Incar.add_keyword_modifer(keyword_modifier_smart_langevin)
