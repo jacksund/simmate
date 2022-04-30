@@ -97,12 +97,12 @@ with Workflow(WORKFLOW_NAME) as workflow:
 
     images = get_migration_images_from_endpoints(
         supercell_start={
-            "calculation_table": "NEBEndpointRelaxation",
+            "calculation_table": "MatVirtualLabCINEBEndpointRelaxation",
             "directory": run_id_00["directory"],
             "structure_field": "structure_final",
         },
         supercell_end={
-            "calculation_table": "NEBEndpointRelaxation",
+            "calculation_table": "MatVirtualLabCINEBEndpointRelaxation",
             "directory": run_id_01["directory"],
             "structure_field": "structure_final",
         },

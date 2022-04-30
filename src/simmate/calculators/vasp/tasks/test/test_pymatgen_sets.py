@@ -7,65 +7,59 @@ from simmate.conftest import make_dummy_files
 from simmate.calculators.vasp.inputs import Incar, Potcar
 from simmate.toolkit.diffusion import MigrationImages
 
-# -----------------------------------------------------------------------------
-# Simmate tasks and their corresponding pymatgen sets are paired below
-
-from simmate.calculators.vasp.tasks.relaxation import MatProjRelaxation
-from pymatgen.io.vasp.sets import MPRelaxSet
-
-from simmate.calculators.vasp.tasks.relaxation import MITRelaxation
-from pymatgen.io.vasp.sets import MITRelaxSet
+from pymatgen.io.vasp.sets import (
+    MPRelaxSet,
+    MITRelaxSet,
+    MPStaticSet,
+    MITMDSet,
+    MPMDSet,
+    MPHSERelaxSet,
+    MPHSEBSSet,
+    MPNonSCFSet,
+    MPMetalRelaxSet,
+    MPNMRSet,
+    MVLElasticSet,
+    MVLGBSet,
+    MITNEBSet,
+    # MVLNPTMDSet,
+)
+from pymatgen.analysis.diffusion.neb.io import MVLCINEBSet, MVLCINEBEndPointSet
 
 from simmate.calculators.vasp.tasks.static_energy import MatProjStaticEnergy
-from pymatgen.io.vasp.sets import MPStaticSet
-
-from simmate.calculators.vasp.tasks.dynamics import MITDynamics
-from pymatgen.io.vasp.sets import MITMDSet
-
-from simmate.calculators.vasp.tasks.dynamics import MatProjDynamics
-from pymatgen.io.vasp.sets import MPMDSet
-
-from simmate.calculators.vasp.tasks.relaxation import MatProjHSERelaxation
-from pymatgen.io.vasp.sets import MPHSERelaxSet
-
-from simmate.calculators.vasp.tasks.band_structure import MatProjHSEBandStructure
-from simmate.calculators.vasp.tasks.density_of_states import MatProjHSEDensityOfStates
-from pymatgen.io.vasp.sets import MPHSEBSSet
-
-from simmate.calculators.vasp.tasks.band_structure import MatProjBandStructure
-from simmate.calculators.vasp.tasks.density_of_states import MatProjDensityOfStates
-from pymatgen.io.vasp.sets import MPNonSCFSet
-
-from simmate.calculators.vasp.tasks.relaxation import MatProjMetalRelaxation
-from pymatgen.io.vasp.sets import MPMetalRelaxSet
-
+from simmate.calculators.vasp.tasks.relaxation import (
+    MatProjRelaxation,
+    MITRelaxation,
+    MatProjHSERelaxation,
+    MatProjMetalRelaxation,
+    MatVirtualLabCINEBEndpointRelaxation,
+)
+from simmate.calculators.vasp.tasks.dynamics import (
+    MITDynamics,
+    MatProjDynamics,
+    # MatVirtualLabNPTDynamics,
+)
+from simmate.calculators.vasp.tasks.band_structure import (
+    MatProjHSEBandStructure,
+    MatProjBandStructure,
+)
+from simmate.calculators.vasp.tasks.density_of_states import (
+    MatProjHSEDensityOfStates,
+    MatProjDensityOfStates,
+)
 from simmate.calculators.vasp.tasks.nuclear_magnetic_resonance import (
     MatProjNMRChemicalShifts,
-    MatProjNMRElectricFieldGradiant,
+    # MatProjNMRElectricFieldGradiant,
 )
-from pymatgen.io.vasp.sets import MPNMRSet
-
 from simmate.calculators.vasp.tasks.elastic import MatVirtualLabElastic
-from pymatgen.io.vasp.sets import MVLElasticSet
-
 from simmate.calculators.vasp.tasks.relaxation import (
     MatVirtualLabGrainBoundaryRelaxation,
     MatVirtualLabSlabRelaxation,
 )
-from pymatgen.io.vasp.sets import MVLGBSet
-
-from simmate.calculators.vasp.tasks.nudged_elastic_band import MITNudgedElasticBand
-from pymatgen.io.vasp.sets import MITNEBSet
-
 from simmate.calculators.vasp.tasks.nudged_elastic_band import (
+    MITNudgedElasticBand,
     MatVirtualLabClimbingImageNudgedElasticBand,
 )
-from pymatgen.analysis.diffusion.neb.io import MVLCINEBSet
 
-from simmate.calculators.vasp.tasks.relaxation import NEBEndpointRelaxation
-from pymatgen.analysis.diffusion.neb.io import MVLCINEBEndPointSet
-
-# -----------------------------------------------------------------------------
 
 MD_KWARGS = {
     "start_temp": 300,
@@ -84,9 +78,11 @@ MD_KWARGS = {
         (MatProjStaticEnergy, MPStaticSet, {}),
         (MatProjHSERelaxation, MPHSERelaxSet, {}),
         (MatProjMetalRelaxation, MPMetalRelaxSet, {}),
-        (NEBEndpointRelaxation, MVLCINEBEndPointSet, {}),
+        (MatVirtualLabCINEBEndpointRelaxation, MVLCINEBEndPointSet, {}),
         (MITDynamics, MITMDSet, MD_KWARGS),
         (MatProjDynamics, MPMDSet, MD_KWARGS),
+        # (MatVirtualLabNPTDynamics, MVLNPTMDSet, MD_KWARGS),
+        # requires POTCARs to be configured for pymatgen. need a workaround.
         (MatProjHSEBandStructure, MPHSEBSSet, {"mode": "line"}),
         (MatProjBandStructure, MPNonSCFSet, {"mode": "line"}),
         (MatProjDensityOfStates, MPNonSCFSet, {"mode": "uniform"}),

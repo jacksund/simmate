@@ -20,8 +20,8 @@ from simmate.calculators.vasp.database.relaxation import (
     Quality04Relaxation,
     Quality04IonicStep,
     StagedRelaxation,
-    NEBEndpointRelaxation,
-    NEBEndpointIonicStep,
+    MatVirtualLabCINEBEndpointRelaxation,
+    MatVirtualLabCINEBEndpointIonicStep,
 )
 
 from simmate.calculators.vasp.database.energy import (

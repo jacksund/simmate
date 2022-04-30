@@ -706,6 +706,13 @@ class Incar(dict):
 
         return quad_efg
 
+    @staticmethod
+    def keyword_modifier_smart_langevin(structure, langevin_config):
+        """
+        Expands LANGEVIN_GAMMA setting based on number of species present
+        """
+        return [10] * structure.ntypesp
+
 
 # TODO: In the future, I want to allow modifiers like __relative_to_previous
 # and __use_previous to string settings accross tasks.

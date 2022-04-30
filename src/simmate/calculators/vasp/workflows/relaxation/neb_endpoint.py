@@ -2,10 +2,10 @@
 
 from simmate.workflow_engine import s3task_to_workflow
 from simmate.calculators.vasp.tasks.relaxation import (
-    NEBEndpointRelaxation as NEBEndpointRelaxationTask,
+    MatVirtualLabCINEBEndpointRelaxation as NEBEndpointRelaxationTask,
 )
 from simmate.calculators.vasp.database.relaxation import (
-    NEBEndpointRelaxation as NEBEndpointRelaxationResults,
+    MatVirtualLabCINEBEndpointRelaxation as NEBEndpointRelaxationResults,
 )
 
 workflow = s3task_to_workflow(
