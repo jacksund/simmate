@@ -11,6 +11,7 @@ library of other examples at `simmate.calculators.vasp.tasks`.
 """
 
 
+from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.tasks.base import VaspTask
 from simmate.calculators.vasp.inputs.potcar_mappings import (
     PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
@@ -55,6 +56,10 @@ class ExampleRelaxation(VaspTask):
                 SIGMA=0.05,
             ),
         },
+        # This is a dummy example of using custom modifiers. This would set the
+        # incar value of EXAMPLE=16 for structure with 2 sites (2*8=16). Note,
+        # we registered "multiply_nsites" logic below.
+        EXAMPLE__multiply_nsites=8,
     )
 
     # These are some default error handlers to use. Note the order matters here!
@@ -65,3 +70,16 @@ class ExampleRelaxation(VaspTask):
         NonConvergingErrorHandler(),
         FrozenErrorHandler(),
     ]
+
+
+# If you need to add advanced logic for one of your INCAR tags, you can register
+# a keyword_modifer to the INCAR class like so:
+
+# first define the logic of your modifier as a function
+def keyword_modifier_multiply_nsites(structure, example_mod_input):
+    # add your advanced logic to determine the keyword value.
+    return structure.num_sites * example_mod_input
+
+
+# then register modifier with the Incar class
+Incar.add_keyword_modifer(keyword_modifier_multiply_nsites)
