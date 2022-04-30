@@ -129,6 +129,7 @@ workflow.s3tasks = [
     neb_from_images.s3task,
 ]
 
+workflow.description_doc_short = "runs NEB using a MigrationHop object as input"
 workflow.__doc__ = """
     Runs a full diffusion analysis on a single migration hop using NEB.
     

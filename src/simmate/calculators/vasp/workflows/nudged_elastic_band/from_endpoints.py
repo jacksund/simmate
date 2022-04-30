@@ -128,6 +128,8 @@ workflow.s3tasks = [
     relaxation_neb_endpoint_workflow.s3task,
     neb_from_images.s3task,
 ]
+
+workflow.description_doc_short = "runs NEB using two endpoint structures as input"
 workflow.__doc__ = """
     Runs a full diffusion analysis from a start and end supercell using NEB.
     
