@@ -24,7 +24,11 @@
 </a>
 <!-- Link to Website -->
 <a href="https://simmate.org/">
-    <img src="https://img.shields.io/badge/-Website-/?logo=crystal&color=043344&logoColor=white">
+    <img src="https://img.shields.io/badge/-Website-/?logo=iCloud&color=043344&logoColor=white">
+</a>
+<!-- link to change-log -->
+<a href="https://github.com/jacksund/simmate/blob/main/CHANGELOG.md">
+    <img src="https://img.shields.io/badge/-Changes & Updates-/?logo=git-extensions&color=043344&logoColor=white">
 </a>
 </p>
 
