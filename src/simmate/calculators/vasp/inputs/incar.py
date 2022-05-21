@@ -91,7 +91,7 @@ class Incar(dict):
         # First we need to iterate through all parameters and check if we have
         # ones that are structure-specific. For example, we would need to
         # evaluate "ENCUT__per_atom". We go through all these and collect the
-        # paramters into a final settings list.
+        # parameters into a final settings list.
         final_settings = {}
         for parameter, value in self.items():
 
@@ -117,7 +117,7 @@ class Incar(dict):
                 parameter, modifier_tag = parameter.split("__")
 
                 # check that this class has this modifier supported. It should
-                # be a method named "keyword_modifier_mymodifer".
+                # be a method named "keyword_modifier_mymodifier".
                 # If everything looks good, we grab the modifier function
                 modifier_fxn_name = "keyword_modifier_" + modifier_tag
                 if hasattr(self, modifier_fxn_name):
@@ -136,7 +136,7 @@ class Incar(dict):
                 # our value for this keyword.
                 value = modifier_fxn(structure, value)
 
-                # sometimes the modifer returns None. In this case we don't
+                # sometimes the modifier returns None. In this case we don't
                 # set anything in the INCAR, but leave it to the programs
                 # default value.
                 if not value:
@@ -145,7 +145,7 @@ class Incar(dict):
                 # to write it to the INCAR? If so, it'd be skipped here.
 
                 # if the "parameter" is actually "multiple_keywords", then we
-                # have our actually parameters as a dictionary. We need to
+                # have our actual parameters as a dictionary. We need to
                 # pull these out of the "value" we have.
                 if parameter == "multiple_keywords":
                     for subparameter, subvalue in value.items():
@@ -465,7 +465,7 @@ class Incar(dict):
         return Incar(**new_parameters)
 
     @classmethod
-    def add_keyword_modifer(cls, keyword_modifer: Callable):
+    def add_keyword_modifier(cls, keyword_modifier: Callable):
         """
         Dynamically sets a keyword_modifier function to the Incar class. When
         loaded onto the Incar class, you can then use the modifiers name to
@@ -484,7 +484,7 @@ class Incar(dict):
             return per_atom_value * structure.num_sites * 2
 
         # add it to the Incar class to make it active
-        Incar.add_keyword_modifer(keyword_modifier_double_per_atom)
+        Incar.add_keyword_modifier(keyword_modifier_double_per_atom)
 
         # You can not use the modifier in incar logic!
         incar = Incar(ENCUT__double_per_atom=1e-5)
@@ -492,7 +492,7 @@ class Incar(dict):
         """
 
         # first ensure that the modifier does not conflict with an existing one
-        if hasattr(cls, keyword_modifer.__name__):
+        if hasattr(cls, keyword_modifier.__name__):
             raise Exception(
                 "The Incar class already has a modifier with this name. "
                 "Please use a different modifier name to avoid conflicts."
@@ -501,7 +501,7 @@ class Incar(dict):
         # add the function/callable as a static method to this class.
         # This line of code is based on...
         #   https://stackoverflow.com/questions/17929543/
-        setattr(cls, keyword_modifer.__name__, staticmethod(keyword_modifer))
+        setattr(cls, keyword_modifier.__name__, staticmethod(keyword_modifier))
 
 
 # set some default keyword modifiers
@@ -516,4 +516,4 @@ for modifier in [
     keyword_modifier_smart_ldau,
     keyword_modifier_smart_ismear,
 ]:
-    Incar.add_keyword_modifer(modifier)
+    Incar.add_keyword_modifier(modifier)
