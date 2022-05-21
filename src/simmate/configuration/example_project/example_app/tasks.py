@@ -73,7 +73,7 @@ class ExampleRelaxation(VaspTask):
 
 
 # If you need to add advanced logic for one of your INCAR tags, you can register
-# a keyword_modifer to the INCAR class like so:
+# a keyword_modifier to the INCAR class like so:
 
 # first define the logic of your modifier as a function
 def keyword_modifier_multiply_nsites(structure, example_mod_input):
@@ -82,4 +82,4 @@ def keyword_modifier_multiply_nsites(structure, example_mod_input):
 
 
 # then register modifier with the Incar class
-Incar.add_keyword_modifer(keyword_modifier_multiply_nsites)
+Incar.add_keyword_modifier(keyword_modifier_multiply_nsites)

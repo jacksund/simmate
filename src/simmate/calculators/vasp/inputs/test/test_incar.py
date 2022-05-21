@@ -314,7 +314,7 @@ def test_custom_keyword_modifier(tmpdir, sample_structures):
     def keyword_modifier_dummy(structure, value):
         return value * 2
 
-    Incar.add_keyword_modifer(keyword_modifier_dummy)
+    Incar.add_keyword_modifier(keyword_modifier_dummy)
 
     # simple tests to confirm method is registered
     assert hasattr(Incar, "keyword_modifier_dummy")

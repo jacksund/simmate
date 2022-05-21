@@ -117,7 +117,7 @@ class Incar(dict):
                 parameter, modifier_tag = parameter.split("__")
 
                 # check that this class has this modifier supported. It should
-                # be a method named "keyword_modifier_mymodifer".
+                # be a method named "keyword_modifier_mymodifier".
                 # If everything looks good, we grab the modifier function
                 modifier_fxn_name = "keyword_modifier_" + modifier_tag
                 if hasattr(self, modifier_fxn_name):
@@ -136,7 +136,7 @@ class Incar(dict):
                 # our value for this keyword.
                 value = modifier_fxn(structure, value)
 
-                # sometimes the modifer returns None. In this case we don't
+                # sometimes the modifier returns None. In this case we don't
                 # set anything in the INCAR, but leave it to the programs
                 # default value.
                 if not value:

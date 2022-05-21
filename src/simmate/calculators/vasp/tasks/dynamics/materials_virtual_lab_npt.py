@@ -37,4 +37,4 @@ def keyword_modifier_smart_langevin(
     return [10] * structure.ntypesp
 
 
-Incar.add_keyword_modifer(keyword_modifier_smart_langevin)
+Incar.add_keyword_modifier(keyword_modifier_smart_langevin)

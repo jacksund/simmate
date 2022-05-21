@@ -62,4 +62,4 @@ def keyword_modifier_smart_quad_efg(structure: Structure, quad_efg_config):
     return quad_efg
 
 
-Incar.add_keyword_modifer(keyword_modifier_smart_quad_efg)
+Incar.add_keyword_modifier(keyword_modifier_smart_quad_efg)
