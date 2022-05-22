@@ -4,6 +4,7 @@
 # 
 # We also use a third-party action for setting up our conda environment. See:
 #   https://github.com/marketplace/actions/setup-miniconda
+#
 # OPTIMIZE: consider switching to mamba for faster CI installs:
 #   https://github.com/marketplace/actions/setup-miniconda#example-6-mamba
 
@@ -22,8 +23,11 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
+
     - uses: actions/checkout@v2
+
     - uses: psf/black@stable
+
     - name: Create conda env and install deps
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -32,14 +36,24 @@ jobs:
         auto-activate-base: false
         channels: conda-forge
         activate-environment: simmate_dev
+    # The lines "shell: bash -l {0}" ensure we use the created env below
+
     - name: Install Simmate
       shell: bash -l {0}
       run: |
-        conda info
         pip install -e .
+
+    - name: Check conda info
+      shell: bash -l {0}
+      run: |
+        conda info
+        conda list
+
     - name: Run default tests
+      shell: bash -l {0}
       run: |
         pytest
+
     # Marked tests can be dropped for now. I'll re-add this test when needed.
     # - name: Run no_django_setup tests
     #   run: |
