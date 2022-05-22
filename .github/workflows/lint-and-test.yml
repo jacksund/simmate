@@ -28,7 +28,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         environment-file: tutorials/Guides_for_contributors/environment.yaml
-        python-version: 3.10
+        python-version: "3.10"
         auto-activate-base: false
         channels: conda-forge
         activate-environment: simmate_dev
