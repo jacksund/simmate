@@ -33,7 +33,9 @@ jobs:
         channels: conda-forge
         activate-environment: simmate_dev
     - name: Install Simmate
+      shell: bash -l {0}
       run: |
+        conda info
         pip install -e .
     - name: Run default tests
       run: |
