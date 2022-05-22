@@ -48,7 +48,6 @@ pip install -e .
 ```
 
 6. Make sure everything works properly by running our tests
-> :warning::warning::warning: there is currently a bug on windows for pytest v7.1 see issue [#162](https://github.com/jacksund/simmate/issues/162). Downgrade to v7.0 to fix this: `conda install -c conda-forge pytest==7.0`
 ``` shell
 # you can optionally run tests in parallel 
 # with a command such as "pytest -n 4"
@@ -83,7 +82,6 @@ black .
 > :bulb: you can optionally format files as you code with Spyder too. `Tools` -> `Preferences` -> `Completion and Linting` -> `Code Style and Formatting` > Under code formatting dropdown, select `black`. To format a file you have open in Spyder, use the the `Ctrl+Shift+I` shortcut.
 
 7. Simmate has test cases to make sure new changes don't break any of Simmate's existing features. These are written using [pytest](https://docs.pytest.org/en/6.2.x/). Run these to check your changes. Make sure you are in the `~/Documents/github/simmate` directory when you run this command:
-> :warning::warning::warning: there is currently a bug on windows for pytest v7.1 see issue [#162](https://github.com/jacksund/simmate/issues/162). Downgrade to v7.0 to fix this: `conda install -c conda-forge pytest==7.0`
 ``` shell
 # you can optionally run tests in parallel 
 # with a command such as "pytest -n 4"

@@ -29,7 +29,7 @@ dependencies:
     - prefect >=0.15.11
     - pymatgen >=2022.1.9
     - pymatgen-analysis-diffusion >=2021.4.29
-    - pytest >=6.2.5
+    - pytest >=6.2.5,<7.1
     - pytest-django >=4.5.2
     - python >=3.10
     - pytest-mock >=3.7.0
