@@ -1,6 +1,11 @@
 
 # This workflow will check for Black formating, install Python dependencies using Anaconda, and then run tests with a single version of Python.
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+# 
+# We also use a third-party action for setting up our conda environment. See:
+#   https://github.com/marketplace/actions/setup-miniconda
+# OPTIMIZE: consider switching to mamba for faster CI installs:
+#   https://github.com/marketplace/actions/setup-miniconda#example-6-mamba
 
 name: Run linting and tests with Anaconda
 
@@ -19,23 +24,21 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: psf/black@stable
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v2
+    - name: Create conda env and install deps
+      uses: conda-incubator/setup-miniconda@v2
       with:
-        python-version: "3.10"
-    - name: Add conda to system path
+        environment-file: tutorials/Guides_for_contributors/environment.yaml
+        python-version: 3.10
+        auto-activate-base: false
+        channels: conda-forge
+        activate-environment: simmate_dev
+    - name: Install Simmate
       run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
-        echo $CONDA/bin >> $GITHUB_PATH
-    - name: Install dependencies
-      run: |
-        conda update -n base -c defaults conda
-        conda env update -f tutorials/Guides_for_contributors/environment.yaml -n base
         pip install -e .
-    - name: Run unmarked tests
+    - name: Run default tests
       run: |
         pytest
-    # Marked tests can be dropped for now. I'll readd this test when needed.
+    # Marked tests can be dropped for now. I'll re-add this test when needed.
     # - name: Run no_django_setup tests
     #   run: |
     #     pytest -m no_django_setup -p no:django
