@@ -125,7 +125,7 @@ setup(
         "pdoc>=11.0.0",  # for docs and markdown rendering in html templates
         #
         # For development and testing
-        "pytest>=6.2.5,<7.1",  # BUG: see issue #162 for limiting <7.1
+        "pytest>=6.2.5,<7.2",  # BUG: see issue #162 for limiting <7.1
         "pytest-django>=4.5.2",
         "pytest-mock>=3.7.0",
         "pytest-xdist>=2.5.0",
