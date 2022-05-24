@@ -34,7 +34,7 @@ Website components | [crystaltoolkit](https://github.com/materialsproject/crysta
 Third-party Data | [mpcontribs](https://github.com/materialsproject/MPContribs) | our `database.third_parties` module 
 *more comparisons can be made too!* | ..... | ....
 
-There are more comparisons that can be made between this orangization and Simmate, but this table gets to the major analogies between the two.
+There are more comparisons that can be made between this organization and Simmate, but this table gets to the major analogies between the two.
 
 In addition to the Materials Project, there are many other organizations (the AFLOW and AiiDA ecosystems) that have analogous components to those in Simmate. A detailed comparison to each of these is beyond the scope of this page, but overall, we can say that the biggest differences are...
 
