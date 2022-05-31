@@ -116,7 +116,35 @@ def test_serialize_parameters():
         a=TestParameter1(),
         b=TestParameter2(),
     )
-    Workflow._serialize_parameters(parameters)
+    Workflow._serialize_parameters(**parameters)
+
+
+def test_deserialize_parameters(mocker):
+
+    # -------
+    # We don't want to actually call these methods, but just ensure that they
+    # have been called.
+    from simmate.toolkit import Structure
+    from simmate.toolkit.diffusion import MigrationHop
+
+    mocker.patch.object(
+        Structure,
+        "from_dynamic",
+    )
+    mocker.patch.object(
+        MigrationHop,
+        "from_dynamic",
+    )
+    # -------
+
+    example_parameters = {
+        "migration_hop": None,
+        "supercell_start": None,
+        "supercell_end": None,
+        "structures": "None; None; None",
+    }
+
+    Workflow._serialize_parameters(**example_parameters)
 
 
 def test_parameter_names():

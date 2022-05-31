@@ -48,7 +48,7 @@ def register_calc(workflow_base, input_parameters, updated_settings, source, dir
     # HACK FIX: I need to make sure everything is JSON serailizable, and I use
     # a static method from the Workflow class to do this. This may be a good
     # sign that this method should become a utility instead.
-    inputs_cleaned = Workflow._serialize_parameters(input_parameters)
+    inputs_cleaned = Workflow._serialize_parameters(**input_parameters)
 
     calculation = CustomizedVASPCalculation.from_prefect_id(
         id=prefect_flow_run_id,

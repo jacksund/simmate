@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import click
+from typing import List
 
-from typing import List, Union
+import click
 from click import Context
 
 
@@ -63,9 +63,8 @@ def parse_parameters(
 ) -> dict:
     """
     This is a utility for click (cli) that formats input parameters for workflow
-    runs. It is a small wrapper around
-    `simmate.workflow_engine.utilities.parse_parameters` that accounts for
-    recieving a `click.Context` object.
+    runs. It accounts for recieving a `click.Context` object and ensures we
+    return a dictionary.
 
     In order to provide a context, make sure the click command has the following:
 
@@ -85,8 +84,6 @@ def parse_parameters(
     inputs (e.g. structures, migration_hop, etc. instead of a structure input).
     This is also why we have pass_context and then the kwarg context.
     """
-
-    from simmate.workflows.utilities import parse_parameters
 
     # The extra keywords passed are given as a list such as...
     #   ["--arg1", "val1", "--arg2", "val2",]
@@ -108,10 +105,6 @@ def parse_parameters(
             "When giving workflow parameters, make sure you provide both the \n"
             "keyword and the value (such as `--example_kwarg example_value`)."
         )
-
-    # We can now pass this dictionary to our normal parse_parameters utility
-    # that will convert everything to python objects for us.
-    kwargs_cleaned = parse_parameters(**kwargs_cleaned)
 
     return kwargs_cleaned
 
@@ -389,19 +382,18 @@ def run_yaml(filename):
     with open(filename) as file:
         kwargs = yaml.full_load(file)
 
-    # we pop the workflow name so that it is also removed from the rest of kwargs
-    from simmate.workflows.utilities import get_workflow, parse_parameters
+    from simmate.workflows.utilities import get_workflow
 
     workflow = get_workflow(
+        # we pop the workflow name so that it is also removed from the rest of kwargs
         workflow_name=kwargs.pop("workflow_name"),
         precheck_flow_exists=True,
         print_equivalent_import=True,
     )
-    kwargs_cleaned = parse_parameters(**kwargs)
 
     click.echo("RUNNING WORKFLOW...")
 
-    result = workflow.run(**kwargs_cleaned)
+    result = workflow.run(**kwargs)
 
     # Let the user know everything succeeded
     if result.is_successful():
