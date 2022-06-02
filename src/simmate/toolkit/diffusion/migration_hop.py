@@ -6,6 +6,15 @@ from pymatgen.analysis.diffusion.neb.pathfinder import (
 
 
 class MigrationHop(PymatgenMigrationHop):
+    def as_dict(self):
+        # Pymatgen.diffusion has a broken as_dict method, so I need to fix this
+        # here. I don't want to raise an error because I don't want issues
+        # with the higher-level serialize_parameters utility
+        return (
+            "MigrationHop is not MSONable, and this bug is within pymatgen diffusion."
+            "See https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion/pull/264"
+        )
+
     @classmethod
     def from_dynamic(cls, migration_hop):
         """

@@ -60,7 +60,8 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
 
     # ---------------------------------------------------------------------
 
-    # Grab the workflow object as we need to reference some of its attributes
+    # Grab the workflow object as we need to reference some of its attributes.
+    # In addition, we will also use the flow run id for registration.
 
     # BUG: for some reason, this script fails when get_workflow is imported
     # at the top of this file rather than here.
@@ -71,6 +72,8 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
         raise Exception("Unknown workflow")
 
     workflow = get_workflow(workflow_name)
+
+    prefect_flow_run_id = prefect.context.flow_run_id
 
     # ---------------------------------------------------------------------
 
@@ -301,8 +304,6 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # This is only done if a table is provided. Some special-case workflows
     # don't store calculation information bc the flow is just a quick python
     # analysis.
-    prefect_flow_run_id = prefect.context.flow_run_id
-
     if register_run and workflow.calculation_table:
         # load/create the calculation for this workflow run
         calculation = workflow.calculation_table.from_prefect_id(
@@ -325,7 +326,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
         workflow_name=workflow.name,
         # this ID is ingored as an input but needed for loading past data
         prefect_flow_run_id=prefect_flow_run_id,
-        **parameters_cleaned,  # BUG: use parameters? use serialize_parameters()?
+        **workflow._serialize_parameters(**parameters_cleaned),
     )
 
     # now write the summary to file in the same directory as the calc.
