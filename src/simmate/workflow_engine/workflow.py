@@ -3,6 +3,7 @@
 import json
 import cloudpickle
 import yaml
+from typing import List
 
 # note: extra modules are imported from prefect for convenience imports elsewhere
 import prefect
@@ -16,9 +17,8 @@ from prefect.backend import FlowRunView, FlowView
 # in order to support "mocking" this function in unit tests
 from prefect.backend import flow_run as flow_run_module
 
-from typing import List
-from simmate.workflow_engine.supervised_staged_shell_task import S3Task
 from simmate.database.base_data_types import DatabaseTable, Calculation
+from simmate.workflow_engine import S3Task
 
 
 class Workflow(PrefectFlow):
@@ -28,7 +28,8 @@ class Workflow(PrefectFlow):
     method, which allows us to register a calculation to a database table before
     we submit the workflow to Prefect Cloud.
 
-    To learn how to use this class, see [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)
+    To learn how to use this class, see
+    [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)
     """
 
     result_task: Task = None
@@ -41,8 +42,8 @@ class Workflow(PrefectFlow):
 
     project_name: str = None
     """
-    The name of the project in the  that this workflow is associated with. This 
-    attribute is mainly just for organizing workflows in the Prefect Cloud interface.
+    The name of the project in Prefect Cloud that this workflow is associated with. This 
+    attribute is mainly just for organizing workflows in the web interface.
     """
 
     s3task: S3Task = None
@@ -76,6 +77,12 @@ class Workflow(PrefectFlow):
     """
     A quick description for this workflow. This will be shown in the website UI
     in the list-view of all different workflow presets.
+    """
+
+    register_kwargs: List[str] = []
+    """
+    (experimental feature)
+    A list of input parameters that should be used to register the calculation.
     """
 
     @property
@@ -174,8 +181,28 @@ class Workflow(PrefectFlow):
             project_name=self.project_name,
         )
 
-        # Serialize all of the parameters so they can be properly submitted
-        parameters_serialized = self._serialize_parameters(kwargs)
+        # -----------------------------------
+        # This part is unique to Simmate. Because we often want to save some info
+        # to our database even before the calculation starts/finishes, we do that
+        # here. An example is storing the structure and prefect id that we just
+        # submitted.
+        # BUG: Will there be a race condition here? What if the workflow finishes
+        # and tries writing to the databse before this is done?
+
+        # Deserialize and then Serialize all of the parameters so they can be properly submitted
+        from simmate.workflow_engine.common_tasks import load_input_and_register
+
+        parameters_deserialized = load_input_and_register.run(
+            workflow_name=self.name,
+            **kwargs,
+        )
+        parameters_serialized = self._serialize_parameters(**parameters_deserialized)
+        # NOTE: This may seem odd to deserialize right before serializing in the
+        # next line, but this is done to ensure parameters that accept file names
+        # are submitted properly. i.e -- We don't want to submit to a cluster and
+        # have the job fail because it doesn't have access to the file. Having
+        # these lines back-to-back ensures we submit with all necessary data.
+        # -----------------------------------
 
         # Now we submit the workflow
         logger.info(f"Creating flow run for {self.name}...") if logger else None
@@ -190,45 +217,12 @@ class Workflow(PrefectFlow):
         run_url = client.get_cloud_url("flow-run", flow_run_id, as_user=False)
         logger.info(f"Created flow run: {run_url}") if logger else None
 
-        # -----------------------------------
-        # This part is unique to Simmate. Because we often want to save some info
-        # to our database even before the calculation starts/finishes, we do that
-        # here. An example is storing the structure and prefect id that we just
-        # submitted.
-        # BUG: Will there be a race condition here? What if the workflow finishes
-        # and tries writing to the databse before this is done?
-        register_kwargs = {
-            key: kwargs[key] for key in kwargs if key in self.register_kwargs
-        }
-        calc = self._register_calculation(
-            flow_run_id,
-            **register_kwargs,
-        )  # !!! should I return the calc to the user?
-        # -----------------------------------
-
         # if we want to wait until the job is complete, we do that here
         if wait_for_run:
             flow_run_view = self.wait_for_flow_run(flow_run_id)
             # return flow_run_view # !!! Should I return this instead?
         # return the flow_run_id for the user
         return flow_run_id
-
-    def _register_calculation(self, flow_run_id: str, **kwargs):
-        """
-        If the workflow is linked to a calculation table in the Simmate database,
-        this adds the flow run to the Simmate database.
-
-        This method should not be called directly as it is used within the
-        run_cloud() method.
-        """
-        # If there's no calculation database table in Simmate for this workflow,
-        # just skip this step. Otherwise save/load the calculation to our table
-        if self.calculation_table:
-            calculation = self.calculation_table.from_prefect_id(
-                id=flow_run_id,
-                **kwargs,
-            )
-            return calculation
 
     def wait_for_flow_run(self, flow_run_id: str):
         """
@@ -249,7 +243,7 @@ class Workflow(PrefectFlow):
         return flow_run.get_latest()
 
     @staticmethod
-    def _serialize_parameters(parameters: dict) -> dict:
+    def _serialize_parameters(**parameters) -> dict:
         """
         Converts input parameters to json-sealiziable objects that Prefect can
         use.

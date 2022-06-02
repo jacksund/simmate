@@ -9,7 +9,6 @@ from simmate.workflows.utilities import (
     get_workflow,
     load_results_from_directories,
     get_unique_parameters,
-    parse_parameters,
 )
 
 
@@ -96,31 +95,3 @@ def test_load_results_from_directories(tmpdir):
     )
 
     load_results_from_directories(base_directory=tmpdir)
-
-
-def test_parse_parameters(mocker):
-
-    # -------
-    # We don't want to actually call these methods, but just ensure that they
-    # have been called.
-    from simmate.toolkit import Structure
-    from simmate.toolkit.diffusion import MigrationHop
-
-    mocker.patch.object(
-        Structure,
-        "from_dynamic",
-    )
-    mocker.patch.object(
-        MigrationHop,
-        "from_dynamic",
-    )
-    # -------
-
-    example_parameters = {
-        "migration_hop": None,
-        "supercell_start": None,
-        "supercell_end": None,
-        "structures": "None; None; None",
-    }
-
-    parse_parameters(**example_parameters)

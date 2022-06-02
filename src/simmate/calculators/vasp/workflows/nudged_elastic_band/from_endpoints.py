@@ -8,7 +8,7 @@ from simmate.workflow_engine.workflow import (
     ModuleStorage,
 )
 from simmate.workflow_engine.common_tasks import (
-    LoadInputAndRegister,
+    load_input_and_register,
     parse_multi_command,
 )
 
@@ -25,19 +25,11 @@ from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
 )
 
-WORKFLOW_NAME = "diffusion/from-endpoints"
-
 # Convert our workflow objects to task objects
 relax_endpoint = relaxation_neb_endpoint_workflow.to_workflow_task()
 run_neb = neb_from_images.to_workflow_task()
 
-# Extra setup tasks
-load_input_and_register = LoadInputAndRegister(
-    workflow_name=WORKFLOW_NAME,
-    input_obj_name="structure",
-)
-
-with Workflow(WORKFLOW_NAME) as workflow:
+with Workflow("diffusion/from-endpoints") as workflow:
 
     supercell_start = Parameter("supercell_start")
     supercell_end = Parameter("supercell_end")
@@ -61,39 +53,31 @@ with Workflow(WORKFLOW_NAME) as workflow:
 
     # Load our input and make a base directory for all other workflows to run
     # within for us.
-    # OPTIMIZE: is there a cleaner way to load two structures? Also,
-    # directory_cleaned is grabbed twice here.
-    supercell_start_toolkit, directory_cleaned = load_input_and_register(
-        input_obj=supercell_start,
+    parameters_cleaned = load_input_and_register(
+        supercell_start=supercell_start,
+        supercell_end=supercell_end,
         source=source,
         directory=directory,
         command=command,
         diffusion_analysis_id=diffusion_analysis_id,
     )
-    supercell_end_toolkit, directory_cleaned = load_input_and_register(
-        input_obj=supercell_end,
-        source=source,
-        directory=directory,
-        command=command,
-        diffusion_analysis_id=diffusion_analysis_id,
-    )
-    # BUG: if directory isn't supplied, then we'd be making two directories
-    # here -- and then only using the 2nd.
-    # BUG: simmate_metadata.yaml will not include the supercell_start and
-    # supercell_end it.
 
     # Relax the starting supercell structure
     run_id_00 = relax_endpoint(
-        structure=supercell_start_toolkit,
+        structure=parameters_cleaned["supercell_start"],
         command=subcommands["command_supercell"],
-        directory=directory_cleaned + os.path.sep + "endpoint_relaxation_start",
+        directory=parameters_cleaned["directory"]
+        + os.path.sep
+        + "endpoint_relaxation_start",
     )
 
     # Relax the ending supercell structure
     run_id_01 = relax_endpoint(
-        structure=supercell_end_toolkit,
+        structure=parameters_cleaned["supercell_end"],
         command=subcommands["command_supercell"],
-        directory=directory_cleaned + os.path.sep + "endpoint_relaxation_end",
+        directory=parameters_cleaned["directory"]
+        + os.path.sep
+        + "endpoint_relaxation_end",
     )
 
     images = get_migration_images_from_endpoints(
@@ -113,16 +97,15 @@ with Workflow(WORKFLOW_NAME) as workflow:
     run_id_02 = run_neb(
         migration_images=images,
         command=subcommands["command_neb"],
-        source=source,
-        directory=directory_cleaned,
-        diffusion_analysis_id=diffusion_analysis_id,
+        source=parameters_cleaned["source"],
+        directory=parameters_cleaned["directory"],
+        diffusion_analysis_id=parameters_cleaned["diffusion_analysis_id"],
     )
 
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
 # workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet
-# workflow.register_kwargs = ["prefect_flow_run_id"]
 workflow.result_table = MITDiffusionAnalysis
 workflow.s3tasks = [
     relaxation_neb_endpoint_workflow.s3task,

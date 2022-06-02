@@ -1,29 +1,37 @@
 # -*- coding: utf-8 -*-
 
 import prefect
-from prefect import Task
+from prefect import task
 
 
-class SaveOutputTask(Task):
-    def __init__(self, calculation_table, **kwargs):
-        self.calculation_table = calculation_table
-        super().__init__(**kwargs)
+@task
+def save_result(result):
+    # ---------------------------------------------------------------------
 
-    def run(self, output):
+    # Grab the workflow object as we need to reference some of its attributes
 
-        # split our results and corrections (which are given as a dict) into
-        # separate variables
-        vasprun = output["result"]
-        corrections = output["corrections"]
-        directory = output["directory"]
+    # BUG: for some reason, this script fails when get_workflow is imported
+    # at the top of this file rather than here.
+    from simmate.workflows.utilities import get_workflow
 
-        # load the calculation entry for this workflow run. This should already
-        # exist thanks to the load_input_and_register task.
-        calculation = self.calculation_table.from_prefect_id(
-            prefect.context.flow_run_id,
-        )
+    workflow_name = prefect.context.get("flow_name")
+    workflow = get_workflow(workflow_name)
 
-        # now update the calculation entry with our results
-        calculation.update_from_vasp_run(vasprun, corrections, directory)
+    # ---------------------------------------------------------------------
 
-        return calculation.id
+    # split our results and corrections (which are given as a dict) into
+    # separate variables
+    vasprun = result["result"]
+    corrections = result["corrections"]
+    directory = result["directory"]
+
+    # load the calculation entry for this workflow run. This should already
+    # exist thanks to the load_input_and_register task.
+    calculation = workflow.calculation_table.from_prefect_id(
+        prefect.context.flow_run_id,
+    )
+
+    # now update the calculation entry with our results
+    calculation.update_from_vasp_run(vasprun, corrections, directory)
+
+    return calculation.id

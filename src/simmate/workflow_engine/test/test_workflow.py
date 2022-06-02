@@ -5,7 +5,8 @@ import pytest
 from prefect import Client
 from prefect.backend import flow_run
 
-from simmate.workflow_engine.workflow import Workflow, task, Parameter
+from simmate.workflow_engine import Workflow, task, Parameter
+from simmate.workflow_engine.common_tasks import load_input_and_register
 from simmate.website.test_app.models import TestStructureCalculation
 
 
@@ -25,7 +26,7 @@ with Workflow("dummy-flowtype/dummy-flow") as DUMMY_FLOW:
     dummy_task_1(source)
     dummy_task_2(structure)
 DUMMY_FLOW.calculation_table = TestStructureCalculation
-DUMMY_FLOW.register_kwargs = ["prefect_flow_run_id", "source", "structure"]
+DUMMY_FLOW.register_kwargs = ["source", "structure"]
 
 
 def test_workflow():
@@ -88,6 +89,9 @@ def test_workflow_cloud(mocker, sample_structures):
         "watch_flow_run",
         return_value=[DummyMessage(), DummyMessage(), DummyMessage()],
     )
+    mocker.patch.object(
+        load_input_and_register, "run", return_value={"structure": structure}
+    )
     # -----------------
 
     # Run the workflow through prefect cloud
@@ -116,7 +120,35 @@ def test_serialize_parameters():
         a=TestParameter1(),
         b=TestParameter2(),
     )
-    Workflow._serialize_parameters(parameters)
+    Workflow._serialize_parameters(**parameters)
+
+
+def test_deserialize_parameters(mocker):
+
+    # -------
+    # We don't want to actually call these methods, but just ensure that they
+    # have been called.
+    from simmate.toolkit import Structure
+    from simmate.toolkit.diffusion import MigrationHop
+
+    mocker.patch.object(
+        Structure,
+        "from_dynamic",
+    )
+    mocker.patch.object(
+        MigrationHop,
+        "from_dynamic",
+    )
+    # -------
+
+    example_parameters = {
+        "migration_hop": None,
+        "supercell_start": None,
+        "supercell_end": None,
+        "structures": "None; None; None",
+    }
+
+    Workflow._serialize_parameters(**example_parameters)
 
 
 def test_parameter_names():

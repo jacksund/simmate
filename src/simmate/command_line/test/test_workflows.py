@@ -118,8 +118,9 @@ def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
     )
     assert result.exit_code == 0
     Workflow.run.assert_called_with(
-        structure=structure,
+        structure=cif_filename,
         directory=new_dirname,
+        command=None,
     )
 
     # ensure failure on improperly matched kwargs
@@ -153,8 +154,9 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
     )
     assert result.exit_code == 0
     Workflow.run_cloud.assert_called_with(
-        structure=structure,
+        structure=cif_filename,
         directory=new_dirname,
+        command=None,
     )
 
 
@@ -191,6 +193,6 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
     )
     assert result.exit_code == 0
     Workflow.run.assert_called_with(
-        structure=structure,
+        structure=cif_filename,
         directory=new_dirname,
     )

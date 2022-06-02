@@ -131,4 +131,3 @@ workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"
 workflow.calculation_table = StagedRelaxation
 workflow.result_table = Quality04StaticEnergy
-workflow.register_kwargs = ["prefect_flow_run_id"]

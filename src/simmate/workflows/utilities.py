@@ -12,9 +12,6 @@ import shutil
 
 from importlib import import_module
 
-from simmate.toolkit import Structure
-from simmate.toolkit.diffusion import MigrationHop
-
 from simmate.utilities import get_directory, make_archive
 from simmate.workflow_engine import Workflow, S3Task
 
@@ -270,83 +267,3 @@ def get_unique_parameters() -> List[str]:
     unique_parameters.sort()
 
     return unique_parameters
-
-
-# TODO: what if I called this within the workflow.run method instead?
-# I could have a `_parse_parameters` method for each Workflow class that does this
-# right before calling super().run() too
-def parse_parameters(**kwargs) -> dict:
-    """
-    This utility is meant to take a dictionary of parameters for a workflow and
-    then convert them to proper python objects.
-
-    For example, a common input parameter for workflows is "structure", which
-    can be provided a number of ways:
-        - a filename
-        - a json string
-        - a dictionary pointing to a database entry
-        - a toolkit Structure object
-        - etc...
-
-    Even though all of these inputs are accepted, `workflow.run` always expects
-    python objects, so this utility converts them.
-    """
-
-    # we don't want to pass arguments like command=None or structure=None if the
-    # user didn't provide this input parameter. Instead, we want the workflow to
-    # use its own default value. To do this, we first check if the parameter
-    # is set in our kwargs dictionary and making sure the value is NOT None.
-    # If it is None, then we remove it from our final list of kwargs. This
-    # is only done for command, directory, and structure inputs -- as these
-    # are the three that are typically assumed to be present (see the CLI).
-
-    if not kwargs.get("command", None):
-        kwargs.pop("command", None)
-
-    if not kwargs.get("directory", None):
-        kwargs.pop("directory", None)
-
-    structure = kwargs.get("structure", None)
-    if structure:
-        kwargs["structure"] = Structure.from_dynamic(structure)
-    else:
-        kwargs.pop("structure", None)
-
-    if "structures" in kwargs.keys():
-        structure_filenames = kwargs["structures"].split(";")
-        kwargs["structures"] = [
-            Structure.from_dynamic(file) for file in structure_filenames
-        ]
-
-    if "migration_hop" in kwargs.keys():
-        migration_hop = MigrationHop.from_dynamic(kwargs["migration_hop"])
-        kwargs["migration_hop"] = migration_hop
-
-    if "supercell_start" in kwargs.keys():
-        kwargs["supercell_start"] = Structure.from_dynamic(kwargs["supercell_start"])
-
-    if "supercell_end" in kwargs.keys():
-        kwargs["supercell_end"] = Structure.from_dynamic(kwargs["supercell_end"])
-
-    # lastly, for customized workflows, we need to completely change the format
-    # that we provide the parameters. Customized workflows expect parameters
-    # broken into a dictionary of
-    #   {"workflow_base": ..., "input_parameters":..., "updated_settings": ...}
-    # The
-    if "workflow_base" in kwargs.keys():
-
-        kwargs["workflow_base"] = get_workflow(kwargs["workflow_base"])
-        kwargs["input_parameters"] = {}
-        kwargs["updated_settings"] = {}
-
-        for key, update_values in list(kwargs.items()):
-            if key in ["workflow_base", "input_parameters", "updated_settings"]:
-                continue
-            elif not key.startswith("custom__"):
-                kwargs["input_parameters"][key] = kwargs.pop(key)
-            # Otherwise remove the prefix and add it to the custom settings.
-            else:
-                key_cleaned = key.removeprefix("custom__")
-                kwargs["updated_settings"][key_cleaned] = kwargs.pop(key)
-
-    return kwargs

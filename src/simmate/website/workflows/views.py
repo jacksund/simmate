@@ -11,7 +11,6 @@ from simmate.workflows.utilities import (
     # WORKFLOW_TYPES,
     get_workflow,
     get_list_of_workflows_by_type,
-    parse_parameters,
 )
 from simmate.website.workflows.forms import SubmitWorkflow
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
@@ -162,23 +161,16 @@ def workflow_submit(
     if request.method == "POST":
         submission_form = FormClass(request.POST, request.FILES)
 
+        # To help with debugging:
         # raise Exception(str(submission_form.errors))
 
         if submission_form.is_valid():
 
-            # raise Exception("TEST123")
-
-            parameters = parse_parameters(**submission_form.cleaned_data)
-
-            # use parse_parameters util?
-
-            # grab the structure (as a pymatgen object) and all other inputs
-            # structure = submission_form.cleaned_data["structure_file"]
-            # labels = submission_form.cleaned_data["labels"]
-            # vasp_command = submission_form.cleaned_data["vasp_command"]
-
             # We can now submit the workflow for the structure.
-            flow_run_id = workflow.run_cloud(wait_for_run=False, **parameters)
+            flow_run_id = workflow.run_cloud(
+                wait_for_run=False,
+                **submission_form.cleaned_data,
+            )
 
             return redirect(f"https://cloud.prefect.io/simmate/flow-run/{flow_run_id}")
     else:

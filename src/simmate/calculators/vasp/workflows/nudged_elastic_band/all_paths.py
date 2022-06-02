@@ -33,7 +33,7 @@ from simmate.workflow_engine.workflow import (
     ModuleStorage,
 )
 from simmate.workflow_engine.common_tasks import (
-    LoadInputAndRegister,
+    load_input_and_register,
     parse_multi_command,
 )
 from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
@@ -54,26 +54,19 @@ from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
 )
 
-workflow_name = "diffusion/all-paths"
-
 # Convert our workflow objects to task objects
 relax_bulk = relaxation_mit_workflow.to_workflow_task()
 energy_bulk = energy_mit_workflow.to_workflow_task()
 run_neb = neb_workflow.to_workflow_task()
 
 # Extra setup tasks
-load_input_and_register = LoadInputAndRegister(
-    workflow_name=workflow_name,
-    input_obj_name="structure",
-)  # TODO: make MigrationHop a calc so we can use calculation_table?
-
 build_db = BuildDiffusionAnalysisTask(MITDiffusionAnalysis)
 
 # ------------------------
 
 # TODO: Prefect isn't able to do this for-loop. I may need to ask them how
-# to map this kind of input. Hopefully this changes with Prefect Orion. This is
-# the code that would be in the workflow context:
+# to map this kind of input. Hopefully this changes with Prefect 2.0 (Orion).
+# This is the code that would be in the workflow context:
 #
 # for i, hop_id in enumerate(migration_hop_ids):
 #     run_neb(
@@ -122,7 +115,7 @@ def map_neb(migration_hop_id: int, directory: str, subcommands: dict):
 # ------------------------
 
 
-with Workflow(workflow_name) as workflow:
+with Workflow("diffusion/all-paths") as workflow:
 
     structure = Parameter("structure")
     migrating_specie = Parameter("migrating_specie")
@@ -144,8 +137,8 @@ with Workflow(workflow_name) as workflow:
 
     # Load our input and make a base directory for all other workflows to run
     # within for us.
-    structure_toolkit, directory_cleaned = load_input_and_register(
-        input_obj=structure,
+    parameters_cleaned = load_input_and_register(
+        structure=structure,
         source=source,
         directory=directory,
         command=command,
@@ -155,9 +148,9 @@ with Workflow(workflow_name) as workflow:
     # Our step is to run a relaxation on the bulk structure and it uses our inputs
     # directly. The remaining one tasks pass on results.
     run_id_00 = relax_bulk(
-        structure=structure_toolkit,
+        structure=parameters_cleaned["structure"],
         command=subcommands["command_bulk"],
-        directory=directory_cleaned + os.path.sep + "bulk_relaxation",
+        directory=parameters_cleaned["directory"] + os.path.sep + "bulk_relaxation",
     )
 
     # A static energy calculation on the relaxed structure. This isn't necessarily
@@ -169,7 +162,7 @@ with Workflow(workflow_name) as workflow:
             "structure_field": "structure_final",
         },
         command=subcommands["command_bulk"],
-        directory=directory_cleaned + os.path.sep + "bulk_static_energy",
+        directory=parameters_cleaned["directory"] + os.path.sep + "bulk_static_energy",
     )
 
     # This step does NOT run any calculation, but instead, identifies all
@@ -180,7 +173,7 @@ with Workflow(workflow_name) as workflow:
             "directory": run_id_01["directory"],
         },
         migrating_specie=migrating_specie,
-        directory=directory_cleaned,
+        directory=parameters_cleaned["directory"],
         vacancy_mode=True,  # assumed for now
     )
 
@@ -188,7 +181,9 @@ with Workflow(workflow_name) as workflow:
     apply_map(
         map_neb,  # the task that we are mapping
         migration_hop_id=migration_hop_ids,  # this input is mapped
-        directory=unmapped(directory_cleaned),  # this input will be constant
+        directory=unmapped(
+            parameters_cleaned["directory"]
+        ),  # this input will be constant
         subcommands=unmapped(subcommands),  # this input will be constant
     )
 
@@ -196,7 +191,6 @@ with Workflow(workflow_name) as workflow:
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
 # workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet
-# workflow.register_kwargs = ["prefect_flow_run_id"]
 workflow.result_table = MITDiffusionAnalysis
 workflow.s3tasks = [
     relaxation_mit_workflow.s3task,

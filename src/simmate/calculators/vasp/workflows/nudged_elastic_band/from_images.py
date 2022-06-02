@@ -2,7 +2,7 @@
 
 # NOTE TO DEVS: This workflow is very close to those made by s3task_to_workflow
 # but there are some key differences, which is why we manually make the workflow
-# here. Most notably, there is no "structures" parameter here -- instead, this
+# here. Most notably, there is no "structure" parameter here -- instead, this
 # flow takes migration_images. The fact that we are passing multiple structures
 # changes the naming of some variables in the workflow. For example, we use
 # neb_task(structures=...) instead of s3task(structure=...). Further, we also
@@ -10,14 +10,12 @@
 # NEB workflows (where many images/hops are linked together). These parameters
 # are used in saving the results.
 
-from simmate.toolkit.diffusion import MigrationImages
-
 from simmate.workflow_engine.workflow import (
     Workflow,
     Parameter,
     ModuleStorage,
 )
-from simmate.workflow_engine.common_tasks import LoadInputAndRegister
+from simmate.workflow_engine.common_tasks import load_input_and_register
 from simmate.calculators.vasp.tasks.nudged_elastic_band import MITNudgedElasticBand
 from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
@@ -28,20 +26,14 @@ from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
     SaveNEBOutputTask,
 )
 
-WORKFLOW_NAME = "diffusion/from-images"
-
 neb_task = MITNudgedElasticBand()
-load_input_and_register = LoadInputAndRegister(
-    workflow_name=WORKFLOW_NAME,
-    input_obj_name="migration_images",
-)
 save_results = SaveNEBOutputTask(
     MITDiffusionAnalysis,
     MITMigrationHop,
     MITMigrationImage,
 )
 
-with Workflow(WORKFLOW_NAME) as workflow:
+with Workflow("diffusion/from-images") as workflow:
 
     migration_images = Parameter("migration_images")
     command = Parameter("command", default="vasp_std > vasp.out")
@@ -55,17 +47,18 @@ with Workflow(WORKFLOW_NAME) as workflow:
 
     # Load our input and make a base directory for all other workflows to run
     # within for us.
-    migration_images_toolkit, directory_cleaned = load_input_and_register(
-        input_obj=migration_images,
-        input_class=MigrationImages,
+    parameters_cleaned = load_input_and_register(
+        migration_images=migration_images,
         source=source,
         directory=directory,
+        command=command,
+        register_run=False,  # temporary fix bc no calc table exists yet
     )
 
     output = neb_task(
-        structures=migration_images_toolkit,
-        command=command,
-        directory=directory_cleaned,
+        structures=parameters_cleaned["migration_images"],
+        command=parameters_cleaned["command"],
+        directory=parameters_cleaned["directory"],
     )
 
     calculation_id = save_results(
@@ -79,7 +72,6 @@ workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
 workflow.calculation_table = MITMigrationImage
 workflow.result_table = MITMigrationImage
-workflow.register_kwargs = ["prefect_flow_run_id"]
 workflow.result_task = output
 workflow.s3task = neb_task
 # workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet

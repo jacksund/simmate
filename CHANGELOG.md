@@ -14,7 +14,10 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 # Upcoming Release
 > :bulb: for ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
-- no changes merged yet
+- condense where parsing/deserialization of workflow parameters occurs to the refactored the `load_input_and_register` task. Originally, this would occur in multiple places (e.g. in the CLI module before submission, in the workflow run_cloud method, in the LoadInputAndRegister task, etc.) and involved boilerplate code. ([#173](https://github.com/jacksund/simmate/pull/173))
+- refactor experimental features `register_kwargs` and `customized` workflows
+- refactor `LoadInputAndRegister` and `SaveOutputTask` to `load_input_and_register` and `save_result`
+- fix bug where `source` is not determined with yaml-file submissions ([#172](https://github.com/jacksund/simmate/issues/172))
 
 
 # v0.5.0 (2022.05.30)
