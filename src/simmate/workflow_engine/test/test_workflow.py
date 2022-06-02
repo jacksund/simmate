@@ -26,7 +26,7 @@ with Workflow("dummy-flowtype/dummy-flow") as DUMMY_FLOW:
     dummy_task_1(source)
     dummy_task_2(structure)
 DUMMY_FLOW.calculation_table = TestStructureCalculation
-DUMMY_FLOW.register_kwargs = ["prefect_flow_run_id", "source", "structure"]
+DUMMY_FLOW.register_kwargs = ["source", "structure"]
 
 
 def test_workflow():

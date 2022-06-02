@@ -15,6 +15,9 @@ from simmate.utilities import get_directory
 # OPTIMIZE: consider splitting this task into load_structure, load_directory,
 # and register_calc so that our flow_visualize looks cleaner
 
+# OPTIMIZE: Customized workflows cause a lot of special handling in this task
+# so it may be worth isolating these into a separate task.
+
 
 @task
 def load_input_and_register(register_run=True, **parameters: Any) -> dict:
@@ -87,72 +90,21 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # is only done for command, directory, and structure inputs -- as these
     # are the three that are typically assumed to be present (see the CLI).
 
-    parameters_cleaned = parameters.copy()
+    parameters_cleaned = deserialize_parameters(parameters)
 
-    if not parameters.get("command", None):
-        parameters_cleaned.pop("command", None)
-
-    if not parameters.get("directory", None):
-        parameters_cleaned.pop("directory", None)
-
-    structure = parameters.get("structure", None)
-    if structure:
-        parameters_cleaned["structure"] = Structure.from_dynamic(structure)
-    else:
-        parameters_cleaned.pop("structure", None)
-
-    if "structures" in parameters.keys():
-        structure_filenames = parameters["structures"].split(";")
-        parameters_cleaned["structures"] = [
-            Structure.from_dynamic(file) for file in structure_filenames
-        ]
-
-    if "migration_hop" in parameters.keys():
-        migration_hop = MigrationHop.from_dynamic(parameters["migration_hop"])
-        parameters_cleaned["migration_hop"] = migration_hop
-
-    if "migration_images" in parameters.keys():
-        migration_images = MigrationImages.from_dynamic(parameters["migration_images"])
-        parameters_cleaned["migration_images"] = migration_images
-
-    if "supercell_start" in parameters.keys():
-        parameters_cleaned["supercell_start"] = Structure.from_dynamic(
-            parameters["supercell_start"]
-        )
-
-    if "supercell_end" in parameters.keys():
-        parameters_cleaned["supercell_end"] = Structure.from_dynamic(
-            parameters["supercell_end"]
-        )
-
-    # lastly, for customized workflows, we need to completely change the format
-    # that we provide the parameters. Customized workflows expect parameters
-    # broken into a dictionary of
-    #   {"workflow_base": ..., "input_parameters":..., "updated_settings": ...}
-    # The
+    #######
+    # SPECIAL CASE: customized workflows have their parameters stored under
+    # "input_parameters" instead of the base dict
     if "workflow_base" in parameters.keys():
-
         # This is a non-modular import that can cause issues and slower
         # run times. We therefore import lazily.
         from simmate.workflows.utilities import get_workflow
 
         parameters_cleaned["workflow_base"] = get_workflow(parameters["workflow_base"])
-        parameters_cleaned["input_parameters"] = {}
-        parameters_cleaned["updated_settings"] = {}
-
-        for key, update_values in list(parameters.items()):
-            if key in ["workflow_base", "input_parameters", "updated_settings"]:
-                continue
-            elif not key.startswith("custom__"):
-                parameters_cleaned["input_parameters"][key] = parameters_cleaned.pop(
-                    key
-                )
-            # Otherwise remove the prefix and add it to the custom settings.
-            else:
-                key_cleaned = key.removeprefix("custom__")
-                parameters_cleaned["updated_settings"][
-                    key_cleaned
-                ] = parameters_cleaned.pop(key)
+        parameters_cleaned["input_parameters"] = deserialize_parameters(
+            parameters["input_parameters"]
+        )
+    #######
 
     # ---------------------------------------------------------------------
 
@@ -245,7 +197,11 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
         # filesystem names (e.g. "WarWulf") to know where to connect.
 
     if "directory" in workflow.parameter_names:
-        parameters_cleaned["directory"] = directory_cleaned
+        # SPECIAL CASE for customized flows
+        if "workflow_base" not in parameters_cleaned:
+            parameters_cleaned["directory"] = directory_cleaned
+        else:
+            parameters_cleaned["input_parameters"]["directory"] = directory_cleaned
 
     # ---------------------------------------------------------------------
 
@@ -275,49 +231,45 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
 
     # STEP 4: Register the calculation so the user can follow along in the UI.
 
-    # TODO: replace this step with the self._register_calculation method
-    # register_kwargs = {
-    #     key: kwargs[key] for key in kwargs if key in self.register_kwargs
-    # }
-    # calc = self._register_calculation(
-    #     flow_run_id,
-    #     **register_kwargs,
-    # )  # !!! should I return the calc to the user?
-
-    # def _register_calculation(self, flow_run_id: str, **kwargs):
-    #     """
-    #     If the workflow is linked to a calculation table in the Simmate database,
-    #     this adds the flow run to the Simmate database.
-
-    #     This method should not be called directly as it is used within the
-    #     run_cloud() method.
-    #     """
-    #     # If there's no calculation database table in Simmate for this workflow,
-    #     # just skip this step. Otherwise save/load the calculation to our table
-    #     if self.calculation_table:
-    #         calculation = self.calculation_table.from_prefect_id(
-    #             id=flow_run_id,
-    #             **kwargs,
-    #         )
-    #         return calculation
-
     # This is only done if a table is provided. Some special-case workflows
     # don't store calculation information bc the flow is just a quick python
     # analysis.
+
     if register_run and workflow.calculation_table:
+
+        # grab the registration kwargs from the parameters provided
+        register_kwargs = {
+            key: parameters_cleaned.get(key, None) for key in workflow.register_kwargs
+        }
+
+        # SPECIAL CASE: for customized workflows we need to convert the inputs
+        # back to json for saving to the database. I just use original inputs
+        # for now.
+        register_kwargs = (
+            register_kwargs if "workflow_base" not in parameters_cleaned else parameters
+        )
+
         # load/create the calculation for this workflow run
         calculation = workflow.calculation_table.from_prefect_id(
             id=prefect_flow_run_id,
-            # We pass the initial primiary input in case the calculation wasn't created
-            # yet (and creation requires the structure)
-            # BUG: does this catch other inputs like "migration_hop"?
-            structure=primary_input_cleaned,
-            source=source_cleaned,
+            **register_kwargs
+            if "workflow_base" not in parameters_cleaned
+            else parameters,
         )
 
     # ---------------------------------------------------------------------
 
     # STEP 5: Write metadata file for user reference
+
+    # convert back to json format. We convert back rather than use the original
+    # to ensure the input data is all present. For example, we want to store
+    # structure data instead of a filename in the metadata.
+    # SPECIAL CASE: "if ..." used to catch customized workflows
+    parameters_serialized = (
+        workflow._serialize_parameters(**parameters_cleaned)
+        if "workflow_base" not in parameters_cleaned
+        else parameters
+    )
 
     # We want to write a file summarizing the inputs used for this
     # workflow run. This allows future users to reproduce the results if
@@ -326,7 +278,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
         workflow_name=workflow.name,
         # this ID is ingored as an input but needed for loading past data
         prefect_flow_run_id=prefect_flow_run_id,
-        **workflow._serialize_parameters(**parameters_cleaned),
+        **parameters_serialized,
     )
 
     # now write the summary to file in the same directory as the calc.
@@ -339,4 +291,47 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
 
     # Finally we just want to return the dictionary of cleaned parameters
     # to be used by the workflow
+    return parameters_cleaned
+
+
+def deserialize_parameters(parameters: dict) -> dict:
+
+    parameters_cleaned = parameters.copy()
+
+    if not parameters.get("command", None):
+        parameters_cleaned.pop("command", None)
+
+    if not parameters.get("directory", None):
+        parameters_cleaned.pop("directory", None)
+
+    structure = parameters.get("structure", None)
+    if structure:
+        parameters_cleaned["structure"] = Structure.from_dynamic(structure)
+    else:
+        parameters_cleaned.pop("structure", None)
+
+    if "structures" in parameters.keys():
+        structure_filenames = parameters["structures"].split(";")
+        parameters_cleaned["structures"] = [
+            Structure.from_dynamic(file) for file in structure_filenames
+        ]
+
+    if "migration_hop" in parameters.keys():
+        migration_hop = MigrationHop.from_dynamic(parameters["migration_hop"])
+        parameters_cleaned["migration_hop"] = migration_hop
+
+    if "migration_images" in parameters.keys():
+        migration_images = MigrationImages.from_dynamic(parameters["migration_images"])
+        parameters_cleaned["migration_images"] = migration_images
+
+    if "supercell_start" in parameters.keys():
+        parameters_cleaned["supercell_start"] = Structure.from_dynamic(
+            parameters["supercell_start"]
+        )
+
+    if "supercell_end" in parameters.keys():
+        parameters_cleaned["supercell_end"] = Structure.from_dynamic(
+            parameters["supercell_end"]
+        )
+
     return parameters_cleaned

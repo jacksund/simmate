@@ -21,7 +21,7 @@ prebader_workflow = s3task_to_workflow(
     project_name="Simmate-PopulationAnalysis",
     s3task=MPPreBaderTask,
     calculation_table=MPBaderResults,
-    register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    register_kwargs=["structure", "source"],
     description_doc_short="uses Materials Project settings with denser FFT grid",
 )
 
@@ -76,7 +76,7 @@ workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-PopulationAnalysis"
 workflow.calculation_table = MPBaderResults
 workflow.result_table = MPBaderResults
-workflow.register_kwargs = ["prefect_flow_run_id", "structure", "source"]
+workflow.register_kwargs = ["structure", "source"]
 workflow.result_task = bader_result
 workflow.s3tasks = [MPPreBaderTask, BaderAnalysisTask]
 

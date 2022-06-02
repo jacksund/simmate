@@ -72,7 +72,6 @@ workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
 workflow.calculation_table = MITMigrationImage
 workflow.result_table = MITMigrationImage
-workflow.register_kwargs = ["prefect_flow_run_id"]
 workflow.result_task = output
 workflow.s3task = neb_task
 # workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet

@@ -211,7 +211,7 @@ example_workflow = s3task_to_workflow(
     project_name="Simmate-Relaxation",
     s3task=ExampleRelaxationTable,
     calculation_table=MyCustomTable,
-    register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    register_kwargs=["structure", "source"],
 )
 
 # Running the workflow acts exactly like how we ran the task, except now 

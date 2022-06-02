@@ -3,7 +3,7 @@
 import json
 import cloudpickle
 import yaml
-from typing import List, Any, Union
+from typing import List
 
 # note: extra modules are imported from prefect for convenience imports elsewhere
 import prefect
@@ -77,6 +77,12 @@ class Workflow(PrefectFlow):
     """
     A quick description for this workflow. This will be shown in the website UI
     in the list-view of all different workflow presets.
+    """
+
+    register_kwargs: List[str] = []
+    """
+    (experimental feature)
+    A list of input parameters that should be used to register the calculation.
     """
 
     @property

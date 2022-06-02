@@ -14,6 +14,6 @@ workflow = s3task_to_workflow(
     project_name="Simmate-Energy",
     s3task=NEBEndpointStaticEnergyTask,
     calculation_table=NEBEndpointStaticEnergyResults,
-    register_kwargs=["prefect_flow_run_id", "structure", "source"],
+    register_kwargs=["structure", "source"],
     description_doc_short="uses Materials Project settings meant for defect supercell structures",
 )

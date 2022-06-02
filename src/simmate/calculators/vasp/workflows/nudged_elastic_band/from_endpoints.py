@@ -106,7 +106,6 @@ with Workflow("diffusion/from-endpoints") as workflow:
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
 # workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet
-# workflow.register_kwargs = ["prefect_flow_run_id"]
 workflow.result_table = MITDiffusionAnalysis
 workflow.s3tasks = [
     relaxation_neb_endpoint_workflow.s3task,

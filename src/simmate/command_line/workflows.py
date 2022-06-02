@@ -380,20 +380,50 @@ def run_yaml(filename):
     import yaml
 
     with open(filename) as file:
-        kwargs = yaml.full_load(file)
+        parameters = yaml.full_load(file)  # this is updated below
 
     from simmate.workflows.utilities import get_workflow
 
     workflow = get_workflow(
         # we pop the workflow name so that it is also removed from the rest of kwargs
-        workflow_name=kwargs.pop("workflow_name"),
+        workflow_name=parameters.pop("workflow_name"),
         precheck_flow_exists=True,
         print_equivalent_import=True,
     )
 
+    # -------------------------------------------------------------------------
+
+    # SPECIAL CASE -- Running customized workflows from yaml.
+    # !!! When prefect 2.0 is available, I will be able to use **kwargs as an
+    # input for workflow parameters -- in which case, I can move this functionality
+    # to load_input_and_register.
+
+    # For customized workflows, we need to completely change the format
+    # that we provide the parameters. Customized workflows expect parameters
+    # broken into a dictionary of
+    #   {"workflow_base": ..., "input_parameters":..., "updated_settings": ...}
+    if "workflow_base" in parameters.keys():
+
+        parameters["input_parameters"] = {}
+        parameters["updated_settings"] = {}
+
+        for key, update_values in list(parameters.items()):
+            # Skip the base keys
+            if key in ["workflow_base", "input_parameters", "updated_settings"]:
+                continue
+            # if there is no prefix, then we have a normal input parameter
+            elif not key.startswith("custom__"):
+                parameters["input_parameters"][key] = parameters.pop(key)
+            # Otherwise remove the prefix and add it to the custom settings.
+            else:
+                key_cleaned = key.removeprefix("custom__")
+                parameters["updated_settings"][key_cleaned] = parameters.pop(key)
+
+    # -------------------------------------------------------------------------
+
     click.echo("RUNNING WORKFLOW...")
 
-    result = workflow.run(**kwargs)
+    result = workflow.run(**parameters)
 
     # Let the user know everything succeeded
     if result.is_successful():
