@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine import Workflow, Parameter, ModuleStorage
+from typing import List
+
+from simmate.workflow_engine import Workflow, Parameter, ModuleStorage, S3Task
 from simmate.workflow_engine.common_tasks import (
-    LoadInputAndRegister,
+    load_input_and_register,
     SaveOutputTask,
 )
-
-from typing import List
-from simmate.workflow_engine.supervised_staged_shell_task import S3Task
 from simmate.database.base_data_types import Calculation
 
 
@@ -38,11 +37,6 @@ def s3task_to_workflow(
     """
 
     s3task_obj = s3task()  # Use defaults
-    load_input_and_register = LoadInputAndRegister(
-        workflow_name=name,
-        input_obj_name="structure",
-        calculation_table=calculation_table,
-    )
     save_results = SaveOutputTask(calculation_table)
 
     with Workflow(name) as workflow:
@@ -52,18 +46,20 @@ def s3task_to_workflow(
         directory = Parameter("directory", default=None)
         copy_previous_directory = Parameter("copy_previous_directory", default=False)
 
-        structure_toolkit, directory_cleaned = load_input_and_register(
-            input_obj=structure,
+        parameters_cleaned = load_input_and_register(
+            structure=structure,
             command=command,
             source=source,
             directory=directory,
             copy_previous_directory=copy_previous_directory,
         )
+
         output = s3task_obj(
-            structure=structure_toolkit,
-            command=command,
-            directory=directory_cleaned,
+            structure=parameters_cleaned["structure"],
+            command=parameters_cleaned["command"],
+            directory=parameters_cleaned["directory"],
         )
+
         calculation_id = save_results(output=output)
 
     workflow.storage = ModuleStorage(module)

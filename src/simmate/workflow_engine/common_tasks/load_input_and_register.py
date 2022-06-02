@@ -3,202 +3,339 @@
 import os
 import shutil
 import yaml
+from typing import Any
 
 import prefect
-from prefect import Task
+from prefect import task
 
-from simmate.utilities import get_directory
 from simmate.toolkit import Structure
-from simmate.database.base_data_types import DatabaseTable
-
-from typing import Tuple, Any
+from simmate.toolkit.diffusion import MigrationHop, MigrationImages
+from simmate.utilities import get_directory
 
 # OPTIMIZE: consider splitting this task into load_structure, load_directory,
 # and register_calc so that our flow_visualize looks cleaner
 
 
-class LoadInputAndRegister(Task):
-    def __init__(
-        self,
-        workflow_name: str = None,
-        input_obj_name: str = None,
-        calculation_table: DatabaseTable = None,
-        **kwargs,
-    ):
-        self.workflow_name = workflow_name
-        self.input_obj_name = input_obj_name
-        self.calculation_table = calculation_table  # If None, registration is skipped
-        super().__init__(**kwargs)
+@task
+def load_input_and_register(register_run=True, **parameters: Any) -> dict:
+    """
+    How the input was submitted as a parameter depends on if we are submitting
+    to Prefect Cloud, running the flow locally, or even continuing from a
+    previous calculation.  Here, we use a task to convert the input to a toolkit
+    object and (if requested) provide the directory as well.
 
-    def run(
-        self,
-        input_obj: Any,
-        input_class: Any = Structure,
-        source: dict = None,
-        directory: str = None,
-        copy_previous_directory: bool = False,
-        **kwargs: Any,
-    ) -> Tuple[Structure, str]:
-        """
-        How the input was submitted as a parameter depends on if we are submitting
-        to Prefect Cloud, running the flow locally, or even continuing from a
-        previous calculation.  Here, we use a task to convert the input to a toolkit
-        object and (if requested) provide the directory as well.
+    For example, a common input parameter for workflows is "structure", which
+    can be provided a number of ways:
+        - a filename
+        - a json string
+        - a dictionary pointing to a database entry
+        - a toolkit Structure object
+        - etc...
+    Even though all of these inputs are accepted, `workflow.run` always expects
+    python objects, so this utility converts the input to a toolkit Structure
+    object.
 
-        input_class is any class that has a from_dynamic method accepts the
-        input_obj format. In the large majority of cases, this is just
-        a Structure object so we use that as the default.
+    `register_run` allows us to skip the database step if the calculation_table
+    isn't properly set yet. This input is a temporary fix for the
+    diffusion/from-images workflow.
 
-        directory is optional
+    `copy_previous_directory` is only used when we are pulling a structure from a
+    previous calculation. If copy_previous_directory=True, then the directory
+    parameter is ignored.
 
-        copy_previous_directory is only used when we are pulling a structure from a
-        previous calculation. If copy_previous_directory=True, then the directory
-        parameter is ignored.
+    `**parameters` includes all parameters and anything extra that you want saved
+    to simmate_metadata.yaml
+    """
 
-        **kwargs is anything extra that you want saved to simmate_metadata.yaml
-        """
+    # !!! This function needs a refactor that is waiting on prefect 2.0.
+    # In the future, this will be broken into smaller methods and utilities.
+    # Prefect 2.0 will allow us to do more pythonic things such as...
+    # @flow
+    # def example_workflow(**kwargs):
+    #     # NOT a prefect task but a normal function
+    #     kwargs_cleaned = serialize_parameters(**kwargs)
+    #
+    #     # a prefect task
+    #     result = some_prefect_task(**kwargs_cleaned)
 
-        # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
 
-        # First we load the structure to a toolkit structure object
+    # Grab the workflow object as we need to reference some of its attributes
 
-        input_cleaned = input_class.from_dynamic(input_obj)
+    # BUG: for some reason, this script fails when get_workflow is imported
+    # at the top of this file rather than here.
+    from simmate.workflows.utilities import get_workflow
 
-        # -------------------------------------------------------------------------
+    workflow_name = prefect.context.get("flow_name") or parameters.get("workflow_name")
+    if not workflow_name:
+        raise Exception("Unknown workflow")
 
-        # Now let's load the directory
+    workflow = get_workflow(workflow_name)
 
-        # Start by creating a new directory or grabbing the one given. We create
-        # this directly immediately (rather than just passing the name to the
-        # S3Task). We do this because NestedWorkflows often use a parent directory
-        # to organize results.
-        directory_cleaned = get_directory(directory)
+    # ---------------------------------------------------------------------
 
-        # if the user requested, we grab the previous directory as well
-        if copy_previous_directory:
+    # STEP 1: clean parameters
 
-            # catch incorrect use of this function
-            if not input_cleaned.is_from_past_calc:
-                raise Exception(
-                    "There isn't a previous directory available! Your source "
-                    "structure must point to a past calculation to use this feature."
+    # we don't want to pass arguments like command=None or structure=None if the
+    # user didn't provide this input parameter. Instead, we want the workflow to
+    # use its own default value. To do this, we first check if the parameter
+    # is set in our kwargs dictionary and making sure the value is NOT None.
+    # If it is None, then we remove it from our final list of kwargs. This
+    # is only done for command, directory, and structure inputs -- as these
+    # are the three that are typically assumed to be present (see the CLI).
+
+    parameters_cleaned = parameters.copy()
+
+    if not parameters.get("command", None):
+        parameters_cleaned.pop("command", None)
+
+    if not parameters.get("directory", None):
+        parameters_cleaned.pop("directory", None)
+
+    structure = parameters.get("structure", None)
+    if structure:
+        parameters_cleaned["structure"] = Structure.from_dynamic(structure)
+    else:
+        parameters_cleaned.pop("structure", None)
+
+    if "structures" in parameters.keys():
+        structure_filenames = parameters["structures"].split(";")
+        parameters_cleaned["structures"] = [
+            Structure.from_dynamic(file) for file in structure_filenames
+        ]
+
+    if "migration_hop" in parameters.keys():
+        migration_hop = MigrationHop.from_dynamic(parameters["migration_hop"])
+        parameters_cleaned["migration_hop"] = migration_hop
+
+    if "migration_images" in parameters.keys():
+        migration_images = MigrationImages.from_dynamic(parameters["migration_images"])
+        parameters_cleaned["migration_images"] = migration_images
+
+    if "supercell_start" in parameters.keys():
+        parameters_cleaned["supercell_start"] = Structure.from_dynamic(
+            parameters["supercell_start"]
+        )
+
+    if "supercell_end" in parameters.keys():
+        parameters_cleaned["supercell_end"] = Structure.from_dynamic(
+            parameters["supercell_end"]
+        )
+
+    # lastly, for customized workflows, we need to completely change the format
+    # that we provide the parameters. Customized workflows expect parameters
+    # broken into a dictionary of
+    #   {"workflow_base": ..., "input_parameters":..., "updated_settings": ...}
+    # The
+    if "workflow_base" in parameters.keys():
+
+        # This is a non-modular import that can cause issues and slower
+        # run times. We therefore import lazily.
+        from simmate.workflows.utilities import get_workflow
+
+        parameters_cleaned["workflow_base"] = get_workflow(parameters["workflow_base"])
+        parameters_cleaned["input_parameters"] = {}
+        parameters_cleaned["updated_settings"] = {}
+
+        for key, update_values in list(parameters.items()):
+            if key in ["workflow_base", "input_parameters", "updated_settings"]:
+                continue
+            elif not key.startswith("custom__"):
+                parameters_cleaned["input_parameters"][key] = parameters_cleaned.pop(
+                    key
                 )
-
-            # the past directory should be stored on the input object
-            previous_directory = input_cleaned.calculation.directory
-
-            # First check if the previous directory exists. There are several
-            # possibilities that we need to check for:
-            #   1. directory exists on the same file system and can be found
-            #   2. directory exists on the same file system but is now an archive
-            #   3. directory/archive is on another file system (requires ssh to access)
-            #   4. directory was deleted and unavailable
-            # When copying over the directory, we ignore any `simmate_` files
-            # that correspond to metadata/results/corrections/etc.
-            if os.path.exists(previous_directory):
-                # copy the old directory to the new one
-                shutil.copytree(
-                    src=previous_directory,
-                    dst=directory_cleaned,
-                    ignore=shutil.ignore_patterns("simmate_*"),
-                    dirs_exist_ok=True,
-                )
-            elif os.path.exists(f"{previous_directory}.zip"):
-                # unpack the old archive
-                shutil.unpack_archive(
-                    filename=f"{previous_directory}.zip",
-                    extract_dir=os.path.dirname(previous_directory),
-                )
-                # copy the old directory to the new one
-                shutil.copytree(
-                    src=previous_directory,
-                    dst=directory_cleaned,
-                    ignore=shutil.ignore_patterns("simmate_*"),
-                    dirs_exist_ok=True,
-                )
-                # Then remove the unpacked archive now that we copied it.
-                # This leaves the original archive behind and unaltered too.
-                shutil.rmtree(previous_directory)
+            # Otherwise remove the prefix and add it to the custom settings.
             else:
-                raise Exception(
-                    "Unable to locate the previous calculation to copy. Make sure the "
-                    "past directory is located on the same file system. Directory that "
-                    f"couldn't be found was... {previous_directory}"
-                )
-            # TODO: for possibility 3, I could implement automatic copying with
-            # the "fabric" python package (uses ssh). I'd also need to store
-            # filesystem names (e.g. "WarWulf") to know where to connect.
+                key_cleaned = key.removeprefix("custom__")
+                parameters_cleaned["updated_settings"][
+                    key_cleaned
+                ] = parameters_cleaned.pop(key)
 
-        # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
 
-        # Load the source of the input object
+    # STEP 1b: Determine the "primary" input to use for determining the
+    # source (and previous directory)
+    # !!! Is there a better way to do this?
 
-        # If we were given a input from a previous calculation, the source should
-        # point directory to that same input. Otherwise we are incorrectly trying
-        # to change what the source is.
-        if source and input_cleaned.is_from_past_calc:
-            # note input_obj here is a dictionary
-            assert source == input_obj
-        elif input_cleaned.is_from_past_calc:
-            source_cleaned = input_obj
-        elif source:
-            source_cleaned = source
-        else:
-            source_cleaned = None
+    # Currently I just set a priority of possible parameters that can be
+    # the primary input. I go through each one at a time until I find one
+    # that was provided -- then I exit with that parameter's value.
+    primary_input = None
+    for primary_input_key in ["structure", "migration_hop", "supercell_start"]:
+        primary_input = parameters.get(primary_input_key, None)
+        primary_input_cleaned = parameters_cleaned.get(primary_input_key, None)
+        if primary_input:
+            break
 
-        # -------------------------------------------------------------------------
+    # ---------------------------------------------------------------------
 
-        # Register the calculation so the user can follow along in the UI.
+    # STEP 2: Load the directory (and copy over from an old directory if necessary)
 
-        # This is only done if a table is provided. Some special-case workflows
-        # don't store calculation information bc the flow is just a quick python
-        # analysis.
-        prefect_flow_run_id = prefect.context.flow_run_id
-        if self.calculation_table:
-            # load/create the calculation for this workflow run
-            calculation = self.calculation_table.from_prefect_id(
-                id=prefect_flow_run_id,
-                # We pass the initial input_obj in case the calculation wasn't created
-                # yet (and creation requires the structure)
-                structure=input_cleaned,
-                # BUG: what if the initial structure changed? An example of this happening
-                # is with a relaxation where a correction was applied and the calc
-                # was not fully restarted. This issue also will not matter when
-                # workflows are ran through cloud -- as the structure is already
-                # saved and won't be overwritten here.
-                source=source_cleaned,
+    # Start by creating a new directory or grabbing the one given. We create
+    # this directory immediately (rather than just passing the name to the
+    # S3Task). We do this because NestedWorkflows often use a parent directory
+    # to organize results.
+    directory = parameters.get("directory", None)
+    directory_cleaned = get_directory(directory)
+
+    # if the user requested, we grab the previous directory as well
+    copy_previous_directory = parameters.get("copy_previous_directory", None)
+    if copy_previous_directory:
+
+        if not primary_input:
+            raise Exception(
+                "No primary input detected, which is required for copying "
+                "past directories. This is an experimental feature so "
+                "please contact our team for more help."
             )
 
-        # -------------------------------------------------------------------------
+        # catch incorrect use of this function
+        if not primary_input_cleaned.is_from_past_calc:
+            raise Exception(
+                "There isn't a previous directory available! Your source "
+                "structure must point to a past calculation to use this feature."
+            )
 
-        # Lastly, we want to write a file summarizing the inputs used for this
-        # workflow run. This allows future users to reproduce the results if
-        # desired -- and it also allows us to load old results into a database.
-        input_summary = dict(
-            workflow_name=self.workflow_name,
+        # the past directory should be stored on the input object
+        previous_directory = primary_input_cleaned.calculation.directory
+
+        # First check if the previous directory exists. There are several
+        # possibilities that we need to check for:
+        #   1. directory exists on the same file system and can be found
+        #   2. directory exists on the same file system but is now an archive
+        #   3. directory/archive is on another file system (requires ssh to access)
+        #   4. directory was deleted and unavailable
+        # When copying over the directory, we ignore any `simmate_` files
+        # that correspond to metadata/results/corrections/etc.
+        if os.path.exists(previous_directory):
+            # copy the old directory to the new one
+            shutil.copytree(
+                src=previous_directory,
+                dst=directory_cleaned,
+                ignore=shutil.ignore_patterns("simmate_*"),
+                dirs_exist_ok=True,
+            )
+        elif os.path.exists(f"{previous_directory}.zip"):
+            # unpack the old archive
+            shutil.unpack_archive(
+                filename=f"{previous_directory}.zip",
+                extract_dir=os.path.dirname(previous_directory),
+            )
+            # copy the old directory to the new one
+            shutil.copytree(
+                src=previous_directory,
+                dst=directory_cleaned,
+                ignore=shutil.ignore_patterns("simmate_*"),
+                dirs_exist_ok=True,
+            )
+            # Then remove the unpacked archive now that we copied it.
+            # This leaves the original archive behind and unaltered too.
+            shutil.rmtree(previous_directory)
+        else:
+            raise Exception(
+                "Unable to locate the previous calculation to copy. Make sure the "
+                "past directory is located on the same file system. Directory that "
+                f"couldn't be found was... {previous_directory}"
+            )
+        # TODO: for possibility 3, I could implement automatic copying with
+        # the "fabric" python package (uses ssh). I'd also need to store
+        # filesystem names (e.g. "WarWulf") to know where to connect.
+
+    if "directory" in workflow.parameter_names:
+        parameters_cleaned["directory"] = directory_cleaned
+
+    # ---------------------------------------------------------------------
+
+    # STEP 3: Load the source of the input object
+
+    # If we were given a input from a previous calculation, the source should
+    # point directory to that same input. Otherwise we are incorrectly trying
+    # to change what the source is.
+    source = parameters.get("source", None)
+
+    # "primary_input and" is added to the start to ensure cleaned input exists
+    # and therefore prevent an error/bug.
+    if source and primary_input and primary_input_cleaned.is_from_past_calc:
+        # note primary_input here is a dictionary
+        assert source == primary_input
+    elif primary_input and primary_input_cleaned.is_from_past_calc:
+        source_cleaned = primary_input
+    elif source:
+        source_cleaned = source
+    else:
+        source_cleaned = None
+
+    if "source" in workflow.parameter_names:
+        parameters_cleaned["source"] = source_cleaned
+
+    # ---------------------------------------------------------------------
+
+    # STEP 4: Register the calculation so the user can follow along in the UI.
+
+    # TODO: replace this step with the self._register_calculation method
+    # register_kwargs = {
+    #     key: kwargs[key] for key in kwargs if key in self.register_kwargs
+    # }
+    # calc = self._register_calculation(
+    #     flow_run_id,
+    #     **register_kwargs,
+    # )  # !!! should I return the calc to the user?
+
+    # def _register_calculation(self, flow_run_id: str, **kwargs):
+    #     """
+    #     If the workflow is linked to a calculation table in the Simmate database,
+    #     this adds the flow run to the Simmate database.
+
+    #     This method should not be called directly as it is used within the
+    #     run_cloud() method.
+    #     """
+    #     # If there's no calculation database table in Simmate for this workflow,
+    #     # just skip this step. Otherwise save/load the calculation to our table
+    #     if self.calculation_table:
+    #         calculation = self.calculation_table.from_prefect_id(
+    #             id=flow_run_id,
+    #             **kwargs,
+    #         )
+    #         return calculation
+
+    # This is only done if a table is provided. Some special-case workflows
+    # don't store calculation information bc the flow is just a quick python
+    # analysis.
+    prefect_flow_run_id = prefect.context.flow_run_id
+
+    if register_run and workflow.calculation_table:
+        # load/create the calculation for this workflow run
+        calculation = workflow.calculation_table.from_prefect_id(
+            id=prefect_flow_run_id,
+            # We pass the initial primiary input in case the calculation wasn't created
+            # yet (and creation requires the structure)
+            # BUG: does this catch other inputs like "migration_hop"?
+            structure=primary_input_cleaned,
             source=source_cleaned,
-            directory=directory_cleaned,
-            # this ID is ingored as an input but needed for loading past data
-            prefect_flow_run_id=prefect_flow_run_id,
-            **kwargs,
         )
-        # As a final thing to add, we want the input_obj, but we want to save
-        # this to the proper input name. Also, this input should either be a
-        # dictionary or a python object, where we convert to a dictionary in
-        # order to write to file.
-        input_dict = input_obj if isinstance(input_obj, dict) else input_obj.as_dict()
-        input_summary[self.input_obj_name] = input_dict
 
-        # now write the summary to file in the same directory as the calc.
-        input_summary_filename = os.path.join(
-            directory_cleaned, "simmate_metadata.yaml"
-        )
-        with open(input_summary_filename, "w") as file:
-            content = yaml.dump(input_summary)
-            file.write(content)
+    # ---------------------------------------------------------------------
 
-        # -------------------------------------------------------------------------
+    # STEP 5: Write metadata file for user reference
 
-        # the rest of the calculation doesn't need the source (that was only for
-        # registering the calc), so we just return the pymatgen structure and dir
-        return input_cleaned, directory_cleaned
+    # We want to write a file summarizing the inputs used for this
+    # workflow run. This allows future users to reproduce the results if
+    # desired -- and it also allows us to load old results into a database.
+    input_summary = dict(
+        workflow_name=workflow.name,
+        # this ID is ingored as an input but needed for loading past data
+        prefect_flow_run_id=prefect_flow_run_id,
+        **parameters_cleaned,  # BUG: use parameters? use serialize_parameters()?
+    )
+
+    # now write the summary to file in the same directory as the calc.
+    input_summary_filename = os.path.join(directory_cleaned, "simmate_metadata.yaml")
+    with open(input_summary_filename, "w") as file:
+        content = yaml.dump(input_summary)
+        file.write(content)
+
+    # ---------------------------------------------------------------------
+
+    # Finally we just want to return the dictionary of cleaned parameters
+    # to be used by the workflow
+    return parameters_cleaned

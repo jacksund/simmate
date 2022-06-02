@@ -17,8 +17,6 @@ from prefect.backend import FlowRunView, FlowView
 # in order to support "mocking" this function in unit tests
 from prefect.backend import flow_run as flow_run_module
 
-from simmate.toolkit import Structure
-from simmate.toolkit.diffusion import MigrationHop
 from simmate.database.base_data_types import DatabaseTable, Calculation
 from simmate.workflow_engine import S3Task
 
@@ -44,8 +42,8 @@ class Workflow(PrefectFlow):
 
     project_name: str = None
     """
-    The name of the project in the  that this workflow is associated with. This 
-    attribute is mainly just for organizing workflows in the Prefect Cloud interface.
+    The name of the project in Prefect Cloud that this workflow is associated with. This 
+    attribute is mainly just for organizing workflows in the web interface.
     """
 
     s3task: S3Task = None
@@ -127,12 +125,6 @@ class Workflow(PrefectFlow):
         # use yaml to make the printout pretty (no quotes and separate lines)
         print(yaml.dump(self.parameter_names))
 
-    def run(self, **kwargs: Any) -> Union["prefect.engine.state.State", None]:
-        # Simply deserializes inputs before calling the normal workflow.run
-        # method. We leave the docstring empty for inheritance.
-        kwargs_cleaned = self._deserialize_parameters(**kwargs)
-        return super().run(**kwargs_cleaned)
-
     def run_cloud(
         self,
         labels: List[str] = [],
@@ -183,14 +175,28 @@ class Workflow(PrefectFlow):
             project_name=self.project_name,
         )
 
+        # -----------------------------------
+        # This part is unique to Simmate. Because we often want to save some info
+        # to our database even before the calculation starts/finishes, we do that
+        # here. An example is storing the structure and prefect id that we just
+        # submitted.
+        # BUG: Will there be a race condition here? What if the workflow finishes
+        # and tries writing to the databse before this is done?
+
         # Deserialize and then Serialize all of the parameters so they can be properly submitted
-        parameters_deserialized = self._deserialize_parameters(**kwargs)
+        from simmate.workflow_engine.common_tasks import load_input_and_register
+
+        parameters_deserialized = load_input_and_register.run(
+            workflow_name=self.name,
+            **kwargs,
+        )
         parameters_serialized = self._serialize_parameters(**parameters_deserialized)
         # NOTE: This may seem odd to deserialize right before serializing in the
         # next line, but this is done to ensure parameters that accept file names
         # are submitted properly. i.e -- We don't want to submit to a cluster and
         # have the job fail because it doesn't have access to the file. Having
         # these lines back-to-back ensures we submit with all necessary data.
+        # -----------------------------------
 
         # Now we submit the workflow
         logger.info(f"Creating flow run for {self.name}...") if logger else None
@@ -205,45 +211,12 @@ class Workflow(PrefectFlow):
         run_url = client.get_cloud_url("flow-run", flow_run_id, as_user=False)
         logger.info(f"Created flow run: {run_url}") if logger else None
 
-        # -----------------------------------
-        # This part is unique to Simmate. Because we often want to save some info
-        # to our database even before the calculation starts/finishes, we do that
-        # here. An example is storing the structure and prefect id that we just
-        # submitted.
-        # BUG: Will there be a race condition here? What if the workflow finishes
-        # and tries writing to the databse before this is done?
-        register_kwargs = {
-            key: kwargs[key] for key in kwargs if key in self.register_kwargs
-        }
-        calc = self._register_calculation(
-            flow_run_id,
-            **register_kwargs,
-        )  # !!! should I return the calc to the user?
-        # -----------------------------------
-
         # if we want to wait until the job is complete, we do that here
         if wait_for_run:
             flow_run_view = self.wait_for_flow_run(flow_run_id)
             # return flow_run_view # !!! Should I return this instead?
         # return the flow_run_id for the user
         return flow_run_id
-
-    def _register_calculation(self, flow_run_id: str, **kwargs):
-        """
-        If the workflow is linked to a calculation table in the Simmate database,
-        this adds the flow run to the Simmate database.
-
-        This method should not be called directly as it is used within the
-        run_cloud() method.
-        """
-        # If there's no calculation database table in Simmate for this workflow,
-        # just skip this step. Otherwise save/load the calculation to our table
-        if self.calculation_table:
-            calculation = self.calculation_table.from_prefect_id(
-                id=flow_run_id,
-                **kwargs,
-            )
-            return calculation
 
     def wait_for_flow_run(self, flow_run_id: str):
         """
@@ -262,94 +235,6 @@ class Workflow(PrefectFlow):
             prefect.context.logger.log(log.level, message)
         # Return the final view of the flow run
         return flow_run.get_latest()
-
-    @staticmethod
-    def _deserialize_parameters(**parameters) -> dict:
-        """
-        Converts input parameters to proper python objects. This handles the
-        variety of formats accepted by Simmate.
-
-        For example, a common input parameter for workflows is "structure", which
-        can be provided a number of ways:
-            - a filename
-            - a json string
-            - a dictionary pointing to a database entry
-            - a toolkit Structure object
-            - etc...
-        Even though all of these inputs are accepted, `workflow.run` always expects
-        python objects, so this utility converts the input to a toolkit Structure
-        object.
-
-        This method should not be called directly as it is used within higher-level
-        methods such as run() and run_cloud().
-        """
-
-        # we don't want to pass arguments like command=None or structure=None if the
-        # user didn't provide this input parameter. Instead, we want the workflow to
-        # use its own default value. To do this, we first check if the parameter
-        # is set in our kwargs dictionary and making sure the value is NOT None.
-        # If it is None, then we remove it from our final list of kwargs. This
-        # is only done for command, directory, and structure inputs -- as these
-        # are the three that are typically assumed to be present (see the CLI).
-
-        if not parameters.get("command", None):
-            parameters.pop("command", None)
-
-        if not parameters.get("directory", None):
-            parameters.pop("directory", None)
-
-        structure = parameters.get("structure", None)
-        if structure:
-            parameters["structure"] = Structure.from_dynamic(structure)
-        else:
-            parameters.pop("structure", None)
-
-        if "structures" in parameters.keys():
-            structure_filenames = parameters["structures"].split(";")
-            parameters["structures"] = [
-                Structure.from_dynamic(file) for file in structure_filenames
-            ]
-
-        if "migration_hop" in parameters.keys():
-            migration_hop = MigrationHop.from_dynamic(parameters["migration_hop"])
-            parameters["migration_hop"] = migration_hop
-
-        if "supercell_start" in parameters.keys():
-            parameters["supercell_start"] = Structure.from_dynamic(
-                parameters["supercell_start"]
-            )
-
-        if "supercell_end" in parameters.keys():
-            parameters["supercell_end"] = Structure.from_dynamic(
-                parameters["supercell_end"]
-            )
-
-        # lastly, for customized workflows, we need to completely change the format
-        # that we provide the parameters. Customized workflows expect parameters
-        # broken into a dictionary of
-        #   {"workflow_base": ..., "input_parameters":..., "updated_settings": ...}
-        # The
-        if "workflow_base" in parameters.keys():
-
-            # This is a non-modular import that can cause issues and slower
-            # run times. We therefore import lazily.
-            from simmate.workflows.utilities import get_workflow
-
-            parameters["workflow_base"] = get_workflow(parameters["workflow_base"])
-            parameters["input_parameters"] = {}
-            parameters["updated_settings"] = {}
-
-            for key, update_values in list(parameters.items()):
-                if key in ["workflow_base", "input_parameters", "updated_settings"]:
-                    continue
-                elif not key.startswith("custom__"):
-                    parameters["input_parameters"][key] = parameters.pop(key)
-                # Otherwise remove the prefix and add it to the custom settings.
-                else:
-                    key_cleaned = key.removeprefix("custom__")
-                    parameters["updated_settings"][key_cleaned] = parameters.pop(key)
-
-        return parameters
 
     @staticmethod
     def _serialize_parameters(**parameters) -> dict:

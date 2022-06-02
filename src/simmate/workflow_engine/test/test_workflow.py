@@ -5,7 +5,8 @@ import pytest
 from prefect import Client
 from prefect.backend import flow_run
 
-from simmate.workflow_engine.workflow import Workflow, task, Parameter
+from simmate.workflow_engine import Workflow, task, Parameter
+from simmate.workflow_engine.common_tasks import load_input_and_register
 from simmate.website.test_app.models import TestStructureCalculation
 
 
@@ -87,6 +88,9 @@ def test_workflow_cloud(mocker, sample_structures):
         flow_run,
         "watch_flow_run",
         return_value=[DummyMessage(), DummyMessage(), DummyMessage()],
+    )
+    mocker.patch.object(
+        load_input_and_register, "run", return_value={"structure": structure}
     )
     # -----------------
 

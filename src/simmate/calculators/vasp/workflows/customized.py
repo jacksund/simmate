@@ -37,7 +37,7 @@ from simmate.calculators.vasp.database.customized import CustomizedVASPCalculati
 
 @task
 def register_calc(workflow_base, input_parameters, updated_settings, source, directory):
-    # !!! This code is copied and modified from the LoadInputAndRegister task.
+    # !!! This code is copied and modified from the load_input_and_register task.
     # I need to merge these functions in the future.
 
     directory_cleaned = get_directory(directory)
