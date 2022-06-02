@@ -31,7 +31,7 @@ import prefect
 
 from simmate.utilities import get_directory
 from simmate.workflow_engine import Workflow, Parameter, ModuleStorage, task
-from simmate.workflow_engine.common_tasks import run_customized_s3task, SaveOutputTask
+from simmate.workflow_engine.common_tasks import run_customized_s3task, save_result
 from simmate.calculators.vasp.database.customized import CustomizedVASPCalculation
 
 
@@ -62,8 +62,6 @@ def register_calc(workflow_base, input_parameters, updated_settings, source, dir
     return input_parameters
 
 
-save_results = SaveOutputTask(CustomizedVASPCalculation)
-
 with Workflow("customized/vasp") as vasp_workflow:
 
     workflow_base = Parameter("workflow_base")
@@ -86,7 +84,7 @@ with Workflow("customized/vasp") as vasp_workflow:
         updated_settings=updated_settings,
     )
 
-    save_results(result)
+    save_result(result)
 
 vasp_workflow.storage = ModuleStorage(__name__)
 vasp_workflow.project_name = "Simmate-Customized"

@@ -155,7 +155,7 @@ def get_migration_images_from_endpoints(supercell_start, supercell_end):
 
 
 class SaveNEBOutputTask(Task):
-    # This is a modification of simmate.workflows.common_tasks.SaveOutputTask
+    # This is a modification of simmate.workflows.common_tasks.save_result
 
     def __init__(
         self,

@@ -5,7 +5,7 @@ from typing import List
 from simmate.workflow_engine import Workflow, Parameter, ModuleStorage, S3Task
 from simmate.workflow_engine.common_tasks import (
     load_input_and_register,
-    SaveOutputTask,
+    save_result,
 )
 from simmate.database.base_data_types import Calculation
 
@@ -37,7 +37,6 @@ def s3task_to_workflow(
     """
 
     s3task_obj = s3task()  # Use defaults
-    save_results = SaveOutputTask(calculation_table)
 
     with Workflow(name) as workflow:
         structure = Parameter("structure")
@@ -54,20 +53,20 @@ def s3task_to_workflow(
             copy_previous_directory=copy_previous_directory,
         )
 
-        output = s3task_obj(
+        result = s3task_obj(
             structure=parameters_cleaned["structure"],
             command=parameters_cleaned["command"],
             directory=parameters_cleaned["directory"],
         )
 
-        calculation_id = save_results(output=output)
+        calculation_id = save_result(result)
 
     workflow.storage = ModuleStorage(module)
     workflow.project_name = project_name
     workflow.calculation_table = calculation_table
     workflow.result_table = calculation_table
     workflow.register_kwargs = register_kwargs
-    workflow.result_task = output
+    workflow.result_task = result
     workflow.s3task = s3task
     workflow.description_doc_short = description_doc_short
 

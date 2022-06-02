@@ -5,12 +5,11 @@ from simmate.workflow_engine.workflow import (
     Parameter,
     ModuleStorage,
 )
-from simmate.workflow_engine.common_tasks import load_input_and_register, SaveOutputTask
+from simmate.workflow_engine.common_tasks import load_input_and_register, save_result
 from simmate.calculators.vasp.tasks.dynamics import MITDynamics
 from simmate.calculators.vasp.database.dynamics import MITDynamicsRun
 
 s3task_obj = MITDynamics()
-save_results = SaveOutputTask(MITDynamicsRun)
 
 with Workflow("dynamics/mit") as workflow:
     structure = Parameter("structure")
@@ -37,7 +36,7 @@ with Workflow("dynamics/mit") as workflow:
         nsteps=nsteps,
     )
 
-    output = s3task_obj(
+    result = s3task_obj(
         structure=parameters_cleaned["structure"],
         command=parameters_cleaned["command"],
         directory=parameters_cleaned["directory"],
@@ -46,14 +45,14 @@ with Workflow("dynamics/mit") as workflow:
         time_step=parameters_cleaned["time_step"],
         nsteps=parameters_cleaned["nsteps"],
     )
-    calculation_id = save_results(output=output)
+    calculation_id = save_result(result)
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Dynamics"
 workflow.calculation_table = MITDynamicsRun
 workflow.result_table = MITDynamicsRun
 workflow.register_kwargs = (["prefect_flow_run_id", "structure", "source"],)
-workflow.result_task = output
+workflow.result_task = result
 workflow.s3task = MITDynamics
 
 # by default we just copy the docstring of the S3task to the workflow
