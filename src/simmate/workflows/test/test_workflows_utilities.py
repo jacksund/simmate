@@ -32,6 +32,7 @@ def test_list_of_all_workflows():
         "population-analysis/elf-matproj",
         "band-structure/matproj",
         "density-of-states/matproj",
+        "electronic-structure/matproj",
         "dynamics/mit",
         "diffusion/all-paths",
         "diffusion/from-endpoints",

@@ -75,7 +75,9 @@ with Workflow("electronic-structure/matproj") as workflow:
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
 # workflow.calculation_table = None  # not implemented yet
-workflow.result_table = None  # not implemented yet
+workflow.result_table = (
+    bs_workflow.result_table
+)  # not implemented yet. This is a placeholder
 workflow.s3tasks = [
     static_workflow.s3task,
     dos_workflow.s3task,
