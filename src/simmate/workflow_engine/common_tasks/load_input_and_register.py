@@ -50,6 +50,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     `**parameters` includes all parameters and anything extra that you want saved
     to simmate_metadata.yaml
     """
+    print(parameters)
 
     # !!! This function needs a refactor that is waiting on prefect 2.0.
     # In the future, this will be broken into smaller methods and utilities.
@@ -222,6 +223,8 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # and therefore prevent an error/bug.
     if source and primary_input and primary_input_cleaned.is_from_past_calc:
         # note primary_input here is a dictionary
+        print(source)
+        print(primary_input)
         assert source == primary_input
         source_cleaned = source
     # Check if we have a primary input loaded from a past calculation and
@@ -234,10 +237,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     else:
         source_cleaned = None
 
-    # We don't include the source if it's None in case a later call to this
-    # function wants to automatically determine actual source (via primary input)
-    if source_cleaned:
-        parameters_cleaned["source"] = source_cleaned
+    parameters_cleaned["source"] = source_cleaned
 
     # ---------------------------------------------------------------------
 
