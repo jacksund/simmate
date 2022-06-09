@@ -213,18 +213,22 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
 
     # STEP 3: Load the source of the input object
 
+    source = parameters.get("source", None)
+
     # If we were given a input from a previous calculation, the source should
     # point directory to that same input. Otherwise we are incorrectly trying
     # to change what the source is.
-    source = parameters.get("source", None)
-
     # "primary_input and" is added to the start to ensure cleaned input exists
     # and therefore prevent an error/bug.
     if source and primary_input and primary_input_cleaned.is_from_past_calc:
         # note primary_input here is a dictionary
         assert source == primary_input
+        source_cleaned = source
+    # Check if we have a primary input loaded from a past calculation and
+    # default to that as the source.
     elif primary_input and primary_input_cleaned.is_from_past_calc:
         source_cleaned = primary_input
+    # Otherwise just use the source given
     elif source:
         source_cleaned = source
     else:
