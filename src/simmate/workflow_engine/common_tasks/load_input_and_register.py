@@ -234,7 +234,10 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     else:
         source_cleaned = None
 
-    parameters_cleaned["source"] = source_cleaned
+    # We don't include the source if it's None in case a later call to this
+    # function wants to automatically determine actual source (via primary input)
+    if source_cleaned:
+        parameters_cleaned["source"] = source_cleaned
 
     # ---------------------------------------------------------------------
 
