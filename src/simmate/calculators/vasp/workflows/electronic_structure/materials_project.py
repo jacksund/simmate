@@ -50,6 +50,7 @@ with Workflow("electronic-structure/matproj") as workflow:
         structure=parameters_cleaned["structure"],
         command=parameters_cleaned["command"],
         directory=parameters_cleaned["directory"] + os.path.sep + "static_energy",
+        source=parameters_cleaned["source"],
     )
 
     dos_result = dos_task(
@@ -60,6 +61,7 @@ with Workflow("electronic-structure/matproj") as workflow:
         command=parameters_cleaned["command"],
         directory=parameters_cleaned["directory"] + os.path.sep + "density_of_states",
         copy_previous_directory=True,
+        source=None,  # default to structure dict above
     )
 
     bs_result = bs_task(
@@ -70,6 +72,7 @@ with Workflow("electronic-structure/matproj") as workflow:
         command=parameters_cleaned["command"],
         directory=parameters_cleaned["directory"] + os.path.sep + "band_structure",
         copy_previous_directory=True,
+        source=None,  # default to structure dict above
     )
 
 workflow.storage = ModuleStorage(__name__)
