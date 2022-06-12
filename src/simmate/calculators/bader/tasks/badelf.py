@@ -33,7 +33,7 @@ class BaderELFAnalysis(BaderAnalysis):
         """
 
         # Run the default method of the parent class.
-        super().setup(directory=directory)
+        super().setup(structure=structure, directory=directory)
 
         # establish file names
         elfcar_filename = os.path.join(directory, "ELFCAR")
