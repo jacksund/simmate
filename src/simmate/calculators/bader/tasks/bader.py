@@ -21,7 +21,24 @@ class BaderAnalysis(S3Task):
     use the `-b weight` by default, which means we apply the weight method for
     partitioning from of 
     [Yu and Trinkle](http://theory.cm.utexas.edu/henkelman/code/bader/download/yu11_064111.pdf).
+    
+    This command is modified to use the `-ref` file as the reference for determining
+    zero-flux surfaces when partitioning the CHGCAR. 
+    
+    There are cases where also use structures that contain "empty atoms" in them.
+    This is to help with partitioning of electrides, which possess electron 
+    density that is not associated with any atomic orbital. For these cases,
+    you will see files like "CHGCAR_empty" used in the command.
     """
+
+    required_files = ["CHGCAR", "AECCAR0", "AECCAR2", "POTCAR"]
+    """
+    In order for bader analysis to run properly, all of these files must be
+    present in the provided directory.
+    """
+    # !!! Maybe move required_files attribute to the S3Task...? This could also
+    # be useful for other tasks -- such as DOS and BS calculations. I could
+    # then have an extra method that checks these before calling execute.
 
     def setup(self, structure: Structure, directory: str):
         """
@@ -31,13 +48,12 @@ class BaderAnalysis(S3Task):
         """
 
         # Make sure that there are the proper output files from a VASP calc
-        files = ["CHGCAR", "AECCAR0", "AECCAR2", "POTCAR"]
-        filenames = [os.path.join(directory, file) for file in files]
+        filenames = [os.path.join(directory, file) for file in self.required_files]
         if not all(os.path.exists(filename) for filename in filenames):
             raise Exception(
                 "A static energy calculation is required before running Bader "
                 "analysis. The following files must exist in the directory where "
-                f"this task is ran: {files}"
+                f"this task is ran: {self.required_files}"
             )
 
         # Make the CHGCAR_sum file using Bader's helper script
