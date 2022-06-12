@@ -80,12 +80,25 @@ class BaderAnalysis(S3Task):
         for potcar in potcars:
             nelectron_data.update({potcar.element: potcar.nelectrons})
 
-        # grab the structure from the CHGCAR
-        # OPTIMIZE: I should just grab from the POSCAR or CONTCAR for speed.
-        # The reason I don't at the moment is because there may be empty atoms.
+        # SPECIAL CASE: in scenarios where empty atoms are added to the structure,
+        # we should grab that modified structure instead of the one from the POSCAR.
         chgcar_filename = os.path.join(directory, "CHGCAR")
-        chgcar = Chgcar.from_file(chgcar_filename)
-        structure = chgcar.structure
+        chgcar_empty_filename = os.path.join(directory, "CHGCAR_empty")
+
+        # the empty file will always take preference
+        if os.path.exists(chgcar_empty_filename):
+            chgcar = Chgcar.from_file(chgcar_empty_filename)
+            structure = chgcar.structure
+            # We typically use hydrogen ("H") as the empty atom, so we will
+            # need to add this to our element list for oxidation analysis.
+            # We use 0 for electron count because this is an 'empty' atom, and
+            # not actually Hydrogen
+            nelectron_data.update({"H": 0})
+        # otherwise, grab the structure from the CHGCAR
+        # OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed
+        else:
+            chgcar = Chgcar.from_file(chgcar_filename)
+            structure = chgcar.structure
 
         # Calculate the oxidation state of each site where it is simply the
         # change in number of electrons associated with it from vasp potcar vs
