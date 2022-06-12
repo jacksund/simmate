@@ -10,19 +10,7 @@ from pymatgen.io.vasp import Potcar
 from simmate.toolkit import Structure
 from simmate.workflow_engine import S3Task
 from simmate.calculators.bader.outputs import ACF
-
-
-# TODO: The chgsum.pl script will be replaced with a simple python function
-# that just sums the two files. It might not be as fast but it removes one
-# executable file from having to be in the user's path. So in the future, this
-# Task will be depreciated/removed.
-class CombineCHGCARs(S3Task):
-    """
-    This tasks simply sums two charge density files into a new file. It uses
-    a script from the Henkleman group.
-    """
-
-    command = "chgsum.pl AECCAR0 AECCAR2 > chgsum.out"
+from simmate.calculators.bader.tasks import CombineCHGCARs
 
 
 class BaderAnalysis(S3Task):
