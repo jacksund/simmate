@@ -16,7 +16,7 @@ from simmate.calculators.vasp.tasks.population_analysis import (
 )
 from simmate.calculators.bader.tasks import BaderELFAnalysis
 from simmate.calculators.vasp.database.population_analysis import (
-    MatProjBaderAnalysis as MPBadelfResults,
+    MatProjBaderELFAnalysis as MPBadelfResults,
 )
 
 prebadelf_matproj_workflow = s3task_to_workflow(
@@ -26,7 +26,7 @@ prebadelf_matproj_workflow = s3task_to_workflow(
     s3task=MatProjPreBaderELF,
     calculation_table=MPBadelfResults,
     register_kwargs=["structure", "source"],
-    description_doc_short="uses Materials Project settings with denser FFT grid",
+    description_doc_short="runs Bader analysis with ELFCAR as reference",
 )
 
 prebadelf_task = prebadelf_matproj_workflow.to_workflow_task()
