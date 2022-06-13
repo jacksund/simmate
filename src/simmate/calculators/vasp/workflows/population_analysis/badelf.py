@@ -2,6 +2,7 @@
 
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
+from simmate.toolkit import Structure
 from simmate.workflow_engine import (
     s3task_to_workflow,
     task,
@@ -54,6 +55,9 @@ def get_structure_w_empties(
     # and also search the same table for a match (rather than the MatProj).
 
     # Grab the chemical system of the structure when it includes the empty ion template
+    structure = Structure.from_dynamic(
+        structure
+    )  # !!! because we don't load input in this flow yet
     structure_dummy = structure.copy()
     structure_dummy.append(
         empty_ion_template, [0, 0, 0]
