@@ -22,7 +22,7 @@ class MatProjPreBaderELF(MatProjStaticEnergy):
         PREC="Single",  # ensures CHGCAR grid matches ELFCAR grid
         # Note that these set the FFT grid while the pre-Bader task sets the
         # fine FFT grid (e.g. useds NGX instead of NGXF)
-        NGX__density_a=6,
-        NGY__density_b=6,
-        NGZ__density_c=6,
+        NGX__density_a=12,
+        NGY__density_b=12,
+        NGZ__density_c=12,
     )
