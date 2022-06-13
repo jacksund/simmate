@@ -31,6 +31,8 @@ def test_list_of_all_workflows():
         "population-analysis/badelf-matproj",
         "population-analysis/bader-matproj",
         "population-analysis/elf-matproj",
+        "population-analysis/prebadelf-matproj",
+        "population-analysis/prebader-matproj",
         "band-structure/matproj",
         "density-of-states/matproj",
         "electronic-structure/matproj",

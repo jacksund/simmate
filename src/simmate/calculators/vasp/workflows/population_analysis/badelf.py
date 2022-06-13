@@ -19,7 +19,7 @@ from simmate.calculators.vasp.database.population_analysis import (
     MatProjBaderAnalysis as MPBadelfResults,
 )
 
-prebadelf_workflow = s3task_to_workflow(
+prebadelf_matproj_workflow = s3task_to_workflow(
     name="population-analysis/prebadelf-matproj",
     module=__name__,
     project_name="Simmate-PopulationAnalysis",
@@ -29,7 +29,7 @@ prebadelf_workflow = s3task_to_workflow(
     description_doc_short="uses Materials Project settings with denser FFT grid",
 )
 
-prebadelf_task = prebadelf_workflow.to_workflow_task()
+prebadelf_task = prebadelf_matproj_workflow.to_workflow_task()
 
 badelf_task = BaderELFAnalysis()
 
@@ -111,7 +111,7 @@ def save_bader_results(bader_result, prefect_flow_run_id):
     calculation.save()
 
 
-with Workflow("population-analysis/bader-matproj") as workflow:
+with Workflow("population-analysis/badelf-matproj") as workflow:
 
     structure = Parameter("structure")
     command = Parameter("command", default="vasp_std > vasp.out")
