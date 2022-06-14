@@ -66,7 +66,10 @@ def get_structure_w_empties(
 
     # Go through the Materials Project database and find a structure that
     # is matching when the empty ion type is ignored.
-    matcher = StructureMatcher(ignored_species=empty_ion_template)
+    matcher = StructureMatcher(
+        ignored_species=empty_ion_template,
+        primitive_cell=False,  # required for the get_s2_like_s1 method
+    )
     potential_matches = MatProjStructure.objects.filter(
         chemical_system=template_system
     ).all()
@@ -81,12 +84,20 @@ def get_structure_w_empties(
     if not is_match:
         raise Exception("No match found when trying to generate empty sites")
 
+    # convert our match to an equivalent basis set as the original input
+    # structure -- this ensures frac coords are matches.
+    structure_template = matcher.get_s2_like_s1(structure, structure_template)
+
     # make a copy because we will be modifying the structure
     structure_w_empties = structure.copy()
 
     for site in structure_template.sites:
         if site.specie.symbol == empty_ion_template:
             structure_w_empties.append("H", site.frac_coords)
+
+    # TODO: consider doing a check to ensure the H atoms added are reasonable.
+    # A simple check could be to use the SiteDistance validator and make sure
+    # the hydrogen isn't too close to another atom.
 
     # write the new structure to file
     # filename = os.path.join(directory, "simmate_structure_w_empties.cif")
