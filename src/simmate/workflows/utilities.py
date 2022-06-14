@@ -23,6 +23,7 @@ WORKFLOW_TYPES = [
     "population-analysis",
     "band-structure",
     "density-of-states",
+    "electronic-structure",
     "dynamics",
     "diffusion",
     "customized",

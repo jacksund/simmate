@@ -2,6 +2,9 @@
 
 import os
 import sys
+import requests
+
+import simmate
 
 
 def get_conda_env() -> str:
@@ -55,6 +58,40 @@ def get_doc_from_readme(file: str) -> str:
     ) as doc_file:
         doc = doc_file.read()
     return doc
+
+
+def get_latest_version() -> str:
+    """
+    Looks at the jacks/simmate repo and grabs the latest release version.
+    """
+    # Access the data via a web request
+    response = requests.get(
+        "https://api.github.com/repos/jacksund/simmate/releases/latest"
+    )
+
+    # load the version from the json response
+    # [1:] simply removes the first letter "v" from something like "v1.2.3"
+    latest_version = response.json()["tag_name"][1:]
+    return latest_version
+
+
+def check_if_using_latest_version(current_version=simmate.__version__):
+    """
+    Checks if there's a newer version by looking at the latest release on Github
+    and comparing it to the currently installed version
+    """
+    latest_version = get_latest_version()
+
+    if current_version != latest_version:
+        print(
+            "WARNING: There is a new version of Simmate available. \n"
+            f"You are currently using v{current_version} while v{latest_version} "
+            "is the latest. To update, you should first check what has been "
+            "changed at https://github.com/jacksund/simmate/blob/main/CHANGELOG.md. "
+            "If you would like to use these changes, you can run the follwing "
+            "command in the terminal (with your desired conda environment "
+            "active): `conda update --all`"
+        )
 
 
 def get_chemical_subsystems(chemical_system: str):

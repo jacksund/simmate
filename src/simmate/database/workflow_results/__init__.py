@@ -52,6 +52,7 @@ from simmate.calculators.vasp.database.dynamics import (
 
 from simmate.calculators.vasp.database.population_analysis import (
     MatProjBaderAnalysis,
+    MatProjBaderELFAnalysis,
 )
 
 from simmate.calculators.vasp.database.customized import (

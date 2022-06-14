@@ -181,6 +181,11 @@ class WorkflowTask(Task):
         # also make sure the workflow is successful -- otherwise we want to
         # raise an error so that this task is flagged as failed
         if executor_type == "local":
+            # BUG: even if 'parameters' is not set (i.e. no kwargs passed to this
+            # method), this task run will still inherit from the parameters of the
+            # parent slow. I'm seeing this with the source kwarg. In order to
+            # ensure proper effect, be sure to pass all kwargs explicitly. This
+            # is fixed in Prefect 2.0
             state = self.workflow.run(**parameters)
             if state.is_failed():
                 # Grab the all task errors except for those that never ran

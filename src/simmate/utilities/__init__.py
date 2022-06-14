@@ -7,7 +7,13 @@ from .files import (
     archive_old_runs,
     empty_directory,
 )
-from .other import get_conda_env, get_doc_from_readme, get_chemical_subsystems
+from .other import (
+    get_conda_env,
+    get_doc_from_readme,
+    get_chemical_subsystems,
+    get_latest_version,
+    check_if_using_latest_version,
+)
 
 # must be last to prevent circular import
 __doc__ = get_doc_from_readme(__file__)

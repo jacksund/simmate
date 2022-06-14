@@ -11,6 +11,7 @@ from prefect import task
 from simmate.toolkit import Structure
 from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 from simmate.utilities import get_directory
+from simmate.workflow_engine import Workflow
 
 # OPTIMIZE: consider splitting this task into load_structure, load_directory,
 # and register_calc so that our flow_visualize looks cleaner
@@ -74,7 +75,13 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     if not workflow_name:
         raise Exception("Unknown workflow")
 
-    workflow = get_workflow(workflow_name)
+    # BUG: I have to do this in order to allow workflows that are from the
+    # simmate.workflows module. There should be a better way to handle user
+    # created workflows.
+    try:
+        workflow = get_workflow(workflow_name)
+    except:
+        workflow = None
 
     prefect_flow_run_id = prefect.context.flow_run_id
 
@@ -196,36 +203,38 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
         # the "fabric" python package (uses ssh). I'd also need to store
         # filesystem names (e.g. "WarWulf") to know where to connect.
 
-    if "directory" in workflow.parameter_names:
-        # SPECIAL CASE for customized flows
-        if "workflow_base" not in parameters_cleaned:
-            parameters_cleaned["directory"] = directory_cleaned
-        else:
-            parameters_cleaned["input_parameters"]["directory"] = directory_cleaned
+    # SPECIAL CASE for customized flows
+    if "workflow_base" not in parameters_cleaned:
+        parameters_cleaned["directory"] = directory_cleaned
+    else:
+        parameters_cleaned["input_parameters"]["directory"] = directory_cleaned
 
     # ---------------------------------------------------------------------
 
     # STEP 3: Load the source of the input object
 
+    source = parameters.get("source", None)
+
     # If we were given a input from a previous calculation, the source should
     # point directory to that same input. Otherwise we are incorrectly trying
     # to change what the source is.
-    source = parameters.get("source", None)
-
     # "primary_input and" is added to the start to ensure cleaned input exists
     # and therefore prevent an error/bug.
     if source and primary_input and primary_input_cleaned.is_from_past_calc:
         # note primary_input here is a dictionary
         assert source == primary_input
+        source_cleaned = source
+    # Check if we have a primary input loaded from a past calculation and
+    # default to that as the source.
     elif primary_input and primary_input_cleaned.is_from_past_calc:
         source_cleaned = primary_input
+    # Otherwise just use the source given
     elif source:
         source_cleaned = source
     else:
         source_cleaned = None
 
-    if "source" in workflow.parameter_names:
-        parameters_cleaned["source"] = source_cleaned
+    parameters_cleaned["source"] = source_cleaned
 
     # ---------------------------------------------------------------------
 
@@ -235,7 +244,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # don't store calculation information bc the flow is just a quick python
     # analysis.
 
-    if register_run and workflow.calculation_table:
+    if register_run and workflow and workflow.calculation_table:
 
         # grab the registration kwargs from the parameters provided
         register_kwargs = {
@@ -266,7 +275,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # structure data instead of a filename in the metadata.
     # SPECIAL CASE: "if ..." used to catch customized workflows
     parameters_serialized = (
-        workflow._serialize_parameters(**parameters_cleaned)
+        Workflow._serialize_parameters(**parameters_cleaned)
         if "workflow_base" not in parameters_cleaned
         else parameters
     )
@@ -275,7 +284,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # workflow run. This allows future users to reproduce the results if
     # desired -- and it also allows us to load old results into a database.
     input_summary = dict(
-        workflow_name=workflow.name,
+        workflow_name=workflow.name if workflow else "non-module-flow",
         # this ID is ingored as an input but needed for loading past data
         prefect_flow_run_id=prefect_flow_run_id,
         **parameters_serialized,

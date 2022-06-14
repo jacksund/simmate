@@ -10,19 +10,7 @@ from pymatgen.io.vasp import Potcar
 from simmate.toolkit import Structure
 from simmate.workflow_engine import S3Task
 from simmate.calculators.bader.outputs import ACF
-
-
-# TODO: The chgsum.pl script will be replaced with a simple python function
-# that just sums the two files. It might not be as fast but it removes one
-# executable file from having to be in the user's path. So in the future, this
-# Task will be depreciated/removed.
-class CombineCHGCARs(S3Task):
-    """
-    This tasks simply sums two charge density files into a new file. It uses
-    a script from the Henkleman group.
-    """
-
-    command = "chgsum.pl AECCAR0 AECCAR2 > chgsum.out"
+from simmate.calculators.bader.tasks import CombineCHGCARs
 
 
 class BaderAnalysis(S3Task):
@@ -33,7 +21,24 @@ class BaderAnalysis(S3Task):
     use the `-b weight` by default, which means we apply the weight method for
     partitioning from of 
     [Yu and Trinkle](http://theory.cm.utexas.edu/henkelman/code/bader/download/yu11_064111.pdf).
+    
+    This command is modified to use the `-ref` file as the reference for determining
+    zero-flux surfaces when partitioning the CHGCAR. 
+    
+    There are cases where also use structures that contain "empty atoms" in them.
+    This is to help with partitioning of electrides, which possess electron 
+    density that is not associated with any atomic orbital. For these cases,
+    you will see files like "CHGCAR_empty" used in the command.
     """
+
+    required_files = ["CHGCAR", "AECCAR0", "AECCAR2", "POTCAR"]
+    """
+    In order for bader analysis to run properly, all of these files must be
+    present in the provided directory.
+    """
+    # !!! Maybe move required_files attribute to the S3Task...? This could also
+    # be useful for other tasks -- such as DOS and BS calculations. I could
+    # then have an extra method that checks these before calling execute.
 
     def setup(self, structure: Structure, directory: str):
         """
@@ -43,13 +48,12 @@ class BaderAnalysis(S3Task):
         """
 
         # Make sure that there are the proper output files from a VASP calc
-        files = ["CHGCAR", "AECCAR0", "AECCAR2", "POTCAR"]
-        filenames = [os.path.join(directory, file) for file in files]
+        filenames = [os.path.join(directory, file) for file in self.required_files]
         if not all(os.path.exists(filename) for filename in filenames):
             raise Exception(
                 "A static energy calculation is required before running Bader "
                 "analysis. The following files must exist in the directory where "
-                f"this task is ran: {files}"
+                f"this task is ran: {self.required_files}"
             )
 
         # Make the CHGCAR_sum file using Bader's helper script
@@ -76,12 +80,25 @@ class BaderAnalysis(S3Task):
         for potcar in potcars:
             nelectron_data.update({potcar.element: potcar.nelectrons})
 
-        # grab the structure from the CHGCAR
-        # OPTIMIZE: I should just grab from the POSCAR or CONTCAR for speed.
-        # The reason I don't at the moment is because there may be empty atoms.
+        # SPECIAL CASE: in scenarios where empty atoms are added to the structure,
+        # we should grab that modified structure instead of the one from the POSCAR.
         chgcar_filename = os.path.join(directory, "CHGCAR")
-        chgcar = Chgcar.from_file(chgcar_filename)
-        structure = chgcar.structure
+        chgcar_empty_filename = os.path.join(directory, "CHGCAR_empty")
+
+        # the empty file will always take preference
+        if os.path.exists(chgcar_empty_filename):
+            chgcar = Chgcar.from_file(chgcar_empty_filename)
+            structure = chgcar.structure
+            # We typically use hydrogen ("H") as the empty atom, so we will
+            # need to add this to our element list for oxidation analysis.
+            # We use 0 for electron count because this is an 'empty' atom, and
+            # not actually Hydrogen
+            nelectron_data.update({"H": 0})
+        # otherwise, grab the structure from the CHGCAR
+        # OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed
+        else:
+            chgcar = Chgcar.from_file(chgcar_filename)
+            structure = chgcar.structure
 
         # Calculate the oxidation state of each site where it is simply the
         # change in number of electrons associated with it from vasp potcar vs

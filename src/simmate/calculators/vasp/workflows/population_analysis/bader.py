@@ -15,7 +15,7 @@ from simmate.calculators.vasp.database.population_analysis import (
 )
 from simmate.calculators.bader.tasks import BaderAnalysis as BaderAnalysisTask
 
-prebader_workflow = s3task_to_workflow(
+prebader_matproj_workflow = s3task_to_workflow(
     name="population-analysis/prebader-matproj",
     module=__name__,
     project_name="Simmate-PopulationAnalysis",
@@ -25,7 +25,7 @@ prebader_workflow = s3task_to_workflow(
     description_doc_short="uses Materials Project settings with denser FFT grid",
 )
 
-prebader_task = prebader_workflow.to_workflow_task()
+prebader_task = prebader_matproj_workflow.to_workflow_task()
 
 
 @task
