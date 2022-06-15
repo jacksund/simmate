@@ -115,6 +115,7 @@ class Thermodynamics(DatabaseTable):
         entries = (
             cls.objects.filter(
                 chemical_system__in=subsystems,
+                energy__isnull=False,  # only completed calculations
             )
             .only("energy", "formula_full")
             .all()
