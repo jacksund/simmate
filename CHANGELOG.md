@@ -13,16 +13,22 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 
 # Upcoming Release
-> :bulb: for ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
+> :bulb: For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
+
+**Enhancements**
 - check if there is a newer version of Simmate available and let the user know about the update
 - add experimental `badelf` workflow for determining electride character
 - add `electronic-structure` workflow which carries out both DOS and BS calculations
-- fix bug where SCF calculation is not completed before the non-SCF DOS or BS calculation and causes the workflows to fail ([#171](https://github.com/jacksund/simmate/issues/171))
-- fix bug for Bader workflow by registering the prebader workflow ([#174](https://github.com/jacksund/simmate/pull/174))
 - condense where parsing/deserialization of workflow parameters occurs to the refactored the `load_input_and_register` task. Originally, this would occur in multiple places (e.g. in the CLI module before submission, in the workflow run_cloud method, in the LoadInputAndRegister task, etc.) and involved boilerplate code. ([#173](https://github.com/jacksund/simmate/pull/173))
 - refactor experimental features `register_kwargs` and `customized` workflows
 - refactor `LoadInputAndRegister` and `SaveOutputTask` to `load_input_and_register` and `save_result`
+
+**Fixes**
+- fix bug where `update_all_stabilities` grabs incomplete calculations ([#177](https://github.com/jacksund/simmate/pull/177))
+- fix bug where SCF calculation is not completed before the non-SCF DOS or BS calculation and causes the workflows to fail ([#171](https://github.com/jacksund/simmate/issues/171))
+- fix bug for Bader workflow by registering the prebader workflow ([#174](https://github.com/jacksund/simmate/pull/174))
 - fix bug where `source` is not determined with yaml-file submissions ([#172](https://github.com/jacksund/simmate/issues/172))
+
 
 
 # v0.5.0 (2022.05.30)
@@ -33,11 +39,13 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - catch error with vasp freezing when `Brmix` handler switches to kerker mixing ([@becca9835](https://github.com/becca9835), [#159](https://github.com/jacksund/simmate/issues/159))
 
 
+
 # v0.4.0 (2022.04.24)
 - add `description_doc_short` + `show_parameters` to workflows and use these to update the UI
 - add django-allauth dependency for account management and google/github sign-ins
 - archive directory as `simmate_attempt_01.zip` whenever an error handler is triggered
 - depreciate the workflow parameter `use_prev_directory` in favor of `copy_previous_directory`
+
 
 
 # v0.3.0 (2022.04.19)
@@ -47,12 +55,14 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - reorganize `toolkit` module
 
 
+
 # v0.2.0 (2022.04.15)
 - start the CHANGELOG!
 - refactor API views and add `SimmateAPIViewSet` class
 - refactor `simmate start-project` command and underlying methods
 - refactor `simmate workflow-engine run-cluster` command and underlying methods
 - continue outlining `file_converters` module
+
 
 
 # v0.0.0 - v0.1.4 (2022.03.28 - 2022.04.12)
