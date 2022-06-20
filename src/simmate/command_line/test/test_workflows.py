@@ -196,3 +196,50 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
         structure=cif_filename,
         directory=new_dirname,
     )
+    
+    # TODO: other yaml files to test with I would like to test these but the
+    # current issues is that they are reliant on a vasp command. Maybe I need
+    # to mock a lower level method like S3Task.run...?
+
+    # A customized workflow
+    """
+    # Indicates we want to change the settings, using a specific workflow as a starting-point
+    workflow_name: customized/vasp
+    workflow_base: static-energy/mit
+    
+    # These would update the class attributes for the single workflow run
+    # The "custom__" start indicates we are updating some attribute
+    custom__incar: 
+        ENCUT: 600
+        KSPACING: 0.25
+        MAGMOM: 0.9
+    custom__potcar_mappings:
+        Y: Y_sv
+    
+    # Then the remaining inputs are the same as the workflow_base
+    structure: Y2CF2.cif
+    command: mpirun -n 5 vasp_std > vasp.out
+    """
+
+    # From structure file
+    """
+    workflow_name: static-energy/mit
+    structure: Y2CF2.cif
+    command: mpirun -n 5 vasp_std > vasp.out
+    """
+
+    # From database structure
+    """
+    workflow_name: static-energy/mit
+    structure:
+        calculation_table: MITStaticEnergy
+        calculation_id: 1
+    command: mpirun -n 5 vasp_std > vasp.out
+    """
+    
+    # Nested workflow
+    """
+    workflow_name: electronic-structure/matproj
+    structure: Y2CF2.cif
+    command: mpirun -n 5 vasp_std > vasp.out
+    """

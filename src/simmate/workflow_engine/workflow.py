@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+import shutil
 import json
 import cloudpickle
 import yaml
@@ -181,28 +183,14 @@ class Workflow(PrefectFlow):
             project_name=self.project_name,
         )
 
-        # -----------------------------------
-        # This part is unique to Simmate. Because we often want to save some info
-        # to our database even before the calculation starts/finishes, we do that
-        # here. An example is storing the structure and prefect id that we just
-        # submitted.
-        # BUG: Will there be a race condition here? What if the workflow finishes
-        # and tries writing to the databse before this is done?
-
-        # Deserialize and then Serialize all of the parameters so they can be properly submitted
-        from simmate.workflow_engine.common_tasks import load_input_and_register
-
-        parameters_deserialized = load_input_and_register.run(
-            workflow_name=self.name,
-            **kwargs,
-        )
-        parameters_serialized = self._serialize_parameters(**parameters_deserialized)
-        # NOTE: This may seem odd to deserialize right before serializing in the
-        # next line, but this is done to ensure parameters that accept file names
-        # are submitted properly. i.e -- We don't want to submit to a cluster and
-        # have the job fail because it doesn't have access to the file. Having
-        # these lines back-to-back ensures we submit with all necessary data.
-        # -----------------------------------
+        # Prefect does not properly deserialize objects that have
+        # as as_dict or to_dict method, so we use a custom method to do that here
+        parameters_serialized = self._serialize_parameters(**kwargs)
+        # BUG: What if we are submitting using a filename? We don't want to
+        # submit to a cluster and have the job fail because it doesn't have
+        # access to the file. One solution could be to deserialize right before
+        # serializing in the next line in order to ensure parameters that
+        # accept file names are submitted with all necessary data.
 
         # Now we submit the workflow
         logger.info(f"Creating flow run for {self.name}...") if logger else None
@@ -217,10 +205,22 @@ class Workflow(PrefectFlow):
         run_url = client.get_cloud_url("flow-run", flow_run_id, as_user=False)
         logger.info(f"Created flow run: {run_url}") if logger else None
 
+        # -----------------------------------
+        # This part is unique to Simmate. Because we often want to save some info
+        # to our database even before the calculation starts/finishes, we do that
+        # here. An example is storing the structure and prefect id that we just
+        # submitted.
+        # BUG: Will there be a race condition here? What if the workflow finishes
+        # and tries writing to the databse before this is done?
+        parameters_cleaned = self._deserialize_parameters(**kwargs)
+        self._register_calculation(flow_run_id, parameters_cleaned)
+        # -----------------------------------
+
         # if we want to wait until the job is complete, we do that here
         if wait_for_run:
             flow_run_view = self.wait_for_flow_run(flow_run_id)
             # return flow_run_view # !!! Should I return this instead?
+
         # return the flow_run_id for the user
         return flow_run_id
 
@@ -239,8 +239,40 @@ class Workflow(PrefectFlow):
         for log in flow_run_module.watch_flow_run(flow_run_id):
             message = f"Flow {flow_run.name}: {log.message}"
             prefect.context.logger.log(log.level, message)
+
         # Return the final view of the flow run
         return flow_run.get_latest()
+
+    def _register_calculation(self, prefect_flow_run_id, parameters):
+        """
+        If the workflow is linked to a calculation table in the Simmate database,
+        this adds the flow run to the database.
+
+        Parameters passed should be deserialized and cleaned.
+
+        This method should not be called directly as it is used within the
+        `run_cloud` method and `load_input_and_register` task.
+        """
+
+        # grab the registration kwargs from the parameters provided
+        register_kwargs = {
+            key: parameters.get(key, None) for key in self.register_kwargs
+        }
+
+        # SPECIAL CASE: for customized workflows we need to convert the inputs
+        # back to json before saving to the database.
+        if "workflow_base" in parameters:
+            parameters_serialized = self._serialize_parameters(**parameters)
+            calculation = self.calculation_table.from_prefect_id(
+                id=prefect_flow_run_id,
+                **parameters_serialized,
+            )
+        else:
+            # load/create the calculation for this workflow run
+            calculation = self.calculation_table.from_prefect_id(
+                id=prefect_flow_run_id,
+                **register_kwargs,
+            )
 
     @staticmethod
     def _serialize_parameters(**parameters) -> dict:
@@ -251,6 +283,8 @@ class Workflow(PrefectFlow):
         This method should not be called directly as it is used within the
         run_cloud() method.
         """
+        # TODO: consider moving this into prefect's core code as a contribution.
+
         # Because many flows allow object-type inputs (such as structure object),
         # we need to serialize these inputs before scheduling them with prefect
         # cloud. To do this, I only check for two potential methods:
@@ -273,10 +307,96 @@ class Workflow(PrefectFlow):
                     parameter_value = parameter_value.as_dict()
                 elif hasattr(parameter_value, "to_dict"):
                     parameter_value = parameter_value.to_dict()
+                    
+                # workflow_base and input_parameters are special cases that
+                # may require a refactor (for customized workflows)
+                elif parameter_key == "workflow_base":
+                    parameter_value = parameter_value.name
+                elif parameter_key == "input_parameters":
+                    # recursive call to this function
+                    parameter_value = Workflow._serialize_parameters(**parameter_value)
+
                 else:
                     parameter_value = cloudpickle.dumps(parameter_value)
             parameters_serialized[parameter_key] = parameter_value
         return parameters_serialized
+
+    @staticmethod
+    def _deserialize_parameters(**parameters) -> dict:
+        """
+        converts all parameters to appropriate python objects
+        """
+
+        # we don't want to pass arguments like command=None or structure=None if the
+        # user didn't provide this input parameter. Instead, we want the workflow to
+        # use its own default value. To do this, we first check if the parameter
+        # is set in our kwargs dictionary and making sure the value is NOT None.
+        # If it is None, then we remove it from our final list of kwargs. This
+        # is only done for command, directory, and structure inputs -- as these
+        # are the three that are typically assumed to be present (see the CLI).
+
+        from simmate.toolkit import Structure
+        from simmate.toolkit.diffusion import MigrationHop, MigrationImages
+
+        parameters_cleaned = parameters.copy()
+
+        #######
+        # SPECIAL CASE: customized workflows have their parameters stored under
+        # "input_parameters" instead of the base dict
+        # THIS INVOLVES A RECURSIVE CALL TO THIS SAME METHOD
+        if "workflow_base" in parameters.keys():
+            # This is a non-modular import that can cause issues and slower
+            # run times. We therefore import lazily.
+            from simmate.workflows.utilities import get_workflow
+
+            parameters_cleaned["workflow_base"] = get_workflow(
+                parameters["workflow_base"]
+            )
+            parameters_cleaned["input_parameters"] = Workflow._deserialize_parameters(
+                **parameters["input_parameters"]
+            )
+            return parameters_cleaned
+        #######
+
+        if not parameters.get("command", None):
+            parameters_cleaned.pop("command", None)
+
+        if not parameters.get("directory", None):
+            parameters_cleaned.pop("directory", None)
+
+        structure = parameters.get("structure", None)
+        if structure:
+            parameters_cleaned["structure"] = Structure.from_dynamic(structure)
+        else:
+            parameters_cleaned.pop("structure", None)
+
+        if "structures" in parameters.keys():
+            structure_filenames = parameters["structures"].split(";")
+            parameters_cleaned["structures"] = [
+                Structure.from_dynamic(file) for file in structure_filenames
+            ]
+
+        if "migration_hop" in parameters.keys():
+            migration_hop = MigrationHop.from_dynamic(parameters["migration_hop"])
+            parameters_cleaned["migration_hop"] = migration_hop
+
+        if "migration_images" in parameters.keys():
+            migration_images = MigrationImages.from_dynamic(
+                parameters["migration_images"]
+            )
+            parameters_cleaned["migration_images"] = migration_images
+
+        if "supercell_start" in parameters.keys():
+            parameters_cleaned["supercell_start"] = Structure.from_dynamic(
+                parameters["supercell_start"]
+            )
+
+        if "supercell_end" in parameters.keys():
+            parameters_cleaned["supercell_end"] = Structure.from_dynamic(
+                parameters["supercell_end"]
+            )
+
+        return parameters_cleaned
 
     @property
     def nflows_submitted(self) -> int:

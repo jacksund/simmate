@@ -148,7 +148,7 @@ def test_deserialize_parameters(mocker):
         "structures": "None; None; None",
     }
 
-    Workflow._serialize_parameters(**example_parameters)
+    Workflow._deserialize_parameters(**example_parameters)
 
 
 def test_parameter_names():

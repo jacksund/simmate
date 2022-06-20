@@ -59,8 +59,7 @@ from simmate.calculators.vasp.database.customized import (
     CustomizedVASPCalculation,
 )
 
-# This module is still under early development
-# from simmate.toolkit.structure_prediction.evolution.database import (
-#     EvolutionarySearch,
-#     StructureSource,
-# )
+from simmate.toolkit.structure_prediction.evolution.database import (
+    EvolutionarySearch,
+    StructureSource,
+)

@@ -166,6 +166,10 @@ class SearchResults(models.QuerySet):
         base_info = self.model.base_info
         if "id" not in base_info:
             base_info.append("id")
+        # if "created_at" not in base_info:
+        #     base_info.append("created_at")
+        # if "updated_at" not in base_info:
+        #     base_info.append("updated_at")
 
         # We want to load the entire table, but only grab the fields that
         # are in base_info.
@@ -249,6 +253,27 @@ class DatabaseTable(models.Model):
     when the `to_archive` method is used. Using the columns in this list, all 
     other columns for this table can be calculated, so the columns in this list 
     are effectively the "raw data".
+    """
+    # TODO: setting base_info is becoming boilerplate. Consider making this
+    # into a method like to_toolkit that automatically looks at all mix-ins
+    # and creates this list (i.e. involves _base_info properties)
+
+    created_at = table_column.DateTimeField(
+        auto_now_add=True,
+        blank=True,
+        null=True,
+    )
+    """
+    Timestamp of when this row was first added to the database table
+    """
+
+    updated_at = table_column.DateTimeField(
+        auto_now=True,
+        blank=True,
+        null=True,
+    )
+    """
+    Timestamp of when this row was was lasted changed / updated
     """
 
     source = table_column.JSONField(blank=True, null=True)

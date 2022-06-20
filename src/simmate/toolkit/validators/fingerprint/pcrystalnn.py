@@ -6,15 +6,12 @@ from tqdm import tqdm
 from django.utils import timezone
 
 from matminer.featurizers.site import CrystalNNFingerprint
-from matminer.featurizers.structure.sites import PartialsSiteStatsFingerprint
 
-# TODO: what if we want to add to the structure_pool list later on? Should this
-# be integrated with the Simmate database tables? An example use-case is with
-# evolutionary searches where structures can be added at random times, but those
-# additions won't be reflected here...
-# One potential solution is to have an "update_fingerprint_table" method along with
-# structure_ids list. We'd make this so structure_pool can be either a
-# list of structures OR a structure database table.
+# BUG: waiting on this pSS to be added to matminer. See the following PR:
+#   https://github.com/hackingmaterials/matminer/pull/809
+from matminer.featurizers.structure.sites import (
+    SiteStatsFingerprint,
+)  # PartialsSiteStatsFingerprint
 
 
 class PartialCrystalNNFingerprint:
@@ -43,7 +40,7 @@ class PartialCrystalNNFingerprint:
 
         # now that we made the sitefingerprint_method, we can input it into the
         # structurefingerprint_method which finishes up the featurizer
-        self.featurizer = PartialsSiteStatsFingerprint(
+        self.featurizer = SiteStatsFingerprint(
             sitefingerprint_method, stats=stat_options
         )
 
