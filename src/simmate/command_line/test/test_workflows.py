@@ -196,7 +196,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
         structure=cif_filename,
         directory=new_dirname,
     )
-    
+
     # TODO: other yaml files to test with I would like to test these but the
     # current issues is that they are reliant on a vasp command. Maybe I need
     # to mock a lower level method like S3Task.run...?
@@ -236,7 +236,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
         calculation_id: 1
     command: mpirun -n 5 vasp_std > vasp.out
     """
-    
+
     # Nested workflow
     """
     workflow_name: electronic-structure/matproj

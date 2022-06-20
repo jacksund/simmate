@@ -307,7 +307,7 @@ class Workflow(PrefectFlow):
                     parameter_value = parameter_value.as_dict()
                 elif hasattr(parameter_value, "to_dict"):
                     parameter_value = parameter_value.to_dict()
-                    
+
                 # workflow_base and input_parameters are special cases that
                 # may require a refactor (for customized workflows)
                 elif parameter_key == "workflow_base":
