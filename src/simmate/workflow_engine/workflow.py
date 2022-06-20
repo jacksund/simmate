@@ -202,7 +202,7 @@ class Workflow(PrefectFlow):
         )
 
         # we log the website url to the flow for the user
-        run_url = client.get_cloud_url("flow-run", flow_run_id, as_user=False)
+        run_url = client.get_cloud_url("flow-run", flow_run_id)
         logger.info(f"Created flow run: {run_url}") if logger else None
 
         # -----------------------------------
