@@ -4,30 +4,61 @@
 This module provides conversion between Simmate toolkit and database structures.
 
 Everything is built-in to the base toolkit/database classes, so you typically 
-convert between these two without ever loading this module directly.
-
-Recommended use:
+convert between these two without ever loading this module directly. Below are 
+some examples of how we recommend doing this.
+    
+EXAMPLE 1: Database object to Toolkit object
 ``` python
-# using MatProj as an example, but the same applies for all Structure tables
+# Grab an example database structure.
+# We use MatProj as an example, but the same applies for all Structure tables.
 from simmate.database.third_parties import MatProjStructure
-
-db_structure = MatProjStructure.objects.first()
+database_structure = MatProjStructure.objects.first()
 
 # convert to toolkit
-tk_structure = db_structure.to_toolkit()
+toolkit_structure = database_structure.to_toolkit()
 
-# convert back to database (as new row)
-db_structure2 = MatProjStructure.from_toolkit(structure=structure)
+# access the original database object and confirm we have the same thing
+database_structure_2 = toolkit_structure.database_object
+assert database_structure == database_structure_2
+```
+
+EXAMPLE 2: Toolkit object to Database object
+``` python
+# Grab an example toolkit structure.
+# We use a cif file, but you can load this structure from anywhere
+from simmate.toolkit import Structure
+toolkit_structure = Structure.from_file("cif")
+
+# Convert back to database (as new row)
+# We save this to the Materials Project Database (which you should NOT do), but
+# in practice, you should have your own independent table to do this.
+database_structure = MatProjStructure.from_toolkit(structure=toolkit_structure)
+database_structure.save()
+```
+
+EXAMPLE 3: Database metadata (dict) to Toolkit object
+``` python
+
+# Setup some database metadata
+example_metadata = {
+    "database_table": "MatProjStructure",
+    "database_id": "mp-123",
+}
+
+# Grab the structure directly as a toolkit object
+structure_toolkit = Structure.from_database_dict(example_metadata)
+
+# access the original database object
+database_structure = toolkit_structure.database_object
 ```
 """
 
 from django.utils.module_loading import import_string
 
-from simmate.database import connect
-from simmate.website.workflows import models as all_datatables
 from simmate.toolkit import Structure as ToolkitStructure
-
-# from simmate.database.base_data_types import Structure as DatabaseStructure
+from simmate.database import connect
+from simmate.database.base_data_types import Structure as DatabaseStructure
+from simmate.website.workflows import models as all_datatables
 
 
 class DatabaseAdapter:
@@ -44,24 +75,15 @@ class DatabaseAdapter:
     # def get_database(structure: ToolkitStructure) -> DatabaseStructure:
     #     return ...
 
-    # This method is not included as it is obtuse and promotes improper use.
-    # We keep this comment here for those inspecting the code for understanding.
-    #
-    # @staticmethod
-    # def get_toolkit(structure: DatabaseStructure) -> ToolkitStructure:
-    #     return structure.to_toolkit()
-
     @staticmethod
-    def get_toolkit_from_database_dict(structure: dict) -> ToolkitStructure:
+    def get_toolkit_from_database_dict(structure_dict: dict) -> ToolkitStructure:
         """
-        This is an experimental feature.
-
         Loads a structure from the Simmate database from a dictionary of
         metadata.
         """
 
         # start by loading the datbase table, which is given as a module path
-        datatable_str = structure["calculation_table"]
+        datatable_str = structure_dict["database_table"]
 
         # Import the datatable class -- how this is done depends on if it
         # is from a simmate supplied class or if the user supplied a full
@@ -75,43 +97,60 @@ class DatabaseAdapter:
         # These attributes tells us which structure to grab from our datatable.
         # The user should have only provided one -- if they gave more, we just
         # use whichever one comes first.
-        prefect_flow_run_id = structure.get("prefect_flow_run_id")
-        calculation_id = structure.get("calculation_id")
-        directory_old = structure.get("directory")
+        prefect_flow_run_id = structure_dict.get("prefect_flow_run_id")
+        database_id = structure_dict.get("database_id")
+        directory = structure_dict.get("directory")
 
-        # we must have either a prefect_flow_run_id or calculation_id
-        if not prefect_flow_run_id and not calculation_id and not directory_old:
+        # we must have either a prefect_flow_run_id or database_id
+        if not prefect_flow_run_id and not database_id and not directory:
             raise Exception(
-                "You must have either a prefect_flow_run_id, calculation_id, "
+                "You must have either a prefect_flow_run_id, database_id, "
                 "or directory provided if you want to load a structure from "
                 "a previous calculation."
             )
 
         # now query the datable with which whichever was provided. Each of these
         # are unique so all three should return a single calculation.
-        if calculation_id:
-            calculation = datatable.objects.get(id=calculation_id)
+        if database_id:
+            database_object = datatable.objects.get(id=database_id)
         elif prefect_flow_run_id:
-            calculation = datatable.objects.get(
+            database_object = datatable.objects.get(
                 prefect_flow_run_id=prefect_flow_run_id,
             )
-        elif directory_old:
-            calculation = datatable.objects.get(directory=directory_old)
+        elif directory:
+            database_object = datatable.objects.get(directory=directory)
 
         # In some cases, the structure we want is not within the calculation table.
         # For example, in relaxations the final structure is attached via
         # the table.structure_final attribute
-        structure_field = structure.get("structure_field")
+        structure_field = structure_dict.get("structure_field")
         if structure_field:
-            structure_cleaned = getattr(calculation, structure_field).to_toolkit()
+            structure_cleaned = getattr(database_object, structure_field).to_toolkit()
         # if there's no structure field, that means we already have the correct entry
         else:
-            structure_cleaned = calculation.to_toolkit()
+            structure_cleaned = database_object.to_toolkit()
 
         # For ease of access, we also link the calculation database entry
-        structure_cleaned.calculation = calculation
+        structure_cleaned.database_object = database_object
 
         return structure_cleaned
+
+    @staticmethod
+    def get_toolkit_from_database_object(
+        structure_object: DatabaseStructure,
+    ) -> ToolkitStructure:
+        """
+        Converts a database Structure object into a toolkit Structure
+        """
+        # we just call the the other method of this adapter
+        structure_toolkit = DatabaseAdapter.get_toolkit_from_database_string(
+            structure_object.structure_string
+        )
+
+        # For ease of access, we also link the calculation database entry
+        structure_toolkit.database_object = structure_object
+
+        return structure_toolkit
 
     @staticmethod
     def get_toolkit_from_database_string(structure_string: str) -> ToolkitStructure:

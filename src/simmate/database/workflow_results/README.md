@@ -15,7 +15,7 @@ from simmate.workflows.static_energy import mit_workflow
 status = mit_workflow.run(structure=...)
 
 # gives the DatabaseTable where ALL results are stored
-mit_workflow.result_table
+mit_workflow.database_table
 ```
 
 You can also access a table directly with...
@@ -26,7 +26,7 @@ from simmate.database import connect
 
 from simmate.database.workflow_results import MITStaticEnergy
 
-# NOTE: MITStaticEnergy here is the exact same as result_table in the codeblock
+# NOTE: MITStaticEnergy here is the exact same as database_table in the codeblock
 # above this one. These are just two different ways of accessing it.
 MITStaticEnergy.objects.filter(...)
 ```

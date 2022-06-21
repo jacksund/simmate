@@ -25,7 +25,7 @@ with Workflow("dummy-flowtype/dummy-flow") as DUMMY_FLOW:
     structure = Parameter("structure", default=None)
     dummy_task_1(source)
     dummy_task_2(structure)
-DUMMY_FLOW.calculation_table = TestStructureCalculation
+DUMMY_FLOW.database_table = TestStructureCalculation
 DUMMY_FLOW.register_kwargs = ["source", "structure"]
 
 

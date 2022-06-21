@@ -13,7 +13,7 @@ workflow = s3task_to_workflow(
     module=__name__,
     project_name="Simmate-Energy",
     s3task=NEBEndpointStaticEnergyTask,
-    calculation_table=NEBEndpointStaticEnergyResults,
+    database_table=NEBEndpointStaticEnergyResults,
     register_kwargs=["structure", "source"],
     description_doc_short="uses Materials Project settings meant for defect supercell structures",
 )

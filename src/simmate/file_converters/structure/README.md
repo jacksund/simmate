@@ -14,7 +14,7 @@ structure1 = Structure.from_dynamic("example.cif")
 structure2 = Structure.from_dynamic("POSCAR")
 
 structure3 = Structure.from_dynamic(
-    {"calculation_table": "MITStaticEnergy", "calculation_id": 1}
+    {"database_table": "MITStaticEnergy", "database_id": 1}
 )
 ```
 

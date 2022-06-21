@@ -23,7 +23,7 @@ class NestedCalculation(Calculation):
         app_label = "workflows"
 
     # TODO:
-    # child_calculation_tables = [...]
+    # child_database_tables = [...]
 
     # TODO:
     # should this be a list of all modifications? It could maybe be used to
@@ -36,7 +36,7 @@ class NestedCalculation(Calculation):
     def create_subclass_from_calcs(
         cls,
         name: str,
-        child_calculation_tables: List[Calculation],
+        child_database_tables: List[Calculation],
         module: str,
         **extra_columns,
     ):
@@ -76,7 +76,7 @@ class NestedCalculation(Calculation):
 
         - `name` :
             Name of the subclass that is output.
-        - `child_calculation_tables` :
+        - `child_database_tables` :
             list of database tables for the nested workflows. This table links
             these sub-tables together so results can be viewed from each step.
         - `module` :
@@ -99,7 +99,7 @@ class NestedCalculation(Calculation):
         # I can only think of multi-structure workflows (like EvolutionarySearch)
         # which I don't give their own table for now.
         new_columns = {}
-        for child_calc in child_calculation_tables:
+        for child_calc in child_database_tables:
             new_column = table_column.OneToOneField(
                 child_calc,
                 on_delete=table_column.CASCADE,
@@ -115,7 +115,7 @@ class NestedCalculation(Calculation):
             **new_columns,
             **extra_columns,
             # also have child calcs list as an attribute
-            child_calculation_tables=child_calculation_tables,
+            child_database_tables=child_database_tables,
             module=module,
         )
 
@@ -129,7 +129,7 @@ class NestedCalculation(Calculation):
     #     """
     #     # BUG: This assumes we ran all calculations within the same directory,
     #     # which isn't true in all cases.
-    #     for child_calc_table in self.child_calculation_tables:
+    #     for child_calc_table in self.child_database_tables:
     #         if child_calc_table.objects.filter(directory=self.directory).exists():
     #             child_calc = child_calc_table.objects.get(directory=self.directory)
     #             setattr(self, child_calc._meta.model_name, child_calc)

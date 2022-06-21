@@ -37,7 +37,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     python objects, so this utility converts the input to a toolkit Structure
     object.
 
-    `register_run` allows us to skip the database step if the calculation_table
+    `register_run` allows us to skip the database step if the database_table
     isn't properly set yet. This input is a temporary fix for the
     diffusion/from-images workflow.
 
@@ -219,7 +219,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # don't store calculation information bc the flow is just a quick python
     # analysis.
 
-    if register_run and workflow and workflow.calculation_table:
+    if register_run and workflow and workflow.database_table:
 
         workflow._register_calculation(prefect_flow_run_id, parameters_cleaned)
 

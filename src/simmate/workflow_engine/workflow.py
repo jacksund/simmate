@@ -17,7 +17,7 @@ from prefect.backend import FlowRunView, FlowView
 # in order to support "mocking" this function in unit tests
 from prefect.backend import flow_run as flow_run_module
 
-from simmate.database.base_data_types import DatabaseTable, Calculation
+from simmate.database.base_data_types import Calculation
 from simmate.workflow_engine import S3Task
 
 
@@ -54,23 +54,14 @@ class Workflow(PrefectFlow):
     without storing results in the database.
     """
 
-    calculation_table: Calculation = None
+    database_table: Calculation = None
     """
     The database table where calculation information (such as the prefect_flow_run_id)
-    is stored. Note, for NestedWorkflows, this table will not be the same as the
-    result table! The table should use 
-    `simmate.database.base_data_types.Calculation`
-    """
-
-    result_table: DatabaseTable = None
-    """
-    The database table where all calculation results are stored. In many cases,
-    this is the same table as `calculation_table` -- the exception is
-    for NestedWorkflows, where the result table may point to a specific
-    sub-workflow's table for results. An example of this is the relaxation/staged
-    workflow, which is made up of a series of relaxations -- and the result 
-    table points to the final relaxation in this series. The table should use 
-    `simmate.database.base_data_types.DatabaseTable`
+    is stored. The table should use `simmate.database.base_data_types.Calculation`
+    
+    In many cases, this table will contain all of the results you need. However,
+    pay special attention to NestedWorkflows, where your results are often tied
+    to a final task.
     """
 
     description_doc_short: str = None
@@ -261,13 +252,13 @@ class Workflow(PrefectFlow):
         # back to json before saving to the database.
         if "workflow_base" in parameters:
             parameters_serialized = self._serialize_parameters(**parameters)
-            calculation = self.calculation_table.from_prefect_id(
+            calculation = self.database_table.from_prefect_id(
                 id=prefect_flow_run_id,
                 **parameters_serialized,
             )
         else:
             # load/create the calculation for this workflow run
-            calculation = self.calculation_table.from_prefect_id(
+            calculation = self.database_table.from_prefect_id(
                 id=prefect_flow_run_id,
                 **register_kwargs,
             )

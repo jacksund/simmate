@@ -13,7 +13,7 @@ workflow = s3task_to_workflow(
     module=__name__,
     project_name="Simmate-Relaxation",
     s3task=Quality02RelaxationTask,
-    calculation_table=Quality02RelaxationResults,
+    database_table=Quality02RelaxationResults,
     register_kwargs=["structure", "source"],
     description_doc_short="low-quality settings meant for highly unreasonable structures",
 )

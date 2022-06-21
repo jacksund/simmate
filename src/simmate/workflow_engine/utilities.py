@@ -15,7 +15,7 @@ def s3task_to_workflow(
     module: str,
     project_name: str,
     s3task: S3Task,
-    calculation_table: Calculation,
+    database_table: Calculation,
     register_kwargs: List[str],
     description_doc_short: str = None,
 ):
@@ -63,8 +63,7 @@ def s3task_to_workflow(
 
     workflow.storage = ModuleStorage(module)
     workflow.project_name = project_name
-    workflow.calculation_table = calculation_table
-    workflow.result_table = calculation_table
+    workflow.database_table = database_table
     workflow.register_kwargs = register_kwargs
     workflow.result_task = result
     workflow.s3task = s3task

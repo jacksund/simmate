@@ -13,7 +13,7 @@ workflow = s3task_to_workflow(
     module=__name__,
     project_name="Simmate-Density-of-States",
     s3task=MatProjDensityOfStatesTask,
-    calculation_table=MatProjDensityOfStatesResults,
+    database_table=MatProjDensityOfStatesResults,
     register_kwargs=["structure", "source"],
     description_doc_short="uses Materials Project settings (PBE)",
 )

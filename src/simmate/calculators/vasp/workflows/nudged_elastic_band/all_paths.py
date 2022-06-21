@@ -143,6 +143,7 @@ with Workflow("diffusion/all-paths") as workflow:
         directory=directory,
         command=command,
         migrating_specie=migrating_specie,
+        register_run=False,
     )
 
     # Our step is to run a relaxation on the bulk structure and it uses our inputs
@@ -157,7 +158,7 @@ with Workflow("diffusion/all-paths") as workflow:
     # required for NEB, but it takes very little time.
     run_id_01 = energy_bulk(
         structure={
-            "calculation_table": "MITRelaxation",
+            "database_table": "MITRelaxation",
             "directory": run_id_00["directory"],
             "structure_field": "structure_final",
         },
@@ -169,7 +170,7 @@ with Workflow("diffusion/all-paths") as workflow:
     # diffusion pathways and builds the necessary database entries.
     migration_hop_ids = build_db(
         structure={
-            "calculation_table": "MITStaticEnergy",
+            "database_table": "MITStaticEnergy",
             "directory": run_id_01["directory"],
         },
         migrating_specie=migrating_specie,
@@ -190,8 +191,7 @@ with Workflow("diffusion/all-paths") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
-# workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet
-workflow.result_table = MITDiffusionAnalysis
+workflow.database_table = MITDiffusionAnalysis
 workflow.s3tasks = [
     relaxation_mit_workflow.s3task,
     energy_mit_workflow.s3task,

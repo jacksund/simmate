@@ -60,8 +60,7 @@ with Workflow("customized/vasp") as vasp_workflow:
 
 vasp_workflow.storage = ModuleStorage(__name__)
 vasp_workflow.project_name = "Simmate-Customized"
-vasp_workflow.calculation_table = CustomizedVASPCalculation
-vasp_workflow.result_table = CustomizedVASPCalculation
+vasp_workflow.database_table = CustomizedVASPCalculation
 vasp_workflow.register_kwargs = [
     "workflow_base",
     "input_parameters",

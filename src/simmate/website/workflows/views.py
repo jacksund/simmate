@@ -100,7 +100,7 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         """
         workflow_name_full = workflow_type + "/" + workflow_name
         workflow = get_workflow(workflow_name_full)
-        return workflow.result_table
+        return workflow.database_table
 
     def get_list_context(
         self,

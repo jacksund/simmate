@@ -195,8 +195,10 @@ class SearchEngine:
 
         # Point to the structure datatable that we'll pull from
         # For now, I assume its the results table of the workflow
-        self.individuals_datatable = self.workflow.result_table
-        self.calculation_datatable = self.workflow.calculation_table
+        self.individuals_datatable = (
+            self.workflow.result_table
+        )  #################################### BUG
+        self.calculation_datatable = self.workflow.database_table
 
         # Check if there is an existing search and grab it if so. Otherwise, add
         # the search entry to the DB.

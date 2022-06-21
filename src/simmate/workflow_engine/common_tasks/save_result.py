@@ -27,7 +27,7 @@ def save_result(result):
 
     # load the calculation entry for this workflow run. This should already
     # exist thanks to the load_input_and_register task.
-    calculation = workflow.calculation_table.from_prefect_id(
+    calculation = workflow.database_table.from_prefect_id(
         prefect.context.flow_run_id,
     )
 

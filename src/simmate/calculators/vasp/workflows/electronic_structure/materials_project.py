@@ -55,7 +55,7 @@ with Workflow("electronic-structure/matproj") as workflow:
 
     dos_result = dos_task(
         structure={
-            "calculation_table": static_workflow.result_table.__name__,
+            "database_table": static_workflow.database_table.__name__,
             "directory": static_result["directory"],
         },
         command=parameters_cleaned["command"],
@@ -66,7 +66,7 @@ with Workflow("electronic-structure/matproj") as workflow:
 
     bs_result = bs_task(
         structure={
-            "calculation_table": static_workflow.result_table.__name__,
+            "database_table": static_workflow.database_table.__name__,
             "directory": static_result["directory"],
         },
         command=parameters_cleaned["command"],
@@ -77,9 +77,8 @@ with Workflow("electronic-structure/matproj") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
-# workflow.calculation_table = None  # not implemented yet
-workflow.result_table = (
-    bs_workflow.result_table
+workflow.database_table = (
+    bs_workflow.database_table
 )  # not implemented yet. This is a placeholder
 workflow.s3tasks = [
     static_workflow.s3task,

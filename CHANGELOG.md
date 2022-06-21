@@ -16,12 +16,15 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 > :bulb: For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
 
 **Enhancements**
+- add new modules to `toolkit.structure_prediction` and `toolkit.creation`, including ones to provide `known`, `substitution`, and `prototype` based structures.
 - add `created_at` and `updated_at` columns to all database tables
 - check if there is a newer version of Simmate available and let the user know about the update
 - add experimental `badelf` workflow for determining electride character
 - add `electronic-structure` workflow which carries out both DOS and BS calculations
+- add `database_obj` attribute to the `toolkit.Structure` base class that is dynamically set
 
-** Refactors **
+**Refactors**
+- standardize `database_table` attribute for workflows by merging `calculation_table` and `result_table` attributes ([#102](https://github.com/jacksund/simmate/issues/102))
 - removed use of `-s`, `-c`, and `-d` shortcuts from the `workflows` commands
 - refactor `relaxation/staged` workflow to run in single parent directory
 - refactor evolutionary search algorithm (alpha feature)

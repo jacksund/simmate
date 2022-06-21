@@ -210,7 +210,7 @@ example_workflow = s3task_to_workflow(
     # Set the name where you want this to show up in prefect cloud
     project_name="Simmate-Relaxation",
     s3task=ExampleRelaxationTable,
-    calculation_table=MyCustomTable,
+    database_table=MyCustomTable,
     register_kwargs=["structure", "source"],
 )
 

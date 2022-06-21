@@ -195,4 +195,4 @@ class Structure(DatabaseTable):
         """
         Converts the database object to toolkit Structure object.
         """
-        return ToolkitStructure.from_database_string(self.structure_string)
+        return ToolkitStructure.from_database_object(self)

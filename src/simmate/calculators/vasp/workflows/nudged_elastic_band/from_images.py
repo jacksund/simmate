@@ -70,11 +70,9 @@ with Workflow("diffusion/from-images") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
-workflow.calculation_table = MITMigrationImage
-workflow.result_table = MITMigrationImage
+workflow.database_table = MITMigrationImage
 workflow.result_task = output
 workflow.s3task = neb_task
-# workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet
 
 workflow.description_doc_short = "runs NEB using a series of structures images as input"
 workflow.__doc__ = """

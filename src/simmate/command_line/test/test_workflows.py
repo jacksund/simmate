@@ -250,8 +250,8 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
     """
     workflow_name: static-energy/mit
     structure:
-        calculation_table: MITStaticEnergy
-        calculation_id: 1
+        database_table: MITStaticEnergy
+        database_id: 1
     command: mpirun -n 5 vasp_std > vasp.out
     """
 

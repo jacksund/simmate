@@ -27,7 +27,7 @@ example_workflow = s3task_to_workflow(
     project_name="Simmate-Relaxation",
     # Simply set these two variables to your Task and DatabaseTable classes!
     s3task=ExampleRelaxationTable,
-    calculation_table=ExampleRelaxationTable,
+    database_table=ExampleRelaxationTable,
     # this sets what should be saved to the database BEFORE the calculation
     # is actually started. This helps you search your database for calculations
     # that have not completed yet.

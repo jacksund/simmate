@@ -73,7 +73,7 @@ with Workflow("relaxation/staged") as workflow:
     # relaxation 01
     run_id_01 = relax_task_01(
         structure={
-            "calculation_table": "Quality00Relaxation",
+            "database_table": "Quality00Relaxation",
             "directory": run_id_00["directory"],
             "structure_field": "structure_final",
         },
@@ -84,7 +84,7 @@ with Workflow("relaxation/staged") as workflow:
     # relaxation 02
     run_id_02 = relax_task_02(
         structure={
-            "calculation_table": "Quality01Relaxation",
+            "database_table": "Quality01Relaxation",
             "directory": run_id_01["directory"],
             "structure_field": "structure_final",
         },
@@ -95,7 +95,7 @@ with Workflow("relaxation/staged") as workflow:
     # relaxation 03
     run_id_03 = relax_task_03(
         structure={
-            "calculation_table": "Quality02Relaxation",
+            "database_table": "Quality02Relaxation",
             "directory": run_id_02["directory"],
             "structure_field": "structure_final",
         },
@@ -106,7 +106,7 @@ with Workflow("relaxation/staged") as workflow:
     # relaxation 04
     run_id_04 = relax_task_04(
         structure={
-            "calculation_table": "Quality03Relaxation",
+            "database_table": "Quality03Relaxation",
             "directory": run_id_03["directory"],
             "structure_field": "structure_final",
         },
@@ -117,7 +117,7 @@ with Workflow("relaxation/staged") as workflow:
     # Static Energy (same quality as 04 relaxation)
     run_id_05 = static_task_04(
         structure={
-            "calculation_table": "Quality04Relaxation",
+            "database_table": "Quality04Relaxation",
             "directory": run_id_04["directory"],
             "structure_field": "structure_final",
         },
@@ -127,8 +127,7 @@ with Workflow("relaxation/staged") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Relaxation"
-workflow.calculation_table = StagedRelaxation
-workflow.result_table = Quality04StaticEnergy
+workflow.database_table = StagedRelaxation
 workflow.result_task = run_id_05
 workflow.s3tasks = [
     w.s3task
