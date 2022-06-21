@@ -48,7 +48,6 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     `**parameters` includes all parameters and anything extra that you want saved
     to simmate_metadata.yaml
     """
-
     # !!! This function needs a refactor that is waiting on prefect 2.0.
     # In the future, this will be broken into smaller methods and utilities.
     # Prefect 2.0 will allow us to do more pythonic things such as...

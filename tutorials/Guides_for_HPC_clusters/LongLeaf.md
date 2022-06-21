@@ -91,7 +91,7 @@ And paste in the example content...
 #SBATCH --mail-user=youronyen@live.unc.edu
 #SBATCH --time=11-00:00
 
-simmate workflows run energy-mit -s POSCAR -c "mpirun -n 20 vasp_std > vasp.out"
+simmate workflows run energy-mit --structure POSCAR --command "mpirun -n 20 vasp_std > vasp.out"
 ```
 
 <br/>

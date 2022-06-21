@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 from simmate.workflow_engine.workflow import (
     Workflow,
     Parameter,
     ModuleStorage,
 )
-
+from simmate.workflow_engine.common_tasks import load_input_and_register
 from simmate.calculators.vasp.workflows.relaxation.quality_00 import (
     workflow as relaxation_quality00,
 )
@@ -43,12 +45,27 @@ with Workflow("relaxation/staged") as workflow:
 
     structure = Parameter("structure")
     command = Parameter("command", default="vasp_std > vasp.out")
+    source = Parameter("source", default=None)
+    directory = Parameter("directory", default=None)
+    copy_previous_directory = Parameter(
+        "copy_previous_directory",
+        default=False,
+    )
+
+    parameters_cleaned = load_input_and_register(
+        structure=structure,
+        command=command,
+        source=source,
+        directory=directory,
+        copy_previous_directory=copy_previous_directory,
+    )
 
     # Our first relaxation is directly from our inputs. The remaining one
     # pass along results
     run_id_00 = relax_task_00(
-        structure=structure,
-        command=command,
+        structure=parameters_cleaned["structure"],
+        command=parameters_cleaned["command"],
+        directory=parameters_cleaned["directory"] + os.path.sep + "relax_00",
     )
 
     # TODO: Use a for-loop in Prefect 2.0!
@@ -60,7 +77,8 @@ with Workflow("relaxation/staged") as workflow:
             "directory": run_id_00["directory"],
             "structure_field": "structure_final",
         },
-        command=command,
+        command=parameters_cleaned["command"],
+        directory=parameters_cleaned["directory"] + os.path.sep + "relax_01",
     )
 
     # relaxation 02
@@ -70,7 +88,8 @@ with Workflow("relaxation/staged") as workflow:
             "directory": run_id_01["directory"],
             "structure_field": "structure_final",
         },
-        command=command,
+        command=parameters_cleaned["command"],
+        directory=parameters_cleaned["directory"] + os.path.sep + "relax_02",
     )
 
     # relaxation 03
@@ -80,7 +99,8 @@ with Workflow("relaxation/staged") as workflow:
             "directory": run_id_02["directory"],
             "structure_field": "structure_final",
         },
-        command=command,
+        command=parameters_cleaned["command"],
+        directory=parameters_cleaned["directory"] + os.path.sep + "relax_03",
     )
 
     # relaxation 04
@@ -90,7 +110,8 @@ with Workflow("relaxation/staged") as workflow:
             "directory": run_id_03["directory"],
             "structure_field": "structure_final",
         },
-        command=command,
+        command=parameters_cleaned["command"],
+        directory=parameters_cleaned["directory"] + os.path.sep + "relax_04",
     )
 
     # Static Energy (same quality as 04 relaxation)
@@ -100,7 +121,8 @@ with Workflow("relaxation/staged") as workflow:
             "directory": run_id_04["directory"],
             "structure_field": "structure_final",
         },
-        command=command,
+        command=parameters_cleaned["command"],
+        directory=parameters_cleaned["directory"] + os.path.sep + "static_04",
     )
 
 workflow.storage = ModuleStorage(__name__)

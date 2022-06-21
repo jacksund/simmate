@@ -55,12 +55,7 @@ def list_options(options: List) -> int:
     return selected_index
 
 
-def parse_parameters(
-    context: Context,
-    structure: str = None,
-    command: str = None,
-    directory: str = None,
-) -> dict:
+def parse_parameters(context: Context) -> dict:
     """
     This is a utility for click (cli) that formats input parameters for workflow
     runs. It accounts for recieving a `click.Context` object and ensures we
@@ -95,9 +90,6 @@ def parse_parameters(
             context.args[i][2:]: context.args[i + 1]
             for i in range(0, len(context.args), 2)
         }
-        kwargs_cleaned["structure"] = structure
-        kwargs_cleaned["directory"] = directory
-        kwargs_cleaned["command"] = command
 
     except:
         raise click.ClickException(
@@ -260,27 +252,8 @@ def setup_only(workflow_name, filename, directory):
     )
 )
 @click.argument("workflow_name")
-@click.option(
-    "--structure",
-    "-s",
-    default=None,
-    type=click.Path(exists=True),
-    help="filename of the structure used for this workflow (note, not all workflows use this arg)",
-)
-@click.option(
-    "--command",
-    "-c",
-    default=None,
-    help="the command used to call call the calculator (e.g. 'mpirun -n 12 vasp_std > vasp.out')",
-)
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="the folder to run this workflow in. Defaults to simmate-task-12345, where 12345 is randomized",
-)
 @click.pass_context
-def run(context, workflow_name, structure, command, directory):
+def run(context, workflow_name):
     """Runs a workflow using provided parameters"""
 
     click.echo("LOADING WORKFLOW & INPUT PARAMETERS...")
@@ -292,22 +265,15 @@ def run(context, workflow_name, structure, command, directory):
         precheck_flow_exists=True,
         print_equivalent_import=True,
     )
-    kwargs_cleaned = parse_parameters(
-        context=context,
-        structure=structure,
-        command=command,
-        directory=directory,
-    )
+    kwargs_cleaned = parse_parameters(context=context)
 
     click.echo("RUNNING WORKFLOW...")
 
     result = workflow.run(**kwargs_cleaned)
 
     # Let the user know everything succeeded
-    # if result.is_successful():
-    #     click.echo("Success! All results are also stored in your database.")
-    # BUG: we remove this temporarily because we have s3tasks ran through this
-    # module. When we add their database components, this will be removed.
+    if result.is_successful():
+        click.echo("Success! All results are also stored in your database.")
 
 
 @workflows.command(
@@ -317,27 +283,8 @@ def run(context, workflow_name, structure, command, directory):
     )
 )
 @click.argument("workflow_name")
-@click.option(
-    "--structure",
-    "-s",
-    default=None,
-    type=click.Path(exists=True),
-    help="filename of the structure used for this workflow (note, not all workflows use this arg)",
-)
-@click.option(
-    "--command",
-    "-c",
-    default=None,
-    help="the command used to call call the calculator (e.g. 'mpirun -n 12 vasp_std > vasp.out')",
-)
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="the folder to run this workflow in. Defaults to simmate-task-12345, where 12345 is randomized",
-)
 @click.pass_context
-def run_cloud(context, workflow_name, structure, command, directory):
+def run_cloud(context, workflow_name):
     """Submits a workflow to Prefect cloud"""
 
     click.echo("LOADING WORKFLOW & INPUT PARAMETERS...")
@@ -349,12 +296,7 @@ def run_cloud(context, workflow_name, structure, command, directory):
         precheck_flow_exists=True,
         print_equivalent_import=True,
     )
-    kwargs_cleaned = parse_parameters(
-        context=context,
-        structure=structure,
-        command=command,
-        directory=directory,
-    )
+    kwargs_cleaned = parse_parameters(context=context)
 
     click.echo("RUNNING WORKFLOW...")
 

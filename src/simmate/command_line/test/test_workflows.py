@@ -82,7 +82,13 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
     # now try writing input files to the tmpdir
     result = command_line_runner.invoke(
         workflows,
-        ["setup-only", "static-energy/mit", cif_filename, "-d", new_dirname],
+        [
+            "setup-only",
+            "static-energy/mit",
+            cif_filename,
+            "--directory",
+            new_dirname,
+        ],
     )
     assert result.exit_code == 0
     assert os.path.exists(new_dirname)
@@ -114,13 +120,19 @@ def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
     # now try writing input files to the tmpdir
     result = command_line_runner.invoke(
         workflows,
-        ["run", "static-energy/mit", "-s", cif_filename, "-d", new_dirname],
+        [
+            "run",
+            "static-energy/mit",
+            "--structure",
+            cif_filename,
+            "--directory",
+            new_dirname,
+        ],
     )
     assert result.exit_code == 0
     Workflow.run.assert_called_with(
         structure=cif_filename,
         directory=new_dirname,
-        command=None,
     )
 
     # ensure failure on improperly matched kwargs
@@ -150,13 +162,19 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
     # now try writing input files to the tmpdir
     result = command_line_runner.invoke(
         workflows,
-        ["run-cloud", "static-energy/mit", "-s", cif_filename, "-d", new_dirname],
+        [
+            "run-cloud",
+            "static-energy/mit",
+            "--structure",
+            cif_filename,
+            "--directory",
+            new_dirname,
+        ],
     )
     assert result.exit_code == 0
     Workflow.run_cloud.assert_called_with(
         structure=cif_filename,
         directory=new_dirname,
-        command=None,
     )
 
 

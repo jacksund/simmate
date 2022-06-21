@@ -16,14 +16,21 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 > :bulb: For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
 
 **Enhancements**
+- add `created_at` and `updated_at` columns to all database tables
 - check if there is a newer version of Simmate available and let the user know about the update
 - add experimental `badelf` workflow for determining electride character
 - add `electronic-structure` workflow which carries out both DOS and BS calculations
+
+** Refactors **
+- removed use of `-s`, `-c`, and `-d` shortcuts from the `workflows` commands
+- refactor `relaxation/staged` workflow to run in single parent directory
+- refactor evolutionary search algorithm (alpha feature)
 - condense where parsing/deserialization of workflow parameters occurs to the refactored the `load_input_and_register` task. Originally, this would occur in multiple places (e.g. in the CLI module before submission, in the workflow run_cloud method, in the LoadInputAndRegister task, etc.) and involved boilerplate code. ([#173](https://github.com/jacksund/simmate/pull/173))
 - refactor experimental features `register_kwargs` and `customized` workflows
 - refactor `LoadInputAndRegister` and `SaveOutputTask` to `load_input_and_register` and `save_result`
 
 **Fixes**
+- fix bug where `command` or `directory` improperly passes `None` when they are not set in the `simmate workflows run` command
 - fix bug where `update_all_stabilities` grabs incomplete calculations ([#177](https://github.com/jacksund/simmate/pull/177))
 - fix bug where SCF calculation is not completed before the non-SCF DOS or BS calculation and causes the workflows to fail ([#171](https://github.com/jacksund/simmate/issues/171))
 - fix bug for Bader workflow by registering the prebader workflow ([#174](https://github.com/jacksund/simmate/pull/174))
