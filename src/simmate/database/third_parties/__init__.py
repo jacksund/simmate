@@ -4,7 +4,7 @@ from simmate.utilities import get_doc_from_readme
 
 __doc__ = get_doc_from_readme(__file__)
 
-from .aflow import AflowStructure
+from .aflow import AflowStructure, AflowPrototype
 from .cod import CodStructure
 from .jarvis import JarvisStructure
 from .materials_project import MatProjStructure

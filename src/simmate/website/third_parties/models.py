@@ -8,6 +8,7 @@ from simmate.database.third_parties import (
     MatProjStructure,
     JarvisStructure,
     AflowStructure,
+    AflowPrototype,
     OqmdStructure,
     CodStructure,
 )

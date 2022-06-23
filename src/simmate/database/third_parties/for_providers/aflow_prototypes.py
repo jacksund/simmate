@@ -22,8 +22,7 @@ from django.db import transaction
 from pymatgen.analysis.prototypes import AFLOW_PROTOTYPE_LIBRARY
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.database import connect
-from simmate.database.prototypes.aflow import AflowPrototype
+from simmate.database.third_parties import AflowPrototype
 
 
 @transaction.atomic
@@ -44,7 +43,7 @@ def load_all_prototypes():
             mineral_name=prototype_data["tags"]["mineral"],
             aflow_id=prototype_data["tags"]["aflow"],
             pearson_symbol=prototype_data["tags"]["pearson"],
-            strukturbericht=prototype_data["tags"]["strukturbericht"],
+            strukturbericht_symbol=prototype_data["tags"]["strukturbericht"],
             nsites_wyckoff=len(structure_sym.wyckoff_symbols),
         )
 

@@ -18,7 +18,13 @@ def test_providers_view(client):
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "provider_name",
-    ["MatProjStructure", "CodStructure", "JarvisStructure", "OqmdStructure"],
+    [
+        "AflowPrototype",
+        "MatProjStructure",
+        "CodStructure",
+        "JarvisStructure",
+        "OqmdStructure",
+    ],
 )
 def test_workflows_by_type_view(client, provider_name):
 

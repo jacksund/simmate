@@ -11,10 +11,8 @@ def providers_all(request):
 
     # TODO: auto determine this list and descriptions
     workflows_metadata = {
-        # "AflowStructure": (
-        #     "These workflows calculate the energy for a structure. In many cases, "
-        #     "this also involves calculating the lattice strain and forces for each site."
-        # ),
+        # "AflowStructure": "...",  # not allowed to redistribute
+        "AflowPrototype": "...",
         "CodStructure": "...",
         "JarvisStructure": "...",
         "MatProjStructure": "...",
