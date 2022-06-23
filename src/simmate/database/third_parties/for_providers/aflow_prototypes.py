@@ -35,7 +35,7 @@ def load_all_prototypes():
 
         # To see how many unique wyckoff sites there are we also need the
         # symmetrized structure
-        structure_sym = SpacegroupAnalyzer(structure, 0.1).get_symmetrized_structure()
+        structure_sym = SpacegroupAnalyzer(structure).get_symmetrized_structure()
 
         # Organize the data into our database format
         prototype = AflowPrototype.from_toolkit(
