@@ -41,7 +41,7 @@ The code that defines these tables are located in the corresponding `simmate.cal
 from simmate.database.workflow_results import MITStaticEnergy
 ```
 
-Alternatively, this same results could have been imported with...
+Alternatively, this same database table could have been imported with...
 
 ``` python
 from simmate.calculators.vasp.database.energy import MITStaticEnergy
