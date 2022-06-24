@@ -25,7 +25,7 @@ prebadelf_matproj_workflow = s3task_to_workflow(
     module=__name__,
     project_name="Simmate-PopulationAnalysis",
     s3task=MatProjPreBaderELF,
-    calculation_table=MPBadelfResults,
+    database_table=MPBadelfResults,
     register_kwargs=["structure", "source"],
     description_doc_short="runs Bader analysis with ELFCAR as reference",
 )
@@ -159,8 +159,7 @@ with Workflow("population-analysis/badelf-matproj") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-PopulationAnalysis"
-workflow.calculation_table = MPBadelfResults
-workflow.result_table = MPBadelfResults
+workflow.database_table = MPBadelfResults
 workflow.register_kwargs = ["structure", "source"]
 workflow.result_task = prebadelf_result
 workflow.s3tasks = [MatProjPreBaderELF, BaderELFAnalysis]

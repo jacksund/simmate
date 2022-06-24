@@ -8,8 +8,6 @@ from typing import Any
 import prefect
 from prefect import task
 
-from simmate.toolkit import Structure
-from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 from simmate.utilities import get_directory
 from simmate.workflow_engine import Workflow
 
@@ -39,7 +37,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     python objects, so this utility converts the input to a toolkit Structure
     object.
 
-    `register_run` allows us to skip the database step if the calculation_table
+    `register_run` allows us to skip the database step if the database_table
     isn't properly set yet. This input is a temporary fix for the
     diffusion/from-images workflow.
 
@@ -50,7 +48,6 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     `**parameters` includes all parameters and anything extra that you want saved
     to simmate_metadata.yaml
     """
-
     # !!! This function needs a refactor that is waiting on prefect 2.0.
     # In the future, this will be broken into smaller methods and utilities.
     # Prefect 2.0 will allow us to do more pythonic things such as...
@@ -89,29 +86,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
 
     # STEP 1: clean parameters
 
-    # we don't want to pass arguments like command=None or structure=None if the
-    # user didn't provide this input parameter. Instead, we want the workflow to
-    # use its own default value. To do this, we first check if the parameter
-    # is set in our kwargs dictionary and making sure the value is NOT None.
-    # If it is None, then we remove it from our final list of kwargs. This
-    # is only done for command, directory, and structure inputs -- as these
-    # are the three that are typically assumed to be present (see the CLI).
-
-    parameters_cleaned = deserialize_parameters(parameters)
-
-    #######
-    # SPECIAL CASE: customized workflows have their parameters stored under
-    # "input_parameters" instead of the base dict
-    if "workflow_base" in parameters.keys():
-        # This is a non-modular import that can cause issues and slower
-        # run times. We therefore import lazily.
-        from simmate.workflows.utilities import get_workflow
-
-        parameters_cleaned["workflow_base"] = get_workflow(parameters["workflow_base"])
-        parameters_cleaned["input_parameters"] = deserialize_parameters(
-            parameters["input_parameters"]
-        )
-    #######
+    parameters_cleaned = workflow._deserialize_parameters(**parameters)
 
     # ---------------------------------------------------------------------
 
@@ -244,27 +219,9 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # don't store calculation information bc the flow is just a quick python
     # analysis.
 
-    if register_run and workflow and workflow.calculation_table:
+    if register_run and workflow and workflow.database_table:
 
-        # grab the registration kwargs from the parameters provided
-        register_kwargs = {
-            key: parameters_cleaned.get(key, None) for key in workflow.register_kwargs
-        }
-
-        # SPECIAL CASE: for customized workflows we need to convert the inputs
-        # back to json for saving to the database. I just use original inputs
-        # for now.
-        register_kwargs = (
-            register_kwargs if "workflow_base" not in parameters_cleaned else parameters
-        )
-
-        # load/create the calculation for this workflow run
-        calculation = workflow.calculation_table.from_prefect_id(
-            id=prefect_flow_run_id,
-            **register_kwargs
-            if "workflow_base" not in parameters_cleaned
-            else parameters,
-        )
+        workflow._register_calculation(prefect_flow_run_id, parameters_cleaned)
 
     # ---------------------------------------------------------------------
 
@@ -300,47 +257,4 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
 
     # Finally we just want to return the dictionary of cleaned parameters
     # to be used by the workflow
-    return parameters_cleaned
-
-
-def deserialize_parameters(parameters: dict) -> dict:
-
-    parameters_cleaned = parameters.copy()
-
-    if not parameters.get("command", None):
-        parameters_cleaned.pop("command", None)
-
-    if not parameters.get("directory", None):
-        parameters_cleaned.pop("directory", None)
-
-    structure = parameters.get("structure", None)
-    if structure:
-        parameters_cleaned["structure"] = Structure.from_dynamic(structure)
-    else:
-        parameters_cleaned.pop("structure", None)
-
-    if "structures" in parameters.keys():
-        structure_filenames = parameters["structures"].split(";")
-        parameters_cleaned["structures"] = [
-            Structure.from_dynamic(file) for file in structure_filenames
-        ]
-
-    if "migration_hop" in parameters.keys():
-        migration_hop = MigrationHop.from_dynamic(parameters["migration_hop"])
-        parameters_cleaned["migration_hop"] = migration_hop
-
-    if "migration_images" in parameters.keys():
-        migration_images = MigrationImages.from_dynamic(parameters["migration_images"])
-        parameters_cleaned["migration_images"] = migration_images
-
-    if "supercell_start" in parameters.keys():
-        parameters_cleaned["supercell_start"] = Structure.from_dynamic(
-            parameters["supercell_start"]
-        )
-
-    if "supercell_end" in parameters.keys():
-        parameters_cleaned["supercell_end"] = Structure.from_dynamic(
-            parameters["supercell_end"]
-        )
-
     return parameters_cleaned

@@ -49,8 +49,7 @@ with Workflow("dynamics/mit") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Dynamics"
-workflow.calculation_table = MITDynamicsRun
-workflow.result_table = MITDynamicsRun
+workflow.database_table = MITDynamicsRun
 workflow.register_kwargs = ["structure", "source"]
 workflow.result_task = result
 workflow.s3task = MITDynamics

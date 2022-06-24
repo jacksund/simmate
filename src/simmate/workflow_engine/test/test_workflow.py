@@ -25,7 +25,7 @@ with Workflow("dummy-flowtype/dummy-flow") as DUMMY_FLOW:
     structure = Parameter("structure", default=None)
     dummy_task_1(source)
     dummy_task_2(structure)
-DUMMY_FLOW.calculation_table = TestStructureCalculation
+DUMMY_FLOW.database_table = TestStructureCalculation
 DUMMY_FLOW.register_kwargs = ["source", "structure"]
 
 
@@ -148,7 +148,7 @@ def test_deserialize_parameters(mocker):
         "structures": "None; None; None",
     }
 
-    Workflow._serialize_parameters(**example_parameters)
+    Workflow._deserialize_parameters(**example_parameters)
 
 
 def test_parameter_names():

@@ -90,7 +90,7 @@ Paste in the example content. This example is for the 2112_queue partition, but 
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=lamcrae@live.unc.edu
 
-simmate workflows run energy-mit -s POSCAR -c "mpirun -n 704 vasp_std > vasp.out"
+simmate workflows run energy-mit --structure POSCAR --command "mpirun -n 704 vasp_std > vasp.out"
 ```
 
 <br/>

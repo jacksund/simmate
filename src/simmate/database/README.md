@@ -82,7 +82,7 @@ Using Materials Project as an example, we can load the table using...
 from simmate.database.third_parties import MatProjStructure
 ```
 
-If you are accessing data from a specific workflow, then in addition to loading from the `workflow_results` module, most workflows have a `result_table` that let you access the table as well:
+If you are accessing data from a specific workflow, then in addition to loading from the `workflow_results` module, most workflows have a `database_table` attribute that let you access the table as well:
 
 ``` python
 # There are two ways to load a table from calculation results...
@@ -90,7 +90,7 @@ If you are accessing data from a specific workflow, then in addition to loading 
 ######## METHOD 1 ########
 from simmate.workflows.static_energy import mit_workflow
 
-table = mit_workflow.result_table
+table = mit_workflow.database_table
 
 
 ######## METHOD 2 ########

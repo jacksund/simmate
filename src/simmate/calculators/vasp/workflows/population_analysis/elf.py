@@ -14,7 +14,7 @@ workflow = s3task_to_workflow(
     module=__name__,
     project_name="Simmate-PopulationAnalysis",
     s3task=MPPreBaderTask,
-    calculation_table=MPELFResults,
+    database_table=MPELFResults,
     register_kwargs=["structure", "source"],
     description_doc_short="uses Materials Project settings",
 )

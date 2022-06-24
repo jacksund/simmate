@@ -5,13 +5,13 @@ import time
 from simmate.toolkit import Composition
 
 from simmate.database import connect
-from simmate.database.workflow_results.evolution import (
+from simmate.database.workflow_results import (
     EvolutionarySearch as SearchDatatable,
     StructureSource as SourceDatatable,
 )
 
 import simmate.toolkit.creators as creation_module
-import simmate.toolkit.transformations as transform_module
+import simmate.toolkit.transformations.from_ase as transform_module
 from simmate.toolkit.validators.fingerprint.pcrystalnn import (
     PartialCrystalNNFingerprint,
 )
@@ -19,48 +19,23 @@ from simmate.toolkit.validators.fingerprint.pcrystalnn import (
 from typing import List, Union, Tuple
 from simmate.workflow_engine import Workflow
 
-# TODO:
-#
-# what if the workflow changes (e.g. starts with ML relax) but the
-# final table stays the same?
-#
-# chemical system instead of composition input? Allow 1,2,3D?
-#
-# I assume fitness_field="energy_per_atom" for now. Allow other fields from
-# the individuals_table, like "conductivity" or "electride character"
-#
-# Specifying a stop_condition class to allow custom ones?
-# I just assume the stop condition is either (1) the maximum allowed
-# calculated structures or (2) how long a given structure has been
-# the "best" one.
-#
-# add triggered_actions which can be things like "start_ml_potential" or
-# "update volume in sources" or "switch workflow to __"
-#
-# I assume we are using Prefect for workflow submission right now. Add support
-# for local execution or even dask.
-#
-# Add singleshot sources
-# "prototypes_aflow",
-# "substitution",
-# "third_party_structures",
-# "third_party_substitution",
-# "SomeOtherDatatable",  # e.g. best from table of lower quality calculations
-
 
 class SearchEngine:
     """
+    **WARNING** This search engine assumes you have properly configured
+    Prefect Cloud and a cloud database backend (e.g. Postgres). In the future,
+    we will accommodate local runs and other backends.
+
     This class is the entry point for predicting crystal structures with an
     evolutionary search algorithm.
 
     Once you initialize a SearchEngine with a composition (and any other
     optional parameters), you simply need to call the run() method to start
-    the search. Note that we've added this class to the shortcuts module for
-    convenience:
+    the search:
 
-    .. code-block:: python
+    ``` python
 
-        from simmate.shortcuts import SearchEngine
+        from simmate.toolkit.structure_prediction import SearchEngine
 
         search_engine = SearchEngine(
             composition="C4",
@@ -69,16 +44,19 @@ class SearchEngine:
         )
 
         search.run()
+    ```
 
     This class is only for creating (or continuing) searches. If you only want
     to view results, you should instead look directly at the database table for
     previously ran searches:
 
-    .. code-block:: python
+    ``` python
 
        from simmate.shortcuts import SearchResults
 
        search_results = SearchResults.objects.get(composition="Sr4 Si4 N8")
+
+    ```
 
     If you start a separate terminal from where a search is running, you can
     actually use this table to view results WHILE the search is still running!
@@ -86,29 +64,21 @@ class SearchEngine:
     You can also access the search results from your search_engine object. So
     once your search is finished or stopped, you can do:
 
-    .. code-block:: python
-
+    ``` python
        search_results = search_engine.search_datatable
+    ```
 
     To better understand how to view/analyze results, please read the documentation
     for the SearchResults class.
 
-    **WARNING** This search engine assumes you have properly configured
-    Prefect Cloud and a cloud database backend (e.g. Postgres). In the future,
-    we will accommodate local runs and other backends.
+    #### Alternative Codes & Softwares
 
-    Alternative Codes & Softwares
-    ----------------------------
-
-    `USPEX`_, `XtalOpt`_, `CALYPSO`_, `AIRSS`_, `ASE-GA`_, `GASP`_
-
-    .. _USPEX: https://uspex-team.org/en
-    .. _XtalOpt: https://github.com/xtalopt/XtalOpt
-    .. _CALYPSO: http://www.calypso.cn/
-    .. _AIRSS: https://www.mtg.msm.cam.ac.uk/Codes/AIRSS
-    .. _ASE-GA: https://wiki.fysik.dtu.dk/ase/ase/ga/ga.html#module-ase.ga
-    .. _GASP: https://github.com/henniggroup/GASP-python
-
+    [USPEX](https://uspex-team.org/en),
+    [XtalOpt](https://github.com/xtalopt/XtalOpt),
+    [CALYPSO](http://www.calypso.cn/),
+    [AIRSS](https://www.mtg.msm.cam.ac.uk/Codes/AIRSS),
+    [ASE-GA](https://wiki.fysik.dtu.dk/ase/ase/ga/ga.html#module-ase.ga),
+    [GASP](https://github.com/henniggroup/GASP-python)
     """
 
     def __init__(
@@ -123,18 +93,18 @@ class SearchEngine:
         nsteadystate: int = 40,
         steadystate_sources: List[Tuple[float, str]] = [
             (0.30, "RandomSymStructure"),
-            (0.50, "HeredityASE"),
-            (0.10, "SoftMutationASE"),
-            # (0.10, "MirrorMutationASE"),
-            # (0.05, "LatticeStrainASE"),
-            # (0.05, "RotationalMutationASE"),
-            # (0.05, "AtomicPermutationASE"),
-            # (0.05, "CoordinatePerturbationASE"),
+            (0.30, "from_ase.Heredity"),
+            (0.10, "from_ase.SoftMutation"),
+            (0.10, "from_ase.MirrorMutation"),
+            (0.05, "from_ase.LatticeStrain"),
+            (0.05, "from_ase.RotationalMutation"),
+            (0.05, "from_ase.AtomicPermutation"),
+            (0.05, "from_ase.CoordinatePerturbation"),
         ],
         selector: str = "TruncatedSelection",
         labels: List[str] = [],
+        # TODO: maybe use **workflow_run_kwargs...?
     ):
-
         """
         Sets up the search engine and its settings.
 
@@ -173,16 +143,9 @@ class SearchEngine:
         selector : str (optional)
             The defualt method to use for choosing the parent individual(s). The
             default is TruncatedSelection.
+        labels:
+            a list of labels to submit individuals structures with to prefect
         """
-
-        # No mutations/transforms are done until this many calcs complete
-        # this includes those from singleshot and steadystate creators.
-
-        # prefect labels to submit workflows with
-
-        # this is total number of submitted calcs at any given time
-
-        # !!! Some of these sources should be removed for compositions with 1 element type
 
         # make sure we were givent a Composition object, and if not, we have
         # a string that should be converted to one.
@@ -218,22 +181,24 @@ class SearchEngine:
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.
         if workflow == "StagedRelaxation":
-            from simmate.workflows import relaxation_staged
+            from simmate.workflows.relaxation import staged_workflow
 
-            self.workflow = relaxation_staged
+            self.workflow = staged_workflow
         else:
             raise Exception("Only StagedRelaxation is supported in early testing")
-        # BUG: I'll need to rewrite this in the future bc I don't really account
-        # for other workflows yet. It would make sense that our workflow changes
-        # as the search progresses (e.g. we incorporate DeePMD relaxation once ready)
         print(
             f"All individuals will be evaulated through the {self.workflow.name} workflow."
         )
+        # BUG: I'll need to rewrite this in the future bc I don't really account
+        # for other workflows yet. It would make sense that our workflow changes
+        # as the search progresses (e.g. we incorporate DeePMD relaxation once ready)
 
         # Point to the structure datatable that we'll pull from
         # For now, I assume its the results table of the workflow
-        self.individuals_datatable = self.workflow.result_table
-        self.calculation_datatable = self.workflow.calculation_table
+        self.individuals_datatable = (
+            self.workflow.result_table
+        )  #################################### BUG
+        self.calculation_datatable = self.workflow.database_table
 
         # Check if there is an existing search and grab it if so. Otherwise, add
         # the search entry to the DB.
@@ -281,12 +246,15 @@ class SearchEngine:
         # Initialize the single-shot sources
         self.singleshot_sources = []
         for source in singleshot_sources:
+
             # if we are given a string, we want initialize the class
             # otherwise it should be a class alreadys
             if type(source) == str:
                 source = self._init_common_class(source)
+
             # and add it to our final list
             self.singleshot_sources.append(source)
+
         # Initialize the steady-state sources, which are given as a list of
         # (proportion, class/class_str, kwargs) for each. As we go through these,
         # we also collect the proportion list for them.
@@ -312,10 +280,15 @@ class SearchEngine:
                 source = self._init_common_class(source)
             # and add it to our final list
             self.steadystate_sources.append(source)
+
         # Make sure the proportions sum to 1, otherwise scale them. We then convert
         # these to steady-state integers (and round to the nearest integer)
         sum_proportions = sum(self.steadystate_source_proportions)
         if sum_proportions != 1:
+            print(
+                "Warning: fractions for steady-state sources do not add to 1."
+                "We have scaled all sources to equal one to fix this."
+            )
             self.steadystate_source_proportions = [
                 p / sum_proportions for p in self.steadystate_source_proportions
             ]
@@ -355,15 +328,15 @@ class SearchEngine:
         # For this we need to grab all previously calculated structures of this
         # compositon too pass in too.
         print("Generating fingerprints for past structures...")
+        self.fingerprint_validator = PartialCrystalNNFingerprint(
+            composition=composition,
+            structure_pool=self.search_datatable.individuals,
+        )
         # BUG: should we only do structures that were successfully calculated?
         # If not, there's a chance a structure fails because of something like a
         # crashed slurm job, but it's never submitted again...
         # OPTIMIZE: should we only do final structures? Or should I include input
         # structures and even all ionic steps as well...?
-        self.fingerprint_validator = PartialCrystalNNFingerprint(
-            composition=composition,
-            structure_pool=self.search_datatable.individuals,
-        )
         print("Done.")
 
     def run(self, sleep_step=10):
@@ -445,7 +418,7 @@ class SearchEngine:
         return False
 
     def _check_singleshot_sources(self):
-        print("Singleshot sources not implemented yet.")
+        print("Singleshot sources not implemented yet. Skipping this step.")
 
     def _check_steadystate_workflows(self):
 
@@ -501,10 +474,6 @@ class SearchEngine:
 
     def _make_new_structure(self, source, max_attempts=100):
 
-        # TODO: check to make sure this structure is unique and hasn't been
-        # submitted already. I may have two nested while loops -- one for
-        # max_unique_attempts and one for max_creation_attempts.
-
         # check if we have a transformation or a creator
         # OPTIMIZE: is there a faster way? check subclass maybe?
         if "transformation" in str(type(source)):
@@ -555,8 +524,8 @@ class SearchEngine:
             if new_structure:
                 # this will return false if the structure is NOT unique
                 if not self.fingerprint_validator.check_structure(new_structure):
-                    # in this case we unset the structure, so we try the loop
-                    # again.
+                    # if it is not unique, we can throw away the structure and
+                    # try the loop again.
                     print("Generated structure is not unique. Trying again.")
                     new_structure = None
 
@@ -568,6 +537,8 @@ class SearchEngine:
                 " contact our team for help."
             )
             return False, False
+
+        # Otherwise we were successful
         print("Creation Successful.")
 
         # return the structure and its parents
@@ -589,7 +560,7 @@ class SearchEngine:
         # grab the id column of the parents and convert it to a list
         parent_ids = parents_df.id.values.tolist()
 
-        # now lets grab these structures from our database and convert them
+        # Now lets grab these structures from our database and convert them
         # to a list of pymatgen structures.
         # We have to make separate queries for this instead of doing "id__in=parent_ids".
         # This is because (1) order may be important and (2) we may have duplicate
@@ -603,10 +574,11 @@ class SearchEngine:
         ]
 
         # When there's only one structure selected we return the structure and
-        # id independents -- not within a list
+        # id independently -- not within a list
         if nselect == 1:
             parent_ids = parent_ids[0]
             parent_structures = parent_structures[0]
+
         # for record keeping, we also want to return the ids for each structure
         return parent_ids, parent_structures
 
@@ -619,24 +591,29 @@ class SearchEngine:
         ]:
             creator_class = getattr(creation_module, class_str)
             return creator_class(self.composition)
+
         # TRANSFORMATIONS
         elif class_str in [
-            "HeredityASE",
-            "SoftMutationASE",
-            "MirrorMutationASE",
-            "LatticeStrainASE",
-            "RotationalMutationASE",
-            "AtomicPermutationASE",
-            "CoordinatePerturbationASE",
+            "from_ase.Heredity",
+            "from_ase.SoftMutation",
+            "from_ase.MirrorMutation",
+            "from_ase.LatticeStrain",
+            "from_ase.RotationalMutation",
+            "from_ase.AtomicPermutation",
+            "from_ase.CoordinatePerturbation",
         ]:
-            mutation_class = getattr(transform_module, class_str)
+            # all start with "from_ase" so I assume that import for now
+            ase_class_str = class_str.split(".")[-1]
+            mutation_class = getattr(transform_module, ase_class_str)
             return mutation_class(self.composition)
+
         # !!! There aren't any common transformations that don't accept composition
         # as an input, but I expect this to change in the future.
         elif class_str in []:
             mutation_class = getattr(transform_module, class_str)
             return mutation_class()
-        # These are commonly used Single-shot sources
+
+        # These are commonly used single-shot sources
         elif class_str == "prototypes_aflow":
             pass  # TODO
         elif class_str == "substitution":
@@ -645,6 +622,7 @@ class SearchEngine:
             pass  # TODO
         elif class_str == "third_party_substitution":
             pass  # TODO
+
         else:
             raise Exception(
                 f"{class_str} is not recognized as a common input. Make sure you"

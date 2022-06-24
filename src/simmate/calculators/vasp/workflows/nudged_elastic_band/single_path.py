@@ -59,6 +59,7 @@ with Workflow("diffusion/single-path") as workflow:
         command=command,
         diffusion_analysis_id=diffusion_analysis_id,
         migration_hop_id=migration_hop_id,
+        register_run=False,
     )
 
     # get the supercell endpoint structures
@@ -86,12 +87,12 @@ with Workflow("diffusion/single-path") as workflow:
 
     images = get_migration_images_from_endpoints(
         supercell_start={
-            "calculation_table": "MatVirtualLabCINEBEndpointRelaxation",
+            "database_table": "MatVirtualLabCINEBEndpointRelaxation",
             "directory": run_id_00["directory"],
             "structure_field": "structure_final",
         },
         supercell_end={
-            "calculation_table": "MatVirtualLabCINEBEndpointRelaxation",
+            "database_table": "MatVirtualLabCINEBEndpointRelaxation",
             "directory": run_id_01["directory"],
             "structure_field": "structure_final",
         },
@@ -110,8 +111,7 @@ with Workflow("diffusion/single-path") as workflow:
 
 workflow.storage = ModuleStorage(__name__)
 workflow.project_name = "Simmate-Diffusion"
-# workflow.calculation_table = MITDiffusionAnalysis  # not implemented yet
-workflow.result_table = MITDiffusionAnalysis
+workflow.database_table = MITDiffusionAnalysis
 workflow.s3tasks = [
     relaxation_neb_endpoint_workflow.s3task,
     neb_from_images.s3task,

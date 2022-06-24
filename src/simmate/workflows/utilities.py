@@ -227,7 +227,7 @@ def load_results_from_directories(
             workflow = get_workflow(workflow_name)
 
             # now load the data
-            results_db = workflow.result_table.from_directory(foldername)
+            results_db = workflow.database_table.from_directory(foldername)
 
             # use the metadata to update the other fields
             results_db.source = metadata["source"]

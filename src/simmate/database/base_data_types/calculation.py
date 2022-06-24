@@ -51,16 +51,6 @@ class Calculation(DatabaseTable):
     An example id is... d8a785e1-e344-463a-bede-0e7b3da7bab6
     """
 
-    created_at = table_column.DateTimeField(auto_now_add=True)
-    """
-    timestamping for when this was added to the database
-    """
-
-    updated_at = table_column.DateTimeField(auto_now=True)
-    """
-    timestamping for when this was last updated
-    """
-
     corrections = table_column.JSONField(blank=True, null=True)
     """
     Simmate workflows often have ErrorHandlers that fix any issues while the

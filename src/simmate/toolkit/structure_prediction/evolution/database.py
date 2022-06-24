@@ -256,11 +256,6 @@ class StructureSource(DatabaseTable):
 
     settings = table_column.JSONField(default=dict)
 
-    # timestamping for when this was added to the database
-    # This also gives a feel for how long the steady-state was running
-    created_at = table_column.DateTimeField(auto_now_add=True)
-    updated_at = table_column.DateTimeField(auto_now=True)
-
     # This list limits to ids that are submitted or running
     prefect_flow_run_ids = table_column.JSONField(default=list)
 

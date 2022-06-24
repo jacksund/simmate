@@ -15,6 +15,16 @@ from pymatgen.core import Structure as PymatgenStructure
 class Structure(PymatgenStructure):
     # Leave docstring blank and just inherit from pymatgen
 
+    database_object = None  # simmate.database.base_data_types.Structure
+    """
+    If this structure came from a `simmate.database.base_data_types.Structure`
+    object, then this attribute will be set to the original database object.
+    
+    Otherwise, this will be left as `None`.
+    """
+    # Note, we don't set the type here because it is a cross-module dependency
+    # that is frequently not required
+
     def get_sanitized_structure(self):
         """
         Run symmetry analysis and "sanitization" on the pymatgen structure
@@ -79,11 +89,11 @@ class Structure(PymatgenStructure):
         elif isinstance(structure, dict) and "@module" in structure.keys():
             structure_cleaned = cls.from_dict(structure)
 
-        # if there is a calculation_table key, then we are pointing to the simmate
+        # if there is a database_table key, then we are pointing to the simmate
         # database for the input structure
-        elif isinstance(structure, dict) and "calculation_table" in structure.keys():
+        elif isinstance(structure, dict) and "database_table" in structure.keys():
             is_from_past_calc = True
-            structure_cleaned = cls.from_database(structure)
+            structure_cleaned = cls.from_database_dict(structure)
 
         # if the value is a str and it relates to a filepath, then we load the
         # structure from a file.
@@ -113,10 +123,16 @@ class Structure(PymatgenStructure):
     # the method is called -- rather than when this module is initially loaded.
 
     @classmethod
-    def from_database(cls, structure: dict):
+    def from_database_dict(cls, structure: dict):
         from simmate.file_converters.structure.database import DatabaseAdapter
 
         return DatabaseAdapter.get_toolkit_from_database_dict(structure)
+
+    @classmethod
+    def from_database_object(cls, structure: dict):
+        from simmate.file_converters.structure.database import DatabaseAdapter
+
+        return DatabaseAdapter.get_toolkit_from_database_object(structure)
 
     @classmethod
     def from_database_string(cls, structure_string: str):

@@ -102,20 +102,17 @@ Again, take a look at [our main website](https://simmate.org/) if you'd like to 
 ``` bash
 # The command line let's you quickly run a workflow
 # from a structure file (CIF or POSCAR)
-simmate workflows run relaxation/matproj -s NaCl.cif
+simmate workflows run relaxation/matproj --structure NaCl.cif
 ```
 
 ``` python
 # Python let's you run workflows within scripts and
-# it also enables advanced setting configurations
+# it also enables advanced setting configurations.
+# Simply load the workflow you'd like and run it!
 
-# Load the structure file you'd like to use
-from simmate.toolkit import Structure
-my_structure = Structure.from_file("NaCl.cif")
-
-# Load the workflow you'd like and run it!
 from simmate.workflows.relaxation import matproj_workflow
-status = matproj_workflow.run(structure=my_structure)
+
+status = matproj_workflow.run(structure="NaCl.cif")
 ```
 
 
@@ -157,7 +154,7 @@ structures = structures.to_toolkit()
 ``` python
 # Load the structure file you'd like to use
 from simmate.toolkit import Structure
-structure = Structure.from_file('NaCl.cif')
+structure = Structure.from_file("NaCl.cif")
 
 # Access a wide variety of properties. Here are some simple ones.
 structure.density

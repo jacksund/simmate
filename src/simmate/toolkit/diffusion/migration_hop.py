@@ -33,7 +33,7 @@ class MigrationHop(PymatgenMigrationHop):
             and "migration_hop_table" in migration_hop.keys()
         ):
             is_from_past_calc = True
-            migration_hop_cleaned = cls.from_database(migration_hop)
+            migration_hop_cleaned = cls.from_database_dict(migration_hop)
         else:
             raise Exception("Unknown format provided for migration_hop input.")
         migration_hop_cleaned.is_from_past_calc = is_from_past_calc
@@ -41,7 +41,7 @@ class MigrationHop(PymatgenMigrationHop):
         return migration_hop_cleaned
 
     @classmethod
-    def from_database(cls, migration_hop: dict):
+    def from_database_dict(cls, migration_hop: dict):
         """
         This is an experimental feature. The code here is a repurposing of
         Structre.from_dynamic so consider making a general class for

@@ -13,7 +13,7 @@ workflow = s3task_to_workflow(
     module=__name__,
     project_name="Simmate-Band-Structure",
     s3task=MatProjBandStructureTask,
-    calculation_table=MatProjBandStructureResults,
+    database_table=MatProjBandStructureResults,
     register_kwargs=["structure", "source"],
     description_doc_short="uses Materials Project settings (PBE)",
 )

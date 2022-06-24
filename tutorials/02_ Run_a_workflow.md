@@ -62,11 +62,11 @@ simmate/
 
 - **OPTION 1**: Define all settings directly in the command line (best for quick submitting and testing)
 ``` bash
-simmate workflows run static-energy/mit -s POSCAR
+simmate workflows run static-energy/mit --structure POSCAR
 
 # OR
 
-simmate workflows run static-energy/mit -s POSCAR --command "mpirun -n 5 vasp_std > vasp.out"
+simmate workflows run static-energy/mit --structure POSCAR --command "mpirun -n 5 vasp_std > vasp.out"
 ```
 
 - **OPTION 2**: Run from a settings file in yaml format (best for complex settings)
@@ -350,7 +350,7 @@ Here, you'll see that some INCAR settings rely on composition and that we have a
 Now, let's go one step further and provide a specific structure (the POSCAR we just made) into a specific workflow (static-energy/mit). To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can type `cd Desktop` to change your active folder to your Desktop. Then run the command:
 
 ``` shell
-simmate workflows setup-only static-energy/mit -s POSCAR
+simmate workflows setup-only static-energy/mit --structure POSCAR
 ```
 
 You'll see a new folder created named `MIT_Static_Energy_inputs`. When you open it, you'll see all the files that Simmate made for VASP to use. This is useful when you're an advanced user who wants to alter these files before running VASP manually -- this could happen when you want to test new workflows or unique systems.
@@ -368,7 +368,7 @@ The default Simmate settings will run everything immediately and locally on your
 The command to do this with our POSCAR and static-energy/mit workflow is (the `-s` is short for `--structure`): 
 
 ``` shell
-simmate workflows run static-energy/mit -s POSCAR
+simmate workflows run static-energy/mit --structure POSCAR
 ```
 
 By default, Simmate uses the command `vasp_std > vasp.out` and creates a new `simmate-task` folder with a unique identifier (ex: `simmate-task-j8djk3mn8`).
@@ -381,7 +381,7 @@ simmate workflows run --help
 Using this help info, we can change our folder name (`--directory`, `-d`) as well as the command used to run VASP (`--command`, `-c`). For example, we can update our command to this:
 
 ``` shell
-simmate workflows run static-energy/mit -s POSCAR -c "mpirun -n 4 vasp_std > vasp.out" -d my_custom_folder
+simmate workflows run static-energy/mit --structure POSCAR --command "mpirun -n 4 vasp_std > vasp.out" --directory my_custom_folder
 ```
 
 
@@ -520,7 +520,7 @@ nano submit.sh
 #SBATCH --mail-type=ALL 
 #SBATCH --mail-user=my_username@live.unc.edu
 
-simmate workflows run static-energy/mit POSCAR -c "mpirun -n 4 vasp_std > vasp.out"
+simmate workflows run static-energy/mit --structure POSCAR --command "mpirun -n 4 vasp_std > vasp.out"
 ```
 
 Each of these `SBATCH` parameters set how we would like to sumbit a job and how many resources we expect to use. These are explained in [SLURM's documnetation for sbatch](https://slurm.schedmd.com/sbatch.html), but you may need help from your IT team to update them. But to break down these example parameters...

@@ -13,7 +13,7 @@ workflow = s3task_to_workflow(
     module=__name__,
     project_name="Simmate-Relaxation",
     s3task=NEBEndpointRelaxationTask,
-    calculation_table=NEBEndpointRelaxationResults,
+    database_table=NEBEndpointRelaxationResults,
     register_kwargs=["structure", "source"],
     description_doc_short="uses Materials Project settings and meant for endpoint supercells",
 )
