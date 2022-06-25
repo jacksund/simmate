@@ -8,7 +8,7 @@ from django.shortcuts import render
 
 from simmate.toolkit import Structure
 from simmate.database.base_data_types import Spacegroup
-from simmate.visualization.structure import make_blender_structure
+from simmate.visualization.structure.blender import make_blender_structure
 from simmate.configuration.django import settings
 from simmate.utilities import get_directory
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet

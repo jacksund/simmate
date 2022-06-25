@@ -498,8 +498,8 @@ class S3Task(Task):
         """
 
         # The operating system (Windows, OSX, or Linux) will give us the best guess
-        # as to where to access the blender command. The results are as you'd expect
-        # except for Macs, which return "Darwin".
+        # as to where to access the running command. The results are as you'd expect
+        # except for Macs, which returns "Darwin".
         #   Linux: Linux
         #   Mac: Darwin
         #   Windows: Windows
