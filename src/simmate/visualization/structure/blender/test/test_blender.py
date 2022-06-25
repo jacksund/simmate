@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import platform
+
 import pytest
 
 from simmate.visualization.structure.blender.configuration import (
@@ -14,6 +16,16 @@ from simmate.visualization.structure.blender.configuration import (
 #     serialize_structure_sites,
 # )
 
-# @pytest.mark.blender  -- this test requires blender to NOT be installed
+
+# @pytest.mark.blender  # this test requires blender to NOT be installed
 def test_get_blender_command():
-    pytest.raises(BlenderNotInstalledError, get_blender_command)
+
+    operating_system = platform.system()
+
+    if operating_system == "Darwin":
+        pytest.raises(NotImplementedError, get_blender_command)
+    else:
+        pytest.raises(BlenderNotInstalledError, get_blender_command)
+
+
+#
