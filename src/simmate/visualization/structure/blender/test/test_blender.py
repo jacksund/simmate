@@ -17,7 +17,7 @@ from simmate.visualization.structure.blender.configuration import (
 # )
 
 
-# @pytest.mark.blender  # this test requires blender to NOT be installed
+@pytest.mark.blender  # this test requires blender to NOT be installed
 def test_get_blender_command():
 
     operating_system = platform.system()
@@ -26,6 +26,3 @@ def test_get_blender_command():
         pytest.raises(NotImplementedError, get_blender_command)
     else:
         pytest.raises(BlenderNotInstalledError, get_blender_command)
-
-
-#
