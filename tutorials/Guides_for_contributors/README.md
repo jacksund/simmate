@@ -158,20 +158,17 @@ To make a new release, you must follow these steps:
 ``` bash
 # Before the new documentation can be produced, there are a number
 # of optional dependencies that need to be installed.
-conda install -n simmate_dev -c conda-forge fabric jarvis-tools aflow -y
+conda install -n simmate_dev -c conda-forge jarvis-tools aflow -y
 pip install qmpy_rester
-pip install pdoc
 
 # You can the change into the docs directory and run the make_docs.py.
 # Note we also delete existing docs to ensure a clean setup.
 cd docs/
 rm -r simmate/ index.html search.js simmate.html
 python make_docs.py
-
-# NOTE: for api changes or new modules, you may need to delete existing
 ```
 
-2. Update the Simmate version number in `setup.py` [link](https://github.com/jacksund/simmate/blob/main/setup.py)
+2. Update the Simmate version number in `setup.py` ([here](https://github.com/jacksund/simmate/blob/main/setup.py))
 
 3. Make a [release](https://github.com/jacksund/simmate/releases/new) on Github (which will automatically release to pypi)
 
