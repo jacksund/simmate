@@ -34,6 +34,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - refactor `LoadInputAndRegister` and `SaveOutputTask` to `load_input_and_register` and `save_result`
 
 **Fixes**
+- fix import for `visualization.structure.blender` module ([@bocklund](https://github.com/bocklund), [#180](https://github.com/jacksund/simmate/issues/180))
 - fix bug where `command` or `directory` improperly passes `None` when they are not set in the `simmate workflows run` command
 - fix bug where `update_all_stabilities` grabs incomplete calculations ([#177](https://github.com/jacksund/simmate/pull/177))
 - fix bug where SCF calculation is not completed before the non-SCF DOS or BS calculation and causes the workflows to fail ([#171](https://github.com/jacksund/simmate/issues/171))
