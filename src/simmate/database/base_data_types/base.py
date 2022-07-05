@@ -8,11 +8,11 @@ See the `simmate.database.base_data_types` (which is the parent module of
 this one) for example usage.
 """
 
-
 import os
 import inspect
 import shutil
 import urllib
+import warnings
 
 import yaml
 
@@ -651,6 +651,10 @@ class DatabaseTable(models.Model):
             knows what they are doing and know the risks of parallelization.
             Default is False.
         """
+
+        # We disable warnings while loading archives because pymatgen prints
+        # a lot of them (for things like rounding or electronegativity alerts).
+        warnings.filterwarnings("ignore")
 
         # make sure the user actually wants to do this!
         cls._confirm_override(

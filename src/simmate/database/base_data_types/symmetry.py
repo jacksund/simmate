@@ -53,7 +53,7 @@ class Spacegroup(DatabaseTable):
         called when you first set up your database and should never be called
         after that.
 
-        See simmate.configuration.django.database.reset_database
+        See `simmate.database.utilities.reset_database`
         """
 
         for number in range(1, 231):
