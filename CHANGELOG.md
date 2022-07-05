@@ -17,9 +17,11 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Enhancements**
 - add guide for installing VASP v5 to Ubuntu v22.04 ([@scott-materials](https://github.com/scott-materials), [#183](https://github.com/jacksund/simmate/issues/183))
+- add `simmate database load-remote-archives` command and `load_remote_archives` utility that populates all tables from `database.third_parties`
+- add `load_default_sqlite3_build` utility that downloads a pre-built database with all third-party data present. This is an alternative to calling `load_all_remote_archives` if you are using sqlite3 and saves a significant amount of time for users.
 
 **Refactors**
-- None
+- move contents of `configuration.django.database` to `database.utilities`
 
 **Fixes**
 - None

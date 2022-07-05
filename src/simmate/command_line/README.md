@@ -6,7 +6,8 @@ This module defines the `simmate` command and all of it's sub-commands.
 Note, nearly all of the commands in this module wrap a lower-level function, so little code is located here. For example, the `simmate database reset` command is just a wrapper for the following python code:
 
 ``` python
-from simmate.configuration.django.database import reset_database
+from simmate.database import connect
+from simmate.database.utilities import reset_database
 
 reset_database()
 ```

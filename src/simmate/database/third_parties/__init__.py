@@ -9,3 +9,4 @@ from .cod import CodStructure
 from .jarvis import JarvisStructure
 from .materials_project import MatProjStructure
 from .oqmd import OqmdStructure
+from .utilities import load_remote_archives, load_default_sqlite3_build

@@ -1,0 +1,1 @@
+This folder stores compressed versions of sqlite3 database files. The databases contain all third-party data and are used as an optional starting point whenever users reset their database.

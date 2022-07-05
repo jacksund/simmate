@@ -3,17 +3,14 @@
 import os
 import shutil
 
+from django.apps import apps
 from django.core.management import call_command
 
-from simmate.database import connect
 from simmate.configuration.django.settings import DATABASES
-from simmate.database.base_data_types import Spacegroup
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
 # so this list is grabbed directly from django. I also grab the CUSTOM_APPS to
 # check for user-installed applications.
-from django.apps import apps
-
 APPS_TO_MIGRATE = list(apps.app_configs.keys())
 
 
@@ -24,15 +21,24 @@ def update_database(apps_to_migrate=APPS_TO_MIGRATE):
     call_command("migrate")
 
 
-def reset_database(apps_to_migrate=APPS_TO_MIGRATE):
+def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
+
+    # BUG: Why doesn't call_command("flush") do this? How is it different?
+
     # BUG: this is only for SQLite3
     # Consider wrapping the django-extensions function for this instead:
     #   https://django-extensions.readthedocs.io/en/latest/reset_db.html
     # An example command to call this (when django-extensions is installed) is...
     #   django-admin reset_db --settings=simmate.configuration.django.settings
     # Note: this does not remove migration files or reapply migrating after
-
-    # BUG: Why doesn't call_command("flush") do this? How is it different?
+    # Make sure the backend is using SQLite3 as this is the only allowed format
+    using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
+    if not using_sqlite:
+        print(
+            "WARNING: reseting your database does not clear your database tables "
+            "for non-sqlite3 backends. Make sure you only use this function when "
+            "initially building your database and not after."
+        )
 
     # grab the location of the database file. I assume the default database for now.
     db_filename = DATABASES["default"]["NAME"]
@@ -56,9 +62,20 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE):
     # now update the database based on the registered models
     update_database(apps_to_migrate)
 
-    # because this is our first time building the database, we also want to
+    # instead of building the database from scratch, we instead download a
+    # prebuilt database file.
+    if using_sqlite and use_prebuilt:
+        from simmate.database.third_parties import load_default_sqlite3_build
+
+        load_default_sqlite3_build()
+
+    # Otherwise we leave the empty database.
+    # Because this is our first time building the database, we also want to
     # load the Spacegroup metadata for us to query Structures by.
-    Spacegroup._load_database_from_toolkit()
+    else:
+        from simmate.database.base_data_types import Spacegroup
+
+        Spacegroup._load_database_from_toolkit()
 
 
 def dump_database_to_json(filename="database_dump.json", exclude=[]):
