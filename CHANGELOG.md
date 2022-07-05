@@ -14,10 +14,18 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 # Upcoming Release
 > :bulb: For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
-- no changes have been merged into main yet
 
+**Enhancements**
+- add guide for installing VASP v5 to Ubuntu v22.04 ([@scott-materials](https://github.com/scott-materials), [#183](https://github.com/jacksund/simmate/issues/183))
+
+**Refactors**
+- None
+
+**Fixes**
+- None
 
 # v0.6.0 (2022.06.25)
+
 **Enhancements**
 - add `AflowPrototypes` to the `database.third_parties` module (only includes data distributed through pymatgen)
 - add new modules to `toolkit.structure_prediction` and `toolkit.creation`, including ones to provide `known`, `substitution`, and `prototype` based structures.
