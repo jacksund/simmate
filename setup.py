@@ -9,8 +9,6 @@ For the details on conda-forge installation see:
     https://github.com/conda-forge/simmate-feedstock
 """
 
-import os
-from glob import glob
 from setuptools import setup, find_packages
 import pathlib
 
@@ -25,50 +23,6 @@ long_description = (
     " Visit our [github page](https://github.com/jacksund/simmate)"
     " for more information."
 )
-
-
-def get_package_data(base_dir):
-    """
-    This function goes through the src/simmate directory and grabs all of our
-    non-python files (md, rst, json, csv, yaml, html). It returns a list of
-    paths to these files with the relative path starting from src/simmate.
-
-    These should all be passed to package_data to ensure these files are
-    included when simmate is installed.
-    """
-    # convert PosixPath to string
-    base_dir = str(base_dir)
-
-    # all designate the path to source code
-    source_dir = os.path.join("src", "simmate")
-
-    queries = [
-        "**/*.md",
-        "**/*.rst",
-        "**/*.json",
-        "**/*.csv",
-        "**/*.yaml",
-        "**/*.html",
-        "**/*.svg",
-    ]
-    # add the base directory to the start of each query
-    # we also add the source directory
-    queries = [os.path.join(base_dir, source_dir, q) for q in queries]
-
-    # now grab all the files
-    all_files = []
-    for query in queries:
-        files = glob(query, recursive=True)
-        all_files += files
-
-    # each filename will still start with base_dir, which we want to remove.
-    all_files = [os.path.relpath(f, start=source_dir) for f in all_files]
-
-    return all_files
-
-
-# For debugging get_package_data
-# raise Exception(get_package_data(here))
 
 setup(
     # published name for pip install to use
@@ -108,7 +62,7 @@ setup(
         "numpy>=1.22.0",
         "pandas>=1.3.5",
         "django>=4.0.0",
-        "prefect>=0.15.11",
+        "prefect==2.0b7",  # !!! FIXED VERSIONING UNTIL FIRST STABLE RELEASE
         "dask>=2021.12.0",
         "click>=8.0.3",
         # Extra (smaller) dependencies & utilities
@@ -144,7 +98,7 @@ setup(
         # "psycopg2-binary>=2.9.2",  # for Postgres connections (added -binary to fix bug)
         # 'selenium',  # for web scraping (slow but robust)
         # 'spyder',  # IDE for writing/editting
-        # 'gunicorn',  # for website server (Django+DigitalOcean) # !!! NOT WINDOWS
+        # 'gunicorn',  # for website server (Django+DigitalOcean) # NOT WINDOWS
         # "graphviz==1.7",  # python-graphviz on conda. for viewing prefect flows
         # "pygraphviz==0.19",  # pygraphviz on conda. for viewing django tables
         # "scikit-learn>=1.0.1",  # for machine-learning
@@ -162,17 +116,13 @@ setup(
     # be effectively the opposite of .gitignore.
     include_package_data=True,
     package_data={
-        # Recursive calls are not supported yet, so keep an eye on this issue
-        # https://github.com/pypa/setuptools/issues/1806
-        # "simmate": [
-        #     "**/*.md",
-        #     "**/*.rst",
-        #     "**/*.json",
-        #     "**/*.csv",
-        #     "**/*.yaml",
-        #     "**/*.html",
-        # ],
-        # For now, I make a custom function that calls glob recursively
-        "simmate": get_package_data(here),
+        "simmate": [
+            "**/*.md",
+            "**/*.rst",
+            "**/*.json",
+            "**/*.csv",
+            "**/*.yaml",
+            "**/*.html",
+        ],
     },
 )
