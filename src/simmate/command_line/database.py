@@ -146,6 +146,7 @@ def load_remote_archives(parallel):
     when you run `simmate database reset` instead.d.
     """
 
+    from simmate.database import connect
     from simmate.database.third_parties import load_remote_archives
 
     load_remote_archives(parallel=parallel)
