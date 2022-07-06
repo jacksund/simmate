@@ -10,9 +10,8 @@ from typing import List, Any
 
 import pandas
 
-import prefect
-from prefect.core.task import Task
-from prefect.utilities.tasks import defaults_from_attrs
+from prefect.tasks import Task
+from prefect.context import get_run_context, MissingContextError
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import ErrorHandler
@@ -28,7 +27,7 @@ from simmate.utilities import get_directory, make_archive, make_error_archive
 # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
 
 
-class S3Task(Task):
+class S3Task:
     """
     The Supervised-Staged-Shell Task (aka "S3Task")
     -----------------------------------------------
@@ -131,7 +130,6 @@ class S3Task(Task):
 
     For a full (and advanced) example, of a subclass take a look at
     `simmate.calculators.vasp.tasks.base.VaspTask`.
-
     """
 
     # I set this here so that I don't have to copy/paste the init method
@@ -140,15 +138,6 @@ class S3Task(Task):
     command: str = None
     """
     The defualt shell command to use.
-    """
-
-    # While it's not needed for a number of cases, it's extremely common for the
-    # setup method to need an input structure in matsci. I therefore include
-    # this rather than having a nearly identical subclass that could cause
-    # some confusion.
-    requires_structure: bool = False
-    """
-    Indicates whether a structure is needed if for the run() method.
     """
 
     error_handlers: List[ErrorHandler] = []
@@ -227,7 +216,7 @@ class S3Task(Task):
         # now inherit the parent Prefect Task class
         super().__init__(**kwargs)
 
-    def setup(self, structure: Structure, directory: str, **kwargs):
+    def setup(self, directory: str, **kwargs):
         """
         This abstract method is ran before the command is actually executed. This
         allows for some pre-processing, such as writing input files or any other
@@ -556,10 +545,8 @@ class S3Task(Task):
         # You should never need to call this method directly!
         pass
 
-    @defaults_from_attrs("command")
     def run(
         self,
-        structure: Structure = None,
         directory: str = None,
         command: str = None,
         **kwargs,
@@ -601,15 +588,14 @@ class S3Task(Task):
         # workflow level, then we want to make it so the user can set it for
         # each unique task.run() call. Otherwise we grab the default from the
         # class attribute
+        if not command:
+            command = self.command
 
-        # make sure a structure was given if it's required
-        if not structure and self.requires_structure:
-            raise StructureRequiredError("a structure is required as an input")
         # establish the working directory
         directory = get_directory(directory)
 
         # run the setup stage of the task
-        self.setup(structure, directory, **kwargs)
+        self.setup(directory, **kwargs)
 
         # run the shelltask and error supervision stages. This method returns
         # a list of any corrections applied during the run.
@@ -623,15 +609,48 @@ class S3Task(Task):
         # the directory.
         if self.compress_output:
             make_archive(directory)
+
+        # Grab the prefect flow run id. Note, when not ran within a prefect
+        # flow, there won't be an id. We therefore need this try/except
+        try:
+            prefect_context = get_run_context()
+            flow_run_id = prefect_context.flow_run.id
+        except MissingContextError:
+            flow_run_id = None
+
         # Return our final information as a dictionary
         return {
             "result": result,
             "corrections": corrections,
             "directory": directory,
-            "prefect_flow_run_id": prefect.context.flow_run_id
-            if hasattr(prefect.context, "flow_run_id")
-            else None,  # when not ran within a prefect flow, there won't be an id
+            "prefect_flow_run_id": flow_run_id,
         }
+
+    @classmethod
+    def to_prefect_task(cls) -> Task:
+        """
+        Converts this workflow into a Prefect task
+        """
+        return Task(
+            fn=cls.run,
+            name=cls.name,
+            version=cls.version,
+        )
+
+    @classmethod
+    def run_as_prefect_task(cls, **kwargs):
+        """
+        A convience method to run a workflow as a subflow in a prefect context.
+        """
+        task = cls.to_prefect_task()
+        state = task(**kwargs)
+
+        # We don't want to block and wait because this might disable parallel
+        # features of subflows. We therefore return the state and let the
+        # user decide if/when to block.
+        # result = state.result()
+
+        return state
 
     @classmethod
     def get_config(cls):

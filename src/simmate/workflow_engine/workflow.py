@@ -5,23 +5,22 @@ import cloudpickle
 import yaml
 from typing import List
 
-# note: extra modules are imported from prefect for convenience imports elsewhere
-import prefect
-from prefect import Client
-from prefect import Flow as PrefectFlow, Parameter, task, Task
-from prefect.storage import Module as ModuleStorage
-from prefect.utilities.graphql import with_args
-from prefect.backend import FlowRunView, FlowView
+from prefect.tasks import task  # present only for convience imports elsewhere
+from prefect.flows import Flow
+from prefect.states import State
+from prefect.client import get_client
 
-# This import below is used to grab `watch_flow_run`, but we don't grab it directly
-# in order to support "mocking" this function in unit tests
-from prefect.backend import flow_run as flow_run_module
-
+import simmate
+from simmate.toolkit import Structure
 from simmate.database.base_data_types import Calculation
 from simmate.workflow_engine import S3Task
+from simmate.workflow_engine.common_tasks import (
+    load_input_and_register,
+    save_result,
+)
 
 
-class Workflow(PrefectFlow):
+class Workflow:
     """
     This class behaves exactly like a normal Prefect workflow, where we add some
     common utilities and pre-submit tasks. For example, there is the `run_cloud`
@@ -32,12 +31,20 @@ class Workflow(PrefectFlow):
     [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)
     """
 
-    result_task: Task = None
+    # TODO: set storage attribute to module
+
+    # TODO: inherit doc from s3task
+    # by default we just copy the docstring of the S3task to the workflow
+    # workflow.__doc__ = s3task.__doc__
+
+    name: str = None
     """
-    In many ETL workflows, we may also want the result of the some terminating
-    task directly. This would save us from having to go find the result in
-    the database. So by setting `result_task`, we are able get access a specific task's
-    result -- directly as a python object(s). This is optional.
+    The name of this workflow (e.g. "relaxation.matproj")
+    """
+
+    version: str = simmate.__version__
+    """
+    Version number for this flow. Defaults to the Simmate version (such as "0.7.0")
     """
 
     project_name: str = None
@@ -76,13 +83,90 @@ class Workflow(PrefectFlow):
     A list of input parameters that should be used to register the calculation.
     """
 
+    @classmethod
+    def run(
+        cls,
+        structure: Structure,
+        command: str = None,
+        source: dict = None,
+        directory: str = None,
+        copy_previous_directory: bool = False,
+    ):
+        """
+        The workflow method, which can be overwritten when inheriting from this
+        class. This can be either a staticmethod or classmethod.
+
+        #### The default run method
+
+        There is a default run method implemented that is for S3Tasks.
+
+        Builds a workflow from a S3Task and it's corresponding database table.
+
+        Very often with Simmate's S3Tasks, the workflow for a single S3Task is
+        the same. The workflow is typically made of three tasks:
+
+        1. loading the input parameters and registering the calculation
+        2. running the calculation (what this S3Task does on its own)
+        3. saving the calculation results
+
+        Task 1 and 3 always use the same functions, where we just need to tell
+        it which database table we are registering/saving to.
+
+        Because of this common recipe for workflows, we use this method to make
+        the workflow for us.
+        """
+
+        parameters_cleaned = load_input_and_register(
+            structure=structure,
+            command=command,
+            source=source,
+            directory=directory,
+            copy_previous_directory=copy_previous_directory,
+        )
+
+        result = cls.s3task.run_as_prefect_task(
+            structure=parameters_cleaned["structure"],
+            command=parameters_cleaned["command"],
+            directory=parameters_cleaned["directory"],
+        )
+
+        save_result(result)
+
+        return result
+
+    @classmethod
+    def to_prefect_flow(cls) -> Flow:
+        """
+        Converts this workflow into a Prefect flow
+        """
+        return Flow(
+            fn=cls.run,
+            name=cls.name,
+            version=cls.version,
+        )
+
+    @classmethod
+    def run_as_subflow(cls, **kwargs) -> State:
+        """
+        A convience method to run a workflow as a subflow in a prefect context.
+        """
+        subflow = cls.to_prefect_flow()
+        state = subflow(**kwargs)
+
+        # We don't want to block and wait because this might disable parallel
+        # features of subflows. We therefore return the state and let the
+        # user decide if/when to block.
+        # result = state.result()
+
+        return state
+
     @property
     def type(self) -> str:
         """
         Gives the workflow type of this workflow. For example the workflow named
-        'static-energy/matproj' would have the type `static-energy`.
+        'static-energy.matproj' would have the type `static-energy`.
         """
-        return self.name.split("/")[0]
+        return self.name.split(".")[0]
 
     @property
     def name_short(self) -> str:
@@ -90,6 +174,7 @@ class Workflow(PrefectFlow):
         Gives the present name of the workflow. For example the workflow named
         'static-energy/matproj' would have the shortname `matproj`
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
         return self.name.split("/")[-1]
 
     # BUG: naming this `description` causes issues.
@@ -101,6 +186,7 @@ class Workflow(PrefectFlow):
         is the same as `__doc__`. This attribute is only defined for beginners
         to python and for use in django templates for the website interface.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
         return self.__doc__
 
     @property
@@ -108,6 +194,7 @@ class Workflow(PrefectFlow):
         """
         Prints a list of all the parameter names for this workflow.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
         # Iterate through and grab the columns. Note we don't use get_column_names
         # here because we are attaching relation data as well. We also
         # sort them alphabetically for consistent results.
@@ -119,6 +206,7 @@ class Workflow(PrefectFlow):
         """
         Prints a list of all the parameter names for this workflow.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
         # use yaml to make the printout pretty (no quotes and separate lines)
         print(yaml.dump(self.parameter_names))
 
@@ -159,6 +247,7 @@ class Workflow(PrefectFlow):
         I don't accept any other client.create_flow_run() inputs besides 'labels'.
         This may change in the future if I need to set flow run names or schedules.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
 
         # Grab the logger as we will print useful information below.
         # In some cases, there is no logger present, so we just set logger=None.
@@ -222,6 +311,7 @@ class Workflow(PrefectFlow):
 
         It does exactly the same thing where I just assume I want to stream logs.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
 
         flow_run = FlowRunView.from_flow_run_id(flow_run_id)
 
@@ -242,6 +332,7 @@ class Workflow(PrefectFlow):
         This method should not be called directly as it is used within the
         `run_cloud` method and `load_input_and_register` task.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
 
         # grab the registration kwargs from the parameters provided
         register_kwargs = {
@@ -272,6 +363,8 @@ class Workflow(PrefectFlow):
         This method should not be called directly as it is used within the
         run_cloud() method.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
+
         # TODO: consider moving this into prefect's core code as a contribution.
 
         # Because many flows allow object-type inputs (such as structure object),
@@ -315,6 +408,7 @@ class Workflow(PrefectFlow):
         """
         converts all parameters to appropriate python objects
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
 
         # we don't want to pass arguments like command=None or structure=None if the
         # user didn't provide this input parameter. Instead, we want the workflow to
@@ -395,6 +489,7 @@ class Workflow(PrefectFlow):
 
         Note, your workflow must be registered with Prefect for this to work.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
         query = {
             "query": {
                 with_args(
@@ -411,31 +506,3 @@ class Workflow(PrefectFlow):
         client = Client()
         result = client.graphql(query)
         return result["data"]["flow_run_aggregate"]["aggregate"]["count"]
-
-    def to_workflow_task(self):
-        """
-        Converts a prefect workflow to a prefect task (aka a "workflow task")
-
-        See the documentation in workflow_engine.tasks.workflow_task for more.
-        """
-        from simmate.workflow_engine import WorkflowTask
-
-        return WorkflowTask(workflow=self)
-
-    # @classmethod
-    # def get_all_ids_in_state(cls, states=["Completed", "Scheduled"]):
-    #     # TODO: This is an example query where I grab all ids. This may be useful in the
-    #     # future.
-    #     query = {
-    #         "query": {
-    #             with_args(
-    #                 "flow_run",
-    #                 {
-    #                     "where": {
-    #                         "flow": {"name": {"_eq": cls.name}},
-    #                         "state": {"_in": states},
-    #                     },
-    #                 },
-    #             ): ["id"]
-    #         }
-    #     }
