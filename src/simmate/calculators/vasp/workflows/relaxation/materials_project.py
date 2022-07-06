@@ -9,9 +9,7 @@ from simmate.calculators.vasp.database.relaxation import (
 )
 
 
-class MatProjRelaxation(Workflow):
-    name = "relaxation/matproj"
-    project_name = "Simmate-Relaxation"
+class Relaxation__VASP__MatProj(Workflow):
     s3task = MPRelaxationTask
     database_table = MPRelaxationResults
     register_kwargs = ["structure", "source"]

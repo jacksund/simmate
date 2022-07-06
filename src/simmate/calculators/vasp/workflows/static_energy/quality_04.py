@@ -9,9 +9,7 @@ from simmate.calculators.vasp.database.energy import (
 )
 
 
-class Quality04StaticEnergy(Workflow):
-    name = "static-energy/quality04"
-    project_name = "Simmate-Energy"
+class Static_Energy__VASP__Quality04(Workflow):
     s3task = Quality04EnergyTask
     database_table = Quality04StaticEnergyResults
     register_kwargs = ["structure", "source"]

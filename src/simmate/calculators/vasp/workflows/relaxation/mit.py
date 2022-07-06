@@ -9,9 +9,7 @@ from simmate.calculators.vasp.database.relaxation import (
 )
 
 
-class MITRelaxation(Workflow):
-    name = "relaxation/mit"
-    project_name = "Simmate-Relaxation"
+class Relaxation__VASP__MIT(Workflow):
     s3task = MITRelaxationTask
     database_table = MITRelaxationResults
     register_kwargs = ["structure", "source"]

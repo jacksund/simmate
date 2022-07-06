@@ -33,11 +33,6 @@ class Workflow:
     # by default we just copy the docstring of the S3task to the workflow
     # workflow.__doc__ = s3task.__doc__
 
-    name: str = None
-    """
-    The name of this workflow (e.g. "relaxation.matproj")
-    """
-
     version: str = simmate.__version__
     """
     Version number for this flow. Defaults to the Simmate version 
@@ -149,7 +144,7 @@ class Workflow:
         """
         return Flow(
             fn=cls.run,
-            name=cls.name,
+            name=cls.name_full,
             version=cls.version,
         )
 
@@ -170,21 +165,41 @@ class Workflow:
 
     @classmethod
     @property
-    def type(cls) -> str:
+    def name_full(cls) -> str:
         """
-        Gives the workflow type of this workflow. For example the workflow named
-        'static-energy.matproj' would have the type `static-energy`.
+        Standardized name of the workflow. This converts the class name like so:
+        `Static_Energy__VASP__MatProj` --> `static-energy.vasp.matproj`
         """
-        return cls.name.split(".")[0]
+        if not len(cls.__name__.split("__")) == 3:
+            raise Exception("Make sure you are following Simmate naming conventions!")
+        return cls.__name__.replace("__", ".").replace("_", "-").lower()
 
     @classmethod
     @property
-    def name_short(cls) -> str:
+    def name_project(cls) -> str:
         """
-        Gives the present name of the workflow. For example the workflow named
-        'static-energy/matproj' would have the shortname `matproj`
+        Name of the Project this workflow is associated with. This is the first
+        portion of the flow name (e.g. "static-energy")
         """
-        return cls.name.split(".")[-1]
+        return cls.name_full.split(".")[0]
+
+    @classmethod
+    @property
+    def name_calculator(cls) -> str:
+        """
+        Name of the calculator this workflow is associated with. This is the second
+        portion of the flow name (e.g. "vasp")
+        """
+        return cls.name_full.split(".")[1]
+
+    @classmethod
+    @property
+    def name_preset(cls) -> str:
+        """
+        Name of the settings/preset this workflow is associated with. This is the third
+        portion of the flow name (e.g. "matproj" or "matproj-prebader")
+        """
+        return cls.name_full.split(".")[2]
 
     # BUG: naming this `description` causes issues.
     # See https://github.com/PrefectHQ/prefect/issues/3911

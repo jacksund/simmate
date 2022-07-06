@@ -9,9 +9,7 @@ from simmate.calculators.vasp.database.energy import (
 )
 
 
-class NEBEndpointStaticEnergy(Workflow):
-    name = "static-energy/neb-endpoint"
-    project_name = "Simmate-Energy"
+class Static_Energy__VASP__NEB_Endpoint(Workflow):
     s3task = NEBEndpointStaticEnergyTask
     database_table = NEBEndpointStaticEnergyResults
     register_kwargs = ["structure", "source"]

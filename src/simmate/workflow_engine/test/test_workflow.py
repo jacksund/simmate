@@ -15,12 +15,11 @@ def dummy_task_2(a):
     return 2
 
 
-class DummyFlow(Workflow):
+class Dummy_Project__Dummy_Caclulator__Dummy_Preset(Workflow):
     """
     Minimal example of a workflow
     """
 
-    name = "dummy-flowtype.dummy-flow"
     # database_table = TestStructureCalculation
     register_kwargs = ["source", "structure"]
 
@@ -31,6 +30,10 @@ class DummyFlow(Workflow):
         return x.result() + y.result()
 
 
+# copy to variable for shorthand use
+DummyFlow = Dummy_Project__Dummy_Caclulator__Dummy_Preset
+
+
 def test_workflow():
     # Run the workflow just like you would for the base Prefect class
     flow = DummyFlow.to_prefect_flow()
@@ -39,8 +42,10 @@ def test_workflow():
     assert state.result() == 3
 
     # testing naming conventions
-    assert DummyFlow.type == "dummy-flowtype"
-    assert DummyFlow.name_short == "dummy-flow"
+    assert DummyFlow.name_full == "dummy-project.dummy-caclulator.dummy-preset"
+    assert DummyFlow.name_project == "dummy-project"
+    assert DummyFlow.name_calculator == "dummy-caclulator"
+    assert DummyFlow.name_preset == "dummy-preset"
 
     # testing class properties
     assert DummyFlow.description_doc == DummyFlow.__doc__
