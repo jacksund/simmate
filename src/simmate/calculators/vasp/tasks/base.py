@@ -31,11 +31,6 @@ def get_default_parallel_settings():
 
 class VaspTask(S3Task):
 
-    requires_structure: bool = True
-    """
-    Vasp calculations always need an input structure, so this is always True.
-    """
-
     command: str = "vasp_std > vasp.out"
     """
     The command to call vasp, which is typically vasp_std. To ensure error
@@ -136,7 +131,8 @@ class VaspTask(S3Task):
     and ensuring we have a standardized high-symmetry path.
     """
 
-    def _get_clean_structure(self, structure: Structure) -> Structure:
+    @classmethod
+    def _get_clean_structure(cls, structure: Structure) -> Structure:
         """
         Uses the class attributes for `pre_sanitize_structure` and
         `pre_standardize_structure`. If either of these are set to True, then
@@ -148,7 +144,7 @@ class VaspTask(S3Task):
 
         # if both pre_standardize_structure and pre_sanitize_structure are set,
         # we raise an error. I may want to change this in the future though
-        if self.pre_sanitize_structure and self.pre_standardize_structure:
+        if cls.pre_sanitize_structure and cls.pre_standardize_structure:
             raise Exception(
                 "For this VaspTask, only one of `pre_sanitize_structure` or "
                 " `pre_standardize_structure` can be set to True, not both."
@@ -156,15 +152,15 @@ class VaspTask(S3Task):
 
         # If requested, we convert to the LLL-reduced unit cell, which aims to
         # be as cubic as possible.
-        if self.pre_sanitize_structure:
+        if cls.pre_sanitize_structure:
             structure_cleaned = structure.copy(sanitize=True)
             return structure_cleaned
 
         # For band structures, we need to make sure the structure is in the
         # standardized primitive form.
         # We use the same SYMPREC from the INCAR, which is 1e-5 if not set.
-        if self.pre_standardize_structure:
-            sym_prec = self.incar.get("SYMPREC", 1e-5) if self.incar else 1e-5
+        if cls.pre_standardize_structure:
+            sym_prec = cls.incar.get("SYMPREC", 1e-5) if cls.incar else 1e-5
             sym_finder = SpacegroupAnalyzer(structure, symprec=sym_prec)
             structure_cleaned = sym_finder.get_primitive_standard_structure(
                 international_monoclinic=False,
@@ -177,17 +173,18 @@ class VaspTask(S3Task):
         # input structure.
         return structure
 
-    def setup(self, structure: Structure, directory: str):
+    @classmethod
+    def setup(cls, structure: Structure, directory: str):
 
         # run cleaning and standardizing on structure (based on class attributes)
-        structure_cleaned = self._get_clean_structure(structure)
+        structure_cleaned = cls._get_clean_structure(structure)
 
         # write the poscar file
         Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file
-        incar = Incar(**self.incar) + Incar(**self.incar_parallel_settings)
+        incar = Incar(**cls.incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
             filename=os.path.join(directory, "INCAR"),
             structure=structure_cleaned,
@@ -195,22 +192,23 @@ class VaspTask(S3Task):
 
         # if KSPACING is not provided in the incar AND kpoints is attached to this
         # class instance, then we write the KPOINTS file
-        if self.kpoints and ("KSPACING" not in self.incar):
+        if cls.kpoints and ("KSPACING" not in cls.incar):
             Kpoints.to_file(
                 structure_cleaned,
-                self.kpoints,
+                cls.kpoints,
                 os.path.join(directory, "KPOINTS"),
             )
 
         # write the POTCAR file
         Potcar.to_file_from_type(
             structure_cleaned.composition.elements,
-            self.functional,
+            cls.functional,
             os.path.join(directory, "POTCAR"),
-            self.potcar_mappings,
+            cls.potcar_mappings,
         )
 
-    def workup(self, directory: str):
+    @classmethod
+    def workup(cls, directory: str):
         """
         This is the most basic VASP workup where I simply load the final structure,
         final energy, and (if requested) confirm convergence. I will likely make
@@ -240,16 +238,17 @@ class VaspTask(S3Task):
         # a separate method for those that loads the CONTCAR and moves on.
 
         # write output files/plots for the user to quickly reference
-        self._write_output_summary(directory, vasprun)
+        cls._write_output_summary(directory, vasprun)
 
         # confirm that the calculation converged (ionicly and electronically)
-        if self.confirm_convergence:
+        if cls.confirm_convergence:
             assert vasprun.converged
 
         # return vasprun object
         return vasprun
 
-    def _write_output_summary(self, directory: str, vasprun: Vasprun):
+    @staticmethod
+    def _write_output_summary(directory: str, vasprun: Vasprun):
         """
         This prints a "simmate_summary.yaml" file with key output information.
 
@@ -295,7 +294,10 @@ class VaspTask(S3Task):
         }
 
 
-def check_for_standardization_bugs(structure_original, structure_new):
+def check_for_standardization_bugs(
+    structure_original: Structure,
+    structure_new: Structure,
+):
 
     # In pymatgen, they include this code with the standardization of their
     # structures because there were several bugs in the past and they want to

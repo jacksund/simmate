@@ -43,8 +43,9 @@ class VaspNudgedElasticBandTask(VaspTask):
     # confirm convergence here. I'll have to write my own output class to do this.
     confirm_convergence = False
 
+    @classmethod
     def _pre_checks(
-        self,
+        cls,
         structures: MigrationImages,
         directory: str,
         structure: None,
@@ -67,7 +68,7 @@ class VaspNudgedElasticBandTask(VaspTask):
         # The next common mistake is to mislabel the number of images in the
         # INCAR file.
         # first, we check if the user set this.
-        nimages = self.incar.get("IMAGES")
+        nimages = cls.incar.get("IMAGES")
         if nimages:
             # if so, we check that it was set correctly. It should be equal to
             # the number of structures minus 2 (because we don't count the
@@ -89,7 +90,7 @@ class VaspNudgedElasticBandTask(VaspTask):
         #       "M_divide: can not subdivide 16 nodes by 3"
 
         # make sure all images are contained with the cell
-        self.structures = self._process_structures(structures)
+        cls.structures = cls._process_structures(structures)
 
     @staticmethod
     def _process_structures(
@@ -114,8 +115,9 @@ class VaspNudgedElasticBandTask(VaspTask):
             structures.append(s)
         return structures
 
+    @classmethod
     def setup(
-        self,
+        cls,
         structure: None,  # This is first and required bc of S3task.run
         directory: str,
         structures: MigrationImages,
@@ -146,7 +148,7 @@ class VaspNudgedElasticBandTask(VaspTask):
         # removing it from the S3Task...
 
         # run some prechecks to make sure the user has everything set up properly.
-        self._pre_checks(structures, directory, structure)
+        cls._pre_checks(structures, directory, structure)
 
         # Here, each image (start to end structures) is put inside of its own
         # folder. We make those folders here, where they are named 00, 01, 02...N
@@ -167,7 +169,7 @@ class VaspNudgedElasticBandTask(VaspTask):
         # the IMAGES__auto while grabbing its value. Because we are modifying
         # the incar dictionary here, we must make a copy of it -- this ensures
         # no bugs when this task is called in parallel.
-        incar = self.incar.copy()
+        incar = cls.incar.copy()
         # !!! Should this code be moved to the INCAR class? Or would that require
         # too much reworking to allow INCAR to accept a list of structures?
         if not incar.get("IMAGES") and incar.pop("IMAGES__auto", None):
@@ -175,7 +177,7 @@ class VaspNudgedElasticBandTask(VaspTask):
 
         # Combine our base incar settings with those of our parallel settings
         # and then write the incar file
-        incar = Incar(**incar) + Incar(**self.incar_parallel_settings)
+        incar = Incar(**incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
             filename=os.path.join(directory, "INCAR"),
             # we can use the start image for our structure -- as all structures
@@ -185,7 +187,7 @@ class VaspNudgedElasticBandTask(VaspTask):
 
         # if KSPACING is not provided in the incar AND kpoints is attached to this
         # class instance, then we write the KPOINTS file
-        if self.kpoints and ("KSPACING" not in self.incar):
+        if cls.kpoints and ("KSPACING" not in cls.incar):
             raise Exception(
                 "Custom KPOINTS are not supported by Simmate yet. "
                 "Please use KSPACING in your INCAR instead."
@@ -197,9 +199,9 @@ class VaspNudgedElasticBandTask(VaspTask):
             # we can use the start image for our structure -- as all structures
             # should give the same result.
             structures[0].composition.elements,
-            self.functional,
+            cls.functional,
             os.path.join(directory, "POTCAR"),
-            self.potcar_mappings,
+            cls.potcar_mappings,
         )
 
         # For the user's reference, we also like to write an image of the
@@ -208,10 +210,8 @@ class VaspNudgedElasticBandTask(VaspTask):
         path_vis = structures.get_sum_structure()
         path_vis.to("cif", os.path.join(directory, "path_relaxed_idpp.cif"))
 
-    def workup(
-        self,
-        directory: str,
-    ):
+    @staticmethod
+    def workup(directory: str):
         """
         Works up data from a NEB run, including confirming convergence and
         writing summary output files (structures, data, and plots).

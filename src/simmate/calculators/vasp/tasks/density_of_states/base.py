@@ -18,7 +18,8 @@ class VaspDensityOfStates(MatProjStaticEnergy):
     the a fixed charge density from a previous static energy calculation.
     """
 
-    def _write_output_summary(self, directory, vasprun):
+    @staticmethod
+    def _write_output_summary(directory, vasprun):
         """
         In addition to writing the normal VASP output summary, this also plots
         the DOS to "density_of_states.png"
