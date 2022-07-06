@@ -2,12 +2,7 @@
 
 import pytest
 
-from prefect import Client
-from prefect.backend import flow_run
-
-from simmate.workflow_engine import Workflow, task, Parameter
-from simmate.workflow_engine.common_tasks import load_input_and_register
-from simmate.website.test_app.models import TestStructureCalculation
+from simmate.workflow_engine import Workflow, task
 
 
 @task
@@ -20,27 +15,48 @@ def dummy_task_2(a):
     return 2
 
 
-with Workflow("dummy-flowtype/dummy-flow") as DUMMY_FLOW:
-    source = Parameter("source", default=None)
-    structure = Parameter("structure", default=None)
-    dummy_task_1(source)
-    dummy_task_2(structure)
-DUMMY_FLOW.database_table = TestStructureCalculation
-DUMMY_FLOW.register_kwargs = ["source", "structure"]
+class DummyFlow(Workflow):
+    """
+    Minimal example of a workflow
+    """
+
+    name = "dummy-flowtype.dummy-flow"
+    # database_table = TestStructureCalculation
+    register_kwargs = ["source", "structure"]
+
+    @staticmethod
+    def run(source=None, structure=None, **kwargs):
+        x = dummy_task_1(source)
+        y = dummy_task_2(structure)
+        return x.result() + y.result()
 
 
 def test_workflow():
     # Run the workflow just like you would for the base Prefect class
-    DUMMY_FLOW.run()
+    flow = DummyFlow.to_prefect_flow()
+    state = flow()
+    assert state.is_completed()
+    assert state.result() == 3
 
     # testing naming conventions
-    assert DUMMY_FLOW.type == "dummy-flowtype"
-    assert DUMMY_FLOW.name_short == "dummy-flow"
-    assert DUMMY_FLOW.description_doc == DUMMY_FLOW.__doc__
+    assert DummyFlow.type == "dummy-flowtype"
+    assert DummyFlow.name_short == "dummy-flow"
+
+    # testing class properties
+    assert DummyFlow.description_doc == DummyFlow.__doc__
+    assert DummyFlow.description_doc.strip() == "Minimal example of a workflow"
+    assert DummyFlow.parameter_names == ["kwargs", "source", "structure"]
+    DummyFlow.show_parameters()  # a print statment w. nothing else to check
 
 
 @pytest.mark.django_db
 def test_workflow_cloud(mocker, sample_structures):
+
+    # from simmate.workflow_engine.common_tasks import load_input_and_register
+    # from simmate.website.test_app.models import TestStructureCalculation
+
+    # from prefect.client import Client
+    # from prefect.backend import flow_run
 
     # to test serialization of input parameters we grab a toolkit object
     structure = sample_structures["C_mp-48_primitive"]
@@ -149,11 +165,3 @@ def test_deserialize_parameters(mocker):
     }
 
     Workflow._deserialize_parameters(**example_parameters)
-
-
-def test_parameter_names():
-
-    assert DUMMY_FLOW.parameter_names == ["source", "structure"]
-
-    # simply prints out content so there's nothing to check here
-    DUMMY_FLOW.show_parameters()

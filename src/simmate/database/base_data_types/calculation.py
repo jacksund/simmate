@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from prefect.backend.flow_run import FlowRunView
+# from prefect.backend.flow_run import FlowRunView
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
@@ -70,7 +70,7 @@ class Calculation(DatabaseTable):
         return f"https://cloud.prefect.io/simmate/flow-run/{self.prefect_flow_run_id}"
 
     @property
-    def flow_run_view(self) -> FlowRunView:
+    def flow_run_view(self):  # -> FlowRunView
         """
         Checks if the prefect_flow_run_id was registered with Prefect Cloud, and
         if so, returns a
@@ -95,6 +95,7 @@ class Calculation(DatabaseTable):
         If Prefect Cloud is not configured or if the calculation was ran
         locally, the None is returned.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
         try:
             return FlowRunView.from_flow_run_id(self.prefect_flow_run_id)
         except:  # may fail if this is a local run or prefect api key not configured

@@ -27,6 +27,7 @@ dependencies:
     - pdoc >=11.0.0
     - plotly >=5.4.0
     # - prefect >=2.0  # NOT AVAILABLE ON CONDA UNTIL STABLE RELEASE
+    - pip
     - pip:
         - prefect==2.0b7
     - pymatgen >=2022.1.9

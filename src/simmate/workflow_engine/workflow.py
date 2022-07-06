@@ -14,10 +14,6 @@ import simmate
 from simmate.toolkit import Structure
 from simmate.database.base_data_types import Calculation
 from simmate.workflow_engine import S3Task
-from simmate.workflow_engine.common_tasks import (
-    load_input_and_register,
-    save_result,
-)
 
 
 class Workflow:
@@ -44,7 +40,8 @@ class Workflow:
 
     version: str = simmate.__version__
     """
-    Version number for this flow. Defaults to the Simmate version (such as "0.7.0")
+    Version number for this flow. Defaults to the Simmate version 
+    (e.g. "0.7.0").
     """
 
     project_name: str = None
@@ -115,6 +112,17 @@ class Workflow:
         Because of this common recipe for workflows, we use this method to make
         the workflow for us.
         """
+        # local import to prevent circular import error
+        from simmate.workflow_engine.common_tasks import (
+            load_input_and_register,
+            save_result,
+        )
+
+        # make sure the workflow is configured properly first
+        if not cls.s3task:
+            raise NotImplementedError(
+                "Please either set the s3task attribute or write a custom run method!"
+            )
 
         parameters_cleaned = load_input_and_register(
             structure=structure,
@@ -160,55 +168,56 @@ class Workflow:
 
         return state
 
+    @classmethod
     @property
-    def type(self) -> str:
+    def type(cls) -> str:
         """
         Gives the workflow type of this workflow. For example the workflow named
         'static-energy.matproj' would have the type `static-energy`.
         """
-        return self.name.split(".")[0]
+        return cls.name.split(".")[0]
 
+    @classmethod
     @property
-    def name_short(self) -> str:
+    def name_short(cls) -> str:
         """
         Gives the present name of the workflow. For example the workflow named
         'static-energy/matproj' would have the shortname `matproj`
         """
-        raise NotImplementedError("Migrating to Prefect 2.0")
-        return self.name.split("/")[-1]
+        return cls.name.split(".")[-1]
 
     # BUG: naming this `description` causes issues.
     # See https://github.com/PrefectHQ/prefect/issues/3911
+    @classmethod
     @property
-    def description_doc(self) -> str:
+    def description_doc(cls) -> str:
         """
         This simply returns the documentation string of this workflow -- so this
         is the same as `__doc__`. This attribute is only defined for beginners
         to python and for use in django templates for the website interface.
         """
-        raise NotImplementedError("Migrating to Prefect 2.0")
-        return self.__doc__
+        return cls.__doc__
 
+    @classmethod
     @property
-    def parameter_names(self):
+    def parameter_names(cls) -> List[str]:
         """
-        Prints a list of all the parameter names for this workflow.
+        Gives a list of all the parameter names for this workflow.
         """
-        raise NotImplementedError("Migrating to Prefect 2.0")
         # Iterate through and grab the columns. Note we don't use get_column_names
         # here because we are attaching relation data as well. We also
         # sort them alphabetically for consistent results.
-        parameter_names = [parameter.name for parameter in self.parameters()]
+        parameter_names = list(cls.to_prefect_flow().parameters.properties.keys())
         parameter_names.sort()
         return parameter_names
 
-    def show_parameters(self):
+    @classmethod
+    def show_parameters(cls):
         """
         Prints a list of all the parameter names for this workflow.
         """
-        raise NotImplementedError("Migrating to Prefect 2.0")
         # use yaml to make the printout pretty (no quotes and separate lines)
-        print(yaml.dump(self.parameter_names))
+        print(yaml.dump(cls.parameter_names))
 
     def run_cloud(
         self,
