@@ -56,15 +56,15 @@ class Relaxation__VASP__Staged(Workflow):
         directory=None,
         copy_previous_directory=False,
     ):
-        
+
         parameters_cleaned = load_input_and_register(
             structure=structure,
             command=command,
             source=source,
             directory=directory,
             copy_previous_directory=copy_previous_directory,
-        )
-        
+        ).result()
+
         # Our first relaxation is directly from our inputs.
         recent_task = Relaxation__VASP__Quality00
         recent_state = recent_task.run_as_prefect_flow(
@@ -73,15 +73,17 @@ class Relaxation__VASP__Staged(Workflow):
             directory=parameters_cleaned["directory"] + os.path.sep + recent_task.name,
         )
         recent_result = recent_state.result()
-        
+
         # The remaining tasks continue and use the past results as an input
-        for i, current_task in enumerate([
-            Relaxation__VASP__Quality01,
-            Relaxation__VASP__Quality02,
-            Relaxation__VASP__Quality03,
-            Relaxation__VASP__Quality04,
-            Static_Energy__VASP__Quality04,
-        ]):
+        for i, current_task in enumerate(
+            [
+                Relaxation__VASP__Quality01,
+                Relaxation__VASP__Quality02,
+                Relaxation__VASP__Quality03,
+                Relaxation__VASP__Quality04,
+                Static_Energy__VASP__Quality04,
+            ]
+        ):
             recent_state = current_task.run_as_prefect_flow(
                 structure={
                     "database_table": recent_task.database_table.__name__,
@@ -89,9 +91,11 @@ class Relaxation__VASP__Staged(Workflow):
                     "structure_field": "structure_final",
                 },
                 command=parameters_cleaned["command"],
-                directory=parameters_cleaned["directory"] + os.path.sep + current_task.name,
+                directory=parameters_cleaned["directory"]
+                + os.path.sep
+                + current_task.name,
             )
             recent_result = recent_state.result()
-        
+
         # return the result of the final static energy if the user wants it
         return recent_result

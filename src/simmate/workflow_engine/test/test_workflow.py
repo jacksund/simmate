@@ -40,7 +40,7 @@ def test_workflow():
     state = flow()
     assert state.is_completed()
     assert state.result() == 3
-    
+
     # Same exact thing but using higher-level method
     state = DummyFlow.run_as_prefect_flow()
     assert state.is_completed()

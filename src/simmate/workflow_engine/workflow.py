@@ -8,6 +8,7 @@ from typing import List
 from prefect.tasks import task  # present only for convience imports elsewhere
 from prefect.flows import Flow
 from prefect.states import State
+
 # from prefect.client import get_client
 
 import simmate
@@ -125,7 +126,7 @@ class Workflow:
             source=source,
             directory=directory,
             copy_previous_directory=copy_previous_directory,
-        )
+        ).result()
 
         result = cls.s3task.run_as_prefect_task(
             structure=parameters_cleaned["structure"],

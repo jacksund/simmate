@@ -5,8 +5,8 @@ import shutil
 import yaml
 from typing import Any
 
-import prefect
 from prefect import task
+from prefect.context import FlowRunContext
 
 from simmate.utilities import get_directory
 from simmate.workflow_engine import Workflow
@@ -19,7 +19,10 @@ from simmate.workflow_engine import Workflow
 
 
 @task
-def load_input_and_register(register_run=True, **parameters: Any) -> dict:
+def load_input_and_register(
+    register_run: bool = True,
+    **parameters: Any,
+) -> dict:
     """
     How the input was submitted as a parameter depends on if we are submitting
     to Prefect Cloud, running the flow locally, or even continuing from a
@@ -64,23 +67,48 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # Grab the workflow object as we need to reference some of its attributes.
     # In addition, we will also use the flow run id for registration.
 
-    # BUG: for some reason, this script fails when get_workflow is imported
-    # at the top of this file rather than here.
-    from simmate.workflows.utilities import get_workflow
-
-    workflow_name = prefect.context.get("flow_name") or parameters.get("workflow_name")
+    run_context = FlowRunContext.get()
+    workflow_name = run_context.flow.name or parameters.get("workflow_name")
     if not workflow_name:
         raise Exception("Unknown workflow")
+
+    """
+    from simmate.toolkit import Structure
+
+    structure = Structure(
+        species=["Na", "Cl"],
+        lattice=[
+            [-2.84584700e00, -2.84584700e00, 0.00000000e00],
+            [-2.84584700e00, 0.00000000e00, -2.84584700e00],
+            [-4.57647102e-16, -2.84584700e00, -2.84584700e00],
+        ],
+        coords=[
+            [0.5, 0.5, 0.5],
+            [0.0, 0.0, 0.0],
+        ],
+    )
+
+    from simmate.calculators.vasp.workflows.all import (
+        Relaxation__VASP__MatProj as workflow,
+    )
+
+    state = workflow.run_as_prefect_flow(structure=structure)
+    state.result()
+    """
 
     # BUG: I have to do this in order to allow workflows that are from the
     # simmate.workflows module. There should be a better way to handle user
     # created workflows.
     try:
+        # BUG: for some reason, this script fails when get_workflow is imported
+        # at the top of this file rather than here.
+        from simmate.workflows.utilities import get_workflow
+
         workflow = get_workflow(workflow_name)
     except:
         workflow = None
 
-    prefect_flow_run_id = prefect.context.flow_run_id
+    flow_run_id = str(run_context.flow_run.id)
 
     # ---------------------------------------------------------------------
 
@@ -248,7 +276,9 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     )
 
     # now write the summary to file in the same directory as the calc.
-    input_summary_filename = os.path.join(directory_cleaned, "simmate_metadata.yaml")
+    input_summary_filename = os.path.join(
+        directory_cleaned, "simmate_metadata.yaml"
+    )
     with open(input_summary_filename, "w") as file:
         content = yaml.dump(input_summary)
         file.write(content)
