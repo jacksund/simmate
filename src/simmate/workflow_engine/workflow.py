@@ -149,7 +149,7 @@ class Workflow:
         )
 
     @classmethod
-    def run_as_subflow(cls, **kwargs) -> State:
+    def run_as_prefect_flow(cls, **kwargs) -> State:
         """
         A convience method to run a workflow as a subflow in a prefect context.
         """

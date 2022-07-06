@@ -14,3 +14,4 @@ class CombineCHGCARs(S3Task):
     """
 
     command = "chgsum.pl AECCAR0 AECCAR2 > chgsum.out"
+    monitor = False
