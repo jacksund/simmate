@@ -19,7 +19,8 @@ class BaderELFAnalysis(BaderAnalysis):
     requires_structure = True  # !!! This may change in the future
     required_files = BaderAnalysis.required_files + ["ELFCAR"]
 
-    def setup(self, structure: Structure, directory: str):
+    @staticmethod
+    def setup(structure: Structure, directory: str):
         """
         Bader analysis requires that a static-energy calculation be ran beforehand
         - typically using VASP. This setup involves ensuring that

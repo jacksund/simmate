@@ -85,7 +85,12 @@ def test_s3task_methods():
         task = DummyTask.run_as_prefect_task()
         return task.result()
 
-    test()
+    state = test()
+    result = state.result()
+
+    assert state.is_completed()
+    assert os.path.exists(result["directory"])
+    os.rmdir(result["directory"])
 
 
 def test_s3task_1():
@@ -209,6 +214,20 @@ def test_s3task_7(tmpdir):
 
     pytest.raises(
         MaxCorrectionsError,
+        DummyTask.run,
+        directory=tmpdir,
+    )
+
+
+def test_s3task_8(tmpdir):
+    # make sure an error is raised when a file is missing
+
+    class DummyTask(S3Task):
+        command = "echo dummy"
+        required_files = ["FILE_THAT_DOESNT_EXIST"]
+
+    pytest.raises(
+        Exception,
         DummyTask.run,
         directory=tmpdir,
     )

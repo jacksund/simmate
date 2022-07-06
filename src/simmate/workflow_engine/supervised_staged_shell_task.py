@@ -140,6 +140,13 @@ class S3Task:
     The defualt shell command to use.
     """
 
+    required_files = []
+    """
+    Before the command is executed, this list of files should be present
+    in the working directory. This check will be made after `setup` is called
+    and before `execute` is called. By default, no input files are required.
+    """
+
     error_handlers: List[ErrorHandler] = []
     """
     A list of ErrorHandler objects to use in order of priority (that is, highest
@@ -231,6 +238,17 @@ class S3Task:
             writing a setup method.
         """
         pass
+
+    @classmethod
+    def _check_input_files(cls, directory: str):
+        # Make sure that there are the proper output files from a VASP calc
+        filenames = [os.path.join(directory, file) for file in cls.required_files]
+        if not all(os.path.exists(filename) for filename in filenames):
+            raise Exception(
+                "Make sure your `setup` method directory source is set up correctly"
+                "The following files must exist in the directory where "
+                f"this task is ran but some are missing: {cls.required_files}"
+            )
 
     @classmethod
     def execute(cls, directory: str, command: str) -> List[Tuple[str]]:
@@ -587,6 +605,9 @@ class S3Task:
 
         # run the setup stage of the task
         cls.setup(directory, **kwargs)
+
+        # make sure proper files are present
+        cls._check_input_files(directory)
 
         # run the shelltask and error supervision stages. This method returns
         # a list of any corrections applied during the run.
