@@ -8,7 +8,7 @@ from typing import List
 from prefect.tasks import task  # present only for convience imports elsewhere
 from prefect.flows import Flow
 from prefect.states import State
-from prefect.client import get_client
+# from prefect.client import get_client
 
 import simmate
 from simmate.toolkit import Structure

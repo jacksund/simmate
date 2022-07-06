@@ -33,12 +33,12 @@ class Relaxation__VASP__Staged(Workflow):
 
     This is therefore a "Nested Workflow" made of the following smaller workflows:
 
-        - relaxation/quality00
-        - relaxation/quality01
-        - relaxation/quality02
-        - relaxation/quality03
-        - relaxation/quality04
-        - static-energy/quality04
+        - relaxation.vasp.quality00
+        - relaxation.vasp.quality01
+        - relaxation.vasp.quality02
+        - relaxation.vasp.quality03
+        - relaxation.vasp.quality04
+        - static-energy.vasp.quality04
 
     This workflow is most useful for randomly-created structures or extremely
     large supercells. More precise relaxations+energy calcs should be done
@@ -65,8 +65,7 @@ class Relaxation__VASP__Staged(Workflow):
             copy_previous_directory=copy_previous_directory,
         )
         
-        # Our first relaxation is directly from our inputs. The remaining one
-        # pass along results
+        # Our first relaxation is directly from our inputs.
         recent_task = Relaxation__VASP__Quality00
         recent_state = recent_task.run_as_prefect_flow(
             structure=parameters_cleaned["structure"],
