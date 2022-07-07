@@ -1,59 +1,49 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine.workflow import (
-    Workflow,
-    Parameter,
-    ModuleStorage,
+from simmate.toolkit import Structure
+from simmate.workflow_engine import Workflow
+from simmate.workflow_engine.common_tasks import (
+    load_input_and_register,
+    save_result,
 )
-from simmate.workflow_engine.common_tasks import load_input_and_register, save_result
 from simmate.calculators.vasp.tasks.dynamics import MITDynamics
 from simmate.calculators.vasp.database.dynamics import MITDynamicsRun
 
-s3task_obj = MITDynamics()
 
-with Workflow("dynamics/mit") as workflow:
-    structure = Parameter("structure")
-    command = Parameter("command", default="vasp_std > vasp.out")
-    source = Parameter("source", default=None)
-    directory = Parameter("directory", default=None)
-    copy_previous_directory = Parameter("copy_previous_directory", default=False)
+class Dynamics__Vasp__Mit(Workflow):
+    description_doc_short = "uses MIT Project settings"
+    database_table = MITDynamicsRun
+    register_kwargs = ["structure", "source"]
+    s3task = MITDynamics
 
-    # extra parameters unique to molecular dynamics runs
-    temperature_start = Parameter("temperature_start", default=300)
-    temperature_end = Parameter("temperature_end", default=1200)
-    time_step = Parameter("time_step", default=2)
-    nsteps = Parameter("nsteps", default=10000)
+    @classmethod
+    def run_config(
+        cls,
+        structure: Structure,
+        command: str = None,
+        source: dict = None,
+        directory: str = None,
+        #
+        # extra parameters unique to molecular dynamics runs
+        copy_previous_directory: bool = False,
+        temperature_start: float = 300,
+        temperature_end: float = 1200,
+        time_step: float = 2,
+        nsteps: int = 10000,
+    ):
+        parameters_cleaned = load_input_and_register(
+            structure=structure,
+            source=source,
+            directory=directory,
+            command=command,
+            copy_previous_directory=copy_previous_directory,
+            temperature_start=temperature_start,
+            temperature_end=temperature_end,
+            time_step=time_step,
+            nsteps=nsteps,
+        ).result()
 
-    parameters_cleaned = load_input_and_register(
-        structure=structure,
-        source=source,
-        directory=directory,
-        command=command,
-        copy_previous_directory=copy_previous_directory,
-        temperature_start=temperature_start,
-        temperature_end=temperature_end,
-        time_step=time_step,
-        nsteps=nsteps,
-    )
+        result = cls.s3task.run(**parameters_cleaned)
+        calculation_id = save_result(result)
 
-    result = s3task_obj(
-        structure=parameters_cleaned["structure"],
-        command=parameters_cleaned["command"],
-        directory=parameters_cleaned["directory"],
-        temperature_start=parameters_cleaned["temperature_start"],
-        temperature_end=parameters_cleaned["temperature_end"],
-        time_step=parameters_cleaned["time_step"],
-        nsteps=parameters_cleaned["nsteps"],
-    )
-    calculation_id = save_result(result)
-
-workflow.storage = ModuleStorage(__name__)
-workflow.project_name = "Simmate-Dynamics"
-workflow.database_table = MITDynamicsRun
-workflow.register_kwargs = ["structure", "source"]
-workflow.result_task = result
-workflow.s3task = MITDynamics
-
-# by default we just copy the docstring of the S3task to the workflow
-workflow.__doc__ = MITDynamics.__doc__
-workflow.description_doc_short = "uses MIT Project settings"
+        return result
