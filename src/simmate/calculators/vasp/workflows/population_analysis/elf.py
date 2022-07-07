@@ -9,9 +9,7 @@ from simmate.calculators.vasp.database.population_analysis import (
 )
 
 
-class ELFMatProjPopulationAnalysis(Workflow):
-    name = "population-analysis/elf-matproj"
-    project_name = "Simmate-PopulationAnalysis"
+class PopulationAnalysis__Vasp__ElfMatproj(Workflow):
     s3task = MPPreBaderTask
     database_table = MPELFResults
     register_kwargs = ["structure", "source"]
