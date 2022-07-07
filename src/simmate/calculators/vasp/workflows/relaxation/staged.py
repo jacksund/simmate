@@ -49,7 +49,7 @@ class Relaxation__VASP__Staged(Workflow):
     database_table = StagedRelaxation
 
     @staticmethod
-    def run(
+    def run_config(
         structure,
         command=None,
         source=None,
@@ -65,37 +65,39 @@ class Relaxation__VASP__Staged(Workflow):
             copy_previous_directory=copy_previous_directory,
         ).result()
 
+        tasks_to_run = [
+            Relaxation__VASP__Quality00,
+            Relaxation__VASP__Quality01,
+            Relaxation__VASP__Quality02,
+            Relaxation__VASP__Quality03,
+            Relaxation__VASP__Quality04,
+            Static_Energy__VASP__Quality04,
+        ]
+
         # Our first relaxation is directly from our inputs.
-        recent_task = Relaxation__VASP__Quality00
-        recent_state = recent_task.run_as_prefect_flow(
+        current_task = tasks_to_run[0]
+        state = current_task.run(
             structure=parameters_cleaned["structure"],
             command=parameters_cleaned["command"],
-            directory=parameters_cleaned["directory"] + os.path.sep + recent_task.name,
+            directory=parameters_cleaned["directory"] + os.path.sep + current_task.name,
         )
-        recent_result = recent_state.result()
+        result = state.result()
 
         # The remaining tasks continue and use the past results as an input
-        for i, current_task in enumerate(
-            [
-                Relaxation__VASP__Quality01,
-                Relaxation__VASP__Quality02,
-                Relaxation__VASP__Quality03,
-                Relaxation__VASP__Quality04,
-                Static_Energy__VASP__Quality04,
-            ]
-        ):
-            recent_state = current_task.run_as_prefect_flow(
+        for i, current_task in enumerate(tasks_to_run[1:]):
+            preceding_task = tasks_to_run[i]  # will be one before because of [:1]
+            state = current_task.run(
                 structure={
-                    "database_table": recent_task.database_table.__name__,
-                    "directory": recent_result["directory"],
+                    "database_table": preceding_task.database_table.__name__,
+                    "directory": result["directory"],  # uses preceding result
                     "structure_field": "structure_final",
                 },
                 command=parameters_cleaned["command"],
                 directory=parameters_cleaned["directory"]
                 + os.path.sep
-                + current_task.name,
+                + current_task.name_full,
             )
-            recent_result = recent_state.result()
+            result = state.result()
 
         # return the result of the final static energy if the user wants it
-        return recent_result
+        return result

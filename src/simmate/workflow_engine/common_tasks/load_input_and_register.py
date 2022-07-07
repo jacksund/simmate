@@ -66,61 +66,21 @@ def load_input_and_register(
 
     # Grab the workflow object as we need to reference some of its attributes.
     # In addition, we will also use the flow run id for registration.
-
     run_context = FlowRunContext.get()
-    workflow_name = run_context.flow.name or parameters.get("workflow_name")
-    if not workflow_name:
-        raise Exception("Unknown workflow")
-
-    """
-    from simmate.toolkit import Structure
-
-    structure = Structure(
-        species=["Na", "Cl"],
-        lattice=[
-            [-2.84584700e00, -2.84584700e00, 0.00000000e00],
-            [-2.84584700e00, 0.00000000e00, -2.84584700e00],
-            [-4.57647102e-16, -2.84584700e00, -2.84584700e00],
-        ],
-        coords=[
-            [0.5, 0.5, 0.5],
-            [0.0, 0.0, 0.0],
-        ],
-    )
-
-    from simmate.calculators.vasp.workflows.all import (
-        Relaxation__VASP__MatProj as workflow,
-    )
-
-    state = workflow.run_as_prefect_flow(structure=structure)
-    state.result()
-    """
-
-    # BUG: I have to do this in order to allow workflows that are from the
-    # simmate.workflows module. There should be a better way to handle user
-    # created workflows.
-    try:
-        # BUG: for some reason, this script fails when get_workflow is imported
-        # at the top of this file rather than here.
-        from simmate.workflows.utilities import get_workflow
-
-        workflow = get_workflow(workflow_name)
-    except:
-        workflow = None
-
-    flow_run_id = str(run_context.flow_run.id)
+    workflow_name = run_context.flow.name
+    prefect_flow_run_id = str(run_context.flow_run.id)
 
     # ---------------------------------------------------------------------
 
     # STEP 1: clean parameters
 
-    parameters_cleaned = workflow._deserialize_parameters(**parameters)
+    parameters_cleaned = Workflow._deserialize_parameters(**parameters)
 
     # ---------------------------------------------------------------------
 
-    # STEP 1b: Determine the "primary" input to use for determining the
+    # STEP 1b: Determine the "primary" input to use for setting the
     # source (and previous directory)
-    # !!! Is there a better way to do this?
+    # OPTIMIZE: Is there a better way to do this?
 
     # Currently I just set a priority of possible parameters that can be
     # the primary input. I go through each one at a time until I find one
@@ -241,15 +201,10 @@ def load_input_and_register(
 
     # ---------------------------------------------------------------------
 
-    # STEP 4: Register the calculation so the user can follow along in the UI.
+    # STEP 4: Register the calculation so the user can follow along in the UI
+    # and also see which structures/runs have been submitted aready.
 
-    # This is only done if a table is provided. Some special-case workflows
-    # don't store calculation information bc the flow is just a quick python
-    # analysis.
-
-    if register_run and workflow and workflow.database_table:
-
-        workflow._register_calculation(prefect_flow_run_id, parameters_cleaned)
+    Workflow._register_calculation(prefect_flow_run_id, parameters_cleaned)
 
     # ---------------------------------------------------------------------
 
@@ -269,16 +224,14 @@ def load_input_and_register(
     # workflow run. This allows future users to reproduce the results if
     # desired -- and it also allows us to load old results into a database.
     input_summary = dict(
-        workflow_name=workflow.name if workflow else "non-module-flow",
+        workflow_name=workflow_name,
         # this ID is ingored as an input but needed for loading past data
         prefect_flow_run_id=prefect_flow_run_id,
         **parameters_serialized,
     )
 
     # now write the summary to file in the same directory as the calc.
-    input_summary_filename = os.path.join(
-        directory_cleaned, "simmate_metadata.yaml"
-    )
+    input_summary_filename = os.path.join(directory_cleaned, "simmate_metadata.yaml")
     with open(input_summary_filename, "w") as file:
         content = yaml.dump(input_summary)
         file.write(content)

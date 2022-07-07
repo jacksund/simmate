@@ -24,7 +24,7 @@ class Dummy_Project__Dummy_Caclulator__Dummy_Preset(Workflow):
     register_kwargs = ["source", "structure"]
 
     @staticmethod
-    def run(source=None, structure=None, **kwargs):
+    def run_config(source=None, structure=None, **kwargs):
         x = dummy_task_1(source)
         y = dummy_task_2(structure)
         return x.result() + y.result()
@@ -42,7 +42,7 @@ def test_workflow():
     assert state.result() == 3
 
     # Same exact thing but using higher-level method
-    state = DummyFlow.run_as_prefect_flow()
+    state = DummyFlow.run()
     assert state.is_completed()
     assert state.result() == 3
 

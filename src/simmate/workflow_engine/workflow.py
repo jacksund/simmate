@@ -8,8 +8,8 @@ from typing import List
 from prefect.tasks import task  # present only for convience imports elsewhere
 from prefect.flows import Flow
 from prefect.states import State
-
-# from prefect.client import get_client
+from prefect.context import FlowRunContext
+from prefect.client import get_client
 
 import simmate
 from simmate.toolkit import Structure
@@ -77,7 +77,7 @@ class Workflow:
     """
 
     @classmethod
-    def run(
+    def run_config(
         cls,
         structure: Structure,
         command: str = None,
@@ -144,13 +144,13 @@ class Workflow:
         Converts this workflow into a Prefect flow
         """
         return Flow(
-            fn=cls.run,
+            fn=cls.run_config,
             name=cls.name_full,
             version=cls.version,
         )
 
     @classmethod
-    def run_as_prefect_flow(cls, **kwargs) -> State:
+    def run(cls, **kwargs) -> State:
         """
         A convience method to run a workflow as a subflow in a prefect context.
         """
@@ -235,119 +235,8 @@ class Workflow:
         # use yaml to make the printout pretty (no quotes and separate lines)
         print(yaml.dump(cls.parameter_names))
 
-    def run_cloud(
-        self,
-        labels: List[str] = [],
-        wait_for_run: bool = True,
-        **kwargs,
-    ) -> str:
-        """
-        This schedules the workflow to run remotely on Prefect Cloud.
-
-        #### Parameters
-
-        - `labels`:
-            a list of labels to schedule the workflow with
-
-        - `wait_for_run`:
-            whether to wait for the workflow to finish. If False, the workflow
-            will simply be submitted and then exit. The default is True.
-
-        - `**kwargs`:
-            all options that are normally passed to the workflow.run() method
-
-        #### Returns
-
-        - The flow run id that was used in prefect cloud.
-
-
-        #### Usage
-
-        Make sure you have Prefect properly configured and have registered your
-        workflow with the backend.
-
-        Note that this method can be viewed as a fork of:
-            - from prefect.tasks.prefect.flow_run import create_flow_run
-        It can also be viewed as a more convenient way to call to client.create_flow_run.
-        I don't accept any other client.create_flow_run() inputs besides 'labels'.
-        This may change in the future if I need to set flow run names or schedules.
-        """
-        raise NotImplementedError("Migrating to Prefect 2.0")
-
-        # Grab the logger as we will print useful information below.
-        # In some cases, there is no logger present, so we just set logger=None.
-        # This possibility is why we use `if logger else None` statements below.
-        logger = getattr(prefect.context, "logger", None)
-
-        # Grab the Flow's ID from Prefect Cloud
-        logger.debug("Looking up flow metadata...") if logger else None
-        flow_view = FlowView.from_flow_name(
-            self.name,
-            project_name=self.project_name,
-        )
-
-        # Prefect does not properly deserialize objects that have
-        # as as_dict or to_dict method, so we use a custom method to do that here
-        parameters_serialized = self._serialize_parameters(**kwargs)
-        # BUG: What if we are submitting using a filename? We don't want to
-        # submit to a cluster and have the job fail because it doesn't have
-        # access to the file. One solution could be to deserialize right before
-        # serializing in the next line in order to ensure parameters that
-        # accept file names are submitted with all necessary data.
-
-        # Now we submit the workflow
-        logger.info(f"Creating flow run for {self.name}...") if logger else None
-        client = Client()
-        flow_run_id = client.create_flow_run(
-            flow_id=flow_view.flow_id,
-            parameters=parameters_serialized,
-            labels=labels,
-        )
-
-        # we log the website url to the flow for the user
-        run_url = client.get_cloud_url("flow-run", flow_run_id)
-        logger.info(f"Created flow run: {run_url}") if logger else None
-
-        # -----------------------------------
-        # This part is unique to Simmate. Because we often want to save some info
-        # to our database even before the calculation starts/finishes, we do that
-        # here. An example is storing the structure and prefect id that we just
-        # submitted.
-        # BUG: Will there be a race condition here? What if the workflow finishes
-        # and tries writing to the databse before this is done?
-        parameters_cleaned = self._deserialize_parameters(**kwargs)
-        self._register_calculation(flow_run_id, parameters_cleaned)
-        # -----------------------------------
-
-        # if we want to wait until the job is complete, we do that here
-        if wait_for_run:
-            flow_run_view = self.wait_for_flow_run(flow_run_id)
-            # return flow_run_view # !!! Should I return this instead?
-
-        # return the flow_run_id for the user
-        return flow_run_id
-
-    def wait_for_flow_run(self, flow_run_id: str):
-        """
-        Waits for a given flow run to complete
-
-        This method is a direct fork of...
-            from prefect.tasks.prefect.flow_run import wait_for_flow_run
-
-        It does exactly the same thing where I just assume I want to stream logs.
-        """
-        raise NotImplementedError("Migrating to Prefect 2.0")
-
-        flow_run = FlowRunView.from_flow_run_id(flow_run_id)
-
-        for log in flow_run_module.watch_flow_run(flow_run_id):
-            message = f"Flow {flow_run.name}: {log.message}"
-            prefect.context.logger.log(log.level, message)
-
-        # Return the final view of the flow run
-        return flow_run.get_latest()
-
-    def _register_calculation(self, prefect_flow_run_id, parameters):
+    @classmethod
+    def _register_calculation(cls, **kwargs) -> Calculation:
         """
         If the workflow is linked to a calculation table in the Simmate database,
         this adds the flow run to the database.
@@ -357,27 +246,77 @@ class Workflow:
         This method should not be called directly as it is used within the
         `run_cloud` method and `load_input_and_register` task.
         """
-        raise NotImplementedError("Migrating to Prefect 2.0")
 
-        # grab the registration kwargs from the parameters provided
-        register_kwargs = {
-            key: parameters.get(key, None) for key in self.register_kwargs
-        }
+        # We first need to grab the database table where we want to register
+        # the calculation run to. We can grab the table from either...
+        #   1. the database_table attribute
+        #   2. flow_context --> flow_name --> flow --> then grab its database_table
+
+        # If this method is being called on the base Workflow class, that
+        # means we are trying to register a calculation from within a flow
+        # context -- where the context has information such as the workflow
+        # we are using (and the database table linked to that workflow).
+
+        if cls == Workflow:
+
+            run_context = FlowRunContext.get()
+
+            if not run_context:
+                raise Exception(
+                    "The `_register_calculation` method should only be used "
+                    "within a flow context or on a subclass of Workflow where "
+                    "the database_table attribute is set."
+                )
+
+            workflow_name = run_context.flow.name
+
+            # BUG: I have to do this in order to allow workflows that are from the
+            # simmate.workflows module. There should be a better way to handle user
+            # created workflows.
+            try:
+                # BUG: for some reason, this script fails when get_workflow is imported
+                # at the top of this file rather than here.
+                from simmate.workflows.utilities import get_workflow
+
+                workflow = get_workflow(workflow_name)
+                database_table = workflow.database_table
+            except:
+                database_table = None
+
+            # as an extra, add the prefect_flow_run_id the kwargs in case it
+            # wasn't set already.
+            kwargs["prefect_flow_run_id"] = str(run_context.flow_run.id)
+
+        # Otherwise we should be using the subclass Workflow that has the
+        # database_table property set.
+        else:
+            database_table = cls.database_table
+
+        # Registration is only possible if a table is provided. Some
+        # special-case workflows don't store calculation information bc the flow
+        # is just a quick python analysis.
+        if not database_table:
+            return
+
+        # grab the registration kwargs from the parameters provided and then
+        # convert them to a python object format for the database method
+        register_kwargs = {key: kwargs.get(key, None) for key in cls.register_kwargs}
+        register_kwargs_cleaned = cls._deserialize_parameters(**register_kwargs)
 
         # SPECIAL CASE: for customized workflows we need to convert the inputs
         # back to json before saving to the database.
-        if "workflow_base" in parameters:
-            parameters_serialized = self._serialize_parameters(**parameters)
-            calculation = self.database_table.from_prefect_id(
-                id=prefect_flow_run_id,
+        if "workflow_base" in register_kwargs_cleaned:
+            parameters_serialized = cls._serialize_parameters(**register_kwargs_cleaned)
+            prefect_flow_run_id = parameters_serialized.pop("prefect_flow_run_id", None)
+            calculation = database_table.from_prefect_id(
+                prefect_flow_run_id=prefect_flow_run_id,
                 **parameters_serialized,
             )
         else:
             # load/create the calculation for this workflow run
-            calculation = self.database_table.from_prefect_id(
-                id=prefect_flow_run_id,
-                **register_kwargs,
-            )
+            calculation = cls.database_table.from_prefect_id(**register_kwargs_cleaned)
+
+        return calculation
 
     @staticmethod
     def _serialize_parameters(**parameters) -> dict:
@@ -506,6 +445,124 @@ class Workflow:
 
         return parameters_cleaned
 
+    # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # All methods beyond this point require a Prefect server to be running
+    # and Simmate to be connected to it.
+    # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+
+    def run_cloud(
+        self,
+        labels: List[str] = [],
+        wait_for_run: bool = True,
+        **kwargs,
+    ) -> str:
+        """
+        This schedules the workflow to run remotely on Prefect Cloud.
+
+        #### Parameters
+
+        - `labels`:
+            a list of labels to schedule the workflow with
+
+        - `wait_for_run`:
+            whether to wait for the workflow to finish. If False, the workflow
+            will simply be submitted and then exit. The default is True.
+
+        - `**kwargs`:
+            all options that are normally passed to the workflow.run() method
+
+        #### Returns
+
+        - The flow run id that was used in prefect cloud.
+
+
+        #### Usage
+
+        Make sure you have Prefect properly configured and have registered your
+        workflow with the backend.
+
+        Note that this method can be viewed as a fork of:
+            - from prefect.tasks.prefect.flow_run import create_flow_run
+        It can also be viewed as a more convenient way to call to client.create_flow_run.
+        I don't accept any other client.create_flow_run() inputs besides 'labels'.
+        This may change in the future if I need to set flow run names or schedules.
+        """
+        raise NotImplementedError("Migrating to Prefect 2.0")
+
+        # Grab the logger as we will print useful information below.
+        # In some cases, there is no logger present, so we just set logger=None.
+        # This possibility is why we use `if logger else None` statements below.
+        logger = getattr(prefect.context, "logger", None)
+
+        # Grab the Flow's ID from Prefect Cloud
+        logger.debug("Looking up flow metadata...") if logger else None
+        flow_view = FlowView.from_flow_name(
+            self.name,
+            project_name=self.project_name,
+        )
+
+        # Prefect does not properly deserialize objects that have
+        # as as_dict or to_dict method, so we use a custom method to do that here
+        parameters_serialized = self._serialize_parameters(**kwargs)
+        # BUG: What if we are submitting using a filename? We don't want to
+        # submit to a cluster and have the job fail because it doesn't have
+        # access to the file. One solution could be to deserialize right before
+        # serializing in the next line in order to ensure parameters that
+        # accept file names are submitted with all necessary data.
+
+        # Now we submit the workflow
+        logger.info(f"Creating flow run for {self.name}...") if logger else None
+        client = Client()
+        flow_run_id = client.create_flow_run(
+            flow_id=flow_view.flow_id,
+            parameters=parameters_serialized,
+            labels=labels,
+        )
+
+        # we log the website url to the flow for the user
+        run_url = client.get_cloud_url("flow-run", flow_run_id)
+        logger.info(f"Created flow run: {run_url}") if logger else None
+
+        # -----------------------------------
+        # This part is unique to Simmate. Because we often want to save some info
+        # to our database even before the calculation starts/finishes, we do that
+        # here. An example is storing the structure and prefect id that we just
+        # submitted.
+        self._register_calculation(prefect_flow_run_id=flow_run_id, **kwargs)
+        # BUG: Will there be a race condition here? What if the workflow finishes
+        # and tries writing to the databse before this is done?
+        # -----------------------------------
+
+        # if we want to wait until the job is complete, we do that here
+        if wait_for_run:
+            flow_run_view = self.wait_for_flow_run(flow_run_id)
+            # return flow_run_view # !!! Should I return this instead?
+
+        # return the flow_run_id for the user
+        return flow_run_id
+
+    def wait_for_flow_run(self, flow_run_id: str):
+        """
+        Waits for a given flow run to complete
+
+        This method is a direct fork of...
+            from prefect.tasks.prefect.flow_run import wait_for_flow_run
+
+        It does exactly the same thing where I just assume I want to stream logs.
+        """
+        raise NotImplementedError("Migrating to Prefect 2.0")
+
+        flow_run = FlowRunView.from_flow_run_id(flow_run_id)
+
+        for log in flow_run_module.watch_flow_run(flow_run_id):
+            message = f"Flow {flow_run.name}: {log.message}"
+            prefect.context.logger.log(log.level, message)
+
+        # Return the final view of the flow run
+        return flow_run.get_latest()
+
     @property
     def nflows_submitted(self) -> int:
         """
@@ -515,19 +572,26 @@ class Workflow:
         Note, your workflow must be registered with Prefect for this to work.
         """
         raise NotImplementedError("Migrating to Prefect 2.0")
-        query = {
-            "query": {
-                with_args(
-                    "flow_run_aggregate",
-                    {
-                        "where": {
-                            "flow": {"name": {"_eq": self.name}},
-                            "state": {"_in": ["Running", "Scheduled"]},
-                        },
-                    },
-                ): {"aggregate": {"count"}}
-            }
-        }
-        client = Client()
-        result = client.graphql(query)
-        return result["data"]["flow_run_aggregate"]["aggregate"]["count"]
+
+        # new api may look like...
+        async with get_client() as client:
+            response = await client.read_flow_runs(flow_filter="...")
+        return response
+
+        # OLD API...
+        # query = {
+        #     "query": {
+        #         with_args(
+        #             "flow_run_aggregate",
+        #             {
+        #                 "where": {
+        #                     "flow": {"name": {"_eq": self.name}},
+        #                     "state": {"_in": ["Running", "Scheduled"]},
+        #                 },
+        #             },
+        #         ): {"aggregate": {"count"}}
+        #     }
+        # }
+        # client = Client()
+        # result = client.graphql(query)
+        # return result["data"]["flow_run_aggregate"]["aggregate"]["count"]
