@@ -9,7 +9,8 @@ from prefect.tasks import task  # present only for convience imports elsewhere
 from prefect.flows import Flow
 from prefect.states import State
 from prefect.context import FlowRunContext
-from prefect.client import get_client
+
+# from prefect.client import get_client
 
 import simmate
 from simmate.toolkit import Structure
@@ -441,10 +442,10 @@ class Workflow:
         return parameters_cleaned
 
     # -------------------------------------------------------------------------
-    # -------------------------------------------------------------------------
+    #
     # All methods beyond this point require a Prefect server to be running
     # and Simmate to be connected to it.
-    # -------------------------------------------------------------------------
+    #
     # -------------------------------------------------------------------------
 
     def run_cloud(
