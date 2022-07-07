@@ -9,9 +9,7 @@ from simmate.calculators.vasp.database.density_of_states import (
 )
 
 
-class MatProjDensityOfStates(Workflow):
-    name = "electronic-structure/density-of-states-matproj"
-    project_name = "Simmate-Electronic-Structure"
+class ElectronicStructure__Vasp__MatProjDensityOfStates(Workflow):
     s3task = MatProjDensityOfStatesTask
     database_table = MatProjDensityOfStatesResults
     register_kwargs = ["structure", "source"]

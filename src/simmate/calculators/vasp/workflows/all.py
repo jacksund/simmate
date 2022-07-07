@@ -17,3 +17,7 @@ from .relaxation.all import (
     Relaxation__Vasp__Quality03,
     Relaxation__Vasp__Quality04,
 )
+
+from .electronic_structure.all import (
+    ElectronicStructure__Vasp__MatProjFull,
+)

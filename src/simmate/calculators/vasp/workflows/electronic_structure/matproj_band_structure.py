@@ -9,9 +9,7 @@ from simmate.calculators.vasp.database.band_structure import (
 )
 
 
-class MatProjBandStructure(Workflow):
-    name = ("electronic-structure/matproj-band-structure",)
-    project_name = "Simmate-Electronic-Structure"
+class ElectronicStructure__Vasp__MatProjBandStructure(Workflow):
     s3task = MatProjBandStructureTask
     database_table = MatProjBandStructureResults
     register_kwargs = ["structure", "source"]
