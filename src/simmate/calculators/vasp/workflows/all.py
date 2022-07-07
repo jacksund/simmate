@@ -21,3 +21,10 @@ from .relaxation.all import (
 from .electronic_structure.all import (
     ElectronicStructure__Vasp__MatProjFull,
 )
+
+from .diffusion.all import (
+    Diffusion__Vasp__NebAllPaths,
+    Diffusion__Vasp__NebSinglePath,
+    Diffusion__Vasp__NebFromEndpoints,
+    Diffusion__Vasp__NebFromImages,
+)

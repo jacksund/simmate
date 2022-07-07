@@ -71,7 +71,9 @@ class ElectronicStructure__Vasp__MatProjFull(Workflow):
                 "directory": static_result["directory"],
             },
             command=parameters_cleaned["command"],
-            directory=parameters_cleaned["directory"] + os.path.sep + dos_workflow.name,
+            directory=parameters_cleaned["directory"]
+            + os.path.sep
+            + dos_workflow.name_full,
             copy_previous_directory=True,
             source=None,  # default to structure dict above
         )
@@ -82,7 +84,9 @@ class ElectronicStructure__Vasp__MatProjFull(Workflow):
                 "directory": static_result["directory"],
             },
             command=parameters_cleaned["command"],
-            directory=parameters_cleaned["directory"] + os.path.sep + dos_workflow.name,
+            directory=parameters_cleaned["directory"]
+            + os.path.sep
+            + dos_workflow.name_full,
             copy_previous_directory=True,
             source=None,  # default to structure dict above
         )

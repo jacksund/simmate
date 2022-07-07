@@ -4,6 +4,7 @@
 # nothing unique to VASP here
 
 import os
+from typing import List
 
 from simmate.toolkit import Structure
 from simmate.toolkit.diffusion import (
@@ -11,16 +12,12 @@ from simmate.toolkit.diffusion import (
     MigrationHop,
     MigrationImages,
 )
-
 from simmate.database.base_data_types.nudged_elastic_band import (
     DiffusionAnalysis as DiffusionAnalysisTable,
     MigrationHop as MigrationHopTable,
     MigrationImage as MigrationImageTable,
 )
-
 from simmate.workflow_engine.workflow import Task, task
-
-from typing import List, Tuple
 
 
 class BuildDiffusionAnalysisTask(Task):
@@ -112,26 +109,6 @@ class BuildDiffusionAnalysisTask(Task):
         # For now I return the MigrationHop ids -- because this let's me
         # indicate which MigrationHops should be updated later on.
         return hop_ids
-
-
-@task(nout=2)
-def get_endpoint_structures(migration_hop: MigrationHop) -> Tuple[Structure]:
-    """
-    Simple wrapper for get_sc_structures method that makes it a Prefect task.
-    I assume parameters for now
-    """
-    start_supercell, end_supercell, _ = migration_hop.get_sc_structures(
-        vac_mode=True,
-    )
-    try:
-        assert start_supercell != end_supercell
-    except:
-        raise Exception(
-            "This structure has a bug due to a rounding error. "
-            "Our team is aware of this bug and it has been fixed for the next "
-            "pymatgen-analysis-diffusion release."
-        )
-    return start_supercell, end_supercell
 
 
 @task
