@@ -21,8 +21,6 @@ WORKFLOW_TYPES = [
     "static-energy",
     "relaxation",
     "population-analysis",
-    "band-structure",
-    "density-of-states",
     "electronic-structure",
     "dynamics",
     "diffusion",
@@ -123,10 +121,12 @@ def get_workflow(
     - `workflow_name`:
         Name of the workflow to load. Examples include "relaxation/matproj",
         "static-energy/quality01", and "diffusion/all-paths"
+
     - `precheck_flow_exists`:
         Whether to check if the workflow actually exists before attempting the
         import. Note, this requires loading all other workflows in order to make
         this check, so it slows down the function substansially. Defaults to false.
+
     - `print_equivalent_import`:
         Whether to print a message indicating the equivalent import for this
         workflow. Typically this is only useful for beginners using the CLI.
@@ -146,22 +146,35 @@ def get_workflow(
                 "workflows with `simmate workflows explore`"
             )
 
-    # parse the workflow name. (e.g. static-energy/mit --> static-energy + mit)
-    type_name, preset_name = workflow_name.split("/")
-    type_name = type_name.replace("-", "_")
-    preset_name = preset_name.replace("-", "_")
+    # parse the workflow name. (e.g. static-energy/vasp/mit --> static_energy + vasp + mit)
+    project_name, calculator_name, preset_name = workflow_name.replace("-", "_").split(
+        "."
+    )
 
-    # The naming convention matches the import path, so we can load the workflow
-    workflow_module = import_module(f"simmate.workflows.{type_name}")
+    # Combine the names into the full class name
+    # (e.g. static_energy + vasp + mit --> StaticEnergy__Vasp__Mit)
+    workflow_class_name = "__".join(
+        [
+            n.title().replace("_", "")
+            for n in [project_name, calculator_name, preset_name]
+        ]
+    )
+
+    # The naming convention matches the import path
+    # BUG: What about user workflows...? Should I try each custom app import?
+    workflow_module = import_module(f"simmate.workflows.{project_name}")
 
     # If requested, print a message indicating the import we are using
     if print_equivalent_import:
         print(
-            f"Using... from simmate.workflows.{type_name} import {preset_name}_workflow"
+            "Using: \n\n\t"
+            f"from simmate.workflows.{project_name} import {workflow_class_name} \n\n"
+            "You can find the source code for this workflow in the follwing module: \n\n\t"
+            f"simmate.calculators.{calculator_name}.workflows.{project_name}"
         )
-    # This line effectly does the same as...
-    #   from simmate.workflows.{type_name} import {preset_name}_workflow
-    workflow = getattr(workflow_module, f"{preset_name}_workflow")
+
+    # and import the workflow
+    workflow = getattr(workflow_module, workflow_class_name)
 
     return workflow
 

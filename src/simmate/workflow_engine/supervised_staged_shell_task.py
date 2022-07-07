@@ -215,7 +215,7 @@ class S3Task:
         When writing a custom S3Task, you can overwrite this method. The only
         criteria is that you...
 
-        1. include `directory` and `**kwargs` as input parameters
+        1. include `directory` as the 1st input parameter and add `**kwargs`
         2. decorate your method with `@staticmethod` or `@classmethod`
 
         These criteria allow for compatibility with higher-level functinality.
@@ -557,7 +557,7 @@ class S3Task:
         pass
 
     @classmethod
-    def run(
+    def run_config(
         cls,
         directory: str = None,
         command: str = None,
@@ -604,7 +604,7 @@ class S3Task:
         directory = get_directory(directory)
 
         # run the setup stage of the task
-        cls.setup(directory, **kwargs)
+        cls.setup(directory=directory, **kwargs)
 
         # make sure proper files are present
         cls._check_input_files(directory)
@@ -615,7 +615,7 @@ class S3Task:
 
         # run the workup stage of the task. This is where the data/info is pull
         # out from the calculation and is thus our "result".
-        result = cls.workup(directory)
+        result = cls.workup(directory=directory)
 
         # if requested, compresses the directory to a zip file and then removes
         # the directory.
@@ -644,14 +644,14 @@ class S3Task:
         Converts this workflow into a Prefect task
         """
         return Task(
-            fn=cls.run,
+            fn=cls.run_config,
             name=cls.__name__,
         )
 
     @classmethod
-    def run_as_prefect_task(cls, **kwargs):
+    def run(cls, **kwargs):
         """
-        A convience method to run a workflow as a subflow in a prefect context.
+        A convience method to run this task as a registered task in a prefect context.
         """
         task = cls.to_prefect_task()
         state = task(**kwargs)

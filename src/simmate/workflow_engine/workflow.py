@@ -128,11 +128,7 @@ class Workflow:
             copy_previous_directory=copy_previous_directory,
         ).result()
 
-        result = cls.s3task.run_as_prefect_task(
-            structure=parameters_cleaned["structure"],
-            command=parameters_cleaned["command"],
-            directory=parameters_cleaned["directory"],
-        )
+        result = cls.s3task.run(**parameters_cleaned)
 
         save_result(result)
 
@@ -327,9 +323,9 @@ class Workflow:
         This method should not be called directly as it is used within the
         run_cloud() method.
         """
-        raise NotImplementedError("Migrating to Prefect 2.0")
 
         # TODO: consider moving this into prefect's core code as a contribution.
+        # This alternatively might be a pydantic contribution
 
         # Because many flows allow object-type inputs (such as structure object),
         # we need to serialize these inputs before scheduling them with prefect
@@ -372,7 +368,6 @@ class Workflow:
         """
         converts all parameters to appropriate python objects
         """
-        raise NotImplementedError("Migrating to Prefect 2.0")
 
         # we don't want to pass arguments like command=None or structure=None if the
         # user didn't provide this input parameter. Instead, we want the workflow to
@@ -574,9 +569,9 @@ class Workflow:
         raise NotImplementedError("Migrating to Prefect 2.0")
 
         # new api may look like...
-        async with get_client() as client:
-            response = await client.read_flow_runs(flow_filter="...")
-        return response
+        # async with get_client() as client:
+        #     response = await client.read_flow_runs(flow_filter="...")
+        # return response
 
         # OLD API...
         # query = {

@@ -9,7 +9,7 @@ from simmate.calculators.vasp.database.relaxation import (
 )
 
 
-class Relaxation__VASP__Quality01(Workflow):
+class Relaxation__Vasp__Quality01(Workflow):
     s3task = Quality01RelaxationTask
     database_table = Quality01RelaxationResults
     register_kwargs = ["structure", "source"]

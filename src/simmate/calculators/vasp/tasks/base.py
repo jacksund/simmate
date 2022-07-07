@@ -174,7 +174,7 @@ class VaspTask(S3Task):
         return structure
 
     @classmethod
-    def setup(cls, structure: Structure, directory: str):
+    def setup(cls, directory: str, structure: Structure, **kwargs):
 
         # run cleaning and standardizing on structure (based on class attributes)
         structure_cleaned = cls._get_clean_structure(structure)

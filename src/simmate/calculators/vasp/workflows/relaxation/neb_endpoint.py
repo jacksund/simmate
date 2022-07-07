@@ -9,7 +9,7 @@ from simmate.calculators.vasp.database.relaxation import (
 )
 
 
-class Relaxation__VASP__NEB_Endpoint(Workflow):
+class Relaxation__Vasp__NebEndpoint(Workflow):
     s3task = NEBEndpointRelaxationTask
     database_table = NEBEndpointRelaxationResults
     register_kwargs = ["structure", "source"]

@@ -26,7 +26,7 @@ from simmate.calculators.vasp.workflows.static_energy.quality04 import (
 from simmate.calculators.vasp.database.relaxation import StagedRelaxation
 
 
-class Relaxation__VASP__Staged(Workflow):
+class Relaxation__Vasp__Staged(Workflow):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.

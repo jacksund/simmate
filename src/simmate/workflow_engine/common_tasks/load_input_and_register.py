@@ -51,16 +51,6 @@ def load_input_and_register(
     `**parameters` includes all parameters and anything extra that you want saved
     to simmate_metadata.yaml
     """
-    # !!! This function needs a refactor that is waiting on prefect 2.0.
-    # In the future, this will be broken into smaller methods and utilities.
-    # Prefect 2.0 will allow us to do more pythonic things such as...
-    # @flow
-    # def example_workflow(**kwargs):
-    #     # NOT a prefect task but a normal function
-    #     kwargs_cleaned = serialize_parameters(**kwargs)
-    #
-    #     # a prefect task
-    #     result = some_prefect_task(**kwargs_cleaned)
 
     # ---------------------------------------------------------------------
 
@@ -204,7 +194,7 @@ def load_input_and_register(
     # STEP 4: Register the calculation so the user can follow along in the UI
     # and also see which structures/runs have been submitted aready.
 
-    Workflow._register_calculation(prefect_flow_run_id, parameters_cleaned)
+    Workflow._register_calculation(**parameters_cleaned)
 
     # ---------------------------------------------------------------------
 
