@@ -41,6 +41,8 @@ Read here for info on markdown, badges, and more:
 [Shields Badges](https://shields.io/)
 -->
 
+> :warning: We are currently migrating from Prefect v1 to v2, which involves many changes to our workflow engine (and subsequently our workflows too). Please pay close attention to our [change log](https://github.com/jacksund/simmate/blob/main/CHANGELOG.md) and be sure you are only looking at source code for the version of Simmate that you have installed. The warning at the top of the [installation tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/01_Installation.md) describes how to do this.
+
 > :warning: For Simmate's workflow module, we are currently reliant on VASP, which is an expensive DFT software that can be difficult to install for beginners. We are working to move away from propriatary softwares and toward free/open-source codes like ABINIT, Quantum Espresso, or DFTK.jl. That way you can install Simmate and we will take care of the rest. This will take time though... so we recommend that fully experimental labs wait until Simmate hits this milestone. If you'd like to be notified when this occurs, send us an email at simmate.team@gmail.com.
 
 ## Welcome!
