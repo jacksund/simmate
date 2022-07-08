@@ -26,6 +26,8 @@ class MITDynamics(MITRelaxation):
     calculation does not modify your input structure.
     """
 
+    confirm_convergence = False
+
     incar = MITRelaxation.incar.copy()
     incar.update(
         dict(
@@ -78,6 +80,7 @@ class MITDynamics(MITRelaxation):
         temperature_end: int = 1200,
         time_step: float = 2,
         nsteps: int = 10000,
+        **kwargs,
     ):
 
         # run cleaning and standardizing on structure (based on class attributes)

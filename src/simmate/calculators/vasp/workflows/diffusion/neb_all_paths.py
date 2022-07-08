@@ -108,7 +108,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
         subcommands = parse_multi_command(
             command,
             commands_out=["command_bulk", "command_supercell", "command_neb"],
-        )
+        ).result()
 
         # Load our input and make a base directory for all other workflows to run
         # within for us.
@@ -119,7 +119,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             command=command,
             migrating_specie=migrating_specie,
             register_run=False,
-        )
+        ).result()
 
         # Our step is to run a relaxation on the bulk structure and it uses our inputs
         # directly. The remaining one tasks pass on results.
@@ -133,7 +133,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
 
         # A static energy calculation on the relaxed structure. This isn't necessarily
         # required for NEB, but it takes very little time.
-        bulk_static_energy_result = StaticEnergy__Vasp__Mit(
+        bulk_static_energy_result = StaticEnergy__Vasp__Mit.run(
             structure={
                 "database_table": Relaxation__Vasp__Mit.database_table.__name__,
                 "directory": bulk_relax_result["directory"],
@@ -156,11 +156,11 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             migrating_specie=migrating_specie,
             directory=parameters_cleaned["directory"],
             vacancy_mode=True,  # assumed for now
-        )
+        ).result()
 
         # Run NEB single_path workflow for all these.
         for i, hop_id in enumerate(migration_hop_ids):
-            Diffusion__Vasp__SinglePath.run(
+            Diffusion__Vasp__NebSinglePath.run(
                 migration_hop={
                     "migration_hop_table": "MITMigrationHop",
                     "migration_hop_id": hop_id,

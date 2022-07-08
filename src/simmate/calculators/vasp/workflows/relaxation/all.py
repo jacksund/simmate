@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .Matproj import Relaxation__Vasp__Matproj
+from .matproj import Relaxation__Vasp__Matproj
 from .mit import Relaxation__Vasp__Mit
 from .neb_endpoint import Relaxation__Vasp__NebEndpoint
 from .quality00 import Relaxation__Vasp__Quality00

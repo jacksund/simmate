@@ -85,7 +85,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
             diffusion_analysis_id=diffusion_analysis_id,
             migration_hop_id=migration_hop_id,
             register_run=False,
-        )
+        ).result()
 
         # get the supercell endpoint structures
         supercell_start, supercell_end = get_endpoint_structures(

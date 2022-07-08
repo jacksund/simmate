@@ -10,21 +10,19 @@ import os
 import yaml
 import shutil
 import pkgutil
-
+from typing import List
 from importlib import import_module
 
 from simmate import workflows
 from simmate.utilities import get_directory, make_archive
-from simmate.workflow_engine import Workflow, S3Task
-
-from typing import List
+from simmate.workflow_engine import Workflow
 
 
 def get_workflow_types():
     """
     Grabs all workflow types, which is also all "Project Names" and all of the
     submodules listed in the `simmate.workflows` module.
-    
+
     Gives names in the format with all lowercase and hypens, such as "relaxation"
     or "static-energy"
     """
@@ -77,7 +75,7 @@ def get_list_of_workflows_by_type(
             # and add the name to our list
             workflow_names.append(workflow_name)
     # OPTIMIZE: is there a more efficient way to do this?
-    
+
     workflow_names.sort()
     return workflow_names
 
@@ -113,29 +111,27 @@ def get_workflow(
     ``` python
     from simmate.workflows.utilities import get_workflow
 
-    matproj_workflow = get_workflow("relaxation/matproj")
+    matproj_workflow = get_workflow("static-energy.vasp.matproj")
     ```
 
     ...does the same exact thing as...
     ``` python
-    from simmate.workflows.relaxation import matproj_workflow
+    from simmate.workflows.static_energy import StaticEnergy__Vasp__Matproj
     ```
 
     Note the naming of workflows therefore follows the format:
     ``` python
 
     # an example import of some workflow
-    from simmate.workflows.example_module import example_flowtype_workflow
+    from simmate.workflows.example_module import example_workflow_class
 
-    # an example of how what this workflows name would be
-    workflow_name = "example-module/example-flowtype"
     ```
 
     #### Parameters
 
     - `workflow_name`:
-        Name of the workflow to load. Examples include "relaxation/matproj",
-        "static-energy/quality01", and "diffusion/all-paths"
+        Name of the workflow to load. Examples include "relaxation.vasp.matproj",
+        "static-energy.vasp.quality01", and "diffusion.vasp.all-paths"
 
     - `precheck_flow_exists`:
         Whether to check if the workflow actually exists before attempting the
@@ -161,10 +157,10 @@ def get_workflow(
                 "workflows with `simmate workflows explore`"
             )
 
-    # parse the workflow name. (e.g. static-energy/vasp/mit --> static_energy + vasp + mit)
-    project_name, calculator_name, preset_name = workflow_name.replace(
-        "-", "_"
-    ).split(".")
+    # parse the workflow name. (e.g. static-energy.vasp.mit --> static_energy + vasp + mit)
+    project_name, calculator_name, preset_name = workflow_name.replace("-", "_").split(
+        "."
+    )
 
     # Combine the names into the full class name
     # (e.g. static_energy + vasp + mit --> StaticEnergy__Vasp__Mit)
@@ -288,9 +284,12 @@ def get_unique_parameters() -> List[str]:
     unique_parameters = []
     for flowname in flownames:
         workflow = get_workflow(flowname)
-        for parameter in workflow.parameters():
-            if parameter.name not in unique_parameters:
-                unique_parameters.append(parameter.name)
+        for parameter in workflow.parameter_names:
+            if parameter not in unique_parameters and parameter not in [
+                "kwargs",
+                "cls",
+            ]:
+                unique_parameters.append(parameter)
 
     # for consistency, we sort these alphabetically
     unique_parameters.sort()

@@ -15,7 +15,7 @@ installed. For now, we only pull the mp-id, structure, and final energy.
 from django.db import transaction
 
 from tqdm import tqdm
-from pymatgen.ext.Matproj import MPRester
+from pymatgen.ext.matproj import MPRester
 
 from simmate.database.third_parties import MatprojStructure
 

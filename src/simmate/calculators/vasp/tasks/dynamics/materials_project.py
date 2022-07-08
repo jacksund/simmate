@@ -26,6 +26,8 @@ class MatprojDynamics(MatprojRelaxation):
     calculation does not modify your input structure.
     """
 
+    confirm_convergence = False
+
     incar = MatprojRelaxation.incar.copy()
     incar.update(
         dict(
@@ -77,6 +79,7 @@ class MatprojDynamics(MatprojRelaxation):
         temperature_start: int = 300,
         temperature_end: int = 1200,
         nsteps: int = 10000,
+        **kwargs,
     ):
 
         # run cleaning and standardizing on structure (based on class attributes)

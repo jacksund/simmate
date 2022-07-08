@@ -53,7 +53,7 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
             directory=prebadelf_result["directory"],
         ).result()
 
-        save_bader_results(badelf_result, prebadelf_result["prefect_flow_run_id"])
+        save_badelf_results(badelf_result, prebadelf_result["prefect_flow_run_id"])
 
 
 # -----------------------------------------------------------------------------
@@ -140,7 +140,7 @@ def get_structure_w_empties(
 
 # THIS IS A COPY/PASTE FROM THE BADER WORKFLOW -- I need to condense these
 @task
-def save_bader_results(bader_result, prefect_flow_run_id):
+def save_badelf_results(bader_result, prefect_flow_run_id):
     # load the results. We are particullary after the first result with
     # is a pandas dataframe of oxidation states.
     oxidation_data, extra_data = bader_result["result"]

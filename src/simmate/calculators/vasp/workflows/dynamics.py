@@ -42,7 +42,7 @@ class Dynamics__Vasp__Mit(Workflow):
             nsteps=nsteps,
         ).result()
 
-        result = cls.s3task.run(**parameters_cleaned)
+        result = cls.s3task.run(**parameters_cleaned).result()
         calculation_id = save_result(result)
 
         return result

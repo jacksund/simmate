@@ -176,7 +176,16 @@ def load_input_and_register(
     # and therefore prevent an error/bug.
     if source and primary_input and primary_input_cleaned.is_from_past_calc:
         # note primary_input here is a dictionary
-        assert source == primary_input
+        # assert
+        if not source == primary_input:
+            # only warning for now because this is experimental
+            print(
+                "WARNING: Your source does not match the source of your "
+                "primary input. Sources are an experimental feature, so"
+                "this will not affect your results. Still, please report "
+                "this to our team to help with development. \n"
+                "SOURCE: {source} \n\n PRIMARY_INPUT: {primary_input}"
+            )
         source_cleaned = source
     # Check if we have a primary input loaded from a past calculation and
     # default to that as the source.
@@ -195,7 +204,8 @@ def load_input_and_register(
     # STEP 4: Register the calculation so the user can follow along in the UI
     # and also see which structures/runs have been submitted aready.
 
-    Workflow._register_calculation(**parameters_cleaned)
+    if register_run:
+        Workflow._register_calculation(**parameters_cleaned)
 
     # ---------------------------------------------------------------------
 

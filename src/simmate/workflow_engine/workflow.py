@@ -118,7 +118,7 @@ class Workflow:
             copy_previous_directory=copy_previous_directory,
         ).result()
 
-        result = cls.s3task.run(**parameters_cleaned)
+        result = cls.s3task.run(**parameters_cleaned).result()
 
         save_result(result)
 
@@ -134,6 +134,9 @@ class Workflow:
             fn=cls.run_config,
             name=cls.name_full,
             version=cls.version,
+            # Skip type checking because I don't have robust typing yet
+            # e.g. Structure type inputs also accept inputs like a filename
+            validate_parameters=False,
         )
 
         # as an extra, we set this attribute to the prefect flow instance, which
@@ -167,7 +170,7 @@ class Workflow:
         """
         if not len(cls.__name__.split("__")) == 3:
             raise Exception("Make sure you are following Simmate naming conventions!")
-        
+
         # convert to dot format
         name = cls.__name__.replace("__", ".")
 

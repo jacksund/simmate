@@ -5,13 +5,13 @@ import os
 from simmate.workflow_engine import Workflow
 from simmate.workflow_engine.common_tasks import load_input_and_register
 
-from simmate.calculators.vasp.workflows.static_energy.Matproj import (
+from simmate.calculators.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj as static_workflow,
 )
-from simmate.calculators.vasp.workflows.electronic_structure.Matproj_density_of_states import (
+from simmate.calculators.vasp.workflows.electronic_structure.matproj_density_of_states import (
     ElectronicStructure__Vasp__MatprojDensityOfStates as dos_workflow,
 )
-from simmate.calculators.vasp.workflows.electronic_structure.Matproj_band_structure import (
+from simmate.calculators.vasp.workflows.electronic_structure.matproj_band_structure import (
     ElectronicStructure__Vasp__MatprojBandStructure as bandstruct_workflow,
 )
 
@@ -23,9 +23,9 @@ class ElectronicStructure__Vasp__MatprojFull(Workflow):
 
     This is therefore a "Nested Workflow" made of the following smaller workflows:
 
-        - static-energy.vasp.Matproj
-        - band-structure.vasp.Matproj
-        - density-of-states.vasp.Matproj
+        - static-energy.vasp.matproj
+        - band-structure.vasp.matproj
+        - density-of-states.vasp.matproj
 
     Note, these calculations are done using PBE, which is known to underestimate
     band gaps. For higher quality electronic structure calculations, you should

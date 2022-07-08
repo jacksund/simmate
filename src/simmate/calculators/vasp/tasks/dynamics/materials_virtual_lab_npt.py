@@ -11,6 +11,8 @@ class MatVirtualLabNPTDynamics(MITDynamics):
     [MVLNPTMDSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLNPTMDSet).
     """
 
+    confirm_convergence = False
+
     incar = MITDynamics.incar.copy()
     incar.update(
         dict(
