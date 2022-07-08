@@ -12,5 +12,4 @@ from simmate.calculators.vasp.database.population_analysis import (
 class PopulationAnalysis__Vasp__ElfMatproj(Workflow):
     s3task = MPPreBaderTask
     database_table = MPELFResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "uses Materials Project settings"

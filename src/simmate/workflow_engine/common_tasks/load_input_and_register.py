@@ -59,6 +59,7 @@ def load_input_and_register(
     run_context = FlowRunContext.get()
     workflow_name = run_context.flow.name
     prefect_flow_run_id = str(run_context.flow_run.id)
+    workflow = run_context.flow.simmate_workflow
 
     # ---------------------------------------------------------------------
 

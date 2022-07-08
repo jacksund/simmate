@@ -12,5 +12,4 @@ from simmate.calculators.vasp.database.relaxation import (
 class Relaxation__Vasp__Mit(Workflow):
     s3task = MITRelaxationTask
     database_table = MITRelaxationResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "uses MIT Project settings"

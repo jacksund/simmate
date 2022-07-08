@@ -71,12 +71,6 @@ class Workflow:
     in the list-view of all different workflow presets.
     """
 
-    register_kwargs: List[str] = []
-    """
-    (experimental feature)
-    A list of input parameters that should be used to register the calculation.
-    """
-
     @classmethod
     def run_config(
         cls,
@@ -140,11 +134,19 @@ class Workflow:
         """
         Converts this workflow into a Prefect flow
         """
-        return Flow(
+        # Instead of the @flow decorator, we build the flow instance directly
+        flow = Flow(
             fn=cls.run_config,
             name=cls.name_full,
             version=cls.version,
         )
+
+        # as an extra, we set this attribute to the prefect flow instance, which
+        # allows us to access the source Simmate Workflow easily with Prefect's
+        # context managers.
+        flow.simmate_workflow = cls
+
+        return flow
 
     @classmethod
     def run(cls, **kwargs) -> State:
@@ -217,8 +219,7 @@ class Workflow:
         """
         Gives a list of all the parameter names for this workflow.
         """
-        # Iterate through and grab the columns. Note we don't use get_column_names
-        # here because we are attaching relation data as well. We also
+        # Iterate through and grab the parameters for the run method. We also
         # sort them alphabetically for consistent results.
         parameter_names = list(cls.to_prefect_flow().parameters.properties.keys())
         parameter_names.sort()
@@ -231,6 +232,32 @@ class Workflow:
         """
         # use yaml to make the printout pretty (no quotes and separate lines)
         print(yaml.dump(cls.parameter_names))
+
+    @classmethod
+    @property
+    def parameters_to_register(cls) -> List[str]:
+        """
+        (experimental feature)
+        A list of input parameters that should be used to register the calculation.
+        """
+        parameters_to_register = [
+            "prefect_flow_run_id"
+        ]  # run is always used to register but is never an input parameter
+
+        table_columns = cls.database_table.get_column_names()
+
+        for parameter in cls.parameter_names:
+            if parameter in table_columns:
+                parameters_to_register.append(parameter)
+
+        # check special cases where input parameter doesn't match to a column name
+        if "structure_string" in table_columns:
+            parameters_to_register.append("structure")
+
+        # put in alphabetical order for consistent results
+        parameters_to_register.sort()
+
+        return parameters_to_register
 
     @classmethod
     def _register_calculation(cls, **kwargs) -> Calculation:
@@ -253,51 +280,35 @@ class Workflow:
         # means we are trying to register a calculation from within a flow
         # context -- where the context has information such as the workflow
         # we are using (and the database table linked to that workflow).
-
         if cls == Workflow:
 
             run_context = FlowRunContext.get()
-
-            if not run_context:
-                raise Exception(
-                    "The `_register_calculation` method should only be used "
-                    "within a flow context or on a subclass of Workflow where "
-                    "the database_table attribute is set."
-                )
-
-            workflow_name = run_context.flow.name
-
-            # BUG: I have to do this in order to allow workflows that are from the
-            # simmate.workflows module. There should be a better way to handle user
-            # created workflows.
-            try:
-                # BUG: for some reason, this script fails when get_workflow is imported
-                # at the top of this file rather than here.
-                from simmate.workflows.utilities import get_workflow
-
-                workflow = get_workflow(workflow_name)
-                database_table = workflow.database_table
-            except:
-                database_table = None
+            workflow = run_context.flow.simmate_workflow
+            database_table = workflow.database_table
 
             # as an extra, add the prefect_flow_run_id the kwargs in case it
             # wasn't set already.
-            kwargs["prefect_flow_run_id"] = str(run_context.flow_run.id)
+            if "prefect_flow_run_id" not in kwargs:
+                kwargs["prefect_flow_run_id"] = str(run_context.flow_run.id)
 
         # Otherwise we should be using the subclass Workflow that has the
         # database_table property set.
         else:
+            workflow = cls  # we have the workflow class already
             database_table = cls.database_table
 
         # Registration is only possible if a table is provided. Some
         # special-case workflows don't store calculation information bc the flow
         # is just a quick python analysis.
         if not database_table:
+            print("No database table found. Skipping registration.")
             return
 
         # grab the registration kwargs from the parameters provided and then
         # convert them to a python object format for the database method
-        register_kwargs = {key: kwargs.get(key, None) for key in cls.register_kwargs}
+        register_kwargs = {
+            key: kwargs.get(key, None) for key in workflow.parameters_to_register
+        }
         register_kwargs_cleaned = cls._deserialize_parameters(**register_kwargs)
 
         # SPECIAL CASE: for customized workflows we need to convert the inputs
@@ -311,7 +322,7 @@ class Workflow:
             )
         else:
             # load/create the calculation for this workflow run
-            calculation = cls.database_table.from_prefect_id(**register_kwargs_cleaned)
+            calculation = database_table.from_prefect_id(**register_kwargs_cleaned)
 
         return calculation
 

@@ -12,7 +12,6 @@ from simmate.calculators.vasp.database.energy import (
 class StaticEnergy__Vasp__NebEndpoint(Workflow):
     s3task = NEBEndpointStaticEnergyTask
     database_table = NEBEndpointStaticEnergyResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = (
         "uses Materials Project settings meant for defect supercell structures"
     )

@@ -22,7 +22,6 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
     """
 
     database_table = MPBadelfResults
-    register_kwargs = ["structure", "source"]
 
     @classmethod
     def run_config(
@@ -65,7 +64,6 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
 class PopulationAnalysis__Vasp__PrebadelfMatproj(Workflow):
     s3task = MatProjPreBaderELF
     database_table = MPBadelfResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "runs Bader analysis with ELFCAR as reference"
 
 

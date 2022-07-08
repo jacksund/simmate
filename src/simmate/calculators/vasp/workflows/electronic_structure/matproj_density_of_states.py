@@ -12,5 +12,4 @@ from simmate.calculators.vasp.database.density_of_states import (
 class ElectronicStructure__Vasp__MatProjDensityOfStates(Workflow):
     s3task = MatProjDensityOfStatesTask
     database_table = MatProjDensityOfStatesResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "uses Materials Project settings (PBE)"

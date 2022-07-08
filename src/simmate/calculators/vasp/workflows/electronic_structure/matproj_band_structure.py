@@ -12,5 +12,4 @@ from simmate.calculators.vasp.database.band_structure import (
 class ElectronicStructure__Vasp__MatProjBandStructure(Workflow):
     s3task = MatProjBandStructureTask
     database_table = MatProjBandStructureResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "uses Materials Project settings (PBE)"

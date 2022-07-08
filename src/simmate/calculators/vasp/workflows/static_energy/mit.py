@@ -12,5 +12,4 @@ from simmate.calculators.vasp.database.energy import (
 class StaticEnergy__Vasp__Mit(Workflow):
     s3task = MITStaticEnergyTask
     database_table = MITStaticEnergyResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "uses MIT Project settings"

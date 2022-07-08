@@ -82,7 +82,7 @@ def test_s3task_methods():
 
     @flow
     def test():
-        task = DummyTask.run_as_prefect_task()
+        task = DummyTask.run()
         return task.result()
 
     state = test()
@@ -100,7 +100,7 @@ def test_s3task_1():
         command = "echo dummy"
         monitor = False
 
-    output = DummyTask.run()
+    output = DummyTask.run_config()
 
     assert output["result"] == None
     assert output["corrections"] == []
@@ -121,7 +121,7 @@ def test_s3task_2():
         monitor = False
         compress_output = True
 
-    output = DummyTask.run()
+    output = DummyTask.run_config()
 
     # make sure that a "simmate-task-*.zip" archive was created
     assert os.path.exists(output["directory"] + ".zip")
@@ -147,7 +147,7 @@ def test_s3task_3(tmpdir):
         ]
 
     # use the temporary directory
-    assert DummyTask.run(directory=tmpdir) == {
+    assert DummyTask.run_config(directory=tmpdir) == {
         "result": None,
         "corrections": [],
         "directory": tmpdir,
@@ -166,7 +166,7 @@ def test_s3task_4(tmpdir):
 
     pytest.raises(
         NonZeroExitError,
-        DummyTask.run,
+        DummyTask.run_config,
         directory=tmpdir,
     )
 
@@ -182,7 +182,7 @@ def test_s3task_5(tmpdir):
 
     pytest.raises(
         MaxCorrectionsError,
-        DummyTask.run,
+        DummyTask.run_config,
         directory=tmpdir,
     )
 
@@ -198,7 +198,7 @@ def test_s3task_6(tmpdir):
 
     pytest.raises(
         MaxCorrectionsError,
-        DummyTask.run,
+        DummyTask.run_config,
         directory=tmpdir,
     )
 
@@ -214,7 +214,7 @@ def test_s3task_7(tmpdir):
 
     pytest.raises(
         MaxCorrectionsError,
-        DummyTask.run,
+        DummyTask.run_config,
         directory=tmpdir,
     )
 
@@ -228,6 +228,6 @@ def test_s3task_8(tmpdir):
 
     pytest.raises(
         Exception,
-        DummyTask.run,
+        DummyTask.run_config,
         directory=tmpdir,
     )

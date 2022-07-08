@@ -14,13 +14,13 @@ from simmate.workflow_engine.common_tasks import (
     parse_multi_command,
 )
 
-from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
+from simmate.calculators.vasp.workflows.diffusion.utilities import (
     get_migration_images_from_endpoints,
 )
 from simmate.calculators.vasp.workflows.relaxation.neb_endpoint import (
     Relaxation__Vasp__NebEndpoint,
 )
-from simmate.calculators.vasp.workflows.nudged_elastic_band.from_images import (
+from simmate.calculators.vasp.workflows.diffusion.neb_from_images import (
     Diffusion__Vasp__NebFromImages,
 )
 from simmate.calculators.vasp.database.nudged_elastic_band import (

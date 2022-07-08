@@ -23,27 +23,33 @@ simmate-task-12345/  # determined by simmate.utilities.get_directory
 """
 
 import os
+from typing import List
 
 from simmate.toolkit import Structure
-from simmate.workflow_engine.workflow import Workflow
+from simmate.toolkit.diffusion import DistinctPathFinder, MigrationHop
+from simmate.workflow_engine import Workflow, task
 from simmate.workflow_engine.common_tasks import (
     load_input_and_register,
     parse_multi_command,
 )
-from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
-    BuildDiffusionAnalysisTask,
+from simmate.calculators.vasp.workflows.relaxation.mit import (
+    Relaxation__Vasp__Mit,
 )
-from simmate.calculators.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
-from simmate.calculators.vasp.workflows.static_energy.mit import StaticEnergy__Vasp__Mit
-from simmate.calculators.vasp.workflows.nudged_elastic_band.single_path import (
-    Diffusion__Vasp__SinglePath,
+from simmate.calculators.vasp.workflows.static_energy.mit import (
+    StaticEnergy__Vasp__Mit,
+)
+from simmate.calculators.vasp.workflows.diffusion.neb_single_path import (
+    Diffusion__Vasp__NebSinglePath,
 )
 from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
 )
+from simmate.database.base_data_types.nudged_elastic_band import (
+    DiffusionAnalysis as DiffusionAnalysisTable,
+)
 
 
-class Diffusion__Vasp__NEBAllPaths(Workflow):
+class Diffusion__Vasp__NebAllPaths(Workflow):
     """
     Runs a full diffusion analysis on a bulk crystal structure using NEB.
 
@@ -141,8 +147,8 @@ class Diffusion__Vasp__NEBAllPaths(Workflow):
 
         # This step does NOT run any calculation, but instead, identifies all
         # diffusion pathways and builds the necessary database entries.
-        build_db = BuildDiffusionAnalysisTask(MITDiffusionAnalysis)
-        migration_hop_ids = build_db(
+        migration_hop_ids = build_diffusion_analysis(
+            diffusion_analyis_table=cls.database_table,
             structure={
                 "database_table": StaticEnergy__Vasp__Mit.database_table.__name__,
                 "directory": bulk_static_energy_result["directory"],
@@ -169,3 +175,90 @@ class Diffusion__Vasp__NEBAllPaths(Workflow):
                 + ";"
                 + subcommands["command_neb"],
             )  # don't block on results to allow parallel runs
+
+
+@task
+def build_diffusion_analysis(
+    diffusion_analyis_table: DiffusionAnalysisTable,
+    structure: Structure,
+    migrating_specie: str,
+    vacancy_mode: bool,
+    directory: str = "",
+    **kwargs,
+) -> List[MigrationHop]:
+    """
+    Given a bulk crystal structure, returns all symmetrically unique pathways
+    for the migrating specie (up until the path is percolating). This
+    also create all relevent database entries for this struture and its
+    migration hops.
+
+    #### Parameters
+
+    - `structure`:
+        bulk crystal structure to be analyzed. Can be in any format supported
+        by Structure.from_dynamic method.
+
+    - `migrating_specie`:
+        Element or ion symbol of the diffusion specie (e.g. "Li")
+
+    - `directory`:
+        where to write the CIF file visualizing all migration hops. If no
+        directory is provided, it will be written in the working directory.
+
+    - `**kwargs`:
+        Any parameter normally accepted by DistinctPathFinder
+    """
+
+    ###### STEP 1: creating the toolkit objects and writing them to file
+
+    structure_cleaned = Structure.from_dynamic(structure)
+
+    pathfinder = DistinctPathFinder(
+        structure_cleaned,
+        migrating_specie,
+        **kwargs,
+    )
+    migration_hops = pathfinder.get_paths()
+
+    # We write all the path files so users can visualized them if needed
+    filename = os.path.join(directory, "migration_hop_all.cif")
+    pathfinder.write_all_paths(filename, nimages=10)
+    for i, migration_hop in enumerate(migration_hops):
+        number = str(i).zfill(2)  # converts numbers like 2 to "02"
+        # the files names here will be like "migration_hop_02.cif"
+        migration_hop.write_path(
+            os.path.join(directory, f"migration_hop_{number}.cif"),
+            nimages=10,
+        )
+
+    ###### STEP 2: creating the database objects and saving them to the db
+
+    # Create the main DiffusionAnalysis object that others will link to.
+    da_obj = diffusion_analyis_table.from_toolkit(
+        structure=structure_cleaned,
+        migrating_specie=migrating_specie,
+        vacancy_mode=vacancy_mode,
+    )
+    da_obj.save()
+    # TODO: should I search for a matching bulk structure before deciding
+    # to create a new DiffusionAnalysis entry?
+
+    # grab the linked MigrationHop class
+    hop_class = da_obj.migration_hops.model
+
+    # Now iterate through the hops and add them to the database
+    hop_ids = []
+    for i, hop in enumerate(migration_hops):
+        hop_db = hop_class.from_toolkit(
+            migration_hop=hop,
+            number=i,
+            diffusion_analysis_id=da_obj.id,
+        )
+        hop_db.save()
+        hop_ids.append(hop_db.id)
+
+    # TODO: still figuring out if toolkit vs. db objects should be returned.
+    # Maybe add ids to the toolkit objects? Or dynamic DB dictionaries?
+    # For now I return the MigrationHop ids -- because this let's me
+    # indicate which MigrationHops should be updated later on.
+    return hop_ids

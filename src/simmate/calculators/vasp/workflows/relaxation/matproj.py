@@ -12,5 +12,4 @@ from simmate.calculators.vasp.database.relaxation import (
 class Relaxation__Vasp__MatProj(Workflow):
     s3task = MPRelaxationTask
     database_table = MPRelaxationResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "uses Materials Project settings"

@@ -12,5 +12,4 @@ from simmate.calculators.vasp.database.energy import (
 class StaticEnergy__Vasp__MatProj(Workflow):
     s3task = MPStaticEnergyTask
     database_table = MPStaticEnergyResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "uses Materials Project settings"

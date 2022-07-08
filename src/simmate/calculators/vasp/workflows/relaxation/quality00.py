@@ -12,5 +12,4 @@ from simmate.calculators.vasp.database.relaxation import (
 class Relaxation__Vasp__Quality00(Workflow):
     s3task = Quality00RelaxationTask
     database_table = Quality00RelaxationResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "bare minimum settings meant for highly unreasonable structures. lattice volume kept fixed"

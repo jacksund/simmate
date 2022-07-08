@@ -2,14 +2,14 @@
 
 import os
 
-from simmate.tookit import Structure
-from simmate.workflow_engine.workflow import Workflow
+from simmate.toolkit import Structure
+from simmate.workflow_engine import Workflow
 from simmate.workflow_engine.common_tasks import (
     load_input_and_register,
     parse_multi_command,
 )
 
-from simmate.calculators.vasp.workflows.nudged_elastic_band.utilities import (
+from simmate.calculators.vasp.workflows.diffusion.utilities import (
     get_migration_images_from_endpoints,
 )
 from simmate.calculators.vasp.workflows.relaxation.neb_endpoint import (

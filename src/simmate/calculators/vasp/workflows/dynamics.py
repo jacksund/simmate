@@ -13,7 +13,6 @@ from simmate.calculators.vasp.database.dynamics import MITDynamicsRun
 class Dynamics__Vasp__Mit(Workflow):
     description_doc_short = "uses MIT Project settings"
     database_table = MITDynamicsRun
-    register_kwargs = ["structure", "source"]
     s3task = MITDynamics
 
     @classmethod

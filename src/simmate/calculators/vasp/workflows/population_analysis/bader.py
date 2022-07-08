@@ -18,7 +18,6 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
     """
 
     database_table = MPBaderResults
-    register_kwargs = ["structure", "source"]
 
     @classmethod
     def run_config(
@@ -54,7 +53,6 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
 class PopulationAnalysis__Vasp__PrebaderMatproj(Workflow):
     s3task = MPPreBaderTask
     database_table = MPBaderResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = "uses Materials Project settings with denser FFT grid"
 
 

@@ -12,7 +12,6 @@ from simmate.calculators.vasp.database.relaxation import (
 class Relaxation__Vasp__Quality03(Workflow):
     s3task = Quality03RelaxationTask
     database_table = Quality03RelaxationResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = (
         "low-quality settings meant for highly unreasonable structures"
     )

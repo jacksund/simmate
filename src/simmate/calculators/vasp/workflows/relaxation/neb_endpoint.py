@@ -12,7 +12,6 @@ from simmate.calculators.vasp.database.relaxation import (
 class Relaxation__Vasp__NebEndpoint(Workflow):
     s3task = NEBEndpointRelaxationTask
     database_table = NEBEndpointRelaxationResults
-    register_kwargs = ["structure", "source"]
     description_doc_short = (
         "uses Materials Project settings and meant for endpoint supercells"
     )

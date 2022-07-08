@@ -3,6 +3,7 @@
 import pytest
 
 from simmate.workflow_engine import Workflow, task
+from simmate.website.test_app.models import TestStructureCalculation
 
 
 @task
@@ -20,8 +21,7 @@ class Dummy_Project__Dummy_Caclulator__Dummy_Preset(Workflow):
     Minimal example of a workflow
     """
 
-    # database_table = TestStructureCalculation
-    register_kwargs = ["source", "structure"]
+    database_table = TestStructureCalculation
 
     @staticmethod
     def run_config(source=None, structure=None, **kwargs):
@@ -56,6 +56,11 @@ def test_workflow():
     assert DummyFlow.description_doc == DummyFlow.__doc__
     assert DummyFlow.description_doc.strip() == "Minimal example of a workflow"
     assert DummyFlow.parameter_names == ["kwargs", "source", "structure"]
+    assert DummyFlow.parameters_to_register == [
+        "prefect_flow_run_id",
+        "source",
+        "structure",
+    ]
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 
 
