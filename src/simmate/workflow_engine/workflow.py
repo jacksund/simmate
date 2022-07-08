@@ -41,12 +41,6 @@ class Workflow:
     (e.g. "0.7.0").
     """
 
-    project_name: str = None
-    """
-    The name of the project in Prefect Cloud that this workflow is associated with. This 
-    attribute is mainly just for organizing workflows in the web interface.
-    """
-
     s3task: S3Task = None
     """
     The supervised-staged-shell task (or S3Task) that this workflow uses to run.
