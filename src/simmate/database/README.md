@@ -35,10 +35,10 @@ The sections below will guide you on performing each of these steps. But to plac
 from simmate.database import connect
 
 # Load your database table
-from simmate.database.third_parties import MatProjStructure
+from simmate.database.third_parties import MatprojStructure
 
 # Query and filter data
-results = MatProjStructure.objects.filter(
+results = MatprojStructure.objects.filter(
     nsites=3,
     is_gap_direct=False,
     spacegroup=166,
@@ -79,7 +79,7 @@ The location of your table will depend on what data you're trying to access. To 
 
 Using Materials Project as an example, we can load the table using...
 ``` python
-from simmate.database.third_parties import MatProjStructure
+from simmate.database.third_parties import MatprojStructure
 ```
 
 If you are accessing data from a specific workflow, then in addition to loading from the `workflow_results` module, most workflows have a `database_table` attribute that let you access the table as well:

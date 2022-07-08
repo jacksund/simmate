@@ -300,7 +300,7 @@ class DatabaseTable(models.Model):
     ``` python
     # from a thirdparty database or separate table
     source = {
-        "table": "MatProjStructure",
+        "table": "MatprojStructure",
         "id": "mp-123",
     }
     
@@ -317,14 +317,14 @@ class DatabaseTable(models.Model):
     # from a transformation
     source = {
         "method": "MirrorMutation",
-        "table": "MatProjStructure",
+        "table": "MatprojStructure",
         "id": "mp-123",
     }
     
     # from a multi-structure transformation
     source = {
         "method": "HereditaryMutation",
-        "table": "MatProjStructure",
+        "table": "MatprojStructure",
         "ids": ["mp-123", "mp-321"],
     }
     ```

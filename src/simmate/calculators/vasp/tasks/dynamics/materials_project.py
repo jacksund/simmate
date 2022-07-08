@@ -4,10 +4,10 @@ import os
 
 from simmate.toolkit import Structure
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
-from simmate.calculators.vasp.tasks.relaxation import MatProjRelaxation
+from simmate.calculators.vasp.tasks.relaxation import MatprojRelaxation
 
 
-class MatProjDynamics(MatProjRelaxation):
+class MatprojDynamics(MatprojRelaxation):
     """
     This task is a reimplementation of pymatgen's
     [MPMDSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPMDSet).
@@ -26,7 +26,7 @@ class MatProjDynamics(MatProjRelaxation):
     calculation does not modify your input structure.
     """
 
-    incar = MatProjRelaxation.incar.copy()
+    incar = MatprojRelaxation.incar.copy()
     incar.update(
         dict(
             # Unique to this task, we want to allow users to set these temperatures

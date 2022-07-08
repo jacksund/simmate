@@ -2,10 +2,10 @@
 
 from simmate.workflow_engine import Workflow
 from simmate.calculators.vasp.tasks.population_analysis import (
-    MatProjELF as MPPreBaderTask,
+    MatprojELF as MPPreBaderTask,
 )
 from simmate.calculators.vasp.database.population_analysis import (
-    MatProjELF as MPELFResults,
+    MatprojELF as MPELFResults,
 )
 
 

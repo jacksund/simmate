@@ -8,7 +8,7 @@ from .diffusion.all import (
 )
 
 from .electronic_structure.all import (
-    ElectronicStructure__Vasp__MatProjFull,
+    ElectronicStructure__Vasp__MatprojFull,
 )
 
 from .population_analysis.all import (
@@ -18,14 +18,14 @@ from .population_analysis.all import (
 )
 
 from .static_energy.all import (
-    StaticEnergy__Vasp__MatProj,
+    StaticEnergy__Vasp__Matproj,
     StaticEnergy__Vasp__Mit,
     StaticEnergy__Vasp__Quality04,
     StaticEnergy__Vasp__NebEndpoint,
 )
 
 from .relaxation.all import (
-    Relaxation__Vasp__MatProj,
+    Relaxation__Vasp__Matproj,
     Relaxation__Vasp__Mit,
     Relaxation__Vasp__NebEndpoint,
     Relaxation__Vasp__Quality00,

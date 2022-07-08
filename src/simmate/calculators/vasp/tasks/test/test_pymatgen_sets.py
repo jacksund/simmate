@@ -25,30 +25,30 @@ from pymatgen.io.vasp.sets import (
 )
 from pymatgen.analysis.diffusion.neb.io import MVLCINEBSet, MVLCINEBEndPointSet
 
-from simmate.calculators.vasp.tasks.static_energy import MatProjStaticEnergy
+from simmate.calculators.vasp.tasks.static_energy import MatprojStaticEnergy
 from simmate.calculators.vasp.tasks.relaxation import (
-    MatProjRelaxation,
+    MatprojRelaxation,
     MITRelaxation,
-    MatProjHSERelaxation,
-    MatProjMetalRelaxation,
+    MatprojHSERelaxation,
+    MatprojMetalRelaxation,
     MatVirtualLabCINEBEndpointRelaxation,
 )
 from simmate.calculators.vasp.tasks.dynamics import (
     MITDynamics,
-    MatProjDynamics,
+    MatprojDynamics,
     # MatVirtualLabNPTDynamics,
 )
 from simmate.calculators.vasp.tasks.band_structure import (
-    MatProjHSEBandStructure,
-    MatProjBandStructure,
+    MatprojHSEBandStructure,
+    MatprojBandStructure,
 )
 from simmate.calculators.vasp.tasks.density_of_states import (
-    MatProjHSEDensityOfStates,
-    MatProjDensityOfStates,
+    MatprojHSEDensityOfStates,
+    MatprojDensityOfStates,
 )
 from simmate.calculators.vasp.tasks.nuclear_magnetic_resonance import (
-    MatProjNMRChemicalShifts,
-    # MatProjNMRElectricFieldGradiant,
+    MatprojNMRChemicalShifts,
+    # MatprojNMRElectricFieldGradiant,
 )
 from simmate.calculators.vasp.tasks.elastic import MatVirtualLabElastic
 from simmate.calculators.vasp.tasks.relaxation import (
@@ -72,23 +72,23 @@ MD_KWARGS = {
 @pytest.mark.parametrize(
     "simmate_task, pymatgen_set, pymatgen_kwargs",
     [
-        (MatProjRelaxation, MPRelaxSet, {}),
+        (MatprojRelaxation, MPRelaxSet, {}),
         (MITRelaxation, MITRelaxSet, {}),
         (MITRelaxation, MITRelaxSet, {}),
-        (MatProjStaticEnergy, MPStaticSet, {}),
-        (MatProjHSERelaxation, MPHSERelaxSet, {}),
-        (MatProjMetalRelaxation, MPMetalRelaxSet, {}),
+        (MatprojStaticEnergy, MPStaticSet, {}),
+        (MatprojHSERelaxation, MPHSERelaxSet, {}),
+        (MatprojMetalRelaxation, MPMetalRelaxSet, {}),
         (MatVirtualLabCINEBEndpointRelaxation, MVLCINEBEndPointSet, {}),
         (MITDynamics, MITMDSet, MD_KWARGS),
-        (MatProjDynamics, MPMDSet, MD_KWARGS),
+        (MatprojDynamics, MPMDSet, MD_KWARGS),
         # (MatVirtualLabNPTDynamics, MVLNPTMDSet, MD_KWARGS),
         # requires POTCARs to be configured for pymatgen. need a workaround.
-        (MatProjHSEBandStructure, MPHSEBSSet, {"mode": "line"}),
-        (MatProjBandStructure, MPNonSCFSet, {"mode": "line"}),
-        (MatProjDensityOfStates, MPNonSCFSet, {"mode": "uniform"}),
-        (MatProjHSEDensityOfStates, MPHSEBSSet, {"mode": "uniform"}),
-        (MatProjNMRChemicalShifts, MPNMRSet, {"mode": "cs"}),
-        # (MatProjNMRElectricFieldGradiant, MPNMRSet, {"mode": "efg"}),
+        (MatprojHSEBandStructure, MPHSEBSSet, {"mode": "line"}),
+        (MatprojBandStructure, MPNonSCFSet, {"mode": "line"}),
+        (MatprojDensityOfStates, MPNonSCFSet, {"mode": "uniform"}),
+        (MatprojHSEDensityOfStates, MPHSEBSSet, {"mode": "uniform"}),
+        (MatprojNMRChemicalShifts, MPNMRSet, {"mode": "cs"}),
+        # (MatprojNMRElectricFieldGradiant, MPNMRSet, {"mode": "efg"}),
         # MPNMRSet is bugged at the moment: https://github.com/materialsproject/pymatgen/pull/2509
         (MatVirtualLabElastic, MVLElasticSet, {}),
         (MatVirtualLabGrainBoundaryRelaxation, MVLGBSet, {"slab_mode": False}),

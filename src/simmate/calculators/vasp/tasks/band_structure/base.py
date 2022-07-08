@@ -8,11 +8,11 @@ from pymatgen.electronic_structure.plotter import BSPlotter
 
 from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
 from simmate.calculators.vasp.tasks.static_energy.materials_project import (
-    MatProjStaticEnergy,
+    MatprojStaticEnergy,
 )
 
 
-class VaspBandStructure(MatProjStaticEnergy):
+class VaspBandStructure(MatprojStaticEnergy):
     """
     A base class for band structure calculations. This is not meant
     to be used directly but instead should be inherited from.

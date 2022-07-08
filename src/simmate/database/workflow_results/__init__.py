@@ -5,8 +5,8 @@ from simmate.utilities import get_doc_from_readme
 __doc__ = get_doc_from_readme(__file__)
 
 from simmate.calculators.vasp.database.relaxation import (
-    MatProjRelaxation,
-    MatProjIonicStep,
+    MatprojRelaxation,
+    MatprojIonicStep,
     MITRelaxation,
     MITIonicStep,
     Quality00Relaxation,
@@ -25,18 +25,18 @@ from simmate.calculators.vasp.database.relaxation import (
 )
 
 from simmate.calculators.vasp.database.energy import (
-    MatProjStaticEnergy,
+    MatprojStaticEnergy,
     MITStaticEnergy,
     Quality04StaticEnergy,
     NEBEndpointStaticEnergy,
 )
 
 from simmate.calculators.vasp.database.band_structure import (
-    MatProjBandStructure,
+    MatprojBandStructure,
 )
 
 from simmate.calculators.vasp.database.density_of_states import (
-    MatProjDensityOfStates,
+    MatprojDensityOfStates,
 )
 
 from simmate.calculators.vasp.database.nudged_elastic_band import (
@@ -51,8 +51,8 @@ from simmate.calculators.vasp.database.dynamics import (
 )
 
 from simmate.calculators.vasp.database.population_analysis import (
-    MatProjBaderAnalysis,
-    MatProjBaderELFAnalysis,
+    MatprojBaderAnalysis,
+    MatprojBaderELFAnalysis,
 )
 
 from simmate.calculators.vasp.database.customized import (

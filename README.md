@@ -104,7 +104,7 @@ Again, take a look at [our main website](https://simmate.org/) if you'd like to 
 ``` bash
 # The command line let's you quickly run a workflow
 # from a structure file (CIF or POSCAR)
-simmate workflows run relaxation/matproj --structure NaCl.cif
+simmate workflows run relaxation/Matproj --structure NaCl.cif
 ```
 
 ``` python
@@ -112,9 +112,9 @@ simmate workflows run relaxation/matproj --structure NaCl.cif
 # it also enables advanced setting configurations.
 # Simply load the workflow you'd like and run it!
 
-from simmate.workflows.relaxation import matproj_workflow
+from simmate.workflows.relaxation import Matproj_workflow
 
-status = matproj_workflow.run(structure="NaCl.cif")
+status = Matproj_workflow.run(structure="NaCl.cif")
 ```
 
 
@@ -127,13 +127,13 @@ status = matproj_workflow.run(structure="NaCl.cif")
 # before running any of the code below.
 
 from simmate.database import connect
-from simmate.database.third_parties import MatProjStructure
+from simmate.database.third_parties import MatprojStructure
 
 # EXAMPLE 1: all structures that have less than 6 sites in their unitcell
-structures = MatProjStructure.objects.filter(nsites__lt=6).all()
+structures = MatprojStructure.objects.filter(nsites__lt=6).all()
 
 # EXAMPLE 2: complex filtering
-structures = MatProjStructure.objects.filter(
+structures = MatprojStructure.objects.filter(
     nsites__gte=3,  # greater or equal to 3 sites
     energy__isnull=False,  # the structure DOES have an energy
     density__range=(1,5),  # density is between 1 and 5

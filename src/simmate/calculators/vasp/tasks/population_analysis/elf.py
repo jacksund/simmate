@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from simmate.calculators.vasp.tasks.static_energy.materials_project import (
-    MatProjStaticEnergy,
+    MatprojStaticEnergy,
 )
 
 
-class MatProjELF(MatProjStaticEnergy):
+class MatprojELF(MatprojStaticEnergy):
     """
     Runs a static energy calculation under settings from the Materials Project
     and also writes the electron localization function (to ELFCAR).
     """
 
-    incar = MatProjStaticEnergy.incar.copy()
+    incar = MatprojStaticEnergy.incar.copy()
     incar.update(
         LELF=True,  # writes ELFCAR
         NPAR=1,  # must be set if LELF is set to True

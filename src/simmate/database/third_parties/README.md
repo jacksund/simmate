@@ -27,24 +27,24 @@ If your team would like to make data available via Simmate, please see the `simm
 Usage
 ======
 
-Make sure you have completed [our introductory tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md) for downloading data from these providers. Below we show example usage with `MatProjStructure`, but the same process can be done with all other tables in this module. 
+Make sure you have completed [our introductory tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md) for downloading data from these providers. Below we show example usage with `MatprojStructure`, but the same process can be done with all other tables in this module. 
 
 WARNING: The first time you load archives of data, it can take a long time, so we recommend running some things overnight. Once completed, we also recommend backing up your database (by making a copy of your ~/simmate/my_env-database.sqlite3 file). This ensures you don't have to repeat this long process.
 
 To download all data into your database:
 
 ``` python
-from simmate.database.third_parties import MatProjStructure
+from simmate.database.third_parties import MatprojStructure
 
 # This can take >1 hour for some providers. Optionally, you can
 # add `parallel=True` to speed up this process, but use caution when 
 # parallelizing with SQLite (the default backend). We recommend 
 # avoiding the use of parallel=True, and instead running
 # this line overnight.
-MatProjStructure.load_remote_archive()
+MatprojStructure.load_remote_archive()
 
 # If you use this providers data, be sure to cite them!
-MatProjStructure.source_doi
+MatprojStructure.source_doi
 ```
 
 Some database providers give a calculated energy, which can be used to populate stability information:
@@ -53,11 +53,11 @@ Some database providers give a calculated energy, which can be used to populate 
 # updates ALL chemical systems.
 # Note, this can take over an hour for some providers. Try running 
 # this overnight along with your call to load_remote_archive.
-MatProjStructure.update_all_stabilities()
+MatprojStructure.update_all_stabilities()
 
 # updates ONE chemical system
 # This can be used if you quickly want to update a specific system
-MatProjStructure.update_chemical_system_stabilities("Y-C-F")
+MatprojStructure.update_chemical_system_stabilities("Y-C-F")
 ```
 
 See `simmate.database` docs for a guide on filtering results and converting to toolkit/dataframes.

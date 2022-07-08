@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.static_energy import MatProjStaticEnergy
+from simmate.calculators.vasp.tasks.static_energy import MatprojStaticEnergy
 
 
-class MatProjNMRChemicalShifts(MatProjStaticEnergy):
+class MatprojNMRChemicalShifts(MatprojStaticEnergy):
     """
     This task is a reimplementation of pymatgen's
     [MPNMRSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)
     with mode="cs" (Chemical Shift).
     """
 
-    incar = MatProjStaticEnergy.incar.copy()
+    incar = MatprojStaticEnergy.incar.copy()
     incar.update(
         dict(
             LCHIMAG=True,

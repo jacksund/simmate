@@ -4,13 +4,13 @@ from pymatgen.analysis.structure_matcher import StructureMatcher
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import task, Workflow
-from simmate.database.third_parties import MatProjStructure
+from simmate.database.third_parties import MatprojStructure
 from simmate.calculators.vasp.tasks.population_analysis import (
-    MatProjPreBaderELF,
+    MatprojPreBaderELF,
 )
 from simmate.calculators.bader.tasks import BaderELFAnalysis
 from simmate.calculators.vasp.database.population_analysis import (
-    MatProjBaderELFAnalysis as MPBadelfResults,
+    MatprojBaderELFAnalysis as MPBadelfResults,
 )
 
 
@@ -62,7 +62,7 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
 
 
 class PopulationAnalysis__Vasp__PrebadelfMatproj(Workflow):
-    s3task = MatProjPreBaderELF
+    s3task = MatprojPreBaderELF
     database_table = MPBadelfResults
     description_doc_short = "runs Bader analysis with ELFCAR as reference"
 
@@ -78,13 +78,13 @@ def get_structure_w_empties(
     the extra ion and matching host lattice, and uses it to introduce
     empty atoms into the original structure. For example, if your input
     gave a Ca2N structure and Cl ion for the template, this function will
-    find Ca2NCl in the MatProj database and then use the Cl sites to
+    find Ca2NCl in the Matproj database and then use the Cl sites to
     add dummy "H" atoms into the Ca2N structure. This is particularly useful
     if you would like to analyze electrides.
     """
 
     # !!! It might make more sense to have this accept a database Structure object
-    # and also search the same table for a match (rather than the MatProj).
+    # and also search the same table for a match (rather than the Matproj).
 
     # Grab the chemical system of the structure when it includes the empty ion template
     structure = Structure.from_dynamic(
@@ -102,7 +102,7 @@ def get_structure_w_empties(
         ignored_species=empty_ion_template,
         primitive_cell=False,  # required for the get_s2_like_s1 method
     )
-    potential_matches = MatProjStructure.objects.filter(
+    potential_matches = MatprojStructure.objects.filter(
         chemical_system=template_system
     ).all()
     for potential_match in potential_matches:

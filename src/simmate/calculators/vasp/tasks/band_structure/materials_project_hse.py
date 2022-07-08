@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from simmate.calculators.vasp.tasks.band_structure import VaspBandStructure
-from simmate.calculators.vasp.tasks.relaxation import MatProjHSERelaxation
+from simmate.calculators.vasp.tasks.relaxation import MatprojHSERelaxation
 
 
-class MatProjHSEBandStructure(VaspBandStructure, MatProjHSERelaxation):
+class MatprojHSEBandStructure(VaspBandStructure, MatprojHSERelaxation):
     """
     This task is a reimplementation of pymatgen's
     [MPHSERelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPHSERelaxSet)
@@ -13,7 +13,7 @@ class MatProjHSEBandStructure(VaspBandStructure, MatProjHSERelaxation):
     Calculates the band structure using Materials Project HSE settings.
     """
 
-    incar = MatProjHSERelaxation.incar.copy()
+    incar = MatprojHSERelaxation.incar.copy()
     incar.update(
         NSW=0,
         ISMEAR=0,

@@ -36,30 +36,30 @@ For option 3, we have [a guide for setting a server up on DigitalOcean](https://
 
 While the accronym may not be super intuitive for beginners, "REST API" stands for "**Re**presentational **s**tate **t**ransfer (REST) **A**pplication **P**rogramming **I**nterfaces (API)". In simple terms, this is how we can access databases from a website url. 
 
-The easiest way to understand our API is with some examples. In the examples below, we only look at the Materials Project database (at [`/third-parties/MatProjStructure/`](http://simmate.org/third-parties/MatProjStructure/)), but in addition to this example, nearly every URL within Simmate has REST API functionality! Our API endpoints are automatically built from our database module -- so it's very easy to implement new features and add new tables.
+The easiest way to understand our API is with some examples. In the examples below, we only look at the Materials Project database (at [`/third-parties/MatprojStructure/`](http://simmate.org/third-parties/MatprojStructure/)), but in addition to this example, nearly every URL within Simmate has REST API functionality! Our API endpoints are automatically built from our database module -- so it's very easy to implement new features and add new tables.
 
 
 ### Accessing the API
 
 Let's start with a normal URL and webpage:
 ```
-http://simmate.org/third-parties/MatProjStructure/
+http://simmate.org/third-parties/MatprojStructure/
 ```
 
 When you open that link, you are brought to a webpage that let's you search through all Materials Project structures. Under the hood, this URL is actually a REST API too! All we have to do is add `?format=api` to the end of the URL. Try opening this webpage:
 ```
-http://simmate.org/third-parties/MatProjStructure/?format=api
+http://simmate.org/third-parties/MatprojStructure/?format=api
 ```
 
 Likewise, if we use `?format=json`, we can get our data back as a JSON dictionary:
 ```
-http://simmate.org/third-parties/MatProjStructure/?format=json
+http://simmate.org/third-parties/MatprojStructure/?format=json
 ```
 
 The same can be done for individual entries too! For example, if we wanted all the data for the structure with id `mp-1`, then we can do...
 ```
-http://simmate.org/third-parties/MatProjStructure/mp-1/?format=api
-http://simmate.org/third-parties/MatProjStructure/mp-1/?format=json
+http://simmate.org/third-parties/MatprojStructure/mp-1/?format=api
+http://simmate.org/third-parties/MatprojStructure/mp-1/?format=json
 ```
 
 For these, you should see an output similar too...
@@ -96,7 +96,7 @@ This is super useful because we can grab data from any programming language we'd
 
 Our URLs also support complex filtering too. As an example, let's make a search where we want all structures that have the spacegroup 229 and also are in the Cr-N chemcial system. When you make this search in the normal webpage, you'll notice the URL becomes...
 ```
-http://simmate.org/third-parties/MatProjStructure/?chemical_system=Cr-N&spacegroup__number=229
+http://simmate.org/third-parties/MatprojStructure/?chemical_system=Cr-N&spacegroup__number=229
 ```
 
 We specify our conditions by adding a question mark (`?`) at the end of the URL and then adding `example_key=desired_value` after that. As we add new conditions, we separate them with `&` -- which results in `key1=value1&key2=value2&key3=value3` and so on. You can also add `format=api` at the end of this too!
@@ -114,7 +114,7 @@ To protect our servers from overuse, Simmate currently returns a maximum of 12 r
 For API and JSON formats, you can manually set the ordering of returned data by adding `ordering=example_column` to your URL. You can also reverse the ordering with `ordering=-example_column` (note the "`-`" symbol before the column name). For example:
 
 ```
-http://simmate.org/third-parties/MatProjStructure/?ordering=density_atomic
+http://simmate.org/third-parties/MatprojStructure/?ordering=density_atomic
 ```
 
 ### The API for experts

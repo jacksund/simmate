@@ -3,10 +3,10 @@
 from simmate.toolkit import Structure
 from simmate.workflow_engine import task, Workflow
 from simmate.calculators.vasp.tasks.population_analysis import (
-    MatProjPreBader as MPPreBaderTask,
+    MatprojPreBader as MPPreBaderTask,
 )
 from simmate.calculators.vasp.database.population_analysis import (
-    MatProjBaderAnalysis as MPBaderResults,
+    MatprojBaderAnalysis as MPBaderResults,
 )
 from simmate.calculators.bader.tasks import BaderAnalysis as BaderAnalysisTask
 

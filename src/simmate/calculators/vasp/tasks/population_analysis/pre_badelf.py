@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from simmate.calculators.vasp.tasks.static_energy.materials_project import (
-    MatProjStaticEnergy,
+    MatprojStaticEnergy,
 )
 
 
-class MatProjPreBaderELF(MatProjStaticEnergy):
+class MatprojPreBaderELF(MatprojStaticEnergy):
     """
     Runs a static energy calculation with a high-density FFT grid under settings
     from the Materials Project. Results can be used for Bader analysis where
@@ -14,7 +14,7 @@ class MatProjPreBaderELF(MatProjStaticEnergy):
 
     # The key thing for bader analysis is that we need a very fine FFT mesh. Other
     # than that, it's the same as a static energy calculation.
-    incar = MatProjStaticEnergy.incar.copy()
+    incar = MatprojStaticEnergy.incar.copy()
     incar.update(
         LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
         LELF=True,  # writes ELFCAR

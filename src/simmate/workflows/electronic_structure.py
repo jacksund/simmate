@@ -9,5 +9,5 @@ for a given crystal structure
 # if "simmate.calculators.vasp" in installed_apps:
 
 from simmate.calculators.vasp.workflows.electronic_structure.all import (
-    ElectronicStructure__Vasp__MatProjFull,
+    ElectronicStructure__Vasp__MatprojFull,
 )

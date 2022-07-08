@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from simmate.calculators.vasp.tasks.density_of_states import VaspDensityOfStates
-from simmate.calculators.vasp.tasks.relaxation import MatProjRelaxation
+from simmate.calculators.vasp.tasks.relaxation import MatprojRelaxation
 
 
-class MatProjDensityOfStates(VaspDensityOfStates, MatProjRelaxation):
+class MatprojDensityOfStates(VaspDensityOfStates, MatprojRelaxation):
     """
     This task is a reimplementation of pymatgen's
     [MPNonSCFSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)
@@ -13,7 +13,7 @@ class MatProjDensityOfStates(VaspDensityOfStates, MatProjRelaxation):
     Calculates the band structure using Materials Project HSE settings.
     """
 
-    incar = MatProjRelaxation.incar.copy()
+    incar = MatprojRelaxation.incar.copy()
     incar.update(
         IBRION=-1,
         LCHARG=False,

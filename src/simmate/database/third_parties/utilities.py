@@ -11,7 +11,7 @@ from simmate.database.third_parties import (
     AflowPrototype,
     CodStructure,
     JarvisStructure,
-    MatProjStructure,
+    MatprojStructure,
     OqmdStructure,
 )
 
@@ -37,7 +37,7 @@ def load_remote_archives(**kwargs):
     AflowPrototype.load_remote_archive(**kwargs)
     CodStructure.load_remote_archive(**kwargs)
     JarvisStructure.load_remote_archive(**kwargs)
-    MatProjStructure.load_remote_archive(**kwargs)
+    MatprojStructure.load_remote_archive(**kwargs)
     OqmdStructure.load_remote_archive(**kwargs)
 
 

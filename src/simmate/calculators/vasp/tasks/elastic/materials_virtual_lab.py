@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.relaxation import MatProjRelaxation
+from simmate.calculators.vasp.tasks.relaxation import MatprojRelaxation
 
 
-class MatVirtualLabElastic(MatProjRelaxation):
+class MatVirtualLabElastic(MatprojRelaxation):
     """
     This task is a reimplementation of pymatgen's
     [MVLElasticSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLElasticSet).
     """
 
-    incar = MatProjRelaxation.incar.copy()
+    incar = MatprojRelaxation.incar.copy()
     incar.update(
         dict(
             IBRION=6,

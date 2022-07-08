@@ -8,7 +8,7 @@ from simmate.database.third_parties import (
     AflowStructure,
     CodStructure,
     JarvisStructure,
-    MatProjStructure,
+    MatprojStructure,
     OqmdStructure,
 )
 
@@ -29,7 +29,7 @@ def get_known_structures(
         AflowStructure,
         CodStructure,
         JarvisStructure,
-        MatProjStructure,
+        MatprojStructure,
         OqmdStructure,
     ]
 

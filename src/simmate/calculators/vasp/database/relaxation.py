@@ -22,9 +22,9 @@ from simmate.database.base_data_types import Relaxation, NestedCalculation
 MITRelaxation, MITIonicStep = Relaxation.create_subclasses("MIT", module=__name__)
 
 (
-    MatProjRelaxation,
-    MatProjIonicStep,
-) = Relaxation.create_subclasses("MatProj", module=__name__)
+    MatprojRelaxation,
+    MatprojIonicStep,
+) = Relaxation.create_subclasses("Matproj", module=__name__)
 
 (
     MatVirtualLabCINEBEndpointRelaxation,

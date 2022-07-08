@@ -3,5 +3,5 @@
 from simmate.database.base_data_types import BandStructureCalc
 
 
-class MatProjBandStructure(BandStructureCalc):
+class MatprojBandStructure(BandStructureCalc):
     pass

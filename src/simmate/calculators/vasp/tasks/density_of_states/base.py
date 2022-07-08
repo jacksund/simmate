@@ -5,11 +5,11 @@ import os
 from pymatgen.electronic_structure.plotter import DosPlotter
 
 from simmate.calculators.vasp.tasks.static_energy.materials_project import (
-    MatProjStaticEnergy,
+    MatprojStaticEnergy,
 )
 
 
-class VaspDensityOfStates(MatProjStaticEnergy):
+class VaspDensityOfStates(MatprojStaticEnergy):
     """
     A base class for density of states (DOS) calculations. This is not meant
     to be used directly but instead should be inherited from.

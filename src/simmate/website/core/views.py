@@ -9,7 +9,7 @@ from simmate.database.third_parties import (
     AflowStructure,
     CodStructure,
     JarvisStructure,
-    MatProjStructure,
+    MatprojStructure,
     OqmdStructure,
 )
 
@@ -53,7 +53,7 @@ def home(request):
                 ("aflow", AflowStructure),
                 ("cod", CodStructure),
                 ("jarvis", JarvisStructure),
-                ("materials_project", MatProjStructure),
+                ("materials_project", MatprojStructure),
                 ("oqmd", OqmdStructure),
             ):
                 # if the user requested this database, the value will be true
