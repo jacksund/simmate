@@ -29,7 +29,7 @@ dependencies:
     # - prefect >=2.0  # NOT AVAILABLE ON CONDA UNTIL STABLE RELEASE
     - pip
     - pip:
-        - prefect==2.0b7
+        - prefect==2.0b8
     - pymatgen >=2022.1.9
     - pymatgen-analysis-diffusion >=2021.4.29
     - pytest >=6.2.5,<7.1

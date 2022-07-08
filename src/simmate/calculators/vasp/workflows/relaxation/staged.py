@@ -5,22 +5,22 @@ import os
 from simmate.workflow_engine import Workflow
 from simmate.workflow_engine.common_tasks import load_input_and_register
 from simmate.calculators.vasp.workflows.relaxation.quality00 import (
-    Relaxation__VASP__Quality00,
+    Relaxation__Vasp__Quality00,
 )
 from simmate.calculators.vasp.workflows.relaxation.quality01 import (
-    Relaxation__VASP__Quality01,
+    Relaxation__Vasp__Quality01,
 )
 from simmate.calculators.vasp.workflows.relaxation.quality02 import (
-    Relaxation__VASP__Quality02,
+    Relaxation__Vasp__Quality02,
 )
 from simmate.calculators.vasp.workflows.relaxation.quality03 import (
-    Relaxation__VASP__Quality03,
+    Relaxation__Vasp__Quality03,
 )
 from simmate.calculators.vasp.workflows.relaxation.quality04 import (
-    Relaxation__VASP__Quality04,
+    Relaxation__Vasp__Quality04,
 )
 from simmate.calculators.vasp.workflows.static_energy.quality04 import (
-    Static_Energy__VASP__Quality04,
+    StaticEnergy__Vasp__Quality04,
 )
 
 from simmate.calculators.vasp.database.relaxation import StagedRelaxation
@@ -66,12 +66,12 @@ class Relaxation__Vasp__Staged(Workflow):
         ).result()
 
         tasks_to_run = [
-            Relaxation__VASP__Quality00,
-            Relaxation__VASP__Quality01,
-            Relaxation__VASP__Quality02,
-            Relaxation__VASP__Quality03,
-            Relaxation__VASP__Quality04,
-            Static_Energy__VASP__Quality04,
+            Relaxation__Vasp__Quality00,
+            Relaxation__Vasp__Quality01,
+            Relaxation__Vasp__Quality02,
+            Relaxation__Vasp__Quality03,
+            Relaxation__Vasp__Quality04,
+            StaticEnergy__Vasp__Quality04,
         ]
 
         # Our first relaxation is directly from our inputs.

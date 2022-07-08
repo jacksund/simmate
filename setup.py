@@ -62,7 +62,7 @@ setup(
         "numpy>=1.22.0",
         "pandas>=1.3.5",
         "django>=4.0.0",
-        "prefect==2.0b7",  # !!! FIXED VERSIONING UNTIL FIRST STABLE RELEASE
+        "prefect==2.0b8",  # !!! FIXED VERSIONING UNTIL FIRST STABLE RELEASE
         "dask>=2021.12.0",
         "click>=8.0.3",
         # Extra (smaller) dependencies & utilities

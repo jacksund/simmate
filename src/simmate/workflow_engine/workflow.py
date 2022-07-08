@@ -3,6 +3,7 @@
 import json
 import cloudpickle
 import yaml
+import re
 from typing import List
 
 from prefect.tasks import task  # present only for convience imports elsewhere
@@ -162,11 +163,19 @@ class Workflow:
     def name_full(cls) -> str:
         """
         Standardized name of the workflow. This converts the class name like so:
-        `Static_Energy__VASP__MatProj` --> `static-energy.vasp.matproj`
+        `Static_Energy__VASP__Matproj` --> `static-energy.vasp.matproj`
         """
         if not len(cls.__name__.split("__")) == 3:
             raise Exception("Make sure you are following Simmate naming conventions!")
-        return cls.__name__.replace("__", ".").replace("_", "-").lower()
+        
+        # convert to dot format
+        name = cls.__name__.replace("__", ".")
+
+        # adds a hyphen between each capital letter
+        # copied from https://stackoverflow.com/questions/199059/
+        name = re.sub(r"(\w)([A-Z])", r"\1-\2", name)
+
+        return name.lower()
 
     @classmethod
     @property

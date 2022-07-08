@@ -9,23 +9,35 @@ a workflow using its name.
 import os
 import yaml
 import shutil
+import pkgutil
 
 from importlib import import_module
 
+from simmate import workflows
 from simmate.utilities import get_directory, make_archive
 from simmate.workflow_engine import Workflow, S3Task
 
 from typing import List
 
-WORKFLOW_TYPES = [
-    "static-energy",
-    "relaxation",
-    "population-analysis",
-    "electronic-structure",
-    "dynamics",
-    "diffusion",
-    "customized",
-]
+
+def get_workflow_types():
+    """
+    Grabs all workflow types, which is also all "Project Names" and all of the
+    submodules listed in the `simmate.workflows` module.
+    
+    Gives names in the format with all lowercase and hypens, such as "relaxation"
+    or "static-energy"
+    """
+
+    workflow_types = [
+        submodule.name.replace("_", "-")
+        for submodule in pkgutil.iter_modules(workflows.__path__)
+        if submodule.name != "utilities"
+    ]
+
+    workflow_types.sort()
+
+    return workflow_types
 
 
 def get_list_of_workflows_by_type(
@@ -37,10 +49,11 @@ def get_list_of_workflows_by_type(
     """
 
     # Make sure the type is supported
-    if flow_type not in WORKFLOW_TYPES:
+    workflow_types = get_workflow_types()
+    if flow_type not in workflow_types:
         raise TypeError(
             f"{flow_type} is not allowed. Please use a workflow type from this"
-            f" list: {WORKFLOW_TYPES}"
+            f" list: {workflow_types}"
         )
 
     # switch the naming convention from "flow-name" to "flow_name".
@@ -54,16 +67,18 @@ def get_list_of_workflows_by_type(
     workflow_names = []
     for attr_name in dir(flow_module):
         attr = getattr(flow_module, attr_name)
-        if isinstance(attr, Workflow) or isinstance(attr, S3Task):
-            # We remove the _workflow ending for each because it's repetitve.
-            # We also change the name from "flow_name" to "flow-name".
-            workflow_name = attr_name.removesuffix("_workflow").replace("_", "-")
-            # If requested, convert this to the full name.
+        if hasattr(attr, "run_config"):  # issubclass(attr, Workflow) raises error
+            # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
+            # and we can grab whichever name we'd like from it.
             if full_name:
-                workflow_name = flow_type + "/" + workflow_name
+                workflow_name = attr.name_full
+            else:
+                workflow_name = attr.name_preset
+            # and add the name to our list
             workflow_names.append(workflow_name)
     # OPTIMIZE: is there a more efficient way to do this?
-
+    
+    workflow_names.sort()
     return workflow_names
 
 
@@ -76,7 +91,7 @@ def get_list_of_all_workflows() -> List[str]:
     """
 
     workflow_names = []
-    for flow_type in WORKFLOW_TYPES:
+    for flow_type in get_workflow_types():
         workflow_names += get_list_of_workflows_by_type(flow_type)
 
     return workflow_names
@@ -147,9 +162,9 @@ def get_workflow(
             )
 
     # parse the workflow name. (e.g. static-energy/vasp/mit --> static_energy + vasp + mit)
-    project_name, calculator_name, preset_name = workflow_name.replace("-", "_").split(
-        "."
-    )
+    project_name, calculator_name, preset_name = workflow_name.replace(
+        "-", "_"
+    ).split(".")
 
     # Combine the names into the full class name
     # (e.g. static_energy + vasp + mit --> StaticEnergy__Vasp__Mit)

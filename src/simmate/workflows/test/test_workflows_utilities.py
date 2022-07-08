@@ -4,6 +4,7 @@ import pytest
 
 from simmate.conftest import copy_test_files
 from simmate.workflows.utilities import (
+    get_workflow_types,
     get_list_of_all_workflows,
     get_list_of_workflows_by_type,
     get_workflow,
@@ -12,46 +13,53 @@ from simmate.workflows.utilities import (
 )
 
 
+def test_get_workflow_types():
+    assert get_workflow_types() == [
+        "customized",
+        "diffusion",
+        "dynamics",
+        "electronic_structure",
+        "population_analysis",
+        "relaxation",
+        "static_energy",
+    ]
+
+
 def test_list_of_all_workflows():
 
     assert get_list_of_all_workflows() == [
-        "static-energy/matproj",
-        "static-energy/mit",
-        "static-energy/neb-endpoint",
-        "static-energy/quality04",
-        "relaxation/matproj",
-        "relaxation/mit",
-        "relaxation/neb-endpoint",
-        "relaxation/quality00",
-        "relaxation/quality01",
-        "relaxation/quality02",
-        "relaxation/quality03",
-        "relaxation/quality04",
-        "relaxation/staged",
-        "population-analysis/badelf-matproj",
-        "population-analysis/bader-matproj",
-        "population-analysis/elf-matproj",
-        "population-analysis/prebadelf-matproj",
-        "population-analysis/prebader-matproj",
-        "band-structure/matproj",
-        "density-of-states/matproj",
-        "electronic-structure/matproj",
-        "dynamics/mit",
-        "diffusion/all-paths",
-        "diffusion/from-endpoints",
-        "diffusion/from-images",
-        "diffusion/single-path",
-        "customized/vasp",
+        "customized.vasp.user-config",
+        "diffusion.vasp.neb-all-paths",
+        "diffusion.vasp.neb-from-endpoints",
+        "diffusion.vasp.neb-from-images",
+        "diffusion.vasp.neb-single-path",
+        "dynamics.vasp.mit",
+        "electronic-structure.vasp.mat-proj-full",
+        "population-analysis.vasp.badelf-matproj",
+        "population-analysis.vasp.bader-matproj",
+        "population-analysis.vasp.elf-matproj",
+        "relaxation.vasp.mat-proj",
+        "relaxation.vasp.mit",
+        "relaxation.vasp.neb-endpoint",
+        "relaxation.vasp.quality00",
+        "relaxation.vasp.quality01",
+        "relaxation.vasp.quality02",
+        "relaxation.vasp.quality03",
+        "relaxation.vasp.quality04",
+        "static-energy.vasp.mat-proj",
+        "static-energy.vasp.mit",
+        "static-energy.vasp.neb-endpoint",
+        "static-energy.vasp.quality04",
     ]
 
 
 def test_list_of_workflows_by_type():
 
     assert get_list_of_workflows_by_type("static-energy") == [
-        "static-energy/matproj",
-        "static-energy/mit",
-        "static-energy/neb-endpoint",
-        "static-energy/quality04",
+        "static-energy.vasp.matproj",
+        "static-energy.vasp.mit",
+        "static-energy.vasp.neb-endpoint",
+        "static-energy.vasp.quality04",
     ]
 
     with pytest.raises(TypeError):
