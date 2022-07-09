@@ -13,6 +13,7 @@ from .other import (
     get_chemical_subsystems,
     get_latest_version,
     check_if_using_latest_version,
+    async_to_sync,
 )
 
 # must be last to prevent circular import

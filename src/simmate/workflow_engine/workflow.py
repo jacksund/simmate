@@ -5,18 +5,20 @@ import cloudpickle
 import yaml
 import re
 from typing import List
+from functools import cache  # cached_property doesnt work with classmethod
 
 from prefect.tasks import task  # present only for convience imports elsewhere
 from prefect.flows import Flow
 from prefect.states import State
 from prefect.context import FlowRunContext
-
-# from prefect.client import get_client
+from prefect.client import get_client
+from prefect.orion.schemas.filters import FlowFilter, FlowRunFilter
 
 import simmate
 from simmate.toolkit import Structure
 from simmate.database.base_data_types import Calculation
 from simmate.workflow_engine import S3Task
+from simmate.utilities import async_to_sync
 
 
 class Workflow:
@@ -125,10 +127,12 @@ class Workflow:
         return result
 
     @classmethod
+    @cache
     def to_prefect_flow(cls) -> Flow:
         """
         Converts this workflow into a Prefect flow
         """
+
         # Instead of the @flow decorator, we build the flow instance directly
         flow = Flow(
             fn=cls.run_config,
@@ -465,10 +469,77 @@ class Workflow:
     #
     # -------------------------------------------------------------------------
 
+    @classmethod
+    @property
+    @cache
+    @async_to_sync
+    async def deployment_id(cls) -> str:
+        """
+        Grabs the deployment id from the prefect database if it exists, and
+        if not, creates the depolyment
+        """
+
+        async with get_client() as client:
+            response = await client.read_deployments(
+                flow_filter=FlowFilter(
+                    name={"any_": [cls.name_full]},
+                ),
+            )
+
+        # If this is the first time accessing the deployment id, we will need
+        # to create the deployment
+        if not response:
+            deployment_id = cls._create_deployment()
+            return deployment_id
+
+        # there should only be one deployment associated with this workflow
+        # if it's been deployed already.
+        elif len(response) == 1:
+            return response
+
+        else:
+            raise Exception("There are duplicate deployments for this workflow!")
+
+    @classmethod
+    @async_to_sync
+    async def _create_deployment(cls) -> str:
+        """
+        Registers this workflow to the prefect database as a deployment.
+
+        This method should not be called directly. It will be called by
+        other methods when appropriate
+        """
+
+        # CREATE_DEPLOYMENT method is not yet updated in 2.0b8
+        #
+        # async with get_client() as client:
+        #     response = await client.create_deployment(
+        #         name="leonardo-deployment",
+        #         flow_location="./leo_flow.py",
+        #         tags=['tutorial','test'],
+        #         parameters={'name':'Leo'},
+        #     )
+
+        # For now, this is a modification of the create_deployment code
+        # until they fix the method.
+
+        from prefect.deployments import Deployment
+
+        deployment = Deployment(
+            flow=cls.to_prefect_flow(),
+            name=cls.name_full,
+            # tags=["simmate"], # TODO: make tags based of the flow name..?
+        )
+
+        async with get_client() as client:
+            deployment_id = await deployment.create()
+
+        return str(deployment_id)  # convert from UUID to str first
+
     def run_cloud(
         self,
         labels: List[str] = [],
-        wait_for_run: bool = True,
+        # wait_for_run: bool = True, # TODO: (NOT IMPLEMENTED)
         **kwargs,
     ) -> str:
         """
@@ -548,63 +619,31 @@ class Workflow:
         # and tries writing to the databse before this is done?
         # -----------------------------------
 
+        # TODO: (NOT IMPLEMENTED)
         # if we want to wait until the job is complete, we do that here
-        if wait_for_run:
-            flow_run_view = self.wait_for_flow_run(flow_run_id)
-            # return flow_run_view # !!! Should I return this instead?
+        # if wait_for_run:
+        #     flow_run_view = cls.wait_for_flow_run(flow_run_id)
 
         # return the flow_run_id for the user
         return flow_run_id
 
-    def wait_for_flow_run(self, flow_run_id: str):
-        """
-        Waits for a given flow run to complete
-
-        This method is a direct fork of...
-            from prefect.tasks.prefect.flow_run import wait_for_flow_run
-
-        It does exactly the same thing where I just assume I want to stream logs.
-        """
-        raise NotImplementedError("Migrating to Prefect 2.0")
-
-        flow_run = FlowRunView.from_flow_run_id(flow_run_id)
-
-        for log in flow_run_module.watch_flow_run(flow_run_id):
-            message = f"Flow {flow_run.name}: {log.message}"
-            prefect.context.logger.log(log.level, message)
-
-        # Return the final view of the flow run
-        return flow_run.get_latest()
-
+    @classmethod
     @property
-    def nflows_submitted(self) -> int:
+    @async_to_sync
+    async def nflows_submitted(cls) -> int:
         """
         Queries Prefect to see how many workflows are in a running or submitted
-        state. It will return a count (integer).
-
-        Note, your workflow must be registered with Prefect for this to work.
+        state.
         """
-        raise NotImplementedError("Migrating to Prefect 2.0")
 
-        # new api may look like...
-        # async with get_client() as client:
-        #     response = await client.read_flow_runs(flow_filter="...")
-        # return response
+        async with get_client() as client:
+            response = await client.read_flow_runs(
+                flow_filter=FlowFilter(
+                    name={"any_": [cls.name_full]},
+                ),
+                flow_run_filter=FlowRunFilter(
+                    state={"name": {"any_": ["Scheduled", "Running"]}}
+                ),
+            )
 
-        # OLD API...
-        # query = {
-        #     "query": {
-        #         with_args(
-        #             "flow_run_aggregate",
-        #             {
-        #                 "where": {
-        #                     "flow": {"name": {"_eq": self.name}},
-        #                     "state": {"_in": ["Running", "Scheduled"]},
-        #                 },
-        #             },
-        #         ): {"aggregate": {"count"}}
-        #     }
-        # }
-        # client = Client()
-        # result = client.graphql(query)
-        # return result["data"]["flow_run_aggregate"]["aggregate"]["count"]
+        return len(response)

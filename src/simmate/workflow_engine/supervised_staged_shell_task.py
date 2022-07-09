@@ -7,6 +7,7 @@ import signal
 import subprocess
 import yaml
 from typing import List, Tuple
+from functool import cache
 
 import pandas
 
@@ -639,14 +640,24 @@ class S3Task:
         }
 
     @classmethod
+    @cache
     def to_prefect_task(cls) -> Task:
         """
         Converts this workflow into a Prefect task
         """
-        return Task(
+
+        # Build the Task object directly instead of using prefect's @task decorator
+        task = Task(
             fn=cls.run_config,
             name=cls.__name__,
         )
+
+        # as an extra, we set this attribute to the prefect task instance, which
+        # allows us to access the source Simmate S3Task easily with Prefect's
+        # context managers.
+        task.simmate_s3task = cls
+
+        return task
 
     @classmethod
     def run(cls, **kwargs):

@@ -3,6 +3,7 @@
 import os
 import sys
 import requests
+import asyncio
 
 import simmate
 
@@ -124,3 +125,48 @@ def get_chemical_subsystems(chemical_system: str):
     composition = Composition(chemical_system.replace("-", ""))
 
     return composition.chemical_subsystems
+
+
+def async_to_sync(to_await):
+    """
+    decorator that converts an async function to a sync function
+
+    If using on a classmethod or property, have this first. For example:
+
+    ```python
+    class Test:
+
+        @classmethod
+        @property
+        @async_to_sync
+        async def some_method(cls):
+            <then your async code>
+    ```
+    """
+
+    # This is a hack from several stack overflow posts combined and turned into
+    # a decorator...
+    # https://stackoverflow.com/questions/55647753/
+    # https://stackoverflow.com/questions/56154176/
+    # https://realpython.com/primer-on-python-decorators/
+    # I have no clue what's going on but this decorator works. Soooo who cares.
+    # But I should really figure out how to call async functions with regular
+    # ones, or ask Prefect how to use their client within methods...
+
+    import nest_asyncio
+
+    nest_asyncio.apply()
+
+    def wrapper(*args, **kwargs):
+        async_response = []
+
+        async def run_and_capture_result():
+            r = await to_await(*args, **kwargs)
+            async_response.append(r)
+
+        loop = asyncio.get_event_loop()
+        coroutine = run_and_capture_result()
+        loop.run_until_complete(coroutine)
+        return async_response[0]
+
+    return wrapper
