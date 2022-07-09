@@ -95,7 +95,7 @@ class VaspNudgedElasticBandTask(VaspTask):
                 if numpy.any(numpy.abs(t) > 0.5):
                     s.translate_sites([i], t, to_unit_cell=False)
             structures.append(s)
-        return MigrationImages(structures) # convert back to simmate object
+        return MigrationImages(structures)  # convert back to simmate object
 
     @classmethod
     def setup(
@@ -233,9 +233,7 @@ class VaspNudgedElasticBandTask(VaspTask):
         new_end_filename = os.path.join(directory, numbered_dirs[-1], "OUTCAR")
 
         # now copy the outcars over
-        shutil.copyfile(
-            os.path.join(start_dirname, "OUTCAR"), new_start_filename
-        )
+        shutil.copyfile(os.path.join(start_dirname, "OUTCAR"), new_start_filename)
         shutil.copyfile(os.path.join(end_dirname, "OUTCAR"), new_end_filename)
         ################
 
@@ -270,9 +268,7 @@ class VaspNudgedElasticBandTask(VaspTask):
         # the summed structure.
         migration_images = MigrationImages(neb_results.structures)
         structure_sum = migration_images.get_sum_structure()
-        structure_sum.to(
-            "cif", os.path.join(directory, "path_relaxed_neb.cif")
-        )
+        structure_sum.to("cif", os.path.join(directory, "path_relaxed_neb.cif"))
 
         results_dict = neb_results.as_dict()
         summary = {
