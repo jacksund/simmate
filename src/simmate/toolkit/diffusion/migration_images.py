@@ -340,7 +340,11 @@ class MigrationImages(list):
             migration_images_cleaned = migration_images
 
         else:
-            raise Exception("Unknown format provided for migration_images input.")
+            raise Exception(
+                "Unknown format provided for migration_images input."
+                f"The following was provided: {str(migration_images)} of type "
+                f"{type(migration_images)}"
+            )
 
         migration_images_cleaned.is_from_past_calc = is_from_past_calc
 

@@ -31,14 +31,6 @@ class VaspNudgedElasticBandTask(VaspTask):
     may be useful if you'd like to make your own variation of this class.
     """
 
-    requires_structure = False
-    """
-    `structure` is not a required parameter for the `run` method. This is a 
-    unique case for VASP calculations because the input is NOT a single 
-    structure, but instead a list of structures -- spefically a list
-    supercell images along the diffusion pathway.
-    """
-
     # Pymatgen's NEB parser does not read from the vasprun.xml so it can't
     # confirm convergence here. I'll have to write my own output class to do this.
     confirm_convergence = False
@@ -46,9 +38,8 @@ class VaspNudgedElasticBandTask(VaspTask):
     @classmethod
     def _pre_checks(
         cls,
-        structures: MigrationImages,
+        migration_images: MigrationImages,
         directory: str,
-        structure: None,
     ):
         """
         Runs a series of checks to ensure the user configured the job correctly.
@@ -56,14 +47,6 @@ class VaspNudgedElasticBandTask(VaspTask):
         This is called automatically within the setup() method and shouldn't be
         used directly.
         """
-
-        # The first common mistake is providing a structure instead of structures
-        if structure:
-            raise Exception(
-                "This NEB calculation requires a list of structures (aka images). "
-                "Make sure you provide the structures input and NOT a single "
-                "structure."
-            )
 
         # The next common mistake is to mislabel the number of images in the
         # INCAR file.
@@ -73,7 +56,7 @@ class VaspNudgedElasticBandTask(VaspTask):
             # if so, we check that it was set correctly. It should be equal to
             # the number of structures minus 2 (because we don't count the
             # start and end images here.)
-            if nimages != (len(structures) - 2):
+            if nimages != (len(migration_images) - 2):
                 raise Exception(
                     "IMAGES looks to be improperly set! This value should not"
                     " include the start/end images -- so make sure you counted"
@@ -90,12 +73,11 @@ class VaspNudgedElasticBandTask(VaspTask):
         #       "M_divide: can not subdivide 16 nodes by 3"
 
         # make sure all images are contained with the cell
-        cls.structures = cls._process_structures(structures)
+        migration_images_cleaned = cls._process_structures(migration_images)
+        return migration_images_cleaned
 
     @staticmethod
-    def _process_structures(
-        structures: MigrationImages,
-    ):
+    def _process_structures(structures: MigrationImages):
         """
         Remove any atom jumps across the cell.
 
@@ -113,14 +95,14 @@ class VaspNudgedElasticBandTask(VaspTask):
                 if numpy.any(numpy.abs(t) > 0.5):
                     s.translate_sites([i], t, to_unit_cell=False)
             structures.append(s)
-        return structures
+        return MigrationImages(structures) # convert back to simmate object
 
     @classmethod
     def setup(
         cls,
-        structure: None,  # This is first and required bc of S3task.run
         directory: str,
-        structures: MigrationImages,
+        migration_images: MigrationImages,
+        **kwargs,
     ):
         """
         Writes input files for a NEB calculation. Each structure image recieves
@@ -148,12 +130,12 @@ class VaspNudgedElasticBandTask(VaspTask):
         # removing it from the S3Task...
 
         # run some prechecks to make sure the user has everything set up properly.
-        cls._pre_checks(structures, directory, structure)
+        migration_images_cleaned = cls._pre_checks(migration_images, directory)
 
         # Here, each image (start to end structures) is put inside of its own
         # folder. We make those folders here, where they are named 00, 01, 02...N
         # Also recall that "structure" is really a list of structures here.
-        for i, image in enumerate(structures):
+        for i, image in enumerate(migration_images_cleaned):
 
             # first make establish the foldername
             # The zfill function converts numbers from "1" to "01" for us
@@ -173,7 +155,7 @@ class VaspNudgedElasticBandTask(VaspTask):
         # !!! Should this code be moved to the INCAR class? Or would that require
         # too much reworking to allow INCAR to accept a list of structures?
         if not incar.get("IMAGES") and incar.pop("IMAGES__auto", None):
-            incar["IMAGES"] = len(structures) - 2
+            incar["IMAGES"] = len(migration_images_cleaned) - 2
 
         # Combine our base incar settings with those of our parallel settings
         # and then write the incar file
@@ -182,7 +164,7 @@ class VaspNudgedElasticBandTask(VaspTask):
             filename=os.path.join(directory, "INCAR"),
             # we can use the start image for our structure -- as all structures
             # should give the same result.
-            structure=structures[0],
+            structure=migration_images_cleaned[0],
         )
 
         # if KSPACING is not provided in the incar AND kpoints is attached to this
@@ -198,7 +180,7 @@ class VaspNudgedElasticBandTask(VaspTask):
         Potcar.to_file_from_type(
             # we can use the start image for our structure -- as all structures
             # should give the same result.
-            structures[0].composition.elements,
+            migration_images_cleaned[0].composition.elements,
             cls.functional,
             os.path.join(directory, "POTCAR"),
             cls.potcar_mappings,
@@ -207,11 +189,11 @@ class VaspNudgedElasticBandTask(VaspTask):
         # For the user's reference, we also like to write an image of the
         # starting path to a cif file. This can be slow for large structures
         # (>1s), but it is very little time compared to a full NEB run.
-        path_vis = structures.get_sum_structure()
+        path_vis = migration_images_cleaned.get_sum_structure()
         path_vis.to("cif", os.path.join(directory, "path_relaxed_idpp.cif"))
 
-    @staticmethod
-    def workup(directory: str):
+    @classmethod
+    def workup(cls, directory: str):
         """
         Works up data from a NEB run, including confirming convergence and
         writing summary output files (structures, data, and plots).
@@ -251,7 +233,9 @@ class VaspNudgedElasticBandTask(VaspTask):
         new_end_filename = os.path.join(directory, numbered_dirs[-1], "OUTCAR")
 
         # now copy the outcars over
-        shutil.copyfile(os.path.join(start_dirname, "OUTCAR"), new_start_filename)
+        shutil.copyfile(
+            os.path.join(start_dirname, "OUTCAR"), new_start_filename
+        )
         shutil.copyfile(os.path.join(end_dirname, "OUTCAR"), new_end_filename)
         ################
 
@@ -265,15 +249,11 @@ class VaspNudgedElasticBandTask(VaspTask):
         )
 
         # write output files/plots for the user to quickly reference
-        self._write_output_summary(directory, neb_results)
-
-        # confirm that the calculation converged (ionicly and electronically)
-        if self.confirm_convergence:
-            raise Exception("NEB is currently unable to confirm convergence.")
+        cls._write_output_summary(directory, neb_results)
 
         return neb_results
 
-    def _write_output_summary(self, directory, neb_results):
+    def _write_output_summary(self, directory: str, neb_results: NEBAnalysis):
         """
         This is an EXPERIMENTAL feature.
 
@@ -290,7 +270,9 @@ class VaspNudgedElasticBandTask(VaspTask):
         # the summed structure.
         migration_images = MigrationImages(neb_results.structures)
         structure_sum = migration_images.get_sum_structure()
-        structure_sum.to("cif", os.path.join(directory, "path_relaxed_neb.cif"))
+        structure_sum.to(
+            "cif", os.path.join(directory, "path_relaxed_neb.cif")
+        )
 
         results_dict = neb_results.as_dict()
         summary = {

@@ -180,11 +180,12 @@ def load_input_and_register(
         if not source == primary_input:
             # only warning for now because this is experimental
             print(
-                "WARNING: Your source does not match the source of your "
-                "primary input. Sources are an experimental feature, so"
+                "\nWARNING: Your source does not match the source of your "
+                "primary input. Sources are an experimental feature, so "
                 "this will not affect your results. Still, please report "
-                "this to our team to help with development. \n"
-                "SOURCE: {source} \n\n PRIMARY_INPUT: {primary_input}"
+                "this to our team to help with development. \n\n"
+                f"SOURCE: {source} \n\n"
+                f"PRIMARY_INPUT: {primary_input} \n\n"
             )
         source_cleaned = source
     # Check if we have a primary input loaded from a past calculation and

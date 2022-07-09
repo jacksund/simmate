@@ -167,8 +167,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
                 },
                 directory=parameters_cleaned["directory"]
                 + os.path.sep
-                + f"migration_hop_{i}",
-                source="DistinctPathFinder",
+                + f"{Diffusion__Vasp__NebSinglePath.name_full}.{str(i).zfill(2)}",
                 diffusion_analysis_id=None,
                 migration_hop_id=None,
                 command=subcommands["command_supercell"]

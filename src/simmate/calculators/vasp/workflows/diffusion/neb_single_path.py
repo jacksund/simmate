@@ -73,7 +73,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
         subcommands = parse_multi_command(
             command,
             commands_out=["command_supercell", "command_neb"],
-        )
+        ).result()
 
         # Load our input and make a base directory for all other workflows to run
         # within for us.
@@ -90,7 +90,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
         # get the supercell endpoint structures
         supercell_start, supercell_end = get_endpoint_structures(
             parameters_cleaned["migration_hop"]
-        )
+        ).result()
 
         # Relax the starting supercell structure
         endpoint_start_state = Relaxation__Vasp__NebEndpoint.run(
@@ -125,7 +125,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
                 "directory": endpoint_end_result["directory"],
                 "structure_field": "structure_final",
             },
-        )
+        ).result()
 
         # Run NEB on this set of images
         neb_state = Diffusion__Vasp__NebFromImages.run(

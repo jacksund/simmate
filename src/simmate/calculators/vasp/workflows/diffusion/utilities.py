@@ -16,6 +16,7 @@ def get_migration_images_from_endpoints(supercell_start, supercell_end):
     supercell_start_cleaned = Structure.from_dynamic(supercell_start)
     supercell_end_cleaned = Structure.from_dynamic(supercell_end)
 
+    # Then generate the images
     images = MigrationImages.from_endpoints(
         structure_start=supercell_start_cleaned,
         structure_end=supercell_end_cleaned,

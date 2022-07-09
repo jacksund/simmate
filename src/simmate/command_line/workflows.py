@@ -159,10 +159,8 @@ def list_all():
     click.echo("These are the workflows that have been registerd:")
     all_workflows = get_list_of_all_workflows()
     for i, workflow in enumerate(all_workflows):
-        # Replace underscores with dashes for consistency with click
-        workflow_dash = workflow.replace("_", "-")
         workflow_number = str(i + 1).zfill(2)
-        click.echo(f"\t({workflow_number}) {workflow_dash}")  # gives "(1) example-flow"
+        click.echo(f"\t({workflow_number}) {workflow}")  # gives "(01) example-flow"
 
 
 @workflows.command()
@@ -187,26 +185,25 @@ def show_config(workflow_name):
 
     # Not all workflows have a single config because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
-    if hasattr(workflow, "s3task"):
+    if workflow.s3task:
         workflow.s3task.print_config()
-    elif hasattr(workflow, "s3tasks"):
+    else:
         raise click.ClickException(
-            "This is a NestedWorkflow, meaning it is made up of multiple smaller "
-            "workflows. We have not added a show-config feature for these yet. "
-            "This will be added before version 0.0.0 though."
+            "This is not a S3Task-based workflow. It is likely a NestedWorkflow, "
+            "meaning it is made up of multiple smaller workflows. We have not "
+            "added a show-config feature for these yet. "
         )
 
 
-@workflows.command()
-@click.argument("workflow_name")
-@click.argument("filename", type=click.Path(exists=True))
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="the folder to write input file in. Defaults to <workflow_name>_input",
+@workflows.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    )
 )
-def setup_only(workflow_name, filename, directory):
+@click.argument("workflow_name")
+@click.pass_context
+def setup_only(context, workflow_name):
     """
     If the workflow is a single task, the calculation is set up but not ran. This
     is useful when you just want the input files to view/edit.
@@ -221,7 +218,7 @@ def setup_only(workflow_name, filename, directory):
         precheck_flow_exists=True,
         print_equivalent_import=True,
     )
-    structure = Structure.from_file(filename)
+    kwargs_cleaned = parse_parameters(context=context)
 
     click.echo("WRITING INPUT FILES...")
 
@@ -229,17 +226,20 @@ def setup_only(workflow_name, filename, directory):
     # spaces with underscores
     from simmate.utilities import get_directory
 
+    directory = kwargs_cleaned.get("directory", None)
     if not directory:
-        directory = get_directory(f"{workflow.name}_inputs".replace(" ", "_"))
+        directory = get_directory(f"{workflow.name_full}.SETUP-ONLY")
+        kwargs_cleaned["directory"] = directory
 
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
-    if hasattr(workflow, "s3task"):
-        workflow.s3task().setup(structure, directory)
-    elif hasattr(workflow, "s3tasks"):
+    if workflow.s3task:
+        workflow.s3task.setup(**kwargs_cleaned)
+    else:
         raise click.ClickException(
-            "This is a NestedWorkflow, meaning it is made up of multiple smaller "
-            "workflows. We have not added a setup-only feature for these yet."
+            "This is not a S3Task-based workflow. It is likely a NestedWorkflow, "
+            "meaning it is made up of multiple smaller workflows. We have not "
+            "added a setup-only feature for these yet. "
         )
 
     click.echo(f"Done! Your input files are located in {directory}")

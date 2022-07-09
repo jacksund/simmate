@@ -28,7 +28,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 > Prefect Orion is still in beta (v2.0b6), and the first stable release is expected in July 2022. However, this date is not definite, and there is a very good chance for delays. You can stay up to date with their beta status on [the Prefect discourse page](https://discourse.prefect.io/tags/c/announcements/5/prefect-2-0). Until a stable release is made for Prefect, there will be no new Simmate release.
 
 **Fixes**
-- None
+- fix incorrect passing of `source` in NEB all-paths workflow causing it to fail
 
 # v0.6.0 (2022.06.25)
 

@@ -93,7 +93,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
             directory=directory,
             command=command,
             diffusion_analysis_id=diffusion_analysis_id,
-        )
+        ).result()
 
         # Relax the starting supercell structure
         endpoint_start_state = Relaxation__Vasp__NebEndpoint.run(
@@ -129,7 +129,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
                 "directory": endpoint_end_result["directory"],
                 "structure_field": "structure_final",
             },
-        )
+        ).result()
 
         # Run NEB on this set of images
         neb_state = Diffusion__Vasp__NebFromImages.run(
