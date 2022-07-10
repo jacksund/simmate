@@ -45,8 +45,8 @@ def test_workflow_detail_view(client, workflow_name):
     url = reverse(
         "workflow_detail",
         kwargs={
-            "workflow_type": workflow.type,
-            "workflow_name": workflow.name_short,
+            "workflow_type": workflow.name_project,
+            "workflow_name": workflow.name_preset,
         },
     )
 
@@ -63,8 +63,8 @@ def test_workflow_detail_view(client, workflow_name):
     url = reverse(
         "workflow_run_detail",
         kwargs={
-            "workflow_type": workflow.type,
-            "workflow_name": workflow.name_short,
+            "workflow_type": workflow.name_project,
+            "workflow_name": workflow.name_preset,
             "pk": 999,
         },
     )

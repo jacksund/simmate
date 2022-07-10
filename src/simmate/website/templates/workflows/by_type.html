@@ -41,11 +41,11 @@ Simmate
   <div class="col-md-4">
     <div class="card border-primary border">
       <div class="card-body">
-        <h5 class="card-title text-primary">{{ workflow.name_short }}</h5>
+        <h5 class="card-title text-primary">{{ workflow.name_preset }}</h5>
         <!-- should I wrap the markdown in <p class="card-text"></p> ? -->
         {{ workflow.description_doc_short }}
         <br><br>
-        <a href="{% url 'workflow_detail' workflow_type workflow.name_short %}" class="btn btn-primary btn-sm">About</a>
+        <a href="{% url 'workflow_detail' workflow_type workflow.name_preset %}" class="btn btn-primary btn-sm">About</a>
       </div>
     </div>
   </div>

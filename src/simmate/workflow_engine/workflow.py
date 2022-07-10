@@ -223,7 +223,7 @@ class Workflow:
         is the same as `__doc__`. This attribute is only defined for beginners
         to python and for use in django templates for the website interface.
         """
-        return cls.__doc__
+        return cls.__doc__ or cls.s3task.__doc__  # NEEDS REFACTOR
 
     @classmethod
     @property
@@ -236,6 +236,14 @@ class Workflow:
         parameter_names = list(cls.to_prefect_flow().parameters.properties.keys())
         parameter_names.sort()
         return parameter_names
+
+    @classmethod
+    @property
+    def parameter_names_required(cls) -> List[str]:
+        """
+        Gives a list of all the required parameter names for this workflow.
+        """
+        return cls.to_prefect_flow().parameters.required
 
     @classmethod
     def show_parameters(cls):
