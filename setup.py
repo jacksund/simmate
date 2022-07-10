@@ -77,6 +77,7 @@ setup(
         "plotly>=5.4.0",  # for interactive plots and visualization
         "tqdm>=4.62.3",  # for monitoring progress of long for-loops
         "pdoc>=11.0.0",  # for docs and markdown rendering in html templates
+        "nest_asyncio>=1.5.5",  # to allow async calls in Spyder/iPython/Jupyter
         #
         # For development and testing
         "pytest>=6.2.5,<7.1",  # BUG: see issue #162 for limiting <7.1
