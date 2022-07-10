@@ -153,6 +153,17 @@ def async_to_sync(to_await):
     # But I should really figure out how to call async functions with regular
     # ones, or ask Prefect how to use their client within methods...
 
+    # TODO: I'd like to switch to the django-recommended decorator, but for
+    # some reason it doesn't work.
+    #   from asgiref.sync import async_to_sync
+    # https://docs.djangoproject.com/en/4.0/topics/async/#async-adapter-functions
+    #
+    # The error output is...
+    #   RuntimeError: You cannot use AsyncToSync in the same thread as an async
+    #   event loop - just await the async function directly.
+    # I believe this happens because I try running this is Spyder's IPython console
+    # which is an event loop itself.
+
     import nest_asyncio
 
     nest_asyncio.apply()

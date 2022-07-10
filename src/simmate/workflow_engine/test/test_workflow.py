@@ -16,7 +16,7 @@ def dummy_task_2(a):
     return 2
 
 
-class Dummy_Project__Dummy_Caclulator__Dummy_Preset(Workflow):
+class DummyProject__DummyCaclulator__DummyPreset(Workflow):
     """
     Minimal example of a workflow
     """
@@ -31,7 +31,7 @@ class Dummy_Project__Dummy_Caclulator__Dummy_Preset(Workflow):
 
 
 # copy to variable for shorthand use
-DummyFlow = Dummy_Project__Dummy_Caclulator__Dummy_Preset
+DummyFlow = DummyProject__DummyCaclulator__DummyPreset
 
 
 def test_workflow():
@@ -64,79 +64,27 @@ def test_workflow():
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 
 
+def test_cloud_properties(mocker):
+
+    deployment_id = DummyFlow.deployment_id
+    assert isinstance(deployment_id, str)
+    # we dont check the actual value bc its randomly generated
+
+    n = DummyFlow.nflows_submitted
+    assert isinstance(n, int)
+    # we dont check the actual value bc it could be pulling from the actual db
+    # BUG: How do I ensure I'm grabbing a test prefect database...?
+
+
 @pytest.mark.django_db
 def test_workflow_cloud(mocker, sample_structures):
-
-    # from simmate.workflow_engine.common_tasks import load_input_and_register
-    # from simmate.website.test_app.models import TestStructureCalculation
-
-    # from prefect.client import Client
-    # from prefect.backend import flow_run
 
     # to test serialization of input parameters we grab a toolkit object
     structure = sample_structures["C_mp-48_primitive"]
 
-    # -----------------
-    # Because we won't have Prefect Cloud configured, we need to override some
-    # methods so this test runs properly
-
-    class DummyFlowView:
-        flow_id = "example-flow-id-12345"
-
-    class DummyFlowRunView:
-        name = "example name"
-        id = "example-flow-id-12345"
-
-        def get_latest(self):
-            pass
-
-    class DummyMessage:
-        level = 0
-        message = "example message"
-
-    mocker.patch.object(
-        flow_run.FlowView,
-        "from_flow_name",
-        return_value=DummyFlowView(),
-    )
-    mocker.patch.object(
-        Client,
-        "create_flow_run",
-        return_value="example-flowrun-id-12345",
-    )
-    mocker.patch.object(
-        flow_run.FlowRunView,
-        "from_flow_run_id",
-        return_value=DummyFlowRunView(),
-    )
-    mocker.patch.object(
-        Client,
-        "get_cloud_url",
-        return_value="example-url.com",
-    )
-    # BUG: I'm unable to patch this method and I can't figure out why...
-    mocker.patch.object(
-        flow_run,
-        "watch_flow_run",
-        return_value=[DummyMessage(), DummyMessage(), DummyMessage()],
-    )
-    mocker.patch.object(
-        load_input_and_register, "run", return_value={"structure": structure}
-    )
-    # -----------------
-
     # Run the workflow through prefect cloud
-    DUMMY_FLOW.run_cloud(wait_for_run=False, structure=structure)
-    DUMMY_FLOW.run_cloud(wait_for_run=True, structure=structure)
-
-
-def test_workflows_submitted(mocker):
-    mocker.patch.object(
-        Client,
-        "graphql",
-        return_value={"data": {"flow_run_aggregate": {"aggregate": {"count": 4}}}},
-    )
-    assert DUMMY_FLOW.nflows_submitted == 4
+    flow_id = DummyFlow.run_cloud(structure=structure)
+    assert isinstance(flow_id, str)
 
 
 def test_serialize_parameters():
@@ -145,7 +93,9 @@ def test_serialize_parameters():
             return {}
 
     class TestParameter2:
-        a = "can't serialize"
+        """requires cloudpickle to serialize"""
+
+        a = 123
 
     parameters = dict(
         a=TestParameter1(),

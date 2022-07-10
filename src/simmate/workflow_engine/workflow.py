@@ -548,7 +548,30 @@ class Workflow:
 
     @classmethod
     @async_to_sync
-    async def run_cloud(cls, **kwargs) -> str:
+    async def _submit_to_prefect(cls, **kwargs) -> str:
+        """
+        Submits a flow run to prefect cloud.
+
+        This method should not be used directly. Instead use `run_cloud`.
+        """
+
+        # The reason we have this code as a separate method is because we want
+        # to isolate Prefect's async calls from Django's sync-restricted calls
+        # (i.e. django raises errors if called within an async context).
+        # Therefore, methods like `run_cloud` can't have both this async code
+        # AND methods like _register_calculation that make sync database calls.
+
+        async with get_client() as client:
+            response = await client.create_flow_run_from_deployment(
+                deployment_id=cls.deployment_id,
+                **kwargs,
+            )
+
+        flow_run_id = str(response.id)
+        return flow_run_id
+
+    @classmethod
+    def run_cloud(cls, **kwargs) -> str:
         """
         This schedules the workflow to run remotely on Prefect Cloud.
 
@@ -590,26 +613,18 @@ class Workflow:
         # serializing in the next line in order to ensure parameters that
         # accept file names are submitted with all necessary data.
 
-        # Now we submit the workflow
-        async with get_client() as client:
-            response = await client.create_flow_run_from_deployment(
-                deployment_id=cls.deployment_id, parameters=parameters_serialized
-            )
+        # Now we submit the workflow.
+        flow_run_id = cls._submit_to_prefect(parameters=parameters_serialized)
 
-        flow_run_id = str(response.id)
-
-        # -----------------------------------
-        # This part is unique to Simmate. Because we often want to save some info
-        # to our database even before the calculation starts/finishes, we do that
-        # here. An example is storing the structure and prefect id that we just
-        # submitted.
+        # Because we often want to save some info to our database even before
+        # the calculation starts/finishes, we do that here. An example is
+        # storing the structure and prefect id that we just submitted.
         cls._register_calculation(prefect_flow_run_id=flow_run_id, **kwargs)
         # BUG: Will there be a race condition here? What if the workflow finishes
         # and tries writing to the databse before this is done?
         # BUG: if parameters are improperly set, this line will fail, while the
         # job submission (above) will suceed. Should I cancel the flow run if
         # this occurs?
-        # -----------------------------------
 
         # return the flow_run_id for the user
         return flow_run_id
