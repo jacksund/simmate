@@ -72,7 +72,7 @@ def test_get_workflow():
         StaticEnergy__Vasp__Matproj as workflow,
     )
 
-    assert get_workflow("static-energy.vasp.mit") == workflow
+    assert get_workflow("static-energy.vasp.matproj") == workflow
 
 
 def test_get_unique_paramters():

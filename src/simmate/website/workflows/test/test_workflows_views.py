@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import (
-    WORKFLOW_TYPES,
+    get_workflow_types,
     get_list_of_all_workflows,
     get_workflow,
 )
@@ -20,7 +20,7 @@ def test_workflows_view(client):
     assertTemplateUsed(response, "workflows/all.html")
 
 
-@pytest.mark.parametrize("workflow_type", WORKFLOW_TYPES)
+@pytest.mark.parametrize("workflow_type", get_workflow_types())
 def test_workflows_by_type_view(client, workflow_type):
 
     # grabs f"/workflows/{workflow_type}/"
