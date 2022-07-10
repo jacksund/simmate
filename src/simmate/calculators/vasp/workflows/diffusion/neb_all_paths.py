@@ -110,70 +110,70 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             commands_out=["command_bulk", "command_supercell", "command_neb"],
         ).result()
 
-        # # Load our input and make a base directory for all other workflows to run
-        # # within for us.
-        # parameters_cleaned = load_input_and_register(
-        #     structure=structure,
-        #     source=source,
-        #     directory=directory,
-        #     command=command,
-        #     migrating_specie=migrating_specie,
-        #     register_run=False,
-        # ).result()
+        # Load our input and make a base directory for all other workflows to run
+        # within for us.
+        parameters_cleaned = load_input_and_register(
+            structure=structure,
+            source=source,
+            directory=directory,
+            command=command,
+            migrating_specie=migrating_specie,
+            register_run=False,
+        ).result()
 
-        # # Our step is to run a relaxation on the bulk structure and it uses our inputs
-        # # directly. The remaining one tasks pass on results.
-        # bulk_relax_result = Relaxation__Vasp__Mit.run(
-        #     structure=parameters_cleaned["structure"],
-        #     command=subcommands["command_bulk"],
-        #     directory=parameters_cleaned["directory"]
-        #     + os.path.sep
-        #     + Relaxation__Vasp__Mit.name_full,
-        # ).result()
+        # Our step is to run a relaxation on the bulk structure and it uses our inputs
+        # directly. The remaining one tasks pass on results.
+        bulk_relax_result = Relaxation__Vasp__Mit.run(
+            structure=parameters_cleaned["structure"],
+            command=subcommands["command_bulk"],
+            directory=parameters_cleaned["directory"]
+            + os.path.sep
+            + Relaxation__Vasp__Mit.name_full,
+        ).result()
 
-        # # A static energy calculation on the relaxed structure. This isn't necessarily
-        # # required for NEB, but it takes very little time.
-        # bulk_static_energy_result = StaticEnergy__Vasp__Mit.run(
-        #     structure={
-        #         "database_table": Relaxation__Vasp__Mit.database_table.__name__,
-        #         "directory": bulk_relax_result["directory"],
-        #         "structure_field": "structure_final",
-        #     },
-        #     command=subcommands["command_bulk"],
-        #     directory=parameters_cleaned["directory"]
-        #     + os.path.sep
-        #     + StaticEnergy__Vasp__Mit.name_full,
-        # ).result()
+        # A static energy calculation on the relaxed structure. This isn't necessarily
+        # required for NEB, but it takes very little time.
+        bulk_static_energy_result = StaticEnergy__Vasp__Mit.run(
+            structure={
+                "database_table": Relaxation__Vasp__Mit.database_table.__name__,
+                "directory": bulk_relax_result["directory"],
+                "structure_field": "structure_final",
+            },
+            command=subcommands["command_bulk"],
+            directory=parameters_cleaned["directory"]
+            + os.path.sep
+            + StaticEnergy__Vasp__Mit.name_full,
+        ).result()
 
-        # # This step does NOT run any calculation, but instead, identifies all
-        # # diffusion pathways and builds the necessary database entries.
-        # migration_hop_ids = build_diffusion_analysis(
-        #     diffusion_analyis_table=cls.database_table,
-        #     structure={
-        #         "database_table": StaticEnergy__Vasp__Mit.database_table.__name__,
-        #         "directory": bulk_static_energy_result["directory"],
-        #     },
-        #     migrating_specie=migrating_specie,
-        #     directory=parameters_cleaned["directory"],
-        #     vacancy_mode=True,  # assumed for now
-        # ).result()
+        # This step does NOT run any calculation, but instead, identifies all
+        # diffusion pathways and builds the necessary database entries.
+        migration_hop_ids = build_diffusion_analysis(
+            diffusion_analyis_table=cls.database_table,
+            structure={
+                "database_table": StaticEnergy__Vasp__Mit.database_table.__name__,
+                "directory": bulk_static_energy_result["directory"],
+            },
+            migrating_specie=migrating_specie,
+            directory=parameters_cleaned["directory"],
+            vacancy_mode=True,  # assumed for now
+        ).result()
 
-        # # Run NEB single_path workflow for all these.
-        # for i, hop_id in enumerate(migration_hop_ids):
-        #     Diffusion__Vasp__NebSinglePath.run(
-        #         migration_hop={
-        #             "migration_hop_table": "MITMigrationHop",
-        #             "migration_hop_id": hop_id,
-        #         },
-        #         directory=parameters_cleaned["directory"]
-        #         + os.path.sep
-        #         + f"{Diffusion__Vasp__NebSinglePath.name_full}.{str(i).zfill(2)}",
-        #         diffusion_analysis_id=None,
-        #         migration_hop_id=None,
-        #         command=subcommands["command_supercell"]
-        #         + ";"
-        #         + subcommands["command_neb"],
-        #     )  # don't block on results to allow parallel runs
+        # Run NEB single_path workflow for all these.
+        for i, hop_id in enumerate(migration_hop_ids):
+            Diffusion__Vasp__NebSinglePath.run(
+                migration_hop={
+                    "migration_hop_table": "MITMigrationHop",
+                    "migration_hop_id": hop_id,
+                },
+                directory=parameters_cleaned["directory"]
+                + os.path.sep
+                + f"{Diffusion__Vasp__NebSinglePath.name_full}.{str(i).zfill(2)}",
+                diffusion_analysis_id=None,
+                migration_hop_id=None,
+                command=subcommands["command_supercell"]
+                + ";"
+                + subcommands["command_neb"],
+            )  # don't block on results to allow parallel runs
 
 
 @task
