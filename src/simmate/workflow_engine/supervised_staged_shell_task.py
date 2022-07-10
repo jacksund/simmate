@@ -7,7 +7,7 @@ import signal
 import subprocess
 import yaml
 from typing import List, Tuple
-from functool import cache
+from functools import cache
 
 import pandas
 

@@ -13,6 +13,8 @@ from prefect.states import State
 from prefect.context import FlowRunContext
 from prefect.client import get_client
 from prefect.orion.schemas.filters import FlowFilter, FlowRunFilter
+from prefect.packaging import OrionPackager
+from prefect.packaging.serializers import PickleSerializer
 
 import simmate
 from simmate.toolkit import Structure
@@ -495,7 +497,7 @@ class Workflow:
         # there should only be one deployment associated with this workflow
         # if it's been deployed already.
         elif len(response) == 1:
-            return response
+            return str(response[0].id)
 
         else:
             raise Exception("There are duplicate deployments for this workflow!")
@@ -528,20 +530,25 @@ class Workflow:
         deployment = Deployment(
             flow=cls.to_prefect_flow(),
             name=cls.name_full,
-            # tags=["simmate"], # TODO: make tags based of the flow name..?
+            packager=OrionPackager(serializer=PickleSerializer()),
+            tags=[
+                "simmate",
+                cls.name_project,
+                cls.name_calculator,
+            ],
         )
+        # OPTIMIZE: it would be better if I could figure out the ImportSerializer
+        # here. Only issue is that prefect would need to know to import AND
+        # call a method.
 
         async with get_client() as client:
             deployment_id = await deployment.create()
 
         return str(deployment_id)  # convert from UUID to str first
 
-    def run_cloud(
-        self,
-        labels: List[str] = [],
-        # wait_for_run: bool = True, # TODO: (NOT IMPLEMENTED)
-        **kwargs,
-    ) -> str:
+    @classmethod
+    @async_to_sync
+    async def run_cloud(cls, **kwargs) -> str:
         """
         This schedules the workflow to run remotely on Prefect Cloud.
 
@@ -573,23 +580,10 @@ class Workflow:
         I don't accept any other client.create_flow_run() inputs besides 'labels'.
         This may change in the future if I need to set flow run names or schedules.
         """
-        raise NotImplementedError("Migrating to Prefect 2.0")
-
-        # Grab the logger as we will print useful information below.
-        # In some cases, there is no logger present, so we just set logger=None.
-        # This possibility is why we use `if logger else None` statements below.
-        logger = getattr(prefect.context, "logger", None)
-
-        # Grab the Flow's ID from Prefect Cloud
-        logger.debug("Looking up flow metadata...") if logger else None
-        flow_view = FlowView.from_flow_name(
-            self.name,
-            project_name=self.project_name,
-        )
 
         # Prefect does not properly deserialize objects that have
         # as as_dict or to_dict method, so we use a custom method to do that here
-        parameters_serialized = self._serialize_parameters(**kwargs)
+        parameters_serialized = cls._serialize_parameters(**kwargs)
         # BUG: What if we are submitting using a filename? We don't want to
         # submit to a cluster and have the job fail because it doesn't have
         # access to the file. One solution could be to deserialize right before
@@ -597,32 +591,25 @@ class Workflow:
         # accept file names are submitted with all necessary data.
 
         # Now we submit the workflow
-        logger.info(f"Creating flow run for {self.name}...") if logger else None
-        client = Client()
-        flow_run_id = client.create_flow_run(
-            flow_id=flow_view.flow_id,
-            parameters=parameters_serialized,
-            labels=labels,
-        )
+        async with get_client() as client:
+            response = await client.create_flow_run_from_deployment(
+                deployment_id=cls.deployment_id, parameters=parameters_serialized
+            )
 
-        # we log the website url to the flow for the user
-        run_url = client.get_cloud_url("flow-run", flow_run_id)
-        logger.info(f"Created flow run: {run_url}") if logger else None
+        flow_run_id = str(response.id)
 
         # -----------------------------------
         # This part is unique to Simmate. Because we often want to save some info
         # to our database even before the calculation starts/finishes, we do that
         # here. An example is storing the structure and prefect id that we just
         # submitted.
-        self._register_calculation(prefect_flow_run_id=flow_run_id, **kwargs)
+        cls._register_calculation(prefect_flow_run_id=flow_run_id, **kwargs)
         # BUG: Will there be a race condition here? What if the workflow finishes
         # and tries writing to the databse before this is done?
+        # BUG: if parameters are improperly set, this line will fail, while the
+        # job submission (above) will suceed. Should I cancel the flow run if
+        # this occurs?
         # -----------------------------------
-
-        # TODO: (NOT IMPLEMENTED)
-        # if we want to wait until the job is complete, we do that here
-        # if wait_for_run:
-        #     flow_run_view = cls.wait_for_flow_run(flow_run_id)
 
         # return the flow_run_id for the user
         return flow_run_id
@@ -632,8 +619,8 @@ class Workflow:
     @async_to_sync
     async def nflows_submitted(cls) -> int:
         """
-        Queries Prefect to see how many workflows are in a running or submitted
-        state.
+        Queries Prefect to see how many workflows are in a scheduled, running,
+        or pending state.
         """
 
         async with get_client() as client:
@@ -642,7 +629,7 @@ class Workflow:
                     name={"any_": [cls.name_full]},
                 ),
                 flow_run_filter=FlowRunFilter(
-                    state={"name": {"any_": ["Scheduled", "Running"]}}
+                    state={"type": {"any_": ["SCHEDULED", "PENDING", "RUNNING"]}}
                 ),
             )
 
