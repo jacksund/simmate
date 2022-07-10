@@ -28,9 +28,6 @@ class DummyTask(VaspTask):
 
 def test_base_setup(structure, tmpdir, mocker):
 
-    # init with default settings
-    task = DummyTask()
-
     # estabilish filenames that we make and commonly reference
     incar_filename = os.path.join(tmpdir, "INCAR")
     poscar_filename = os.path.join(tmpdir, "POSCAR")
@@ -45,7 +42,7 @@ def test_base_setup(structure, tmpdir, mocker):
     )
 
     # try to make input files in the tmpdir
-    task.setup(structure, tmpdir)
+    DummyTask.setup(directory=tmpdir, structure=structure)
     assert os.path.exists(incar_filename)
     assert os.path.exists(poscar_filename)
     assert os.path.exists(potcar_filename)
@@ -64,15 +61,12 @@ def test_base_workup(tmpdir):
         test_folder="base",
     )
 
-    # init main task
-    task = DummyTask()
-
     # estabilish filenames that we make and commonly reference
     summary_filename = os.path.join(tmpdir, "simmate_summary.yaml")
     vasprun_filename = os.path.join(tmpdir, "vasprun.xml")
 
     # run the full workup
-    task.workup(tmpdir)
+    DummyTask.workup(tmpdir)
     assert os.path.exists(summary_filename)
 
     # run the workup again with a malformed xml
@@ -81,4 +75,4 @@ def test_base_workup(tmpdir):
     with open(vasprun_filename, "w") as file:
         file.writelines(contents[50])
     with pytest.raises(Exception):
-        task.workup(tmpdir)
+        DummyTask.workup(tmpdir)

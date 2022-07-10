@@ -26,7 +26,7 @@ class VaspDensityOfStates(MatprojStaticEnergy):
         """
 
         # run the normal output
-        super()._write_output_summary(directory, vasprun)
+        MatprojStaticEnergy._write_output_summary(directory, vasprun)
 
         # and then generate a DOS plot
         plotter = DosPlotter()

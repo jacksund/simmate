@@ -206,8 +206,8 @@ class VaspNudgedElasticBandTask(VaspTask):
         # BUG: For now I assume there are start/end image directories are located
         # in the working directory. These relaxation are actually ran by a
         # separate workflow, which is thus a prerequisite for this workflow.
-        start_dirname = os.path.join(directory, "endpoint_relaxation_start")
-        end_dirname = os.path.join(directory, "endpoint_relaxation_end")
+        start_dirname = os.path.join(directory, "relaxation.vasp.neb-endpoint.start")
+        end_dirname = os.path.join(directory, "relaxation.vasp.neb-endpoint.end")
         try:
             assert os.path.exists(start_dirname)
             assert os.path.exists(end_dirname)
@@ -216,7 +216,7 @@ class VaspNudgedElasticBandTask(VaspTask):
                 "Your NEB calculation completed successfully. However, in order "
                 "to run the workup, Simmate needs the start/end point relaxations. "
                 "These should be in the same folder as your NEB run and named "
-                "endpoint_relaxation_start and endpoint_relaxation_end."
+                "relaxation.vasp.neb-endpoint.start and relaxation.vasp.neb-endpoint.end."
             )
 
         ################
@@ -251,7 +251,8 @@ class VaspNudgedElasticBandTask(VaspTask):
 
         return neb_results
 
-    def _write_output_summary(self, directory: str, neb_results: NEBAnalysis):
+    @staticmethod
+    def _write_output_summary(directory: str, neb_results: NEBAnalysis):
         """
         This is an EXPERIMENTAL feature.
 

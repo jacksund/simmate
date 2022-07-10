@@ -37,7 +37,7 @@ class VaspBandStructure(MatprojStaticEnergy):
     pre_standardize_structure = True
 
     @classmethod
-    def setup(cls, structure, directory):
+    def setup(cls, directory, structure, **kwargs):
         """
         Writes input files for this calculation. This differs from the normal
         VaspTask setup because it converts the structure to the standard primative
@@ -96,7 +96,7 @@ class VaspBandStructure(MatprojStaticEnergy):
         """
 
         # run the normal output
-        super()._write_output_summary(directory, vasprun)
+        MatprojStaticEnergy._write_output_summary(directory, vasprun)
 
         bs_plotter = BSPlotter(vasprun.get_band_structure(line_mode=True))
         plot = bs_plotter.get_plot()

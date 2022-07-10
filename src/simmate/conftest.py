@@ -16,9 +16,11 @@ This file helps share fixtures accross files as described
 
 import os
 import shutil
+
 import pytest
 from click.testing import CliRunner
 from django.contrib.auth.models import User
+from prefect.testing.utilities import prefect_test_harness
 
 from simmate.utilities import get_directory
 from simmate.toolkit import Structure, Composition, base_data_types
@@ -250,3 +252,12 @@ def make_dummy_files(*filenames: str):
 @pytest.fixture(scope="package")
 def command_line_runner():
     return CliRunner()
+
+
+@pytest.fixture(autouse=True, scope="package")
+def prefect_test_fixture():
+    """
+    For all prefect flows and tasks, this will automatically use a dummy-database
+    """
+    with prefect_test_harness():
+        yield

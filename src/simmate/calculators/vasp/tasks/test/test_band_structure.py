@@ -10,9 +10,6 @@ from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
 
 def test_band_structure_setup(structure, tmpdir, mocker):
 
-    # init with default settings
-    task = MatprojBandStructure()
-
     # estabilish filenames that we make and commonly reference
     incar_filename = os.path.join(tmpdir, "INCAR")
     poscar_filename = os.path.join(tmpdir, "POSCAR")
@@ -27,7 +24,7 @@ def test_band_structure_setup(structure, tmpdir, mocker):
     )
 
     # try to make input files in the tmpdir
-    task.setup(structure, tmpdir)
+    MatprojBandStructure.setup(directory=tmpdir, structure=structure)
     assert os.path.exists(incar_filename)
     assert os.path.exists(poscar_filename)
     assert os.path.exists(potcar_filename)

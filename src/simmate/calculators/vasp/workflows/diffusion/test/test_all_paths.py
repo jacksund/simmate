@@ -3,11 +3,11 @@
 import pytest
 
 from simmate.conftest import copy_test_files
-
-from simmate.calculators.vasp.inputs import Potcar
 from simmate.workflow_engine import S3Task
-
-from simmate.calculators.vasp.workflows.nudged_elastic_band import all_paths_workflow
+from simmate.calculators.vasp.inputs import Potcar
+from simmate.calculators.vasp.workflows.diffusion.all import (
+    Diffusion__Vasp__NebAllPaths,
+)
 
 
 @pytest.mark.django_db
@@ -31,10 +31,10 @@ def test_neb(sample_structures, tmpdir, mocker):
     mocker.patch.object(S3Task, "execute", return_value=[])
 
     # run the workflow and make sure it handles data properly.
-    state = all_paths_workflow.run(
+    state = Diffusion__Vasp__NebAllPaths.run(
         structure=structure,
         migrating_specie="I",
         command="dummycmd1; dummycmd2; dummycmd3",
         directory=str(tmpdir),
     )
-    assert state.is_successful()
+    assert state.is_completed()
