@@ -67,7 +67,7 @@ class DatabaseTableFilter(filters.FilterSet):
         Dynamically creates a Django Filter from a Simmate database table.
 
         For example, this function would take
-        `simmate.database.third_parties.MatProjStructure`
+        `simmate.database.third_parties.MatprojStructure`
         and automatically make the following filter:
 
         ``` python
@@ -78,13 +78,13 @@ class DatabaseTableFilter(filters.FilterSet):
         )
 
 
-        class MatProjStrucureFilter(
+        class MatprojStrucureFilter(
             DatabaseTableFilter,
             Structure,
             Thermodynamics,
         ):
             class Meta:
-                model = MatProjStructure  # this is database table
+                model = MatprojStructure  # this is database table
                 fields = {...} # this combines the fields from Structure/Thermo mixins
 
             # These attributes are set using the declared filters from Structure/Thermo mixins
@@ -98,8 +98,8 @@ class DatabaseTableFilter(filters.FilterSet):
         from simmate.website.core_components import filters as simmate_filters
 
         # First we need to grab the parent mixin classes of the table. For example,
-        # the MatProjStructure uses the database mixins ['Structure', 'Thermodynamics']
-        # while MatProjStaticEnergy uses ["StaticEnergy"].
+        # the MatprojStructure uses the database mixins ['Structure', 'Thermodynamics']
+        # while MatprojStaticEnergy uses ["StaticEnergy"].
         mixin_names = [base.__name__ for base in table.__bases__]
 
         # Because our Forms follow the same naming conventions as

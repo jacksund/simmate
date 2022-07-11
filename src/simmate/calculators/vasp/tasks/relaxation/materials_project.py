@@ -41,7 +41,7 @@ from simmate.calculators.vasp.error_handlers import (
 )
 
 
-class MatProjRelaxation(VaspTask):
+class MatprojRelaxation(VaspTask):
     """
     This task is a reimplementation of pymatgen's
     [MPRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPRelaxSet).

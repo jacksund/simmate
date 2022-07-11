@@ -4,10 +4,10 @@ import os
 
 from simmate.toolkit import Structure
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
-from simmate.calculators.vasp.tasks.relaxation import MatProjRelaxation
+from simmate.calculators.vasp.tasks.relaxation import MatprojRelaxation
 
 
-class MatProjDynamics(MatProjRelaxation):
+class MatprojDynamics(MatprojRelaxation):
     """
     This task is a reimplementation of pymatgen's
     [MPMDSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPMDSet).
@@ -26,7 +26,9 @@ class MatProjDynamics(MatProjRelaxation):
     calculation does not modify your input structure.
     """
 
-    incar = MatProjRelaxation.incar.copy()
+    confirm_convergence = False
+
+    incar = MatprojRelaxation.incar.copy()
     incar.update(
         dict(
             # Unique to this task, we want to allow users to set these temperatures
@@ -69,17 +71,19 @@ class MatProjDynamics(MatProjRelaxation):
     # TODO
     error_handlers = []
 
+    @classmethod
     def setup(
-        self,
+        cls,
         structure: Structure,
         directory: str,
         temperature_start: int = 300,
         temperature_end: int = 1200,
         nsteps: int = 10000,
+        **kwargs,
     ):
 
         # run cleaning and standardizing on structure (based on class attributes)
-        structure_cleaned = self._get_clean_structure(structure)
+        structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         # write the poscar file
         Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
@@ -87,11 +91,11 @@ class MatProjDynamics(MatProjRelaxation):
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file. Note, we update the values of this incar,
         # so we make a copy of the dict.
-        incar = self.incar.copy()
+        incar = cls.incar.copy()
         incar["TEBEG"] = temperature_start
         incar["TEEND"] = temperature_end
         incar["NSW"] = nsteps
-        incar = Incar(**incar) + Incar(**self.incar_parallel_settings)
+        incar = Incar(**incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
             filename=os.path.join(directory, "INCAR"),
             structure=structure,
@@ -99,17 +103,17 @@ class MatProjDynamics(MatProjRelaxation):
 
         # if KSPACING is not provided in the incar AND kpoints is attached to this
         # class instance, then we write the KPOINTS file
-        if self.kpoints and ("KSPACING" not in self.incar):
+        if cls.kpoints and ("KSPACING" not in cls.incar):
             Kpoints.to_file(
                 structure,
-                self.kpoints,
+                cls.kpoints,
                 os.path.join(directory, "KPOINTS"),
             )
 
         # write the POTCAR file
         Potcar.to_file_from_type(
             structure.composition.elements,
-            self.functional,
+            cls.functional,
             os.path.join(directory, "POTCAR"),
-            self.potcar_mappings,
+            cls.potcar_mappings,
         )

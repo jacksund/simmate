@@ -7,7 +7,7 @@ class MITStaticEnergy(StaticEnergy):
     pass
 
 
-class MatProjStaticEnergy(StaticEnergy):
+class MatprojStaticEnergy(StaticEnergy):
     pass
 
 

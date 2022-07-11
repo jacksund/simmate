@@ -10,9 +10,9 @@ some examples of how we recommend doing this.
 EXAMPLE 1: Database object to Toolkit object
 ``` python
 # Grab an example database structure.
-# We use MatProj as an example, but the same applies for all Structure tables.
-from simmate.database.third_parties import MatProjStructure
-database_structure = MatProjStructure.objects.first()
+# We use Matproj as an example, but the same applies for all Structure tables.
+from simmate.database.third_parties import MatprojStructure
+database_structure = MatprojStructure.objects.first()
 
 # convert to toolkit
 toolkit_structure = database_structure.to_toolkit()
@@ -32,7 +32,7 @@ toolkit_structure = Structure.from_file("cif")
 # Convert back to database (as new row)
 # We save this to the Materials Project Database (which you should NOT do), but
 # in practice, you should have your own independent table to do this.
-database_structure = MatProjStructure.from_toolkit(structure=toolkit_structure)
+database_structure = MatprojStructure.from_toolkit(structure=toolkit_structure)
 database_structure.save()
 ```
 
@@ -41,7 +41,7 @@ EXAMPLE 3: Database metadata (dict) to Toolkit object
 
 # Setup some database metadata
 example_metadata = {
-    "database_table": "MatProjStructure",
+    "database_table": "MatprojStructure",
     "database_id": "mp-123",
 }
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.relaxation import MatProjRelaxation
+from simmate.calculators.vasp.tasks.relaxation import MatprojRelaxation
 
 
-class MatProjMetalRelaxation(MatProjRelaxation):
+class MatprojMetalRelaxation(MatprojRelaxation):
     """
     This task is a reimplementation of pymatgen's
     [MPMetalRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPMetalRelaxSet).
@@ -13,7 +13,7 @@ class MatProjMetalRelaxation(MatProjRelaxation):
     and proper smearing.
     """
 
-    incar = MatProjRelaxation.incar.copy()
+    incar = MatprojRelaxation.incar.copy()
     incar.update(
         dict(
             ISMEAR=1,

@@ -106,7 +106,11 @@ class DiffusionAnalysis(Structure):
         # messy for users)
         # For now, I only grab the structure from the static-energy and store
         # it in the DiffusionAnalysis table.
-        bulk_filename = os.path.join(directory, "bulk_static_energy", "POSCAR")
+        bulk_filename = os.path.join(
+            directory,
+            "static-energy.vasp.matproj",
+            "POSCAR",
+        )
         bulk_structure = ToolkitStructure.from_file(bulk_filename)
 
         # Save a diffusion analysis object so we can connect all other data

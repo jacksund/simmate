@@ -31,23 +31,19 @@ class VaspNudgedElasticBandTask(VaspTask):
     may be useful if you'd like to make your own variation of this class.
     """
 
-    requires_structure = False
-    """
-    `structure` is not a required parameter for the `run` method. This is a 
-    unique case for VASP calculations because the input is NOT a single 
-    structure, but instead a list of structures -- spefically a list
-    supercell images along the diffusion pathway.
-    """
+    # NEB does not require a POSCAR file because input structures are organized
+    # into folders.
+    required_files = ["INCAR", "POTCAR"]
 
     # Pymatgen's NEB parser does not read from the vasprun.xml so it can't
     # confirm convergence here. I'll have to write my own output class to do this.
     confirm_convergence = False
 
+    @classmethod
     def _pre_checks(
-        self,
-        structures: MigrationImages,
+        cls,
+        migration_images: MigrationImages,
         directory: str,
-        structure: None,
     ):
         """
         Runs a series of checks to ensure the user configured the job correctly.
@@ -56,23 +52,15 @@ class VaspNudgedElasticBandTask(VaspTask):
         used directly.
         """
 
-        # The first common mistake is providing a structure instead of structures
-        if structure:
-            raise Exception(
-                "This NEB calculation requires a list of structures (aka images). "
-                "Make sure you provide the structures input and NOT a single "
-                "structure."
-            )
-
         # The next common mistake is to mislabel the number of images in the
         # INCAR file.
         # first, we check if the user set this.
-        nimages = self.incar.get("IMAGES")
+        nimages = cls.incar.get("IMAGES")
         if nimages:
             # if so, we check that it was set correctly. It should be equal to
             # the number of structures minus 2 (because we don't count the
             # start and end images here.)
-            if nimages != (len(structures) - 2):
+            if nimages != (len(migration_images) - 2):
                 raise Exception(
                     "IMAGES looks to be improperly set! This value should not"
                     " include the start/end images -- so make sure you counted"
@@ -89,12 +77,11 @@ class VaspNudgedElasticBandTask(VaspTask):
         #       "M_divide: can not subdivide 16 nodes by 3"
 
         # make sure all images are contained with the cell
-        self.structures = self._process_structures(structures)
+        migration_images_cleaned = cls._process_structures(migration_images)
+        return migration_images_cleaned
 
     @staticmethod
-    def _process_structures(
-        structures: MigrationImages,
-    ):
+    def _process_structures(structures: MigrationImages):
         """
         Remove any atom jumps across the cell.
 
@@ -112,13 +99,14 @@ class VaspNudgedElasticBandTask(VaspTask):
                 if numpy.any(numpy.abs(t) > 0.5):
                     s.translate_sites([i], t, to_unit_cell=False)
             structures.append(s)
-        return structures
+        return MigrationImages(structures)  # convert back to simmate object
 
+    @classmethod
     def setup(
-        self,
-        structure: None,  # This is first and required bc of S3task.run
+        cls,
         directory: str,
-        structures: MigrationImages,
+        migration_images: MigrationImages,
+        **kwargs,
     ):
         """
         Writes input files for a NEB calculation. Each structure image recieves
@@ -146,12 +134,12 @@ class VaspNudgedElasticBandTask(VaspTask):
         # removing it from the S3Task...
 
         # run some prechecks to make sure the user has everything set up properly.
-        self._pre_checks(structures, directory, structure)
+        migration_images_cleaned = cls._pre_checks(migration_images, directory)
 
         # Here, each image (start to end structures) is put inside of its own
         # folder. We make those folders here, where they are named 00, 01, 02...N
         # Also recall that "structure" is really a list of structures here.
-        for i, image in enumerate(structures):
+        for i, image in enumerate(migration_images_cleaned):
 
             # first make establish the foldername
             # The zfill function converts numbers from "1" to "01" for us
@@ -167,25 +155,25 @@ class VaspNudgedElasticBandTask(VaspTask):
         # the IMAGES__auto while grabbing its value. Because we are modifying
         # the incar dictionary here, we must make a copy of it -- this ensures
         # no bugs when this task is called in parallel.
-        incar = self.incar.copy()
+        incar = cls.incar.copy()
         # !!! Should this code be moved to the INCAR class? Or would that require
         # too much reworking to allow INCAR to accept a list of structures?
         if not incar.get("IMAGES") and incar.pop("IMAGES__auto", None):
-            incar["IMAGES"] = len(structures) - 2
+            incar["IMAGES"] = len(migration_images_cleaned) - 2
 
         # Combine our base incar settings with those of our parallel settings
         # and then write the incar file
-        incar = Incar(**incar) + Incar(**self.incar_parallel_settings)
+        incar = Incar(**incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
             filename=os.path.join(directory, "INCAR"),
             # we can use the start image for our structure -- as all structures
             # should give the same result.
-            structure=structures[0],
+            structure=migration_images_cleaned[0],
         )
 
         # if KSPACING is not provided in the incar AND kpoints is attached to this
         # class instance, then we write the KPOINTS file
-        if self.kpoints and ("KSPACING" not in self.incar):
+        if cls.kpoints and ("KSPACING" not in cls.incar):
             raise Exception(
                 "Custom KPOINTS are not supported by Simmate yet. "
                 "Please use KSPACING in your INCAR instead."
@@ -196,22 +184,20 @@ class VaspNudgedElasticBandTask(VaspTask):
         Potcar.to_file_from_type(
             # we can use the start image for our structure -- as all structures
             # should give the same result.
-            structures[0].composition.elements,
-            self.functional,
+            migration_images_cleaned[0].composition.elements,
+            cls.functional,
             os.path.join(directory, "POTCAR"),
-            self.potcar_mappings,
+            cls.potcar_mappings,
         )
 
         # For the user's reference, we also like to write an image of the
         # starting path to a cif file. This can be slow for large structures
         # (>1s), but it is very little time compared to a full NEB run.
-        path_vis = structures.get_sum_structure()
+        path_vis = migration_images_cleaned.get_sum_structure()
         path_vis.to("cif", os.path.join(directory, "path_relaxed_idpp.cif"))
 
-    def workup(
-        self,
-        directory: str,
-    ):
+    @classmethod
+    def workup(cls, directory: str):
         """
         Works up data from a NEB run, including confirming convergence and
         writing summary output files (structures, data, and plots).
@@ -224,8 +210,8 @@ class VaspNudgedElasticBandTask(VaspTask):
         # BUG: For now I assume there are start/end image directories are located
         # in the working directory. These relaxation are actually ran by a
         # separate workflow, which is thus a prerequisite for this workflow.
-        start_dirname = os.path.join(directory, "endpoint_relaxation_start")
-        end_dirname = os.path.join(directory, "endpoint_relaxation_end")
+        start_dirname = os.path.join(directory, "relaxation.vasp.neb-endpoint.start")
+        end_dirname = os.path.join(directory, "relaxation.vasp.neb-endpoint.end")
         try:
             assert os.path.exists(start_dirname)
             assert os.path.exists(end_dirname)
@@ -234,7 +220,7 @@ class VaspNudgedElasticBandTask(VaspTask):
                 "Your NEB calculation completed successfully. However, in order "
                 "to run the workup, Simmate needs the start/end point relaxations. "
                 "These should be in the same folder as your NEB run and named "
-                "endpoint_relaxation_start and endpoint_relaxation_end."
+                "relaxation.vasp.neb-endpoint.start and relaxation.vasp.neb-endpoint.end."
             )
 
         ################
@@ -265,15 +251,12 @@ class VaspNudgedElasticBandTask(VaspTask):
         )
 
         # write output files/plots for the user to quickly reference
-        self._write_output_summary(directory, neb_results)
-
-        # confirm that the calculation converged (ionicly and electronically)
-        if self.confirm_convergence:
-            raise Exception("NEB is currently unable to confirm convergence.")
+        cls._write_output_summary(directory, neb_results)
 
         return neb_results
 
-    def _write_output_summary(self, directory, neb_results):
+    @staticmethod
+    def _write_output_summary(directory: str, neb_results: NEBAnalysis):
         """
         This is an EXPERIMENTAL feature.
 
@@ -283,8 +266,13 @@ class VaspNudgedElasticBandTask(VaspTask):
         """
 
         # plot the results
-        plot = neb_results.get_plot()
-        plot.savefig(os.path.join(directory, "NEB_plot.jpeg"))
+        # plot = neb_results.get_plot()
+        # plot.savefig(os.path.join(directory, "NEB_plot.jpeg"))
+        print(
+            "NEB plot generation is temporarily disabled due to a bug in prefect "
+            "where matplotlib.plot() leads to a segmentation fault. "
+            "See https://github.com/PrefectHQ/prefect/issues/5991"
+        )
 
         # convert all the structures to a MigrationImages object so we can write
         # the summed structure.

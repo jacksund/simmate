@@ -17,9 +17,10 @@ class BaderELFAnalysis(BaderAnalysis):
 
     command = "bader CHGCAR_empty -ref ELFCAR_empty > bader.out"
     requires_structure = True  # !!! This may change in the future
-    required_files = BaderAnalysis.required_files + ["ELFCAR"]
+    required_files = ["CHGCAR", "ELFCAR"]
 
-    def setup(self, structure: Structure, directory: str):
+    @staticmethod
+    def setup(structure: Structure, directory: str):
         """
         Bader analysis requires that a static-energy calculation be ran beforehand
         - typically using VASP. This setup involves ensuring that
@@ -31,9 +32,6 @@ class BaderELFAnalysis(BaderAnalysis):
         - `structure`:
             The structure to use when rewriting the ELFCAR and CHGCAR files.
         """
-
-        # Run the default method of the parent class.
-        super().setup(structure=structure, directory=directory)
 
         # establish file names
         elfcar_filename = os.path.join(directory, "ELFCAR")

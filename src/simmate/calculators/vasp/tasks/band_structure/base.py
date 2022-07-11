@@ -8,11 +8,11 @@ from pymatgen.electronic_structure.plotter import BSPlotter
 
 from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
 from simmate.calculators.vasp.tasks.static_energy.materials_project import (
-    MatProjStaticEnergy,
+    MatprojStaticEnergy,
 )
 
 
-class VaspBandStructure(MatProjStaticEnergy):
+class VaspBandStructure(MatprojStaticEnergy):
     """
     A base class for band structure calculations. This is not meant
     to be used directly but instead should be inherited from.
@@ -24,6 +24,8 @@ class VaspBandStructure(MatProjStaticEnergy):
     the a fixed charge density from a previous static energy calculation.
     """
 
+    required_files = MatprojStaticEnergy.required_files + ["CHGCAR"]
+
     # set the KptGrid or KptPath object
     # TODO: in the future, all functionality of this class will be available
     # by giving a KptPath class here.
@@ -33,10 +35,8 @@ class VaspBandStructure(MatProjStaticEnergy):
     Density of k-points to use along high-symmetry lines
     """
 
-    # For band-structures, unit cells should be in the standardized format
-    pre_standardize_structure = True
-
-    def setup(self, structure, directory):
+    @classmethod
+    def setup(cls, directory, structure, **kwargs):
         """
         Writes input files for this calculation. This differs from the normal
         VaspTask setup because it converts the structure to the standard primative
@@ -44,14 +44,14 @@ class VaspBandStructure(MatProjStaticEnergy):
         """
 
         # run cleaning and standardizing on structure (based on class attributes)
-        structure_cleaned = self._get_clean_structure(structure)
+        structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         # write the poscar file
         Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file
-        incar = Incar(**self.incar) + Incar(**self.incar_parallel_settings)
+        incar = Incar(**cls.incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
             filename=os.path.join(directory, "INCAR"),
             structure=structure_cleaned,
@@ -62,10 +62,10 @@ class VaspBandStructure(MatProjStaticEnergy):
         # functionality will be moved to the KptPath class and then extended to
         # vasp.inputs.kpoints class. Until those classes are ready, we just use
         # pymatgen here.
-        sym_prec = self.incar.get("SYMPREC", 1e-5) if self.incar else 1e-5
+        sym_prec = cls.incar.get("SYMPREC", 1e-5) if cls.incar else 1e-5
         kpath = HighSymmKpath(structure_cleaned, symprec=sym_prec)
         frac_k_points, k_points_labels = kpath.get_kpoints(
-            line_density=self.kpoints_line_density,
+            line_density=cls.kpoints_line_density,
             coords_are_cartesian=False,
         )
         kpoints = Kpoints(
@@ -82,19 +82,20 @@ class VaspBandStructure(MatProjStaticEnergy):
         # write the POTCAR file
         Potcar.to_file_from_type(
             structure_cleaned.composition.elements,
-            self.functional,
+            cls.functional,
             os.path.join(directory, "POTCAR"),
-            self.potcar_mappings,
+            cls.potcar_mappings,
         )
 
-    def _write_output_summary(self, directory, vasprun):
+    @staticmethod
+    def _write_output_summary(directory, vasprun):
         """
         In addition to writing the normal VASP output summary, this also plots
         the bandstructure to "band_structure.png"
         """
 
         # run the normal output
-        super()._write_output_summary(directory, vasprun)
+        MatprojStaticEnergy._write_output_summary(directory, vasprun)
 
         bs_plotter = BSPlotter(vasprun.get_band_structure(line_mode=True))
         plot = bs_plotter.get_plot()

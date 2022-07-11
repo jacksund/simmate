@@ -10,9 +10,9 @@ file serves as a shortcut for the following:
 from simmate.database import connect
 
 # the longer import that does the exact same thing
-from simmate.configuration.django import setup_full
+from simmate.configuration.django import setup
 ```
 """
 
 # This import sets up Django so we can connect with the Simmate database
-from simmate.configuration.django import setup_full as setup
+from simmate.configuration.django import setup

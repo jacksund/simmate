@@ -3,7 +3,7 @@
 import os
 
 from simmate.conftest import copy_test_files
-from simmate.calculators.vasp.tasks.density_of_states import MatProjDensityOfStates
+from simmate.calculators.vasp.tasks.density_of_states import MatprojDensityOfStates
 
 
 def test_density_of_states_workup(tmpdir):
@@ -14,7 +14,7 @@ def test_density_of_states_workup(tmpdir):
     )
 
     # init main task
-    task = MatProjDensityOfStates()
+    task = MatprojDensityOfStates()
 
     # estabilish filenames that we make and commonly reference
     summary_filename = os.path.join(tmpdir, "simmate_summary.yaml")

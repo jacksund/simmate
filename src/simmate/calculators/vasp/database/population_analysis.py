@@ -3,7 +3,7 @@
 from simmate.database.base_data_types import StaticEnergy, table_column
 
 
-class MatProjBaderAnalysis(StaticEnergy):
+class MatprojBaderAnalysis(StaticEnergy):
     """
     This table combines results from a static energy calculation and the follow-up
     bader analysis on the charge density.
@@ -18,7 +18,7 @@ class MatProjBaderAnalysis(StaticEnergy):
 
 
 # THIS IS A COPY/PASTE FROM ABOVE-- I need to condense these and add a new base_type
-class MatProjBaderELFAnalysis(StaticEnergy):
+class MatprojBaderELFAnalysis(StaticEnergy):
     """
     This table combines results from a static energy calculation and the follow-up
     bader analysis on the charge density.
@@ -32,5 +32,5 @@ class MatProjBaderELFAnalysis(StaticEnergy):
     """
 
 
-class MatProjELF(StaticEnergy):
+class MatprojELF(StaticEnergy):
     pass

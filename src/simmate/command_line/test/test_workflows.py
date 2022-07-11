@@ -3,7 +3,7 @@
 import os
 import yaml
 
-from prefect.engine.state import Success
+from prefect.states import Completed
 
 from simmate.calculators.vasp.inputs import Potcar
 from simmate.workflow_engine import Workflow
@@ -23,14 +23,14 @@ def test_workflows_show_config(command_line_runner):
     # list the config for one workflow
     result = command_line_runner.invoke(
         workflows,
-        ["show-config", "static-energy/mit"],
+        ["show-config", "static-energy.vasp.mit"],
     )
     assert result.exit_code == 0
 
     # ensure failure when a nested workflow is given
     result = command_line_runner.invoke(
         workflows,
-        ["show-config", "relaxation/staged"],
+        ["show-config", "relaxation.vasp.staged"],
     )
     assert result.exit_code == 1
 
@@ -48,7 +48,7 @@ def test_workflows_explore(command_line_runner):
     result = command_line_runner.invoke(
         workflows,
         ["explore"],
-        input="1\n2\n",  # gives 1 and then 2 for prompts
+        input="6\n2\n",  # gives 6 and then 2 for prompts
     )
     assert result.exit_code == 0
 
@@ -84,7 +84,8 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
         workflows,
         [
             "setup-only",
-            "static-energy/mit",
+            "static-energy.vasp.mit",
+            "--structure",
             cif_filename,
             "--directory",
             new_dirname,
@@ -96,7 +97,7 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
     # ensure failure when a nested workflow is given
     result = command_line_runner.invoke(
         workflows,
-        ["setup-only", "relaxation/staged", cif_filename],
+        ["setup-only", "relaxation.vasp.staged", cif_filename],
     )
     assert result.exit_code == 1
 
@@ -114,7 +115,7 @@ def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
     mocker.patch.object(
         Workflow,
         "run",
-        return_value=Success(),
+        return_value=Completed(),
     )
 
     # now try writing input files to the tmpdir
@@ -122,7 +123,7 @@ def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
         workflows,
         [
             "run",
-            "static-energy/mit",
+            "static-energy.vasp.mit",
             "--structure",
             cif_filename,
             "--directory",
@@ -138,7 +139,7 @@ def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
     # ensure failure on improperly matched kwargs
     result = command_line_runner.invoke(
         workflows,
-        ["run", "static-energy/mit", "hangingkwarg"],
+        ["run", "static-energy.vasp.mit", "hangingkwarg"],
     )
     assert result.exit_code == 1
 
@@ -156,7 +157,7 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
     mocker.patch.object(
         Workflow,
         "run_cloud",
-        return_value=Success(),
+        return_value=Completed(),
     )
 
     # now try writing input files to the tmpdir
@@ -164,7 +165,7 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
         workflows,
         [
             "run-cloud",
-            "static-energy/mit",
+            "static-energy.vasp.mit",
             "--structure",
             cif_filename,
             "--directory",
@@ -191,7 +192,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
     # write the yaml file with our input args
     input_args = dict(
         structure=cif_filename,
-        workflow_name="static-energy/mit",
+        workflow_name="static-energy.vasp.mit",
         directory=new_dirname,
     )
     with open(yaml_filename, "w") as file:
@@ -201,7 +202,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
     mocker.patch.object(
         Workflow,
         "run",
-        return_value=Success(),
+        return_value=Completed(),
     )
 
     # now try writing input files to the tmpdir

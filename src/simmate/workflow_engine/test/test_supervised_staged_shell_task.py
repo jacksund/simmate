@@ -21,26 +21,22 @@ import os
 
 import pytest
 
-from simmate.workflow_engine.error_handler import ErrorHandler
+from prefect import flow
+
+from simmate.workflow_engine import ErrorHandler, S3Task
 from simmate.workflow_engine.supervised_staged_shell_task import (
-    S3Task,
     NonZeroExitError,
     MaxCorrectionsError,
-    StructureRequiredError,
 )
 
 # ----------------------------------------------------------------------------
 
-# make some a simple S3Task and ErrorHandlers for us to test with
-
-
-class DummyTask(S3Task):
-    command = "echo dummy"
+# make some a simple ErrorHandlers for us to test with
 
 
 class AlwaysPassesHandler(ErrorHandler):
     def check(self, directory):
-        return None
+        return False
 
     def correct(self, directory):
         # this should never be entered since check() never returns an error
@@ -74,10 +70,41 @@ class AlwaysFailsSpecialMonitor(AlwaysFailsMonitor):
 # ----------------------------------------------------------------------------
 
 
+def test_s3task_methods():
+    class DummyTask(S3Task):
+        command = "echo dummy"
+
+    assert isinstance(DummyTask.get_config(), dict)
+
+    DummyTask.print_config()  # a print statment w. nothing else to check
+
+    DummyTask.to_prefect_task()  # unused for now
+
+    @flow
+    def test():
+        task = DummyTask.run()
+        return task.result()
+
+    state = test()
+    result = state.result()
+
+    assert state.is_completed()
+    assert os.path.exists(result["directory"])
+    os.rmdir(result["directory"])
+
+
 def test_s3task_1():
-    # run a basic task
-    task = DummyTask(monitor=False)
-    output = task.run()
+    # run a basic task w.o. any handlers or monitoring
+
+    class DummyTask(S3Task):
+        command = "echo dummy"
+        monitor = False
+
+    output = DummyTask.run_config()
+
+    assert output["result"] == None
+    assert output["corrections"] == []
+    assert output["prefect_flow_run_id"] == None
 
     # make sure that a "simmate-task-*" directory was created
     assert os.path.exists(output["directory"])
@@ -87,9 +114,14 @@ def test_s3task_1():
 
 
 def test_s3task_2():
-    # run a basic task
-    task = DummyTask(monitor=False, compress_output=True)
-    output = task.run()
+    # test file compression
+
+    class DummyTask(S3Task):
+        command = "echo dummy"
+        monitor = False
+        compress_output = True
+
+    output = DummyTask.run_config()
 
     # make sure that a "simmate-task-*.zip" archive was created
     assert os.path.exists(output["directory"] + ".zip")
@@ -101,27 +133,21 @@ def test_s3task_2():
     os.remove(output["directory"] + ".zip")
 
 
-def test_s3task_3():
-    # Make sure an error is raised when the task requires a structure but isn't
-    # given one
-    task = DummyTask(monitor=False)
-    task.requires_structure = True
-    pytest.raises(StructureRequiredError, task.run)
+def test_s3task_3(tmpdir):
+    # Make a task with error handlers, monitoring, and specific directory
 
+    class DummyTask(S3Task):
+        command = "echo dummy"
+        polling_timestep = 0
+        monitor_freq = 2
+        error_handlers = [
+            AlwaysPassesHandler(),
+            AlwaysPassesMonitor(),
+            AlwaysPassesSpecialMonitor(),
+        ]
 
-def test_s3task_4(tmpdir):
-    # Make a task with error handlers and monitoring
-    task = DummyTask(
-        polling_timestep=0,
-        monitor_freq=2,
-    )
-    task.error_handlers = [
-        AlwaysPassesHandler(),
-        AlwaysPassesMonitor(),
-        AlwaysPassesSpecialMonitor(),
-    ]
     # use the temporary directory
-    assert task.run(directory=tmpdir) == {
+    assert DummyTask.run_config(directory=tmpdir) == {
         "result": None,
         "corrections": [],
         "directory": tmpdir,
@@ -129,42 +155,79 @@ def test_s3task_4(tmpdir):
     }
 
 
-def test_s3task_5(tmpdir):
+def test_s3task_4(tmpdir):
     # test nonzero returncode
-    task = DummyTask(
-        polling_timestep=0,
-        monitor_freq=2,
+
+    class DummyTask(S3Task):
+        command = "NonexistantCommand 404"
+        polling_timestep = 0
+        monitor_freq = 2
+        error_handlers = [AlwaysPassesHandler()]
+
+    pytest.raises(
+        NonZeroExitError,
+        DummyTask.run_config,
+        directory=tmpdir,
     )
-    task.command = "NonexistantCommand 404"
-    task.error_handlers = [AlwaysPassesHandler()]
-    pytest.raises(NonZeroExitError, task.run, directory=tmpdir)
+
+
+def test_s3task_5(tmpdir):
+    # testing handler-triggered failures
+
+    class DummyTask(S3Task):
+        command = "echo dummy"
+        polling_timestep = 0
+        monitor_freq = 2
+        error_handlers = [AlwaysFailsHandler()]
+
+    pytest.raises(
+        MaxCorrectionsError,
+        DummyTask.run_config,
+        directory=tmpdir,
+    )
 
 
 def test_s3task_6(tmpdir):
-    # testing handler-triggered failures
-    task = DummyTask(
-        polling_timestep=0,
-        monitor_freq=2,
+    # monitor failure
+
+    class DummyTask(S3Task):
+        command = "echo dummy"
+        polling_timestep = 0
+        monitor_freq = 2
+        error_handlers = [AlwaysFailsMonitor()]
+
+    pytest.raises(
+        MaxCorrectionsError,
+        DummyTask.run_config,
+        directory=tmpdir,
     )
-    task.error_handlers = [AlwaysFailsHandler()]
-    pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)
 
 
 def test_s3task_7(tmpdir):
-    # monitor failure
-    task = DummyTask(
-        polling_timestep=0,
-        monitor_freq=2,
+    # special-monitor failure (non-terminating monitor)
+
+    class DummyTask(S3Task):
+        command = "echo dummy"
+        polling_timestep = 0
+        monitor_freq = 2
+        error_handlers = [AlwaysFailsSpecialMonitor()]
+
+    pytest.raises(
+        MaxCorrectionsError,
+        DummyTask.run_config,
+        directory=tmpdir,
     )
-    task.error_handlers = [AlwaysFailsMonitor()]
-    pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)
 
 
 def test_s3task_8(tmpdir):
-    # special-monitor failure (non-terminating monitor)
-    task = DummyTask(
-        polling_timestep=0,
-        monitor_freq=2,
+    # make sure an error is raised when a file is missing
+
+    class DummyTask(S3Task):
+        command = "echo dummy"
+        required_files = ["FILE_THAT_DOESNT_EXIST"]
+
+    pytest.raises(
+        Exception,
+        DummyTask.run_config,
+        directory=tmpdir,
     )
-    task.error_handlers = [AlwaysFailsSpecialMonitor()]
-    pytest.raises(MaxCorrectionsError, task.run, directory=tmpdir)

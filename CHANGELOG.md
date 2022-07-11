@@ -19,12 +19,16 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add guide for installing VASP v5 to Ubuntu v22.04 ([@scott-materials](https://github.com/scott-materials), [#183](https://github.com/jacksund/simmate/issues/183))
 - add `simmate database load-remote-archives` command and `load_remote_archives` utility that populates all tables from `database.third_parties`
 - add `load_default_sqlite3_build` utility that downloads a pre-built database with all third-party data present. This is an alternative to calling `load_all_remote_archives` if you are using sqlite3 and saves a significant amount of time for users.
+- standardize workflow naming. Note this breaks from python naming conventions for classes ([#150](https://github.com/jacksund/simmate/issues/150))
+- dynamically determine `register_kwargs` and rename property to `parameters_to_register`
 
 **Refactors**
 - move contents of `configuration.django.database` to `database.utilities`
+- :warning: upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire `workflow_engine` module, and therefore the entire workflow library. Users should therefore go back through tutorials from the beginning to see everything that has changed. ([#185](https://github.com/jacksund/simmate/pull/185)). 
+> Prefect Orion is still in beta (v2.0b6), and the first stable release is expected in July 2022. However, this date is not definite, and there is a very good chance for delays. You can stay up to date with their beta status on [the Prefect discourse page](https://discourse.prefect.io/tags/c/announcements/5/prefect-2-0). Until a stable release is made for Prefect, there will be no new Simmate release.
 
 **Fixes**
-- None
+- fix incorrect passing of `source` in NEB all-paths workflow causing it to fail
 
 # v0.6.0 (2022.06.25)
 

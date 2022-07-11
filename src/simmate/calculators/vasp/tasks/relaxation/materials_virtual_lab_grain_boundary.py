@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.relaxation import MatProjRelaxation
+from simmate.calculators.vasp.tasks.relaxation import MatprojRelaxation
 
 
-class MatVirtualLabGrainBoundaryRelaxation(MatProjRelaxation):
+class MatVirtualLabGrainBoundaryRelaxation(MatprojRelaxation):
     """
     This task is a reimplementation of pymatgen's
     [MVLGBSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLGBSet).
@@ -11,7 +11,7 @@ class MatVirtualLabGrainBoundaryRelaxation(MatProjRelaxation):
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.
-    incar = MatProjRelaxation.incar.copy()
+    incar = MatprojRelaxation.incar.copy()
     incar.update(
         dict(
             LCHARG=False,

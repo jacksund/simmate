@@ -4,17 +4,17 @@ from pymatgen.core import Species
 
 from simmate.toolkit import Structure
 from simmate.calculators.vasp.inputs import Incar
-from simmate.calculators.vasp.tasks.static_energy import MatProjStaticEnergy
+from simmate.calculators.vasp.tasks.static_energy import MatprojStaticEnergy
 
 
-class MatProjNMRElectricFieldGradiant(MatProjStaticEnergy):
+class MatprojNMRElectricFieldGradiant(MatprojStaticEnergy):
     """
     This task is a reimplementation of pymatgen's
     [MPNMRSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)
     with mode="efg" (Electric Field Gradient).
     """
 
-    incar = MatProjStaticEnergy.incar.copy()
+    incar = MatprojStaticEnergy.incar.copy()
     incar.update(
         dict(
             ALGO="FAST",

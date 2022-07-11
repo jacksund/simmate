@@ -15,7 +15,7 @@ def providers_all(request):
         "AflowPrototype": "...",
         "CodStructure": "...",
         "JarvisStructure": "...",
-        "MatProjStructure": "...",
+        "MatprojStructure": "...",
         "OqmdStructure": "...",
     }
 

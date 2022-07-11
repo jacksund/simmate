@@ -5,8 +5,8 @@ import shutil
 import yaml
 from typing import Any
 
-import prefect
 from prefect import task
+from prefect.context import FlowRunContext
 
 from simmate.utilities import get_directory
 from simmate.workflow_engine import Workflow
@@ -19,7 +19,10 @@ from simmate.workflow_engine import Workflow
 
 
 @task
-def load_input_and_register(register_run=True, **parameters: Any) -> dict:
+def load_input_and_register(
+    register_run: bool = True,
+    **parameters: Any,
+) -> dict:
     """
     How the input was submitted as a parameter depends on if we are submitting
     to Prefect Cloud, running the flow locally, or even continuing from a
@@ -48,51 +51,27 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     `**parameters` includes all parameters and anything extra that you want saved
     to simmate_metadata.yaml
     """
-    # !!! This function needs a refactor that is waiting on prefect 2.0.
-    # In the future, this will be broken into smaller methods and utilities.
-    # Prefect 2.0 will allow us to do more pythonic things such as...
-    # @flow
-    # def example_workflow(**kwargs):
-    #     # NOT a prefect task but a normal function
-    #     kwargs_cleaned = serialize_parameters(**kwargs)
-    #
-    #     # a prefect task
-    #     result = some_prefect_task(**kwargs_cleaned)
 
     # ---------------------------------------------------------------------
 
     # Grab the workflow object as we need to reference some of its attributes.
     # In addition, we will also use the flow run id for registration.
-
-    # BUG: for some reason, this script fails when get_workflow is imported
-    # at the top of this file rather than here.
-    from simmate.workflows.utilities import get_workflow
-
-    workflow_name = prefect.context.get("flow_name") or parameters.get("workflow_name")
-    if not workflow_name:
-        raise Exception("Unknown workflow")
-
-    # BUG: I have to do this in order to allow workflows that are from the
-    # simmate.workflows module. There should be a better way to handle user
-    # created workflows.
-    try:
-        workflow = get_workflow(workflow_name)
-    except:
-        workflow = None
-
-    prefect_flow_run_id = prefect.context.flow_run_id
+    run_context = FlowRunContext.get()
+    workflow_name = run_context.flow.name
+    prefect_flow_run_id = str(run_context.flow_run.id)
+    workflow = run_context.flow.simmate_workflow
 
     # ---------------------------------------------------------------------
 
     # STEP 1: clean parameters
 
-    parameters_cleaned = workflow._deserialize_parameters(**parameters)
+    parameters_cleaned = Workflow._deserialize_parameters(**parameters)
 
     # ---------------------------------------------------------------------
 
-    # STEP 1b: Determine the "primary" input to use for determining the
+    # STEP 1b: Determine the "primary" input to use for setting the
     # source (and previous directory)
-    # !!! Is there a better way to do this?
+    # OPTIMIZE: Is there a better way to do this?
 
     # Currently I just set a priority of possible parameters that can be
     # the primary input. I go through each one at a time until I find one
@@ -134,7 +113,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
             )
 
         # the past directory should be stored on the input object
-        previous_directory = primary_input_cleaned.calculation.directory
+        previous_directory = primary_input_cleaned.database_object.directory
 
         # First check if the previous directory exists. There are several
         # possibilities that we need to check for:
@@ -197,7 +176,17 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # and therefore prevent an error/bug.
     if source and primary_input and primary_input_cleaned.is_from_past_calc:
         # note primary_input here is a dictionary
-        assert source == primary_input
+        # assert
+        if not source == primary_input:
+            # only warning for now because this is experimental
+            print(
+                "\nWARNING: Your source does not match the source of your "
+                "primary input. Sources are an experimental feature, so "
+                "this will not affect your results. Still, please report "
+                "this to our team to help with development. \n\n"
+                f"SOURCE: {source} \n\n"
+                f"PRIMARY_INPUT: {primary_input} \n\n"
+            )
         source_cleaned = source
     # Check if we have a primary input loaded from a past calculation and
     # default to that as the source.
@@ -213,15 +202,11 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
 
     # ---------------------------------------------------------------------
 
-    # STEP 4: Register the calculation so the user can follow along in the UI.
+    # STEP 4: Register the calculation so the user can follow along in the UI
+    # and also see which structures/runs have been submitted aready.
 
-    # This is only done if a table is provided. Some special-case workflows
-    # don't store calculation information bc the flow is just a quick python
-    # analysis.
-
-    if register_run and workflow and workflow.database_table:
-
-        workflow._register_calculation(prefect_flow_run_id, parameters_cleaned)
+    if register_run:
+        Workflow._register_calculation(**parameters_cleaned)
 
     # ---------------------------------------------------------------------
 
@@ -241,7 +226,7 @@ def load_input_and_register(register_run=True, **parameters: Any) -> dict:
     # workflow run. This allows future users to reproduce the results if
     # desired -- and it also allows us to load old results into a database.
     input_summary = dict(
-        workflow_name=workflow.name if workflow else "non-module-flow",
+        workflow_name=workflow_name,
         # this ID is ingored as an input but needed for loading past data
         prefect_flow_run_id=prefect_flow_run_id,
         **parameters_serialized,

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from prefect.backend.flow_run import FlowRunView
+# from prefect.backend.flow_run import FlowRunView
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
@@ -70,7 +70,7 @@ class Calculation(DatabaseTable):
         return f"https://cloud.prefect.io/simmate/flow-run/{self.prefect_flow_run_id}"
 
     @property
-    def flow_run_view(self) -> FlowRunView:
+    def flow_run_view(self):  # -> FlowRunView
         """
         Checks if the prefect_flow_run_id was registered with Prefect Cloud, and
         if so, returns a
@@ -95,6 +95,7 @@ class Calculation(DatabaseTable):
         If Prefect Cloud is not configured or if the calculation was ran
         locally, the None is returned.
         """
+        raise NotImplementedError("Migrating to Prefect 2.0")
         try:
             return FlowRunView.from_flow_run_id(self.prefect_flow_run_id)
         except:  # may fail if this is a local run or prefect api key not configured
@@ -119,7 +120,7 @@ class Calculation(DatabaseTable):
         return flowrunview.state.__class__.__name__ if flowrunview else None
 
     @classmethod
-    def from_prefect_id(cls, id: str, **kwargs):
+    def from_prefect_id(cls, prefect_flow_run_id: str, **kwargs):
         """
         Given a prefect id, this method will do one of the following...
 
@@ -135,13 +136,16 @@ class Calculation(DatabaseTable):
 
         # check if the calculation already exists in our database, and if so,
         # grab it and return it.
-        if cls.objects.filter(prefect_flow_run_id=id).exists():
-            return cls.objects.get(prefect_flow_run_id=id)
+        if cls.objects.filter(prefect_flow_run_id=prefect_flow_run_id).exists():
+            return cls.objects.get(prefect_flow_run_id=prefect_flow_run_id)
         # Otherwise we need to create a new one and return that.
 
         # To handle the initialization of other Simmate mix-ins, we pass all
         # information to the from_toolkit method rather than directly to cls.
-        calculation = cls.from_toolkit(prefect_flow_run_id=id, **kwargs)
+        calculation = cls.from_toolkit(
+            prefect_flow_run_id=prefect_flow_run_id,
+            **kwargs,
+        )
         calculation.save()
 
         return calculation

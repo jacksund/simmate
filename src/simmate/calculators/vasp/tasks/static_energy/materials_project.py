@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.relaxation import MatProjRelaxation
+from simmate.calculators.vasp.tasks.relaxation import MatprojRelaxation
 
 
-class MatProjStaticEnergy(MatProjRelaxation):
+class MatprojStaticEnergy(MatprojRelaxation):
     """
     This task is a reimplementation of pymatgen's
     [MPStaticSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPStaticSet).
 
     Runs a VASP static energy calculation using Materials Project settings.
 
-    This is identical to relaxation/matproj, but just a single ionic step.
+    This is identical to relaxation/Matproj, but just a single ionic step.
     """
 
-    incar = MatProjRelaxation.incar.copy()
+    incar = MatprojRelaxation.incar.copy()
     incar.update(
         dict(
             IBRION=-1,  # (optional) locks everything between ionic steps

@@ -2,160 +2,102 @@
 
 import os
 
-from simmate.workflow_engine.workflow import (
-    Workflow,
-    Parameter,
-    ModuleStorage,
-)
+from simmate.workflow_engine import Workflow
 from simmate.workflow_engine.common_tasks import load_input_and_register
-from simmate.calculators.vasp.workflows.relaxation.quality_00 import (
-    workflow as relaxation_quality00,
+from simmate.calculators.vasp.workflows.relaxation.quality00 import (
+    Relaxation__Vasp__Quality00,
 )
-from simmate.calculators.vasp.workflows.relaxation.quality_01 import (
-    workflow as relaxation_quality01,
+from simmate.calculators.vasp.workflows.relaxation.quality01 import (
+    Relaxation__Vasp__Quality01,
 )
-from simmate.calculators.vasp.workflows.relaxation.quality_02 import (
-    workflow as relaxation_quality02,
+from simmate.calculators.vasp.workflows.relaxation.quality02 import (
+    Relaxation__Vasp__Quality02,
 )
-from simmate.calculators.vasp.workflows.relaxation.quality_03 import (
-    workflow as relaxation_quality03,
+from simmate.calculators.vasp.workflows.relaxation.quality03 import (
+    Relaxation__Vasp__Quality03,
 )
-from simmate.calculators.vasp.workflows.relaxation.quality_04 import (
-    workflow as relaxation_quality04,
+from simmate.calculators.vasp.workflows.relaxation.quality04 import (
+    Relaxation__Vasp__Quality04,
 )
-from simmate.calculators.vasp.workflows.static_energy.quality_04 import (
-    workflow as energy_quality04,
+from simmate.calculators.vasp.workflows.static_energy.quality04 import (
+    StaticEnergy__Vasp__Quality04,
 )
 
 from simmate.calculators.vasp.database.relaxation import StagedRelaxation
-from simmate.calculators.vasp.database.energy import Quality04StaticEnergy
 
 
-# init workflow tasks
-# OPTIMIZE: Make this a for-loop in Prefect 2.0! We can use a for-loop in the
-# workflow context below too.
-relax_task_00 = relaxation_quality00.to_workflow_task()
-relax_task_01 = relaxation_quality01.to_workflow_task()
-relax_task_02 = relaxation_quality02.to_workflow_task()
-relax_task_03 = relaxation_quality03.to_workflow_task()
-relax_task_04 = relaxation_quality04.to_workflow_task()
-static_task_04 = energy_quality04.to_workflow_task()
-
-with Workflow("relaxation/staged") as workflow:
-
-    structure = Parameter("structure")
-    command = Parameter("command", default="vasp_std > vasp.out")
-    source = Parameter("source", default=None)
-    directory = Parameter("directory", default=None)
-    copy_previous_directory = Parameter(
-        "copy_previous_directory",
-        default=False,
-    )
-
-    parameters_cleaned = load_input_and_register(
-        structure=structure,
-        command=command,
-        source=source,
-        directory=directory,
-        copy_previous_directory=copy_previous_directory,
-    )
-
-    # Our first relaxation is directly from our inputs. The remaining one
-    # pass along results
-    run_id_00 = relax_task_00(
-        structure=parameters_cleaned["structure"],
-        command=parameters_cleaned["command"],
-        directory=parameters_cleaned["directory"] + os.path.sep + "relax_00",
-    )
-
-    # TODO: Use a for-loop in Prefect 2.0!
-
-    # relaxation 01
-    run_id_01 = relax_task_01(
-        structure={
-            "database_table": "Quality00Relaxation",
-            "directory": run_id_00["directory"],
-            "structure_field": "structure_final",
-        },
-        command=parameters_cleaned["command"],
-        directory=parameters_cleaned["directory"] + os.path.sep + "relax_01",
-    )
-
-    # relaxation 02
-    run_id_02 = relax_task_02(
-        structure={
-            "database_table": "Quality01Relaxation",
-            "directory": run_id_01["directory"],
-            "structure_field": "structure_final",
-        },
-        command=parameters_cleaned["command"],
-        directory=parameters_cleaned["directory"] + os.path.sep + "relax_02",
-    )
-
-    # relaxation 03
-    run_id_03 = relax_task_03(
-        structure={
-            "database_table": "Quality02Relaxation",
-            "directory": run_id_02["directory"],
-            "structure_field": "structure_final",
-        },
-        command=parameters_cleaned["command"],
-        directory=parameters_cleaned["directory"] + os.path.sep + "relax_03",
-    )
-
-    # relaxation 04
-    run_id_04 = relax_task_04(
-        structure={
-            "database_table": "Quality03Relaxation",
-            "directory": run_id_03["directory"],
-            "structure_field": "structure_final",
-        },
-        command=parameters_cleaned["command"],
-        directory=parameters_cleaned["directory"] + os.path.sep + "relax_04",
-    )
-
-    # Static Energy (same quality as 04 relaxation)
-    run_id_05 = static_task_04(
-        structure={
-            "database_table": "Quality04Relaxation",
-            "directory": run_id_04["directory"],
-            "structure_field": "structure_final",
-        },
-        command=parameters_cleaned["command"],
-        directory=parameters_cleaned["directory"] + os.path.sep + "static_04",
-    )
-
-workflow.storage = ModuleStorage(__name__)
-workflow.project_name = "Simmate-Relaxation"
-workflow.database_table = StagedRelaxation
-workflow.result_task = run_id_05
-workflow.s3tasks = [
-    w.s3task
-    for w in [
-        relaxation_quality00,
-        relaxation_quality01,
-        relaxation_quality02,
-        relaxation_quality03,
-        relaxation_quality04,
-        energy_quality04,
-    ]
-]
-
-workflow.__doc__ = """
+class Relaxation__Vasp__Staged(Workflow):
+    """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
-    
+
     This is therefore a "Nested Workflow" made of the following smaller workflows:
 
-        - relaxation/quality00
-        - relaxation/quality01
-        - relaxation/quality02
-        - relaxation/quality03
-        - relaxation/quality04
-        - static-energy/quality04
-    
-    This workflow is most useful for randomly-created structures or extremely 
-    large supercells. More precise relaxations+energy calcs should be done 
+        - relaxation.vasp.quality00
+        - relaxation.vasp.quality01
+        - relaxation.vasp.quality02
+        - relaxation.vasp.quality03
+        - relaxation.vasp.quality04
+        - static-energy.vasp.quality04
+
+    This workflow is most useful for randomly-created structures or extremely
+    large supercells. More precise relaxations+energy calcs should be done
     afterwards because ettings are still below MIT and Materials Project quality.
-"""
-workflow.description_doc_short = "runs a series of relaxations (00-04 quality)"
+    """
+
+    description_doc_short = "runs a series of relaxations (00-04 quality)"
+    database_table = StagedRelaxation
+
+    @staticmethod
+    def run_config(
+        structure,
+        command=None,
+        source=None,
+        directory=None,
+        copy_previous_directory=False,
+    ):
+
+        parameters_cleaned = load_input_and_register(
+            structure=structure,
+            command=command,
+            source=source,
+            directory=directory,
+            copy_previous_directory=copy_previous_directory,
+        ).result()
+
+        tasks_to_run = [
+            Relaxation__Vasp__Quality00,
+            Relaxation__Vasp__Quality01,
+            Relaxation__Vasp__Quality02,
+            Relaxation__Vasp__Quality03,
+            Relaxation__Vasp__Quality04,
+            StaticEnergy__Vasp__Quality04,
+        ]
+
+        # Our first relaxation is directly from our inputs.
+        current_task = tasks_to_run[0]
+        state = current_task.run(
+            structure=parameters_cleaned["structure"],
+            command=parameters_cleaned["command"],
+            directory=parameters_cleaned["directory"] + os.path.sep + current_task.name,
+        )
+        result = state.result()
+
+        # The remaining tasks continue and use the past results as an input
+        for i, current_task in enumerate(tasks_to_run[1:]):
+            preceding_task = tasks_to_run[i]  # will be one before because of [:1]
+            state = current_task.run(
+                structure={
+                    "database_table": preceding_task.database_table.__name__,
+                    "directory": result["directory"],  # uses preceding result
+                    "structure_field": "structure_final",
+                },
+                command=parameters_cleaned["command"],
+                directory=parameters_cleaned["directory"]
+                + os.path.sep
+                + current_task.name_full,
+            )
+            result = state.result()
+
+        # return the result of the final static energy if the user wants it
+        return result

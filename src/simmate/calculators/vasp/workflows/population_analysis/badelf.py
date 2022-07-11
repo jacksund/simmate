@@ -3,36 +3,68 @@
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
 from simmate.toolkit import Structure
-from simmate.workflow_engine import (
-    s3task_to_workflow,
-    task,
-    Parameter,
-    Workflow,
-    ModuleStorage,
-)
-from simmate.database import connect
-from simmate.database.third_parties import MatProjStructure
+from simmate.workflow_engine import task, Workflow
+from simmate.database.third_parties import MatprojStructure
 from simmate.calculators.vasp.tasks.population_analysis import (
-    MatProjPreBaderELF,
+    MatprojPreBaderELF,
 )
 from simmate.calculators.bader.tasks import BaderELFAnalysis
 from simmate.calculators.vasp.database.population_analysis import (
-    MatProjBaderELFAnalysis as MPBadelfResults,
+    MatprojBaderELFAnalysis as MPBadelfResults,
 )
 
-prebadelf_matproj_workflow = s3task_to_workflow(
-    name="population-analysis/prebadelf-matproj",
-    module=__name__,
-    project_name="Simmate-PopulationAnalysis",
-    s3task=MatProjPreBaderELF,
-    database_table=MPBadelfResults,
-    register_kwargs=["structure", "source"],
-    description_doc_short="runs Bader analysis with ELFCAR as reference",
-)
 
-prebadelf_task = prebadelf_matproj_workflow.to_workflow_task()
+class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
+    """
+    Runs a static energy calculation using an extra-fine FFT grid and then
+    carries out Bader analysis on the resulting charge density using the ELFCAR
+    as a reference when partitioning.
+    """
 
-badelf_task = BaderELFAnalysis()
+    database_table = MPBadelfResults
+
+    @classmethod
+    def run_config(
+        cls,
+        structure: Structure,
+        command: str = None,
+        source: dict = None,
+        directory: str = None,
+    ):
+
+        prebadelf_result = PopulationAnalysis__Vasp__PrebadelfMatproj.run(
+            structure=structure,
+            command=command,
+            source=source,
+            directory=directory,
+        ).result()
+
+        # load the structure that contains dummy atoms in it
+        structure_w_empties = get_structure_w_empties(
+            structure=structure,
+            empty_ion_template="F",
+        ).result()
+
+        # Bader only adds files and doesn't overwrite any, so I just run it
+        # in the original directory. I may switch to copying over to a new
+        # directory in the future though.
+        badelf_result = BaderELFAnalysis.run(
+            structure=structure_w_empties,
+            directory=prebadelf_result["directory"],
+        ).result()
+
+        save_badelf_results(badelf_result, prebadelf_result["prefect_flow_run_id"])
+
+
+# -----------------------------------------------------------------------------
+
+# Below are extra tasks and subflows for the workflow that is defined above
+
+
+class PopulationAnalysis__Vasp__PrebadelfMatproj(Workflow):
+    s3task = MatprojPreBaderELF
+    database_table = MPBadelfResults
+    description_doc_short = "runs Bader analysis with ELFCAR as reference"
 
 
 @task
@@ -46,13 +78,13 @@ def get_structure_w_empties(
     the extra ion and matching host lattice, and uses it to introduce
     empty atoms into the original structure. For example, if your input
     gave a Ca2N structure and Cl ion for the template, this function will
-    find Ca2NCl in the MatProj database and then use the Cl sites to
+    find Ca2NCl in the Matproj database and then use the Cl sites to
     add dummy "H" atoms into the Ca2N structure. This is particularly useful
     if you would like to analyze electrides.
     """
 
     # !!! It might make more sense to have this accept a database Structure object
-    # and also search the same table for a match (rather than the MatProj).
+    # and also search the same table for a match (rather than the Matproj).
 
     # Grab the chemical system of the structure when it includes the empty ion template
     structure = Structure.from_dynamic(
@@ -70,7 +102,7 @@ def get_structure_w_empties(
         ignored_species=empty_ion_template,
         primitive_cell=False,  # required for the get_s2_like_s1 method
     )
-    potential_matches = MatProjStructure.objects.filter(
+    potential_matches = MatprojStructure.objects.filter(
         chemical_system=template_system
     ).all()
     for potential_match in potential_matches:
@@ -108,7 +140,7 @@ def get_structure_w_empties(
 
 # THIS IS A COPY/PASTE FROM THE BADER WORKFLOW -- I need to condense these
 @task
-def save_bader_results(bader_result, prefect_flow_run_id):
+def save_badelf_results(bader_result, prefect_flow_run_id):
     # load the results. We are particullary after the first result with
     # is a pandas dataframe of oxidation states.
     oxidation_data, extra_data = bader_result["result"]
@@ -124,48 +156,3 @@ def save_bader_results(bader_result, prefect_flow_run_id):
     # now update the calculation entry with our results
     calculation.oxidation_states = list(oxidation_data.oxidation_state.values)
     calculation.save()
-
-
-with Workflow("population-analysis/badelf-matproj") as workflow:
-
-    structure = Parameter("structure")
-    command = Parameter("command", default="vasp_std > vasp.out")
-    source = Parameter("source", default=None)
-    directory = Parameter("directory", default=None)
-
-    prebadelf_result = prebadelf_task(
-        structure=structure,
-        command=command,
-        source=source,
-        directory=directory,
-    )
-
-    # load the structure that contains dummy atoms in it
-    structure_w_empties = get_structure_w_empties(
-        structure=structure,
-        empty_ion_template="F",
-    )
-
-    # Bader only adds files and doesn't overwrite any, so I just run it
-    # in the original directory. I may switch to copying over to a new
-    # directory in the future though.
-    badelf_result = badelf_task(
-        structure=structure_w_empties,
-        directory=prebadelf_result["directory"],
-    )
-
-    save_bader_results(badelf_result, prebadelf_result["prefect_flow_run_id"])
-
-
-workflow.storage = ModuleStorage(__name__)
-workflow.project_name = "Simmate-PopulationAnalysis"
-workflow.database_table = MPBadelfResults
-workflow.register_kwargs = ["structure", "source"]
-workflow.result_task = prebadelf_result
-workflow.s3tasks = [MatProjPreBaderELF, BaderELFAnalysis]
-
-workflow.__doc__ = """
-    Runs a static energy calculation using an extra-fine FFT grid and then
-    carries out Bader analysis on the resulting charge density using the ELFCAR
-    as a reference when partitioning.
-"""

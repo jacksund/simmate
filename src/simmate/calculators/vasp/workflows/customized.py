@@ -27,45 +27,39 @@ vasp_workflow.run(
 ```
 """
 
-from simmate.workflow_engine import Workflow, Parameter, ModuleStorage
+from simmate.workflow_engine import Workflow
 from simmate.workflow_engine.common_tasks import (
     load_input_and_register,
     run_customized_s3task,
     save_result,
 )
-from simmate.calculators.vasp.database.customized import CustomizedVASPCalculation
+from simmate.calculators.vasp.database.customized import (
+    CustomizedVASPCalculation,
+)
 
 
-with Workflow("customized/vasp") as vasp_workflow:
+class Customized__Vasp__UserConfig(Workflow):
+    """
+    "VASP calculation with updated INCAR/POTCAR settings
+    """
 
-    workflow_base = Parameter("workflow_base")
-    input_parameters = Parameter("input_parameters", default={})
-    updated_settings = Parameter("updated_settings", default={})
-    directory = Parameter("directory", default=None)
+    database_table = CustomizedVASPCalculation
 
-    parameters_cleaned = load_input_and_register(
-        workflow_base=workflow_base,
-        input_parameters=input_parameters,
-        updated_settings=updated_settings,
-        directory=directory,
-    )
+    @staticmethod
+    def run_config(
+        cls,
+        workflow_base: str,
+        input_parameters: dict,
+        updated_settings: dict,
+        directory: str,
+    ):
+        parameters_cleaned = load_input_and_register(
+            workflow_base=workflow_base,
+            input_parameters=input_parameters,
+            updated_settings=updated_settings,
+            directory=directory,
+        ).result()
 
-    result = run_customized_s3task(
-        workflow_base=parameters_cleaned["workflow_base"],
-        input_parameters=parameters_cleaned["input_parameters"],
-        updated_settings=parameters_cleaned["updated_settings"],
-    )
+        result = run_customized_s3task(**parameters_cleaned)
 
-    save_result(result)
-
-vasp_workflow.storage = ModuleStorage(__name__)
-vasp_workflow.project_name = "Simmate-Customized"
-vasp_workflow.database_table = CustomizedVASPCalculation
-vasp_workflow.register_kwargs = [
-    "workflow_base",
-    "input_parameters",
-    "updated_settings",
-]
-vasp_workflow.result_task = result
-vasp_workflow.s3task = None
-vasp_workflow.__doc__ = "VASP calculation with updated INCAR/POTCAR settings"
+        save_result(result)

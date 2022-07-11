@@ -31,35 +31,10 @@ class BaderAnalysis(S3Task):
     you will see files like "CHGCAR_empty" used in the command.
     """
 
-    required_files = ["CHGCAR", "AECCAR0", "AECCAR2", "POTCAR"]
-    """
-    In order for bader analysis to run properly, all of these files must be
-    present in the provided directory.
-    """
-    # !!! Maybe move required_files attribute to the S3Task...? This could also
-    # be useful for other tasks -- such as DOS and BS calculations. I could
-    # then have an extra method that checks these before calling execute.
+    required_files = ["CHGCAR_sum", "POTCAR"]
 
-    def setup(self, structure: Structure, directory: str):
-        """
-        Bader analysis requires that a static-energy calculation be ran beforehand
-        - typically using VASP. This setup therefore just involves ensuring that
-        the proper files are present.
-        """
-
-        # Make sure that there are the proper output files from a VASP calc
-        filenames = [os.path.join(directory, file) for file in self.required_files]
-        if not all(os.path.exists(filename) for filename in filenames):
-            raise Exception(
-                "A static energy calculation is required before running Bader "
-                "analysis. The following files must exist in the directory where "
-                f"this task is ran: {self.required_files}"
-            )
-
-        # Make the CHGCAR_sum file using Bader's helper script
-        CombineCHGCARs().run(directory=directory)
-
-    def workup(self, directory: str):
+    @classmethod
+    def workup(cls, directory: str):
         """
         A basic workup process that reads Bader analysis results from the ACF.dat
         file and calculates the corresponding oxidation states with the existing
@@ -121,13 +96,16 @@ class BaderAnalysis(S3Task):
         #     oxi_state_data, index=dataframe.index)
 
         # write output files/plots for the user to quickly reference
-        self._write_output_summary(directory, dataframe, extra_data)
+        cls._write_output_summary(directory, dataframe, extra_data)
 
         # return all of our results
         return dataframe, extra_data
 
+    @staticmethod
     def _write_output_summary(
-        self, directory: str, dataframe: DataFrame, extra_data: dict
+        directory: str,
+        dataframe: DataFrame,
+        extra_data: dict,
     ):
         """
         This prints a "simmate_summary.yaml" file with key output information.

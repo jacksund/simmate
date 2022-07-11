@@ -5,4 +5,4 @@ Customized workflows involve modifying another workflow's core settings and
 thus these are meant for testing.
 """
 
-from simmate.calculators.vasp.workflows.customized import vasp_workflow
+from simmate.calculators.vasp.workflows.customized import Customized__Vasp__UserConfig

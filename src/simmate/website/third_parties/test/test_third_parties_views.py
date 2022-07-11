@@ -20,7 +20,7 @@ def test_providers_view(client):
     "provider_name",
     [
         "AflowPrototype",
-        "MatProjStructure",
+        "MatprojStructure",
         "CodStructure",
         "JarvisStructure",
         "OqmdStructure",

@@ -6,13 +6,13 @@ import time
 import signal
 import subprocess
 import yaml
-from typing import List, Any
+from typing import List, Tuple
+from functools import cache
 
 import pandas
 
-import prefect
-from prefect.core.task import Task
-from prefect.utilities.tasks import defaults_from_attrs
+from prefect.tasks import Task
+from prefect.context import get_run_context, MissingContextError
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import ErrorHandler
@@ -28,7 +28,7 @@ from simmate.utilities import get_directory, make_archive, make_error_archive
 # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
 
 
-class S3Task(Task):
+class S3Task:
     """
     The Supervised-Staged-Shell Task (aka "S3Task")
     -----------------------------------------------
@@ -131,7 +131,6 @@ class S3Task(Task):
 
     For a full (and advanced) example, of a subclass take a look at
     `simmate.calculators.vasp.tasks.base.VaspTask`.
-
     """
 
     # I set this here so that I don't have to copy/paste the init method
@@ -142,13 +141,11 @@ class S3Task(Task):
     The defualt shell command to use.
     """
 
-    # While it's not needed for a number of cases, it's extremely common for the
-    # setup method to need an input structure in matsci. I therefore include
-    # this rather than having a nearly identical subclass that could cause
-    # some confusion.
-    requires_structure: bool = False
+    required_files = []
     """
-    Indicates whether a structure is needed if for the run() method.
+    Before the command is executed, this list of files should be present
+    in the working directory. This check will be made after `setup` is called
+    and before `execute` is called. By default, no input files are required.
     """
 
     error_handlers: List[ErrorHandler] = []
@@ -158,104 +155,104 @@ class S3Task(Task):
     applied and none of the following handlers will be checked.
     """
 
-    def __init__(
-        self,
-        max_corrections: int = 5,
-        monitor: bool = True,
-        polling_timestep: float = 1,
-        monitor_freq: int = 300,
-        save_corrections_to_file: bool = True,
-        corrections_filename: str = "simmate_corrections.csv",
-        compress_output: bool = False,
-        **kwargs: Any,
-    ):
-        """
-        Creates a task instance of this class. The parameters passed will be the
-        same every time you call the task.run() method.
+    max_corrections: int = 5
+    """
+    The maximum number of times we can apply a correction and retry the shell
+    command. The maximum number of times that corrections will be made (and
+    shell command reran) before giving up on the calculation. Note, once this
+    limit is exceeded, the error is stored without correcting or restarting
+    the run.
+    """
 
-        Note, many of the parameters here are for the Monitoring settings. These
-        are only ever relevent if there are ErrorHandlers added that have
-        is_monitor=True. These handlers run while the shelltask itself is also
-        running. Read more about ErrorHandlers for more info.
+    monitor: bool = True
+    """
+    Whether to run monitor handlers while the command runs. False means
+    wait until the job has completed.
+    """
 
-        #### Parameters
+    polling_timestep: float = 1
+    """
+    If we are monitoring the job for errors while it runs, this is how often
+    (in seconds) we should check the status of our job. Note this check is
+    just whether the job is done or not. This is NOT how often we check for
+    errors. See monitor_freq for that.
+    """
 
-        - `max_corrections`:
-            The maximum number of times we can apply a correction and retry the shell
-            command. The maximum number of times that corrections will be made (and
-            shell command reran) before giving up on the calculation. Note, once this
-            limit is exceeded, the error is stored without correcting or restarting
-            the run.
-        - `monitor`:
-            Whether to run monitor handlers while the command runs. False means
-            wait until the job has completed.
-        - `polling_timestep`:
-            If we are monitoring the job for errors while it runs, this is how often
-            (in seconds) we should check the status of our job. Note this check is
-            just whether the job is done or not. This is NOT how often we check for
-            errors. See monitor_freq for that.
-        - `monitor_freq`:
-            The frequency we should run check for errors with our monitors. This is
-            based on the polling_timestep loops. For example, if we have a
-            polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
-            the monitor checks every other loop -- or every 2x10 = 20 seconds. The
-            default values of polling_timestep=10 and monitor_freq=30 indicate that
-            we run monitoring functions every 5 minutes (10x30=300s=5min).
-        - `save_corrections_to_file`:
-            Whether to write a log file of the corrections made. The default is True.
-        - `corrections_filename`:
-            If save_corrections_to_file is True, this is the filename of where
-            to write the corrections. The default is "simmate_corrections.csv".
-        - `compress_output`:
-            Whether to compress the directory to a zip file at the end of the
-            task run. After compression, it will also delete the directory.
-            The default is False.
-        - `**kwargs`:
-            All extra arguments supported by
-            [prefect.core.task.Task](https://docs.prefect.io/api/latest/core/task.html).
-        """
+    monitor_freq: int = 300
+    """
+    The frequency we should run check for errors with our monitors. This is
+    based on the polling_timestep loops. For example, if we have a
+    polling_timestep of 10 seconds and a monitor_freq of 2, then we would run
+    the monitor checks every other loop -- or every 2x10 = 20 seconds. The
+    default values of polling_timestep=10 and monitor_freq=30 indicate that
+    we run monitoring functions every 5 minutes (10x30=300s=5min).
+    """
 
-        # Save the provided settings
-        self.monitor = monitor
-        self.max_corrections = max_corrections
-        self.polling_timestep = polling_timestep
-        self.monitor_freq = monitor_freq
-        self.compress_output = compress_output
-        self.save_corrections_to_file = save_corrections_to_file
-        self.corrections_filename = corrections_filename
+    save_corrections_to_file: bool = True
+    """
+    Whether to write a log file of the corrections made. The default is True.
+    """
 
-        # now inherit the parent Prefect Task class
-        super().__init__(**kwargs)
+    corrections_filename: str = "simmate_corrections.csv"
+    """
+    If save_corrections_to_file is True, this is the filename of where
+    to write the corrections. The default is "simmate_corrections.csv".
+    """
 
-    def setup(self, structure: Structure, directory: str, **kwargs):
+    compress_output: bool = False
+    """
+    Whether to compress the directory to a zip file at the end of the
+    task run. After compression, it will also delete the directory.
+    The default is False.
+    """
+
+    @staticmethod
+    def setup(directory: str, **kwargs):
         """
         This abstract method is ran before the command is actually executed. This
         allows for some pre-processing, such as writing input files or any other
         analysis.
 
-        You should never call this method directly unless you are debugging. This
-        is becuase setup() is normally called within the run() method.
+        When writing a custom S3Task, you can overwrite this method. The only
+        criteria is that you...
 
-        Some tasks don't require a setup() method, so by default, this method
+        1. include `directory` as the 1st input parameter and add `**kwargs`
+        2. decorate your method with `@staticmethod` or `@classmethod`
+
+        These criteria allow for compatibility with higher-level functinality.
+
+        You should never call this method directly unless you are debugging. This
+        is becuase `setup` is normally called within the `run` method.
+
+        Some tasks don't require a `setup` method, so by default, this method
         doesn't nothing but "pass".
 
         #### Parameters
 
-        - `structure`:
-            The structure to use for the task, if one is required.
         - `directory`:
             The directory to run everything in. Must exist already.
+
         - `**kwargs`:
             Extra kwargs that may be passed to some function within. Because
             Simmate prefers fixed settings for their workflows, this is typically
             not used, but instead, keywords should be explicitly defined when
             writing a setup method.
         """
-        # Be sure to include directory and structure (or **kwargs) as input
-        # arguments for higher-level compatibility with the run method.
         pass
 
-    def execute(self, directory: str, command: str):
+    @classmethod
+    def _check_input_files(cls, directory: str):
+        # Make sure that there are the proper output files from a VASP calc
+        filenames = [os.path.join(directory, file) for file in cls.required_files]
+        if not all(os.path.exists(filename) for filename in filenames):
+            raise Exception(
+                "Make sure your `setup` method directory source is set up correctly"
+                "The following files must exist in the directory where "
+                f"this task is ran but some are missing: {cls.required_files}"
+            )
+
+    @classmethod
+    def execute(cls, directory: str, command: str) -> List[Tuple[str]]:
         """
         This calls the command within the target directory and handles all error
         handling as well as monitoring of the job.
@@ -284,9 +281,7 @@ class S3Task(Task):
         # some error_handlers run while the shelltask is running. These are known as
         # Monitors and are labled via the is_monitor attribute. It's good for us
         # to separate these out from other error_handlers.
-        self.monitors = [
-            handler for handler in self.error_handlers if handler.is_monitor
-        ]
+        cls.monitors = [handler for handler in cls.error_handlers if handler.is_monitor]
 
         # We start with zero corrections that we slowly add to. This can be
         # thought of as a table with headers of...
@@ -299,7 +294,7 @@ class S3Task(Task):
         # we can try running the shelltask up to max_corrections. Because only one
         # correction is applied per attempt, you can view this as the maximum
         # number of attempts made on the calculation.
-        while len(corrections) <= self.max_corrections:
+        while len(corrections) <= cls.max_corrections:
 
             # launch the shelltask without waiting for it to complete. Also,
             # make sure to use common shell commands and to set the working
@@ -337,7 +332,7 @@ class S3Task(Task):
             # perform the monitoring. If both of these cases are true, then we
             # want to go through the error_handlers to check for errors until
             # the shelltask completes.
-            if self.monitor and self.monitors:
+            if cls.monitor and cls.monitors:
 
                 # ------ start of monitor while loop ------
 
@@ -350,16 +345,16 @@ class S3Task(Task):
                 while not has_error:
                     monitor_freq_n += 1
                     # Sleep the set amount before checking the shelltask status
-                    time.sleep(self.polling_timestep)
+                    time.sleep(cls.polling_timestep)
 
                     # check if the shelltasks is complete. poll will return 0
                     # when it's done, in which case we break the loop
                     if process.poll() is not None:
                         break
                     # check whether we should run monitors on this poll loop
-                    if monitor_freq_n % self.monitor_freq == 0:
+                    if monitor_freq_n % cls.monitor_freq == 0:
                         # iterate through each monitor
-                        for error_handler in self.monitors:
+                        for error_handler in cls.monitors:
                             # check if there's an error with this error_handler
                             # and grab the error if so
                             error = error_handler.check(directory)
@@ -368,7 +363,7 @@ class S3Task(Task):
                                 if error_handler.is_terminating:
                                     # If so, we kill the process but don't apply
                                     # the fix quite yet. That step is done below.
-                                    self._terminate_job(process, command)
+                                    cls._terminate_job(process, command)
                                 # Otherwise apply the fix and let the shelltask end
                                 # naturally. An example of this is for codes
                                 # where you add a STOP file to get it to
@@ -412,7 +407,7 @@ class S3Task(Task):
             # priority than the monitor triggered above (if there was one).
             # Since the error_handlers are in order of priority, only the first
             # will actually be applied and then we can retry the calc.
-            for error_handler in self.error_handlers:
+            for error_handler in cls.error_handlers:
 
                 # NOTE - The following special case is handled above:
                 #   error_handler.is_monitor and not error_handler.is_terminating
@@ -442,7 +437,7 @@ class S3Task(Task):
             # as a CSV file format and done every while-loop cycle because it
             # lets the user monitor the calculation and error handlers applied
             # as it goes. If no corrections were applied, we skip writing the file.
-            if self.save_corrections_to_file and corrections:
+            if cls.save_corrections_to_file and corrections:
                 # compile the corrections metadata into a dataframe
                 data = pandas.DataFrame(
                     corrections,
@@ -450,7 +445,7 @@ class S3Task(Task):
                 )
                 # write the dataframe to a csv file
                 data.to_csv(
-                    os.path.join(directory, self.corrections_filename),
+                    os.path.join(directory, cls.corrections_filename),
                     index=False,
                 )
             # now that we've gone through the error_handlers, let's see if any
@@ -465,7 +460,7 @@ class S3Task(Task):
         # ------ end of main while loop ------
 
         # make sure the while loop didn't exit because of the correction limit
-        if len(corrections) >= self.max_corrections:
+        if len(corrections) >= cls.max_corrections:
             raise MaxCorrectionsError(
                 "The number of maximum corrections has been exceeded. Note the final "
                 "error and its fix are still listed in the corrections file, but it "
@@ -532,18 +527,27 @@ class S3Task(Task):
         # directory, which will make it so they don't have to overwrite all the
         # classes that inherit from this one.
 
-    def workup(self, directory: str):
+    @staticmethod
+    def workup(directory: str):
         """
         This method is called at the end of a job, *after* error detection.
         This allows post-processing, such as cleanup, analysis of results,
         etc. This should return the result of the entire job, such as a
         the final structure or final energy calculated.
 
-        You should never call this method directly unless you are debugging. This
-        is becuase workup() is normally called within the run() method.
+        When writing a custom S3Task, you can overwrite this method. The only
+        criteria is that you...
 
-        Some tasks don't require a workup() method, so by default, this method
-        does nothing but "pass".
+        1. include `directory` as an input parameters
+        2. decorate your method with `@staticmethod` or `@classmethod`
+
+        These criteria allow for compatibility with higher-level functinality.
+
+        You should never call this method directly unless you are debugging. This
+        is becuase `workup` is normally called within the `run` method.
+
+        Some tasks don't require a `workup` method, so by default, this method
+        doesn't nothing but "pass".
 
         #### Parameters
 
@@ -551,15 +555,11 @@ class S3Task(Task):
             The directory to run everything in.
 
         """
-        # Be sure to include directory (or **kwargs) as input argument for
-        # higher-level compatibility with the run method and SupervisedStagedTask
-        # You should never need to call this method directly!
         pass
 
-    @defaults_from_attrs("command")
-    def run(
-        self,
-        structure: Structure = None,
+    @classmethod
+    def run_config(
+        cls,
         directory: str = None,
         command: str = None,
         **kwargs,
@@ -569,19 +569,16 @@ class S3Task(Task):
         supervising during execution.
 
         Call this method once you have your task initialized. For each run you
-        can provide a new structure, directory, or command. For example,
+        can provide a new structure, directory, or command. For example:
 
         ``` python
         from simmate.calculator.example.tasks import ExampleTask
 
-        my_task = ExampleTask()
-        my_result = my_task.run(structure=my_structure, command=my_command)
+        my_result = ExampleTask.run(command=my_command)
         ```
 
         #### Parameters
 
-        - `structure`:
-            The structure to use for the task, if one is required.
         - `command`:
             The command that will be called during execution.
         - `directory`:
@@ -601,37 +598,81 @@ class S3Task(Task):
         # workflow level, then we want to make it so the user can set it for
         # each unique task.run() call. Otherwise we grab the default from the
         # class attribute
+        if not command:
+            command = cls.command
 
-        # make sure a structure was given if it's required
-        if not structure and self.requires_structure:
-            raise StructureRequiredError("a structure is required as an input")
         # establish the working directory
         directory = get_directory(directory)
 
         # run the setup stage of the task
-        self.setup(structure, directory, **kwargs)
+        cls.setup(directory=directory, **kwargs)
+
+        # make sure proper files are present
+        cls._check_input_files(directory)
 
         # run the shelltask and error supervision stages. This method returns
         # a list of any corrections applied during the run.
-        corrections = self.execute(directory, command)
+        corrections = cls.execute(directory, command)
 
         # run the workup stage of the task. This is where the data/info is pull
         # out from the calculation and is thus our "result".
-        result = self.workup(directory)
+        result = cls.workup(directory=directory)
 
         # if requested, compresses the directory to a zip file and then removes
         # the directory.
-        if self.compress_output:
+        if cls.compress_output:
             make_archive(directory)
+
+        # Grab the prefect flow run id. Note, when not ran within a prefect
+        # flow, there won't be an id. We therefore need this try/except
+        try:
+            prefect_context = get_run_context()
+            flow_run_id = str(prefect_context.task_run.flow_run_id)
+        except MissingContextError:
+            flow_run_id = None
+
         # Return our final information as a dictionary
         return {
             "result": result,
             "corrections": corrections,
             "directory": directory,
-            "prefect_flow_run_id": prefect.context.flow_run_id
-            if hasattr(prefect.context, "flow_run_id")
-            else None,  # when not ran within a prefect flow, there won't be an id
+            "prefect_flow_run_id": flow_run_id,
         }
+
+    @classmethod
+    @cache
+    def to_prefect_task(cls) -> Task:
+        """
+        Converts this workflow into a Prefect task
+        """
+
+        # Build the Task object directly instead of using prefect's @task decorator
+        task = Task(
+            fn=cls.run_config,
+            name=cls.__name__,
+        )
+
+        # as an extra, we set this attribute to the prefect task instance, which
+        # allows us to access the source Simmate S3Task easily with Prefect's
+        # context managers.
+        task.simmate_s3task = cls
+
+        return task
+
+    @classmethod
+    def run(cls, **kwargs):
+        """
+        A convience method to run this task as a registered task in a prefect context.
+        """
+        task = cls.to_prefect_task()
+        state = task(**kwargs)
+
+        # We don't want to block and wait because this might disable parallel
+        # features of subflows. We therefore return the state and let the
+        # user decide if/when to block.
+        # result = state.result()
+
+        return state
 
     @classmethod
     def get_config(cls):
@@ -661,8 +702,4 @@ class MaxCorrectionsError(Exception):
 
 
 class NonZeroExitError(Exception):
-    pass
-
-
-class StructureRequiredError(Exception):
     pass

@@ -1,3 +1,11 @@
+> :warning: Before you begin, make sure you are viewing the tutorials for the correct Simmate version. To do this, select the drop-down menu that has `main` (Find it above this page on the left side. See the image below for what it looks like.) --> switch from the `Branches` to `Tags` tab --> select the version you are using (e.g. `v0.6.0`). If you are unsure which version to select, choose the newest version listed (the top one).
+
+<!-- Image showing the "branches" drop down -->
+<p align="center" style="margin-bottom:40px;">
+<img src="https://docs.github.com/assets/cb-6252/images/help/branch/branch-selection-dropdown.png"  height=100 style="max-height: 100px;">
+</p>
+
+
 # Installation
 
 In this tutorial, you will learn how to install Simmate with Anaconda and start up a local server. Beginners will also be introduced to the command-line.
@@ -18,7 +26,6 @@ In this tutorial, you will learn how to install Simmate with Anaconda and start 
 # The quick tutorial
 
 > :warning: In this tutorial and others, beginners should skip the **quick tutorial** section and jump straight to the **full tutorial**. The critical steps in each are exactly the same, but the full tutorial includes extra exploration of the software and how to use it. So be sure to read the full tutorials if you don't have coding experience!
-
 
 1. Install [anaconda](https://www.anaconda.com/products/distribution)
 2. Create a conda environment, install Simmate in it, and activate it. *(note: Spyder is our recommended IDE but optional)*

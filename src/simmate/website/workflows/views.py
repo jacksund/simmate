@@ -3,8 +3,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
-from prefect.backend.flow_run import FlowView
-
 from simmate.database.base_data_types import DatabaseTable
 from simmate import workflows as workflow_module
 from simmate.workflows.utilities import (
@@ -98,7 +96,7 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         """
         grabs the relevant database table using the URL request
         """
-        workflow_name_full = workflow_type + "/" + workflow_name
+        workflow_name_full = workflow_type + ".vasp." + workflow_name
         workflow = get_workflow(workflow_name_full)
         return workflow.database_table
 
@@ -109,26 +107,17 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         workflow_name,
     ) -> dict:
 
-        workflow_name_full = workflow_type + "/" + workflow_name
+        workflow_name_full = workflow_type + ".vasp." + workflow_name
         workflow = get_workflow(workflow_name_full)
 
-        # In order to make links to the monitoring pages for each of these, we need
-        # to grab the prefect id
-        # If no flow exists in Prefect cloud, a ValueError is raised, so I can't
-        # share this info
-        try:
-            flow_id = FlowView.from_flow_name(workflow_name_full).flow_id
-            nflows_submitted = workflow.nflows_submitted
-        except:  # ValueError is no query result. Need to test what error is if no API key.
-            flow_id = None
-            nflows_submitted = None
         # TODO: grab some metadata about this calc. For example...
         # ncalculations = MITRelaxation.objects.count()
+        # nflows_submitted = workflow.nflows_submitted
 
         return {
             "workflow": workflow,
-            "flow_id": flow_id,
-            "nflows_submitted": nflows_submitted,
+            "flow_id": None,  # TODO
+            "nflows_submitted": None,
         }
 
     def get_retrieve_context(
@@ -139,7 +128,7 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         pk,
     ) -> dict:
 
-        workflow_name_full = workflow_type + "/" + workflow_name
+        workflow_name_full = workflow_type + ".vasp." + workflow_name
         workflow = get_workflow(workflow_name_full)
 
         return {"workflow": workflow}
@@ -152,7 +141,7 @@ def workflow_submit(
     workflow_name: str,
 ):
 
-    workflow_name_full = workflow_type + "/" + workflow_name
+    workflow_name_full = workflow_type + ".vasp." + workflow_name
     workflow = get_workflow(workflow_name_full)
 
     # dynamically create the form for this workflow

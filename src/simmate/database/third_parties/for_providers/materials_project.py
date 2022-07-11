@@ -17,7 +17,7 @@ from django.db import transaction
 from tqdm import tqdm
 from pymatgen.ext.matproj import MPRester
 
-from simmate.database.third_parties import MatProjStructure
+from simmate.database.third_parties import MatprojStructure
 
 
 @transaction.atomic
@@ -96,7 +96,7 @@ def load_all_structures(
         progress_bar.update(1)
 
         # convert the data to a Simmate database object
-        structure_db = MatProjStructure.from_toolkit(
+        structure_db = MatprojStructure.from_toolkit(
             id=entry["material_id"],
             structure=entry["structure"],
             energy=entry["final_energy"],
@@ -107,4 +107,4 @@ def load_all_structures(
 
     # once all structures are saved, let's update the Thermodynamic columns
     if update_stabilities:
-        MatProjStructure.update_all_stabilities()
+        MatprojStructure.update_all_stabilities()

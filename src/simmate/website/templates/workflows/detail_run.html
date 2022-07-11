@@ -18,9 +18,9 @@ Simmate
       <div class="page-title-right">
         <ol class="breadcrumb m-0">
           <li class="breadcrumb-item"><a href="{% url 'workflows' %}">workflows</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.type %}">{{ workflow.type }}</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.type workflow.name_short %}">
-              {{ workflow.name_short }}</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.name_project %}">{{ workflow.name_project }}</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.name_project workflow.name_preset %}">
+              {{ workflow.name_preset }}</a></li>
           <li class="breadcrumb-item active">{{ calculation.id }}</li>
         </ol>
       </div>

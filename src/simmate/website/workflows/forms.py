@@ -142,42 +142,42 @@ class SubmitWorkflow(forms.Form):
 
         # We keep a running dictionary of options for the form.
         form_fields = {}
-        for parameter in workflow.parameters():
-            name = parameter.name
-            is_required = parameter.required
+        for parameter_name in workflow.parameter_names:
 
-            if name in INPUT_MAPPINGS["file-or-json"]:
+            is_required = parameter_name in workflow.parameter_names_required
+
+            if parameter_name in INPUT_MAPPINGS["file-or-json"]:
                 # Only one of these two inputs is required. I set required=False
                 # for both, but I should check that one is given within this
                 # class's "clean" method
 
                 # Max length refers to the filename length, not its contents
-                form_fields[f"{name}_file"] = forms.FileField(
+                form_fields[f"{parameter_name}_file"] = forms.FileField(
                     max_length=100,
                     required=False,
                 )
-                form_fields[f"{name}_json"] = forms.JSONField(required=False)
+                form_fields[f"{parameter_name}_json"] = forms.JSONField(required=False)
 
-            elif name in INPUT_MAPPINGS["string"]:
-                form_fields[name] = forms.CharField(
+            elif parameter_name in INPUT_MAPPINGS["string"]:
+                form_fields[parameter_name] = forms.CharField(
                     max_length=100,
                     required=is_required,
                 )
 
-            elif name in INPUT_MAPPINGS["integer"]:
-                form_fields[name] = forms.IntegerField(required=is_required)
+            elif parameter_name in INPUT_MAPPINGS["integer"]:
+                form_fields[parameter_name] = forms.IntegerField(required=is_required)
 
-            elif name in INPUT_MAPPINGS["float"]:
-                form_fields[name] = forms.FloatField(required=is_required)
+            elif parameter_name in INPUT_MAPPINGS["float"]:
+                form_fields[parameter_name] = forms.FloatField(required=is_required)
 
-            elif name in INPUT_MAPPINGS["boolean"]:
-                form_fields[name] = forms.BooleanField(required=is_required)
+            elif parameter_name in INPUT_MAPPINGS["boolean"]:
+                form_fields[parameter_name] = forms.BooleanField(required=is_required)
 
-            elif name in INPUT_MAPPINGS["json"]:
-                form_fields[name] = forms.JSONField(required=is_required)
+            elif parameter_name in INPUT_MAPPINGS["json"]:
+                form_fields[parameter_name] = forms.JSONField(required=is_required)
 
             else:
-                raise Exception(f"Unknown input type for parameter {name}")
+                raise Exception(f"Unknown input type for parameter {parameter_name}")
 
         # once we have all the fields, we can dynamically create the new class.
         NewClass = type("SubmitWorkflowForm", tuple([cls]), form_fields)
@@ -186,7 +186,8 @@ class SubmitWorkflow(forms.Form):
 
 
 # TODO: is there a way to dynamically inpsect types so that I don't need this?
-# I need a way to accept filters from custom workflows as well.
+# I need a way to accept filters from custom workflows as well. How should
+# I handle user-based parameters?
 INPUT_MAPPINGS = {
     "json": [
         "source",
@@ -215,5 +216,7 @@ INPUT_MAPPINGS = {
     ],
     "boolean": [
         "copy_previous_directory",
+        "pre_standardize_structure",
+        "pre_sanitize_structure",
     ],
 }

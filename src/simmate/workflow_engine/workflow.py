@@ -3,25 +3,27 @@
 import json
 import cloudpickle
 import yaml
+import re
 from typing import List
+from functools import cache  # cached_property doesnt work with classmethod
 
-# note: extra modules are imported from prefect for convenience imports elsewhere
-import prefect
-from prefect import Client
-from prefect import Flow as PrefectFlow, Parameter, task, Task
-from prefect.storage import Module as ModuleStorage
-from prefect.utilities.graphql import with_args
-from prefect.backend import FlowRunView, FlowView
+from prefect.tasks import task  # present only for convience imports elsewhere
+from prefect.flows import Flow
+from prefect.states import State
+from prefect.context import FlowRunContext
+from prefect.client import get_client
+from prefect.orion.schemas.filters import FlowFilter, FlowRunFilter
+from prefect.packaging import OrionPackager
+from prefect.packaging.serializers import PickleSerializer
 
-# This import below is used to grab `watch_flow_run`, but we don't grab it directly
-# in order to support "mocking" this function in unit tests
-from prefect.backend import flow_run as flow_run_module
-
+import simmate
+from simmate.toolkit import Structure
 from simmate.database.base_data_types import Calculation
 from simmate.workflow_engine import S3Task
+from simmate.utilities import async_to_sync
 
 
-class Workflow(PrefectFlow):
+class Workflow:
     """
     This class behaves exactly like a normal Prefect workflow, where we add some
     common utilities and pre-submit tasks. For example, there is the `run_cloud`
@@ -32,18 +34,16 @@ class Workflow(PrefectFlow):
     [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)
     """
 
-    result_task: Task = None
-    """
-    In many ETL workflows, we may also want the result of the some terminating
-    task directly. This would save us from having to go find the result in
-    the database. So by setting `result_task`, we are able get access a specific task's
-    result -- directly as a python object(s). This is optional.
-    """
+    # TODO: set storage attribute to module
 
-    project_name: str = None
+    # TODO: inherit doc from s3task
+    # by default we just copy the docstring of the S3task to the workflow
+    # workflow.__doc__ = s3task.__doc__
+
+    version: str = simmate.__version__
     """
-    The name of the project in Prefect Cloud that this workflow is associated with. This 
-    attribute is mainly just for organizing workflows in the web interface.
+    Version number for this flow. Defaults to the Simmate version 
+    (e.g. "0.7.0").
     """
 
     s3task: S3Task = None
@@ -70,169 +70,221 @@ class Workflow(PrefectFlow):
     in the list-view of all different workflow presets.
     """
 
-    register_kwargs: List[str] = []
-    """
-    (experimental feature)
-    A list of input parameters that should be used to register the calculation.
-    """
+    @classmethod
+    def run_config(
+        cls,
+        structure: Structure,
+        command: str = None,
+        source: dict = None,
+        directory: str = None,
+        copy_previous_directory: bool = False,
+        pre_sanitize_structure: bool = None,
+        pre_standardize_structure: bool = None,
+    ):
+        """
+        The workflow method, which can be overwritten when inheriting from this
+        class. This can be either a staticmethod or classmethod.
 
-    @property
-    def type(self) -> str:
-        """
-        Gives the workflow type of this workflow. For example the workflow named
-        'static-energy/matproj' would have the type `static-energy`.
-        """
-        return self.name.split("/")[0]
+        #### The default run method
 
+        There is a default run method implemented that is for S3Tasks.
+
+        Builds a workflow from a S3Task and it's corresponding database table.
+
+        Very often with Simmate's S3Tasks, the workflow for a single S3Task is
+        the same. The workflow is typically made of three tasks:
+
+        1. loading the input parameters and registering the calculation
+        2. running the calculation (what this S3Task does on its own)
+        3. saving the calculation results
+
+        Task 1 and 3 always use the same functions, where we just need to tell
+        it which database table we are registering/saving to.
+
+        Because of this common recipe for workflows, we use this method to make
+        the workflow for us.
+        """
+        # local import to prevent circular import error
+        from simmate.workflow_engine.common_tasks import (
+            load_input_and_register,
+            save_result,
+        )
+
+        # make sure the workflow is configured properly first
+        if not cls.s3task:
+            raise NotImplementedError(
+                "Please either set the s3task attribute or write a custom run method!"
+            )
+
+        parameters_cleaned = load_input_and_register(
+            structure=structure,
+            command=command,
+            source=source,
+            directory=directory,
+            copy_previous_directory=copy_previous_directory,
+            pre_sanitize_structure=pre_sanitize_structure,
+            pre_standardize_structure=pre_standardize_structure,
+        ).result()
+
+        result = cls.s3task.run(**parameters_cleaned).result()
+
+        save_result(result)
+
+        return result
+
+    @classmethod
+    @cache
+    def to_prefect_flow(cls) -> Flow:
+        """
+        Converts this workflow into a Prefect flow
+        """
+
+        # Instead of the @flow decorator, we build the flow instance directly
+        flow = Flow(
+            fn=cls.run_config,
+            name=cls.name_full,
+            version=cls.version,
+            # Skip type checking because I don't have robust typing yet
+            # e.g. Structure type inputs also accept inputs like a filename
+            validate_parameters=False,
+        )
+
+        # as an extra, we set this attribute to the prefect flow instance, which
+        # allows us to access the source Simmate Workflow easily with Prefect's
+        # context managers.
+        flow.simmate_workflow = cls
+
+        return flow
+
+    @classmethod
+    def run(cls, **kwargs) -> State:
+        """
+        A convience method to run a workflow as a subflow in a prefect context.
+        """
+        subflow = cls.to_prefect_flow()
+        state = subflow(**kwargs)
+
+        # We don't want to block and wait because this might disable parallel
+        # features of subflows. We therefore return the state and let the
+        # user decide if/when to block.
+        # result = state.result()
+
+        return state
+
+    @classmethod
     @property
-    def name_short(self) -> str:
+    def name_full(cls) -> str:
         """
-        Gives the present name of the workflow. For example the workflow named
-        'static-energy/matproj' would have the shortname `matproj`
+        Standardized name of the workflow. This converts the class name like so:
+        `Static_Energy__VASP__Matproj` --> `static-energy.vasp.matproj`
         """
-        return self.name.split("/")[-1]
+        if not len(cls.__name__.split("__")) == 3:
+            raise Exception("Make sure you are following Simmate naming conventions!")
+
+        # convert to dot format
+        name = cls.__name__.replace("__", ".")
+
+        # adds a hyphen between each capital letter
+        # copied from https://stackoverflow.com/questions/199059/
+        name = re.sub(r"(\w)([A-Z])", r"\1-\2", name)
+
+        return name.lower()
+
+    @classmethod
+    @property
+    def name_project(cls) -> str:
+        """
+        Name of the Project this workflow is associated with. This is the first
+        portion of the flow name (e.g. "static-energy")
+        """
+        return cls.name_full.split(".")[0]
+
+    @classmethod
+    @property
+    def name_calculator(cls) -> str:
+        """
+        Name of the calculator this workflow is associated with. This is the second
+        portion of the flow name (e.g. "vasp")
+        """
+        return cls.name_full.split(".")[1]
+
+    @classmethod
+    @property
+    def name_preset(cls) -> str:
+        """
+        Name of the settings/preset this workflow is associated with. This is the third
+        portion of the flow name (e.g. "matproj" or "matproj-prebader")
+        """
+        return cls.name_full.split(".")[2]
 
     # BUG: naming this `description` causes issues.
     # See https://github.com/PrefectHQ/prefect/issues/3911
+    @classmethod
     @property
-    def description_doc(self) -> str:
+    def description_doc(cls) -> str:
         """
         This simply returns the documentation string of this workflow -- so this
         is the same as `__doc__`. This attribute is only defined for beginners
         to python and for use in django templates for the website interface.
         """
-        return self.__doc__
+        return cls.__doc__ or cls.s3task.__doc__  # NEEDS REFACTOR
 
+    @classmethod
     @property
-    def parameter_names(self):
+    def parameter_names(cls) -> List[str]:
         """
-        Prints a list of all the parameter names for this workflow.
+        Gives a list of all the parameter names for this workflow.
         """
-        # Iterate through and grab the columns. Note we don't use get_column_names
-        # here because we are attaching relation data as well. We also
+        # Iterate through and grab the parameters for the run method. We also
         # sort them alphabetically for consistent results.
-        parameter_names = [parameter.name for parameter in self.parameters()]
+        parameter_names = list(cls.to_prefect_flow().parameters.properties.keys())
         parameter_names.sort()
         return parameter_names
 
-    def show_parameters(self):
+    @classmethod
+    @property
+    def parameter_names_required(cls) -> List[str]:
+        """
+        Gives a list of all the required parameter names for this workflow.
+        """
+        return cls.to_prefect_flow().parameters.required
+
+    @classmethod
+    def show_parameters(cls):
         """
         Prints a list of all the parameter names for this workflow.
         """
         # use yaml to make the printout pretty (no quotes and separate lines)
-        print(yaml.dump(self.parameter_names))
+        print(yaml.dump(cls.parameter_names))
 
-    def run_cloud(
-        self,
-        labels: List[str] = [],
-        wait_for_run: bool = True,
-        **kwargs,
-    ) -> str:
+    @classmethod
+    @property
+    def parameters_to_register(cls) -> List[str]:
         """
-        This schedules the workflow to run remotely on Prefect Cloud.
-
-        #### Parameters
-
-        - `labels`:
-            a list of labels to schedule the workflow with
-
-        - `wait_for_run`:
-            whether to wait for the workflow to finish. If False, the workflow
-            will simply be submitted and then exit. The default is True.
-
-        - `**kwargs`:
-            all options that are normally passed to the workflow.run() method
-
-        #### Returns
-
-        - The flow run id that was used in prefect cloud.
-
-
-        #### Usage
-
-        Make sure you have Prefect properly configured and have registered your
-        workflow with the backend.
-
-        Note that this method can be viewed as a fork of:
-            - from prefect.tasks.prefect.flow_run import create_flow_run
-        It can also be viewed as a more convenient way to call to client.create_flow_run.
-        I don't accept any other client.create_flow_run() inputs besides 'labels'.
-        This may change in the future if I need to set flow run names or schedules.
+        (experimental feature)
+        A list of input parameters that should be used to register the calculation.
         """
+        parameters_to_register = [
+            "prefect_flow_run_id"
+        ]  # run is always used to register but is never an input parameter
 
-        # Grab the logger as we will print useful information below.
-        # In some cases, there is no logger present, so we just set logger=None.
-        # This possibility is why we use `if logger else None` statements below.
-        logger = getattr(prefect.context, "logger", None)
+        table_columns = cls.database_table.get_column_names()
 
-        # Grab the Flow's ID from Prefect Cloud
-        logger.debug("Looking up flow metadata...") if logger else None
-        flow_view = FlowView.from_flow_name(
-            self.name,
-            project_name=self.project_name,
-        )
+        for parameter in cls.parameter_names:
+            if parameter in table_columns:
+                parameters_to_register.append(parameter)
 
-        # Prefect does not properly deserialize objects that have
-        # as as_dict or to_dict method, so we use a custom method to do that here
-        parameters_serialized = self._serialize_parameters(**kwargs)
-        # BUG: What if we are submitting using a filename? We don't want to
-        # submit to a cluster and have the job fail because it doesn't have
-        # access to the file. One solution could be to deserialize right before
-        # serializing in the next line in order to ensure parameters that
-        # accept file names are submitted with all necessary data.
+        # check special cases where input parameter doesn't match to a column name
+        if "structure_string" in table_columns:
+            parameters_to_register.append("structure")
 
-        # Now we submit the workflow
-        logger.info(f"Creating flow run for {self.name}...") if logger else None
-        client = Client()
-        flow_run_id = client.create_flow_run(
-            flow_id=flow_view.flow_id,
-            parameters=parameters_serialized,
-            labels=labels,
-        )
+        # put in alphabetical order for consistent results
+        parameters_to_register.sort()
 
-        # we log the website url to the flow for the user
-        run_url = client.get_cloud_url("flow-run", flow_run_id)
-        logger.info(f"Created flow run: {run_url}") if logger else None
+        return parameters_to_register
 
-        # -----------------------------------
-        # This part is unique to Simmate. Because we often want to save some info
-        # to our database even before the calculation starts/finishes, we do that
-        # here. An example is storing the structure and prefect id that we just
-        # submitted.
-        # BUG: Will there be a race condition here? What if the workflow finishes
-        # and tries writing to the databse before this is done?
-        parameters_cleaned = self._deserialize_parameters(**kwargs)
-        self._register_calculation(flow_run_id, parameters_cleaned)
-        # -----------------------------------
-
-        # if we want to wait until the job is complete, we do that here
-        if wait_for_run:
-            flow_run_view = self.wait_for_flow_run(flow_run_id)
-            # return flow_run_view # !!! Should I return this instead?
-
-        # return the flow_run_id for the user
-        return flow_run_id
-
-    def wait_for_flow_run(self, flow_run_id: str):
-        """
-        Waits for a given flow run to complete
-
-        This method is a direct fork of...
-            from prefect.tasks.prefect.flow_run import wait_for_flow_run
-
-        It does exactly the same thing where I just assume I want to stream logs.
-        """
-
-        flow_run = FlowRunView.from_flow_run_id(flow_run_id)
-
-        for log in flow_run_module.watch_flow_run(flow_run_id):
-            message = f"Flow {flow_run.name}: {log.message}"
-            prefect.context.logger.log(log.level, message)
-
-        # Return the final view of the flow run
-        return flow_run.get_latest()
-
-    def _register_calculation(self, prefect_flow_run_id, parameters):
+    @classmethod
+    def _register_calculation(cls, **kwargs) -> Calculation:
         """
         If the workflow is linked to a calculation table in the Simmate database,
         this adds the flow run to the database.
@@ -243,25 +295,60 @@ class Workflow(PrefectFlow):
         `run_cloud` method and `load_input_and_register` task.
         """
 
-        # grab the registration kwargs from the parameters provided
+        # We first need to grab the database table where we want to register
+        # the calculation run to. We can grab the table from either...
+        #   1. the database_table attribute
+        #   2. flow_context --> flow_name --> flow --> then grab its database_table
+
+        # If this method is being called on the base Workflow class, that
+        # means we are trying to register a calculation from within a flow
+        # context -- where the context has information such as the workflow
+        # we are using (and the database table linked to that workflow).
+        if cls == Workflow:
+
+            run_context = FlowRunContext.get()
+            workflow = run_context.flow.simmate_workflow
+            database_table = workflow.database_table
+
+            # as an extra, add the prefect_flow_run_id the kwargs in case it
+            # wasn't set already.
+            if "prefect_flow_run_id" not in kwargs:
+                kwargs["prefect_flow_run_id"] = str(run_context.flow_run.id)
+
+        # Otherwise we should be using the subclass Workflow that has the
+        # database_table property set.
+        else:
+            workflow = cls  # we have the workflow class already
+            database_table = cls.database_table
+
+        # Registration is only possible if a table is provided. Some
+        # special-case workflows don't store calculation information bc the flow
+        # is just a quick python analysis.
+        if not database_table:
+            print("No database table found. Skipping registration.")
+            return
+
+        # grab the registration kwargs from the parameters provided and then
+        # convert them to a python object format for the database method
         register_kwargs = {
-            key: parameters.get(key, None) for key in self.register_kwargs
+            key: kwargs.get(key, None) for key in workflow.parameters_to_register
         }
+        register_kwargs_cleaned = cls._deserialize_parameters(**register_kwargs)
 
         # SPECIAL CASE: for customized workflows we need to convert the inputs
         # back to json before saving to the database.
-        if "workflow_base" in parameters:
-            parameters_serialized = self._serialize_parameters(**parameters)
-            calculation = self.database_table.from_prefect_id(
-                id=prefect_flow_run_id,
+        if "workflow_base" in register_kwargs_cleaned:
+            parameters_serialized = cls._serialize_parameters(**register_kwargs_cleaned)
+            prefect_flow_run_id = parameters_serialized.pop("prefect_flow_run_id", None)
+            calculation = database_table.from_prefect_id(
+                prefect_flow_run_id=prefect_flow_run_id,
                 **parameters_serialized,
             )
         else:
             # load/create the calculation for this workflow run
-            calculation = self.database_table.from_prefect_id(
-                id=prefect_flow_run_id,
-                **register_kwargs,
-            )
+            calculation = database_table.from_prefect_id(**register_kwargs_cleaned)
+
+        return calculation
 
     @staticmethod
     def _serialize_parameters(**parameters) -> dict:
@@ -272,7 +359,9 @@ class Workflow(PrefectFlow):
         This method should not be called directly as it is used within the
         run_cloud() method.
         """
+
         # TODO: consider moving this into prefect's core code as a contribution.
+        # This alternatively might be a pydantic contribution
 
         # Because many flows allow object-type inputs (such as structure object),
         # we need to serialize these inputs before scheduling them with prefect
@@ -316,14 +405,6 @@ class Workflow(PrefectFlow):
         converts all parameters to appropriate python objects
         """
 
-        # we don't want to pass arguments like command=None or structure=None if the
-        # user didn't provide this input parameter. Instead, we want the workflow to
-        # use its own default value. To do this, we first check if the parameter
-        # is set in our kwargs dictionary and making sure the value is NOT None.
-        # If it is None, then we remove it from our final list of kwargs. This
-        # is only done for command, directory, and structure inputs -- as these
-        # are the three that are typically assumed to be present (see the CLI).
-
         from simmate.toolkit import Structure
         from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 
@@ -347,11 +428,24 @@ class Workflow(PrefectFlow):
             return parameters_cleaned
         #######
 
-        if not parameters.get("command", None):
-            parameters_cleaned.pop("command", None)
+        # we don't want to pass arguments like command=None or structure=None if the
+        # user didn't provide this input parameter. Instead, we want the workflow to
+        # use its own default value. To do this, we first check if the parameter
+        # is set in our kwargs dictionary and making sure the value is NOT None.
+        # If it is None, then we remove it from our final list of kwargs. This
+        # is only done for command, directory, and structure inputs -- as these
+        # are the three that are typically assumed to be present (see the CLI).
+        parameter_to_filter = [
+            "command",
+            "directory",
+            "pre_sanitize_structure",
+            "pre_standardize_structure",
+        ]
+        for parameter in parameter_to_filter:
+            if not parameters.get(parameter, None):
+                parameters_cleaned.pop(parameter, None)
 
-        if not parameters.get("directory", None):
-            parameters_cleaned.pop("directory", None)
+        # The remaining checks look to intialize input to toolkit objects
 
         structure = parameters.get("structure", None)
         if structure:
@@ -387,55 +481,188 @@ class Workflow(PrefectFlow):
 
         return parameters_cleaned
 
+    # -------------------------------------------------------------------------
+    #
+    # All methods beyond this point require a Prefect server to be running
+    # and Simmate to be connected to it.
+    #
+    # -------------------------------------------------------------------------
+
+    @classmethod
     @property
-    def nflows_submitted(self) -> int:
+    @cache
+    @async_to_sync
+    async def deployment_id(cls) -> str:
         """
-        Queries Prefect to see how many workflows are in a running or submitted
-        state. It will return a count (integer).
-
-        Note, your workflow must be registered with Prefect for this to work.
+        Grabs the deployment id from the prefect database if it exists, and
+        if not, creates the depolyment
         """
-        query = {
-            "query": {
-                with_args(
-                    "flow_run_aggregate",
-                    {
-                        "where": {
-                            "flow": {"name": {"_eq": self.name}},
-                            "state": {"_in": ["Running", "Scheduled"]},
-                        },
-                    },
-                ): {"aggregate": {"count"}}
-            }
-        }
-        client = Client()
-        result = client.graphql(query)
-        return result["data"]["flow_run_aggregate"]["aggregate"]["count"]
 
-    def to_workflow_task(self):
+        async with get_client() as client:
+            response = await client.read_deployments(
+                flow_filter=FlowFilter(
+                    name={"any_": [cls.name_full]},
+                ),
+            )
+
+        # If this is the first time accessing the deployment id, we will need
+        # to create the deployment
+        if not response:
+            deployment_id = cls._create_deployment()
+            return deployment_id
+
+        # there should only be one deployment associated with this workflow
+        # if it's been deployed already.
+        elif len(response) == 1:
+            return str(response[0].id)
+
+        else:
+            raise Exception("There are duplicate deployments for this workflow!")
+
+    @classmethod
+    @async_to_sync
+    async def _create_deployment(cls) -> str:
         """
-        Converts a prefect workflow to a prefect task (aka a "workflow task")
+        Registers this workflow to the prefect database as a deployment.
 
-        See the documentation in workflow_engine.tasks.workflow_task for more.
+        This method should not be called directly. It will be called by
+        other methods when appropriate
         """
-        from simmate.workflow_engine import WorkflowTask
 
-        return WorkflowTask(workflow=self)
+        # CREATE_DEPLOYMENT method is not yet updated in 2.0b8
+        #
+        # async with get_client() as client:
+        #     response = await client.create_deployment(
+        #         name="leonardo-deployment",
+        #         flow_location="./leo_flow.py",
+        #         tags=['tutorial','test'],
+        #         parameters={'name':'Leo'},
+        #     )
 
-    # @classmethod
-    # def get_all_ids_in_state(cls, states=["Completed", "Scheduled"]):
-    #     # TODO: This is an example query where I grab all ids. This may be useful in the
-    #     # future.
-    #     query = {
-    #         "query": {
-    #             with_args(
-    #                 "flow_run",
-    #                 {
-    #                     "where": {
-    #                         "flow": {"name": {"_eq": cls.name}},
-    #                         "state": {"_in": states},
-    #                     },
-    #                 },
-    #             ): ["id"]
-    #         }
-    #     }
+        # For now, this is a modification of the create_deployment code
+        # until they fix the method.
+
+        from prefect.deployments import Deployment
+
+        deployment = Deployment(
+            flow=cls.to_prefect_flow(),
+            name=cls.name_full,
+            packager=OrionPackager(serializer=PickleSerializer()),
+            tags=[
+                "simmate",
+                cls.name_project,
+                cls.name_calculator,
+            ],
+        )
+        # OPTIMIZE: it would be better if I could figure out the ImportSerializer
+        # here. Only issue is that prefect would need to know to import AND
+        # call a method.
+
+        async with get_client() as client:
+            deployment_id = await deployment.create()
+
+        return str(deployment_id)  # convert from UUID to str first
+
+    @classmethod
+    @async_to_sync
+    async def _submit_to_prefect(cls, **kwargs) -> str:
+        """
+        Submits a flow run to prefect cloud.
+
+        This method should not be used directly. Instead use `run_cloud`.
+        """
+
+        # The reason we have this code as a separate method is because we want
+        # to isolate Prefect's async calls from Django's sync-restricted calls
+        # (i.e. django raises errors if called within an async context).
+        # Therefore, methods like `run_cloud` can't have both this async code
+        # AND methods like _register_calculation that make sync database calls.
+
+        async with get_client() as client:
+            response = await client.create_flow_run_from_deployment(
+                deployment_id=cls.deployment_id,
+                **kwargs,
+            )
+
+        flow_run_id = str(response.id)
+        return flow_run_id
+
+    @classmethod
+    def run_cloud(cls, **kwargs) -> str:
+        """
+        This schedules the workflow to run remotely on Prefect Cloud.
+
+        #### Parameters
+
+        - `labels`:
+            a list of labels to schedule the workflow with
+
+        - `wait_for_run`:
+            whether to wait for the workflow to finish. If False, the workflow
+            will simply be submitted and then exit. The default is True.
+
+        - `**kwargs`:
+            all options that are normally passed to the workflow.run() method
+
+        #### Returns
+
+        - The flow run id that was used in prefect cloud.
+
+
+        #### Usage
+
+        Make sure you have Prefect properly configured and have registered your
+        workflow with the backend.
+
+        Note that this method can be viewed as a fork of:
+            - from prefect.tasks.prefect.flow_run import create_flow_run
+        It can also be viewed as a more convenient way to call to client.create_flow_run.
+        I don't accept any other client.create_flow_run() inputs besides 'labels'.
+        This may change in the future if I need to set flow run names or schedules.
+        """
+
+        # Prefect does not properly deserialize objects that have
+        # as as_dict or to_dict method, so we use a custom method to do that here
+        parameters_serialized = cls._serialize_parameters(**kwargs)
+        # BUG: What if we are submitting using a filename? We don't want to
+        # submit to a cluster and have the job fail because it doesn't have
+        # access to the file. One solution could be to deserialize right before
+        # serializing in the next line in order to ensure parameters that
+        # accept file names are submitted with all necessary data.
+
+        # Now we submit the workflow.
+        flow_run_id = cls._submit_to_prefect(parameters=parameters_serialized)
+
+        # Because we often want to save some info to our database even before
+        # the calculation starts/finishes, we do that here. An example is
+        # storing the structure and prefect id that we just submitted.
+        cls._register_calculation(prefect_flow_run_id=flow_run_id, **kwargs)
+        # BUG: Will there be a race condition here? What if the workflow finishes
+        # and tries writing to the databse before this is done?
+        # BUG: if parameters are improperly set, this line will fail, while the
+        # job submission (above) will suceed. Should I cancel the flow run if
+        # this occurs?
+
+        # return the flow_run_id for the user
+        return flow_run_id
+
+    @classmethod
+    @property
+    @async_to_sync
+    async def nflows_submitted(cls) -> int:
+        """
+        Queries Prefect to see how many workflows are in a scheduled, running,
+        or pending state.
+        """
+
+        async with get_client() as client:
+            response = await client.read_flow_runs(
+                flow_filter=FlowFilter(
+                    name={"any_": [cls.name_full]},
+                ),
+                flow_run_filter=FlowRunFilter(
+                    state={"type": {"any_": ["SCHEDULED", "PENDING", "RUNNING"]}}
+                ),
+            )
+
+        return len(response)

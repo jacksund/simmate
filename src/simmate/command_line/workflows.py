@@ -110,15 +110,15 @@ def explore():
 
     click.echo("\nGathering all available workflows...")
     from simmate.workflows.utilities import (
-        WORKFLOW_TYPES,
+        get_workflow_types,
         get_list_of_workflows_by_type,
         get_workflow,
     )
 
     click.echo("\n\nWhat type of analysis are you interested in?")
-    types_cleaned = [t.replace("-", " ") for t in WORKFLOW_TYPES]
-    type_index = list_options(types_cleaned)
-    selected_type = WORKFLOW_TYPES[type_index]
+    workflow_types = get_workflow_types()
+    type_index = list_options(workflow_types)
+    selected_type = workflow_types[type_index]
 
     # TODO: have the user select a calculator for this analysis. For now,
     # we are assuming VASP because those are our only workflows
@@ -128,7 +128,10 @@ def explore():
     present_index = list_options(presets)
     selected_preset = presets[present_index]
 
-    final_workflow_name = selected_type + "/" + selected_preset
+    final_workflow_name = selected_type + ".vasp." + selected_preset
+    # BUG: I assume vasp for now, but this should change when I add workflows
+    # from new calculators.
+
     click.echo(f"\n\n===================== {final_workflow_name} =====================")
 
     # now we load this workflow and print the docstring.
@@ -138,6 +141,7 @@ def explore():
         print_equivalent_import=True,
     )
 
+    click.echo("Description:")
     click.echo(workflow.__doc__)
 
     click.echo("Parameters:")
@@ -159,10 +163,8 @@ def list_all():
     click.echo("These are the workflows that have been registerd:")
     all_workflows = get_list_of_all_workflows()
     for i, workflow in enumerate(all_workflows):
-        # Replace underscores with dashes for consistency with click
-        workflow_dash = workflow.replace("_", "-")
         workflow_number = str(i + 1).zfill(2)
-        click.echo(f"\t({workflow_number}) {workflow_dash}")  # gives "(1) example-flow"
+        click.echo(f"\t({workflow_number}) {workflow}")  # gives "(01) example-flow"
 
 
 @workflows.command()
@@ -187,26 +189,25 @@ def show_config(workflow_name):
 
     # Not all workflows have a single config because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
-    if hasattr(workflow, "s3task"):
+    if workflow.s3task:
         workflow.s3task.print_config()
-    elif hasattr(workflow, "s3tasks"):
+    else:
         raise click.ClickException(
-            "This is a NestedWorkflow, meaning it is made up of multiple smaller "
-            "workflows. We have not added a show-config feature for these yet. "
-            "This will be added before version 0.0.0 though."
+            "This is not a S3Task-based workflow. It is likely a NestedWorkflow, "
+            "meaning it is made up of multiple smaller workflows. We have not "
+            "added a show-config feature for these yet. "
         )
 
 
-@workflows.command()
-@click.argument("workflow_name")
-@click.argument("filename", type=click.Path(exists=True))
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="the folder to write input file in. Defaults to <workflow_name>_input",
+@workflows.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    )
 )
-def setup_only(workflow_name, filename, directory):
+@click.argument("workflow_name")
+@click.pass_context
+def setup_only(context, workflow_name):
     """
     If the workflow is a single task, the calculation is set up but not ran. This
     is useful when you just want the input files to view/edit.
@@ -221,7 +222,8 @@ def setup_only(workflow_name, filename, directory):
         precheck_flow_exists=True,
         print_equivalent_import=True,
     )
-    structure = Structure.from_file(filename)
+    kwargs_input = parse_parameters(context=context)
+    kwargs_cleaned = workflow._deserialize_parameters(**kwargs_input)
 
     click.echo("WRITING INPUT FILES...")
 
@@ -229,17 +231,20 @@ def setup_only(workflow_name, filename, directory):
     # spaces with underscores
     from simmate.utilities import get_directory
 
+    directory = kwargs_cleaned.get("directory", None)
     if not directory:
-        directory = get_directory(f"{workflow.name}_inputs".replace(" ", "_"))
+        directory = get_directory(f"{workflow.name_full}.SETUP-ONLY")
+        kwargs_cleaned["directory"] = directory
 
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
-    if hasattr(workflow, "s3task"):
-        workflow.s3task().setup(structure, directory)
-    elif hasattr(workflow, "s3tasks"):
+    if workflow.s3task:
+        workflow.s3task.setup(**kwargs_cleaned)
+    else:
         raise click.ClickException(
-            "This is a NestedWorkflow, meaning it is made up of multiple smaller "
-            "workflows. We have not added a setup-only feature for these yet."
+            "This is not a S3Task-based workflow. It is likely a NestedWorkflow, "
+            "meaning it is made up of multiple smaller workflows. We have not "
+            "added a setup-only feature for these yet. "
         )
 
     click.echo(f"Done! Your input files are located in {directory}")
@@ -272,7 +277,7 @@ def run(context, workflow_name):
     result = workflow.run(**kwargs_cleaned)
 
     # Let the user know everything succeeded
-    if result.is_successful():
+    if result.is_completed():
         click.echo("Success! All results are also stored in your database.")
 
 
@@ -303,7 +308,7 @@ def run_cloud(context, workflow_name):
     result = workflow.run_cloud(**kwargs_cleaned)
 
     # Let the user know everything succeeded
-    if result.is_successful():
+    if result.is_completed():
         click.echo("Success! All results are also stored in your database.")
 
 
@@ -351,7 +356,11 @@ def run_yaml(filename):
 
         for key, update_values in list(parameters.items()):
             # Skip the base keys
-            if key in ["workflow_base", "input_parameters", "updated_settings"]:
+            if key in [
+                "workflow_base",
+                "input_parameters",
+                "updated_settings",
+            ]:
                 continue
             # if there is no prefix, then we have a normal input parameter
             elif not key.startswith("custom__"):
@@ -368,7 +377,7 @@ def run_yaml(filename):
     result = workflow.run(**parameters)
 
     # Let the user know everything succeeded
-    if result.is_successful():
+    if result.is_completed():
         click.echo("Success! All results are also stored in your database.")
 
 

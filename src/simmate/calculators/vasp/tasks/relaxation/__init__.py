@@ -8,9 +8,9 @@ from .quality_04 import Quality04Relaxation
 
 from .mit import MITRelaxation
 
-from .materials_project import MatProjRelaxation
-from .materials_project_hse import MatProjHSERelaxation
-from .materials_project_metal import MatProjMetalRelaxation
+from .materials_project import MatprojRelaxation
+from .materials_project_hse import MatprojHSERelaxation
+from .materials_project_metal import MatprojMetalRelaxation
 
 from .materials_virtual_lab_endpoint import MatVirtualLabCINEBEndpointRelaxation
 from .materials_virtual_lab_grain_boundary import MatVirtualLabGrainBoundaryRelaxation

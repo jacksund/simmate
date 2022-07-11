@@ -150,9 +150,9 @@ class DynamicsRun(Structure, Calculation):
             structure = self.structures.model.from_toolkit(
                 number=number,
                 structure=structure,
-                energy=ionic_step["e_wo_entrp"],
-                site_forces=ionic_step["forces"],
-                lattice_stress=ionic_step["stress"],
+                energy=ionic_step.get("e_wo_entrp", None),
+                site_forces=ionic_step.get("forces", None),
+                lattice_stress=ionic_step.get("stress", None),
                 temperature=self._get_temperature_at_step(number),
                 dynamics_run=self,  # this links the structure to this dynamics run
             )

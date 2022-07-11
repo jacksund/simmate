@@ -26,6 +26,8 @@ class MITDynamics(MITRelaxation):
     calculation does not modify your input structure.
     """
 
+    confirm_convergence = False
+
     incar = MITRelaxation.incar.copy()
     incar.update(
         dict(
@@ -69,18 +71,20 @@ class MITDynamics(MITRelaxation):
     # TODO
     error_handlers = []
 
+    @classmethod
     def setup(
-        self,
+        cls,
         structure: Structure,
         directory: str,
         temperature_start: int = 300,
         temperature_end: int = 1200,
         time_step: float = 2,
         nsteps: int = 10000,
+        **kwargs,
     ):
 
         # run cleaning and standardizing on structure (based on class attributes)
-        structure_cleaned = self._get_clean_structure(structure)
+        structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         # write the poscar file
         Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
@@ -88,12 +92,12 @@ class MITDynamics(MITRelaxation):
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file. Note, we update the values of this incar,
         # so we make a copy of the dict.
-        incar = self.incar.copy()
+        incar = cls.incar.copy()
         incar["TEBEG"] = temperature_start
         incar["TEEND"] = temperature_end
         incar["POTIM"] = time_step
         incar["NSW"] = nsteps
-        incar = Incar(**incar) + Incar(**self.incar_parallel_settings)
+        incar = Incar(**incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
             filename=os.path.join(directory, "INCAR"),
             structure=structure,
@@ -101,17 +105,17 @@ class MITDynamics(MITRelaxation):
 
         # if KSPACING is not provided in the incar AND kpoints is attached to this
         # class instance, then we write the KPOINTS file
-        if self.kpoints and ("KSPACING" not in self.incar):
+        if cls.kpoints and ("KSPACING" not in cls.incar):
             Kpoints.to_file(
                 structure,
-                self.kpoints,
+                cls.kpoints,
                 os.path.join(directory, "KPOINTS"),
             )
 
         # write the POTCAR file
         Potcar.to_file_from_type(
             structure.composition.elements,
-            self.functional,
+            cls.functional,
             os.path.join(directory, "POTCAR"),
-            self.potcar_mappings,
+            cls.potcar_mappings,
         )

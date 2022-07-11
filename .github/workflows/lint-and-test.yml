@@ -65,7 +65,8 @@ jobs:
     - name: Run default tests
       shell: bash -l {0}
       run: |
-        pytest
+        pytest -vv
+    # "-vv" makes the pytest output verbose so errors are more useful
 
     # Marked tests can be dropped for now. I'll re-add this test when needed.
     # - name: Run no_django_setup tests

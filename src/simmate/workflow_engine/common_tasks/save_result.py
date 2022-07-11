@@ -1,23 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import prefect
+from prefect.context import FlowRunContext
 from prefect import task
 
 
 @task
 def save_result(result):
-    # ---------------------------------------------------------------------
 
-    # Grab the workflow object as we need to reference some of its attributes
-
-    # BUG: for some reason, this script fails when get_workflow is imported
-    # at the top of this file rather than here.
-    from simmate.workflows.utilities import get_workflow
-
-    workflow_name = prefect.context.get("flow_name")
-    workflow = get_workflow(workflow_name)
-
-    # ---------------------------------------------------------------------
+    # Grab the database_table that we want to save the results in
+    run_context = FlowRunContext.get()
+    prefect_flow_run_id = str(run_context.flow_run.id)
+    database_table = run_context.flow.simmate_workflow.database_table
 
     # split our results and corrections (which are given as a dict) into
     # separate variables
@@ -27,9 +20,7 @@ def save_result(result):
 
     # load the calculation entry for this workflow run. This should already
     # exist thanks to the load_input_and_register task.
-    calculation = workflow.database_table.from_prefect_id(
-        prefect.context.flow_run_id,
-    )
+    calculation = database_table.from_prefect_id(prefect_flow_run_id)
 
     # now update the calculation entry with our results
     calculation.update_from_vasp_run(vasprun, corrections, directory)

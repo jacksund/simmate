@@ -1,31 +1,65 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine import (
-    s3task_to_workflow,
-    task,
-    Parameter,
-    Workflow,
-    ModuleStorage,
-)
+from simmate.toolkit import Structure
+from simmate.workflow_engine import task, Workflow
 from simmate.calculators.vasp.tasks.population_analysis import (
-    MatProjPreBader as MPPreBaderTask,
+    MatprojPreBader as MPPreBaderTask,
 )
 from simmate.calculators.vasp.database.population_analysis import (
-    MatProjBaderAnalysis as MPBaderResults,
+    MatprojBaderAnalysis as MPBaderResults,
 )
-from simmate.calculators.bader.tasks import BaderAnalysis as BaderAnalysisTask
-
-prebader_matproj_workflow = s3task_to_workflow(
-    name="population-analysis/prebader-matproj",
-    module=__name__,
-    project_name="Simmate-PopulationAnalysis",
-    s3task=MPPreBaderTask,
-    database_table=MPBaderResults,
-    register_kwargs=["structure", "source"],
-    description_doc_short="uses Materials Project settings with denser FFT grid",
+from simmate.calculators.bader.tasks import (
+    BaderAnalysis as BaderAnalysisTask,
+    CombineCHGCARs,
 )
 
-prebader_task = prebader_matproj_workflow.to_workflow_task()
+
+class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
+    """
+    Runs a static energy calculation using an extra-fine FFT grid and then
+    carries out Bader analysis on the resulting charge density.
+    """
+
+    database_table = MPBaderResults
+
+    @classmethod
+    def run_config(
+        cls,
+        structure: Structure,
+        command: str = None,
+        source: dict = None,
+        directory: str = None,
+    ):
+
+        prebader_result = PopulationAnalysis__Vasp__PrebaderMatproj.run(
+            structure=structure,
+            command=command,
+            source=source,
+            directory=directory,
+        ).result()
+
+        # Setup chargecars for the bader analysis and wait until complete
+        CombineCHGCARs.run(directory=prebader_result["directory"]).result()
+
+        # Bader only adds files and doesn't overwrite any, so I just run it
+        # in the original directory. I may switch to copying over to a new
+        # directory in the future though.
+        bader_result = BaderAnalysisTask.run(
+            directory=prebader_result["directory"]
+        ).result()
+
+        save_bader_results(bader_result, prebader_result["prefect_flow_run_id"])
+
+
+# -----------------------------------------------------------------------------
+
+# Below are extra tasks and subflows for the workflow that is defined above
+
+
+class PopulationAnalysis__Vasp__PrebaderMatproj(Workflow):
+    s3task = MPPreBaderTask
+    database_table = MPBaderResults
+    description_doc_short = "uses Materials Project settings with denser FFT grid"
 
 
 @task
@@ -45,41 +79,3 @@ def save_bader_results(bader_result, prefect_flow_run_id):
     # now update the calculation entry with our results
     calculation.oxidation_states = list(oxidation_data.oxidation_state.values)
     calculation.save()
-
-
-bader_task = BaderAnalysisTask()
-
-
-with Workflow("population-analysis/bader-matproj") as workflow:
-
-    structure = Parameter("structure")
-    command = Parameter("command", default="vasp_std > vasp.out")
-    source = Parameter("source", default=None)
-    directory = Parameter("directory", default=None)
-
-    prebader_result = prebader_task(
-        structure=structure,
-        command=command,
-        source=source,
-        directory=directory,
-    )
-
-    # Bader only adds files and doesn't overwrite any, so I just run it
-    # in the original directory. I may switch to copying over to a new
-    # directory in the future though.
-    bader_result = bader_task(directory=prebader_result["directory"])
-
-    save_bader_results(bader_result, prebader_result["prefect_flow_run_id"])
-
-
-workflow.storage = ModuleStorage(__name__)
-workflow.project_name = "Simmate-PopulationAnalysis"
-workflow.database_table = MPBaderResults
-workflow.register_kwargs = ["structure", "source"]
-workflow.result_task = bader_result
-workflow.s3tasks = [MPPreBaderTask, BaderAnalysisTask]
-
-workflow.__doc__ = """
-    Runs a static energy calculation using an extra-fine FFT grid and then
-    carries out Bader analysis on the resulting charge density.
-"""

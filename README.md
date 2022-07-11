@@ -41,6 +41,8 @@ Read here for info on markdown, badges, and more:
 [Shields Badges](https://shields.io/)
 -->
 
+> :warning: We are currently migrating from Prefect v1 to v2, which involves many changes to our workflow engine (and subsequently our workflows too). Please pay close attention to our [change log](https://github.com/jacksund/simmate/blob/main/CHANGELOG.md) and be sure you are only looking at source code for the version of Simmate that you have installed. The warning at the top of the [installation tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/01_Installation.md) describes how to do this.
+
 > :warning: For Simmate's workflow module, we are currently reliant on VASP, which is an expensive DFT software that can be difficult to install for beginners. We are working to move away from propriatary softwares and toward free/open-source codes like ABINIT, Quantum Espresso, or DFTK.jl. That way you can install Simmate and we will take care of the rest. This will take time though... so we recommend that fully experimental labs wait until Simmate hits this milestone. If you'd like to be notified when this occurs, send us an email at simmate.team@gmail.com.
 
 ## Welcome!
@@ -102,7 +104,7 @@ Again, take a look at [our main website](https://simmate.org/) if you'd like to 
 ``` bash
 # The command line let's you quickly run a workflow
 # from a structure file (CIF or POSCAR)
-simmate workflows run relaxation/matproj --structure NaCl.cif
+simmate workflows run relaxation/Matproj --structure NaCl.cif
 ```
 
 ``` python
@@ -110,9 +112,9 @@ simmate workflows run relaxation/matproj --structure NaCl.cif
 # it also enables advanced setting configurations.
 # Simply load the workflow you'd like and run it!
 
-from simmate.workflows.relaxation import matproj_workflow
+from simmate.workflows.relaxation import Matproj_workflow
 
-status = matproj_workflow.run(structure="NaCl.cif")
+status = Matproj_workflow.run(structure="NaCl.cif")
 ```
 
 
@@ -125,13 +127,13 @@ status = matproj_workflow.run(structure="NaCl.cif")
 # before running any of the code below.
 
 from simmate.database import connect
-from simmate.database.third_parties import MatProjStructure
+from simmate.database.third_parties import MatprojStructure
 
 # EXAMPLE 1: all structures that have less than 6 sites in their unitcell
-structures = MatProjStructure.objects.filter(nsites__lt=6).all()
+structures = MatprojStructure.objects.filter(nsites__lt=6).all()
 
 # EXAMPLE 2: complex filtering
-structures = MatProjStructure.objects.filter(
+structures = MatprojStructure.objects.filter(
     nsites__gte=3,  # greater or equal to 3 sites
     energy__isnull=False,  # the structure DOES have an energy
     density__range=(1,5),  # density is between 1 and 5

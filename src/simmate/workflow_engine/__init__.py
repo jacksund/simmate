@@ -15,6 +15,4 @@ from .supervised_staged_shell_task import S3Task
 # that models can be imported.
 from simmate.database import connect
 
-from .workflow_task import WorkflowTask
-from .workflow import Workflow, Parameter, ModuleStorage, task, Task
-from .utilities import s3task_to_workflow
+from .workflow import Workflow, task

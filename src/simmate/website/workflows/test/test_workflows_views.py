@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import (
-    WORKFLOW_TYPES,
+    get_workflow_types,
     get_list_of_all_workflows,
     get_workflow,
 )
@@ -20,7 +20,7 @@ def test_workflows_view(client):
     assertTemplateUsed(response, "workflows/all.html")
 
 
-@pytest.mark.parametrize("workflow_type", WORKFLOW_TYPES)
+@pytest.mark.parametrize("workflow_type", get_workflow_types())
 def test_workflows_by_type_view(client, workflow_type):
 
     # grabs f"/workflows/{workflow_type}/"
@@ -45,8 +45,8 @@ def test_workflow_detail_view(client, workflow_name):
     url = reverse(
         "workflow_detail",
         kwargs={
-            "workflow_type": workflow.type,
-            "workflow_name": workflow.name_short,
+            "workflow_type": workflow.name_project,
+            "workflow_name": workflow.name_preset,
         },
     )
 
@@ -63,8 +63,8 @@ def test_workflow_detail_view(client, workflow_name):
     url = reverse(
         "workflow_run_detail",
         kwargs={
-            "workflow_type": workflow.type,
-            "workflow_name": workflow.name_short,
+            "workflow_type": workflow.name_project,
+            "workflow_name": workflow.name_preset,
             "pk": 999,
         },
     )
@@ -122,6 +122,8 @@ def test_workflow_submit_view(client, sample_structures, mocker):
         source=None,
         copy_previous_directory=False,
         wait_for_run=False,
+        pre_sanitize_structure=False,
+        pre_standardize_structure=False,
         # parameters not deserialized yet so these will still be present
         command="",
         directory="",

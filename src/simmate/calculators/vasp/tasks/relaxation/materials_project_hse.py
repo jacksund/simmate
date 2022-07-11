@@ -41,7 +41,7 @@ from simmate.calculators.vasp.error_handlers import (
 )
 
 
-class MatProjHSERelaxation(VaspTask):
+class MatprojHSERelaxation(VaspTask):
     """
     This task is a reimplementation of pymatgen's
     [MPHSERelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPHSERelaxSet).
