@@ -159,8 +159,9 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
         ).result()
 
         # Run NEB single_path workflow for all these.
+        states = []
         for i, hop_id in enumerate(migration_hop_ids):
-            Diffusion__Vasp__NebSinglePath.run(
+            state = Diffusion__Vasp__NebSinglePath.run(
                 migration_hop={
                     "migration_hop_table": "MITMigrationHop",
                     "migration_hop_id": hop_id,
@@ -174,6 +175,9 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
                 + ";"
                 + subcommands["command_neb"],
             )  # don't block on results to allow parallel runs
+            states.append(state)
+
+        [s.result() for s in states]
 
 
 @task
