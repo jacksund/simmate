@@ -38,3 +38,4 @@ def test_neb(sample_structures, tmpdir, mocker):
         directory=str(tmpdir),
     )
     assert state.is_completed()
+    Diffusion__Vasp__NebAllPaths.nflows_submitted
