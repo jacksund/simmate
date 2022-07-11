@@ -264,6 +264,7 @@ class VaspNudgedElasticBandTask(VaspTask):
         # plot the results
         # plot = neb_results.get_plot()
         # plot.savefig(os.path.join(directory, "NEB_plot.jpeg"))
+        print("NEB plot generation is temporarily disabled due to a bug in pymatgen")
 
         # convert all the structures to a MigrationImages object so we can write
         # the summed structure.

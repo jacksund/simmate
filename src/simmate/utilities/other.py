@@ -131,7 +131,7 @@ def async_to_sync(to_await):
     """
     decorator that converts an async function to a sync function
 
-    If using on a classmethod or property, have this first. For example:
+    If using on a classmethod or property, have this at the bottom. For example:
 
     ```python
     class Test:
