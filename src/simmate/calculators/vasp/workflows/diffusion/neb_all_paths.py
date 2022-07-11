@@ -110,16 +110,16 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             commands_out=["command_bulk", "command_supercell", "command_neb"],
         ).result()
 
-        # Load our input and make a base directory for all other workflows to run
-        # within for us.
-        parameters_cleaned = load_input_and_register(
-            structure=structure,
-            source=source,
-            directory=directory,
-            command=command,
-            migrating_specie=migrating_specie,
-            register_run=False,
-        ).result()
+        # # Load our input and make a base directory for all other workflows to run
+        # # within for us.
+        # parameters_cleaned = load_input_and_register(
+        #     structure=structure,
+        #     source=source,
+        #     directory=directory,
+        #     command=command,
+        #     migrating_specie=migrating_specie,
+        #     register_run=False,
+        # ).result()
 
         # # Our step is to run a relaxation on the bulk structure and it uses our inputs
         # # directly. The remaining one tasks pass on results.
