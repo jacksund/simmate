@@ -20,7 +20,7 @@ def get_migration_images_from_endpoints(supercell_start, supercell_end):
     images = MigrationImages.from_endpoints(
         structure_start=supercell_start_cleaned,
         structure_end=supercell_end_cleaned,
-        nimages=7,  # TODO: have from_endpoints figure out pathway length
+        nimages=5,  # TODO: have from_endpoints figure out pathway length
     )
 
     return images

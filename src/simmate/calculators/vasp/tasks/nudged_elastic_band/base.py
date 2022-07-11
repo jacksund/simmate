@@ -262,8 +262,8 @@ class VaspNudgedElasticBandTask(VaspTask):
         """
 
         # plot the results
-        plot = neb_results.get_plot()
-        plot.savefig(os.path.join(directory, "NEB_plot.jpeg"))
+        # plot = neb_results.get_plot()
+        # plot.savefig(os.path.join(directory, "NEB_plot.jpeg"))
 
         # convert all the structures to a MigrationImages object so we can write
         # the summed structure.

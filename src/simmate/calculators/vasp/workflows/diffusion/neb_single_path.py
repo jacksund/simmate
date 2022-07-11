@@ -145,6 +145,9 @@ def get_endpoint_structures(migration_hop: MigrationHop) -> Tuple[Structure]:
     I assume parameters for now
     """
     start_supercell, end_supercell, _ = migration_hop.get_sc_structures(
+        # min_atoms=10,
+        # max_atoms=50,
+        # min_length=5,
         vac_mode=True,
     )
     try:
