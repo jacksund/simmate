@@ -173,10 +173,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
                 command=subcommands["command_supercell"]
                 + ";"
                 + subcommands["command_neb"],
-            ).result()
-            # BUG: we actually don't want to block on results to in order to
-            # allow parallel runs, but there is currently a bug in Mac CI that
-            # causes this test to fail when result is not called.
+            )  # we don't want to wait on results to in order to allow parallel runs
 
 
 @task
