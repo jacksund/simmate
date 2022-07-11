@@ -159,7 +159,6 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
         ).result()
 
         # Run NEB single_path workflow for all these.
-        states = []
         for i, hop_id in enumerate(migration_hop_ids):
             state = Diffusion__Vasp__NebSinglePath.run(
                 migration_hop={
@@ -174,10 +173,10 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
                 command=subcommands["command_supercell"]
                 + ";"
                 + subcommands["command_neb"],
-            )  # don't block on results to allow parallel runs
-            states.append(state)
-
-        [s.result() for s in states]
+            ).result()
+            # BUG: we actually don't want to block on results to in order to
+            # allow parallel runs, but there is currently a bug in Mac CI that
+            # causes this test to fail when result is not called.
 
 
 @task
