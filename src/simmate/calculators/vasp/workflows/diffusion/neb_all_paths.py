@@ -158,22 +158,22 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             vacancy_mode=True,  # assumed for now
         ).result()
 
-        # # Run NEB single_path workflow for all these.
-        # for i, hop_id in enumerate(migration_hop_ids):
-        #     Diffusion__Vasp__NebSinglePath.run(
-        #         migration_hop={
-        #             "migration_hop_table": "MITMigrationHop",
-        #             "migration_hop_id": hop_id,
-        #         },
-        #         directory=parameters_cleaned["directory"]
-        #         + os.path.sep
-        #         + f"{Diffusion__Vasp__NebSinglePath.name_full}.{str(i).zfill(2)}",
-        #         diffusion_analysis_id=None,
-        #         migration_hop_id=None,
-        #         command=subcommands["command_supercell"]
-        #         + ";"
-        #         + subcommands["command_neb"],
-        #     )  # don't block on results to allow parallel runs
+        # Run NEB single_path workflow for all these.
+        for i, hop_id in enumerate(migration_hop_ids):
+            Diffusion__Vasp__NebSinglePath.run(
+                migration_hop={
+                    "migration_hop_table": "MITMigrationHop",
+                    "migration_hop_id": hop_id,
+                },
+                directory=parameters_cleaned["directory"]
+                + os.path.sep
+                + f"{Diffusion__Vasp__NebSinglePath.name_full}.{str(i).zfill(2)}",
+                diffusion_analysis_id=None,
+                migration_hop_id=None,
+                command=subcommands["command_supercell"]
+                + ";"
+                + subcommands["command_neb"],
+            )  # don't block on results to allow parallel runs
 
 
 @task
