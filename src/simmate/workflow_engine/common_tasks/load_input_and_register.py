@@ -113,7 +113,7 @@ def load_input_and_register(
             )
 
         # the past directory should be stored on the input object
-        previous_directory = primary_input_cleaned.calculation.directory
+        previous_directory = primary_input_cleaned.database_object.directory
 
         # First check if the previous directory exists. There are several
         # possibilities that we need to check for:

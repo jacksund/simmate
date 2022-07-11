@@ -24,6 +24,8 @@ class VaspBandStructure(MatprojStaticEnergy):
     the a fixed charge density from a previous static energy calculation.
     """
 
+    required_files = MatprojStaticEnergy.required_files + ["CHGCAR"]
+
     # set the KptGrid or KptPath object
     # TODO: in the future, all functionality of this class will be available
     # by giving a KptPath class here.
@@ -32,9 +34,6 @@ class VaspBandStructure(MatprojStaticEnergy):
     """
     Density of k-points to use along high-symmetry lines
     """
-
-    # For band-structures, unit cells should be in the standardized format
-    pre_standardize_structure = True
 
     @classmethod
     def setup(cls, directory, structure, **kwargs):
@@ -45,7 +44,7 @@ class VaspBandStructure(MatprojStaticEnergy):
         """
 
         # run cleaning and standardizing on structure (based on class attributes)
-        structure_cleaned = cls._get_clean_structure(structure)
+        structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         # write the poscar file
         Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))

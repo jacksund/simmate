@@ -8,7 +8,10 @@ from simmate.calculators.vasp.tasks.population_analysis import (
 from simmate.calculators.vasp.database.population_analysis import (
     MatprojBaderAnalysis as MPBaderResults,
 )
-from simmate.calculators.bader.tasks import BaderAnalysis as BaderAnalysisTask
+from simmate.calculators.bader.tasks import (
+    BaderAnalysis as BaderAnalysisTask,
+    CombineCHGCARs,
+)
 
 
 class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
@@ -34,6 +37,9 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
             source=source,
             directory=directory,
         ).result()
+
+        # Setup chargecars for the bader analysis and wait until complete
+        CombineCHGCARs.run(directory=prebader_result["directory"]).result()
 
         # Bader only adds files and doesn't overwrite any, so I just run it
         # in the original directory. I may switch to copying over to a new

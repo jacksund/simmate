@@ -31,17 +31,7 @@ class BaderAnalysis(S3Task):
     you will see files like "CHGCAR_empty" used in the command.
     """
 
-    required_files = ["CHGCAR", "AECCAR0", "AECCAR2", "POTCAR"]
-
-    @classmethod
-    def setup(cls, structure: Structure, directory: str):
-        """
-        Runs bader script to combine core and valence electron density files
-        into a single CHGCAR
-        """
-
-        # Make the CHGCAR_sum file using Bader's helper script
-        CombineCHGCARs().run(directory=directory)
+    required_files = ["CHGCAR_sum", "POTCAR"]
 
     @classmethod
     def workup(cls, directory: str):

@@ -18,6 +18,8 @@ class VaspDensityOfStates(MatprojStaticEnergy):
     the a fixed charge density from a previous static energy calculation.
     """
 
+    required_files = MatprojStaticEnergy.required_files + ["CHGCAR"]
+
     @staticmethod
     def _write_output_summary(directory, vasprun):
         """

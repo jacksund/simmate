@@ -61,8 +61,10 @@ class ElectronicStructure__Vasp__MatprojFull(Workflow):
             command=parameters_cleaned["command"],
             directory=parameters_cleaned["directory"]
             + os.path.sep
-            + static_workflow.name,
+            + static_workflow.name_full,
             source=parameters_cleaned["source"],
+            # For band-structures, unit cells should be in the standardized format
+            pre_standardize_structure=True,
         ).result()  # block until complete
 
         dos_state = dos_workflow.run(
@@ -75,7 +77,6 @@ class ElectronicStructure__Vasp__MatprojFull(Workflow):
             + os.path.sep
             + dos_workflow.name_full,
             copy_previous_directory=True,
-            source=None,  # default to structure dict above
         )
 
         bs_state = bandstruct_workflow.run(
@@ -86,9 +87,8 @@ class ElectronicStructure__Vasp__MatprojFull(Workflow):
             command=parameters_cleaned["command"],
             directory=parameters_cleaned["directory"]
             + os.path.sep
-            + dos_workflow.name_full,
+            + bandstruct_workflow.name_full,
             copy_previous_directory=True,
-            source=None,  # default to structure dict above
         )
 
         # block until complete

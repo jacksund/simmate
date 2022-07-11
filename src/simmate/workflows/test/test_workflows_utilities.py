@@ -87,6 +87,8 @@ def test_get_unique_paramters():
         "migration_hop_id",
         "migration_images",
         "nsteps",
+        "pre_sanitize_structure",
+        "pre_standardize_structure",
         "source",
         "structure",
         "supercell_end",

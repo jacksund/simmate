@@ -31,6 +31,8 @@ def get_default_parallel_settings():
 
 class VaspTask(S3Task):
 
+    required_files = ["INCAR", "POTCAR", "POSCAR"]
+
     command: str = "vasp_std > vasp.out"
     """
     The command to call vasp, which is typically vasp_std. To ensure error
@@ -132,7 +134,13 @@ class VaspTask(S3Task):
     """
 
     @classmethod
-    def _get_clean_structure(cls, structure: Structure) -> Structure:
+    def _get_clean_structure(
+        cls,
+        structure: Structure,
+        pre_sanitize_structure: bool = None,
+        pre_standardize_structure: bool = None,
+        **kwargs,
+    ) -> Structure:
         """
         Uses the class attributes for `pre_sanitize_structure` and
         `pre_standardize_structure`. If either of these are set to True, then
@@ -142,9 +150,15 @@ class VaspTask(S3Task):
         files are written. You should never have to call it directly.
         """
 
+        # See if these values were provided, or default to class attribute
+        pre_sanitize_structure = pre_sanitize_structure or cls.pre_sanitize_structure
+        pre_standardize_structure = (
+            pre_standardize_structure or cls.pre_standardize_structure
+        )
+
         # if both pre_standardize_structure and pre_sanitize_structure are set,
         # we raise an error. I may want to change this in the future though
-        if cls.pre_sanitize_structure and cls.pre_standardize_structure:
+        if pre_sanitize_structure and pre_standardize_structure:
             raise Exception(
                 "For this VaspTask, only one of `pre_sanitize_structure` or "
                 " `pre_standardize_structure` can be set to True, not both."
@@ -152,14 +166,14 @@ class VaspTask(S3Task):
 
         # If requested, we convert to the LLL-reduced unit cell, which aims to
         # be as cubic as possible.
-        if cls.pre_sanitize_structure:
+        if pre_sanitize_structure:
             structure_cleaned = structure.copy(sanitize=True)
             return structure_cleaned
 
         # For band structures, we need to make sure the structure is in the
         # standardized primitive form.
         # We use the same SYMPREC from the INCAR, which is 1e-5 if not set.
-        if cls.pre_standardize_structure:
+        if pre_standardize_structure:
             sym_prec = cls.incar.get("SYMPREC", 1e-5) if cls.incar else 1e-5
             sym_finder = SpacegroupAnalyzer(structure, symprec=sym_prec)
             structure_cleaned = sym_finder.get_primitive_standard_structure(
@@ -177,7 +191,7 @@ class VaspTask(S3Task):
     def setup(cls, directory: str, structure: Structure, **kwargs):
 
         # run cleaning and standardizing on structure (based on class attributes)
-        structure_cleaned = cls._get_clean_structure(structure)
+        structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         # write the poscar file
         Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))

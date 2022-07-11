@@ -122,6 +122,8 @@ def test_workflow_submit_view(client, sample_structures, mocker):
         source=None,
         copy_previous_directory=False,
         wait_for_run=False,
+        pre_sanitize_structure=False,
+        pre_standardize_structure=False,
         # parameters not deserialized yet so these will still be present
         command="",
         directory="",

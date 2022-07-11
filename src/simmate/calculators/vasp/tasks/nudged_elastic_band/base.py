@@ -31,6 +31,10 @@ class VaspNudgedElasticBandTask(VaspTask):
     may be useful if you'd like to make your own variation of this class.
     """
 
+    # NEB does not require a POSCAR file because input structures are organized
+    # into folders.
+    required_files = ["INCAR", "POTCAR"]
+
     # Pymatgen's NEB parser does not read from the vasprun.xml so it can't
     # confirm convergence here. I'll have to write my own output class to do this.
     confirm_convergence = False

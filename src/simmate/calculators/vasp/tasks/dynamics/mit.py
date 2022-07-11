@@ -84,7 +84,7 @@ class MITDynamics(MITRelaxation):
     ):
 
         # run cleaning and standardizing on structure (based on class attributes)
-        structure_cleaned = cls._get_clean_structure(structure)
+        structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         # write the poscar file
         Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))

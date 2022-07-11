@@ -78,6 +78,8 @@ class Workflow:
         source: dict = None,
         directory: str = None,
         copy_previous_directory: bool = False,
+        pre_sanitize_structure: bool = None,
+        pre_standardize_structure: bool = None,
     ):
         """
         The workflow method, which can be overwritten when inheriting from this
@@ -120,6 +122,8 @@ class Workflow:
             source=source,
             directory=directory,
             copy_previous_directory=copy_previous_directory,
+            pre_sanitize_structure=pre_sanitize_structure,
+            pre_standardize_structure=pre_standardize_structure,
         ).result()
 
         result = cls.s3task.run(**parameters_cleaned).result()
@@ -401,14 +405,6 @@ class Workflow:
         converts all parameters to appropriate python objects
         """
 
-        # we don't want to pass arguments like command=None or structure=None if the
-        # user didn't provide this input parameter. Instead, we want the workflow to
-        # use its own default value. To do this, we first check if the parameter
-        # is set in our kwargs dictionary and making sure the value is NOT None.
-        # If it is None, then we remove it from our final list of kwargs. This
-        # is only done for command, directory, and structure inputs -- as these
-        # are the three that are typically assumed to be present (see the CLI).
-
         from simmate.toolkit import Structure
         from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 
@@ -432,11 +428,24 @@ class Workflow:
             return parameters_cleaned
         #######
 
-        if not parameters.get("command", None):
-            parameters_cleaned.pop("command", None)
+        # we don't want to pass arguments like command=None or structure=None if the
+        # user didn't provide this input parameter. Instead, we want the workflow to
+        # use its own default value. To do this, we first check if the parameter
+        # is set in our kwargs dictionary and making sure the value is NOT None.
+        # If it is None, then we remove it from our final list of kwargs. This
+        # is only done for command, directory, and structure inputs -- as these
+        # are the three that are typically assumed to be present (see the CLI).
+        parameter_to_filter = [
+            "command",
+            "directory",
+            "pre_sanitize_structure",
+            "pre_standardize_structure",
+        ]
+        for parameter in parameter_to_filter:
+            if not parameters.get(parameter, None):
+                parameters_cleaned.pop(parameter, None)
 
-        if not parameters.get("directory", None):
-            parameters_cleaned.pop("directory", None)
+        # The remaining checks look to intialize input to toolkit objects
 
         structure = parameters.get("structure", None)
         if structure:

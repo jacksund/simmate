@@ -186,7 +186,8 @@ class SubmitWorkflow(forms.Form):
 
 
 # TODO: is there a way to dynamically inpsect types so that I don't need this?
-# I need a way to accept filters from custom workflows as well.
+# I need a way to accept filters from custom workflows as well. How should
+# I handle user-based parameters?
 INPUT_MAPPINGS = {
     "json": [
         "source",
@@ -215,5 +216,7 @@ INPUT_MAPPINGS = {
     ],
     "boolean": [
         "copy_previous_directory",
+        "pre_standardize_structure",
+        "pre_sanitize_structure",
     ],
 }

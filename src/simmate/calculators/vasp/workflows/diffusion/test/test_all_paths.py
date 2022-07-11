@@ -30,6 +30,9 @@ def test_neb(sample_structures, tmpdir, mocker):
     # no corrections were made).
     mocker.patch.object(S3Task, "execute", return_value=[])
 
+    # Don't check for proper input files because POTCARs will be missing
+    mocker.patch.object(S3Task, "_check_input_files", return_value=None)
+
     # run the workflow and make sure it handles data properly.
     state = Diffusion__Vasp__NebAllPaths.run(
         structure=structure,
