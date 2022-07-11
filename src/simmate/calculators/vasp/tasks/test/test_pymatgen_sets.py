@@ -186,8 +186,7 @@ def test_pymatgen_input_sets_neb(
     # write both inputs. We just copy the same structure 3 times because we
     # don't really care what the POSCARs look like -- just the INCARs
     simmate_task().setup(
-        structure=None,
-        structures=MigrationImages([structure] * 3),
+        migration_images=MigrationImages([structure] * 3),
         directory=tmpdir,
     )
     pymatgen_set([structure] * 3, **pymatgen_kwargs).incar.write_file(
