@@ -33,10 +33,6 @@ def setup_django():
     )
     django.setup()
 
-    # BUG: To use Django ORM within IPython, Spyder, and Jupyter notebooks, which
-    # are examples of async consoles, I need to all unsafe.
-    os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-
 
 # When I import this module, it automatically configures django for us, including
 # connecting to the database(s). Without this file, I would instead need these two

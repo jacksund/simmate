@@ -38,4 +38,27 @@ def test_neb(sample_structures, tmpdir, mocker):
         directory=str(tmpdir),
     )
     assert state.is_completed()
-    Diffusion__Vasp__NebAllPaths.nflows_submitted
+    
+    # BUG: If this job hangs, this line can break that can have it exit
+    # the pytest command successfully. Still trying to figure out why. 
+    #   Diffusion__Vasp__NebAllPaths.nflows_submitted  
+    #
+    # As a minimal example, I can get a test to hang in a lone test using...
+    # 
+    # from prefect import flow, task
+    # from simmate.database import connect  # causes the hanging test
+    # @task
+    # def dummy_task_1(a):
+    #     return 1
+    # @task
+    # def dummy_task_2(a):
+    #     return 2
+    # @flow
+    # def run_config(source=None, structure=None, **kwargs):
+    #     x = dummy_task_1(source)
+    #     y = dummy_task_2(structure)
+    #     return x.result() + y.result()
+    # def test_workflow():
+    #     state = run_config()
+    #     assert state.is_completed()
+    #     assert state.result() == 3

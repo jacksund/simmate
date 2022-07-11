@@ -427,3 +427,9 @@ LOGIN_REDIRECT_URL = "/accounts/profile/"  # this is already the default
 LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
 
 # -----------------------------------------------------------------------------
+
+# BUG: To use Django ORM within IPython, Spyder, and Jupyter notebooks, which
+# are examples of async consoles, I need to allow unsafe.
+# Read more at...
+# https://docs.djangoproject.com/en/4.0/topics/async/#async-safety
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
