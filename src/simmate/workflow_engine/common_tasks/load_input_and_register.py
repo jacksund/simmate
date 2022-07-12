@@ -198,7 +198,11 @@ def load_input_and_register(
     else:
         source_cleaned = None
 
-    parameters_cleaned["source"] = source_cleaned
+    # SPECIAL CASE for customized flows
+    if "workflow_base" not in parameters_cleaned:
+        parameters_cleaned["source"] = source_cleaned
+    else:
+        parameters_cleaned["input_parameters"]["source"] = source_cleaned
 
     # ---------------------------------------------------------------------
 

@@ -56,7 +56,8 @@ def run_customized_s3task(
     NewS3Task = type(f"Custom{s3task.__name__}", (s3task,), final_attributes)
 
     # now run the task with the remaining parameters
-    task = NewS3Task()
-    result = task.run(**input_parameters)
+    # Note, we are using run_config instead of run because we do not want this
+    # registered as a task run of the original class
+    result = NewS3Task.run_config(**input_parameters)
 
     return result

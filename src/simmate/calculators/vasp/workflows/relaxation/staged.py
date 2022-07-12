@@ -79,7 +79,9 @@ class Relaxation__Vasp__Staged(Workflow):
         state = current_task.run(
             structure=parameters_cleaned["structure"],
             command=parameters_cleaned["command"],
-            directory=parameters_cleaned["directory"] + os.path.sep + current_task.name,
+            directory=parameters_cleaned["directory"]
+            + os.path.sep
+            + current_task.name_full,
         )
         result = state.result()
 

@@ -389,7 +389,7 @@ class Workflow:
                 # workflow_base and input_parameters are special cases that
                 # may require a refactor (for customized workflows)
                 elif parameter_key == "workflow_base":
-                    parameter_value = parameter_value.name
+                    parameter_value = parameter_value.name_full
                 elif parameter_key == "input_parameters":
                     # recursive call to this function
                     parameter_value = Workflow._serialize_parameters(**parameter_value)
@@ -419,9 +419,13 @@ class Workflow:
             # run times. We therefore import lazily.
             from simmate.workflows.utilities import get_workflow
 
-            parameters_cleaned["workflow_base"] = get_workflow(
-                parameters["workflow_base"]
+            # Make sure we have a workflow object
+            parameters_cleaned["workflow_base"] = (
+                get_workflow(parameters["workflow_base"])
+                if isinstance(parameters["workflow_base"], str)
+                else parameters["workflow_base"]
             )
+            # Make a recursive call for the input parameters
             parameters_cleaned["input_parameters"] = Workflow._deserialize_parameters(
                 **parameters["input_parameters"]
             )

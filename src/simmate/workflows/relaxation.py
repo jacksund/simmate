@@ -15,4 +15,5 @@ from simmate.calculators.vasp.workflows.relaxation.all import (
     Relaxation__Vasp__Quality02,
     Relaxation__Vasp__Quality03,
     Relaxation__Vasp__Quality04,
+    Relaxation__Vasp__Staged,
 )
