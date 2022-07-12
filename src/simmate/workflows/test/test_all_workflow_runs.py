@@ -99,3 +99,6 @@ def test_all_workflow_runs(tmpdir, sample_structures):
         "diffusion.vasp.neb-single-path",
         "population-analysis.vasp.badelf-matproj",
     ]
+
+    # for breaking loops
+    [w.nflows_submitted for w in all_flows]

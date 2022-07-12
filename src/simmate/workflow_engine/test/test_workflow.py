@@ -63,8 +63,7 @@ def test_workflow():
     ]
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 
-
-def test_cloud_properties(mocker):
+    # test cloud properties
 
     deployment_id = DummyFlow.deployment_id
     assert isinstance(deployment_id, str)
@@ -72,8 +71,7 @@ def test_cloud_properties(mocker):
 
     n = DummyFlow.nflows_submitted
     assert isinstance(n, int)
-    # we dont check the actual value bc it could be pulling from the actual db
-    # BUG: How do I ensure I'm grabbing a test prefect database...?
+    # we dont check the actual value bc it could be affected by other parallel tests
 
 
 @pytest.mark.django_db
