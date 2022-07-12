@@ -65,8 +65,9 @@ jobs:
     - name: Run default tests
       shell: bash -l {0}
       run: |
-        pytest -vv
+        pytest -vv --durations=15
     # "-vv" makes the pytest output verbose so errors are more useful
+    # and "duration=0" has pytest print how long every test took.
 
     # Marked tests can be dropped for now. I'll re-add this test when needed.
     # - name: Run no_django_setup tests

@@ -34,6 +34,7 @@ class DummyProject__DummyCaclulator__DummyPreset(Workflow):
 DummyFlow = DummyProject__DummyCaclulator__DummyPreset
 
 
+@pytest.mark.prefect_bug
 def test_workflow():
     # Run the workflow just like you would for the base Prefect class
     flow = DummyFlow.to_prefect_flow()

@@ -15,9 +15,10 @@ DJANGO_SETTINGS_MODULE = "simmate.configuration.django.settings_test"
 # We classify all tests so that we can run different subgroups of tests. You can
 # run the tests marked with "slow"... "pytest -m slow"
 markers = [
-    "blender: mark test as requiring blender.",
-    "pymatgen: mark test as pymatgen-compatibility test",
-    "vasp: mark test as requiring vasp.",
+    "blender: requires blender installed",
+    "pymatgen: runs a pymatgen-compatibility test",
+    "vasp: requires vasp installed",
+    "prefect_bug: hangs in github CI but not local tests"
 ]
 
 # By default, we only want to run unmarked tests. The simplest way to do this

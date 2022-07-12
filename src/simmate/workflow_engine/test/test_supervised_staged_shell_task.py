@@ -70,6 +70,7 @@ class AlwaysFailsSpecialMonitor(AlwaysFailsMonitor):
 # ----------------------------------------------------------------------------
 
 
+@pytest.mark.prefect_bug
 def test_s3task_methods():
     class DummyTask(S3Task):
         command = "echo dummy"
