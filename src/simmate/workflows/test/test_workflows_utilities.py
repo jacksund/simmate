@@ -46,6 +46,7 @@ def test_list_of_all_workflows():
         "relaxation.vasp.quality02",
         "relaxation.vasp.quality03",
         "relaxation.vasp.quality04",
+        "relaxation.vasp.staged",
         "static-energy.vasp.matproj",
         "static-energy.vasp.mit",
         "static-energy.vasp.neb-endpoint",

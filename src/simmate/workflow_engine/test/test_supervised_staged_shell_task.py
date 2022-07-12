@@ -70,6 +70,7 @@ class AlwaysFailsSpecialMonitor(AlwaysFailsMonitor):
 # ----------------------------------------------------------------------------
 
 
+@pytest.mark.prefect_bug
 def test_s3task_methods():
     class DummyTask(S3Task):
         command = "echo dummy"
@@ -91,6 +92,7 @@ def test_s3task_methods():
     assert state.is_completed()
     assert os.path.exists(result["directory"])
     os.rmdir(result["directory"])
+    # BUG: see https://github.com/jacksund/simmate/issues/187
 
 
 def test_s3task_1():

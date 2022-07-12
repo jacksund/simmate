@@ -47,17 +47,14 @@ class Customized__Vasp__UserConfig(Workflow):
 
     @staticmethod
     def run_config(
-        cls,
         workflow_base: str,
         input_parameters: dict,
         updated_settings: dict,
-        directory: str,
     ):
         parameters_cleaned = load_input_and_register(
             workflow_base=workflow_base,
             input_parameters=input_parameters,
             updated_settings=updated_settings,
-            directory=directory,
         ).result()
 
         result = run_customized_s3task(**parameters_cleaned)

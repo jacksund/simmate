@@ -59,7 +59,7 @@ def get_structure_files():
 STRUCTURE_FILES = get_structure_files()
 
 
-@pytest.fixture(scope="package", params=COMPOSITIONS_STRS)
+@pytest.fixture(scope="session", params=COMPOSITIONS_STRS)
 def composition(request):
     """
     Gives a iteratible parameter of example compositions, where the compositions
@@ -80,7 +80,7 @@ def composition(request):
     return Composition(request.param)
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="session")
 def sample_compositions():
     """
     Gives a dictionary of example compositions to use, where the compositions
@@ -103,7 +103,7 @@ def sample_compositions():
     return {c: Composition(c) for c in COMPOSITIONS_STRS}
 
 
-@pytest.fixture(scope="package", params=STRUCTURE_FILES)
+@pytest.fixture(scope="session", params=STRUCTURE_FILES)
 def structure(request):
     """
     Gives a iteratible parameter of example structures, where the structures
@@ -124,7 +124,7 @@ def structure(request):
     return Structure.from_file(request.param)
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="session")
 def sample_structures():
     """
     Gives a dictionary of example structures to use.
@@ -160,7 +160,7 @@ def sample_structures():
     return structures
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="session")
 def django_db_setup(
     django_db_setup,
     django_db_blocker,
@@ -249,12 +249,12 @@ def make_dummy_files(*filenames: str):
             file.write("This is a dummy file for testing.")
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="session")
 def command_line_runner():
     return CliRunner()
 
 
-@pytest.fixture(autouse=True, scope="package")
+@pytest.fixture(autouse=True, scope="session")
 def prefect_test_fixture():
     """
     For all prefect flows and tasks, this will automatically use a dummy-database
