@@ -21,6 +21,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `load_default_sqlite3_build` utility that downloads a pre-built database with all third-party data present. This is an alternative to calling `load_all_remote_archives` if you are using sqlite3 and saves a significant amount of time for users.
 - standardize workflow naming. Note this breaks from python naming conventions for classes ([#150](https://github.com/jacksund/simmate/issues/150))
 - dynamically determine `register_kwargs` and rename property to `parameters_to_register`
+- add full-run unittests that call workflows and vasp (without emulation)
 
 **Refactors**
 - move contents of `configuration.django.database` to `database.utilities`
