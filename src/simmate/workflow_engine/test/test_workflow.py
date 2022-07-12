@@ -73,6 +73,7 @@ def test_workflow():
     n = DummyFlow.nflows_submitted
     assert isinstance(n, int)
     # we dont check the actual value bc it could be affected by other parallel tests
+    # BUG: see https://github.com/jacksund/simmate/issues/187
 
 
 @pytest.mark.django_db

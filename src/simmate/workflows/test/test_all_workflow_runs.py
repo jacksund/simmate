@@ -9,6 +9,7 @@ from simmate.workflows.utilities import (
 
 
 @pytest.mark.vasp
+@pytest.mark.prefect_bug
 @pytest.mark.django_db
 def test_all_workflow_runs(tmpdir, sample_structures):
 
@@ -78,12 +79,19 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             successful_flows.append(workflow_name)
 
         # TEST NEB FLOWS
-        # workflow = get_workflow("diffusion.vasp.neb-all-paths")
+        # For testing, look at I- diffusion in Y2CF2
+        # structure = sample_structures["Y2CI2_mp-1206803_primitive"]
+        # workflow_name = "diffusion.vasp.neb-all-paths"
+        # workflow = get_workflow(workflow_name)
         # state = workflow.run(
-        #     structure="ZnSnF6_mp-13903_primitive.cif",
-        #     command="mpirun -n 8 vasp_std > vasp.out; mpirun -n 15 vasp_std > vasp.out;mpirun -n 15 vasp_std > vasp.out",
-        #     migrating_specie="F",
+        #     structure=structure,
+        #     migrating_specie="I",
+        #     command="mpirun -n 15 vasp_std > vasp.out",
+        #     directory=str(tmpdir),
         # )
+        # state.result()
+        # if state.is_completed():
+        #     successful_flows.append(workflow_name)
 
     # check which flows either (1) failed or (2) weren't tested
     all_flows = get_list_of_all_workflows()
@@ -98,5 +106,5 @@ def test_all_workflow_runs(tmpdir, sample_structures):
         "population-analysis.vasp.badelf-matproj",
     ]
 
-    # BUG: breaking loops
+    # BUG: see https://github.com/jacksund/simmate/issues/187
     [get_workflow(w).nflows_submitted for w in all_flows]
