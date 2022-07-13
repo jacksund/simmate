@@ -9,7 +9,6 @@ from simmate.workflows.utilities import (
 
 
 @pytest.mark.vasp
-@pytest.mark.prefect_bug
 @pytest.mark.django_db
 def test_all_workflow_runs(tmpdir, sample_structures):
 
@@ -105,6 +104,3 @@ def test_all_workflow_runs(tmpdir, sample_structures):
         "diffusion.vasp.neb-single-path",
         "population-analysis.vasp.badelf-matproj",
     ]
-
-    # BUG: see https://github.com/jacksund/simmate/issues/187
-    [get_workflow(w).nflows_submitted for w in all_flows]

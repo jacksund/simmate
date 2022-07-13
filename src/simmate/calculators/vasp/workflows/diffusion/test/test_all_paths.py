@@ -11,7 +11,6 @@ from simmate.calculators.vasp.workflows.diffusion.all import (
 
 
 @pytest.mark.django_db
-@pytest.mark.prefect_bug
 def test_neb(sample_structures, tmpdir, mocker):
 
     copy_test_files(
@@ -43,6 +42,3 @@ def test_neb(sample_structures, tmpdir, mocker):
         directory=str(tmpdir),
     )
     assert state.is_completed()
-
-    # BUG: see https://github.com/jacksund/simmate/issues/187
-    Diffusion__Vasp__NebAllPaths.nflows_submitted
