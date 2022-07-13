@@ -66,8 +66,8 @@ def test_workflow():
 
     # test cloud properties
 
-    # deployment_id = DummyFlow.deployment_id
-    # assert isinstance(deployment_id, str)
+    deployment_id = DummyFlow.deployment_id
+    assert isinstance(deployment_id, str)
     # we dont check the actual value bc its randomly generated
 
     n = DummyFlow.nflows_submitted

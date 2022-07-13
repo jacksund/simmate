@@ -492,14 +492,29 @@ class Workflow:
     #
     # -------------------------------------------------------------------------
 
-    # I'd like to have @cache and @async_to_sync on this method but cache
-    # doesn't work with async and this is also called within another async fxn
     @classmethod
     @property
+    @cache
+    @async_to_sync
     async def deployment_id(cls) -> str:
         """
         Grabs the deployment id from the prefect database if it exists, and
-        if not, creates the depolyment
+        if not, creates the depolyment and then returns the id.
+
+        This is a synchronous and cached version of `_get_deployment_id` and
+        this is the preferred method to use for beginners.
+        """
+        return await cls._get_deployment_id()
+
+    @classmethod
+    async def _get_deployment_id(cls) -> str:
+        """
+        Grabs the deployment id from the prefect database if it exists, and
+        if not, creates the depolyment and then returns the id.
+
+        This is an asynchronous method and should only be used when within
+        other async methods. Beginners should instead use the `deployment_id`
+        property.
         """
 
         async with get_client() as client:
@@ -513,15 +528,16 @@ class Workflow:
         # to create the deployment
         if not response:
             deployment_id = await cls._create_deployment()
-            return deployment_id
 
         # there should only be one deployment associated with this workflow
         # if it's been deployed already.
         elif len(response) == 1:
-            return str(response[0].id)
+            deployment_id = str(response[0].id)
 
         else:
             raise Exception("There are duplicate deployments for this workflow!")
+
+        return deployment_id
 
     @classmethod
     async def _create_deployment(cls) -> str:
@@ -583,7 +599,7 @@ class Workflow:
 
         async with get_client() as client:
             response = await client.create_flow_run_from_deployment(
-                deployment_id=await cls.deployment_id,
+                deployment_id=await cls._get_deployment_id(),
                 **kwargs,
             )
 
