@@ -58,7 +58,7 @@ class ElectronicStructure__Vasp__MatprojFull(Workflow):
 
         static_result = static_workflow.run(
             structure=parameters_cleaned["structure"],
-            command=parameters_cleaned["command"],
+            command=parameters_cleaned.get("command"),
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + static_workflow.name_full,
@@ -72,7 +72,7 @@ class ElectronicStructure__Vasp__MatprojFull(Workflow):
                 "database_table": static_workflow.database_table.__name__,
                 "directory": static_result["directory"],
             },
-            command=parameters_cleaned["command"],
+            command=parameters_cleaned.get("command"),
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + dos_workflow.name_full,
@@ -84,7 +84,7 @@ class ElectronicStructure__Vasp__MatprojFull(Workflow):
                 "database_table": static_workflow.database_table.__name__,
                 "directory": static_result["directory"],
             },
-            command=parameters_cleaned["command"],
+            command=parameters_cleaned.get("command"),
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + bandstruct_workflow.name_full,

@@ -19,7 +19,7 @@ class MatprojStructure(Structure, Thermodynamics):
     base_info = ["id", "structure_string", "energy"]
     source = "Materials Project"
     source_doi = "https://doi.org/10.1063/1.4812323"
-    remote_archive_link = "https://archives.simmate.org/MatprojStructure-2022-01-26.zip"
+    remote_archive_link = "https://archives.simmate.org/MatProjStructure-2022-01-26.zip"
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """

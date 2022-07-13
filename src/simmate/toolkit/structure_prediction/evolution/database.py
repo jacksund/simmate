@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import table_column, DatabaseTable
-
-from django.apps import apps as django_apps
-
-# from prefect.client import Client
-# from prefect.utilities.graphql import with_args
-
 import plotly.graph_objects as plotly_go
+from django.apps import apps as django_apps
+from prefect.client import get_client
+from prefect.orion.schemas.filters import FlowRunFilter
+
+from simmate.database.base_data_types import table_column, DatabaseTable
+from simmate.utilities import async_to_sync
 
 
 class EvolutionarySearch(DatabaseTable):
@@ -131,6 +130,9 @@ class EvolutionarySearch(DatabaseTable):
     def individuals_completed(self):
         # If there is an energy_per_atom, we can treat the calculation as completed
         return self.individuals.filter(energy_per_atom__isnull=False)
+        # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
+        # Ideally, I could make a relation to the prefect flow run table but this
+        # would require a large amount of work to implement.
 
     @property
     def best_individual(self):
@@ -172,7 +174,9 @@ class EvolutionarySearch(DatabaseTable):
         import numpy
         from simmate.toolkit import Composition
         from matminer.featurizers.site import CrystalNNFingerprint
-        from matminer.featurizers.structure.sites import PartialsSiteStatsFingerprint
+        from matminer.featurizers.structure.sites import (
+            PartialsSiteStatsFingerprint,
+        )
 
         sitefingerprint_method = CrystalNNFingerprint.from_preset(
             "ops", distance_cutoffs=None, x_diff_weight=3
@@ -265,35 +269,50 @@ class StructureSource(DatabaseTable):
         related_name="sources",
     )
 
-    def update_flow_run_ids(self):
+    @staticmethod
+    @async_to_sync
+    async def _check_still_running_ids(prefect_flow_run_ids):
+        """
+        Queries Prefect to see check on a list of flow run ids and determines
+        which ones are still in a scheduled, running, or pending state.
+        From the list of ids given, it will return a list of the ones that
+        haven't finished yet.
 
-        # Using our list of current run ids, we query prefect to see which of
-        # these still are running or in the queue.
-        # OPTIMIZE: This may be a really bad way to query Prefect...
-        query = {
-            "query": {
-                with_args(
-                    "flow_run",
-                    {
-                        "where": {
-                            "state": {"_in": ["Running", "Scheduled"]},
-                            "id": {"_in": self.prefect_flow_run_ids},
-                        },
-                    },
-                ): ["id"]
-            }
-        }
-        client = Client()
-        result = client.graphql(query)
-        # graphql gives a weird format, so I reparse it into just a list of ids
-        result = [run["id"] for run in result["data"]["flow_run"]]
+        This is normally used within `update_flow_run_ids` and shouldn't
+        be called directly.
+        """
+
+        # The reason we have this code as a separate method is because we want
+        # to isolate Prefect's async calls from Django's sync-restricted calls
+        # (i.e. django raises errors if called within an async context).
+
+        async with get_client() as client:
+            response = await client.read_flow_runs(
+                flow_run_filter=FlowRunFilter(
+                    id={"any_": prefect_flow_run_ids},
+                    state={"type": {"any_": ["SCHEDULED", "PENDING", "RUNNING"]}},
+                ),
+            )
+
+        still_running_ids = [str(entry.id) for entry in response]
+
+        return still_running_ids
+
+    def update_flow_run_ids(self):
+        """
+        Queries Prefect to see how many workflows are in a scheduled, running,
+        or pending state from the list of run ids that are associate with this
+        structure source.
+        """
+
+        # make the async call to Prefect client
+        still_running_ids = self._check_still_running_ids(self.prefect_flow_run_ids)
 
         # we now have our new list of IDs! Let's update it to the database
-        self.prefect_flow_run_ids = result
+        self.prefect_flow_run_ids = still_running_ids
         self.save()
 
-        # in case we need the list of ids, we return it too
-        return result
+        return still_running_ids
 
     @property
     def nprefect_flow_runs(self):

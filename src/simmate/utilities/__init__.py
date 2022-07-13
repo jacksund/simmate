@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .async_wrapper import async_to_sync
 from .files import (
     get_directory,
     make_archive,
@@ -13,7 +14,6 @@ from .other import (
     get_chemical_subsystems,
     get_latest_version,
     check_if_using_latest_version,
-    async_to_sync,
 )
 
 # must be last to prevent circular import

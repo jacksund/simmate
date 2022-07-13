@@ -5,7 +5,11 @@ from tqdm import tqdm
 
 from django.utils import timezone
 
-from matminer.featurizers.site import CrystalNNFingerprint
+# BUG: This prints a tqdm error so we silence it here.
+import warnings
+
+with warnings.catch_warnings(record=True):
+    from matminer.featurizers.site import CrystalNNFingerprint
 
 # BUG: waiting on this pSS to be added to matminer. See the following PR:
 #   https://github.com/hackingmaterials/matminer/pull/809
