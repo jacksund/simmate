@@ -10,6 +10,7 @@ from simmate.calculators.vasp.workflows.diffusion.all import (
 )
 
 
+@pytest.mark.prefect_db
 @pytest.mark.django_db
 def test_neb(sample_structures, tmpdir, mocker):
 

@@ -34,6 +34,7 @@ class DummyProject__DummyCaclulator__DummyPreset(Workflow):
 DummyFlow = DummyProject__DummyCaclulator__DummyPreset
 
 
+@pytest.mark.prefect_db
 def test_workflow():
     # Run the workflow just like you would for the base Prefect class
     flow = DummyFlow.to_prefect_flow()
@@ -72,6 +73,7 @@ def test_workflow():
     assert isinstance(n, int)
 
 
+@pytest.mark.prefect_db
 @pytest.mark.django_db
 def test_workflow_cloud(mocker, sample_structures):
 

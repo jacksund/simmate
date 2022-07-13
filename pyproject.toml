@@ -18,6 +18,7 @@ markers = [
     "blender: requires blender installed",
     "pymatgen: runs a pymatgen-compatibility test",
     "vasp: requires vasp installed",
+    "prefect_db: requires access to the prefect database"
 ]
 
 # By default, we only want to run unmarked tests. The simplest way to do this

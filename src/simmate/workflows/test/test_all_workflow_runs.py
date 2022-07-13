@@ -9,6 +9,7 @@ from simmate.workflows.utilities import (
 
 
 @pytest.mark.vasp
+@pytest.mark.prefect_db
 @pytest.mark.django_db
 def test_all_workflow_runs(tmpdir, sample_structures):
 
