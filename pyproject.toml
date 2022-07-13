@@ -18,7 +18,7 @@ markers = [
     "blender: requires blender installed",
     "pymatgen: runs a pymatgen-compatibility test",
     "vasp: requires vasp installed",
-    "prefect_bug: hangs in github CI but not local tests" # see https://github.com/jacksund/simmate/issues/187
+    "prefect_db: requires access to the prefect database"
 ]
 
 # By default, we only want to run unmarked tests. The simplest way to do this
@@ -27,7 +27,7 @@ markers = [
 # migration folders.
 # I manually remove -m when testing coverage, but am unsure if there's a better
 # way to do this.
-addopts = "--no-migrations -m 'not blender and not pymatgen and not vasp and not prefect_bug'"
+addopts = "--no-migrations -m 'not blender and not pymatgen and not vasp'"
 
 # There are a number of warnings that are expected when running our tests.
 # We remove these from our output for clarity.

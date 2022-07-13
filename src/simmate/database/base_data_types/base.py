@@ -541,6 +541,20 @@ class DatabaseTable(models.Model):
         # return the dictionary
         return all_data if as_dict else cls(**all_data)
 
+    def update_from_toolkit(self, **kwargs):
+        """
+        Given fundamental "base_info" and toolkit objects, this method will populate
+        all relevant columns.
+
+        This method is meant for updating existing database entries with new
+        data. If your creating a brand-new database entry, use the
+        `from_toolkit` method instead.
+        """
+        new_kwargs = self.from_toolkit(as_dict=True, **kwargs)
+        for new_kwarg, new_value in new_kwargs.items():
+            setattr(self, new_kwarg, new_value)
+        self.save()
+
     @classmethod
     def _confirm_override(
         cls,

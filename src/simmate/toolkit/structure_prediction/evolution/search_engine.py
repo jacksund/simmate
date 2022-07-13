@@ -84,7 +84,7 @@ class SearchEngine:
     def __init__(
         self,
         composition: Union[str, Composition],
-        workflow: Union[str, Workflow] = "StagedRelaxation",
+        workflow: Union[str, Workflow] = "relaxation.vasp.staged",
         workflow_command: str = None,
         max_structures: int = 3000,
         limit_best_survival: int = 250,
@@ -102,49 +102,55 @@ class SearchEngine:
             (0.05, "from_ase.CoordinatePerturbation"),
         ],
         selector: str = "TruncatedSelection",
-        labels: List[str] = [],
         # TODO: maybe use **workflow_run_kwargs...?
     ):
         """
         Sets up the search engine and its settings.
 
-        Parameters
-        ----------
-        composition :
+        #### Parameters
+
+        - `composition`:
             The composition to run the evolutionary search for. Note that the
             number of sites is fixed to what is set here. (Ca2N vs Ca4N2)
-        workflow : simmate.workflow_engine.workflow.Workflow or str (optional)
+
+        - `workflow`:
             The workflow to run all individuals through. Note, the result_database
             of this workflow will be treated as the individuals in this search.
-            The default is "StagedRelaxation"
-        workflow_command : str (optional)
+            The default is "relaxation.vasp.staged"
+
+        - `workflow_command`:
             The command that will be passed to the workflow.run() method.
-        max_structures : int (optional)
+
+        - `max_structures`:
             The maximum number of individuals that will be calculated before
             stopping the search. The default is 3000.
-        limit_best_survival : int (optional)
+
+        - `limit_best_survival`:
             The search is stopped when the best individual remains unbeaten for
             this number of new individuals. The default is 250.
-        singleshot_sources : list of strings (optional)
+
+        - `singleshot_sources`:
             TODO: This is not implemented yet
-        nfirst_generation : int (optional)
+
+        - `nfirst_generation`:
             No mutations or "child" individuals will be carried out until this
             number of individuals have been calculated. The default is 20.
-        nsteadystate : int (optional)
+
+        - `nsteadystate`:
             The total number of individuals from steady-state sources that will
             be running/submitted at any given time. The default is 40.
-        steadystate_sources : List[Tuple[float, str]]
+
+        - `steadystate_sources`:
             A list of tuples where each tuple is (percent, source). The percent
             determines the number of steady stage calculations that will be
             running for this at any given time. For example, 0.25 means
             0.25*40=10 individuals will be running/submitted at all times. The
             source can be from either the toolkit.creator or toolkit.transformations
             modules. Don't change this default unless you know what you're doing!
-        selector : str (optional)
+
+        - `selector`:
             The defualt method to use for choosing the parent individual(s). The
             default is TruncatedSelection.
-        labels:
-            a list of labels to submit individuals structures with to prefect
         """
 
         # make sure we were givent a Composition object, and if not, we have
@@ -153,7 +159,6 @@ class SearchEngine:
             composition = Composition(composition)
 
         self.composition = composition
-        self.labels = labels
         self.workflow_command = workflow_command
 
         # TODO: consider grabbing these from the database so that we can update
@@ -180,25 +185,29 @@ class SearchEngine:
 
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.
-        if workflow == "StagedRelaxation":
-            from simmate.workflows.relaxation import staged_workflow
+        if workflow == "relaxation.vasp.staged":
+            from simmate.workflows.relaxation import Relaxation__Vasp__Staged
 
-            self.workflow = staged_workflow
+            self.workflow = Relaxation__Vasp__Staged
+
+            # Point to the structure datatable that we'll pull from
+            # BUG: For now, I assume its the results table of the workflow
+            self.individuals_datatable = self.workflow.database_table._meta.get_field(
+                "quality04relaxation"
+            ).related_model  # gives quality04relaxation table
+            self.calculation_datatable = self.workflow.database_table
+            # BUG: these need to be merged and moved outside this if statement
         else:
-            raise Exception("Only StagedRelaxation is supported in early testing")
+            raise Exception(
+                "Only `relaxation.vasp.staged` is supported in early testing"
+            )
         print(
-            f"All individuals will be evaulated through the {self.workflow.name} workflow."
+            f"All individuals will be evaulated through the "
+            f"{self.workflow.name_full} workflow."
         )
         # BUG: I'll need to rewrite this in the future bc I don't really account
         # for other workflows yet. It would make sense that our workflow changes
         # as the search progresses (e.g. we incorporate DeePMD relaxation once ready)
-
-        # Point to the structure datatable that we'll pull from
-        # For now, I assume its the results table of the workflow
-        self.individuals_datatable = (
-            self.workflow.result_table
-        )  #################################### BUG
-        self.calculation_datatable = self.workflow.database_table
 
         # Check if there is an existing search and grab it if so. Otherwise, add
         # the search entry to the DB.
@@ -212,7 +221,7 @@ class SearchEngine:
             self.search_datatable = SearchDatatable(
                 composition=composition.formula,
                 workflows=[
-                    self.workflow.name
+                    self.workflow.name_full
                 ],  # as a list bc we can add new ones later
                 individuals_datatable_str=self.individuals_datatable.__name__,
                 max_structures=max_structures,
@@ -264,7 +273,9 @@ class SearchEngine:
 
             # There are certain transformation sources that don't work for single-element
             # structures, so we check for this here and remove them.
-            if len(composition.elements) == 1 and source in ["AtomicPermutationASE"]:
+            if len(composition.elements) == 1 and source in [
+                "from_ase.AtomicPermutation"
+            ]:
                 print(
                     f"{source} is not possible with single-element structures."
                     " This is being removed from your steadystate_sources."
@@ -453,10 +464,9 @@ class SearchEngine:
                 )
                 flow_run_id = self.workflow.run_cloud(
                     structure=structure,
-                    wait_for_run=False,
-                    labels=self.labels,
                     **extra_kwargs,
                 )
+                print("Submitted workflow run to prefect cloud.")
 
                 # Attached the flow_run_id to our source so we know how many
                 # associated jobs are running.
@@ -494,7 +504,7 @@ class SearchEngine:
         ):
             print(
                 "Search isn't ready for transformations yet."
-                f" Skipping {source.__class__.__name__}"
+                f" Skipping {source.__class__.__name__}."
             )
             return False, False
 
@@ -555,7 +565,11 @@ class SearchEngine:
         # may not be true in special cases.
 
         # From these individuals, select our parent structures
-        parents_df = self.selector.select(nselect, individuals_df, "energy_per_atom")
+        parents_df = self.selector.select(
+            nselect,
+            individuals_df,
+            "energy_per_atom",
+        )
 
         # grab the id column of the parents and convert it to a list
         parent_ids = parents_df.id.values.tolist()
@@ -567,7 +581,7 @@ class SearchEngine:
         # entries. For example, a hereditary mutation can request parent ids of [123,123]
         # in which case we want to give the same input structure twice!
         parent_structures = [
-            self.individuals_datatable.objects.only("structure_string")
+            self.search_datatable.individuals_completed.only("structure_string")
             .get(id=parent_id)
             .to_toolkit()
             for parent_id in parent_ids

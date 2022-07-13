@@ -78,7 +78,7 @@ class Relaxation__Vasp__Staged(Workflow):
         current_task = tasks_to_run[0]
         state = current_task.run(
             structure=parameters_cleaned["structure"],
-            command=parameters_cleaned["command"],
+            command=parameters_cleaned.get("command"),
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + current_task.name_full,
@@ -94,7 +94,7 @@ class Relaxation__Vasp__Staged(Workflow):
                     "directory": result["directory"],  # uses preceding result
                     "structure_field": "structure_final",
                 },
-                command=parameters_cleaned["command"],
+                command=parameters_cleaned.get("command"),
                 directory=parameters_cleaned["directory"]
                 + os.path.sep
                 + current_task.name_full,
