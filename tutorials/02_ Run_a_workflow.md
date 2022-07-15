@@ -37,7 +37,7 @@ direct
 ```
 3. View a list of all workflows available with `simmate workflows list-all`
 4. Interactively learn about all workflows with `simmate workflows explore`
-5. View the settings used for the `static-energy/mit` workflow with `simmate workflows show-config static-energy/mit`
+5. View the settings used for the `static-energy.vasp.mit` workflow with `simmate workflows show-config static-energy.vasp.mit`
 6. Copy and paste VASP POTCAR files to the folder `~/simmate/vasp/Potentials`. Be sure to unpack the `tar.gz` files. This folder will have the potentials that came with VASP -- and with their original folder+file names:
 ```
 # Located at /home/my_username (~)
@@ -62,18 +62,18 @@ simmate/
 
 - **OPTION 1**: Define all settings directly in the command line (best for quick submitting and testing)
 ``` bash
-simmate workflows run static-energy/mit --structure POSCAR
+simmate workflows run static-energy.vasp.mit --structure POSCAR
 
 # OR
 
-simmate workflows run static-energy/mit --structure POSCAR --command "mpirun -n 5 vasp_std > vasp.out"
+simmate workflows run static-energy.vasp.mit --structure POSCAR --command "mpirun -n 5 vasp_std > vasp.out"
 ```
 
 - **OPTION 2**: Run from a settings file in yaml format (best for complex settings)
 ``` yaml
 # In a file named "my_example.yaml".
 # Note, different workflows accept different settings here.
-workflow_name: static-energy/mit
+workflow_name: static-energy.vasp.mit
 structure: POSCAR
 command: mpirun -n 5 vasp_std > vasp.out  # OPTIONAL
 directory: my_new_folder  # OPTIONAL
@@ -206,7 +206,7 @@ loop_
   Cl  Cl1  1  0.50000000  0.50000000  0.50000000  1
 ```
 
-Nearly all files that you will interact with are text files -- just in different formats. That's where file extensions come in. They indicate what format we are using. Files named `something.cif` just tell programs we have a text file written if the CIF structure format. VASP uses the name POSCAR (without any file extension) to show its format. So rename your file from `POSCAR.txt` to `POSCAR`, and now all programs (VESTA, OVITO, and others) will know what to do with your structure. In Windows, you will often receive a warning about changing the file extension. Ignore the warning and change the extension.
+Nearly all files that you will interact with are text files -- just in different formats. That's where file extensions come in. They indicate what format we are using. Files named `something.cif` just tell programs we have a text file written in the CIF structure format. VASP uses the name POSCAR (without any file extension) to show its format. So rename your file from `POSCAR.txt` to `POSCAR`, and now all programs (VESTA, OVITO, and others) will know what to do with your structure. In Windows, you will often receive a warning about changing the file extension. Ignore the warning and change the extension.
 
 If you're using the command-line to create/edit this file, you can use the copy (`cp`) command to make the `POSCAR` file:
 
@@ -222,7 +222,7 @@ We now have our structure ready to go! Let's get back to running a workflow.
 
 ## Configuring Potentials (for VASP users)
 
-> :warning: once Simmate switches from VASP to a free DFT alternative, this section of the tutorial will be removed. 
+> :warning: once Simmate switches from VASP to a free DFT alternative, this section of the tutorial will be removed.
 
 VASP is a very popular software for running DFT calculations, but our team can't install it for you because VASP is commercially licensed (i.e. you need to [purchase it from their team](https://www.vasp.at/), which we are not affiliated with). Simmate is working to switch to another DFT software -- specifically one that is free/open-source, that can be preinstalled for you, and that you can use on Windows+Mac+Linux. Until Simmate reaches this milestone, you'll have to use VASP. We apologize for the inconvenience.
 
@@ -281,15 +281,15 @@ The output will be similar to...
 ```
 Gathering all available workflows...
 These are the workflows that have been registerd:
-        (01) static-energy/matproj
-        (02) static-energy/mit
-        (03) static-energy/neb-endpoint
-        (04) static-energy/quality04
-        (05) relaxation/matproj
-        (06) relaxation/mit
-        (07) relaxation/neb-endpoint
-        (08) relaxation/quality00
-        (09) relaxation/quality01
+    	(01) customized.vasp.user-config
+    	(02) diffusion.vasp.neb-all-paths
+    	(03) diffusion.vasp.neb-from-endpoints
+    	(04) diffusion.vasp.neb-from-images
+    	(05) diffusion.vasp.neb-single-path
+    	(06) dynamics.vasp.mit
+    	(07) electronic-structure.vasp.matproj-full
+    	(08) population-analysis.vasp.badelf-matproj
+    	(09) population-analysis.vasp.bader-matproj
   ... << plus others that are cut-off for clarity >>
 ```
 
@@ -299,31 +299,48 @@ Next, try out the `explore` command, which gives us a more interactive way to vi
 simmate workflows explore
 ```
 
-When prompted to choose a type of workflow or a specific preset, choose whichever you'd like! A description of the workflow will be printed at the very end. As an example, here's the output of an example workflow `relaxation/staged` which is commonly used in our evolutionary search algorithm. To get this output, we used the `simmate workflows explore` then selected option `2` (relaxation) and then option `9` (staged):
+When prompted to choose a type of workflow or a specific preset, choose whichever you'd like! A description of the workflow will be printed at the very end. As an example, here's the output of an example workflow `relaxation.vasp.staged` which is commonly used in our evolutionary search algorithm. To get this output, we used the `simmate workflows explore` then selected option `6` (relaxation) and then option `9` (staged):
 
 ```
 ===================== relaxation/staged =====================
+
+Using: 
+
+	from simmate.workflows.relaxation import Relaxation__Vasp__Staged 
+
+You can find the source code for this workflow in the follwing module: 
+
+	simmate.calculators.vasp.workflows.relaxation
+
+Description:
 
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
 
     This is therefore a "Nested Workflow" made of the following smaller workflows:
 
-        - relaxation/quality00
-        - relaxation/quality01
-        - relaxation/quality02
-        - relaxation/quality03
-        - relaxation/quality04
-        - static-energy/quality04
+        - relaxation.vasp.quality00
+        - relaxation.vasp.quality01
+        - relaxation.vasp.quality02
+        - relaxation.vasp.quality03
+        - relaxation.vasp.quality04
+        - static-energy.vasp.quality04
 
     This workflow is most useful for randomly-created structures or extremely
     large supercells. More precise relaxations+energy calcs should be done
     afterwards because ettings are still below MIT and Materials Project quality.
+    
+Parameters:
+- command
+- copy_previous_directory
+- directory
+- source
+- structure
 
 ==================================================================
 ```
 
-In this tutorial, we will be using `static-energy/mit` which runs a simple static energy calculation using MIT Project settings (these settings are based on pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)).
+In this tutorial, we will be using `static-energy.vasp.mit` which runs a simple static energy calculation using MIT Project settings (these settings are based on pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)).
 
 <br/> <!-- add empty line -->
 
@@ -334,15 +351,15 @@ Take a look back at the 4 key steps of a workflow above (`configure`, `schedule`
 To view a workflow's configuration before using it, we type the command `simmate workflows show-config`. Try this out by running:
 
 ``` shell
-simmate workflows show-config relaxation/quality00
+simmate workflows show-config relaxation.vasp.quality00
 ```
 
-VASP users will recognize that this specifies the contents of a VASP INCAR file.  The `relaxation_quality00` is the most basic workflow configuration because the INCAR will not depend on the structure or composition of your crystal.
+VASP users will recognize that this specifies the contents of a VASP INCAR file.  The `quality00` is the most basic workflow configuration because the INCAR will not depend on the structure or composition of your crystal.
 
 Next, look at a more advanced calculation. Run the command:
 
 ``` shell
-simmate workflows show-config static-energy/mit
+simmate workflows show-config static-energy.vasp.mit
 ```
 
 Here, you'll see that some INCAR settings rely on composition and that we have a list of error handlers to help ensure that the calculation finishes successfully.
@@ -350,10 +367,10 @@ Here, you'll see that some INCAR settings rely on composition and that we have a
 Now, let's go one step further and provide a specific structure (the POSCAR we just made) into a specific workflow (static-energy/mit). To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can type `cd Desktop` to change your active folder to your Desktop. Then run the command:
 
 ``` shell
-simmate workflows setup-only static-energy/mit --structure POSCAR
+simmate workflows setup-only static-energy.vasp.mit --structure POSCAR
 ```
 
-You'll see a new folder created named `MIT_Static_Energy_inputs`. When you open it, you'll see all the files that Simmate made for VASP to use. This is useful when you're an advanced user who wants to alter these files before running VASP manually -- this could happen when you want to test new workflows or unique systems.
+You'll see a new folder created named `static-energy.vasp.mit.SETUP-ONLY`. When you open it, you'll see all the files that Simmate made for VASP to use. This is useful when you're an advanced user who wants to alter these files before running VASP manually -- this could happen when you want to test new workflows or unique systems.
 
 For absolute beginners, you don't immediately need to understand these files, but they will eventually be important for understanding the scientific limitations of your results or for running your own custom calculations. Whether you use [VASP](https://www.vasp.at/wiki/index.php/Category:Tutorials), [ABINIT](https://docs.abinit.org/tutorial/), or another program, be sure to go through their tutorials, rather than always depending on Simmate to run the program for you.  Until you reach that point, we'll have Simmate do it all for us!
 
@@ -368,20 +385,17 @@ The default Simmate settings will run everything immediately and locally on your
 The command to do this with our POSCAR and static-energy/mit workflow is (the `-s` is short for `--structure`): 
 
 ``` shell
-simmate workflows run static-energy/mit --structure POSCAR
+simmate workflows run static-energy.vasp.mit --structure POSCAR
 ```
 
 By default, Simmate uses the command `vasp_std > vasp.out` and creates a new `simmate-task` folder with a unique identifier (ex: `simmate-task-j8djk3mn8`).
 
-What if we wanted to change this command or the directory it's ran in? First, check the help output for the command:
-``` shell
-simmate workflows run --help
-```
+What if we wanted to change this command or the directory it's ran in? Recall the output from the `simmate workflows explore` command, which listed parameters for us. We can use any of these to update how our worklfow runs.
 
-Using this help info, we can change our folder name (`--directory`, `-d`) as well as the command used to run VASP (`--command`, `-c`). For example, we can update our command to this:
+For example, we can change our folder name (`--directory`) as well as the command used to run VASP (`--command`). Using these, we can update our command to this:
 
 ``` shell
-simmate workflows run static-energy/mit --structure POSCAR --command "mpirun -n 4 vasp_std > vasp.out" --directory my_custom_folder
+simmate workflows run static-energy.vasp.mit --structure POSCAR --command "mpirun -n 4 vasp_std > vasp.out" --directory my_custom_folder
 ```
 
 
@@ -400,7 +414,7 @@ nano my_settings.yaml
 ... and write in the following information ...
 
 ``` yaml
-workflow_name: static-energy/mit
+workflow_name: static-energy.vasp.mit
 structure: POSCAR
 command: mpirun -n 4 vasp_std > vasp.out  # OPTIONAL
 directory: my_custom_folder  # OPTIONAL
@@ -520,7 +534,7 @@ nano submit.sh
 #SBATCH --mail-type=ALL 
 #SBATCH --mail-user=my_username@live.unc.edu
 
-simmate workflows run static-energy/mit --structure POSCAR --command "mpirun -n 4 vasp_std > vasp.out"
+simmate workflows run static-energy.vasp.mit --structure POSCAR --command "mpirun -n 4 vasp_std > vasp.out"
 ```
 
 Each of these `SBATCH` parameters set how we would like to sumbit a job and how many resources we expect to use. These are explained in [SLURM's documnetation for sbatch](https://slurm.schedmd.com/sbatch.html), but you may need help from your IT team to update them. But to break down these example parameters...

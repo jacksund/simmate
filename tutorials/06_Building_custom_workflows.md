@@ -28,10 +28,10 @@ For very quick testing, it is still useful to customize a workflow's settings wi
 
 ``` bash
 # This simply writes input files
-simmate workflows setup-only static-energy/mit POSCAR
+simmate workflows setup-only static-energy.vasp.mit --structure POSCAR
 
 # access your files in the new directory
-cd MIT_Static_Energy_inputs
+cd static-energy.vasp.mit.SETUP-ONLY
 
 # Customize input files as you see fit.
 # For example, you may want to edit INCAR settings
@@ -43,14 +43,14 @@ nano INCAR
 vasp_std > vasp.out
 ```
 
-**OPTION 2:** Using the "customized" workflow for a calculator (e.g. `customized/vasp`)
+**OPTION 2:** Using the "customized" workflow for a calculator (e.g. `customized.vasp.user-config`)
 
 ``` yaml
 # In a file named "my_example.yaml".
 
 # Indicates we want to change the settings, using a specific workflow as a starting-point
-workflow_name: customized/vasp
-workflow_base: static-energy/mit
+workflow_name: customized.vasp.user-config
+workflow_base: static-energy.vasp.mit
 
 # The parameters starting with "custom__" indicates we are updating some class 
 # attribute. These fundamentally change the settings of a workflow.
@@ -61,7 +61,7 @@ custom__incar:
 custom__potcar_mappings:
     Y: Y_sv
 
-# Then the remaining inputs are the same as the base_workflow
+# Then the remaining inputs are the same as the base workflow
 structure: POSCAR
 command: mpirun -n 5 vasp_std > vasp.out
 ```

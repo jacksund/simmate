@@ -77,7 +77,7 @@ conda install -c conda-forge simmate
 Once installed, running a local test server is as simple as...
 
 ``` bash
-# on first-time setup, you must intialize an empty database
+# On first-time setup, you must intialize an empty database.
 simmate database reset
 
 # then start the server!
@@ -103,18 +103,28 @@ Again, take a look at [our main website](https://simmate.org/) if you'd like to 
 
 ``` bash
 # The command line let's you quickly run a workflow
-# from a structure file (CIF or POSCAR)
-simmate workflows run relaxation/Matproj --structure NaCl.cif
+# from a structure file (CIF or POSCAR).
+simmate workflows run relaxation.vasp.matproj --structure NaCl.cif
+```
+
+``` yaml
+# Workflows can also be ran from YAML-based configuration
+# files, such as the one shown here (named `example.yaml`).
+# This would be submitted with the command:
+#   `simmate workflows run-yaml example.yaml`
+workflow_name: relaxation.vasp.matproj
+structure: NaCl.cif
+command: mpirun -n 8 vasp_std > vasp.out
 ```
 
 ``` python
 # Python let's you run workflows within scripts and
 # it also enables advanced setting configurations.
-# Simply load the workflow you'd like and run it!
 
-from simmate.workflows.relaxation import Matproj_workflow
+from simmate.workflows.relaxation import Relaxation__Vasp__Matproj as workflow
 
-status = Matproj_workflow.run(structure="NaCl.cif")
+state = workflow.run(structure="NaCl.cif")
+result = workflow.result()
 ```
 
 
@@ -173,14 +183,14 @@ structure.add_oxidation_state_by_guess()
 4. _**Ease of Scalability.**_ At the beginning of a project, you may want to write and run code on a single computer and single core. But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations. At the extreme, some projects require thousands of computers across numerous locations, including university clusters (using SLURM or PBS) and cloud computing (using Kubernetes and Docker). Simmate can meet all of these needs thanks to integration with [Dask](https://github.com/dask/dask) and [Prefect](https://github.com/PrefectHQ/prefect):
 ```python
 # To run the tasks of a single workflow in parallel, use Dask.
-from prefect.executors import DaskExecutor
-workflow.executor = DaskExecutor()
-status = workflow.run(...)
+from prefect.task_runners import DaskTaskRunner
+workflow.task_runner = DaskTaskRunner()
+state = workflow.run(...)
 
 # To run many workflows in parallel, use Prefect.
 # Once you configure Prefect, you simply switch
 # from using "run" to "run_cloud"
-status = workflow.run_cloud(...)
+prefect_flow_run_id = workflow.run_cloud(...)
 
 # You can use different combinations of these two parallelization strategies as well!
 # Using Prefect and Dask, we can scale out accross various computer resources 

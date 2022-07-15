@@ -226,7 +226,8 @@ On our official website, you are able to explore all results from past workflows
 First, we need to setup our database. We'll explain what this is doing in the next tutorial, but for now, think of this as building an empty excel spreadsheet that we can later fill with data. This is done with...
 
 ``` bash
-# confirm that you want to reset/delete your "old" database when prompted
+# Confirm that you want to reset/delete your "old" database when prompted.
+# Also agree to download and use a prebuilt database.
 simmate database reset
 ```
 
