@@ -1,5 +1,269 @@
 # -*- coding: utf-8 -*-
 
+"""
+This module defines the base class for all workflows in Simmate. When learning 
+how use workflows, make sure you have gone through our intro 
+[tutorials](https://github.com/jacksund/simmate/tree/main/tutorials). You
+can then read through these guides for more features.
+
+It useful to know that our Worklfow class builds Prefect Flows under the 
+hood, so having knowledge of Prefect can be useful in advanced cases. For 
+advanced use or when building new features, we recommend going through the
+prefect tutorials located
+[here](https://orion-docs.prefect.io/tutorials/first-steps/).
+
+
+
+# Using existing workflows
+
+
+## Loading a workflow
+
+To import a specific workflow, see the `simmate.workflows` module. For all the
+example uses below, we will look at the `static-energy.vasp.matproj` workflow,
+which we load with:
+    
+``` python
+from simmate.workflows.all import StaticEnergy__Vasp__Matproj as workflow
+```
+
+
+## Viewing input parameters
+
+
+
+## Running a workflow (local)
+
+To run a workflow locally (i.e. directly on your current computer), you can
+use the `run` method. This is returns a Prefect `State` object, which allows
+you to check if the run completed successfully or not. Then final output of your
+workflow run can be accessed using `state.result()`. You can read more about
+`State` objects [here](https://orion-docs.prefect.io/concepts/states/), but as
+a quick example:
+
+``` python
+state = workflow.run(
+    structure="NaCl.cif", 
+    command="mpirun -n 4 vasp_std > vasp.out",
+)
+
+if state.is_completed():  # optional check
+    result = state.result()
+```
+
+Outside of python, you can also run workflows from the command line, using YAML 
+files, or the website interface. These approaches are covered in the intro
+tutorials.
+
+
+## Running a workflow (cloud)
+
+When you want to schedule a workflow to run elsewhere, you must first make sure
+you have your computational resources configured. You can then run workflows
+using the `run_cloud` method, which returns a Prefect flow run id.
+
+``` python
+prefect_flow_run_id = workflow.run_cloud(
+    structure="NaCl.cif", 
+    command="mpirun -n 4 vasp_std > vasp.out",
+)
+```
+
+## Accessing results
+
+In addition to using `state.result()` as described above, you can also view
+results database through the `database_table` attribute (if one is available).
+This returns a Simmate database object for results of ALL runs of this workflow.
+Guides for filtering and manulipating the data in this table is covered in
+the `simmate.database` module guides. But as an example:
+
+``` python
+table = workflow.database_table
+
+# pandas dataframe that you can view in Spyder
+df = table.obects.to_dataframe()
+
+# or grab a specific run result and convert to a toolkit object
+entry = table.objects.get(prefect_flow_run_id="example-123456")
+structure = entry.to_toolkit()
+```
+
+<!--
+TODO:
+    - viewing parameter names
+    - accessing results (database_table)
+    - run_cloud and other cloud methods
+    - different documentation levels (parameters, mini docstring, etc.)
+    - finding the same workflow in the website UI (place this )
+-->
+
+# Creating new workflows
+
+## Naming workflows (required)
+
+Higher level features such as the website interface require that workflow
+names follow a certain format. If you skip this step, your workflows
+will fail and cause errors elsewhere.
+
+First, we need to update the workflow name to match Simmate's naming
+conventions, which includes:
+    1.  The type of analysis the workflow is doing
+    2.  The "calculator" (or program) that the workflow uses to run
+    3.  A unique name to identify the settings used
+
+Examples for each part would be:
+    1. relaxation, static-energy, dynamics, ...
+    2. vasp, abinit, qe, deepmd, ...
+    3. jacks-test, matproj, quality00, ...
+
+Together, an example workflow names would be:
+    - `relaxation.vasp.jacks-test`
+    - `static-energy.abinit.matproj`
+    - `dynamics.qe.quality00`
+
+When converting this to our workflow name in python, we need to replace
+periods with 2 underscores each and convert our words to
+[pascal case](https://khalilstemmler.com/blogs/camel-case-snake-case-pascal-case/).
+For example, our workflow names become:
+    - `Relaxation__Vasp__JacksTest`
+    - `StaticEnergy__Abinit__Matproj`
+    - `Dynamics__Qe__Quality00`
+
+NOTE: Capitalization is very important here so make sure you double check
+your workflow names.
+
+Now let's test this out in python using a similar workflow name:
+``` python
+from simmate.workflow_engine import Workflow
+
+class Example__Python__MyFavoriteSettings(Workflow):
+    pass  # we will build the rest of workflow later
+
+# These names can be long and unfriendly, so it can be nice to
+# link them to a variable name for easier access.
+my_workflow = Example__Python__MyFavoriteSettings
+
+# Now check that our naming convention works as expected
+assert my_workflow.name_full == "example.pure-python.my-favorite-settings"
+assert my_workflow.name_project == "example"
+assert my_workflow.name_calculator == "python"
+assert my_workflow.name_preset == "my-favorite-settings"
+```
+
+You now have a ready-to-use workflow name!
+
+
+## Minimal example (Prefect vs. Simmate)
+
+It's useful to know how Prefect workflows compare to Simmate workflows. For
+simple cases where you have python code, you'd define a Prefect workflow
+like so:
+
+``` python
+from prefect import flow
+
+@flow
+def my_favorite_workflow():
+    print("This workflow doesn't do much")
+    return 42
+
+# and then run your workflow
+state = my_favorite_workflow()
+result = state.result()
+```
+
+To convert this to a Simmate workflow, we just need to change the format
+a little. Instead of a `@flow` decorator, we use the `run_config` method
+of a new subclass:
+
+``` python
+# NOTE: this example does not follow Simmate's naming convention, so
+# some higher level features will be broken. We will fix in a later step.
+
+from simmate.workflow_engine import Workflow
+
+class Example__Python__MyFavoriteSettings(Workflow):
+
+    @staticmethod
+    def run_config():
+        print("This workflow doesn't do much")
+        return 42
+
+# and then run your workflow
+state = MyFavoriteWorkflow.run()
+result = state.result()
+```
+
+Behind the scenes, the `run` method is converting our `run_config` to a
+Prefect workflow for us.
+
+
+### Full example
+
+Now let's look at a realistic example where we build a Workflow that has
+input parameters and accesses class attributes/methods:
+
+``` python
+
+class Example__Python__MyFavoriteSettings(Workflow):
+
+    example_constant = 12
+
+    @staticmethod
+    def squared(x):
+        return x ** 2
+
+    @classmethod
+    def run_config(cls, name, say_hello=True, **kwargs):
+
+        if say_hello:
+            print(f"Hello and welcome, {name}!")
+
+        # grab class values and methods
+        x = cls.example_constant
+        example_calc = cls.squared(x)
+        print(f"Our calculation gave a result of {example_calc}")
+
+        # grab extra arguments if you need them
+        for key, value in kwargs.items():
+            print(
+                f"An extra parameter for {key} was given "
+                "with a value of {value}"
+            )
+
+        return "Success!"
+```
+
+## Single S3Task + DatabaseTable
+
+In many cases, you may have a workflow that runs a single calculation
+and then writes the results to a specific database table. An example of
+this would be an energy calculation using VASP. For common tasks
+like this, the Workflow class is pre-configured to take an `S3Task`
+and `DatabaseTable` -- including a default `run_config` method for you.
+You can build your workflow like so:
+    
+``` python
+from simmate.workflow_engine import Workflow
+
+from my_app.tasks import ExampleS3Task
+from my_app.models import ExampleTable
+
+class Example__Python__MyFavoriteSettings(Workflow):
+    s3task = ExampleS3Task
+    database_table = ExampleTable
+
+# try your workflow!
+state = Example__Python__MyFavoriteSettings.run()
+result = state.result()
+```
+
+To learn more about making the S3Task and DatabaseTable, make sure you
+have gone through all the Simmate 
+[tutorials](https://github.com/jacksund/simmate/tree/main/tutorials), 
+including the advanced "Creating custom workflows" tutorial.
+"""
+
 import json
 import cloudpickle
 import yaml
@@ -25,13 +289,8 @@ from simmate.utilities import async_to_sync
 
 class Workflow:
     """
-    This class behaves exactly like a normal Prefect workflow, where we add some
-    common utilities and pre-submit tasks. For example, there is the `run_cloud`
-    method, which allows us to register a calculation to a database table before
-    we submit the workflow to Prefect Cloud.
-
-    To learn how to use this class, see
-    [prefect.core.flow.Flow](https://docs.prefect.io/api/latest/core/flow.html#flow-2)
+    An abstract base class for all Simmate workflows. Default methods are configured
+    for use with S3Tasks and Workflows.
     """
 
     # TODO: set storage attribute to module

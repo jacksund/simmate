@@ -175,13 +175,13 @@ class EvolutionarySearch(DatabaseTable):
         from simmate.toolkit import Composition
         from matminer.featurizers.site import CrystalNNFingerprint
         from matminer.featurizers.structure.sites import (
-            PartialsSiteStatsFingerprint,
+            SiteStatsFingerprint,  # PartialsSiteStatsFingerprint,
         )
 
         sitefingerprint_method = CrystalNNFingerprint.from_preset(
             "ops", distance_cutoffs=None, x_diff_weight=3
         )
-        featurizer = PartialsSiteStatsFingerprint(
+        featurizer = SiteStatsFingerprint(
             sitefingerprint_method,
             stats=["mean", "std_dev", "minimum", "maximum"],
         )
