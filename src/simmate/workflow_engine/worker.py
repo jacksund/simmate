@@ -39,10 +39,10 @@ class Worker:
     def __init__(
         self,
         queue_name: str = None,
-        concurrency_limit: int = 2,
+        concurrency_limit: int = 1,
         nflows_max: int = None,
         timeout: float = None,
-        close_on_empty_queue: bool = True,
+        close_on_empty_queue: bool = False,
     ):
         # This will be used when creating the queue
         self.concurrency_limit = concurrency_limit
@@ -91,9 +91,7 @@ class Worker:
 
         async with OrionAgent(work_queue_name=self.queue_name) as agent:
 
-            print(
-                f"Worker started! Looking for work from queue '{self.queue_name}'..."
-            )
+            print(f"Worker started! Looking for work from queue '{self.queue_name}'...")
 
             # Loop endlessly until one of the following happens...
             #   the timeout limit is hit
@@ -111,9 +109,7 @@ class Worker:
                 # check the number of jobs completed so far, and exit if we hit
                 # the limit
                 if nflows_submitted >= self.nflows_max:
-                    print(
-                        "Maxium number of workflow runs hit. Shutting down worker."
-                    )
+                    print("Maxium number of workflow runs hit. Shutting down worker.")
                     break
 
                 # Run and submit flows
@@ -123,9 +119,7 @@ class Worker:
                 # Keep track of the new runs we submit
                 if nflows_new:
                     nflows_submitted += nflows_new
-                    print(
-                        f"Found and submitted {nflows_new} new workflow runs."
-                    )
+                    print(f"Found and submitted {nflows_new} new workflow runs.")
 
                 # If our last query gave zero workflows submitted, then there's
                 # a chance our queue is empty and we should shut down.

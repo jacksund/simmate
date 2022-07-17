@@ -22,41 +22,23 @@ def workflow_engine():
 
 
 @workflow_engine.command()
-def setup_cloud():
-    """
-    This configures Prefect Cloud for all of the Simmate Workflows. This includes
-    registering them as well as organizing them into projects.
-
-    If at any point you'd like to delete all of these and reset them, use the
-    delete-cloud command followed by running this again.
-    """
-    click.echo("Building Prefect Projects and registering Simmate Workflows.")
-    from simmate.configuration.prefect.projects import build
-
-    build()
-
-
-@workflow_engine.command()
-def delete_cloud():
-    """
-    This clears your Prefect Cloud for all of the Simmate Projects and Workflows.
-
-    To rebuild them, use the setup-cloud command. Note, you may have to wait
-    a few minutes before running this second command because it takes a little
-    for your deletion to take place in Prefect Cloud.
-    """
-    click.echo("Deleting all Prefect Projects and Simmate Workflows.")
-    from simmate.configuration.prefect.projects import delete
-
-    delete()
-
-
-@workflow_engine.command()
 @click.option(
-    "--nitems_max",
+    "--queue_name",
+    "-q",
+    default=None,
+    help="the unique name to give the work queue",
+)
+@click.option(
+    "--concurrency_limit",
+    "-c",
+    default=1,
+    help="the max number of workflow runs to run in parallel",
+)
+@click.option(
+    "--nflows_max",
     "-n",
     default=None,
-    help="the number of jobs to run before shutdown",
+    help="the number of workflows runs to submit before shutdown",
 )
 @click.option(
     "--timeout",
@@ -66,35 +48,35 @@ def delete_cloud():
 )
 @click.option(
     "--close_on_empty_queue",
-    "-c",
+    "-e",
     default=False,
-    help="whether to shutdown or not when the queue is empty",
+    help="whether to shutdown when the queue is empty",
 )
-@click.option(
-    "--waittime_on_empty_queue",
-    "-w",
-    default=60,
-    help="how long to wait before checking again when the queue is found to be empty",
-)
-def start_worker(nitems_max, timeout, close_on_empty_queue, waittime_on_empty_queue):
+def start_worker(
+    queue_name,
+    concurrency_limit,
+    nflows_max,
+    timeout,
+    close_on_empty_queue,
+):
     """
     This starts a Simmate Worker which will query the database for jobs to run.
-
     """
 
-    from simmate.workflow_engine.execution.worker import SimmateWorker
+    from simmate.workflow_engine import Worker
 
-    worker = SimmateWorker(
-        nitems_max=nitems_max,
+    worker = Worker(
+        queue_name=queue_name,
+        concurrency_limit=concurrency_limit,
+        nflows_max=nflows_max,
         timeout=timeout,
         close_on_empty_queue=close_on_empty_queue,
-        waittime_on_empty_queue=waittime_on_empty_queue,
     )
-    worker.start()
+    worker.run()
 
 
 @workflow_engine.command()
-def start_singletask_worker():
+def start_singleflow_worker():
     """
     This starts a Simmate Worker that only runs one job and then shuts down. Also,
     if no job is available in the queue, it will shut down.
@@ -103,19 +85,17 @@ def start_singletask_worker():
     this is such a common use-case, we include this command for convienence.
     It is the same as...
 
-    simmate start-worker -n 1 -c True
-
+    simmate workflow-engine start-worker -c 1 -n 1 -e True
     """
 
-    from simmate.workflow_engine.execution.worker import SimmateWorker
+    from simmate.workflow_engine import Worker
 
-    worker = SimmateWorker(
-        nitems_max=1,
-        timeout=None,
+    worker = Worker(
+        concurrency_limit=1,
+        nflows_max=1,
         close_on_empty_queue=True,
-        waittime_on_empty_queue=0.1,
     )
-    worker.start()
+    worker.run()
 
 
 @workflow_engine.command()
@@ -177,6 +157,7 @@ def run_cluster(
     "ps -aef | grep simmate" to find the running process and grab its ID. Then
     kill that process id with "kill 123" (if the id was 123).
     """
+    raise NotImplementedError("This method is still being ported to Prefect v2")
 
     # All input arguments are optional. Therefore, I go through all of them and
     # remove the ones that weren't set. This prevents overwritting default settings
@@ -196,7 +177,9 @@ def run_cluster(
         elif key == "walltime_per_job":
             agent_kwargs["walltime"] = agent_kwargs.pop(key)
 
-    from simmate.configuration.prefect.setup_resources import run_cluster_and_agent
+    from simmate.configuration.prefect.setup_resources import (
+        run_cluster_and_agent,
+    )
 
     run_cluster_and_agent(**agent_kwargs)
 
@@ -204,8 +187,7 @@ def run_cluster(
 # explicitly list functions so that pdoc doesn't skip them
 __all__ = [
     "workflow_engine",
-    "setup_cloud",
-    "delete_cloud",
     "start_worker",
+    "start_singleflow_worker",
     "run_cluster",
 ]
