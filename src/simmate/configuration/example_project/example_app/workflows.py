@@ -21,7 +21,7 @@ from .models import ExampleRelaxation as ExampleRelaxationTable
 from .tasks import ExampleRelaxation as ExampleRelaxationTask
 
 # Now build our workflow
-class Relaxation__Vasp__MyCustomSettings(Workflow):    
+class Relaxation__Vasp__MyCustomSettings(Workflow):
     # Simply set these two variables to your Task and DatabaseTable classes!
     s3task = ExampleRelaxationTask
     database_table = ExampleRelaxationTable
