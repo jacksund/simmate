@@ -10,6 +10,7 @@ This module is only meant for advanced users. Beginners should instead start by 
 
 Here we try to give a birds-eye view of how Simmate `Tasks`, `DatabaseTables`, and `Workflows` fit together. This section is not meant to be an encompassing guide. Instead, beginners should refer to our tutorials and class-level API docs.
 
+
 ## What is an `S3Task`?
 
 A single calculator run is carried out by a `StagedSupervisedShellTask` or a "`S3Task`". There is some history behind why it's named this way, but here is how the name breaks down:
@@ -26,7 +27,7 @@ All stages of an `S3Task` are done through the `run` method. That is... `S3Task.
 
 ## What is a `Workflow`?
 
-Recall from Simmate's [tutorial 2](), that a `Workflow` is made up of 4 stages. These stages can be thought of linking a `S3Task` and a `DatabaseTable`:
+Recall from Simmate's [tutorial 2](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md), that a `Workflow` is made up of 4 stages. These stages can be thought of linking a `S3Task` and a `DatabaseTable`:
 
 - `configure`: default settings are attached to `S3Task`'s attribute
 - `schedule`: decides when and where `S3Task.run` is called
@@ -38,4 +39,4 @@ All stages of a `Workflow` are done through the `run` method. That is... `Workfl
 
 ## What is a `NestedWorkflow`?
 
-Some workflows are "nested", which means it's a workflow made up multiple other workflows. An example of this is the `relaxation_staged` workflow, which involves a series of relaxations of increasing quality and then a final energy calculation.
+Some workflows are "nested", which means it's a workflow made up multiple other workflows. An example of this is the `relaxation.vasp.staged` workflow, which involves a series of relaxations of increasing quality and then a final energy calculation.

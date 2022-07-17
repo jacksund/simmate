@@ -98,7 +98,7 @@ Again, take a look at [our main website](https://simmate.org/) if you'd like to 
 
 <!-- This is an image of the Prefect UI -->
 <p align="center" style="margin-bottom:40px;">
-<img src="https://raw.githubusercontent.com/PrefectHQ/prefect/master/docs/.vuepress/public/orchestration/ui/dashboard-overview2.png"  height=440 style="max-height: 440px;">
+<img src="https://orion-docs.prefect.io/img/ui/orion-dashboard.png"  height=440 style="max-height: 440px;">
 </p>
 
 ``` bash

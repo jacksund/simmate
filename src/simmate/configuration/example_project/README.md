@@ -18,10 +18,10 @@ your conda envirnment:
 ``` bash
 # replace "my_new_project" with the name of your project
 cd my_new_project
-pip install -e my_new_project
+pip install -e .
 ```
 
-2. Make sure this install worked by running this line in python:
+2. Make sure this install worked by running these lines in python:
 
 ``` bash
 # You may need to restart your terminal/Spyder for this to work

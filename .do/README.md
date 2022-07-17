@@ -35,8 +35,6 @@ This button below will launch a new DigitalOcean app (server+database) using a t
 Once open, you can provide your Prefect API key (optional) and a  secret key for Django.
 
 
-
-
 <!-- button that starts up DigitalOcean app -->
 <a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/jacksund/simmate/tree/main&refcode=8aeef2ea807c">
  <img src="https://www.deploytodo.com/do-btn-blue.svg" alt="Deploy to DO">
@@ -44,7 +42,7 @@ Once open, you can provide your Prefect API key (optional) and a  secret key for
 
 > :warning: Note to developers, if you fork this repository and want this button to work for your new repo, you must update the link for this button. For more information, see [here](https://docs.digitalocean.com/products/app-platform/how-to/add-deploy-do-button/)
 
-Steps to use Deploy on DigitalOcean:
+Steps to set up servers on DigitalOcean:
 
 1. Make sure you created a DigitalOcean account (you can use your Github account) and are signed in
 2. Select the "Deploy to DigitalOcean" button above. On this new page, you'll see "Python Detected".
@@ -64,14 +62,17 @@ simmate database reset
 
 ## Manual setup (stage 1): Setting up our PostgreSQL Database
 
+> :warning: This section is only required if you do not wish to use the automatic setup described in the section above it -- or if you need a customized setup.
+
 First, we need to set up our Cloud database, tell Simmate how to connect to it, and build our tables.
 
 ### creating the cloud database
 
 1. On our DigitalOcean dashboard, click the green "Create" button in the top right and then select "Database". It should bring you to [this page](https://cloud.digitalocean.com/databases/new).
-2. For "database engine", select the newest version of PostgreSQL (currently 14)
+2. For "database engine", select the newest version of PostgreSQL (currently v14)
 3. The remainder of the page's options can be left at their default values.
 4. Select **Create a Database Cluster** when you're ready.
+5. For the new homepage on your cluster, there is a "Get Started" button. We will go through this dialog in the next section.
 
 Note, this is the database **cluster**, which can host multiple databases on it (each with all their own tables).
 
@@ -82,7 +83,7 @@ Before we set up our database on this cluster, we are are first going to try con
 
 1. On your new database's page, you'll see a "Getting Started" dialog -- select it!
 2. For "Restrict inbound connections", this is completely optional and beginneers should skip this for now. We skip this because if you know you'll be running calculations on some supercomputer/cluster, then you'll need to add all of the associated IP addresses in order for connections to work properly. That's a lot of IP addresses to grab and configure properly -- so we leave this to advanced users.
-3. "Connection details" is what we need to feed to django! Let's copy this information. As an example, here is what the details look like on DigitalOcean:
+3. "Connection details" is what we need to give to Simmate/Django. Let's copy this information. As an example, here is what the details look like on DigitalOcean:
 ```
 username = doadmin
 password = asd87a9sd867fasd
@@ -119,26 +120,68 @@ Just like how we don't use the `(base)` environment in Anaconda, we don't want t
 2. Create a new database using the "Add new database" button and name this `simmate-database-00`. We name it this way because you may want to make new/separate databases and numbering is a quick way to keep track of these.
 3. In your connection settings (from the section above), switch the NAME from defaultdb to `simmate-database-00`. You will change this in your `my_env-database.yaml` file.
 
+Additionally, we can use this approach to build a separate database for Prefect to use. Go through through these steps again where we now are configuring a database for Prefect:
+
+1. On DigitalOcean with your Database Cluster page, select the "Users&Databases" tab.
+2. Create a new database using the "Add new database" button and name this `prefect-database-00`.
+3. We need to tell Prefect how to connect. You can follow the official [Prefect guides](https://orion-docs.prefect.io/concepts/database/). You can access the URL under by selecting the "Connection String" format on DigitalOcean (note, we remove the `?sslmode=require`. For example, you would set an environment variable like so...
+``` bash
+# added to bottom of ~/.bashrc for Ubuntu
+export PREFECT_ORION_DATABASE_CONNECTION_URL="postgresql+asyncpg://doadmin:asd87a9sd867fasd@db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com:5432/prefect-database-00"
+```
+
+
+<!-- 
+TODO: allow prefect to be configured alongside the Simmate database:
+
+or you can add add `prefect` entry to your `my_env-database.yaml` file.
+
+Your final `my_env-database.yaml` file will look like this:
+```
+default:
+  ENGINE: django.db.backends.postgresql_psycopg2
+  HOST: db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com
+  NAME: simmate-database-00  # WE WILL UPDATE THIS IN THE NEXT STEP
+  USER: doadmin
+  PASSWORD: asd87a9sd867fasd
+  PORT: 25060
+  OPTIONS:
+    sslmode: require
+
+prefect:
+  ENGINE: django.db.backends.postgresql_psycopg2
+  HOST: db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com
+  NAME: prefect-database-00  # WE WILL UPDATE THIS IN THE NEXT STEP
+  USER: doadmin
+  PASSWORD: asd87a9sd867fasd
+  PORT: 25060
+  OPTIONS:
+    sslmode: require
+```
+-->
+
 ### creating a connection pool
 
 When we have a bunch of calculations running at once, we need to make sure our database can handle all of these connections. Therefore we make a connection pool which allows for thousands of connections! This "pool" works like a waitlist where the database handles each connection request in order.
 
 1. Select the "Connection Pools" tab and then "Create a Connection Pool"
 2. Name your pool `simmate-database-00-pool` and select `simmate-database-00` for the database
-3. Select "Transaction" for our mode (the default) and set our pool size to **11** (or modify this value as you wish)
+3. Select "Transaction" for our mode (the default) and set our pool size to **8** (or modify this value as you wish)
 4. Create the pool when you're ready!
 5. You'll have to update your `my_env-database.yaml` file to these connection settings. At this point your file will look similar to this (note, our NAME and PORT values have changed):
 ``` yaml
 default:
   ENGINE: django.db.backends.postgresql_psycopg2
   HOST: db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com
-  NAME: simmate-database-00-pool
+  NAME: simmate-database-00-pool  # THIS LINE WAS UPDATED
   USER: doadmin
   PASSWORD: asd87a9sd867fasd
   PORT: 25061
   OPTIONS:
     sslmode: require
 ```
+6. Repeat these steps to create a `prefect-database-00-pool`.
+
 
 ### making all of our database tables
 
@@ -146,13 +189,23 @@ Now that we set up and connected to our database, we can now make our Simmate da
 
 1. In your terminal, make sure you have you Simmate enviornment activated
 2. Run the following command: 
-```
+``` bash
 simmate database reset
 ```
 3. You're now ready to start using Simmate with your new database!
 4. If you want to share this database with others, you simply need to have them copy your config file: `my_env-database.yaml`. They won't need to run `simmate database reset` because you did it for them.
 
+We need to do the same with Prefect too.
+
+1. In your terminal, make sure you have you Simmate enviornment activated
+2. Run the following command: 
+``` bash
+prefect orion database reset
+```
+
+
 <br/>
+
 
 ## Manual setup (stage 2): Setting up a Django Website Server
 

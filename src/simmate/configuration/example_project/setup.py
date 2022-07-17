@@ -3,7 +3,10 @@
 """
 This file establishes the info needed for installing your project via pip. This
 then let's you import your code! For example, you can do...
-    from example_app.apps import ExampleAppConfig
+
+``` python
+from example_app.apps import ExampleAppConfig
+```
     
 As your project grows, you may want to update the requirements for it or even
 upload it to PyPI, which let's other people download and install your code. 
@@ -18,7 +21,7 @@ from setuptools import setup, find_packages
 setup(
     name="{{ project_name }}",
     version="0.0.0",
-    python_requires=">=3.5, <4",
+    python_requires=">=3.10, <4",
     packages=find_packages(where="."),
     install_requires=["simmate"],
 )
