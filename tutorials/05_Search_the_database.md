@@ -35,11 +35,13 @@ filtered_results = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites
 single_relaxation = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites__lte=2).first()
 nacl_structure = single_relaxation.to_toolkit()
 ```
-8. For third-party data (like [Material Project](https://materialsproject.org/), [AFLOW](http://aflowlib.org/), [COD](http://www.crystallography.net/cod/), etc.) load the database table and then request to download all the available data:
+8. For third-party data (like [Material Project](https://materialsproject.org/), [AFLOW](http://aflowlib.org/), [COD](http://www.crystallography.net/cod/), etc.) load the database table and (if you are NOT using a prebuilt database) then request to download all the available data:
 ```python
 from simmate.database import connect  # this connects to our database
 from simmate.database.third_parties.jarvis import JarvisStructure
 
+# NOTE: This line is only needed if you did NOT accept the download
+# when running `simmate database reset`.
 # This only needs to ran once -- then data is stored locally.
 JarvisStructure.load_remote_archive()
 
@@ -246,23 +248,32 @@ from simmate.database.third_parties import JarvisStructure
 
 `table` from the previous section and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.database import connect`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database. So don't forget to include `from simmate.database import connect`!
 
-Now that we have our datatable class (`JarvisStructure`) loaded, you'll notice it's empty to when you first access it. We can quickly load all of the data using the `load_remote_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database. This can take ~10 minutes because we are actually saving all these structures to your computer -- that way, you can rapidly load these structures in under 1 second in the future.
+Now that we have our datatable class (`JarvisStructure`) loaded, let's check if there's any data in it:
 
 ``` python
-# when you first run this, you'll see this table is empty
-data = JarvisStructure.objects.to_dataframe()
+JarvisStructure.objects.count()
+```
 
-# load all of the data from Simmate's website
+If you are accepted the download during the `simmate database reset` command, then you should see that there are thousands of structures already in this database table! 
+
+However, if the count gives 0, then that means you still need to load data.We can quickly load all of the data using the `load_remote_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org/downloads and moving it into your database. This can take ~10 minutes because we are actually saving all these structures to your computer -- that way, you can rapidly load these structures in under 1 second in the future.
+``` python
+# NOTE: This line is only needed if you did NOT accept the download
+# when running `simmate database reset`.
 JarvisStructure.load_remote_archive()  # This may take ~10min to complete
-
-# you'll now see that the database is filled!
-# We use [:150] to just show the first 150 rows
-data = JarvisStructure.objects.to_dataframe()[:150]
 ```
 
 > :warning: It is very important that you read the warnings printed by `load_remote_archive`. This data was NOT made by Simmate. We are just helping to distribute it on behalf of these other teams. Be sure to cite them for their work!
 
 Calling `load_remote_archive` loads ALL data to your computer and saves it. This data will not be updated unless you call `load_remote_archive` again. This should only be done every time we release a new archive version (typically once per year). To protect our servers from misuse, you can only call `load_remote_archive()` a few times per month -- no matter what. **Don't overuse this feature.**
+
+Now that we ensured our database if filled with data, we can start looking through:
+
+``` python
+# We use [:150] to just show the first 150 rows
+data = JarvisStructure.objects.to_dataframe()[:150]
+```
+
 
 Now let's really test out our filtering ability with this new data:
 ```python

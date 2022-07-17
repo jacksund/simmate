@@ -163,7 +163,6 @@ INSTALLED_APPS = [
     "simmate.website.core_components.apps.CoreComponentsConfig",
     "simmate.website.third_parties.apps.ThirdPartyConfig",
     "simmate.website.workflows.apps.WorkflowsConfig",
-    "simmate.website.workflow_execution.apps.WorkflowExecutionConfig",
     #
     # These are built-in django apps that we use for extra features
     "django.contrib.admin",

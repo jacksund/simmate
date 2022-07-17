@@ -1,5 +1,116 @@
 # -*- coding: utf-8 -*-
 
+"""
+# The Supervised-Staged-Shell Task (aka "S3Task")
+
+This class contains the core functionality to **supervise** a **staged** task
+involving some **shell** command.
+
+Let's breakdown what this means...
+
+A *shell* command is a single call to some external program. For example,
+VASP requires that we call the "vasp_std > vasp.out" command in order to run a
+calculation. We consider calling external programs a *staged* task made
+up of three steps:
+
+- setup = writing any input files required for the program
+- execution = actually calling the command and running our program
+- workup = loading data from output files back into python
+
+And for *supervising* the task, this means we monitor the program while the
+execution stage is running. So once a program is started, Simmate can check
+output files for common errors/issues. If an error is found, we stop the
+program, fix the issue, and then restart it. Any fixes that were made are
+written to "simmate_corrections.csv".
+
+
+<!--
+TODO: Make a simple diagram to visualize the overall process and add it here.
+It will be similar to Custodian's, but we don't have a list of jobs here.
+https://materialsproject.github.io/custodian/index.html#usage
+The steps are...
+
+- Write Input Files based on custom+defualt settings
+- Run the calculation by calling the program
+- Load ouput files
+- check for errors
+- [correct them, rerun]
+- postprocess/analysis
+-->
+
+This entire process (the different stages and monitoring) is carried out
+using the `run` method. You rarely use this class directly. Instead,
+you typically use a subclass of it. As a user, you really just need to do
+something like this:
+
+``` python
+from simmate.calculator.example.tasks import ExampleTask
+
+my_task = ExampleTask()
+my_result = my_task.run()
+```
+
+And that's it!
+
+For experts, this class can be viewed as a combination of prefect's ShellTask,
+a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
+functionality of `pymatgen.io.vasp.sets` too. By merging all of these together
+into one class, we make things much easier for users and creating new Tasks.
+
+
+# Building a custom S3task
+
+This class is commonly used to make tasks for our calculator modules, so you
+will likely want to subclass this. Here is a basic example of inheriting
+and then running a task:
+
+``` python
+
+from simmate.workflow_engine import S3Task
+from example.error_handlers import PossibleError1, PossibleError2
+
+
+class ExampleTask(SSSTask):
+
+    command = "echo example"  # just prints out "example"
+    
+    # settings for error handling
+    max_corrections = 7
+    error_handlers = [PossibleError1, PossibleError2]
+    polling_timestep = 0.1
+    monitor_freq = 10
+    
+    # custom attributes
+    some_new_setting = 123
+
+    @classmethod
+    def setup(cls, directory, custom_parmeter, **kwargs):
+        print("I'm setting things up!")
+        print(f"My new setting value is {cls.some_new_setting}")
+        print(f"My new parameter value is {custom_parmeter}")
+
+    @staticmethod
+    def workup(directory):
+        print("I'm working things up!")
+
+
+task = ExampleTask()
+result = task.run()
+```
+
+There are a two important things to note here:
+
+1. It's optional to write new `setup` or `workup` methods. But if you do...
+    - Both `setup` and `workup` method should be either a staticmethod or classmethod
+    - Custom `setup` methods require the `directory` and `**kwargs` input parameters.
+    - Custom `workup` methods require the `directory` input paramter
+2. It's optional to set/overwrite attributes. You can also add new ones too.
+
+For a full (and advanced) example, of a subclass take a look at
+`simmate.calculators.vasp.tasks.base.VaspTask` and the tasks that use it like
+`simmate.calculators.vasp.tasks.relaxation.matproj`.
+"""
+
 import os
 import platform
 import time
@@ -14,7 +125,6 @@ import pandas
 from prefect.tasks import Task
 from prefect.context import get_run_context, MissingContextError
 
-from simmate.toolkit import Structure
 from simmate.workflow_engine import ErrorHandler
 from simmate.utilities import get_directory, make_archive, make_error_archive
 
@@ -30,107 +140,9 @@ from simmate.utilities import get_directory, make_archive, make_error_archive
 
 class S3Task:
     """
-    The Supervised-Staged-Shell Task (aka "S3Task")
-    -----------------------------------------------
-
-    This class contains the core functionality to **supervise** a **staged** task
-    involving some **shell** command.
-
-    Let's breakdown what this means...
-
-    A *shell* command is a single call to some external program. For example,
-    VASP requires that we call the "vasp_std > vasp.out" command in order to run a
-    calculation. We consider calling external programs a *staged* task made
-    up of three steps:
-
-    - setup = writing any input files required for the program
-    - execution = actually calling the command and running our program
-    - workup = loading data from output files back into python
-
-    And for *supervising* the task, this means we monitor the program while the
-    execution stage is running. So once a program is started, Simmate can check
-    output files for common errors/issues. If an error is found, we stop the
-    program, fix the issue, and then restart it. Any fixes that were made are
-    written to "simmate_corrections.csv".
-
-
-    <!--
-    TODO: Make a simple diagram to visualize the overall process and add it here.
-    It will be similar to Custodian's, but we don't have a list of jobs here.
-    https://materialsproject.github.io/custodian/index.html#usage
-    The steps are...
-
-    - Write Input Files based on custom+defualt settings
-    - Run the calculation by calling the program
-    - Load ouput files
-    - check for errors
-    - [correct them, rerun]
-    - postprocess/analysis
-    -->
-
-    This entire process (the different stages and monitoring) is carried out
-    using the ``run()`` method. You rarely use this class directly. Instead,
-    you typically use a subclass of it. As a user, you really just need to do
-    something like this:
-
-    ``` python
-       from simmate.calculator.example.tasks import ExampleTask
-
-       my_task = ExampleTask()
-       my_result = my_task.run()
-    ```
-
-    And that's it!
-
-    For experts, this class can be viewed as a combination of prefect's ShellTask,
-    a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
-    functionality of pymatgen.io.vasp.sets too. By merging all of these together
-    into one class, we make things much easier for users and creating new Tasks.
-
-
-    Inheriting from this class
-    --------------------------
-
-    This class is commonly used to make tasks for our calculator modules, so you
-    will likely want to subclass this. Here is a basic example of inheriting
-    and then running a task:
-
-    ``` python
-
-    from simmate.workflow_engine import S3Task
-    from example.error_handlers import PossibleError1, PossibleError2
-
-
-    class ExampleTask(SSSTask):
-
-        command = "echo example"  # just prints out "example"
-        max_corrections = 7
-        error_handlers = [PossibleError1, PossibleError2]
-        polling_timestep = 0.1
-        monitor_freq = 10
-        some_new_setting = 123
-
-        def setup(self, structure, directory):  # <-- MUST have these two args
-            print("I'm setting things up!")
-            print(f"My new setting is {some_new_setting}")
-
-        def workup(self, directory):  # <-- MUST have this arg
-            print("I'm working things up!")
-
-
-    task = ExampleTask()
-    result = task.run()
-    ```
-
-    There are a couple things to note here:
-
-    - It's optional to set/overwrite attributes. You can also add new ones too.
-    - It's optional to write a new __init__, setup, or workup methods
-    - make sure you include the structure/directory inputs, even if you don't use them.
-    - Don't add new kwargs to methods. Instead handle these options through attributes.
-
-    For a full (and advanced) example, of a subclass take a look at
-    `simmate.calculators.vasp.tasks.base.VaspTask`.
+    The base Supervised-Staged-Shell that many tasks inherit from. This class
+    encapulates logic for running external programs (like VASP), fixing common
+    errors during a calculation, and working up the results.
     """
 
     # I set this here so that I don't have to copy/paste the init method
@@ -487,6 +499,7 @@ class S3Task:
 
         - `process`:
             The process object that will be terminated.
+
         - `command`:
             the command used to launch the process. This is sometimes useful
             when searching for all running processes under this name.
@@ -553,7 +566,6 @@ class S3Task:
 
         - `directory`:
             The directory to run everything in.
-
         """
         pass
 
@@ -565,33 +577,32 @@ class S3Task:
         **kwargs,
     ):
         """
-        Runs the entire staged task (setup, execution, workup), which includes
-        supervising during execution.
+         Runs the entire staged task (setup, execution, workup), which includes
+         supervising during execution.
 
-        Call this method once you have your task initialized. For each run you
-        can provide a new structure, directory, or command. For example:
+         Call this method once you have your task initialized. For each run you
+         can provide a new structure, directory, or command. For example:
 
-        ``` python
-        from simmate.calculator.example.tasks import ExampleTask
+         ``` python
+         from simmate.calculator.example.tasks import ExampleTask
 
-        my_result = ExampleTask.run(command=my_command)
-        ```
+         my_result = ExampleTask.run(command=my_command)
+         ```
 
-        #### Parameters
+         #### Parameters
 
-        - `command`:
-            The command that will be called during execution.
-        - `directory`:
-            The directory to run everything in. This is passed to the ulitities
-            function simmate.ulitities.get_directory
-        - `**kwargs`:
-            Any extra keywords that should be passed to the setup() method.
+         - `command`:
+             The command that will be called during execution.
+         - `directory`:
+             The directory to run everything in. This is passed to the ulitities
+             function simmate.ulitities.get_directory
+         - `**kwargs`:
+             Any extra keywords that should be passed to the setup() method.
 
-        Returns
-        -------
-        - a dictionary of the result, corrections, and working directory used
-        for this task run
+        #### Returns
 
+         - a dictionary of the result, corrections, and working directory used
+         for this task run
         """
 
         # because the command is something that is frequently changed at the

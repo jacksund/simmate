@@ -6,8 +6,12 @@ you may want to write a new VaspTask that has custom INCAR settings. These tasks
 can be incorporated into our workflows (in `workflows.py`).
 
 Below is an example of a simple VaspTask, which is used to run a single VASP
-calculation. For more complex settings, it's worth looking through our
-library of other examples at `simmate.calculators.vasp.tasks`.
+calculation.
+
+For more information and advanced guides, be sure to read through our
+[S3Task documentation](https://jacksund.github.io/simmate/simmate/workflow_engine/supervised_staged_shell_task.html)
+as well as relevent subclasses like the
+[VaspTask documentation](https://jacksund.github.io/simmate/simmate/calculators/vasp/tasks/base.html)
 """
 
 

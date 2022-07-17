@@ -2,6 +2,10 @@
 Want to make a website interface for your app? Then you'll need to fill this file
 out! If you ever venture to this level, we strongly recommend you go through the
 django tutorials first: https://docs.djangoproject.com/en/3.2/
+
+COMING SOON: Simmate will automatically build out views for a workflow based
+on what your database table looks like. Let us know if you are waiting on this
+feature, so we can prioritize it!
 """
 
 from django.urls import path

@@ -24,11 +24,9 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add full-run unittests that call workflows and vasp (without emulation)
 
 **Refactors**
+- remove experimental `workflow_engine.executor`
 - move contents of `configuration.django.database` to `database.utilities`
 - :warning: upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire `workflow_engine` module, and therefore the entire workflow library. Users should therefore go back through tutorials from the beginning to see everything that has changed. ([#185](https://github.com/jacksund/simmate/pull/185)).
-
-> :warning: the majority of tutorials and documentation are still being updated to account for the new Prefect 2.0 version. This message will be removed when the main branch is fully updated and accurate.
-
 
 > Prefect Orion is still in beta (v2.0b8), and the first stable release is expected in July 2022. However, this date is not definite, and there is a very good chance for delays. Until a stable release is made for Prefect, there will be no new Simmate release. You can stay up to date with Prefect's beta status on [the Prefect discourse page](https://discourse.prefect.io/tags/c/announcements/5/prefect-2-0). This message will be removed when a new release becomes available.
 
