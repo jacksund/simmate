@@ -72,6 +72,8 @@ If you're comfortable with Python, you can install Simmate with...
 conda install -c conda-forge simmate
 ```
 
+> :bulb: Simmate itself is <2MB, but when installed to a clean conda environment, the entire download for Simmate and all it's dependencies comes to ~1.2GB. Additional disk space is also needed for optional downloads -- such as [third-party data](https://jacksund.github.io/simmate/simmate/database/third_parties.html).
+
 ## Running a Server
 
 Once installed, running a local test server is as simple as...
