@@ -19,7 +19,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 
 
-# v0.7.0 (2022.07.19)
+# v0.7.0 - v0.7.1 (2022.07.19)
 
 > :warning: This is a pypi-only release. Prefect Orion is still in beta (v2.0b8), and prevents us from making a release to conda-forge. You can stay up to date with Prefect's beta status on [the Prefect discourse page](https://discourse.prefect.io/tags/c/announcements/5/prefect-2-0).
 
@@ -39,6 +39,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Fixes**
 - fix incorrect passing of `source` in NEB all-paths workflow causing it to fail
+- fix missing SVG files for web UI ([#196](https://github.com/jacksund/simmate/pull/196)).
 
 
 
