@@ -19,7 +19,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 
 
-# v0.7.0 (2022.06.25)
+# v0.7.0 (2022.07.19)
 
 > :warning: This is a pypi-only release. Prefect Orion is still in beta (v2.0b8), and prevents us from making a release to conda-forge. You can stay up to date with Prefect's beta status on [the Prefect discourse page](https://discourse.prefect.io/tags/c/announcements/5/prefect-2-0).
 
@@ -35,7 +35,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - refactor `start-worker` command to use prefect instead of the experimental django executor
 - remove experimental `workflow_engine.executor`
 - move contents of `configuration.django.database` to `database.utilities`
-- :warning: upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire `workflow_engine` module, and therefore the entire workflow library. Users should therefore go back through tutorials from the beginning to see everything that has changed. ([#185](https://github.com/jacksund/simmate/pull/185)).
+- upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire `workflow_engine` module, and therefore the entire workflow library. ([#185](https://github.com/jacksund/simmate/pull/185)).
 
 **Fixes**
 - fix incorrect passing of `source` in NEB all-paths workflow causing it to fail
