@@ -32,20 +32,17 @@ name="simmate"
 # https://www.python.org/dev/peps/pep-0440/
 # https://semver.org/
 version="0.7.1"
-# In the future, I may be able to dynamically determine this:
-#   https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
 
 # Maintainer info
 authors = [{name = "Jack D. Sundberg", email = "jacksund@live.unc.edu"}]
 
 # a quick summary and then README
 # NOTE: instead of our main README, I tell users to move directly to github
-summary="Simmate is a toolbox for computational materials research."
-description_content_type="text/markdown"
-description = "Please do NOT install Simmate with pip. We recommend conda instead. Visit our [github page](https://github.com/jacksund/simmate) for more information."
+description="Simmate is a toolbox for computational materials research."
+readme = ".github/README_for_PyPI.md"
 
 # Specify which Python versions are supported.
-python_requires=">=3.10"
+requires-python=">=3.10"
 
 # This field lists other packages that your project depends on to run.
 dependencies=[
@@ -112,6 +109,18 @@ classifiers=[
     "Operating System :: OS Independent",
 ]
 
+# Link to our homepage. Use github for now.
+[project.urls]
+homepage = "https://simmate.org/"
+repository = "https://github.com/jacksund/simmate"
+documentation = "https://jacksund.github.io/simmate/simmate.html"
+
+# Register command line interface
+[project.scripts]
+simmate = "simmate.command_line.base_command:simmate"
+
+# -----------------------------------------------------------------------------
+
 # Indicate which directory the source coude is in
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -135,16 +144,6 @@ simmate = [
 # Note, the default is to include everything, but I don't want to ship test 
 # files. I could switch this to use exclude-package-data in the future.
 # https://setuptools.pypa.io/en/latest/userguide/datafiles.html#exclude-package-data
-
-# Link to our homepage. Use github for now.
-[project.urls]
-homepage = "https://simmate.org/"
-repository = "https://github.com/jacksund/simmate"
-documentation = "https://jacksund.github.io/simmate/simmate.html"
-
-# Register command line interface
-[project.scripts]
-simmate = "simmate.command_line.base_command:simmate"
 
 # -----------------------------------------------------------------------------
 
