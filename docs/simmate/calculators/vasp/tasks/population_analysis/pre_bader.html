@@ -32,10 +32,13 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#MatProjPreBader">MatProjPreBader</a>
+                    <a class="class" href="#MatprojPreBader">MatprojPreBader</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#MatProjPreBader.incar">incar</a>
+                                <a class="function" href="#MatprojPreBader.__init__">MatprojPreBader</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatprojPreBader.incar">incar</a>
                         </li>
                 </ul>
 
@@ -65,11 +68,11 @@
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="c1"># -*- coding: utf-8 -*-</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a>
 </span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a>    <span class="n">MatProjStaticEnergy</span><span class="p">,</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a>    <span class="n">MatprojStaticEnergy</span><span class="p">,</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="p">)</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="k">class</span> <span class="nc">MatProjPreBader</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="k">class</span> <span class="nc">MatprojPreBader</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    Runs a static energy calculation with a high-density FFT grid under settings</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="sd">    from the Materials Project. Results can be used for Bader analysis.</span>
@@ -83,7 +86,7 @@
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>
 </span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>    <span class="c1"># The key thing for bader analysis is that we need a very fine FFT mesh. Other</span>
 </span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>    <span class="c1"># than that, it&#39;s the same as a static energy calculation.</span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
 </span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>        <span class="n">NGXF__density_a</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
 </span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>        <span class="n">NGYF__density_b</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
@@ -94,38 +97,38 @@
 
 
             </section>
-                <section id="MatProjPreBader">
-                            <input id="MatProjPreBader-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                <section id="MatprojPreBader">
+                            <input id="MatprojPreBader-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">MatProjPreBader</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></span>):
+    <span class="name">MatprojPreBader</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatprojStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatprojStaticEnergy</a></span>):
 
-                <label class="view-source-button" for="MatProjPreBader-view-source"><span>View Source</span></label>
+                <label class="view-source-button" for="MatprojPreBader-view-source"><span>View Source</span></label>
 
     </div>
-    <a class="headerlink" href="#MatProjPreBader"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="MatProjPreBader-9"><a href="#MatProjPreBader-9"><span class="linenos"> 9</span></a><span class="k">class</span> <span class="nc">MatProjPreBader</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
-</span><span id="MatProjPreBader-10"><a href="#MatProjPreBader-10"><span class="linenos">10</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="MatProjPreBader-11"><a href="#MatProjPreBader-11"><span class="linenos">11</span></a><span class="sd">    Runs a static energy calculation with a high-density FFT grid under settings</span>
-</span><span id="MatProjPreBader-12"><a href="#MatProjPreBader-12"><span class="linenos">12</span></a><span class="sd">    from the Materials Project. Results can be used for Bader analysis.</span>
-</span><span id="MatProjPreBader-13"><a href="#MatProjPreBader-13"><span class="linenos">13</span></a>
-</span><span id="MatProjPreBader-14"><a href="#MatProjPreBader-14"><span class="linenos">14</span></a><span class="sd">    We do NOT recommend running this calculation on its own. Instead, you should</span>
-</span><span id="MatProjPreBader-15"><a href="#MatProjPreBader-15"><span class="linenos">15</span></a><span class="sd">    use the full workflow, which runs this calculation AND the following bader</span>
-</span><span id="MatProjPreBader-16"><a href="#MatProjPreBader-16"><span class="linenos">16</span></a><span class="sd">    analysis for you. This S3Task is only the first step of that workflow.</span>
-</span><span id="MatProjPreBader-17"><a href="#MatProjPreBader-17"><span class="linenos">17</span></a>
-</span><span id="MatProjPreBader-18"><a href="#MatProjPreBader-18"><span class="linenos">18</span></a><span class="sd">    See `bader.workflows.materials_project`.</span>
-</span><span id="MatProjPreBader-19"><a href="#MatProjPreBader-19"><span class="linenos">19</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="MatProjPreBader-20"><a href="#MatProjPreBader-20"><span class="linenos">20</span></a>
-</span><span id="MatProjPreBader-21"><a href="#MatProjPreBader-21"><span class="linenos">21</span></a>    <span class="c1"># The key thing for bader analysis is that we need a very fine FFT mesh. Other</span>
-</span><span id="MatProjPreBader-22"><a href="#MatProjPreBader-22"><span class="linenos">22</span></a>    <span class="c1"># than that, it&#39;s the same as a static energy calculation.</span>
-</span><span id="MatProjPreBader-23"><a href="#MatProjPreBader-23"><span class="linenos">23</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="MatProjPreBader-24"><a href="#MatProjPreBader-24"><span class="linenos">24</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-</span><span id="MatProjPreBader-25"><a href="#MatProjPreBader-25"><span class="linenos">25</span></a>        <span class="n">NGXF__density_a</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-</span><span id="MatProjPreBader-26"><a href="#MatProjPreBader-26"><span class="linenos">26</span></a>        <span class="n">NGYF__density_b</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-</span><span id="MatProjPreBader-27"><a href="#MatProjPreBader-27"><span class="linenos">27</span></a>        <span class="n">NGZF__density_c</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-</span><span id="MatProjPreBader-28"><a href="#MatProjPreBader-28"><span class="linenos">28</span></a>        <span class="n">LAECHG</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># write core charge density to AECCAR0 and valence to AECCAR2</span>
-</span><span id="MatProjPreBader-29"><a href="#MatProjPreBader-29"><span class="linenos">29</span></a>    <span class="p">)</span>
+    <a class="headerlink" href="#MatprojPreBader"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="MatprojPreBader-9"><a href="#MatprojPreBader-9"><span class="linenos"> 9</span></a><span class="k">class</span> <span class="nc">MatprojPreBader</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
+</span><span id="MatprojPreBader-10"><a href="#MatprojPreBader-10"><span class="linenos">10</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="MatprojPreBader-11"><a href="#MatprojPreBader-11"><span class="linenos">11</span></a><span class="sd">    Runs a static energy calculation with a high-density FFT grid under settings</span>
+</span><span id="MatprojPreBader-12"><a href="#MatprojPreBader-12"><span class="linenos">12</span></a><span class="sd">    from the Materials Project. Results can be used for Bader analysis.</span>
+</span><span id="MatprojPreBader-13"><a href="#MatprojPreBader-13"><span class="linenos">13</span></a>
+</span><span id="MatprojPreBader-14"><a href="#MatprojPreBader-14"><span class="linenos">14</span></a><span class="sd">    We do NOT recommend running this calculation on its own. Instead, you should</span>
+</span><span id="MatprojPreBader-15"><a href="#MatprojPreBader-15"><span class="linenos">15</span></a><span class="sd">    use the full workflow, which runs this calculation AND the following bader</span>
+</span><span id="MatprojPreBader-16"><a href="#MatprojPreBader-16"><span class="linenos">16</span></a><span class="sd">    analysis for you. This S3Task is only the first step of that workflow.</span>
+</span><span id="MatprojPreBader-17"><a href="#MatprojPreBader-17"><span class="linenos">17</span></a>
+</span><span id="MatprojPreBader-18"><a href="#MatprojPreBader-18"><span class="linenos">18</span></a><span class="sd">    See `bader.workflows.materials_project`.</span>
+</span><span id="MatprojPreBader-19"><a href="#MatprojPreBader-19"><span class="linenos">19</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="MatprojPreBader-20"><a href="#MatprojPreBader-20"><span class="linenos">20</span></a>
+</span><span id="MatprojPreBader-21"><a href="#MatprojPreBader-21"><span class="linenos">21</span></a>    <span class="c1"># The key thing for bader analysis is that we need a very fine FFT mesh. Other</span>
+</span><span id="MatprojPreBader-22"><a href="#MatprojPreBader-22"><span class="linenos">22</span></a>    <span class="c1"># than that, it&#39;s the same as a static energy calculation.</span>
+</span><span id="MatprojPreBader-23"><a href="#MatprojPreBader-23"><span class="linenos">23</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="MatprojPreBader-24"><a href="#MatprojPreBader-24"><span class="linenos">24</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="MatprojPreBader-25"><a href="#MatprojPreBader-25"><span class="linenos">25</span></a>        <span class="n">NGXF__density_a</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+</span><span id="MatprojPreBader-26"><a href="#MatprojPreBader-26"><span class="linenos">26</span></a>        <span class="n">NGYF__density_b</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+</span><span id="MatprojPreBader-27"><a href="#MatprojPreBader-27"><span class="linenos">27</span></a>        <span class="n">NGZF__density_c</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+</span><span id="MatprojPreBader-28"><a href="#MatprojPreBader-28"><span class="linenos">28</span></a>        <span class="n">LAECHG</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># write core charge density to AECCAR0 and valence to AECCAR2</span>
+</span><span id="MatprojPreBader-29"><a href="#MatprojPreBader-29"><span class="linenos">29</span></a>    <span class="p">)</span>
 </span></pre></div>
 
 
@@ -140,13 +143,25 @@ analysis for you. This S3Task is only the first step of that workflow.</p>
 </div>
 
 
-                            <div id="MatProjPreBader.incar" class="classattr">
+                            <div id="MatprojPreBader.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MatprojPreBader</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatprojPreBader.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="MatprojPreBader.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Normal&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: -5, &#39;ISPIN&#39;: 2, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;SIGMA&#39;: 0.05, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;LAECHG&#39;: True, &#39;LCHARG&#39;: True, &#39;LVHAR&#39;: True, &#39;NGXF__density_a&#39;: 20, &#39;NGYF__density_b&#39;: 20, &#39;NGZF__density_c&#39;: 20}</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjPreBader.incar"></a>
+    <a class="headerlink" href="#MatprojPreBader.incar"></a>
     
             <div class="docstring"><p>This sets the default vasp settings from a dictionary. This is the one thing
 you <em>must</em> set when subclassing VaspTask. An example is:</p>
@@ -160,47 +175,38 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatProjPreBader.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatProjPreBader.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatProjPreBader.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatProjPreBader.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
-                                <dd id="MatProjPreBader.functional" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.functional">functional</a></dd>
-                <dd id="MatProjPreBader.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.potcar_mappings">potcar_mappings</a></dd>
-                <dd id="MatProjPreBader.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.error_handlers">error_handlers</a></dd>
+                                    <div><dt><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="MatprojPreBader.functional" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="MatprojPreBader.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="MatprojPreBader.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MatProjPreBader.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="MatProjPreBader.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
-                <dd id="MatProjPreBader.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
-                <dd id="MatProjPreBader.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
-                <dd id="MatProjPreBader.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
-                <dd id="MatProjPreBader.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
-                <dd id="MatProjPreBader.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
-                <dd id="MatProjPreBader.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
-                <dd id="MatProjPreBader.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
-                <dd id="MatProjPreBader.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
+                                <dd id="MatprojPreBader.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
+                <dd id="MatprojPreBader.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
+                <dd id="MatprojPreBader.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="MatprojPreBader.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="MatprojPreBader.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="MatprojPreBader.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="MatprojPreBader.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="MatprojPreBader.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
+                <dd id="MatprojPreBader.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
+                <dd id="MatprojPreBader.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MatProjPreBader.copy" class="function">copy</dd>
-                <dd id="MatProjPreBader.bind" class="function">bind</dd>
-                <dd id="MatProjPreBader.map" class="function">map</dd>
-                <dd id="MatProjPreBader.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MatProjPreBader.set_upstream" class="function">set_upstream</dd>
-                <dd id="MatProjPreBader.set_downstream" class="function">set_downstream</dd>
-                <dd id="MatProjPreBader.inputs" class="function">inputs</dd>
-                <dd id="MatProjPreBader.outputs" class="function">outputs</dd>
-                <dd id="MatProjPreBader.pipe" class="function">pipe</dd>
-                <dd id="MatProjPreBader.serialize" class="function">serialize</dd>
-                <dd id="MatProjPreBader.is_equal" class="function">is_equal</dd>
-                <dd id="MatProjPreBader.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MatProjPreBader.not_" class="function">not_</dd>
-                <dd id="MatProjPreBader.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatprojPreBader.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatprojPreBader.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatprojPreBader.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatprojPreBader.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatprojPreBader.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MatprojPreBader.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MatprojPreBader.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MatprojPreBader.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatprojPreBader.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MatprojPreBader.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MatprojPreBader.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatprojPreBader.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

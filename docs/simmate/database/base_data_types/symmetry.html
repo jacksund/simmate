@@ -98,10 +98,10 @@
                                 <a class="variable" href="#Spacegroup.matprojionicstep_set">matprojionicstep_set</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Spacegroup.nebendpointrelaxation_set">nebendpointrelaxation_set</a>
+                                <a class="variable" href="#Spacegroup.matvirtuallabcinebendpointrelaxation_set">matvirtuallabcinebendpointrelaxation_set</a>
                         </li>
                         <li>
-                                <a class="variable" href="#Spacegroup.nebendpointionicstep_set">nebendpointionicstep_set</a>
+                                <a class="variable" href="#Spacegroup.matvirtuallabcinebendpointionicstep_set">matvirtuallabcinebendpointionicstep_set</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Spacegroup.quality00relaxation_set">quality00relaxation_set</a>
@@ -279,7 +279,7 @@
 </span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a><span class="sd">        called when you first set up your database and should never be called</span>
 </span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a><span class="sd">        after that.</span>
 </span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a><span class="sd">        See simmate.configuration.django.database.reset_database</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a><span class="sd">        See `simmate.database.utilities.reset_database`</span>
 </span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>
 </span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>        <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">):</span>
@@ -353,7 +353,7 @@
 </span><span id="Spacegroup-54"><a href="#Spacegroup-54"><span class="linenos">54</span></a><span class="sd">        called when you first set up your database and should never be called</span>
 </span><span id="Spacegroup-55"><a href="#Spacegroup-55"><span class="linenos">55</span></a><span class="sd">        after that.</span>
 </span><span id="Spacegroup-56"><a href="#Spacegroup-56"><span class="linenos">56</span></a>
-</span><span id="Spacegroup-57"><a href="#Spacegroup-57"><span class="linenos">57</span></a><span class="sd">        See simmate.configuration.django.database.reset_database</span>
+</span><span id="Spacegroup-57"><a href="#Spacegroup-57"><span class="linenos">57</span></a><span class="sd">        See `simmate.database.utilities.reset_database`</span>
 </span><span id="Spacegroup-58"><a href="#Spacegroup-58"><span class="linenos">58</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="Spacegroup-59"><a href="#Spacegroup-59"><span class="linenos">59</span></a>
 </span><span id="Spacegroup-60"><a href="#Spacegroup-60"><span class="linenos">60</span></a>        <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">):</span>
@@ -732,13 +732,13 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
 
 
                             </div>
-                            <div id="Spacegroup.nebendpointrelaxation_set" class="classattr">
+                            <div id="Spacegroup.matvirtuallabcinebendpointrelaxation_set" class="classattr">
                                 <div class="attr variable">
-            <span class="name">nebendpointrelaxation_set</span>
+            <span class="name">matvirtuallabcinebendpointrelaxation_set</span>
 
         
     </div>
-    <a class="headerlink" href="#Spacegroup.nebendpointrelaxation_set"></a>
+    <a class="headerlink" href="#Spacegroup.matvirtuallabcinebendpointrelaxation_set"></a>
     
             <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
 many-to-one relation.</p>
@@ -757,13 +757,13 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
 
 
                             </div>
-                            <div id="Spacegroup.nebendpointionicstep_set" class="classattr">
+                            <div id="Spacegroup.matvirtuallabcinebendpointionicstep_set" class="classattr">
                                 <div class="attr variable">
-            <span class="name">nebendpointionicstep_set</span>
+            <span class="name">matvirtuallabcinebendpointionicstep_set</span>
 
         
     </div>
-    <a class="headerlink" href="#Spacegroup.nebendpointionicstep_set"></a>
+    <a class="headerlink" href="#Spacegroup.matvirtuallabcinebendpointionicstep_set"></a>
     
             <div class="docstring"><p>Accessor to the related objects manager on the reverse side of a
 many-to-one relation.</p>
@@ -1614,6 +1614,7 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
                 <dd id="Spacegroup.get_table_name" class="function"><a href="base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="Spacegroup.create_subclass" class="function"><a href="base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="Spacegroup.from_toolkit" class="function"><a href="base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="Spacegroup.update_from_toolkit" class="function"><a href="base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="Spacegroup.load_archive" class="function"><a href="base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="Spacegroup.load_remote_archive" class="function"><a href="base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="Spacegroup.get_column_names" class="function"><a href="base.html#DatabaseTable.get_column_names">get_column_names</a></dd>

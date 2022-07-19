@@ -35,13 +35,13 @@
                     <a class="class" href="#BaderAnalysis">BaderAnalysis</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#BaderAnalysis.__init__">BaderAnalysis</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#BaderAnalysis.command">command</a>
                         </li>
                         <li>
                                 <a class="variable" href="#BaderAnalysis.required_files">required_files</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#BaderAnalysis.setup">setup</a>
                         </li>
                         <li>
                                 <a class="function" href="#BaderAnalysis.workup">workup</a>
@@ -104,123 +104,101 @@
 </span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a><span class="sd">    you will see files like &quot;CHGCAR_empty&quot; used in the command.</span>
 </span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a>
-</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">]</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    In order for bader analysis to run properly, all of these files must be</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">    present in the provided directory.</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>    <span class="c1"># !!! Maybe move required_files attribute to the S3Task...? This could also</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>    <span class="c1"># be useful for other tasks -- such as DOS and BS calculations. I could</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>    <span class="c1"># then have an extra method that checks these before calling execute.</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
-</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">        - typically using VASP. This setup therefore just involves ensuring that</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="sd">        the proper files are present.</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>        <span class="c1"># Make sure that there are the proper output files from a VASP calc</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">required_files</span><span class="p">]</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">):</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>                <span class="s2">&quot;A static energy calculation is required before running Bader &quot;</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>                <span class="s2">&quot;analysis. The following files must exist in the directory where &quot;</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>                <span class="sa">f</span><span class="s2">&quot;this task is ran: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">required_files</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>            <span class="p">)</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>
-</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>        <span class="c1"># Make the CHGCAR_sum file using Bader&#39;s helper script</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>        <span class="n">CombineCHGCARs</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>
-</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="sd">        A basic workup process that reads Bader analysis results from the ACF.dat</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">        file and calculates the corresponding oxidation states with the existing</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">        POTCAR files.</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>        <span class="c1"># load the ACF.dat file</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>        <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">ACF</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">acf_filename</span><span class="p">)</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>        <span class="c1"># load the electron counts used by VASP from the POTCAR files</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>        <span class="c1"># OPTIMIZE: this can be much faster if I have a reference file</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>        <span class="n">potcars</span> <span class="o">=</span> <span class="n">Potcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">potcar_filename</span><span class="p">)</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>        <span class="n">nelectron_data</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>        <span class="c1"># the result is a list because there can be multiple element potcars</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>        <span class="c1"># in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>        <span class="k">for</span> <span class="n">potcar</span> <span class="ow">in</span> <span class="n">potcars</span><span class="p">:</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">potcar</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">potcar</span><span class="o">.</span><span class="n">nelectrons</span><span class="p">})</span>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>        <span class="c1"># SPECIAL CASE: in scenarios where empty atoms are added to the structure,</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>        <span class="c1"># we should grab that modified structure instead of the one from the POSCAR.</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>        <span class="n">chgcar_empty_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR_empty&quot;</span><span class="p">)</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>        <span class="c1"># the empty file will always take preference</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">):</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">)</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>            <span class="c1"># We typically use hydrogen (&quot;H&quot;) as the empty atom, so we will</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>            <span class="c1"># need to add this to our element list for oxidation analysis.</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>            <span class="c1"># We use 0 for electron count because this is an &#39;empty&#39; atom, and</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>            <span class="c1"># not actually Hydrogen</span>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>        <span class="c1"># otherwise, grab the structure from the CHGCAR</span>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>        <span class="c1"># OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed</span>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>        <span class="c1"># Calculate the oxidation state of each site where it is simply the</span>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>        <span class="c1"># change in number of electrons associated with it from vasp potcar vs</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>        <span class="c1"># the bader charge I also add the element strings for filtering functionality</span>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>        <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>        <span class="n">oxi_state_data</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">site_charge</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">charge</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>            <span class="n">element_str</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">name</span>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element_str</span><span class="p">)</span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>            <span class="n">oxi_state</span> <span class="o">=</span> <span class="n">nelectron_data</span><span class="p">[</span><span class="n">element_str</span><span class="p">]</span> <span class="o">-</span> <span class="n">site_charge</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>            <span class="n">oxi_state_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxi_state</span><span class="p">)</span>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>        <span class="c1"># add the new column to the dataframe</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>            <span class="n">oxidation_state</span><span class="o">=</span><span class="n">oxi_state_data</span><span class="p">,</span>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>            <span class="n">element</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>        <span class="p">)</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>        <span class="c1"># write output files/plots for the user to quickly reference</span>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">)</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>        <span class="c1"># return all of our results</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>        <span class="k">return</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">:</span> <span class="nb">dict</span>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>    <span class="p">):</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="sd">        This prints a &quot;simmate_summary.yaml&quot; file with key output information.</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a><span class="sd">        This method should not be called directly as it used within workup().</span>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>        <span class="c1"># write output of the dataframe</span>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>        <span class="n">summary_csv_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary_bader.csv&quot;</span><span class="p">)</span>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>        <span class="n">dataframe</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">summary_csv_filename</span><span class="p">)</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>            <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="s2">&quot;view simmate_summary_bader.csv for more information&quot;</span><span class="p">,</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>            <span class="o">**</span><span class="n">extra_data</span><span class="p">,</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="p">}</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>        <span class="n">summary_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary.yaml&quot;</span><span class="p">)</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>            <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR_sum&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">]</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a>    <span class="nd">@classmethod</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a>    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">        A basic workup process that reads Bader analysis results from the ACF.dat</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="sd">        file and calculates the corresponding oxidation states with the existing</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">        POTCAR files.</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a>        <span class="c1"># load the ACF.dat file</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>        <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">ACF</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">acf_filename</span><span class="p">)</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>        <span class="c1"># load the electron counts used by VASP from the POTCAR files</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>        <span class="c1"># OPTIMIZE: this can be much faster if I have a reference file</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>        <span class="n">potcars</span> <span class="o">=</span> <span class="n">Potcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">potcar_filename</span><span class="p">)</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>        <span class="n">nelectron_data</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>        <span class="c1"># the result is a list because there can be multiple element potcars</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>        <span class="c1"># in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>        <span class="k">for</span> <span class="n">potcar</span> <span class="ow">in</span> <span class="n">potcars</span><span class="p">:</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">potcar</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">potcar</span><span class="o">.</span><span class="n">nelectrons</span><span class="p">})</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>        <span class="c1"># SPECIAL CASE: in scenarios where empty atoms are added to the structure,</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>        <span class="c1"># we should grab that modified structure instead of the one from the POSCAR.</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>        <span class="n">chgcar_empty_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR_empty&quot;</span><span class="p">)</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>        <span class="c1"># the empty file will always take preference</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">):</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">)</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>            <span class="c1"># We typically use hydrogen (&quot;H&quot;) as the empty atom, so we will</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>            <span class="c1"># need to add this to our element list for oxidation analysis.</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>            <span class="c1"># We use 0 for electron count because this is an &#39;empty&#39; atom, and</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>            <span class="c1"># not actually Hydrogen</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>        <span class="c1"># otherwise, grab the structure from the CHGCAR</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>        <span class="c1"># OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>        <span class="c1"># Calculate the oxidation state of each site where it is simply the</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>        <span class="c1"># change in number of electrons associated with it from vasp potcar vs</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>        <span class="c1"># the bader charge I also add the element strings for filtering functionality</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>        <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>        <span class="n">oxi_state_data</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">site_charge</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">charge</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>            <span class="n">element_str</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">name</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element_str</span><span class="p">)</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>            <span class="n">oxi_state</span> <span class="o">=</span> <span class="n">nelectron_data</span><span class="p">[</span><span class="n">element_str</span><span class="p">]</span> <span class="o">-</span> <span class="n">site_charge</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>            <span class="n">oxi_state_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxi_state</span><span class="p">)</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>        <span class="c1"># add the new column to the dataframe</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>            <span class="n">oxidation_state</span><span class="o">=</span><span class="n">oxi_state_data</span><span class="p">,</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>            <span class="n">element</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>        <span class="p">)</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>        <span class="c1"># write output files/plots for the user to quickly reference</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>        <span class="bp">cls</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">)</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>        <span class="c1"># return all of our results</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>        <span class="k">return</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>        <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>        <span class="n">extra_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>    <span class="p">):</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a><span class="sd">        This prints a &quot;simmate_summary.yaml&quot; file with key output information.</span>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="sd">        This method should not be called directly as it used within workup().</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>        <span class="c1"># write output of the dataframe</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>        <span class="n">summary_csv_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary_bader.csv&quot;</span><span class="p">)</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>        <span class="n">dataframe</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">summary_csv_filename</span><span class="p">)</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>            <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="s2">&quot;view simmate_summary_bader.csv for more information&quot;</span><span class="p">,</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>            <span class="o">**</span><span class="n">extra_data</span><span class="p">,</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>        <span class="p">}</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>        <span class="n">summary_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary.yaml&quot;</span><span class="p">)</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>            <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -254,227 +232,122 @@
 </span><span id="BaderAnalysis-32"><a href="#BaderAnalysis-32"><span class="linenos"> 32</span></a><span class="sd">    you will see files like &quot;CHGCAR_empty&quot; used in the command.</span>
 </span><span id="BaderAnalysis-33"><a href="#BaderAnalysis-33"><span class="linenos"> 33</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="BaderAnalysis-34"><a href="#BaderAnalysis-34"><span class="linenos"> 34</span></a>
-</span><span id="BaderAnalysis-35"><a href="#BaderAnalysis-35"><span class="linenos"> 35</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">]</span>
-</span><span id="BaderAnalysis-36"><a href="#BaderAnalysis-36"><span class="linenos"> 36</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis-37"><a href="#BaderAnalysis-37"><span class="linenos"> 37</span></a><span class="sd">    In order for bader analysis to run properly, all of these files must be</span>
-</span><span id="BaderAnalysis-38"><a href="#BaderAnalysis-38"><span class="linenos"> 38</span></a><span class="sd">    present in the provided directory.</span>
-</span><span id="BaderAnalysis-39"><a href="#BaderAnalysis-39"><span class="linenos"> 39</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis-40"><a href="#BaderAnalysis-40"><span class="linenos"> 40</span></a>    <span class="c1"># !!! Maybe move required_files attribute to the S3Task...? This could also</span>
-</span><span id="BaderAnalysis-41"><a href="#BaderAnalysis-41"><span class="linenos"> 41</span></a>    <span class="c1"># be useful for other tasks -- such as DOS and BS calculations. I could</span>
-</span><span id="BaderAnalysis-42"><a href="#BaderAnalysis-42"><span class="linenos"> 42</span></a>    <span class="c1"># then have an extra method that checks these before calling execute.</span>
-</span><span id="BaderAnalysis-43"><a href="#BaderAnalysis-43"><span class="linenos"> 43</span></a>
-</span><span id="BaderAnalysis-44"><a href="#BaderAnalysis-44"><span class="linenos"> 44</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="BaderAnalysis-45"><a href="#BaderAnalysis-45"><span class="linenos"> 45</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis-46"><a href="#BaderAnalysis-46"><span class="linenos"> 46</span></a><span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
-</span><span id="BaderAnalysis-47"><a href="#BaderAnalysis-47"><span class="linenos"> 47</span></a><span class="sd">        - typically using VASP. This setup therefore just involves ensuring that</span>
-</span><span id="BaderAnalysis-48"><a href="#BaderAnalysis-48"><span class="linenos"> 48</span></a><span class="sd">        the proper files are present.</span>
-</span><span id="BaderAnalysis-49"><a href="#BaderAnalysis-49"><span class="linenos"> 49</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis-50"><a href="#BaderAnalysis-50"><span class="linenos"> 50</span></a>
-</span><span id="BaderAnalysis-51"><a href="#BaderAnalysis-51"><span class="linenos"> 51</span></a>        <span class="c1"># Make sure that there are the proper output files from a VASP calc</span>
-</span><span id="BaderAnalysis-52"><a href="#BaderAnalysis-52"><span class="linenos"> 52</span></a>        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">required_files</span><span class="p">]</span>
-</span><span id="BaderAnalysis-53"><a href="#BaderAnalysis-53"><span class="linenos"> 53</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">):</span>
-</span><span id="BaderAnalysis-54"><a href="#BaderAnalysis-54"><span class="linenos"> 54</span></a>            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-</span><span id="BaderAnalysis-55"><a href="#BaderAnalysis-55"><span class="linenos"> 55</span></a>                <span class="s2">&quot;A static energy calculation is required before running Bader &quot;</span>
-</span><span id="BaderAnalysis-56"><a href="#BaderAnalysis-56"><span class="linenos"> 56</span></a>                <span class="s2">&quot;analysis. The following files must exist in the directory where &quot;</span>
-</span><span id="BaderAnalysis-57"><a href="#BaderAnalysis-57"><span class="linenos"> 57</span></a>                <span class="sa">f</span><span class="s2">&quot;this task is ran: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">required_files</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="BaderAnalysis-58"><a href="#BaderAnalysis-58"><span class="linenos"> 58</span></a>            <span class="p">)</span>
-</span><span id="BaderAnalysis-59"><a href="#BaderAnalysis-59"><span class="linenos"> 59</span></a>
-</span><span id="BaderAnalysis-60"><a href="#BaderAnalysis-60"><span class="linenos"> 60</span></a>        <span class="c1"># Make the CHGCAR_sum file using Bader&#39;s helper script</span>
-</span><span id="BaderAnalysis-61"><a href="#BaderAnalysis-61"><span class="linenos"> 61</span></a>        <span class="n">CombineCHGCARs</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="BaderAnalysis-62"><a href="#BaderAnalysis-62"><span class="linenos"> 62</span></a>
-</span><span id="BaderAnalysis-63"><a href="#BaderAnalysis-63"><span class="linenos"> 63</span></a>    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="BaderAnalysis-64"><a href="#BaderAnalysis-64"><span class="linenos"> 64</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis-65"><a href="#BaderAnalysis-65"><span class="linenos"> 65</span></a><span class="sd">        A basic workup process that reads Bader analysis results from the ACF.dat</span>
-</span><span id="BaderAnalysis-66"><a href="#BaderAnalysis-66"><span class="linenos"> 66</span></a><span class="sd">        file and calculates the corresponding oxidation states with the existing</span>
-</span><span id="BaderAnalysis-67"><a href="#BaderAnalysis-67"><span class="linenos"> 67</span></a><span class="sd">        POTCAR files.</span>
-</span><span id="BaderAnalysis-68"><a href="#BaderAnalysis-68"><span class="linenos"> 68</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis-69"><a href="#BaderAnalysis-69"><span class="linenos"> 69</span></a>
-</span><span id="BaderAnalysis-70"><a href="#BaderAnalysis-70"><span class="linenos"> 70</span></a>        <span class="c1"># load the ACF.dat file</span>
-</span><span id="BaderAnalysis-71"><a href="#BaderAnalysis-71"><span class="linenos"> 71</span></a>        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis-72"><a href="#BaderAnalysis-72"><span class="linenos"> 72</span></a>        <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">ACF</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">acf_filename</span><span class="p">)</span>
-</span><span id="BaderAnalysis-73"><a href="#BaderAnalysis-73"><span class="linenos"> 73</span></a>
-</span><span id="BaderAnalysis-74"><a href="#BaderAnalysis-74"><span class="linenos"> 74</span></a>        <span class="c1"># load the electron counts used by VASP from the POTCAR files</span>
-</span><span id="BaderAnalysis-75"><a href="#BaderAnalysis-75"><span class="linenos"> 75</span></a>        <span class="c1"># OPTIMIZE: this can be much faster if I have a reference file</span>
-</span><span id="BaderAnalysis-76"><a href="#BaderAnalysis-76"><span class="linenos"> 76</span></a>        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis-77"><a href="#BaderAnalysis-77"><span class="linenos"> 77</span></a>        <span class="n">potcars</span> <span class="o">=</span> <span class="n">Potcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">potcar_filename</span><span class="p">)</span>
-</span><span id="BaderAnalysis-78"><a href="#BaderAnalysis-78"><span class="linenos"> 78</span></a>        <span class="n">nelectron_data</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="BaderAnalysis-79"><a href="#BaderAnalysis-79"><span class="linenos"> 79</span></a>        <span class="c1"># the result is a list because there can be multiple element potcars</span>
-</span><span id="BaderAnalysis-80"><a href="#BaderAnalysis-80"><span class="linenos"> 80</span></a>        <span class="c1"># in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)</span>
-</span><span id="BaderAnalysis-81"><a href="#BaderAnalysis-81"><span class="linenos"> 81</span></a>        <span class="k">for</span> <span class="n">potcar</span> <span class="ow">in</span> <span class="n">potcars</span><span class="p">:</span>
-</span><span id="BaderAnalysis-82"><a href="#BaderAnalysis-82"><span class="linenos"> 82</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">potcar</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">potcar</span><span class="o">.</span><span class="n">nelectrons</span><span class="p">})</span>
-</span><span id="BaderAnalysis-83"><a href="#BaderAnalysis-83"><span class="linenos"> 83</span></a>
-</span><span id="BaderAnalysis-84"><a href="#BaderAnalysis-84"><span class="linenos"> 84</span></a>        <span class="c1"># SPECIAL CASE: in scenarios where empty atoms are added to the structure,</span>
-</span><span id="BaderAnalysis-85"><a href="#BaderAnalysis-85"><span class="linenos"> 85</span></a>        <span class="c1"># we should grab that modified structure instead of the one from the POSCAR.</span>
-</span><span id="BaderAnalysis-86"><a href="#BaderAnalysis-86"><span class="linenos"> 86</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis-87"><a href="#BaderAnalysis-87"><span class="linenos"> 87</span></a>        <span class="n">chgcar_empty_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR_empty&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis-88"><a href="#BaderAnalysis-88"><span class="linenos"> 88</span></a>
-</span><span id="BaderAnalysis-89"><a href="#BaderAnalysis-89"><span class="linenos"> 89</span></a>        <span class="c1"># the empty file will always take preference</span>
-</span><span id="BaderAnalysis-90"><a href="#BaderAnalysis-90"><span class="linenos"> 90</span></a>        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">):</span>
-</span><span id="BaderAnalysis-91"><a href="#BaderAnalysis-91"><span class="linenos"> 91</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">)</span>
-</span><span id="BaderAnalysis-92"><a href="#BaderAnalysis-92"><span class="linenos"> 92</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
-</span><span id="BaderAnalysis-93"><a href="#BaderAnalysis-93"><span class="linenos"> 93</span></a>            <span class="c1"># We typically use hydrogen (&quot;H&quot;) as the empty atom, so we will</span>
-</span><span id="BaderAnalysis-94"><a href="#BaderAnalysis-94"><span class="linenos"> 94</span></a>            <span class="c1"># need to add this to our element list for oxidation analysis.</span>
-</span><span id="BaderAnalysis-95"><a href="#BaderAnalysis-95"><span class="linenos"> 95</span></a>            <span class="c1"># We use 0 for electron count because this is an &#39;empty&#39; atom, and</span>
-</span><span id="BaderAnalysis-96"><a href="#BaderAnalysis-96"><span class="linenos"> 96</span></a>            <span class="c1"># not actually Hydrogen</span>
-</span><span id="BaderAnalysis-97"><a href="#BaderAnalysis-97"><span class="linenos"> 97</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
-</span><span id="BaderAnalysis-98"><a href="#BaderAnalysis-98"><span class="linenos"> 98</span></a>        <span class="c1"># otherwise, grab the structure from the CHGCAR</span>
-</span><span id="BaderAnalysis-99"><a href="#BaderAnalysis-99"><span class="linenos"> 99</span></a>        <span class="c1"># OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed</span>
-</span><span id="BaderAnalysis-100"><a href="#BaderAnalysis-100"><span class="linenos">100</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="BaderAnalysis-101"><a href="#BaderAnalysis-101"><span class="linenos">101</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
-</span><span id="BaderAnalysis-102"><a href="#BaderAnalysis-102"><span class="linenos">102</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
-</span><span id="BaderAnalysis-103"><a href="#BaderAnalysis-103"><span class="linenos">103</span></a>
-</span><span id="BaderAnalysis-104"><a href="#BaderAnalysis-104"><span class="linenos">104</span></a>        <span class="c1"># Calculate the oxidation state of each site where it is simply the</span>
-</span><span id="BaderAnalysis-105"><a href="#BaderAnalysis-105"><span class="linenos">105</span></a>        <span class="c1"># change in number of electrons associated with it from vasp potcar vs</span>
-</span><span id="BaderAnalysis-106"><a href="#BaderAnalysis-106"><span class="linenos">106</span></a>        <span class="c1"># the bader charge I also add the element strings for filtering functionality</span>
-</span><span id="BaderAnalysis-107"><a href="#BaderAnalysis-107"><span class="linenos">107</span></a>        <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="BaderAnalysis-108"><a href="#BaderAnalysis-108"><span class="linenos">108</span></a>        <span class="n">oxi_state_data</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="BaderAnalysis-109"><a href="#BaderAnalysis-109"><span class="linenos">109</span></a>        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">site_charge</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">charge</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
-</span><span id="BaderAnalysis-110"><a href="#BaderAnalysis-110"><span class="linenos">110</span></a>            <span class="n">element_str</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">name</span>
-</span><span id="BaderAnalysis-111"><a href="#BaderAnalysis-111"><span class="linenos">111</span></a>            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element_str</span><span class="p">)</span>
-</span><span id="BaderAnalysis-112"><a href="#BaderAnalysis-112"><span class="linenos">112</span></a>            <span class="n">oxi_state</span> <span class="o">=</span> <span class="n">nelectron_data</span><span class="p">[</span><span class="n">element_str</span><span class="p">]</span> <span class="o">-</span> <span class="n">site_charge</span>
-</span><span id="BaderAnalysis-113"><a href="#BaderAnalysis-113"><span class="linenos">113</span></a>            <span class="n">oxi_state_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxi_state</span><span class="p">)</span>
-</span><span id="BaderAnalysis-114"><a href="#BaderAnalysis-114"><span class="linenos">114</span></a>
-</span><span id="BaderAnalysis-115"><a href="#BaderAnalysis-115"><span class="linenos">115</span></a>        <span class="c1"># add the new column to the dataframe</span>
-</span><span id="BaderAnalysis-116"><a href="#BaderAnalysis-116"><span class="linenos">116</span></a>        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
-</span><span id="BaderAnalysis-117"><a href="#BaderAnalysis-117"><span class="linenos">117</span></a>            <span class="n">oxidation_state</span><span class="o">=</span><span class="n">oxi_state_data</span><span class="p">,</span>
-</span><span id="BaderAnalysis-118"><a href="#BaderAnalysis-118"><span class="linenos">118</span></a>            <span class="n">element</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
-</span><span id="BaderAnalysis-119"><a href="#BaderAnalysis-119"><span class="linenos">119</span></a>        <span class="p">)</span>
-</span><span id="BaderAnalysis-120"><a href="#BaderAnalysis-120"><span class="linenos">120</span></a>        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
-</span><span id="BaderAnalysis-121"><a href="#BaderAnalysis-121"><span class="linenos">121</span></a>        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
-</span><span id="BaderAnalysis-122"><a href="#BaderAnalysis-122"><span class="linenos">122</span></a>        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
-</span><span id="BaderAnalysis-123"><a href="#BaderAnalysis-123"><span class="linenos">123</span></a>
-</span><span id="BaderAnalysis-124"><a href="#BaderAnalysis-124"><span class="linenos">124</span></a>        <span class="c1"># write output files/plots for the user to quickly reference</span>
-</span><span id="BaderAnalysis-125"><a href="#BaderAnalysis-125"><span class="linenos">125</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">)</span>
-</span><span id="BaderAnalysis-126"><a href="#BaderAnalysis-126"><span class="linenos">126</span></a>
-</span><span id="BaderAnalysis-127"><a href="#BaderAnalysis-127"><span class="linenos">127</span></a>        <span class="c1"># return all of our results</span>
-</span><span id="BaderAnalysis-128"><a href="#BaderAnalysis-128"><span class="linenos">128</span></a>        <span class="k">return</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span>
-</span><span id="BaderAnalysis-129"><a href="#BaderAnalysis-129"><span class="linenos">129</span></a>
-</span><span id="BaderAnalysis-130"><a href="#BaderAnalysis-130"><span class="linenos">130</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span>
-</span><span id="BaderAnalysis-131"><a href="#BaderAnalysis-131"><span class="linenos">131</span></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">:</span> <span class="nb">dict</span>
-</span><span id="BaderAnalysis-132"><a href="#BaderAnalysis-132"><span class="linenos">132</span></a>    <span class="p">):</span>
-</span><span id="BaderAnalysis-133"><a href="#BaderAnalysis-133"><span class="linenos">133</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis-134"><a href="#BaderAnalysis-134"><span class="linenos">134</span></a><span class="sd">        This prints a &quot;simmate_summary.yaml&quot; file with key output information.</span>
-</span><span id="BaderAnalysis-135"><a href="#BaderAnalysis-135"><span class="linenos">135</span></a>
-</span><span id="BaderAnalysis-136"><a href="#BaderAnalysis-136"><span class="linenos">136</span></a><span class="sd">        This method should not be called directly as it used within workup().</span>
-</span><span id="BaderAnalysis-137"><a href="#BaderAnalysis-137"><span class="linenos">137</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis-138"><a href="#BaderAnalysis-138"><span class="linenos">138</span></a>
-</span><span id="BaderAnalysis-139"><a href="#BaderAnalysis-139"><span class="linenos">139</span></a>        <span class="c1"># write output of the dataframe</span>
-</span><span id="BaderAnalysis-140"><a href="#BaderAnalysis-140"><span class="linenos">140</span></a>        <span class="n">summary_csv_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary_bader.csv&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis-141"><a href="#BaderAnalysis-141"><span class="linenos">141</span></a>        <span class="n">dataframe</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">summary_csv_filename</span><span class="p">)</span>
-</span><span id="BaderAnalysis-142"><a href="#BaderAnalysis-142"><span class="linenos">142</span></a>
-</span><span id="BaderAnalysis-143"><a href="#BaderAnalysis-143"><span class="linenos">143</span></a>        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="BaderAnalysis-144"><a href="#BaderAnalysis-144"><span class="linenos">144</span></a>            <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="s2">&quot;view simmate_summary_bader.csv for more information&quot;</span><span class="p">,</span>
-</span><span id="BaderAnalysis-145"><a href="#BaderAnalysis-145"><span class="linenos">145</span></a>            <span class="o">**</span><span class="n">extra_data</span><span class="p">,</span>
-</span><span id="BaderAnalysis-146"><a href="#BaderAnalysis-146"><span class="linenos">146</span></a>        <span class="p">}</span>
-</span><span id="BaderAnalysis-147"><a href="#BaderAnalysis-147"><span class="linenos">147</span></a>
-</span><span id="BaderAnalysis-148"><a href="#BaderAnalysis-148"><span class="linenos">148</span></a>        <span class="n">summary_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary.yaml&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis-149"><a href="#BaderAnalysis-149"><span class="linenos">149</span></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-</span><span id="BaderAnalysis-150"><a href="#BaderAnalysis-150"><span class="linenos">150</span></a>            <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
-</span><span id="BaderAnalysis-151"><a href="#BaderAnalysis-151"><span class="linenos">151</span></a>            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</span><span id="BaderAnalysis-35"><a href="#BaderAnalysis-35"><span class="linenos"> 35</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR_sum&quot;</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">]</span>
+</span><span id="BaderAnalysis-36"><a href="#BaderAnalysis-36"><span class="linenos"> 36</span></a>
+</span><span id="BaderAnalysis-37"><a href="#BaderAnalysis-37"><span class="linenos"> 37</span></a>    <span class="nd">@classmethod</span>
+</span><span id="BaderAnalysis-38"><a href="#BaderAnalysis-38"><span class="linenos"> 38</span></a>    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="BaderAnalysis-39"><a href="#BaderAnalysis-39"><span class="linenos"> 39</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="BaderAnalysis-40"><a href="#BaderAnalysis-40"><span class="linenos"> 40</span></a><span class="sd">        A basic workup process that reads Bader analysis results from the ACF.dat</span>
+</span><span id="BaderAnalysis-41"><a href="#BaderAnalysis-41"><span class="linenos"> 41</span></a><span class="sd">        file and calculates the corresponding oxidation states with the existing</span>
+</span><span id="BaderAnalysis-42"><a href="#BaderAnalysis-42"><span class="linenos"> 42</span></a><span class="sd">        POTCAR files.</span>
+</span><span id="BaderAnalysis-43"><a href="#BaderAnalysis-43"><span class="linenos"> 43</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="BaderAnalysis-44"><a href="#BaderAnalysis-44"><span class="linenos"> 44</span></a>
+</span><span id="BaderAnalysis-45"><a href="#BaderAnalysis-45"><span class="linenos"> 45</span></a>        <span class="c1"># load the ACF.dat file</span>
+</span><span id="BaderAnalysis-46"><a href="#BaderAnalysis-46"><span class="linenos"> 46</span></a>        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis-47"><a href="#BaderAnalysis-47"><span class="linenos"> 47</span></a>        <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">ACF</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">acf_filename</span><span class="p">)</span>
+</span><span id="BaderAnalysis-48"><a href="#BaderAnalysis-48"><span class="linenos"> 48</span></a>
+</span><span id="BaderAnalysis-49"><a href="#BaderAnalysis-49"><span class="linenos"> 49</span></a>        <span class="c1"># load the electron counts used by VASP from the POTCAR files</span>
+</span><span id="BaderAnalysis-50"><a href="#BaderAnalysis-50"><span class="linenos"> 50</span></a>        <span class="c1"># OPTIMIZE: this can be much faster if I have a reference file</span>
+</span><span id="BaderAnalysis-51"><a href="#BaderAnalysis-51"><span class="linenos"> 51</span></a>        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis-52"><a href="#BaderAnalysis-52"><span class="linenos"> 52</span></a>        <span class="n">potcars</span> <span class="o">=</span> <span class="n">Potcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">potcar_filename</span><span class="p">)</span>
+</span><span id="BaderAnalysis-53"><a href="#BaderAnalysis-53"><span class="linenos"> 53</span></a>        <span class="n">nelectron_data</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="BaderAnalysis-54"><a href="#BaderAnalysis-54"><span class="linenos"> 54</span></a>        <span class="c1"># the result is a list because there can be multiple element potcars</span>
+</span><span id="BaderAnalysis-55"><a href="#BaderAnalysis-55"><span class="linenos"> 55</span></a>        <span class="c1"># in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)</span>
+</span><span id="BaderAnalysis-56"><a href="#BaderAnalysis-56"><span class="linenos"> 56</span></a>        <span class="k">for</span> <span class="n">potcar</span> <span class="ow">in</span> <span class="n">potcars</span><span class="p">:</span>
+</span><span id="BaderAnalysis-57"><a href="#BaderAnalysis-57"><span class="linenos"> 57</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">potcar</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">potcar</span><span class="o">.</span><span class="n">nelectrons</span><span class="p">})</span>
+</span><span id="BaderAnalysis-58"><a href="#BaderAnalysis-58"><span class="linenos"> 58</span></a>
+</span><span id="BaderAnalysis-59"><a href="#BaderAnalysis-59"><span class="linenos"> 59</span></a>        <span class="c1"># SPECIAL CASE: in scenarios where empty atoms are added to the structure,</span>
+</span><span id="BaderAnalysis-60"><a href="#BaderAnalysis-60"><span class="linenos"> 60</span></a>        <span class="c1"># we should grab that modified structure instead of the one from the POSCAR.</span>
+</span><span id="BaderAnalysis-61"><a href="#BaderAnalysis-61"><span class="linenos"> 61</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis-62"><a href="#BaderAnalysis-62"><span class="linenos"> 62</span></a>        <span class="n">chgcar_empty_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR_empty&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis-63"><a href="#BaderAnalysis-63"><span class="linenos"> 63</span></a>
+</span><span id="BaderAnalysis-64"><a href="#BaderAnalysis-64"><span class="linenos"> 64</span></a>        <span class="c1"># the empty file will always take preference</span>
+</span><span id="BaderAnalysis-65"><a href="#BaderAnalysis-65"><span class="linenos"> 65</span></a>        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">):</span>
+</span><span id="BaderAnalysis-66"><a href="#BaderAnalysis-66"><span class="linenos"> 66</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">)</span>
+</span><span id="BaderAnalysis-67"><a href="#BaderAnalysis-67"><span class="linenos"> 67</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
+</span><span id="BaderAnalysis-68"><a href="#BaderAnalysis-68"><span class="linenos"> 68</span></a>            <span class="c1"># We typically use hydrogen (&quot;H&quot;) as the empty atom, so we will</span>
+</span><span id="BaderAnalysis-69"><a href="#BaderAnalysis-69"><span class="linenos"> 69</span></a>            <span class="c1"># need to add this to our element list for oxidation analysis.</span>
+</span><span id="BaderAnalysis-70"><a href="#BaderAnalysis-70"><span class="linenos"> 70</span></a>            <span class="c1"># We use 0 for electron count because this is an &#39;empty&#39; atom, and</span>
+</span><span id="BaderAnalysis-71"><a href="#BaderAnalysis-71"><span class="linenos"> 71</span></a>            <span class="c1"># not actually Hydrogen</span>
+</span><span id="BaderAnalysis-72"><a href="#BaderAnalysis-72"><span class="linenos"> 72</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+</span><span id="BaderAnalysis-73"><a href="#BaderAnalysis-73"><span class="linenos"> 73</span></a>        <span class="c1"># otherwise, grab the structure from the CHGCAR</span>
+</span><span id="BaderAnalysis-74"><a href="#BaderAnalysis-74"><span class="linenos"> 74</span></a>        <span class="c1"># OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed</span>
+</span><span id="BaderAnalysis-75"><a href="#BaderAnalysis-75"><span class="linenos"> 75</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="BaderAnalysis-76"><a href="#BaderAnalysis-76"><span class="linenos"> 76</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
+</span><span id="BaderAnalysis-77"><a href="#BaderAnalysis-77"><span class="linenos"> 77</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
+</span><span id="BaderAnalysis-78"><a href="#BaderAnalysis-78"><span class="linenos"> 78</span></a>
+</span><span id="BaderAnalysis-79"><a href="#BaderAnalysis-79"><span class="linenos"> 79</span></a>        <span class="c1"># Calculate the oxidation state of each site where it is simply the</span>
+</span><span id="BaderAnalysis-80"><a href="#BaderAnalysis-80"><span class="linenos"> 80</span></a>        <span class="c1"># change in number of electrons associated with it from vasp potcar vs</span>
+</span><span id="BaderAnalysis-81"><a href="#BaderAnalysis-81"><span class="linenos"> 81</span></a>        <span class="c1"># the bader charge I also add the element strings for filtering functionality</span>
+</span><span id="BaderAnalysis-82"><a href="#BaderAnalysis-82"><span class="linenos"> 82</span></a>        <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="BaderAnalysis-83"><a href="#BaderAnalysis-83"><span class="linenos"> 83</span></a>        <span class="n">oxi_state_data</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="BaderAnalysis-84"><a href="#BaderAnalysis-84"><span class="linenos"> 84</span></a>        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">site_charge</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">charge</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+</span><span id="BaderAnalysis-85"><a href="#BaderAnalysis-85"><span class="linenos"> 85</span></a>            <span class="n">element_str</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">name</span>
+</span><span id="BaderAnalysis-86"><a href="#BaderAnalysis-86"><span class="linenos"> 86</span></a>            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element_str</span><span class="p">)</span>
+</span><span id="BaderAnalysis-87"><a href="#BaderAnalysis-87"><span class="linenos"> 87</span></a>            <span class="n">oxi_state</span> <span class="o">=</span> <span class="n">nelectron_data</span><span class="p">[</span><span class="n">element_str</span><span class="p">]</span> <span class="o">-</span> <span class="n">site_charge</span>
+</span><span id="BaderAnalysis-88"><a href="#BaderAnalysis-88"><span class="linenos"> 88</span></a>            <span class="n">oxi_state_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxi_state</span><span class="p">)</span>
+</span><span id="BaderAnalysis-89"><a href="#BaderAnalysis-89"><span class="linenos"> 89</span></a>
+</span><span id="BaderAnalysis-90"><a href="#BaderAnalysis-90"><span class="linenos"> 90</span></a>        <span class="c1"># add the new column to the dataframe</span>
+</span><span id="BaderAnalysis-91"><a href="#BaderAnalysis-91"><span class="linenos"> 91</span></a>        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+</span><span id="BaderAnalysis-92"><a href="#BaderAnalysis-92"><span class="linenos"> 92</span></a>            <span class="n">oxidation_state</span><span class="o">=</span><span class="n">oxi_state_data</span><span class="p">,</span>
+</span><span id="BaderAnalysis-93"><a href="#BaderAnalysis-93"><span class="linenos"> 93</span></a>            <span class="n">element</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
+</span><span id="BaderAnalysis-94"><a href="#BaderAnalysis-94"><span class="linenos"> 94</span></a>        <span class="p">)</span>
+</span><span id="BaderAnalysis-95"><a href="#BaderAnalysis-95"><span class="linenos"> 95</span></a>        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
+</span><span id="BaderAnalysis-96"><a href="#BaderAnalysis-96"><span class="linenos"> 96</span></a>        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
+</span><span id="BaderAnalysis-97"><a href="#BaderAnalysis-97"><span class="linenos"> 97</span></a>        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
+</span><span id="BaderAnalysis-98"><a href="#BaderAnalysis-98"><span class="linenos"> 98</span></a>
+</span><span id="BaderAnalysis-99"><a href="#BaderAnalysis-99"><span class="linenos"> 99</span></a>        <span class="c1"># write output files/plots for the user to quickly reference</span>
+</span><span id="BaderAnalysis-100"><a href="#BaderAnalysis-100"><span class="linenos">100</span></a>        <span class="bp">cls</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">)</span>
+</span><span id="BaderAnalysis-101"><a href="#BaderAnalysis-101"><span class="linenos">101</span></a>
+</span><span id="BaderAnalysis-102"><a href="#BaderAnalysis-102"><span class="linenos">102</span></a>        <span class="c1"># return all of our results</span>
+</span><span id="BaderAnalysis-103"><a href="#BaderAnalysis-103"><span class="linenos">103</span></a>        <span class="k">return</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span>
+</span><span id="BaderAnalysis-104"><a href="#BaderAnalysis-104"><span class="linenos">104</span></a>
+</span><span id="BaderAnalysis-105"><a href="#BaderAnalysis-105"><span class="linenos">105</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="BaderAnalysis-106"><a href="#BaderAnalysis-106"><span class="linenos">106</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span>
+</span><span id="BaderAnalysis-107"><a href="#BaderAnalysis-107"><span class="linenos">107</span></a>        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="BaderAnalysis-108"><a href="#BaderAnalysis-108"><span class="linenos">108</span></a>        <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
+</span><span id="BaderAnalysis-109"><a href="#BaderAnalysis-109"><span class="linenos">109</span></a>        <span class="n">extra_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+</span><span id="BaderAnalysis-110"><a href="#BaderAnalysis-110"><span class="linenos">110</span></a>    <span class="p">):</span>
+</span><span id="BaderAnalysis-111"><a href="#BaderAnalysis-111"><span class="linenos">111</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="BaderAnalysis-112"><a href="#BaderAnalysis-112"><span class="linenos">112</span></a><span class="sd">        This prints a &quot;simmate_summary.yaml&quot; file with key output information.</span>
+</span><span id="BaderAnalysis-113"><a href="#BaderAnalysis-113"><span class="linenos">113</span></a>
+</span><span id="BaderAnalysis-114"><a href="#BaderAnalysis-114"><span class="linenos">114</span></a><span class="sd">        This method should not be called directly as it used within workup().</span>
+</span><span id="BaderAnalysis-115"><a href="#BaderAnalysis-115"><span class="linenos">115</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="BaderAnalysis-116"><a href="#BaderAnalysis-116"><span class="linenos">116</span></a>
+</span><span id="BaderAnalysis-117"><a href="#BaderAnalysis-117"><span class="linenos">117</span></a>        <span class="c1"># write output of the dataframe</span>
+</span><span id="BaderAnalysis-118"><a href="#BaderAnalysis-118"><span class="linenos">118</span></a>        <span class="n">summary_csv_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary_bader.csv&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis-119"><a href="#BaderAnalysis-119"><span class="linenos">119</span></a>        <span class="n">dataframe</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">summary_csv_filename</span><span class="p">)</span>
+</span><span id="BaderAnalysis-120"><a href="#BaderAnalysis-120"><span class="linenos">120</span></a>
+</span><span id="BaderAnalysis-121"><a href="#BaderAnalysis-121"><span class="linenos">121</span></a>        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="BaderAnalysis-122"><a href="#BaderAnalysis-122"><span class="linenos">122</span></a>            <span class="s2">&quot;notes&quot;</span><span class="p">:</span> <span class="s2">&quot;view simmate_summary_bader.csv for more information&quot;</span><span class="p">,</span>
+</span><span id="BaderAnalysis-123"><a href="#BaderAnalysis-123"><span class="linenos">123</span></a>            <span class="o">**</span><span class="n">extra_data</span><span class="p">,</span>
+</span><span id="BaderAnalysis-124"><a href="#BaderAnalysis-124"><span class="linenos">124</span></a>        <span class="p">}</span>
+</span><span id="BaderAnalysis-125"><a href="#BaderAnalysis-125"><span class="linenos">125</span></a>
+</span><span id="BaderAnalysis-126"><a href="#BaderAnalysis-126"><span class="linenos">126</span></a>        <span class="n">summary_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;simmate_summary.yaml&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis-127"><a href="#BaderAnalysis-127"><span class="linenos">127</span></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+</span><span id="BaderAnalysis-128"><a href="#BaderAnalysis-128"><span class="linenos">128</span></a>            <span class="n">content</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+</span><span id="BaderAnalysis-129"><a href="#BaderAnalysis-129"><span class="linenos">129</span></a>            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 </span></pre></div>
 
 
-            <div class="docstring"><h2 id="the-supervised-staged-shell-task-aka-s3task">The Supervised-Staged-Shell Task (aka "S3Task")</h2>
-
-<p>This class contains the core functionality to <strong>supervise</strong> a <strong>staged</strong> task
-involving some <strong>shell</strong> command.</p>
-
-<p>Let's breakdown what this means...</p>
-
-<p>A <em>shell</em> command is a single call to some external program. For example,
-VASP requires that we call the "vasp_std &gt; vasp.out" command in order to run a
-calculation. We consider calling external programs a <em>staged</em> task made
-up of three steps:</p>
-
-<ul>
-<li>setup = writing any input files required for the program</li>
-<li>execution = actually calling the command and running our program</li>
-<li>workup = loading data from output files back into python</li>
-</ul>
-
-<p>And for <em>supervising</em> the task, this means we monitor the program while the
-execution stage is running. So once a program is started, Simmate can check
-output files for common errors/issues. If an error is found, we stop the
-program, fix the issue, and then restart it. Any fixes that were made are
-written to "simmate_corrections.csv".</p>
-
-<!--
-TODO: Make a simple diagram to visualize the overall process and add it here.
-It will be similar to Custodian's, but we don't have a list of jobs here.
-https://materialsproject.github.io/custodian/index.html#usage
-The steps are...
-
-- Write Input Files based on custom+defualt settings
-- Run the calculation by calling the program
-- Load ouput files
-- check for errors
-- [correct them, rerun]
-- postprocess/analysis
--->
-
-<p>This entire process (the different stages and monitoring) is carried out
-using the <code><a href="#BaderAnalysis.run">run()</a></code> method. You rarely use this class directly. Instead,
-you typically use a subclass of it. As a user, you really just need to do
-something like this:</p>
-
-<div class="pdoc-code codehilite"><pre><span></span><code>   <span class="kn">from</span> <span class="nn">simmate.calculator.example.tasks</span> <span class="kn">import</span> <span class="n">ExampleTask</span>
-
-   <span class="n">my_task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
-   <span class="n">my_result</span> <span class="o">=</span> <span class="n">my_task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-
-<p>And that's it!</p>
-
-<p>For experts, this class can be viewed as a combination of prefect's ShellTask,
-a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
-functionality of pymatgen.io.vasp.sets too. By merging all of these together
-into one class, we make things much easier for users and creating new Tasks.</p>
-
-<h2 id="inheriting-from-this-class">Inheriting from this class</h2>
-
-<p>This class is commonly used to make tasks for our calculator modules, so you
-will likely want to subclass this. Here is a basic example of inheriting
-and then running a task:</p>
-
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="../../../workflow_engine.html">simmate.workflow_engine</a></span> <span class="kn">import</span> <span class="n">S3Task</span>
-<span class="kn">from</span> <span class="nn">example.error_handlers</span> <span class="kn">import</span> <span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span>
-
-
-<span class="k">class</span> <span class="nc">ExampleTask</span><span class="p">(</span><span class="n">SSSTask</span><span class="p">):</span>
-
-    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;echo example&quot;</span>  <span class="c1"># just prints out &quot;example&quot;</span>
-    <span class="n">max_corrections</span> <span class="o">=</span> <span class="mi">7</span>
-    <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span><span class="n">PossibleError1</span><span class="p">,</span> <span class="n">PossibleError2</span><span class="p">]</span>
-    <span class="n">polling_timestep</span> <span class="o">=</span> <span class="mf">0.1</span>
-    <span class="n">monitor_freq</span> <span class="o">=</span> <span class="mi">10</span>
-    <span class="n">some_new_setting</span> <span class="o">=</span> <span class="mi">123</span>
-
-    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have these two args</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m setting things up!&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;My new setting is </span><span class="si">{</span><span class="n">some_new_setting</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>  <span class="c1"># &lt;-- MUST have this arg</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I&#39;m working things up!&quot;</span><span class="p">)</span>
-
-
-<span class="n">task</span> <span class="o">=</span> <span class="n">ExampleTask</span><span class="p">()</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-
-<p>There are a couple things to note here:</p>
-
-<ul>
-<li>It's optional to set/overwrite attributes. You can also add new ones too.</li>
-<li>It's optional to write a new __init__, setup, or workup methods</li>
-<li>make sure you include the structure/directory inputs, even if you don't use them.</li>
-<li>Don't add new kwargs to methods. Instead handle these options through attributes.</li>
-</ul>
-
-<p>For a full (and advanced) example, of a subclass take a look at
-<code><a href="../../vasp/tasks/base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></code>.</p>
+            <div class="docstring"><p>The base Supervised-Staged-Shell that many tasks inherit from. This class
+encapulates logic for running external programs (like VASP), fixing common
+errors during a calculation, and working up the results.</p>
 </div>
 
 
+                            <div id="BaderAnalysis.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">BaderAnalysis</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#BaderAnalysis.__init__"></a>
+    
+    
+
+                            </div>
                             <div id="BaderAnalysis.command" class="classattr">
                                 <div class="attr variable">
             <span class="name">command</span><span class="annotation">: str</span><span class="default_value"> = &#39;bader CHGCAR -ref CHGCAR_sum -b weight &gt; bader.out&#39;</span>
@@ -501,56 +374,15 @@ you will see files like "CHGCAR_empty" used in the command.</p>
                             </div>
                             <div id="BaderAnalysis.required_files" class="classattr">
                                 <div class="attr variable">
-            <span class="name">required_files</span><span class="default_value"> = [&#39;CHGCAR&#39;, &#39;AECCAR0&#39;, &#39;AECCAR2&#39;, &#39;POTCAR&#39;]</span>
+            <span class="name">required_files</span><span class="default_value"> = [&#39;CHGCAR_sum&#39;, &#39;POTCAR&#39;]</span>
 
         
     </div>
     <a class="headerlink" href="#BaderAnalysis.required_files"></a>
     
-            <div class="docstring"><p>In order for bader analysis to run properly, all of these files must be
-present in the provided directory.</p>
-</div>
-
-
-                            </div>
-                            <div id="BaderAnalysis.setup" class="classattr">
-                                        <input id="BaderAnalysis.setup-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-<div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">setup</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">structure</span><span class="p">:</span> <span class="n"><a href="../../../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a></span>,</span><span class="param">	<span class="n">directory</span><span class="p">:</span> <span class="nb">str</span></span>)</span>
-
-                <label class="view-source-button" for="BaderAnalysis.setup-view-source"><span>View Source</span></label>
-
-    </div>
-    <a class="headerlink" href="#BaderAnalysis.setup"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="BaderAnalysis.setup-44"><a href="#BaderAnalysis.setup-44"><span class="linenos">44</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="BaderAnalysis.setup-45"><a href="#BaderAnalysis.setup-45"><span class="linenos">45</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis.setup-46"><a href="#BaderAnalysis.setup-46"><span class="linenos">46</span></a><span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
-</span><span id="BaderAnalysis.setup-47"><a href="#BaderAnalysis.setup-47"><span class="linenos">47</span></a><span class="sd">        - typically using VASP. This setup therefore just involves ensuring that</span>
-</span><span id="BaderAnalysis.setup-48"><a href="#BaderAnalysis.setup-48"><span class="linenos">48</span></a><span class="sd">        the proper files are present.</span>
-</span><span id="BaderAnalysis.setup-49"><a href="#BaderAnalysis.setup-49"><span class="linenos">49</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis.setup-50"><a href="#BaderAnalysis.setup-50"><span class="linenos">50</span></a>
-</span><span id="BaderAnalysis.setup-51"><a href="#BaderAnalysis.setup-51"><span class="linenos">51</span></a>        <span class="c1"># Make sure that there are the proper output files from a VASP calc</span>
-</span><span id="BaderAnalysis.setup-52"><a href="#BaderAnalysis.setup-52"><span class="linenos">52</span></a>        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">required_files</span><span class="p">]</span>
-</span><span id="BaderAnalysis.setup-53"><a href="#BaderAnalysis.setup-53"><span class="linenos">53</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">):</span>
-</span><span id="BaderAnalysis.setup-54"><a href="#BaderAnalysis.setup-54"><span class="linenos">54</span></a>            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-</span><span id="BaderAnalysis.setup-55"><a href="#BaderAnalysis.setup-55"><span class="linenos">55</span></a>                <span class="s2">&quot;A static energy calculation is required before running Bader &quot;</span>
-</span><span id="BaderAnalysis.setup-56"><a href="#BaderAnalysis.setup-56"><span class="linenos">56</span></a>                <span class="s2">&quot;analysis. The following files must exist in the directory where &quot;</span>
-</span><span id="BaderAnalysis.setup-57"><a href="#BaderAnalysis.setup-57"><span class="linenos">57</span></a>                <span class="sa">f</span><span class="s2">&quot;this task is ran: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">required_files</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="BaderAnalysis.setup-58"><a href="#BaderAnalysis.setup-58"><span class="linenos">58</span></a>            <span class="p">)</span>
-</span><span id="BaderAnalysis.setup-59"><a href="#BaderAnalysis.setup-59"><span class="linenos">59</span></a>
-</span><span id="BaderAnalysis.setup-60"><a href="#BaderAnalysis.setup-60"><span class="linenos">60</span></a>        <span class="c1"># Make the CHGCAR_sum file using Bader&#39;s helper script</span>
-</span><span id="BaderAnalysis.setup-61"><a href="#BaderAnalysis.setup-61"><span class="linenos">61</span></a>        <span class="n">CombineCHGCARs</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
-</span></pre></div>
-
-
-            <div class="docstring"><p>Bader analysis requires that a static-energy calculation be ran beforehand</p>
-
-<ul>
-<li>typically using VASP. This setup therefore just involves ensuring that
-the proper files are present.</li>
-</ul>
+            <div class="docstring"><p>Before the command is executed, this list of files should be present
+in the working directory. This check will be made after <code><a href="#BaderAnalysis.setup">setup</a></code> is called
+and before <code><a href="#BaderAnalysis.execute">execute</a></code> is called. By default, no input files are required.</p>
 </div>
 
 
@@ -558,80 +390,82 @@ the proper files are present.</li>
                             <div id="BaderAnalysis.workup" class="classattr">
                                         <input id="BaderAnalysis.workup-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+                    <div class="decorator">@classmethod</div>
+
         <span class="def">def</span>
-        <span class="name">workup</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span></span>)</span>
+        <span class="name">workup</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">cls</span>, </span><span class="param"><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span></span>)</span>
 
                 <label class="view-source-button" for="BaderAnalysis.workup-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#BaderAnalysis.workup"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="BaderAnalysis.workup-63"><a href="#BaderAnalysis.workup-63"><span class="linenos"> 63</span></a>    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="BaderAnalysis.workup-64"><a href="#BaderAnalysis.workup-64"><span class="linenos"> 64</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis.workup-65"><a href="#BaderAnalysis.workup-65"><span class="linenos"> 65</span></a><span class="sd">        A basic workup process that reads Bader analysis results from the ACF.dat</span>
-</span><span id="BaderAnalysis.workup-66"><a href="#BaderAnalysis.workup-66"><span class="linenos"> 66</span></a><span class="sd">        file and calculates the corresponding oxidation states with the existing</span>
-</span><span id="BaderAnalysis.workup-67"><a href="#BaderAnalysis.workup-67"><span class="linenos"> 67</span></a><span class="sd">        POTCAR files.</span>
-</span><span id="BaderAnalysis.workup-68"><a href="#BaderAnalysis.workup-68"><span class="linenos"> 68</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="BaderAnalysis.workup-69"><a href="#BaderAnalysis.workup-69"><span class="linenos"> 69</span></a>
-</span><span id="BaderAnalysis.workup-70"><a href="#BaderAnalysis.workup-70"><span class="linenos"> 70</span></a>        <span class="c1"># load the ACF.dat file</span>
-</span><span id="BaderAnalysis.workup-71"><a href="#BaderAnalysis.workup-71"><span class="linenos"> 71</span></a>        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-72"><a href="#BaderAnalysis.workup-72"><span class="linenos"> 72</span></a>        <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">ACF</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">acf_filename</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-73"><a href="#BaderAnalysis.workup-73"><span class="linenos"> 73</span></a>
-</span><span id="BaderAnalysis.workup-74"><a href="#BaderAnalysis.workup-74"><span class="linenos"> 74</span></a>        <span class="c1"># load the electron counts used by VASP from the POTCAR files</span>
-</span><span id="BaderAnalysis.workup-75"><a href="#BaderAnalysis.workup-75"><span class="linenos"> 75</span></a>        <span class="c1"># OPTIMIZE: this can be much faster if I have a reference file</span>
-</span><span id="BaderAnalysis.workup-76"><a href="#BaderAnalysis.workup-76"><span class="linenos"> 76</span></a>        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-77"><a href="#BaderAnalysis.workup-77"><span class="linenos"> 77</span></a>        <span class="n">potcars</span> <span class="o">=</span> <span class="n">Potcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">potcar_filename</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-78"><a href="#BaderAnalysis.workup-78"><span class="linenos"> 78</span></a>        <span class="n">nelectron_data</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="BaderAnalysis.workup-79"><a href="#BaderAnalysis.workup-79"><span class="linenos"> 79</span></a>        <span class="c1"># the result is a list because there can be multiple element potcars</span>
-</span><span id="BaderAnalysis.workup-80"><a href="#BaderAnalysis.workup-80"><span class="linenos"> 80</span></a>        <span class="c1"># in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)</span>
-</span><span id="BaderAnalysis.workup-81"><a href="#BaderAnalysis.workup-81"><span class="linenos"> 81</span></a>        <span class="k">for</span> <span class="n">potcar</span> <span class="ow">in</span> <span class="n">potcars</span><span class="p">:</span>
-</span><span id="BaderAnalysis.workup-82"><a href="#BaderAnalysis.workup-82"><span class="linenos"> 82</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">potcar</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">potcar</span><span class="o">.</span><span class="n">nelectrons</span><span class="p">})</span>
-</span><span id="BaderAnalysis.workup-83"><a href="#BaderAnalysis.workup-83"><span class="linenos"> 83</span></a>
-</span><span id="BaderAnalysis.workup-84"><a href="#BaderAnalysis.workup-84"><span class="linenos"> 84</span></a>        <span class="c1"># SPECIAL CASE: in scenarios where empty atoms are added to the structure,</span>
-</span><span id="BaderAnalysis.workup-85"><a href="#BaderAnalysis.workup-85"><span class="linenos"> 85</span></a>        <span class="c1"># we should grab that modified structure instead of the one from the POSCAR.</span>
-</span><span id="BaderAnalysis.workup-86"><a href="#BaderAnalysis.workup-86"><span class="linenos"> 86</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-87"><a href="#BaderAnalysis.workup-87"><span class="linenos"> 87</span></a>        <span class="n">chgcar_empty_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR_empty&quot;</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-88"><a href="#BaderAnalysis.workup-88"><span class="linenos"> 88</span></a>
-</span><span id="BaderAnalysis.workup-89"><a href="#BaderAnalysis.workup-89"><span class="linenos"> 89</span></a>        <span class="c1"># the empty file will always take preference</span>
-</span><span id="BaderAnalysis.workup-90"><a href="#BaderAnalysis.workup-90"><span class="linenos"> 90</span></a>        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">):</span>
-</span><span id="BaderAnalysis.workup-91"><a href="#BaderAnalysis.workup-91"><span class="linenos"> 91</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-92"><a href="#BaderAnalysis.workup-92"><span class="linenos"> 92</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
-</span><span id="BaderAnalysis.workup-93"><a href="#BaderAnalysis.workup-93"><span class="linenos"> 93</span></a>            <span class="c1"># We typically use hydrogen (&quot;H&quot;) as the empty atom, so we will</span>
-</span><span id="BaderAnalysis.workup-94"><a href="#BaderAnalysis.workup-94"><span class="linenos"> 94</span></a>            <span class="c1"># need to add this to our element list for oxidation analysis.</span>
-</span><span id="BaderAnalysis.workup-95"><a href="#BaderAnalysis.workup-95"><span class="linenos"> 95</span></a>            <span class="c1"># We use 0 for electron count because this is an &#39;empty&#39; atom, and</span>
-</span><span id="BaderAnalysis.workup-96"><a href="#BaderAnalysis.workup-96"><span class="linenos"> 96</span></a>            <span class="c1"># not actually Hydrogen</span>
-</span><span id="BaderAnalysis.workup-97"><a href="#BaderAnalysis.workup-97"><span class="linenos"> 97</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
-</span><span id="BaderAnalysis.workup-98"><a href="#BaderAnalysis.workup-98"><span class="linenos"> 98</span></a>        <span class="c1"># otherwise, grab the structure from the CHGCAR</span>
-</span><span id="BaderAnalysis.workup-99"><a href="#BaderAnalysis.workup-99"><span class="linenos"> 99</span></a>        <span class="c1"># OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed</span>
-</span><span id="BaderAnalysis.workup-100"><a href="#BaderAnalysis.workup-100"><span class="linenos">100</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="BaderAnalysis.workup-101"><a href="#BaderAnalysis.workup-101"><span class="linenos">101</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-102"><a href="#BaderAnalysis.workup-102"><span class="linenos">102</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
-</span><span id="BaderAnalysis.workup-103"><a href="#BaderAnalysis.workup-103"><span class="linenos">103</span></a>
-</span><span id="BaderAnalysis.workup-104"><a href="#BaderAnalysis.workup-104"><span class="linenos">104</span></a>        <span class="c1"># Calculate the oxidation state of each site where it is simply the</span>
-</span><span id="BaderAnalysis.workup-105"><a href="#BaderAnalysis.workup-105"><span class="linenos">105</span></a>        <span class="c1"># change in number of electrons associated with it from vasp potcar vs</span>
-</span><span id="BaderAnalysis.workup-106"><a href="#BaderAnalysis.workup-106"><span class="linenos">106</span></a>        <span class="c1"># the bader charge I also add the element strings for filtering functionality</span>
-</span><span id="BaderAnalysis.workup-107"><a href="#BaderAnalysis.workup-107"><span class="linenos">107</span></a>        <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="BaderAnalysis.workup-108"><a href="#BaderAnalysis.workup-108"><span class="linenos">108</span></a>        <span class="n">oxi_state_data</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="BaderAnalysis.workup-109"><a href="#BaderAnalysis.workup-109"><span class="linenos">109</span></a>        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">site_charge</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">charge</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
-</span><span id="BaderAnalysis.workup-110"><a href="#BaderAnalysis.workup-110"><span class="linenos">110</span></a>            <span class="n">element_str</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">name</span>
-</span><span id="BaderAnalysis.workup-111"><a href="#BaderAnalysis.workup-111"><span class="linenos">111</span></a>            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element_str</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-112"><a href="#BaderAnalysis.workup-112"><span class="linenos">112</span></a>            <span class="n">oxi_state</span> <span class="o">=</span> <span class="n">nelectron_data</span><span class="p">[</span><span class="n">element_str</span><span class="p">]</span> <span class="o">-</span> <span class="n">site_charge</span>
-</span><span id="BaderAnalysis.workup-113"><a href="#BaderAnalysis.workup-113"><span class="linenos">113</span></a>            <span class="n">oxi_state_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxi_state</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-114"><a href="#BaderAnalysis.workup-114"><span class="linenos">114</span></a>
-</span><span id="BaderAnalysis.workup-115"><a href="#BaderAnalysis.workup-115"><span class="linenos">115</span></a>        <span class="c1"># add the new column to the dataframe</span>
-</span><span id="BaderAnalysis.workup-116"><a href="#BaderAnalysis.workup-116"><span class="linenos">116</span></a>        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
-</span><span id="BaderAnalysis.workup-117"><a href="#BaderAnalysis.workup-117"><span class="linenos">117</span></a>            <span class="n">oxidation_state</span><span class="o">=</span><span class="n">oxi_state_data</span><span class="p">,</span>
-</span><span id="BaderAnalysis.workup-118"><a href="#BaderAnalysis.workup-118"><span class="linenos">118</span></a>            <span class="n">element</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
-</span><span id="BaderAnalysis.workup-119"><a href="#BaderAnalysis.workup-119"><span class="linenos">119</span></a>        <span class="p">)</span>
-</span><span id="BaderAnalysis.workup-120"><a href="#BaderAnalysis.workup-120"><span class="linenos">120</span></a>        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
-</span><span id="BaderAnalysis.workup-121"><a href="#BaderAnalysis.workup-121"><span class="linenos">121</span></a>        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
-</span><span id="BaderAnalysis.workup-122"><a href="#BaderAnalysis.workup-122"><span class="linenos">122</span></a>        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
-</span><span id="BaderAnalysis.workup-123"><a href="#BaderAnalysis.workup-123"><span class="linenos">123</span></a>
-</span><span id="BaderAnalysis.workup-124"><a href="#BaderAnalysis.workup-124"><span class="linenos">124</span></a>        <span class="c1"># write output files/plots for the user to quickly reference</span>
-</span><span id="BaderAnalysis.workup-125"><a href="#BaderAnalysis.workup-125"><span class="linenos">125</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">)</span>
-</span><span id="BaderAnalysis.workup-126"><a href="#BaderAnalysis.workup-126"><span class="linenos">126</span></a>
-</span><span id="BaderAnalysis.workup-127"><a href="#BaderAnalysis.workup-127"><span class="linenos">127</span></a>        <span class="c1"># return all of our results</span>
-</span><span id="BaderAnalysis.workup-128"><a href="#BaderAnalysis.workup-128"><span class="linenos">128</span></a>        <span class="k">return</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="BaderAnalysis.workup-37"><a href="#BaderAnalysis.workup-37"><span class="linenos"> 37</span></a>    <span class="nd">@classmethod</span>
+</span><span id="BaderAnalysis.workup-38"><a href="#BaderAnalysis.workup-38"><span class="linenos"> 38</span></a>    <span class="k">def</span> <span class="nf">workup</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="BaderAnalysis.workup-39"><a href="#BaderAnalysis.workup-39"><span class="linenos"> 39</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="BaderAnalysis.workup-40"><a href="#BaderAnalysis.workup-40"><span class="linenos"> 40</span></a><span class="sd">        A basic workup process that reads Bader analysis results from the ACF.dat</span>
+</span><span id="BaderAnalysis.workup-41"><a href="#BaderAnalysis.workup-41"><span class="linenos"> 41</span></a><span class="sd">        file and calculates the corresponding oxidation states with the existing</span>
+</span><span id="BaderAnalysis.workup-42"><a href="#BaderAnalysis.workup-42"><span class="linenos"> 42</span></a><span class="sd">        POTCAR files.</span>
+</span><span id="BaderAnalysis.workup-43"><a href="#BaderAnalysis.workup-43"><span class="linenos"> 43</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="BaderAnalysis.workup-44"><a href="#BaderAnalysis.workup-44"><span class="linenos"> 44</span></a>
+</span><span id="BaderAnalysis.workup-45"><a href="#BaderAnalysis.workup-45"><span class="linenos"> 45</span></a>        <span class="c1"># load the ACF.dat file</span>
+</span><span id="BaderAnalysis.workup-46"><a href="#BaderAnalysis.workup-46"><span class="linenos"> 46</span></a>        <span class="n">acf_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ACF.dat&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-47"><a href="#BaderAnalysis.workup-47"><span class="linenos"> 47</span></a>        <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">ACF</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">acf_filename</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-48"><a href="#BaderAnalysis.workup-48"><span class="linenos"> 48</span></a>
+</span><span id="BaderAnalysis.workup-49"><a href="#BaderAnalysis.workup-49"><span class="linenos"> 49</span></a>        <span class="c1"># load the electron counts used by VASP from the POTCAR files</span>
+</span><span id="BaderAnalysis.workup-50"><a href="#BaderAnalysis.workup-50"><span class="linenos"> 50</span></a>        <span class="c1"># OPTIMIZE: this can be much faster if I have a reference file</span>
+</span><span id="BaderAnalysis.workup-51"><a href="#BaderAnalysis.workup-51"><span class="linenos"> 51</span></a>        <span class="n">potcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-52"><a href="#BaderAnalysis.workup-52"><span class="linenos"> 52</span></a>        <span class="n">potcars</span> <span class="o">=</span> <span class="n">Potcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">potcar_filename</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-53"><a href="#BaderAnalysis.workup-53"><span class="linenos"> 53</span></a>        <span class="n">nelectron_data</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="BaderAnalysis.workup-54"><a href="#BaderAnalysis.workup-54"><span class="linenos"> 54</span></a>        <span class="c1"># the result is a list because there can be multiple element potcars</span>
+</span><span id="BaderAnalysis.workup-55"><a href="#BaderAnalysis.workup-55"><span class="linenos"> 55</span></a>        <span class="c1"># in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)</span>
+</span><span id="BaderAnalysis.workup-56"><a href="#BaderAnalysis.workup-56"><span class="linenos"> 56</span></a>        <span class="k">for</span> <span class="n">potcar</span> <span class="ow">in</span> <span class="n">potcars</span><span class="p">:</span>
+</span><span id="BaderAnalysis.workup-57"><a href="#BaderAnalysis.workup-57"><span class="linenos"> 57</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">potcar</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">potcar</span><span class="o">.</span><span class="n">nelectrons</span><span class="p">})</span>
+</span><span id="BaderAnalysis.workup-58"><a href="#BaderAnalysis.workup-58"><span class="linenos"> 58</span></a>
+</span><span id="BaderAnalysis.workup-59"><a href="#BaderAnalysis.workup-59"><span class="linenos"> 59</span></a>        <span class="c1"># SPECIAL CASE: in scenarios where empty atoms are added to the structure,</span>
+</span><span id="BaderAnalysis.workup-60"><a href="#BaderAnalysis.workup-60"><span class="linenos"> 60</span></a>        <span class="c1"># we should grab that modified structure instead of the one from the POSCAR.</span>
+</span><span id="BaderAnalysis.workup-61"><a href="#BaderAnalysis.workup-61"><span class="linenos"> 61</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-62"><a href="#BaderAnalysis.workup-62"><span class="linenos"> 62</span></a>        <span class="n">chgcar_empty_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR_empty&quot;</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-63"><a href="#BaderAnalysis.workup-63"><span class="linenos"> 63</span></a>
+</span><span id="BaderAnalysis.workup-64"><a href="#BaderAnalysis.workup-64"><span class="linenos"> 64</span></a>        <span class="c1"># the empty file will always take preference</span>
+</span><span id="BaderAnalysis.workup-65"><a href="#BaderAnalysis.workup-65"><span class="linenos"> 65</span></a>        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">):</span>
+</span><span id="BaderAnalysis.workup-66"><a href="#BaderAnalysis.workup-66"><span class="linenos"> 66</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_empty_filename</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-67"><a href="#BaderAnalysis.workup-67"><span class="linenos"> 67</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
+</span><span id="BaderAnalysis.workup-68"><a href="#BaderAnalysis.workup-68"><span class="linenos"> 68</span></a>            <span class="c1"># We typically use hydrogen (&quot;H&quot;) as the empty atom, so we will</span>
+</span><span id="BaderAnalysis.workup-69"><a href="#BaderAnalysis.workup-69"><span class="linenos"> 69</span></a>            <span class="c1"># need to add this to our element list for oxidation analysis.</span>
+</span><span id="BaderAnalysis.workup-70"><a href="#BaderAnalysis.workup-70"><span class="linenos"> 70</span></a>            <span class="c1"># We use 0 for electron count because this is an &#39;empty&#39; atom, and</span>
+</span><span id="BaderAnalysis.workup-71"><a href="#BaderAnalysis.workup-71"><span class="linenos"> 71</span></a>            <span class="c1"># not actually Hydrogen</span>
+</span><span id="BaderAnalysis.workup-72"><a href="#BaderAnalysis.workup-72"><span class="linenos"> 72</span></a>            <span class="n">nelectron_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+</span><span id="BaderAnalysis.workup-73"><a href="#BaderAnalysis.workup-73"><span class="linenos"> 73</span></a>        <span class="c1"># otherwise, grab the structure from the CHGCAR</span>
+</span><span id="BaderAnalysis.workup-74"><a href="#BaderAnalysis.workup-74"><span class="linenos"> 74</span></a>        <span class="c1"># OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed</span>
+</span><span id="BaderAnalysis.workup-75"><a href="#BaderAnalysis.workup-75"><span class="linenos"> 75</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="BaderAnalysis.workup-76"><a href="#BaderAnalysis.workup-76"><span class="linenos"> 76</span></a>            <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-77"><a href="#BaderAnalysis.workup-77"><span class="linenos"> 77</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span>
+</span><span id="BaderAnalysis.workup-78"><a href="#BaderAnalysis.workup-78"><span class="linenos"> 78</span></a>
+</span><span id="BaderAnalysis.workup-79"><a href="#BaderAnalysis.workup-79"><span class="linenos"> 79</span></a>        <span class="c1"># Calculate the oxidation state of each site where it is simply the</span>
+</span><span id="BaderAnalysis.workup-80"><a href="#BaderAnalysis.workup-80"><span class="linenos"> 80</span></a>        <span class="c1"># change in number of electrons associated with it from vasp potcar vs</span>
+</span><span id="BaderAnalysis.workup-81"><a href="#BaderAnalysis.workup-81"><span class="linenos"> 81</span></a>        <span class="c1"># the bader charge I also add the element strings for filtering functionality</span>
+</span><span id="BaderAnalysis.workup-82"><a href="#BaderAnalysis.workup-82"><span class="linenos"> 82</span></a>        <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="BaderAnalysis.workup-83"><a href="#BaderAnalysis.workup-83"><span class="linenos"> 83</span></a>        <span class="n">oxi_state_data</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="BaderAnalysis.workup-84"><a href="#BaderAnalysis.workup-84"><span class="linenos"> 84</span></a>        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">site_charge</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">charge</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+</span><span id="BaderAnalysis.workup-85"><a href="#BaderAnalysis.workup-85"><span class="linenos"> 85</span></a>            <span class="n">element_str</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">name</span>
+</span><span id="BaderAnalysis.workup-86"><a href="#BaderAnalysis.workup-86"><span class="linenos"> 86</span></a>            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element_str</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-87"><a href="#BaderAnalysis.workup-87"><span class="linenos"> 87</span></a>            <span class="n">oxi_state</span> <span class="o">=</span> <span class="n">nelectron_data</span><span class="p">[</span><span class="n">element_str</span><span class="p">]</span> <span class="o">-</span> <span class="n">site_charge</span>
+</span><span id="BaderAnalysis.workup-88"><a href="#BaderAnalysis.workup-88"><span class="linenos"> 88</span></a>            <span class="n">oxi_state_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oxi_state</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-89"><a href="#BaderAnalysis.workup-89"><span class="linenos"> 89</span></a>
+</span><span id="BaderAnalysis.workup-90"><a href="#BaderAnalysis.workup-90"><span class="linenos"> 90</span></a>        <span class="c1"># add the new column to the dataframe</span>
+</span><span id="BaderAnalysis.workup-91"><a href="#BaderAnalysis.workup-91"><span class="linenos"> 91</span></a>        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+</span><span id="BaderAnalysis.workup-92"><a href="#BaderAnalysis.workup-92"><span class="linenos"> 92</span></a>            <span class="n">oxidation_state</span><span class="o">=</span><span class="n">oxi_state_data</span><span class="p">,</span>
+</span><span id="BaderAnalysis.workup-93"><a href="#BaderAnalysis.workup-93"><span class="linenos"> 93</span></a>            <span class="n">element</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
+</span><span id="BaderAnalysis.workup-94"><a href="#BaderAnalysis.workup-94"><span class="linenos"> 94</span></a>        <span class="p">)</span>
+</span><span id="BaderAnalysis.workup-95"><a href="#BaderAnalysis.workup-95"><span class="linenos"> 95</span></a>        <span class="c1"># !!! There are multiple ways to do this, but I don&#39;t know which is best</span>
+</span><span id="BaderAnalysis.workup-96"><a href="#BaderAnalysis.workup-96"><span class="linenos"> 96</span></a>        <span class="c1"># dataframe[&quot;oxidation_state&quot;] = pandas.Series(</span>
+</span><span id="BaderAnalysis.workup-97"><a href="#BaderAnalysis.workup-97"><span class="linenos"> 97</span></a>        <span class="c1">#     oxi_state_data, index=dataframe.index)</span>
+</span><span id="BaderAnalysis.workup-98"><a href="#BaderAnalysis.workup-98"><span class="linenos"> 98</span></a>
+</span><span id="BaderAnalysis.workup-99"><a href="#BaderAnalysis.workup-99"><span class="linenos"> 99</span></a>        <span class="c1"># write output files/plots for the user to quickly reference</span>
+</span><span id="BaderAnalysis.workup-100"><a href="#BaderAnalysis.workup-100"><span class="linenos">100</span></a>        <span class="bp">cls</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span><span class="p">)</span>
+</span><span id="BaderAnalysis.workup-101"><a href="#BaderAnalysis.workup-101"><span class="linenos">101</span></a>
+</span><span id="BaderAnalysis.workup-102"><a href="#BaderAnalysis.workup-102"><span class="linenos">102</span></a>        <span class="c1"># return all of our results</span>
+</span><span id="BaderAnalysis.workup-103"><a href="#BaderAnalysis.workup-103"><span class="linenos">103</span></a>        <span class="k">return</span> <span class="n">dataframe</span><span class="p">,</span> <span class="n">extra_data</span>
 </span></pre></div>
 
 
@@ -646,30 +480,21 @@ POTCAR files.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="BaderAnalysis.__init__" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="BaderAnalysis.requires_structure" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.requires_structure">requires_structure</a></dd>
-                <dd id="BaderAnalysis.error_handlers" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                                <dd id="BaderAnalysis.error_handlers" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                <dd id="BaderAnalysis.max_corrections" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="BaderAnalysis.monitor" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="BaderAnalysis.polling_timestep" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="BaderAnalysis.monitor_freq" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="BaderAnalysis.save_corrections_to_file" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="BaderAnalysis.corrections_filename" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="BaderAnalysis.compress_output" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="BaderAnalysis.setup" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.setup">setup</a></dd>
                 <dd id="BaderAnalysis.execute" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="BaderAnalysis.run_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="BaderAnalysis.to_prefect_task" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
                 <dd id="BaderAnalysis.run" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
                 <dd id="BaderAnalysis.get_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.get_config">get_config</a></dd>
                 <dd id="BaderAnalysis.print_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="BaderAnalysis.copy" class="function">copy</dd>
-                <dd id="BaderAnalysis.bind" class="function">bind</dd>
-                <dd id="BaderAnalysis.map" class="function">map</dd>
-                <dd id="BaderAnalysis.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="BaderAnalysis.set_upstream" class="function">set_upstream</dd>
-                <dd id="BaderAnalysis.set_downstream" class="function">set_downstream</dd>
-                <dd id="BaderAnalysis.inputs" class="function">inputs</dd>
-                <dd id="BaderAnalysis.outputs" class="function">outputs</dd>
-                <dd id="BaderAnalysis.pipe" class="function">pipe</dd>
-                <dd id="BaderAnalysis.serialize" class="function">serialize</dd>
-                <dd id="BaderAnalysis.is_equal" class="function">is_equal</dd>
-                <dd id="BaderAnalysis.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="BaderAnalysis.not_" class="function">not_</dd>
-                <dd id="BaderAnalysis.or_" class="function">or_</dd>
 
             </div>
                                 </dl>

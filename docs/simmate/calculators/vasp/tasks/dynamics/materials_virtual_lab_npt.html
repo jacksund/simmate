@@ -35,6 +35,12 @@
                     <a class="class" href="#MatVirtualLabNPTDynamics">MatVirtualLabNPTDynamics</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#MatVirtualLabNPTDynamics.__init__">MatVirtualLabNPTDynamics</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatVirtualLabNPTDynamics.confirm_convergence">confirm_convergence</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#MatVirtualLabNPTDynamics.incar">incar</a>
                         </li>
                 </ul>
@@ -78,33 +84,35 @@
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="sd">    [MVLNPTMDSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLNPTMDSet).</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MITDynamics</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>        <span class="nb">dict</span><span class="p">(</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>            <span class="n">IALGO</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>            <span class="n">ISIF</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>            <span class="n">LANGEVIN_GAMMA__smart_langevin</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>            <span class="n">LANGEVIN_GAMMA_L</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>            <span class="n">MDALGO</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>            <span class="n">PMASS</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>            <span class="n">PSTRESS</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>            <span class="n">SMASS</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>            <span class="n">ENCUT</span><span class="o">=</span><span class="mi">450</span><span class="p">,</span>  <span class="c1"># pymatgen sets to 1.5 * max of all potcars</span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>        <span class="p">)</span>
-</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>    <span class="p">)</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="k">def</span> <span class="nf">keyword_modifier_smart_langevin</span><span class="p">(</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>    <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a>    <span class="n">langevin_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># not required</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a><span class="p">):</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a><span class="sd">    Expands LANGEVIN_GAMMA setting based on number of species present</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>    <span class="k">return</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">structure</span><span class="o">.</span><span class="n">ntypesp</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a><span class="n">Incar</span><span class="o">.</span><span class="n">add_keyword_modifier</span><span class="p">(</span><span class="n">keyword_modifier_smart_langevin</span><span class="p">)</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>    <span class="n">confirm_convergence</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MITDynamics</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>        <span class="nb">dict</span><span class="p">(</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>            <span class="n">IALGO</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>            <span class="n">ISIF</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>            <span class="n">LANGEVIN_GAMMA__smart_langevin</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>            <span class="n">LANGEVIN_GAMMA_L</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>            <span class="n">MDALGO</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>            <span class="n">PMASS</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>            <span class="n">PSTRESS</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>            <span class="n">SMASS</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>            <span class="n">ENCUT</span><span class="o">=</span><span class="mi">450</span><span class="p">,</span>  <span class="c1"># pymatgen sets to 1.5 * max of all potcars</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>        <span class="p">)</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>    <span class="p">)</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="k">def</span> <span class="nf">keyword_modifier_smart_langevin</span><span class="p">(</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>    <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>    <span class="n">langevin_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># not required</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a><span class="p">):</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a><span class="sd">    Expands LANGEVIN_GAMMA setting based on number of species present</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>    <span class="k">return</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">structure</span><span class="o">.</span><span class="n">ntypesp</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a><span class="n">Incar</span><span class="o">.</span><span class="n">add_keyword_modifier</span><span class="p">(</span><span class="n">keyword_modifier_smart_langevin</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -126,20 +134,22 @@
 </span><span id="MatVirtualLabNPTDynamics-12"><a href="#MatVirtualLabNPTDynamics-12"><span class="linenos">12</span></a><span class="sd">    [MVLNPTMDSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLNPTMDSet).</span>
 </span><span id="MatVirtualLabNPTDynamics-13"><a href="#MatVirtualLabNPTDynamics-13"><span class="linenos">13</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="MatVirtualLabNPTDynamics-14"><a href="#MatVirtualLabNPTDynamics-14"><span class="linenos">14</span></a>
-</span><span id="MatVirtualLabNPTDynamics-15"><a href="#MatVirtualLabNPTDynamics-15"><span class="linenos">15</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MITDynamics</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="MatVirtualLabNPTDynamics-16"><a href="#MatVirtualLabNPTDynamics-16"><span class="linenos">16</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-</span><span id="MatVirtualLabNPTDynamics-17"><a href="#MatVirtualLabNPTDynamics-17"><span class="linenos">17</span></a>        <span class="nb">dict</span><span class="p">(</span>
-</span><span id="MatVirtualLabNPTDynamics-18"><a href="#MatVirtualLabNPTDynamics-18"><span class="linenos">18</span></a>            <span class="n">IALGO</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span>
-</span><span id="MatVirtualLabNPTDynamics-19"><a href="#MatVirtualLabNPTDynamics-19"><span class="linenos">19</span></a>            <span class="n">ISIF</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-</span><span id="MatVirtualLabNPTDynamics-20"><a href="#MatVirtualLabNPTDynamics-20"><span class="linenos">20</span></a>            <span class="n">LANGEVIN_GAMMA__smart_langevin</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="MatVirtualLabNPTDynamics-21"><a href="#MatVirtualLabNPTDynamics-21"><span class="linenos">21</span></a>            <span class="n">LANGEVIN_GAMMA_L</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="MatVirtualLabNPTDynamics-22"><a href="#MatVirtualLabNPTDynamics-22"><span class="linenos">22</span></a>            <span class="n">MDALGO</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-</span><span id="MatVirtualLabNPTDynamics-23"><a href="#MatVirtualLabNPTDynamics-23"><span class="linenos">23</span></a>            <span class="n">PMASS</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-</span><span id="MatVirtualLabNPTDynamics-24"><a href="#MatVirtualLabNPTDynamics-24"><span class="linenos">24</span></a>            <span class="n">PSTRESS</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="MatVirtualLabNPTDynamics-25"><a href="#MatVirtualLabNPTDynamics-25"><span class="linenos">25</span></a>            <span class="n">SMASS</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="MatVirtualLabNPTDynamics-26"><a href="#MatVirtualLabNPTDynamics-26"><span class="linenos">26</span></a>            <span class="n">ENCUT</span><span class="o">=</span><span class="mi">450</span><span class="p">,</span>  <span class="c1"># pymatgen sets to 1.5 * max of all potcars</span>
-</span><span id="MatVirtualLabNPTDynamics-27"><a href="#MatVirtualLabNPTDynamics-27"><span class="linenos">27</span></a>        <span class="p">)</span>
-</span><span id="MatVirtualLabNPTDynamics-28"><a href="#MatVirtualLabNPTDynamics-28"><span class="linenos">28</span></a>    <span class="p">)</span>
+</span><span id="MatVirtualLabNPTDynamics-15"><a href="#MatVirtualLabNPTDynamics-15"><span class="linenos">15</span></a>    <span class="n">confirm_convergence</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="MatVirtualLabNPTDynamics-16"><a href="#MatVirtualLabNPTDynamics-16"><span class="linenos">16</span></a>
+</span><span id="MatVirtualLabNPTDynamics-17"><a href="#MatVirtualLabNPTDynamics-17"><span class="linenos">17</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MITDynamics</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="MatVirtualLabNPTDynamics-18"><a href="#MatVirtualLabNPTDynamics-18"><span class="linenos">18</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="MatVirtualLabNPTDynamics-19"><a href="#MatVirtualLabNPTDynamics-19"><span class="linenos">19</span></a>        <span class="nb">dict</span><span class="p">(</span>
+</span><span id="MatVirtualLabNPTDynamics-20"><a href="#MatVirtualLabNPTDynamics-20"><span class="linenos">20</span></a>            <span class="n">IALGO</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span>
+</span><span id="MatVirtualLabNPTDynamics-21"><a href="#MatVirtualLabNPTDynamics-21"><span class="linenos">21</span></a>            <span class="n">ISIF</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span id="MatVirtualLabNPTDynamics-22"><a href="#MatVirtualLabNPTDynamics-22"><span class="linenos">22</span></a>            <span class="n">LANGEVIN_GAMMA__smart_langevin</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="MatVirtualLabNPTDynamics-23"><a href="#MatVirtualLabNPTDynamics-23"><span class="linenos">23</span></a>            <span class="n">LANGEVIN_GAMMA_L</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span><span id="MatVirtualLabNPTDynamics-24"><a href="#MatVirtualLabNPTDynamics-24"><span class="linenos">24</span></a>            <span class="n">MDALGO</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span id="MatVirtualLabNPTDynamics-25"><a href="#MatVirtualLabNPTDynamics-25"><span class="linenos">25</span></a>            <span class="n">PMASS</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span id="MatVirtualLabNPTDynamics-26"><a href="#MatVirtualLabNPTDynamics-26"><span class="linenos">26</span></a>            <span class="n">PSTRESS</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="MatVirtualLabNPTDynamics-27"><a href="#MatVirtualLabNPTDynamics-27"><span class="linenos">27</span></a>            <span class="n">SMASS</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="MatVirtualLabNPTDynamics-28"><a href="#MatVirtualLabNPTDynamics-28"><span class="linenos">28</span></a>            <span class="n">ENCUT</span><span class="o">=</span><span class="mi">450</span><span class="p">,</span>  <span class="c1"># pymatgen sets to 1.5 * max of all potcars</span>
+</span><span id="MatVirtualLabNPTDynamics-29"><a href="#MatVirtualLabNPTDynamics-29"><span class="linenos">29</span></a>        <span class="p">)</span>
+</span><span id="MatVirtualLabNPTDynamics-30"><a href="#MatVirtualLabNPTDynamics-30"><span class="linenos">30</span></a>    <span class="p">)</span>
 </span></pre></div>
 
 
@@ -148,6 +158,33 @@
 </div>
 
 
+                            <div id="MatVirtualLabNPTDynamics.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MatVirtualLabNPTDynamics</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatVirtualLabNPTDynamics.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="MatVirtualLabNPTDynamics.confirm_convergence" class="classattr">
+                                <div class="attr variable">
+            <span class="name">confirm_convergence</span><span class="annotation">: bool</span><span class="default_value"> = False</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatVirtualLabNPTDynamics.confirm_convergence"></a>
+    
+            <div class="docstring"><p>This flag controls whether or not we raise an error when the calculation 
+failed to converge. In somecases we still want results from calculations 
+that did NOT converge successfully.</p>
+</div>
+
+
+                            </div>
                             <div id="MatVirtualLabNPTDynamics.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;IBRION&#39;: 0, &#39;ICHARG&#39;: 1, &#39;ISIF&#39;: 3, &#39;ISPIN&#39;: 1, &#39;ISYM&#39;: 0, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: True, &#39;LWAVE&#39;: True, &#39;NELM&#39;: 500, &#39;NELMIN&#39;: 4, &#39;NSW&#39;: &#39;Defaults to 10,000 but can be set by the user&#39;, &#39;PREC&#39;: &#39;Low&#39;, &#39;ISMEAR&#39;: 0, &#39;SIGMA&#39;: 0.05, &#39;KSPACING&#39;: 0.5, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;TEBEG&#39;: &#39;Defaults to 300 but can be set by the user&#39;, &#39;TEEND&#39;: &#39;Defaults to 1200 but can be set by the user&#39;, &#39;POTIM&#39;: &#39;Defaults to 2 but can be set by the user&#39;, &#39;EDIFF__per_atom&#39;: 1e-06, &#39;LSCALU&#39;: False, &#39;LCHARG&#39;: False, &#39;LPLANE&#39;: False, &#39;BMIX&#39;: 1, &#39;MAXMIX&#39;: 20, &#39;NSIM&#39;: 4, &#39;KBLOCK&#39;: 100, &#39;SMASS&#39;: 0, &#39;NBLOCK&#39;: 1, &#39;IALGO&#39;: 48, &#39;LANGEVIN_GAMMA__smart_langevin&#39;: True, &#39;LANGEVIN_GAMMA_L&#39;: 1, &#39;MDALGO&#39;: 3, &#39;PMASS&#39;: 10, &#39;PSTRESS&#39;: 0, &#39;ENCUT&#39;: 450}</span>
@@ -168,14 +205,7 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatVirtualLabNPTDynamics.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatVirtualLabNPTDynamics.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatVirtualLabNPTDynamics.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatVirtualLabNPTDynamics.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="mit.html#MITDynamics">simmate.calculators.vasp.tasks.dynamics.mit.MITDynamics</a></dt>
+                                    <div><dt><a href="mit.html#MITDynamics">simmate.calculators.vasp.tasks.dynamics.mit.MITDynamics</a></dt>
                                 <dd id="MatVirtualLabNPTDynamics.error_handlers" class="variable"><a href="mit.html#MITDynamics.error_handlers">error_handlers</a></dd>
                 <dd id="MatVirtualLabNPTDynamics.setup" class="function"><a href="mit.html#MITDynamics.setup">setup</a></dd>
 
@@ -186,32 +216,29 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MatVirtualLabNPTDynamics.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
+                                <dd id="MatVirtualLabNPTDynamics.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
                 <dd id="MatVirtualLabNPTDynamics.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
                 <dd id="MatVirtualLabNPTDynamics.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
                 <dd id="MatVirtualLabNPTDynamics.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
-                <dd id="MatVirtualLabNPTDynamics.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
                 <dd id="MatVirtualLabNPTDynamics.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
                 <dd id="MatVirtualLabNPTDynamics.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
                 <dd id="MatVirtualLabNPTDynamics.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
                 <dd id="MatVirtualLabNPTDynamics.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MatVirtualLabNPTDynamics.copy" class="function">copy</dd>
-                <dd id="MatVirtualLabNPTDynamics.bind" class="function">bind</dd>
-                <dd id="MatVirtualLabNPTDynamics.map" class="function">map</dd>
-                <dd id="MatVirtualLabNPTDynamics.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MatVirtualLabNPTDynamics.set_upstream" class="function">set_upstream</dd>
-                <dd id="MatVirtualLabNPTDynamics.set_downstream" class="function">set_downstream</dd>
-                <dd id="MatVirtualLabNPTDynamics.inputs" class="function">inputs</dd>
-                <dd id="MatVirtualLabNPTDynamics.outputs" class="function">outputs</dd>
-                <dd id="MatVirtualLabNPTDynamics.pipe" class="function">pipe</dd>
-                <dd id="MatVirtualLabNPTDynamics.serialize" class="function">serialize</dd>
-                <dd id="MatVirtualLabNPTDynamics.is_equal" class="function">is_equal</dd>
-                <dd id="MatVirtualLabNPTDynamics.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MatVirtualLabNPTDynamics.not_" class="function">not_</dd>
-                <dd id="MatVirtualLabNPTDynamics.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatVirtualLabNPTDynamics.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatVirtualLabNPTDynamics.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>
@@ -228,14 +255,14 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
 
     </div>
     <a class="headerlink" href="#keyword_modifier_smart_langevin"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="keyword_modifier_smart_langevin-31"><a href="#keyword_modifier_smart_langevin-31"><span class="linenos">31</span></a><span class="k">def</span> <span class="nf">keyword_modifier_smart_langevin</span><span class="p">(</span>
-</span><span id="keyword_modifier_smart_langevin-32"><a href="#keyword_modifier_smart_langevin-32"><span class="linenos">32</span></a>    <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
-</span><span id="keyword_modifier_smart_langevin-33"><a href="#keyword_modifier_smart_langevin-33"><span class="linenos">33</span></a>    <span class="n">langevin_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># not required</span>
-</span><span id="keyword_modifier_smart_langevin-34"><a href="#keyword_modifier_smart_langevin-34"><span class="linenos">34</span></a><span class="p">):</span>
-</span><span id="keyword_modifier_smart_langevin-35"><a href="#keyword_modifier_smart_langevin-35"><span class="linenos">35</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="keyword_modifier_smart_langevin-36"><a href="#keyword_modifier_smart_langevin-36"><span class="linenos">36</span></a><span class="sd">    Expands LANGEVIN_GAMMA setting based on number of species present</span>
-</span><span id="keyword_modifier_smart_langevin-37"><a href="#keyword_modifier_smart_langevin-37"><span class="linenos">37</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="keyword_modifier_smart_langevin-38"><a href="#keyword_modifier_smart_langevin-38"><span class="linenos">38</span></a>    <span class="k">return</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">structure</span><span class="o">.</span><span class="n">ntypesp</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="keyword_modifier_smart_langevin-33"><a href="#keyword_modifier_smart_langevin-33"><span class="linenos">33</span></a><span class="k">def</span> <span class="nf">keyword_modifier_smart_langevin</span><span class="p">(</span>
+</span><span id="keyword_modifier_smart_langevin-34"><a href="#keyword_modifier_smart_langevin-34"><span class="linenos">34</span></a>    <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+</span><span id="keyword_modifier_smart_langevin-35"><a href="#keyword_modifier_smart_langevin-35"><span class="linenos">35</span></a>    <span class="n">langevin_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># not required</span>
+</span><span id="keyword_modifier_smart_langevin-36"><a href="#keyword_modifier_smart_langevin-36"><span class="linenos">36</span></a><span class="p">):</span>
+</span><span id="keyword_modifier_smart_langevin-37"><a href="#keyword_modifier_smart_langevin-37"><span class="linenos">37</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="keyword_modifier_smart_langevin-38"><a href="#keyword_modifier_smart_langevin-38"><span class="linenos">38</span></a><span class="sd">    Expands LANGEVIN_GAMMA setting based on number of species present</span>
+</span><span id="keyword_modifier_smart_langevin-39"><a href="#keyword_modifier_smart_langevin-39"><span class="linenos">39</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="keyword_modifier_smart_langevin-40"><a href="#keyword_modifier_smart_langevin-40"><span class="linenos">40</span></a>    <span class="k">return</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">structure</span><span class="o">.</span><span class="n">ntypesp</span>
 </span></pre></div>
 
 

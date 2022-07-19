@@ -43,11 +43,9 @@
         <ul>
                 <li><a href="workflow_engine/common_tasks.html">common_tasks</a></li>
                 <li><a href="workflow_engine/error_handler.html">error_handler</a></li>
-                <li><a href="workflow_engine/execution.html">execution</a></li>
                 <li><a href="workflow_engine/supervised_staged_shell_task.html">supervised_staged_shell_task</a></li>
-                <li><a href="workflow_engine/utilities.html">utilities</a></li>
+                <li><a href="workflow_engine/worker.html">worker</a></li>
                 <li><a href="workflow_engine/workflow.html">workflow</a></li>
-                <li><a href="workflow_engine/workflow_task.html">workflow_task</a></li>
         </ul>
 
 
@@ -94,7 +92,7 @@
 
 <h2 id="what-is-a-workflow">What is a <code>Workflow</code>?</h2>
 
-<p>Recall from Simmate's <a href="">tutorial 2</a>, that a <code>Workflow</code> is made up of 4 stages. These stages can be thought of linking a <code>S3Task</code> and a <code>DatabaseTable</code>:</p>
+<p>Recall from Simmate's <a href="https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md">tutorial 2</a>, that a <code>Workflow</code> is made up of 4 stages. These stages can be thought of linking a <code>S3Task</code> and a <code>DatabaseTable</code>:</p>
 
 <ul>
 <li><code>configure</code>: default settings are attached to <code>S3Task</code>'s attribute</li>
@@ -107,7 +105,7 @@
 
 <h2 id="what-is-a-nestedworkflow">What is a <code>NestedWorkflow</code>?</h2>
 
-<p>Some workflows are "nested", which means it's a workflow made up multiple other workflows. An example of this is the <code>relaxation_staged</code> workflow, which involves a series of relaxations of increasing quality and then a final energy calculation.</p>
+<p>Some workflows are "nested", which means it's a workflow made up multiple other workflows. An example of this is the <code>relaxation.vasp.staged</code> workflow, which involves a series of relaxations of increasing quality and then a final energy calculation.</p>
 </div>
 
                         <input id="workflow_engine-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
@@ -125,15 +123,14 @@
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="c1"># module, so it may be worth isolating them for faster imports.</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="kn">from</span> <span class="nn">.error_handler</span> <span class="kn">import</span> <span class="n">ErrorHandler</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="kn">from</span> <span class="nn">.supervised_staged_shell_task</span> <span class="kn">import</span> <span class="n">S3Task</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="c1"># All imports below this point depend on the simmate.database module and therefore</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="c1"># need a database connection. This line sets up the database connection so</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="c1"># that models can be imported.</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="kn">from</span> <span class="nn">simmate.database</span> <span class="kn">import</span> <span class="n">connect</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="kn">from</span> <span class="nn">.workflow_task</span> <span class="kn">import</span> <span class="n">WorkflowTask</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="kn">from</span> <span class="nn">.workflow</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ModuleStorage</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">Task</span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a><span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="n">s3task_to_workflow</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="kn">from</span> <span class="nn">.worker</span> <span class="kn">import</span> <span class="n">Worker</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="c1"># All imports below this point depend on the simmate.database module and therefore</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="c1"># need a database connection. This line sets up the database connection so</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="c1"># that models can be imported.</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="kn">from</span> <span class="nn">simmate.database</span> <span class="kn">import</span> <span class="n">connect</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>
+</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="kn">from</span> <span class="nn">.workflow</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">task</span>
 </span></pre></div>
 
 

@@ -432,9 +432,9 @@
 </span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
 </span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>                <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">,</span>
 </span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>                <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>                <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">],</span>
-</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>                <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">],</span>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>                <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">],</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>                <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>                <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;forces&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>                <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stress&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
 </span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>                <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_temperature_at_step</span><span class="p">(</span><span class="n">number</span><span class="p">),</span>
 </span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>                <span class="n">dynamics_run</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>  <span class="c1"># this links the structure to this dynamics run</span>
 </span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>            <span class="p">)</span>
@@ -695,9 +695,9 @@
 </span><span id="DynamicsRun-151"><a href="#DynamicsRun-151"><span class="linenos">151</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
 </span><span id="DynamicsRun-152"><a href="#DynamicsRun-152"><span class="linenos">152</span></a>                <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">,</span>
 </span><span id="DynamicsRun-153"><a href="#DynamicsRun-153"><span class="linenos">153</span></a>                <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
-</span><span id="DynamicsRun-154"><a href="#DynamicsRun-154"><span class="linenos">154</span></a>                <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">],</span>
-</span><span id="DynamicsRun-155"><a href="#DynamicsRun-155"><span class="linenos">155</span></a>                <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">],</span>
-</span><span id="DynamicsRun-156"><a href="#DynamicsRun-156"><span class="linenos">156</span></a>                <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">],</span>
+</span><span id="DynamicsRun-154"><a href="#DynamicsRun-154"><span class="linenos">154</span></a>                <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+</span><span id="DynamicsRun-155"><a href="#DynamicsRun-155"><span class="linenos">155</span></a>                <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;forces&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+</span><span id="DynamicsRun-156"><a href="#DynamicsRun-156"><span class="linenos">156</span></a>                <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stress&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
 </span><span id="DynamicsRun-157"><a href="#DynamicsRun-157"><span class="linenos">157</span></a>                <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_temperature_at_step</span><span class="p">(</span><span class="n">number</span><span class="p">),</span>
 </span><span id="DynamicsRun-158"><a href="#DynamicsRun-158"><span class="linenos">158</span></a>                <span class="n">dynamics_run</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>  <span class="c1"># this links the structure to this dynamics run</span>
 </span><span id="DynamicsRun-159"><a href="#DynamicsRun-159"><span class="linenos">159</span></a>            <span class="p">)</span>
@@ -951,9 +951,9 @@ A subclass of DynamicDynamicsIonicStep.</li>
 </span><span id="DynamicsRun.update_from_vasp_run-151"><a href="#DynamicsRun.update_from_vasp_run-151"><span class="linenos">151</span></a>            <span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
 </span><span id="DynamicsRun.update_from_vasp_run-152"><a href="#DynamicsRun.update_from_vasp_run-152"><span class="linenos">152</span></a>                <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">,</span>
 </span><span id="DynamicsRun.update_from_vasp_run-153"><a href="#DynamicsRun.update_from_vasp_run-153"><span class="linenos">153</span></a>                <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
-</span><span id="DynamicsRun.update_from_vasp_run-154"><a href="#DynamicsRun.update_from_vasp_run-154"><span class="linenos">154</span></a>                <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">],</span>
-</span><span id="DynamicsRun.update_from_vasp_run-155"><a href="#DynamicsRun.update_from_vasp_run-155"><span class="linenos">155</span></a>                <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">],</span>
-</span><span id="DynamicsRun.update_from_vasp_run-156"><a href="#DynamicsRun.update_from_vasp_run-156"><span class="linenos">156</span></a>                <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">],</span>
+</span><span id="DynamicsRun.update_from_vasp_run-154"><a href="#DynamicsRun.update_from_vasp_run-154"><span class="linenos">154</span></a>                <span class="n">energy</span><span class="o">=</span><span class="n">ionic_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;e_wo_entrp&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+</span><span id="DynamicsRun.update_from_vasp_run-155"><a href="#DynamicsRun.update_from_vasp_run-155"><span class="linenos">155</span></a>                <span class="n">site_forces</span><span class="o">=</span><span class="n">ionic_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;forces&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+</span><span id="DynamicsRun.update_from_vasp_run-156"><a href="#DynamicsRun.update_from_vasp_run-156"><span class="linenos">156</span></a>                <span class="n">lattice_stress</span><span class="o">=</span><span class="n">ionic_step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stress&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
 </span><span id="DynamicsRun.update_from_vasp_run-157"><a href="#DynamicsRun.update_from_vasp_run-157"><span class="linenos">157</span></a>                <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_temperature_at_step</span><span class="p">(</span><span class="n">number</span><span class="p">),</span>
 </span><span id="DynamicsRun.update_from_vasp_run-158"><a href="#DynamicsRun.update_from_vasp_run-158"><span class="linenos">158</span></a>                <span class="n">dynamics_run</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>  <span class="c1"># this links the structure to this dynamics run</span>
 </span><span id="DynamicsRun.update_from_vasp_run-159"><a href="#DynamicsRun.update_from_vasp_run-159"><span class="linenos">159</span></a>            <span class="p">)</span>
@@ -1312,7 +1312,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -1329,14 +1329,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1398,6 +1398,7 @@ values used in this column:</p>
                 <dd id="DynamicsRun.get_table_name" class="function"><a href="base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="DynamicsRun.create_subclass" class="function"><a href="base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="DynamicsRun.from_toolkit" class="function"><a href="base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="DynamicsRun.update_from_toolkit" class="function"><a href="base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="DynamicsRun.load_archive" class="function"><a href="base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="DynamicsRun.load_remote_archive" class="function"><a href="base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="DynamicsRun.get_column_names" class="function"><a href="base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -2231,7 +2232,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -2248,14 +2249,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -2313,6 +2314,7 @@ values used in this column:</p>
                 <dd id="DynamicsIonicStep.get_table_name" class="function"><a href="base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="DynamicsIonicStep.create_subclass" class="function"><a href="base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="DynamicsIonicStep.from_toolkit" class="function"><a href="base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="DynamicsIonicStep.update_from_toolkit" class="function"><a href="base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="DynamicsIonicStep.load_archive" class="function"><a href="base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="DynamicsIonicStep.load_remote_archive" class="function"><a href="base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="DynamicsIonicStep.get_column_names" class="function"><a href="base.html#DatabaseTable.get_column_names">get_column_names</a></dd>

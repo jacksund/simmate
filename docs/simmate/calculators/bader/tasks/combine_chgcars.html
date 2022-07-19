@@ -35,7 +35,16 @@
                     <a class="class" href="#CombineCHGCARs">CombineCHGCARs</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#CombineCHGCARs.__init__">CombineCHGCARs</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#CombineCHGCARs.command">command</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#CombineCHGCARs.monitor">monitor</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#CombineCHGCARs.required_files">required_files</a>
                         </li>
                 </ul>
 
@@ -70,7 +79,7 @@
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="c1"># TODO: The chgsum.pl script will be replaced with a simple python function</span>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="c1"># that just sums the two files. It might not be as fast but it removes one</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="c1"># executable file from having to be in the user&#39;s path. So in the future, this</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="c1"># Task will be depreciated/removed.</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="c1"># Task will be depreciated/removed into the BaderAnalysis.setup method.</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="k">class</span> <span class="nc">CombineCHGCARs</span><span class="p">(</span><span class="n">S3Task</span><span class="p">):</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">    This tasks simply sums two charge density files into a new file. It uses</span>
@@ -78,6 +87,8 @@
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>
 </span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;chgsum.pl AECCAR0 AECCAR2 &gt; chgsum.out&quot;</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">monitor</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">]</span>
 </span></pre></div>
 
 
@@ -100,6 +111,8 @@
 </span><span id="CombineCHGCARs-15"><a href="#CombineCHGCARs-15"><span class="linenos">15</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="CombineCHGCARs-16"><a href="#CombineCHGCARs-16"><span class="linenos">16</span></a>
 </span><span id="CombineCHGCARs-17"><a href="#CombineCHGCARs-17"><span class="linenos">17</span></a>    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;chgsum.pl AECCAR0 AECCAR2 &gt; chgsum.out&quot;</span>
+</span><span id="CombineCHGCARs-18"><a href="#CombineCHGCARs-18"><span class="linenos">18</span></a>    <span class="n">monitor</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="CombineCHGCARs-19"><a href="#CombineCHGCARs-19"><span class="linenos">19</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR0&quot;</span><span class="p">,</span> <span class="s2">&quot;AECCAR2&quot;</span><span class="p">]</span>
 </span></pre></div>
 
 
@@ -108,6 +121,18 @@ a script from the Henkleman group.</p>
 </div>
 
 
+                            <div id="CombineCHGCARs.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">CombineCHGCARs</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#CombineCHGCARs.__init__"></a>
+    
+    
+
+                            </div>
                             <div id="CombineCHGCARs.command" class="classattr">
                                 <div class="attr variable">
             <span class="name">command</span><span class="annotation">: str</span><span class="default_value"> = &#39;chgsum.pl AECCAR0 AECCAR2 &gt; chgsum.out&#39;</span>
@@ -121,36 +146,54 @@ a script from the Henkleman group.</p>
 
 
                             </div>
+                            <div id="CombineCHGCARs.monitor" class="classattr">
+                                <div class="attr variable">
+            <span class="name">monitor</span><span class="annotation">: bool</span><span class="default_value"> = False</span>
+
+        
+    </div>
+    <a class="headerlink" href="#CombineCHGCARs.monitor"></a>
+    
+            <div class="docstring"><p>Whether to run monitor handlers while the command runs. False means
+wait until the job has completed.</p>
+</div>
+
+
+                            </div>
+                            <div id="CombineCHGCARs.required_files" class="classattr">
+                                <div class="attr variable">
+            <span class="name">required_files</span><span class="default_value"> = [&#39;CHGCAR&#39;, &#39;AECCAR0&#39;, &#39;AECCAR2&#39;]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#CombineCHGCARs.required_files"></a>
+    
+            <div class="docstring"><p>Before the command is executed, this list of files should be present
+in the working directory. This check will be made after <code><a href="#CombineCHGCARs.setup">setup</a></code> is called
+and before <code><a href="#CombineCHGCARs.execute">execute</a></code> is called. By default, no input files are required.</p>
+</div>
+
+
+                            </div>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="CombineCHGCARs.__init__" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="CombineCHGCARs.requires_structure" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.requires_structure">requires_structure</a></dd>
-                <dd id="CombineCHGCARs.error_handlers" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                                <dd id="CombineCHGCARs.error_handlers" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                <dd id="CombineCHGCARs.max_corrections" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="CombineCHGCARs.polling_timestep" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="CombineCHGCARs.monitor_freq" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="CombineCHGCARs.save_corrections_to_file" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="CombineCHGCARs.corrections_filename" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="CombineCHGCARs.compress_output" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
                 <dd id="CombineCHGCARs.setup" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.setup">setup</a></dd>
                 <dd id="CombineCHGCARs.execute" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
                 <dd id="CombineCHGCARs.workup" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.workup">workup</a></dd>
+                <dd id="CombineCHGCARs.run_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="CombineCHGCARs.to_prefect_task" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
                 <dd id="CombineCHGCARs.run" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
                 <dd id="CombineCHGCARs.get_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.get_config">get_config</a></dd>
                 <dd id="CombineCHGCARs.print_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="CombineCHGCARs.copy" class="function">copy</dd>
-                <dd id="CombineCHGCARs.bind" class="function">bind</dd>
-                <dd id="CombineCHGCARs.map" class="function">map</dd>
-                <dd id="CombineCHGCARs.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="CombineCHGCARs.set_upstream" class="function">set_upstream</dd>
-                <dd id="CombineCHGCARs.set_downstream" class="function">set_downstream</dd>
-                <dd id="CombineCHGCARs.inputs" class="function">inputs</dd>
-                <dd id="CombineCHGCARs.outputs" class="function">outputs</dd>
-                <dd id="CombineCHGCARs.pipe" class="function">pipe</dd>
-                <dd id="CombineCHGCARs.serialize" class="function">serialize</dd>
-                <dd id="CombineCHGCARs.is_equal" class="function">is_equal</dd>
-                <dd id="CombineCHGCARs.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="CombineCHGCARs.not_" class="function">not_</dd>
-                <dd id="CombineCHGCARs.or_" class="function">or_</dd>
 
             </div>
                                 </dl>

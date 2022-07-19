@@ -32,10 +32,13 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#MatProjNMRElectricFieldGradiant">MatProjNMRElectricFieldGradiant</a>
+                    <a class="class" href="#MatprojNMRElectricFieldGradiant">MatprojNMRElectricFieldGradiant</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#MatProjNMRElectricFieldGradiant.incar">incar</a>
+                                <a class="function" href="#MatprojNMRElectricFieldGradiant.__init__">MatprojNMRElectricFieldGradiant</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatprojNMRElectricFieldGradiant.incar">incar</a>
                         </li>
                 </ul>
 
@@ -71,17 +74,17 @@
 </span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs</span> <span class="kn">import</span> <span class="n">Incar</span>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy</span> <span class="kn">import</span> <span class="n">MatProjStaticEnergy</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy</span> <span class="kn">import</span> <span class="n">MatprojStaticEnergy</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="k">class</span> <span class="nc">MatProjNMRElectricFieldGradiant</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="k">class</span> <span class="nc">MatprojNMRElectricFieldGradiant</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd">    [MPNMRSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">    with mode=&quot;efg&quot; (Electric Field Gradient).</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>        <span class="nb">dict</span><span class="p">(</span>
 </span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>            <span class="n">ALGO</span><span class="o">=</span><span class="s2">&quot;FAST&quot;</span><span class="p">,</span>
@@ -134,39 +137,39 @@
 
 
             </section>
-                <section id="MatProjNMRElectricFieldGradiant">
-                            <input id="MatProjNMRElectricFieldGradiant-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                <section id="MatprojNMRElectricFieldGradiant">
+                            <input id="MatprojNMRElectricFieldGradiant-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">MatProjNMRElectricFieldGradiant</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></span>):
+    <span class="name">MatprojNMRElectricFieldGradiant</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatprojStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatprojStaticEnergy</a></span>):
 
-                <label class="view-source-button" for="MatProjNMRElectricFieldGradiant-view-source"><span>View Source</span></label>
+                <label class="view-source-button" for="MatprojNMRElectricFieldGradiant-view-source"><span>View Source</span></label>
 
     </div>
-    <a class="headerlink" href="#MatProjNMRElectricFieldGradiant"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="MatProjNMRElectricFieldGradiant-11"><a href="#MatProjNMRElectricFieldGradiant-11"><span class="linenos">11</span></a><span class="k">class</span> <span class="nc">MatProjNMRElectricFieldGradiant</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
-</span><span id="MatProjNMRElectricFieldGradiant-12"><a href="#MatProjNMRElectricFieldGradiant-12"><span class="linenos">12</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="MatProjNMRElectricFieldGradiant-13"><a href="#MatProjNMRElectricFieldGradiant-13"><span class="linenos">13</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
-</span><span id="MatProjNMRElectricFieldGradiant-14"><a href="#MatProjNMRElectricFieldGradiant-14"><span class="linenos">14</span></a><span class="sd">    [MPNMRSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)</span>
-</span><span id="MatProjNMRElectricFieldGradiant-15"><a href="#MatProjNMRElectricFieldGradiant-15"><span class="linenos">15</span></a><span class="sd">    with mode=&quot;efg&quot; (Electric Field Gradient).</span>
-</span><span id="MatProjNMRElectricFieldGradiant-16"><a href="#MatProjNMRElectricFieldGradiant-16"><span class="linenos">16</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="MatProjNMRElectricFieldGradiant-17"><a href="#MatProjNMRElectricFieldGradiant-17"><span class="linenos">17</span></a>
-</span><span id="MatProjNMRElectricFieldGradiant-18"><a href="#MatProjNMRElectricFieldGradiant-18"><span class="linenos">18</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="MatProjNMRElectricFieldGradiant-19"><a href="#MatProjNMRElectricFieldGradiant-19"><span class="linenos">19</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-</span><span id="MatProjNMRElectricFieldGradiant-20"><a href="#MatProjNMRElectricFieldGradiant-20"><span class="linenos">20</span></a>        <span class="nb">dict</span><span class="p">(</span>
-</span><span id="MatProjNMRElectricFieldGradiant-21"><a href="#MatProjNMRElectricFieldGradiant-21"><span class="linenos">21</span></a>            <span class="n">ALGO</span><span class="o">=</span><span class="s2">&quot;FAST&quot;</span><span class="p">,</span>
-</span><span id="MatProjNMRElectricFieldGradiant-22"><a href="#MatProjNMRElectricFieldGradiant-22"><span class="linenos">22</span></a>            <span class="n">EDIFF</span><span class="o">=-</span><span class="mf">1.0e-10</span><span class="p">,</span>
-</span><span id="MatProjNMRElectricFieldGradiant-23"><a href="#MatProjNMRElectricFieldGradiant-23"><span class="linenos">23</span></a>            <span class="n">ISYM</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="MatProjNMRElectricFieldGradiant-24"><a href="#MatProjNMRElectricFieldGradiant-24"><span class="linenos">24</span></a>            <span class="n">LCHARG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="MatProjNMRElectricFieldGradiant-25"><a href="#MatProjNMRElectricFieldGradiant-25"><span class="linenos">25</span></a>            <span class="n">LEFG</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="MatProjNMRElectricFieldGradiant-26"><a href="#MatProjNMRElectricFieldGradiant-26"><span class="linenos">26</span></a>            <span class="n">QUAD_EFG__smart_quad_efg</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="MatProjNMRElectricFieldGradiant-27"><a href="#MatProjNMRElectricFieldGradiant-27"><span class="linenos">27</span></a>            <span class="n">NELMIN</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-</span><span id="MatProjNMRElectricFieldGradiant-28"><a href="#MatProjNMRElectricFieldGradiant-28"><span class="linenos">28</span></a>            <span class="n">PREC</span><span class="o">=</span><span class="s2">&quot;ACCURATE&quot;</span><span class="p">,</span>
-</span><span id="MatProjNMRElectricFieldGradiant-29"><a href="#MatProjNMRElectricFieldGradiant-29"><span class="linenos">29</span></a>            <span class="n">SIGMA</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-</span><span id="MatProjNMRElectricFieldGradiant-30"><a href="#MatProjNMRElectricFieldGradiant-30"><span class="linenos">30</span></a>        <span class="p">)</span>
-</span><span id="MatProjNMRElectricFieldGradiant-31"><a href="#MatProjNMRElectricFieldGradiant-31"><span class="linenos">31</span></a>    <span class="p">)</span>
-</span><span id="MatProjNMRElectricFieldGradiant-32"><a href="#MatProjNMRElectricFieldGradiant-32"><span class="linenos">32</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;EDIFF__per_atom&quot;</span><span class="p">)</span>
+    <a class="headerlink" href="#MatprojNMRElectricFieldGradiant"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="MatprojNMRElectricFieldGradiant-11"><a href="#MatprojNMRElectricFieldGradiant-11"><span class="linenos">11</span></a><span class="k">class</span> <span class="nc">MatprojNMRElectricFieldGradiant</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
+</span><span id="MatprojNMRElectricFieldGradiant-12"><a href="#MatprojNMRElectricFieldGradiant-12"><span class="linenos">12</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="MatprojNMRElectricFieldGradiant-13"><a href="#MatprojNMRElectricFieldGradiant-13"><span class="linenos">13</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
+</span><span id="MatprojNMRElectricFieldGradiant-14"><a href="#MatprojNMRElectricFieldGradiant-14"><span class="linenos">14</span></a><span class="sd">    [MPNMRSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)</span>
+</span><span id="MatprojNMRElectricFieldGradiant-15"><a href="#MatprojNMRElectricFieldGradiant-15"><span class="linenos">15</span></a><span class="sd">    with mode=&quot;efg&quot; (Electric Field Gradient).</span>
+</span><span id="MatprojNMRElectricFieldGradiant-16"><a href="#MatprojNMRElectricFieldGradiant-16"><span class="linenos">16</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="MatprojNMRElectricFieldGradiant-17"><a href="#MatprojNMRElectricFieldGradiant-17"><span class="linenos">17</span></a>
+</span><span id="MatprojNMRElectricFieldGradiant-18"><a href="#MatprojNMRElectricFieldGradiant-18"><span class="linenos">18</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="MatprojNMRElectricFieldGradiant-19"><a href="#MatprojNMRElectricFieldGradiant-19"><span class="linenos">19</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="MatprojNMRElectricFieldGradiant-20"><a href="#MatprojNMRElectricFieldGradiant-20"><span class="linenos">20</span></a>        <span class="nb">dict</span><span class="p">(</span>
+</span><span id="MatprojNMRElectricFieldGradiant-21"><a href="#MatprojNMRElectricFieldGradiant-21"><span class="linenos">21</span></a>            <span class="n">ALGO</span><span class="o">=</span><span class="s2">&quot;FAST&quot;</span><span class="p">,</span>
+</span><span id="MatprojNMRElectricFieldGradiant-22"><a href="#MatprojNMRElectricFieldGradiant-22"><span class="linenos">22</span></a>            <span class="n">EDIFF</span><span class="o">=-</span><span class="mf">1.0e-10</span><span class="p">,</span>
+</span><span id="MatprojNMRElectricFieldGradiant-23"><a href="#MatprojNMRElectricFieldGradiant-23"><span class="linenos">23</span></a>            <span class="n">ISYM</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="MatprojNMRElectricFieldGradiant-24"><a href="#MatprojNMRElectricFieldGradiant-24"><span class="linenos">24</span></a>            <span class="n">LCHARG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="MatprojNMRElectricFieldGradiant-25"><a href="#MatprojNMRElectricFieldGradiant-25"><span class="linenos">25</span></a>            <span class="n">LEFG</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="MatprojNMRElectricFieldGradiant-26"><a href="#MatprojNMRElectricFieldGradiant-26"><span class="linenos">26</span></a>            <span class="n">QUAD_EFG__smart_quad_efg</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="MatprojNMRElectricFieldGradiant-27"><a href="#MatprojNMRElectricFieldGradiant-27"><span class="linenos">27</span></a>            <span class="n">NELMIN</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span id="MatprojNMRElectricFieldGradiant-28"><a href="#MatprojNMRElectricFieldGradiant-28"><span class="linenos">28</span></a>            <span class="n">PREC</span><span class="o">=</span><span class="s2">&quot;ACCURATE&quot;</span><span class="p">,</span>
+</span><span id="MatprojNMRElectricFieldGradiant-29"><a href="#MatprojNMRElectricFieldGradiant-29"><span class="linenos">29</span></a>            <span class="n">SIGMA</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+</span><span id="MatprojNMRElectricFieldGradiant-30"><a href="#MatprojNMRElectricFieldGradiant-30"><span class="linenos">30</span></a>        <span class="p">)</span>
+</span><span id="MatprojNMRElectricFieldGradiant-31"><a href="#MatprojNMRElectricFieldGradiant-31"><span class="linenos">31</span></a>    <span class="p">)</span>
+</span><span id="MatprojNMRElectricFieldGradiant-32"><a href="#MatprojNMRElectricFieldGradiant-32"><span class="linenos">32</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;EDIFF__per_atom&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -176,13 +179,25 @@ with mode="efg" (Electric Field Gradient).</p>
 </div>
 
 
-                            <div id="MatProjNMRElectricFieldGradiant.incar" class="classattr">
+                            <div id="MatprojNMRElectricFieldGradiant.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MatprojNMRElectricFieldGradiant</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatprojNMRElectricFieldGradiant.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="MatprojNMRElectricFieldGradiant.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;FAST&#39;, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: -5, &#39;ISPIN&#39;: 2, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;ACCURATE&#39;, &#39;SIGMA&#39;: 0.01, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;LAECHG&#39;: True, &#39;LCHARG&#39;: False, &#39;LVHAR&#39;: True, &#39;EDIFF&#39;: -1e-10, &#39;ISYM&#39;: 0, &#39;LEFG&#39;: True, &#39;QUAD_EFG__smart_quad_efg&#39;: True, &#39;NELMIN&#39;: 10}</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjNMRElectricFieldGradiant.incar"></a>
+    <a class="headerlink" href="#MatprojNMRElectricFieldGradiant.incar"></a>
     
             <div class="docstring"><p>This sets the default vasp settings from a dictionary. This is the one thing
 you <em>must</em> set when subclassing VaspTask. An example is:</p>
@@ -196,47 +211,38 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatProjNMRElectricFieldGradiant.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
-                                <dd id="MatProjNMRElectricFieldGradiant.functional" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.functional">functional</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.potcar_mappings">potcar_mappings</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.error_handlers">error_handlers</a></dd>
+                                    <div><dt><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="MatprojNMRElectricFieldGradiant.functional" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MatProjNMRElectricFieldGradiant.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
-                <dd id="MatProjNMRElectricFieldGradiant.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
+                                <dd id="MatprojNMRElectricFieldGradiant.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MatProjNMRElectricFieldGradiant.copy" class="function">copy</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.bind" class="function">bind</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.map" class="function">map</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.set_upstream" class="function">set_upstream</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.set_downstream" class="function">set_downstream</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.inputs" class="function">inputs</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.outputs" class="function">outputs</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.pipe" class="function">pipe</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.serialize" class="function">serialize</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.is_equal" class="function">is_equal</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.not_" class="function">not_</dd>
-                <dd id="MatProjNMRElectricFieldGradiant.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatprojNMRElectricFieldGradiant.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatprojNMRElectricFieldGradiant.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

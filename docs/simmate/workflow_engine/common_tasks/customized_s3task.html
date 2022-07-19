@@ -114,17 +114,18 @@
 </span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>    <span class="n">NewS3Task</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Custom</span><span class="si">{</span><span class="n">s3task</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">s3task</span><span class="p">,),</span> <span class="n">final_attributes</span><span class="p">)</span>
 </span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>
 </span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>    <span class="c1"># now run the task with the remaining parameters</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>    <span class="n">task</span> <span class="o">=</span> <span class="n">NewS3Task</span><span class="p">()</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="o">**</span><span class="n">input_parameters</span><span class="p">)</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>    <span class="k">return</span> <span class="n">result</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>    <span class="c1"># Note, we are using run_config instead of run because we do not want this</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>    <span class="c1"># registered as a task run of the original class</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">NewS3Task</span><span class="o">.</span><span class="n">run_config</span><span class="p">(</span><span class="o">**</span><span class="n">input_parameters</span><span class="p">)</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>
+</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a>    <span class="k">return</span> <span class="n">result</span>
 </span></pre></div>
 
 
             </section>
                 <section id="run_customized_s3task">
                     <div class="attr variable">
-            <span class="name">run_customized_s3task</span><span class="default_value"> = &lt;Task: run_customized_s3task&gt;</span>
+            <span class="name">run_customized_s3task</span><span class="default_value"> = &lt;prefect.tasks.Task object&gt;</span>
 
         
     </div>

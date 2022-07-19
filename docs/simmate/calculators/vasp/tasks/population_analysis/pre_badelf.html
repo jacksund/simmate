@@ -32,10 +32,13 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#MatProjPreBaderELF">MatProjPreBaderELF</a>
+                    <a class="class" href="#MatprojPreBaderELF">MatprojPreBaderELF</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#MatProjPreBaderELF.incar">incar</a>
+                                <a class="function" href="#MatprojPreBaderELF.__init__">MatprojPreBaderELF</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatprojPreBaderELF.incar">incar</a>
                         </li>
                 </ul>
 
@@ -65,11 +68,11 @@
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="c1"># -*- coding: utf-8 -*-</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a>
 </span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a>    <span class="n">MatProjStaticEnergy</span><span class="p">,</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a>    <span class="n">MatprojStaticEnergy</span><span class="p">,</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="p">)</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="k">class</span> <span class="nc">MatProjPreBaderELF</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="k">class</span> <span class="nc">MatprojPreBaderELF</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    Runs a static energy calculation with a high-density FFT grid under settings</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="sd">    from the Materials Project. Results can be used for Bader analysis where</span>
@@ -78,7 +81,7 @@
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>
 </span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>    <span class="c1"># The key thing for bader analysis is that we need a very fine FFT mesh. Other</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="c1"># than that, it&#39;s the same as a static energy calculation.</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>        <span class="n">LAECHG</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># write core charge density to AECCAR0 and valence to AECCAR2</span>
 </span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>        <span class="n">LELF</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># writes ELFCAR</span>
@@ -94,38 +97,38 @@
 
 
             </section>
-                <section id="MatProjPreBaderELF">
-                            <input id="MatProjPreBaderELF-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                <section id="MatprojPreBaderELF">
+                            <input id="MatprojPreBaderELF-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">MatProjPreBaderELF</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></span>):
+    <span class="name">MatprojPreBaderELF</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatprojStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatprojStaticEnergy</a></span>):
 
-                <label class="view-source-button" for="MatProjPreBaderELF-view-source"><span>View Source</span></label>
+                <label class="view-source-button" for="MatprojPreBaderELF-view-source"><span>View Source</span></label>
 
     </div>
-    <a class="headerlink" href="#MatProjPreBaderELF"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="MatProjPreBaderELF-9"><a href="#MatProjPreBaderELF-9"><span class="linenos"> 9</span></a><span class="k">class</span> <span class="nc">MatProjPreBaderELF</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
-</span><span id="MatProjPreBaderELF-10"><a href="#MatProjPreBaderELF-10"><span class="linenos">10</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="MatProjPreBaderELF-11"><a href="#MatProjPreBaderELF-11"><span class="linenos">11</span></a><span class="sd">    Runs a static energy calculation with a high-density FFT grid under settings</span>
-</span><span id="MatProjPreBaderELF-12"><a href="#MatProjPreBaderELF-12"><span class="linenos">12</span></a><span class="sd">    from the Materials Project. Results can be used for Bader analysis where</span>
-</span><span id="MatProjPreBaderELF-13"><a href="#MatProjPreBaderELF-13"><span class="linenos">13</span></a><span class="sd">    the ELF is used as the reference instead of the CHGCAR.</span>
-</span><span id="MatProjPreBaderELF-14"><a href="#MatProjPreBaderELF-14"><span class="linenos">14</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="MatProjPreBaderELF-15"><a href="#MatProjPreBaderELF-15"><span class="linenos">15</span></a>
-</span><span id="MatProjPreBaderELF-16"><a href="#MatProjPreBaderELF-16"><span class="linenos">16</span></a>    <span class="c1"># The key thing for bader analysis is that we need a very fine FFT mesh. Other</span>
-</span><span id="MatProjPreBaderELF-17"><a href="#MatProjPreBaderELF-17"><span class="linenos">17</span></a>    <span class="c1"># than that, it&#39;s the same as a static energy calculation.</span>
-</span><span id="MatProjPreBaderELF-18"><a href="#MatProjPreBaderELF-18"><span class="linenos">18</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="MatProjPreBaderELF-19"><a href="#MatProjPreBaderELF-19"><span class="linenos">19</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-</span><span id="MatProjPreBaderELF-20"><a href="#MatProjPreBaderELF-20"><span class="linenos">20</span></a>        <span class="n">LAECHG</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># write core charge density to AECCAR0 and valence to AECCAR2</span>
-</span><span id="MatProjPreBaderELF-21"><a href="#MatProjPreBaderELF-21"><span class="linenos">21</span></a>        <span class="n">LELF</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># writes ELFCAR</span>
-</span><span id="MatProjPreBaderELF-22"><a href="#MatProjPreBaderELF-22"><span class="linenos">22</span></a>        <span class="n">NPAR</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># must be set if LELF is set to True</span>
-</span><span id="MatProjPreBaderELF-23"><a href="#MatProjPreBaderELF-23"><span class="linenos">23</span></a>        <span class="n">PREC</span><span class="o">=</span><span class="s2">&quot;Single&quot;</span><span class="p">,</span>  <span class="c1"># ensures CHGCAR grid matches ELFCAR grid</span>
-</span><span id="MatProjPreBaderELF-24"><a href="#MatProjPreBaderELF-24"><span class="linenos">24</span></a>        <span class="c1"># Note that these set the FFT grid while the pre-Bader task sets the</span>
-</span><span id="MatProjPreBaderELF-25"><a href="#MatProjPreBaderELF-25"><span class="linenos">25</span></a>        <span class="c1"># fine FFT grid (e.g. useds NGX instead of NGXF)</span>
-</span><span id="MatProjPreBaderELF-26"><a href="#MatProjPreBaderELF-26"><span class="linenos">26</span></a>        <span class="n">NGX__density_a</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-</span><span id="MatProjPreBaderELF-27"><a href="#MatProjPreBaderELF-27"><span class="linenos">27</span></a>        <span class="n">NGY__density_b</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-</span><span id="MatProjPreBaderELF-28"><a href="#MatProjPreBaderELF-28"><span class="linenos">28</span></a>        <span class="n">NGZ__density_c</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-</span><span id="MatProjPreBaderELF-29"><a href="#MatProjPreBaderELF-29"><span class="linenos">29</span></a>    <span class="p">)</span>
+    <a class="headerlink" href="#MatprojPreBaderELF"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="MatprojPreBaderELF-9"><a href="#MatprojPreBaderELF-9"><span class="linenos"> 9</span></a><span class="k">class</span> <span class="nc">MatprojPreBaderELF</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
+</span><span id="MatprojPreBaderELF-10"><a href="#MatprojPreBaderELF-10"><span class="linenos">10</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="MatprojPreBaderELF-11"><a href="#MatprojPreBaderELF-11"><span class="linenos">11</span></a><span class="sd">    Runs a static energy calculation with a high-density FFT grid under settings</span>
+</span><span id="MatprojPreBaderELF-12"><a href="#MatprojPreBaderELF-12"><span class="linenos">12</span></a><span class="sd">    from the Materials Project. Results can be used for Bader analysis where</span>
+</span><span id="MatprojPreBaderELF-13"><a href="#MatprojPreBaderELF-13"><span class="linenos">13</span></a><span class="sd">    the ELF is used as the reference instead of the CHGCAR.</span>
+</span><span id="MatprojPreBaderELF-14"><a href="#MatprojPreBaderELF-14"><span class="linenos">14</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="MatprojPreBaderELF-15"><a href="#MatprojPreBaderELF-15"><span class="linenos">15</span></a>
+</span><span id="MatprojPreBaderELF-16"><a href="#MatprojPreBaderELF-16"><span class="linenos">16</span></a>    <span class="c1"># The key thing for bader analysis is that we need a very fine FFT mesh. Other</span>
+</span><span id="MatprojPreBaderELF-17"><a href="#MatprojPreBaderELF-17"><span class="linenos">17</span></a>    <span class="c1"># than that, it&#39;s the same as a static energy calculation.</span>
+</span><span id="MatprojPreBaderELF-18"><a href="#MatprojPreBaderELF-18"><span class="linenos">18</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="MatprojPreBaderELF-19"><a href="#MatprojPreBaderELF-19"><span class="linenos">19</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="MatprojPreBaderELF-20"><a href="#MatprojPreBaderELF-20"><span class="linenos">20</span></a>        <span class="n">LAECHG</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># write core charge density to AECCAR0 and valence to AECCAR2</span>
+</span><span id="MatprojPreBaderELF-21"><a href="#MatprojPreBaderELF-21"><span class="linenos">21</span></a>        <span class="n">LELF</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># writes ELFCAR</span>
+</span><span id="MatprojPreBaderELF-22"><a href="#MatprojPreBaderELF-22"><span class="linenos">22</span></a>        <span class="n">NPAR</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># must be set if LELF is set to True</span>
+</span><span id="MatprojPreBaderELF-23"><a href="#MatprojPreBaderELF-23"><span class="linenos">23</span></a>        <span class="n">PREC</span><span class="o">=</span><span class="s2">&quot;Single&quot;</span><span class="p">,</span>  <span class="c1"># ensures CHGCAR grid matches ELFCAR grid</span>
+</span><span id="MatprojPreBaderELF-24"><a href="#MatprojPreBaderELF-24"><span class="linenos">24</span></a>        <span class="c1"># Note that these set the FFT grid while the pre-Bader task sets the</span>
+</span><span id="MatprojPreBaderELF-25"><a href="#MatprojPreBaderELF-25"><span class="linenos">25</span></a>        <span class="c1"># fine FFT grid (e.g. useds NGX instead of NGXF)</span>
+</span><span id="MatprojPreBaderELF-26"><a href="#MatprojPreBaderELF-26"><span class="linenos">26</span></a>        <span class="n">NGX__density_a</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+</span><span id="MatprojPreBaderELF-27"><a href="#MatprojPreBaderELF-27"><span class="linenos">27</span></a>        <span class="n">NGY__density_b</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+</span><span id="MatprojPreBaderELF-28"><a href="#MatprojPreBaderELF-28"><span class="linenos">28</span></a>        <span class="n">NGZ__density_c</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+</span><span id="MatprojPreBaderELF-29"><a href="#MatprojPreBaderELF-29"><span class="linenos">29</span></a>    <span class="p">)</span>
 </span></pre></div>
 
 
@@ -135,13 +138,25 @@ the ELF is used as the reference instead of the CHGCAR.</p>
 </div>
 
 
-                            <div id="MatProjPreBaderELF.incar" class="classattr">
+                            <div id="MatprojPreBaderELF.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MatprojPreBaderELF</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatprojPreBaderELF.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="MatprojPreBaderELF.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Normal&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: -5, &#39;ISPIN&#39;: 2, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Single&#39;, &#39;SIGMA&#39;: 0.05, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;LAECHG&#39;: True, &#39;LCHARG&#39;: True, &#39;LVHAR&#39;: True, &#39;LELF&#39;: True, &#39;NPAR&#39;: 1, &#39;NGX__density_a&#39;: 12, &#39;NGY__density_b&#39;: 12, &#39;NGZ__density_c&#39;: 12}</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjPreBaderELF.incar"></a>
+    <a class="headerlink" href="#MatprojPreBaderELF.incar"></a>
     
             <div class="docstring"><p>This sets the default vasp settings from a dictionary. This is the one thing
 you <em>must</em> set when subclassing VaspTask. An example is:</p>
@@ -155,47 +170,38 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatProjPreBaderELF.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatProjPreBaderELF.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatProjPreBaderELF.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatProjPreBaderELF.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
-                                <dd id="MatProjPreBaderELF.functional" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.functional">functional</a></dd>
-                <dd id="MatProjPreBaderELF.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.potcar_mappings">potcar_mappings</a></dd>
-                <dd id="MatProjPreBaderELF.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.error_handlers">error_handlers</a></dd>
+                                    <div><dt><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="MatprojPreBaderELF.functional" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="MatprojPreBaderELF.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="MatprojPreBaderELF.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MatProjPreBaderELF.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="MatProjPreBaderELF.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
-                <dd id="MatProjPreBaderELF.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
-                <dd id="MatProjPreBaderELF.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
-                <dd id="MatProjPreBaderELF.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
-                <dd id="MatProjPreBaderELF.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
-                <dd id="MatProjPreBaderELF.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
-                <dd id="MatProjPreBaderELF.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
-                <dd id="MatProjPreBaderELF.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
-                <dd id="MatProjPreBaderELF.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
+                                <dd id="MatprojPreBaderELF.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
+                <dd id="MatprojPreBaderELF.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
+                <dd id="MatprojPreBaderELF.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="MatprojPreBaderELF.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="MatprojPreBaderELF.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="MatprojPreBaderELF.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="MatprojPreBaderELF.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="MatprojPreBaderELF.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
+                <dd id="MatprojPreBaderELF.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
+                <dd id="MatprojPreBaderELF.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MatProjPreBaderELF.copy" class="function">copy</dd>
-                <dd id="MatProjPreBaderELF.bind" class="function">bind</dd>
-                <dd id="MatProjPreBaderELF.map" class="function">map</dd>
-                <dd id="MatProjPreBaderELF.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MatProjPreBaderELF.set_upstream" class="function">set_upstream</dd>
-                <dd id="MatProjPreBaderELF.set_downstream" class="function">set_downstream</dd>
-                <dd id="MatProjPreBaderELF.inputs" class="function">inputs</dd>
-                <dd id="MatProjPreBaderELF.outputs" class="function">outputs</dd>
-                <dd id="MatProjPreBaderELF.pipe" class="function">pipe</dd>
-                <dd id="MatProjPreBaderELF.serialize" class="function">serialize</dd>
-                <dd id="MatProjPreBaderELF.is_equal" class="function">is_equal</dd>
-                <dd id="MatProjPreBaderELF.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MatProjPreBaderELF.not_" class="function">not_</dd>
-                <dd id="MatProjPreBaderELF.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatprojPreBaderELF.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatprojPreBaderELF.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatprojPreBaderELF.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatprojPreBaderELF.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatprojPreBaderELF.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MatprojPreBaderELF.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MatprojPreBaderELF.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MatprojPreBaderELF.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatprojPreBaderELF.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MatprojPreBaderELF.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MatprojPreBaderELF.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatprojPreBaderELF.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

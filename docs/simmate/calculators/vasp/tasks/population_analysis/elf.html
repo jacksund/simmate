@@ -32,10 +32,13 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#MatProjELF">MatProjELF</a>
+                    <a class="class" href="#MatprojELF">MatprojELF</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#MatProjELF.incar">incar</a>
+                                <a class="function" href="#MatprojELF.__init__">MatprojELF</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatprojELF.incar">incar</a>
                         </li>
                 </ul>
 
@@ -65,17 +68,17 @@
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="c1"># -*- coding: utf-8 -*-</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a>
 </span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a>    <span class="n">MatProjStaticEnergy</span><span class="p">,</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a>    <span class="n">MatprojStaticEnergy</span><span class="p">,</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a><span class="p">)</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a>
-</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="k">class</span> <span class="nc">MatProjELF</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="k">class</span> <span class="nc">MatprojELF</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="sd">    Runs a static energy calculation under settings from the Materials Project</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="sd">    and also writes the electron localization function (to ELFCAR).</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a>
-</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a>        <span class="n">LELF</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># writes ELFCAR</span>
 </span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a>        <span class="n">NPAR</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># must be set if LELF is set to True</span>
@@ -218,30 +221,30 @@
 
 
             </section>
-                <section id="MatProjELF">
-                            <input id="MatProjELF-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                <section id="MatprojELF">
+                            <input id="MatprojELF-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">MatProjELF</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></span>):
+    <span class="name">MatprojELF</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatprojStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatprojStaticEnergy</a></span>):
 
-                <label class="view-source-button" for="MatProjELF-view-source"><span>View Source</span></label>
+                <label class="view-source-button" for="MatprojELF-view-source"><span>View Source</span></label>
 
     </div>
-    <a class="headerlink" href="#MatProjELF"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="MatProjELF-9"><a href="#MatProjELF-9"><span class="linenos"> 9</span></a><span class="k">class</span> <span class="nc">MatProjELF</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
-</span><span id="MatProjELF-10"><a href="#MatProjELF-10"><span class="linenos">10</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="MatProjELF-11"><a href="#MatProjELF-11"><span class="linenos">11</span></a><span class="sd">    Runs a static energy calculation under settings from the Materials Project</span>
-</span><span id="MatProjELF-12"><a href="#MatProjELF-12"><span class="linenos">12</span></a><span class="sd">    and also writes the electron localization function (to ELFCAR).</span>
-</span><span id="MatProjELF-13"><a href="#MatProjELF-13"><span class="linenos">13</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="MatProjELF-14"><a href="#MatProjELF-14"><span class="linenos">14</span></a>
-</span><span id="MatProjELF-15"><a href="#MatProjELF-15"><span class="linenos">15</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="MatProjELF-16"><a href="#MatProjELF-16"><span class="linenos">16</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-</span><span id="MatProjELF-17"><a href="#MatProjELF-17"><span class="linenos">17</span></a>        <span class="n">LELF</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># writes ELFCAR</span>
-</span><span id="MatProjELF-18"><a href="#MatProjELF-18"><span class="linenos">18</span></a>        <span class="n">NPAR</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># must be set if LELF is set to True</span>
-</span><span id="MatProjELF-19"><a href="#MatProjELF-19"><span class="linenos">19</span></a>        <span class="c1"># BUG: if NPAR conflicts with INCAR_parallel_settings config this</span>
-</span><span id="MatProjELF-20"><a href="#MatProjELF-20"><span class="linenos">20</span></a>        <span class="c1"># fails and tells the user to specify a setting</span>
-</span><span id="MatProjELF-21"><a href="#MatProjELF-21"><span class="linenos">21</span></a>    <span class="p">)</span>
+    <a class="headerlink" href="#MatprojELF"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="MatprojELF-9"><a href="#MatprojELF-9"><span class="linenos"> 9</span></a><span class="k">class</span> <span class="nc">MatprojELF</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
+</span><span id="MatprojELF-10"><a href="#MatprojELF-10"><span class="linenos">10</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="MatprojELF-11"><a href="#MatprojELF-11"><span class="linenos">11</span></a><span class="sd">    Runs a static energy calculation under settings from the Materials Project</span>
+</span><span id="MatprojELF-12"><a href="#MatprojELF-12"><span class="linenos">12</span></a><span class="sd">    and also writes the electron localization function (to ELFCAR).</span>
+</span><span id="MatprojELF-13"><a href="#MatprojELF-13"><span class="linenos">13</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="MatprojELF-14"><a href="#MatprojELF-14"><span class="linenos">14</span></a>
+</span><span id="MatprojELF-15"><a href="#MatprojELF-15"><span class="linenos">15</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="MatprojELF-16"><a href="#MatprojELF-16"><span class="linenos">16</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="MatprojELF-17"><a href="#MatprojELF-17"><span class="linenos">17</span></a>        <span class="n">LELF</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># writes ELFCAR</span>
+</span><span id="MatprojELF-18"><a href="#MatprojELF-18"><span class="linenos">18</span></a>        <span class="n">NPAR</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># must be set if LELF is set to True</span>
+</span><span id="MatprojELF-19"><a href="#MatprojELF-19"><span class="linenos">19</span></a>        <span class="c1"># BUG: if NPAR conflicts with INCAR_parallel_settings config this</span>
+</span><span id="MatprojELF-20"><a href="#MatprojELF-20"><span class="linenos">20</span></a>        <span class="c1"># fails and tells the user to specify a setting</span>
+</span><span id="MatprojELF-21"><a href="#MatprojELF-21"><span class="linenos">21</span></a>    <span class="p">)</span>
 </span></pre></div>
 
 
@@ -250,13 +253,25 @@ and also writes the electron localization function (to ELFCAR).</p>
 </div>
 
 
-                            <div id="MatProjELF.incar" class="classattr">
+                            <div id="MatprojELF.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MatprojELF</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatprojELF.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="MatprojELF.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Normal&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: -5, &#39;ISPIN&#39;: 2, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;SIGMA&#39;: 0.05, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;LAECHG&#39;: True, &#39;LCHARG&#39;: True, &#39;LVHAR&#39;: True, &#39;LELF&#39;: True, &#39;NPAR&#39;: 1}</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjELF.incar"></a>
+    <a class="headerlink" href="#MatprojELF.incar"></a>
     
             <div class="docstring"><p>This sets the default vasp settings from a dictionary. This is the one thing
 you <em>must</em> set when subclassing VaspTask. An example is:</p>
@@ -270,47 +285,38 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatProjELF.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatProjELF.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatProjELF.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatProjELF.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
-                                <dd id="MatProjELF.functional" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.functional">functional</a></dd>
-                <dd id="MatProjELF.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.potcar_mappings">potcar_mappings</a></dd>
-                <dd id="MatProjELF.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.error_handlers">error_handlers</a></dd>
+                                    <div><dt><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="MatprojELF.functional" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="MatprojELF.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="MatprojELF.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MatProjELF.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="MatProjELF.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
-                <dd id="MatProjELF.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
-                <dd id="MatProjELF.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
-                <dd id="MatProjELF.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
-                <dd id="MatProjELF.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
-                <dd id="MatProjELF.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
-                <dd id="MatProjELF.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
-                <dd id="MatProjELF.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
-                <dd id="MatProjELF.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
+                                <dd id="MatprojELF.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
+                <dd id="MatprojELF.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
+                <dd id="MatprojELF.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="MatprojELF.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="MatprojELF.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="MatprojELF.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="MatprojELF.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="MatprojELF.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
+                <dd id="MatprojELF.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
+                <dd id="MatprojELF.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MatProjELF.copy" class="function">copy</dd>
-                <dd id="MatProjELF.bind" class="function">bind</dd>
-                <dd id="MatProjELF.map" class="function">map</dd>
-                <dd id="MatProjELF.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MatProjELF.set_upstream" class="function">set_upstream</dd>
-                <dd id="MatProjELF.set_downstream" class="function">set_downstream</dd>
-                <dd id="MatProjELF.inputs" class="function">inputs</dd>
-                <dd id="MatProjELF.outputs" class="function">outputs</dd>
-                <dd id="MatProjELF.pipe" class="function">pipe</dd>
-                <dd id="MatProjELF.serialize" class="function">serialize</dd>
-                <dd id="MatProjELF.is_equal" class="function">is_equal</dd>
-                <dd id="MatProjELF.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MatProjELF.not_" class="function">not_</dd>
-                <dd id="MatProjELF.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatprojELF.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatprojELF.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatprojELF.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatprojELF.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatprojELF.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MatprojELF.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MatprojELF.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MatprojELF.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatprojELF.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MatprojELF.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MatprojELF.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatprojELF.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

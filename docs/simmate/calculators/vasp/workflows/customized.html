@@ -29,6 +29,25 @@
 
 
 
+        <h2>API Documentation</h2>
+            <ul class="memberlist">
+            <li>
+                    <a class="class" href="#Customized__Vasp__UserConfig">Customized__Vasp__UserConfig</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#Customized__Vasp__UserConfig.__init__">Customized__Vasp__UserConfig</a>
+                        </li>
+                        <li>
+                                <a class="class" href="#Customized__Vasp__UserConfig.database_table">Customized__Vasp__UserConfig.database_table</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Customized__Vasp__UserConfig.run_config">run_config</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
+
 
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev" target="_blank">
@@ -103,52 +122,276 @@
 </span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">```</span>
 </span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ModuleStorage</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">Workflow</span>
 </span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="kn">from</span> <span class="nn">simmate.workflow_engine.common_tasks</span> <span class="kn">import</span> <span class="p">(</span>
 </span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a>    <span class="n">load_input_and_register</span><span class="p">,</span>
 </span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>    <span class="n">run_customized_s3task</span><span class="p">,</span>
 </span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>    <span class="n">save_result</span><span class="p">,</span>
 </span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a><span class="p">)</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.database.customized</span> <span class="kn">import</span> <span class="n">CustomizedVASPCalculation</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="k">with</span> <span class="n">Workflow</span><span class="p">(</span><span class="s2">&quot;customized/vasp&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">vasp_workflow</span><span class="p">:</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.database.customized</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>    <span class="n">CustomizedVASPCalculation</span><span class="p">,</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="p">)</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>
 </span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>    <span class="n">workflow_base</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;workflow_base&quot;</span><span class="p">)</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>    <span class="n">input_parameters</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;input_parameters&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">{})</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>    <span class="n">updated_settings</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;updated_settings&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">{})</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>    <span class="n">directory</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a><span class="k">class</span> <span class="nc">Customized__Vasp__UserConfig</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="sd">    &quot;VASP calculation with updated INCAR/POTCAR settings</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>    <span class="n">parameters_cleaned</span> <span class="o">=</span> <span class="n">load_input_and_register</span><span class="p">(</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>        <span class="n">workflow_base</span><span class="o">=</span><span class="n">workflow_base</span><span class="p">,</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>        <span class="n">input_parameters</span><span class="o">=</span><span class="n">input_parameters</span><span class="p">,</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>        <span class="n">updated_settings</span><span class="o">=</span><span class="n">updated_settings</span><span class="p">,</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>        <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a>    <span class="p">)</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a>
-</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">run_customized_s3task</span><span class="p">(</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>        <span class="n">workflow_base</span><span class="o">=</span><span class="n">parameters_cleaned</span><span class="p">[</span><span class="s2">&quot;workflow_base&quot;</span><span class="p">],</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>        <span class="n">input_parameters</span><span class="o">=</span><span class="n">parameters_cleaned</span><span class="p">[</span><span class="s2">&quot;input_parameters&quot;</span><span class="p">],</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>        <span class="n">updated_settings</span><span class="o">=</span><span class="n">parameters_cleaned</span><span class="p">[</span><span class="s2">&quot;updated_settings&quot;</span><span class="p">],</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>    <span class="p">)</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>    <span class="n">save_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a><span class="n">vasp_workflow</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">ModuleStorage</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a><span class="n">vasp_workflow</span><span class="o">.</span><span class="n">project_name</span> <span class="o">=</span> <span class="s2">&quot;Simmate-Customized&quot;</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a><span class="n">vasp_workflow</span><span class="o">.</span><span class="n">database_table</span> <span class="o">=</span> <span class="n">CustomizedVASPCalculation</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a><span class="n">vasp_workflow</span><span class="o">.</span><span class="n">register_kwargs</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>    <span class="s2">&quot;workflow_base&quot;</span><span class="p">,</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>    <span class="s2">&quot;input_parameters&quot;</span><span class="p">,</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>    <span class="s2">&quot;updated_settings&quot;</span><span class="p">,</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a><span class="p">]</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a><span class="n">vasp_workflow</span><span class="o">.</span><span class="n">result_task</span> <span class="o">=</span> <span class="n">result</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a><span class="n">vasp_workflow</span><span class="o">.</span><span class="n">s3task</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a><span class="n">vasp_workflow</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;VASP calculation with updated INCAR/POTCAR settings&quot;</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">CustomizedVASPCalculation</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>    <span class="k">def</span> <span class="nf">run_config</span><span class="p">(</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>        <span class="n">workflow_base</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a>        <span class="n">input_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a>        <span class="n">updated_settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a>    <span class="p">):</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>        <span class="n">parameters_cleaned</span> <span class="o">=</span> <span class="n">load_input_and_register</span><span class="p">(</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>            <span class="n">workflow_base</span><span class="o">=</span><span class="n">workflow_base</span><span class="p">,</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>            <span class="n">input_parameters</span><span class="o">=</span><span class="n">input_parameters</span><span class="p">,</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>            <span class="n">updated_settings</span><span class="o">=</span><span class="n">updated_settings</span><span class="p">,</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>
+</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">run_customized_s3task</span><span class="p">(</span><span class="o">**</span><span class="n">parameters_cleaned</span><span class="p">)</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>
+</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>        <span class="n">save_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </span></pre></div>
 
 
             </section>
+                <section id="Customized__Vasp__UserConfig">
+                            <input id="Customized__Vasp__UserConfig-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">Customized__Vasp__UserConfig</span><wbr>(<span class="base"><a href="../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></span>):
+
+                <label class="view-source-button" for="Customized__Vasp__UserConfig-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#Customized__Vasp__UserConfig"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Customized__Vasp__UserConfig-42"><a href="#Customized__Vasp__UserConfig-42"><span class="linenos">42</span></a><span class="k">class</span> <span class="nc">Customized__Vasp__UserConfig</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="Customized__Vasp__UserConfig-43"><a href="#Customized__Vasp__UserConfig-43"><span class="linenos">43</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Customized__Vasp__UserConfig-44"><a href="#Customized__Vasp__UserConfig-44"><span class="linenos">44</span></a><span class="sd">    &quot;VASP calculation with updated INCAR/POTCAR settings</span>
+</span><span id="Customized__Vasp__UserConfig-45"><a href="#Customized__Vasp__UserConfig-45"><span class="linenos">45</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="Customized__Vasp__UserConfig-46"><a href="#Customized__Vasp__UserConfig-46"><span class="linenos">46</span></a>
+</span><span id="Customized__Vasp__UserConfig-47"><a href="#Customized__Vasp__UserConfig-47"><span class="linenos">47</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">CustomizedVASPCalculation</span>
+</span><span id="Customized__Vasp__UserConfig-48"><a href="#Customized__Vasp__UserConfig-48"><span class="linenos">48</span></a>
+</span><span id="Customized__Vasp__UserConfig-49"><a href="#Customized__Vasp__UserConfig-49"><span class="linenos">49</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="Customized__Vasp__UserConfig-50"><a href="#Customized__Vasp__UserConfig-50"><span class="linenos">50</span></a>    <span class="k">def</span> <span class="nf">run_config</span><span class="p">(</span>
+</span><span id="Customized__Vasp__UserConfig-51"><a href="#Customized__Vasp__UserConfig-51"><span class="linenos">51</span></a>        <span class="n">workflow_base</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig-52"><a href="#Customized__Vasp__UserConfig-52"><span class="linenos">52</span></a>        <span class="n">input_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig-53"><a href="#Customized__Vasp__UserConfig-53"><span class="linenos">53</span></a>        <span class="n">updated_settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig-54"><a href="#Customized__Vasp__UserConfig-54"><span class="linenos">54</span></a>    <span class="p">):</span>
+</span><span id="Customized__Vasp__UserConfig-55"><a href="#Customized__Vasp__UserConfig-55"><span class="linenos">55</span></a>        <span class="n">parameters_cleaned</span> <span class="o">=</span> <span class="n">load_input_and_register</span><span class="p">(</span>
+</span><span id="Customized__Vasp__UserConfig-56"><a href="#Customized__Vasp__UserConfig-56"><span class="linenos">56</span></a>            <span class="n">workflow_base</span><span class="o">=</span><span class="n">workflow_base</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig-57"><a href="#Customized__Vasp__UserConfig-57"><span class="linenos">57</span></a>            <span class="n">input_parameters</span><span class="o">=</span><span class="n">input_parameters</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig-58"><a href="#Customized__Vasp__UserConfig-58"><span class="linenos">58</span></a>            <span class="n">updated_settings</span><span class="o">=</span><span class="n">updated_settings</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig-59"><a href="#Customized__Vasp__UserConfig-59"><span class="linenos">59</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="Customized__Vasp__UserConfig-60"><a href="#Customized__Vasp__UserConfig-60"><span class="linenos">60</span></a>
+</span><span id="Customized__Vasp__UserConfig-61"><a href="#Customized__Vasp__UserConfig-61"><span class="linenos">61</span></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">run_customized_s3task</span><span class="p">(</span><span class="o">**</span><span class="n">parameters_cleaned</span><span class="p">)</span>
+</span><span id="Customized__Vasp__UserConfig-62"><a href="#Customized__Vasp__UserConfig-62"><span class="linenos">62</span></a>
+</span><span id="Customized__Vasp__UserConfig-63"><a href="#Customized__Vasp__UserConfig-63"><span class="linenos">63</span></a>        <span class="n">save_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>"VASP calculation with updated INCAR/POTCAR settings</p>
+</div>
+
+
+                            <div id="Customized__Vasp__UserConfig.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">Customized__Vasp__UserConfig</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Customized__Vasp__UserConfig.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="Customized__Vasp__UserConfig.run_config" class="classattr">
+                                        <input id="Customized__Vasp__UserConfig.run_config-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+                    <div class="decorator">@staticmethod</div>
+
+        <span class="def">def</span>
+        <span class="name">run_config</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">workflow_base</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">input_parameters</span><span class="p">:</span> <span class="nb">dict</span>, </span><span class="param"><span class="n">updated_settings</span><span class="p">:</span> <span class="nb">dict</span></span>)</span>
+
+                <label class="view-source-button" for="Customized__Vasp__UserConfig.run_config-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#Customized__Vasp__UserConfig.run_config"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Customized__Vasp__UserConfig.run_config-49"><a href="#Customized__Vasp__UserConfig.run_config-49"><span class="linenos">49</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-50"><a href="#Customized__Vasp__UserConfig.run_config-50"><span class="linenos">50</span></a>    <span class="k">def</span> <span class="nf">run_config</span><span class="p">(</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-51"><a href="#Customized__Vasp__UserConfig.run_config-51"><span class="linenos">51</span></a>        <span class="n">workflow_base</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-52"><a href="#Customized__Vasp__UserConfig.run_config-52"><span class="linenos">52</span></a>        <span class="n">input_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-53"><a href="#Customized__Vasp__UserConfig.run_config-53"><span class="linenos">53</span></a>        <span class="n">updated_settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-54"><a href="#Customized__Vasp__UserConfig.run_config-54"><span class="linenos">54</span></a>    <span class="p">):</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-55"><a href="#Customized__Vasp__UserConfig.run_config-55"><span class="linenos">55</span></a>        <span class="n">parameters_cleaned</span> <span class="o">=</span> <span class="n">load_input_and_register</span><span class="p">(</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-56"><a href="#Customized__Vasp__UserConfig.run_config-56"><span class="linenos">56</span></a>            <span class="n">workflow_base</span><span class="o">=</span><span class="n">workflow_base</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-57"><a href="#Customized__Vasp__UserConfig.run_config-57"><span class="linenos">57</span></a>            <span class="n">input_parameters</span><span class="o">=</span><span class="n">input_parameters</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-58"><a href="#Customized__Vasp__UserConfig.run_config-58"><span class="linenos">58</span></a>            <span class="n">updated_settings</span><span class="o">=</span><span class="n">updated_settings</span><span class="p">,</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-59"><a href="#Customized__Vasp__UserConfig.run_config-59"><span class="linenos">59</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-60"><a href="#Customized__Vasp__UserConfig.run_config-60"><span class="linenos">60</span></a>
+</span><span id="Customized__Vasp__UserConfig.run_config-61"><a href="#Customized__Vasp__UserConfig.run_config-61"><span class="linenos">61</span></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">run_customized_s3task</span><span class="p">(</span><span class="o">**</span><span class="n">parameters_cleaned</span><span class="p">)</span>
+</span><span id="Customized__Vasp__UserConfig.run_config-62"><a href="#Customized__Vasp__UserConfig.run_config-62"><span class="linenos">62</span></a>
+</span><span id="Customized__Vasp__UserConfig.run_config-63"><a href="#Customized__Vasp__UserConfig.run_config-63"><span class="linenos">63</span></a>        <span class="n">save_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>The workflow method, which can be overwritten when inheriting from this
+class. This can be either a staticmethod or classmethod.</p>
+
+<h4 id="the-default-run-method">The default run method</h4>
+
+<p>There is a default run method implemented that is for S3Tasks.</p>
+
+<p>Builds a workflow from a S3Task and it's corresponding database table.</p>
+
+<p>Very often with Simmate's S3Tasks, the workflow for a single S3Task is
+the same. The workflow is typically made of three tasks:</p>
+
+<ol>
+<li>loading the input parameters and registering the calculation</li>
+<li>running the calculation (what this S3Task does on its own)</li>
+<li>saving the calculation results</li>
+</ol>
+
+<p>Task 1 and 3 always use the same functions, where we just need to tell
+it which database table we are registering/saving to.</p>
+
+<p>Because of this common recipe for workflows, we use this method to make
+the workflow for us.</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></dt>
+                                <dd id="Customized__Vasp__UserConfig.version" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.version">version</a></dd>
+                <dd id="Customized__Vasp__UserConfig.s3task" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.s3task">s3task</a></dd>
+                <dd id="Customized__Vasp__UserConfig.description_doc_short" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.description_doc_short">description_doc_short</a></dd>
+                <dd id="Customized__Vasp__UserConfig.to_prefect_flow" class="function"><a href="../../../workflow_engine/workflow.html#Workflow.to_prefect_flow">to_prefect_flow</a></dd>
+                <dd id="Customized__Vasp__UserConfig.run" class="function"><a href="../../../workflow_engine/workflow.html#Workflow.run">run</a></dd>
+                <dd id="Customized__Vasp__UserConfig.name_full" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.name_full">name_full</a></dd>
+                <dd id="Customized__Vasp__UserConfig.name_project" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.name_project">name_project</a></dd>
+                <dd id="Customized__Vasp__UserConfig.name_calculator" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.name_calculator">name_calculator</a></dd>
+                <dd id="Customized__Vasp__UserConfig.name_preset" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.name_preset">name_preset</a></dd>
+                <dd id="Customized__Vasp__UserConfig.description_doc" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.description_doc">description_doc</a></dd>
+                <dd id="Customized__Vasp__UserConfig.parameter_names" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.parameter_names">parameter_names</a></dd>
+                <dd id="Customized__Vasp__UserConfig.parameter_names_required" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.parameter_names_required">parameter_names_required</a></dd>
+                <dd id="Customized__Vasp__UserConfig.show_parameters" class="function"><a href="../../../workflow_engine/workflow.html#Workflow.show_parameters">show_parameters</a></dd>
+                <dd id="Customized__Vasp__UserConfig.parameters_to_register" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.parameters_to_register">parameters_to_register</a></dd>
+                <dd id="Customized__Vasp__UserConfig.deployment_id" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.deployment_id">deployment_id</a></dd>
+                <dd id="Customized__Vasp__UserConfig.run_cloud" class="function"><a href="../../../workflow_engine/workflow.html#Workflow.run_cloud">run_cloud</a></dd>
+                <dd id="Customized__Vasp__UserConfig.nflows_submitted" class="variable"><a href="../../../workflow_engine/workflow.html#Workflow.nflows_submitted">nflows_submitted</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="Customized__Vasp__UserConfig.database_table">
+                            <input id="Customized__Vasp__UserConfig.database_table-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">Customized__Vasp__UserConfig.database_table</span><wbr>(<span class="base"><a href="../../../database/base_data_types/calculation_customized.html#CustomizedCalculation">simmate.database.base_data_types.calculation_customized.CustomizedCalculation</a></span>):
+
+                <label class="view-source-button" for="Customized__Vasp__UserConfig.database_table-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#Customized__Vasp__UserConfig.database_table"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Customized__Vasp__UserConfig.database_table-7"><a href="#Customized__Vasp__UserConfig.database_table-7"><span class="linenos">7</span></a><span class="k">class</span> <span class="nc">CustomizedVASPCalculation</span><span class="p">(</span><span class="n">CustomizedCalculation</span><span class="p">):</span>
+</span><span id="Customized__Vasp__UserConfig.database_table-8"><a href="#Customized__Vasp__UserConfig.database_table-8"><span class="linenos">8</span></a>    <span class="k">pass</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>The database table where calculation information (such as the prefect_flow_run_id)
+is stored. The table should use <code>simmate.database.base_data_types.Calculation</code></p>
+
+<p>In many cases, this table will contain all of the results you need. However,
+pay special attention to NestedWorkflows, where your results are often tied
+to a final task.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>django.db.models.base.Model</dt>
+                                <dd id="Customized__Vasp__UserConfig.database_table.__init__" class="function">Model</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.from_db" class="function">from_db</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.pk" class="variable">pk</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.get_deferred_fields" class="function">get_deferred_fields</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.refresh_from_db" class="function">refresh_from_db</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.serializable_value" class="function">serializable_value</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.save" class="function">save</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.save_base" class="function">save_base</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.delete" class="function">delete</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.prepare_database_save" class="function">prepare_database_save</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.clean" class="function">clean</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.validate_unique" class="function">validate_unique</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.date_error_message" class="function">date_error_message</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.unique_error_message" class="function">unique_error_message</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.full_clean" class="function">full_clean</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.clean_fields" class="function">clean_fields</dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.check" class="function">check</dd>
+
+            </div>
+            <div><dt><a href="../../../database/base_data_types/calculation_customized.html#CustomizedCalculation">simmate.database.base_data_types.calculation_customized.CustomizedCalculation</a></dt>
+                                <dd id="Customized__Vasp__UserConfig.database_table.Meta" class="class"><a href="../../../database/base_data_types/calculation_customized.html#CustomizedCalculation.Meta">Meta</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.update_from_vasp_run" class="function"><a href="../../../database/base_data_types/calculation_customized.html#CustomizedCalculation.update_from_vasp_run">update_from_vasp_run</a></dd>
+
+            </div>
+            <div><dt><a href="../database/customized.html#CustomizedVASPCalculation">simmate.calculators.vasp.database.customized.CustomizedVASPCalculation</a></dt>
+                                <dd id="Customized__Vasp__UserConfig.database_table.workflow_base" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.workflow_base">workflow_base</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.input_parameters" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.input_parameters">input_parameters</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.updated_settings" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.updated_settings">updated_settings</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.data" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.data">data</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.directory" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.directory">directory</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.prefect_flow_run_id" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.prefect_flow_run_id">prefect_flow_run_id</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.corrections" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.corrections">corrections</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.created_at" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.created_at">created_at</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.updated_at" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.updated_at">updated_at</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.source" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.source">source</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.DoesNotExist" class="class"><a href="../database/customized.html#CustomizedVASPCalculation.DoesNotExist">DoesNotExist</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.MultipleObjectsReturned" class="class"><a href="../database/customized.html#CustomizedVASPCalculation.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.id" class="function"><a href="../database/customized.html#CustomizedVASPCalculation.id">id</a></dd>
+
+            </div>
+            <div><dt><a href="../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
+                                <dd id="Customized__Vasp__UserConfig.database_table.base_info" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.base_info">base_info</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.prefect_cloud_link" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.flow_run_view" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.prefect_flow_run_name" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.prefect_state" class="variable"><a href="../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.from_prefect_id" class="function"><a href="../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
+
+            </div>
+            <div><dt><a href="../../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
+                                <dd id="Customized__Vasp__UserConfig.database_table.source_doi" class="variable"><a href="../../../database/base_data_types/base.html#DatabaseTable.source_doi">source_doi</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.remote_archive_link" class="variable"><a href="../../../database/base_data_types/base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.objects" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.get_table_name" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.create_subclass" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.from_toolkit" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.update_from_toolkit" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.load_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.load_remote_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.get_column_names" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.show_columns" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.get_mixins" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_mixins">get_mixins</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.get_mixin_names" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_mixin_names">get_mixin_names</a></dd>
+                <dd id="Customized__Vasp__UserConfig.database_table.get_extra_columns" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_extra_columns">get_extra_columns</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

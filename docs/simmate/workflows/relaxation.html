@@ -58,17 +58,17 @@
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="c1"># TODO: when I add more calculators, I can do something like this...</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="c1"># if &quot;simmate.calculators.vasp&quot; in installed_apps:</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.workflows.relaxation</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>    <span class="n">mit_workflow</span><span class="p">,</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>    <span class="n">matproj_workflow</span><span class="p">,</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>    <span class="n">quality00_workflow</span><span class="p">,</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>    <span class="n">quality01_workflow</span><span class="p">,</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>    <span class="n">quality02_workflow</span><span class="p">,</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>    <span class="n">quality03_workflow</span><span class="p">,</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">quality04_workflow</span><span class="p">,</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">staged_workflow</span><span class="p">,</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="n">neb_endpoint_workflow</span><span class="p">,</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="c1"># if &quot;simmate.calculators.Vasp&quot; in installed_apps:</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.workflows.relaxation.all</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>    <span class="n">Relaxation__Vasp__Matproj</span><span class="p">,</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>    <span class="n">Relaxation__Vasp__Mit</span><span class="p">,</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>    <span class="n">Relaxation__Vasp__NebEndpoint</span><span class="p">,</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>    <span class="n">Relaxation__Vasp__Quality00</span><span class="p">,</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>    <span class="n">Relaxation__Vasp__Quality01</span><span class="p">,</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>    <span class="n">Relaxation__Vasp__Quality02</span><span class="p">,</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">Relaxation__Vasp__Quality03</span><span class="p">,</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">Relaxation__Vasp__Quality04</span><span class="p">,</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="n">Relaxation__Vasp__Staged</span><span class="p">,</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="p">)</span>
 </span></pre></div>
 

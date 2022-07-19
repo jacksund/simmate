@@ -75,9 +75,9 @@ some examples of how we recommend doing this.</p>
 <p>EXAMPLE 1: Database object to Toolkit object</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># Grab an example database structure.</span>
-<span class="c1"># We use MatProj as an example, but the same applies for all Structure tables.</span>
-<span class="kn">from</span> <span class="nn"><a href="../../database/third_parties.html">simmate.database.third_parties</a></span> <span class="kn">import</span> <span class="n">MatProjStructure</span>
-<span class="n">database_structure</span> <span class="o">=</span> <span class="n">MatProjStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="c1"># We use Matproj as an example, but the same applies for all Structure tables.</span>
+<span class="kn">from</span> <span class="nn"><a href="../../database/third_parties.html">simmate.database.third_parties</a></span> <span class="kn">import</span> <span class="n">MatprojStructure</span>
+<span class="n">database_structure</span> <span class="o">=</span> <span class="n">MatprojStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
 
 <span class="c1"># convert to toolkit</span>
 <span class="n">toolkit_structure</span> <span class="o">=</span> <span class="n">database_structure</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
@@ -97,7 +97,7 @@ some examples of how we recommend doing this.</p>
 <span class="c1"># Convert back to database (as new row)</span>
 <span class="c1"># We save this to the Materials Project Database (which you should NOT do), but</span>
 <span class="c1"># in practice, you should have your own independent table to do this.</span>
-<span class="n">database_structure</span> <span class="o">=</span> <span class="n">MatProjStructure</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">toolkit_structure</span><span class="p">)</span>
+<span class="n">database_structure</span> <span class="o">=</span> <span class="n">MatprojStructure</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">toolkit_structure</span><span class="p">)</span>
 <span class="n">database_structure</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 </code></pre></div>
 
@@ -105,7 +105,7 @@ some examples of how we recommend doing this.</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># Setup some database metadata</span>
 <span class="n">example_metadata</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;database_table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;database_table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;database_id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -133,9 +133,9 @@ some examples of how we recommend doing this.</p>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="sd">EXAMPLE 1: Database object to Toolkit object</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="sd">``` python</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="sd"># Grab an example database structure.</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="sd"># We use MatProj as an example, but the same applies for all Structure tables.</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="sd">from simmate.database.third_parties import MatProjStructure</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="sd">database_structure = MatProjStructure.objects.first()</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="sd"># We use Matproj as an example, but the same applies for all Structure tables.</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="sd">from simmate.database.third_parties import MatprojStructure</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="sd">database_structure = MatprojStructure.objects.first()</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a>
 </span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="sd"># convert to toolkit</span>
 </span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="sd">toolkit_structure = database_structure.to_toolkit()</span>
@@ -155,7 +155,7 @@ some examples of how we recommend doing this.</p>
 </span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a><span class="sd"># Convert back to database (as new row)</span>
 </span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="sd"># We save this to the Materials Project Database (which you should NOT do), but</span>
 </span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a><span class="sd"># in practice, you should have your own independent table to do this.</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">database_structure = MatProjStructure.from_toolkit(structure=toolkit_structure)</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">database_structure = MatprojStructure.from_toolkit(structure=toolkit_structure)</span>
 </span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">database_structure.save()</span>
 </span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">```</span>
 </span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>
@@ -164,7 +164,7 @@ some examples of how we recommend doing this.</p>
 </span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>
 </span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd"># Setup some database metadata</span>
 </span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="sd">example_metadata = {</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">    &quot;database_table&quot;: &quot;MatProjStructure&quot;,</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">    &quot;database_table&quot;: &quot;MatprojStructure&quot;,</span>
 </span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">    &quot;database_id&quot;: &quot;mp-123&quot;,</span>
 </span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">}</span>
 </span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>

@@ -35,13 +35,16 @@
                     <a class="class" href="#VaspBandStructure">VaspBandStructure</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#VaspBandStructure.__init__">VaspBandStructure</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#VaspBandStructure.required_files">required_files</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#VaspBandStructure.kpoints">kpoints</a>
                         </li>
                         <li>
                                 <a class="variable" href="#VaspBandStructure.kpoints_line_density">kpoints_line_density</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#VaspBandStructure.pre_standardize_structure">pre_standardize_structure</a>
                         </li>
                         <li>
                                 <a class="function" href="#VaspBandStructure.setup">setup</a>
@@ -81,11 +84,11 @@
 </span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a>
 </span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.inputs</span> <span class="kn">import</span> <span class="n">Incar</span><span class="p">,</span> <span class="n">Poscar</span><span class="p">,</span> <span class="n">Potcar</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>    <span class="n">MatProjStaticEnergy</span><span class="p">,</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>    <span class="n">MatprojStaticEnergy</span><span class="p">,</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="p">)</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a>
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a>
-</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="k">class</span> <span class="nc">VaspBandStructure</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="k">class</span> <span class="nc">VaspBandStructure</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="sd">    A base class for band structure calculations. This is not meant</span>
 </span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="sd">    to be used directly but instead should be inherited from.</span>
@@ -97,19 +100,19 @@
 </span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a><span class="sd">    the a fixed charge density from a previous static energy calculation.</span>
 </span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>
-</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a>    <span class="c1"># set the KptGrid or KptPath object</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a>    <span class="c1"># TODO: in the future, all functionality of this class will be available</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a>    <span class="c1"># by giving a KptPath class here.</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a>    <span class="n">kpoints</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a>    <span class="n">kpoints_line_density</span> <span class="o">=</span> <span class="mi">20</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="sd">    Density of k-points to use along high-symmetry lines</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a>
-</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a>    <span class="c1"># For band-structures, unit cells should be in the standardized format</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a>    <span class="n">pre_standardize_structure</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>
-</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">required_files</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">]</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a>
+</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a>    <span class="c1"># set the KptGrid or KptPath object</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a>    <span class="c1"># TODO: in the future, all functionality of this class will be available</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a>    <span class="c1"># by giving a KptPath class here.</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a>    <span class="n">kpoints</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a>    <span class="n">kpoints_line_density</span> <span class="o">=</span> <span class="mi">20</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">    Density of k-points to use along high-symmetry lines</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>    <span class="nd">@classmethod</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 </span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">        Writes input files for this calculation. This differs from the normal</span>
 </span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd">        VaspTask setup because it converts the structure to the standard primative</span>
@@ -117,14 +120,14 @@
 </span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>
 </span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>        <span class="c1"># run cleaning and standardizing on structure (based on class attributes)</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>        <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_structure</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>        <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_clean_structure</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>
 </span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>        <span class="c1"># write the poscar file</span>
 </span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>        <span class="n">Poscar</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">structure_cleaned</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">))</span>
 </span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>
 </span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>        <span class="c1"># Combine our base incar settings with those of our parallelization settings</span>
 </span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>        <span class="c1"># and then write the incar file</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>        <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">incar</span><span class="p">)</span> <span class="o">+</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">incar_parallel_settings</span><span class="p">)</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>        <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">cls</span><span class="o">.</span><span class="n">incar</span><span class="p">)</span> <span class="o">+</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">cls</span><span class="o">.</span><span class="n">incar_parallel_settings</span><span class="p">)</span>
 </span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>        <span class="n">incar</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
 </span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>            <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">),</span>
 </span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure_cleaned</span><span class="p">,</span>
@@ -135,10 +138,10 @@
 </span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>        <span class="c1"># functionality will be moved to the KptPath class and then extended to</span>
 </span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>        <span class="c1"># vasp.inputs.kpoints class. Until those classes are ready, we just use</span>
 </span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>        <span class="c1"># pymatgen here.</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>        <span class="n">sym_prec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">incar</span> <span class="k">else</span> <span class="mf">1e-5</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>        <span class="n">sym_prec</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">)</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">incar</span> <span class="k">else</span> <span class="mf">1e-5</span>
 </span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>        <span class="n">kpath</span> <span class="o">=</span> <span class="n">HighSymmKpath</span><span class="p">(</span><span class="n">structure_cleaned</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="n">sym_prec</span><span class="p">)</span>
 </span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>        <span class="n">frac_k_points</span><span class="p">,</span> <span class="n">k_points_labels</span> <span class="o">=</span> <span class="n">kpath</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">(</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>            <span class="n">line_density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints_line_density</span><span class="p">,</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>            <span class="n">line_density</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">kpoints_line_density</span><span class="p">,</span>
 </span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>            <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 </span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>        <span class="p">)</span>
 </span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>        <span class="n">kpoints</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="p">(</span>
@@ -155,24 +158,25 @@
 </span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>        <span class="c1"># write the POTCAR file</span>
 </span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>        <span class="n">Potcar</span><span class="o">.</span><span class="n">to_file_from_type</span><span class="p">(</span>
 </span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>            <span class="n">structure_cleaned</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">functional</span><span class="p">,</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">functional</span><span class="p">,</span>
 </span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">),</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">potcar_mappings</span><span class="p">,</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">potcar_mappings</span><span class="p">,</span>
 </span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>        <span class="p">)</span>
 </span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="sd">        In addition to writing the normal VASP output summary, this also plots</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a><span class="sd">        the bandstructure to &quot;band_structure.png&quot;</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>        <span class="c1"># run the normal output</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>        <span class="n">bs_plotter</span> <span class="o">=</span> <span class="n">BSPlotter</span><span class="p">(</span><span class="n">vasprun</span><span class="o">.</span><span class="n">get_band_structure</span><span class="p">(</span><span class="n">line_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>        <span class="n">plot</span> <span class="o">=</span> <span class="n">bs_plotter</span><span class="o">.</span><span class="n">get_plot</span><span class="p">()</span>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>        <span class="n">plot_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;band_structure.png&quot;</span><span class="p">)</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>        <span class="n">plot</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_filename</span><span class="p">)</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a><span class="sd">        In addition to writing the normal VASP output summary, this also plots</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="sd">        the bandstructure to &quot;band_structure.png&quot;</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>        <span class="c1"># run the normal output</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>        <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>        <span class="n">bs_plotter</span> <span class="o">=</span> <span class="n">BSPlotter</span><span class="p">(</span><span class="n">vasprun</span><span class="o">.</span><span class="n">get_band_structure</span><span class="p">(</span><span class="n">line_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>        <span class="n">plot</span> <span class="o">=</span> <span class="n">bs_plotter</span><span class="o">.</span><span class="n">get_plot</span><span class="p">()</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>        <span class="n">plot_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;band_structure.png&quot;</span><span class="p">)</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>        <span class="n">plot</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_filename</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -182,13 +186,13 @@
 <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">VaspBandStructure</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></span>):
+    <span class="name">VaspBandStructure</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatprojStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatprojStaticEnergy</a></span>):
 
                 <label class="view-source-button" for="VaspBandStructure-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#VaspBandStructure"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="VaspBandStructure-16"><a href="#VaspBandStructure-16"><span class="linenos"> 16</span></a><span class="k">class</span> <span class="nc">VaspBandStructure</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="VaspBandStructure-16"><a href="#VaspBandStructure-16"><span class="linenos"> 16</span></a><span class="k">class</span> <span class="nc">VaspBandStructure</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
 </span><span id="VaspBandStructure-17"><a href="#VaspBandStructure-17"><span class="linenos"> 17</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="VaspBandStructure-18"><a href="#VaspBandStructure-18"><span class="linenos"> 18</span></a><span class="sd">    A base class for band structure calculations. This is not meant</span>
 </span><span id="VaspBandStructure-19"><a href="#VaspBandStructure-19"><span class="linenos"> 19</span></a><span class="sd">    to be used directly but instead should be inherited from.</span>
@@ -200,19 +204,19 @@
 </span><span id="VaspBandStructure-25"><a href="#VaspBandStructure-25"><span class="linenos"> 25</span></a><span class="sd">    the a fixed charge density from a previous static energy calculation.</span>
 </span><span id="VaspBandStructure-26"><a href="#VaspBandStructure-26"><span class="linenos"> 26</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="VaspBandStructure-27"><a href="#VaspBandStructure-27"><span class="linenos"> 27</span></a>
-</span><span id="VaspBandStructure-28"><a href="#VaspBandStructure-28"><span class="linenos"> 28</span></a>    <span class="c1"># set the KptGrid or KptPath object</span>
-</span><span id="VaspBandStructure-29"><a href="#VaspBandStructure-29"><span class="linenos"> 29</span></a>    <span class="c1"># TODO: in the future, all functionality of this class will be available</span>
-</span><span id="VaspBandStructure-30"><a href="#VaspBandStructure-30"><span class="linenos"> 30</span></a>    <span class="c1"># by giving a KptPath class here.</span>
-</span><span id="VaspBandStructure-31"><a href="#VaspBandStructure-31"><span class="linenos"> 31</span></a>    <span class="n">kpoints</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="VaspBandStructure-32"><a href="#VaspBandStructure-32"><span class="linenos"> 32</span></a>    <span class="n">kpoints_line_density</span> <span class="o">=</span> <span class="mi">20</span>
-</span><span id="VaspBandStructure-33"><a href="#VaspBandStructure-33"><span class="linenos"> 33</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="VaspBandStructure-34"><a href="#VaspBandStructure-34"><span class="linenos"> 34</span></a><span class="sd">    Density of k-points to use along high-symmetry lines</span>
-</span><span id="VaspBandStructure-35"><a href="#VaspBandStructure-35"><span class="linenos"> 35</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="VaspBandStructure-36"><a href="#VaspBandStructure-36"><span class="linenos"> 36</span></a>
-</span><span id="VaspBandStructure-37"><a href="#VaspBandStructure-37"><span class="linenos"> 37</span></a>    <span class="c1"># For band-structures, unit cells should be in the standardized format</span>
-</span><span id="VaspBandStructure-38"><a href="#VaspBandStructure-38"><span class="linenos"> 38</span></a>    <span class="n">pre_standardize_structure</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="VaspBandStructure-39"><a href="#VaspBandStructure-39"><span class="linenos"> 39</span></a>
-</span><span id="VaspBandStructure-40"><a href="#VaspBandStructure-40"><span class="linenos"> 40</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+</span><span id="VaspBandStructure-28"><a href="#VaspBandStructure-28"><span class="linenos"> 28</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">required_files</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">]</span>
+</span><span id="VaspBandStructure-29"><a href="#VaspBandStructure-29"><span class="linenos"> 29</span></a>
+</span><span id="VaspBandStructure-30"><a href="#VaspBandStructure-30"><span class="linenos"> 30</span></a>    <span class="c1"># set the KptGrid or KptPath object</span>
+</span><span id="VaspBandStructure-31"><a href="#VaspBandStructure-31"><span class="linenos"> 31</span></a>    <span class="c1"># TODO: in the future, all functionality of this class will be available</span>
+</span><span id="VaspBandStructure-32"><a href="#VaspBandStructure-32"><span class="linenos"> 32</span></a>    <span class="c1"># by giving a KptPath class here.</span>
+</span><span id="VaspBandStructure-33"><a href="#VaspBandStructure-33"><span class="linenos"> 33</span></a>    <span class="n">kpoints</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="VaspBandStructure-34"><a href="#VaspBandStructure-34"><span class="linenos"> 34</span></a>    <span class="n">kpoints_line_density</span> <span class="o">=</span> <span class="mi">20</span>
+</span><span id="VaspBandStructure-35"><a href="#VaspBandStructure-35"><span class="linenos"> 35</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="VaspBandStructure-36"><a href="#VaspBandStructure-36"><span class="linenos"> 36</span></a><span class="sd">    Density of k-points to use along high-symmetry lines</span>
+</span><span id="VaspBandStructure-37"><a href="#VaspBandStructure-37"><span class="linenos"> 37</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="VaspBandStructure-38"><a href="#VaspBandStructure-38"><span class="linenos"> 38</span></a>
+</span><span id="VaspBandStructure-39"><a href="#VaspBandStructure-39"><span class="linenos"> 39</span></a>    <span class="nd">@classmethod</span>
+</span><span id="VaspBandStructure-40"><a href="#VaspBandStructure-40"><span class="linenos"> 40</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 </span><span id="VaspBandStructure-41"><a href="#VaspBandStructure-41"><span class="linenos"> 41</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="VaspBandStructure-42"><a href="#VaspBandStructure-42"><span class="linenos"> 42</span></a><span class="sd">        Writes input files for this calculation. This differs from the normal</span>
 </span><span id="VaspBandStructure-43"><a href="#VaspBandStructure-43"><span class="linenos"> 43</span></a><span class="sd">        VaspTask setup because it converts the structure to the standard primative</span>
@@ -220,14 +224,14 @@
 </span><span id="VaspBandStructure-45"><a href="#VaspBandStructure-45"><span class="linenos"> 45</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="VaspBandStructure-46"><a href="#VaspBandStructure-46"><span class="linenos"> 46</span></a>
 </span><span id="VaspBandStructure-47"><a href="#VaspBandStructure-47"><span class="linenos"> 47</span></a>        <span class="c1"># run cleaning and standardizing on structure (based on class attributes)</span>
-</span><span id="VaspBandStructure-48"><a href="#VaspBandStructure-48"><span class="linenos"> 48</span></a>        <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_structure</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+</span><span id="VaspBandStructure-48"><a href="#VaspBandStructure-48"><span class="linenos"> 48</span></a>        <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_clean_structure</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span><span id="VaspBandStructure-49"><a href="#VaspBandStructure-49"><span class="linenos"> 49</span></a>
 </span><span id="VaspBandStructure-50"><a href="#VaspBandStructure-50"><span class="linenos"> 50</span></a>        <span class="c1"># write the poscar file</span>
 </span><span id="VaspBandStructure-51"><a href="#VaspBandStructure-51"><span class="linenos"> 51</span></a>        <span class="n">Poscar</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">structure_cleaned</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">))</span>
 </span><span id="VaspBandStructure-52"><a href="#VaspBandStructure-52"><span class="linenos"> 52</span></a>
 </span><span id="VaspBandStructure-53"><a href="#VaspBandStructure-53"><span class="linenos"> 53</span></a>        <span class="c1"># Combine our base incar settings with those of our parallelization settings</span>
 </span><span id="VaspBandStructure-54"><a href="#VaspBandStructure-54"><span class="linenos"> 54</span></a>        <span class="c1"># and then write the incar file</span>
-</span><span id="VaspBandStructure-55"><a href="#VaspBandStructure-55"><span class="linenos"> 55</span></a>        <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">incar</span><span class="p">)</span> <span class="o">+</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">incar_parallel_settings</span><span class="p">)</span>
+</span><span id="VaspBandStructure-55"><a href="#VaspBandStructure-55"><span class="linenos"> 55</span></a>        <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">cls</span><span class="o">.</span><span class="n">incar</span><span class="p">)</span> <span class="o">+</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">cls</span><span class="o">.</span><span class="n">incar_parallel_settings</span><span class="p">)</span>
 </span><span id="VaspBandStructure-56"><a href="#VaspBandStructure-56"><span class="linenos"> 56</span></a>        <span class="n">incar</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
 </span><span id="VaspBandStructure-57"><a href="#VaspBandStructure-57"><span class="linenos"> 57</span></a>            <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">),</span>
 </span><span id="VaspBandStructure-58"><a href="#VaspBandStructure-58"><span class="linenos"> 58</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure_cleaned</span><span class="p">,</span>
@@ -238,10 +242,10 @@
 </span><span id="VaspBandStructure-63"><a href="#VaspBandStructure-63"><span class="linenos"> 63</span></a>        <span class="c1"># functionality will be moved to the KptPath class and then extended to</span>
 </span><span id="VaspBandStructure-64"><a href="#VaspBandStructure-64"><span class="linenos"> 64</span></a>        <span class="c1"># vasp.inputs.kpoints class. Until those classes are ready, we just use</span>
 </span><span id="VaspBandStructure-65"><a href="#VaspBandStructure-65"><span class="linenos"> 65</span></a>        <span class="c1"># pymatgen here.</span>
-</span><span id="VaspBandStructure-66"><a href="#VaspBandStructure-66"><span class="linenos"> 66</span></a>        <span class="n">sym_prec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">incar</span> <span class="k">else</span> <span class="mf">1e-5</span>
+</span><span id="VaspBandStructure-66"><a href="#VaspBandStructure-66"><span class="linenos"> 66</span></a>        <span class="n">sym_prec</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">)</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">incar</span> <span class="k">else</span> <span class="mf">1e-5</span>
 </span><span id="VaspBandStructure-67"><a href="#VaspBandStructure-67"><span class="linenos"> 67</span></a>        <span class="n">kpath</span> <span class="o">=</span> <span class="n">HighSymmKpath</span><span class="p">(</span><span class="n">structure_cleaned</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="n">sym_prec</span><span class="p">)</span>
 </span><span id="VaspBandStructure-68"><a href="#VaspBandStructure-68"><span class="linenos"> 68</span></a>        <span class="n">frac_k_points</span><span class="p">,</span> <span class="n">k_points_labels</span> <span class="o">=</span> <span class="n">kpath</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">(</span>
-</span><span id="VaspBandStructure-69"><a href="#VaspBandStructure-69"><span class="linenos"> 69</span></a>            <span class="n">line_density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints_line_density</span><span class="p">,</span>
+</span><span id="VaspBandStructure-69"><a href="#VaspBandStructure-69"><span class="linenos"> 69</span></a>            <span class="n">line_density</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">kpoints_line_density</span><span class="p">,</span>
 </span><span id="VaspBandStructure-70"><a href="#VaspBandStructure-70"><span class="linenos"> 70</span></a>            <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 </span><span id="VaspBandStructure-71"><a href="#VaspBandStructure-71"><span class="linenos"> 71</span></a>        <span class="p">)</span>
 </span><span id="VaspBandStructure-72"><a href="#VaspBandStructure-72"><span class="linenos"> 72</span></a>        <span class="n">kpoints</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="p">(</span>
@@ -258,24 +262,25 @@
 </span><span id="VaspBandStructure-83"><a href="#VaspBandStructure-83"><span class="linenos"> 83</span></a>        <span class="c1"># write the POTCAR file</span>
 </span><span id="VaspBandStructure-84"><a href="#VaspBandStructure-84"><span class="linenos"> 84</span></a>        <span class="n">Potcar</span><span class="o">.</span><span class="n">to_file_from_type</span><span class="p">(</span>
 </span><span id="VaspBandStructure-85"><a href="#VaspBandStructure-85"><span class="linenos"> 85</span></a>            <span class="n">structure_cleaned</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span>
-</span><span id="VaspBandStructure-86"><a href="#VaspBandStructure-86"><span class="linenos"> 86</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">functional</span><span class="p">,</span>
+</span><span id="VaspBandStructure-86"><a href="#VaspBandStructure-86"><span class="linenos"> 86</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">functional</span><span class="p">,</span>
 </span><span id="VaspBandStructure-87"><a href="#VaspBandStructure-87"><span class="linenos"> 87</span></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">),</span>
-</span><span id="VaspBandStructure-88"><a href="#VaspBandStructure-88"><span class="linenos"> 88</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">potcar_mappings</span><span class="p">,</span>
+</span><span id="VaspBandStructure-88"><a href="#VaspBandStructure-88"><span class="linenos"> 88</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">potcar_mappings</span><span class="p">,</span>
 </span><span id="VaspBandStructure-89"><a href="#VaspBandStructure-89"><span class="linenos"> 89</span></a>        <span class="p">)</span>
 </span><span id="VaspBandStructure-90"><a href="#VaspBandStructure-90"><span class="linenos"> 90</span></a>
-</span><span id="VaspBandStructure-91"><a href="#VaspBandStructure-91"><span class="linenos"> 91</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
-</span><span id="VaspBandStructure-92"><a href="#VaspBandStructure-92"><span class="linenos"> 92</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="VaspBandStructure-93"><a href="#VaspBandStructure-93"><span class="linenos"> 93</span></a><span class="sd">        In addition to writing the normal VASP output summary, this also plots</span>
-</span><span id="VaspBandStructure-94"><a href="#VaspBandStructure-94"><span class="linenos"> 94</span></a><span class="sd">        the bandstructure to &quot;band_structure.png&quot;</span>
-</span><span id="VaspBandStructure-95"><a href="#VaspBandStructure-95"><span class="linenos"> 95</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="VaspBandStructure-96"><a href="#VaspBandStructure-96"><span class="linenos"> 96</span></a>
-</span><span id="VaspBandStructure-97"><a href="#VaspBandStructure-97"><span class="linenos"> 97</span></a>        <span class="c1"># run the normal output</span>
-</span><span id="VaspBandStructure-98"><a href="#VaspBandStructure-98"><span class="linenos"> 98</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
-</span><span id="VaspBandStructure-99"><a href="#VaspBandStructure-99"><span class="linenos"> 99</span></a>
-</span><span id="VaspBandStructure-100"><a href="#VaspBandStructure-100"><span class="linenos">100</span></a>        <span class="n">bs_plotter</span> <span class="o">=</span> <span class="n">BSPlotter</span><span class="p">(</span><span class="n">vasprun</span><span class="o">.</span><span class="n">get_band_structure</span><span class="p">(</span><span class="n">line_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</span><span id="VaspBandStructure-101"><a href="#VaspBandStructure-101"><span class="linenos">101</span></a>        <span class="n">plot</span> <span class="o">=</span> <span class="n">bs_plotter</span><span class="o">.</span><span class="n">get_plot</span><span class="p">()</span>
-</span><span id="VaspBandStructure-102"><a href="#VaspBandStructure-102"><span class="linenos">102</span></a>        <span class="n">plot_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;band_structure.png&quot;</span><span class="p">)</span>
-</span><span id="VaspBandStructure-103"><a href="#VaspBandStructure-103"><span class="linenos">103</span></a>        <span class="n">plot</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_filename</span><span class="p">)</span>
+</span><span id="VaspBandStructure-91"><a href="#VaspBandStructure-91"><span class="linenos"> 91</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="VaspBandStructure-92"><a href="#VaspBandStructure-92"><span class="linenos"> 92</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
+</span><span id="VaspBandStructure-93"><a href="#VaspBandStructure-93"><span class="linenos"> 93</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="VaspBandStructure-94"><a href="#VaspBandStructure-94"><span class="linenos"> 94</span></a><span class="sd">        In addition to writing the normal VASP output summary, this also plots</span>
+</span><span id="VaspBandStructure-95"><a href="#VaspBandStructure-95"><span class="linenos"> 95</span></a><span class="sd">        the bandstructure to &quot;band_structure.png&quot;</span>
+</span><span id="VaspBandStructure-96"><a href="#VaspBandStructure-96"><span class="linenos"> 96</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="VaspBandStructure-97"><a href="#VaspBandStructure-97"><span class="linenos"> 97</span></a>
+</span><span id="VaspBandStructure-98"><a href="#VaspBandStructure-98"><span class="linenos"> 98</span></a>        <span class="c1"># run the normal output</span>
+</span><span id="VaspBandStructure-99"><a href="#VaspBandStructure-99"><span class="linenos"> 99</span></a>        <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
+</span><span id="VaspBandStructure-100"><a href="#VaspBandStructure-100"><span class="linenos">100</span></a>
+</span><span id="VaspBandStructure-101"><a href="#VaspBandStructure-101"><span class="linenos">101</span></a>        <span class="n">bs_plotter</span> <span class="o">=</span> <span class="n">BSPlotter</span><span class="p">(</span><span class="n">vasprun</span><span class="o">.</span><span class="n">get_band_structure</span><span class="p">(</span><span class="n">line_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</span><span id="VaspBandStructure-102"><a href="#VaspBandStructure-102"><span class="linenos">102</span></a>        <span class="n">plot</span> <span class="o">=</span> <span class="n">bs_plotter</span><span class="o">.</span><span class="n">get_plot</span><span class="p">()</span>
+</span><span id="VaspBandStructure-103"><a href="#VaspBandStructure-103"><span class="linenos">103</span></a>        <span class="n">plot_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;band_structure.png&quot;</span><span class="p">)</span>
+</span><span id="VaspBandStructure-104"><a href="#VaspBandStructure-104"><span class="linenos">104</span></a>        <span class="n">plot</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_filename</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -290,6 +295,33 @@ the a fixed charge density from a previous static energy calculation.</p>
 </div>
 
 
+                            <div id="VaspBandStructure.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">VaspBandStructure</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#VaspBandStructure.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="VaspBandStructure.required_files" class="classattr">
+                                <div class="attr variable">
+            <span class="name">required_files</span><span class="default_value"> = [&#39;INCAR&#39;, &#39;POTCAR&#39;, &#39;POSCAR&#39;, &#39;CHGCAR&#39;]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#VaspBandStructure.required_files"></a>
+    
+            <div class="docstring"><p>Before the command is executed, this list of files should be present
+in the working directory. This check will be made after <code><a href="#VaspBandStructure.setup">setup</a></code> is called
+and before <code><a href="#VaspBandStructure.execute">execute</a></code> is called. By default, no input files are required.</p>
+</div>
+
+
+                            </div>
                             <div id="VaspBandStructure.kpoints" class="classattr">
                                 <div class="attr variable">
             <span class="name">kpoints</span><span class="default_value"> = None</span>
@@ -320,33 +352,20 @@ is set here.</p>
 
 
                             </div>
-                            <div id="VaspBandStructure.pre_standardize_structure" class="classattr">
-                                <div class="attr variable">
-            <span class="name">pre_standardize_structure</span><span class="annotation">: bool</span><span class="default_value"> = True</span>
-
-        
-    </div>
-    <a class="headerlink" href="#VaspBandStructure.pre_standardize_structure"></a>
-    
-            <div class="docstring"><p>In some cases, we may want to convert the structure to the standard primitive
-of a structure. For example, this is required when calculating band structures
-and ensuring we have a standardized high-symmetry path.</p>
-</div>
-
-
-                            </div>
                             <div id="VaspBandStructure.setup" class="classattr">
                                         <input id="VaspBandStructure.setup-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+                    <div class="decorator">@classmethod</div>
+
         <span class="def">def</span>
-        <span class="name">setup</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">structure</span>, </span><span class="param"><span class="n">directory</span></span>)</span>
+        <span class="name">setup</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">cls</span>, </span><span class="param"><span class="n">directory</span>, </span><span class="param"><span class="n">structure</span>, </span><span class="param"><span class="o">**</span><span class="n">kwargs</span></span>)</span>
 
                 <label class="view-source-button" for="VaspBandStructure.setup-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#VaspBandStructure.setup"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="VaspBandStructure.setup-40"><a href="#VaspBandStructure.setup-40"><span class="linenos">40</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="VaspBandStructure.setup-39"><a href="#VaspBandStructure.setup-39"><span class="linenos">39</span></a>    <span class="nd">@classmethod</span>
+</span><span id="VaspBandStructure.setup-40"><a href="#VaspBandStructure.setup-40"><span class="linenos">40</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 </span><span id="VaspBandStructure.setup-41"><a href="#VaspBandStructure.setup-41"><span class="linenos">41</span></a>        <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="VaspBandStructure.setup-42"><a href="#VaspBandStructure.setup-42"><span class="linenos">42</span></a><span class="sd">        Writes input files for this calculation. This differs from the normal</span>
 </span><span id="VaspBandStructure.setup-43"><a href="#VaspBandStructure.setup-43"><span class="linenos">43</span></a><span class="sd">        VaspTask setup because it converts the structure to the standard primative</span>
@@ -354,14 +373,14 @@ and ensuring we have a standardized high-symmetry path.</p>
 </span><span id="VaspBandStructure.setup-45"><a href="#VaspBandStructure.setup-45"><span class="linenos">45</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="VaspBandStructure.setup-46"><a href="#VaspBandStructure.setup-46"><span class="linenos">46</span></a>
 </span><span id="VaspBandStructure.setup-47"><a href="#VaspBandStructure.setup-47"><span class="linenos">47</span></a>        <span class="c1"># run cleaning and standardizing on structure (based on class attributes)</span>
-</span><span id="VaspBandStructure.setup-48"><a href="#VaspBandStructure.setup-48"><span class="linenos">48</span></a>        <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_structure</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+</span><span id="VaspBandStructure.setup-48"><a href="#VaspBandStructure.setup-48"><span class="linenos">48</span></a>        <span class="n">structure_cleaned</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_clean_structure</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span><span id="VaspBandStructure.setup-49"><a href="#VaspBandStructure.setup-49"><span class="linenos">49</span></a>
 </span><span id="VaspBandStructure.setup-50"><a href="#VaspBandStructure.setup-50"><span class="linenos">50</span></a>        <span class="c1"># write the poscar file</span>
 </span><span id="VaspBandStructure.setup-51"><a href="#VaspBandStructure.setup-51"><span class="linenos">51</span></a>        <span class="n">Poscar</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">structure_cleaned</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">))</span>
 </span><span id="VaspBandStructure.setup-52"><a href="#VaspBandStructure.setup-52"><span class="linenos">52</span></a>
 </span><span id="VaspBandStructure.setup-53"><a href="#VaspBandStructure.setup-53"><span class="linenos">53</span></a>        <span class="c1"># Combine our base incar settings with those of our parallelization settings</span>
 </span><span id="VaspBandStructure.setup-54"><a href="#VaspBandStructure.setup-54"><span class="linenos">54</span></a>        <span class="c1"># and then write the incar file</span>
-</span><span id="VaspBandStructure.setup-55"><a href="#VaspBandStructure.setup-55"><span class="linenos">55</span></a>        <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">incar</span><span class="p">)</span> <span class="o">+</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">incar_parallel_settings</span><span class="p">)</span>
+</span><span id="VaspBandStructure.setup-55"><a href="#VaspBandStructure.setup-55"><span class="linenos">55</span></a>        <span class="n">incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">cls</span><span class="o">.</span><span class="n">incar</span><span class="p">)</span> <span class="o">+</span> <span class="n">Incar</span><span class="p">(</span><span class="o">**</span><span class="bp">cls</span><span class="o">.</span><span class="n">incar_parallel_settings</span><span class="p">)</span>
 </span><span id="VaspBandStructure.setup-56"><a href="#VaspBandStructure.setup-56"><span class="linenos">56</span></a>        <span class="n">incar</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
 </span><span id="VaspBandStructure.setup-57"><a href="#VaspBandStructure.setup-57"><span class="linenos">57</span></a>            <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;INCAR&quot;</span><span class="p">),</span>
 </span><span id="VaspBandStructure.setup-58"><a href="#VaspBandStructure.setup-58"><span class="linenos">58</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure_cleaned</span><span class="p">,</span>
@@ -372,10 +391,10 @@ and ensuring we have a standardized high-symmetry path.</p>
 </span><span id="VaspBandStructure.setup-63"><a href="#VaspBandStructure.setup-63"><span class="linenos">63</span></a>        <span class="c1"># functionality will be moved to the KptPath class and then extended to</span>
 </span><span id="VaspBandStructure.setup-64"><a href="#VaspBandStructure.setup-64"><span class="linenos">64</span></a>        <span class="c1"># vasp.inputs.kpoints class. Until those classes are ready, we just use</span>
 </span><span id="VaspBandStructure.setup-65"><a href="#VaspBandStructure.setup-65"><span class="linenos">65</span></a>        <span class="c1"># pymatgen here.</span>
-</span><span id="VaspBandStructure.setup-66"><a href="#VaspBandStructure.setup-66"><span class="linenos">66</span></a>        <span class="n">sym_prec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">incar</span> <span class="k">else</span> <span class="mf">1e-5</span>
+</span><span id="VaspBandStructure.setup-66"><a href="#VaspBandStructure.setup-66"><span class="linenos">66</span></a>        <span class="n">sym_prec</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SYMPREC&quot;</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">)</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">incar</span> <span class="k">else</span> <span class="mf">1e-5</span>
 </span><span id="VaspBandStructure.setup-67"><a href="#VaspBandStructure.setup-67"><span class="linenos">67</span></a>        <span class="n">kpath</span> <span class="o">=</span> <span class="n">HighSymmKpath</span><span class="p">(</span><span class="n">structure_cleaned</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="n">sym_prec</span><span class="p">)</span>
 </span><span id="VaspBandStructure.setup-68"><a href="#VaspBandStructure.setup-68"><span class="linenos">68</span></a>        <span class="n">frac_k_points</span><span class="p">,</span> <span class="n">k_points_labels</span> <span class="o">=</span> <span class="n">kpath</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">(</span>
-</span><span id="VaspBandStructure.setup-69"><a href="#VaspBandStructure.setup-69"><span class="linenos">69</span></a>            <span class="n">line_density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints_line_density</span><span class="p">,</span>
+</span><span id="VaspBandStructure.setup-69"><a href="#VaspBandStructure.setup-69"><span class="linenos">69</span></a>            <span class="n">line_density</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">kpoints_line_density</span><span class="p">,</span>
 </span><span id="VaspBandStructure.setup-70"><a href="#VaspBandStructure.setup-70"><span class="linenos">70</span></a>            <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 </span><span id="VaspBandStructure.setup-71"><a href="#VaspBandStructure.setup-71"><span class="linenos">71</span></a>        <span class="p">)</span>
 </span><span id="VaspBandStructure.setup-72"><a href="#VaspBandStructure.setup-72"><span class="linenos">72</span></a>        <span class="n">kpoints</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="p">(</span>
@@ -392,9 +411,9 @@ and ensuring we have a standardized high-symmetry path.</p>
 </span><span id="VaspBandStructure.setup-83"><a href="#VaspBandStructure.setup-83"><span class="linenos">83</span></a>        <span class="c1"># write the POTCAR file</span>
 </span><span id="VaspBandStructure.setup-84"><a href="#VaspBandStructure.setup-84"><span class="linenos">84</span></a>        <span class="n">Potcar</span><span class="o">.</span><span class="n">to_file_from_type</span><span class="p">(</span>
 </span><span id="VaspBandStructure.setup-85"><a href="#VaspBandStructure.setup-85"><span class="linenos">85</span></a>            <span class="n">structure_cleaned</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span>
-</span><span id="VaspBandStructure.setup-86"><a href="#VaspBandStructure.setup-86"><span class="linenos">86</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">functional</span><span class="p">,</span>
+</span><span id="VaspBandStructure.setup-86"><a href="#VaspBandStructure.setup-86"><span class="linenos">86</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">functional</span><span class="p">,</span>
 </span><span id="VaspBandStructure.setup-87"><a href="#VaspBandStructure.setup-87"><span class="linenos">87</span></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;POTCAR&quot;</span><span class="p">),</span>
-</span><span id="VaspBandStructure.setup-88"><a href="#VaspBandStructure.setup-88"><span class="linenos">88</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">potcar_mappings</span><span class="p">,</span>
+</span><span id="VaspBandStructure.setup-88"><a href="#VaspBandStructure.setup-88"><span class="linenos">88</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">potcar_mappings</span><span class="p">,</span>
 </span><span id="VaspBandStructure.setup-89"><a href="#VaspBandStructure.setup-89"><span class="linenos">89</span></a>        <span class="p">)</span>
 </span></pre></div>
 
@@ -409,48 +428,39 @@ first and then writes a KPOINT file with using a highsym path.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="VaspBandStructure.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="VaspBandStructure.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="VaspBandStructure.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="VaspBandStructure.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                    <div><dt><a href="../static_energy/materials_project.html#MatprojStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatprojStaticEnergy</a></dt>
+                                <dd id="VaspBandStructure.incar" class="variable"><a href="../static_energy/materials_project.html#MatprojStaticEnergy.incar">incar</a></dd>
 
             </div>
-            <div><dt><a href="../static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></dt>
-                                <dd id="VaspBandStructure.incar" class="variable"><a href="../static_energy/materials_project.html#MatProjStaticEnergy.incar">incar</a></dd>
-
-            </div>
-            <div><dt><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
-                                <dd id="VaspBandStructure.functional" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.functional">functional</a></dd>
-                <dd id="VaspBandStructure.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.potcar_mappings">potcar_mappings</a></dd>
-                <dd id="VaspBandStructure.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.error_handlers">error_handlers</a></dd>
+            <div><dt><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="VaspBandStructure.functional" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="VaspBandStructure.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="VaspBandStructure.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="VaspBandStructure.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="VaspBandStructure.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
+                                <dd id="VaspBandStructure.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
                 <dd id="VaspBandStructure.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
                 <dd id="VaspBandStructure.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
                 <dd id="VaspBandStructure.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="VaspBandStructure.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
                 <dd id="VaspBandStructure.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
                 <dd id="VaspBandStructure.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="VaspBandStructure.copy" class="function">copy</dd>
-                <dd id="VaspBandStructure.bind" class="function">bind</dd>
-                <dd id="VaspBandStructure.map" class="function">map</dd>
-                <dd id="VaspBandStructure.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="VaspBandStructure.set_upstream" class="function">set_upstream</dd>
-                <dd id="VaspBandStructure.set_downstream" class="function">set_downstream</dd>
-                <dd id="VaspBandStructure.inputs" class="function">inputs</dd>
-                <dd id="VaspBandStructure.outputs" class="function">outputs</dd>
-                <dd id="VaspBandStructure.pipe" class="function">pipe</dd>
-                <dd id="VaspBandStructure.serialize" class="function">serialize</dd>
-                <dd id="VaspBandStructure.is_equal" class="function">is_equal</dd>
-                <dd id="VaspBandStructure.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="VaspBandStructure.not_" class="function">not_</dd>
-                <dd id="VaspBandStructure.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="VaspBandStructure.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="VaspBandStructure.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="VaspBandStructure.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="VaspBandStructure.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="VaspBandStructure.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="VaspBandStructure.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="VaspBandStructure.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="VaspBandStructure.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="VaspBandStructure.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="VaspBandStructure.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="VaspBandStructure.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="VaspBandStructure.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

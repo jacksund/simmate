@@ -32,19 +32,22 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#MatProjHSERelaxation">MatProjHSERelaxation</a>
+                    <a class="class" href="#MatprojHSERelaxation">MatprojHSERelaxation</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#MatProjHSERelaxation.functional">functional</a>
+                                <a class="function" href="#MatprojHSERelaxation.__init__">MatprojHSERelaxation</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MatProjHSERelaxation.potcar_mappings">potcar_mappings</a>
+                                <a class="variable" href="#MatprojHSERelaxation.functional">functional</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MatProjHSERelaxation.incar">incar</a>
+                                <a class="variable" href="#MatprojHSERelaxation.potcar_mappings">potcar_mappings</a>
                         </li>
                         <li>
-                                <a class="variable" href="#MatProjHSERelaxation.error_handlers">error_handlers</a>
+                                <a class="variable" href="#MatprojHSERelaxation.incar">incar</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatprojHSERelaxation.error_handlers">error_handlers</a>
                         </li>
                 </ul>
 
@@ -114,7 +117,7 @@
 </span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="p">)</span>
 </span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
 </span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="k">class</span> <span class="nc">MatProjHSERelaxation</span><span class="p">(</span><span class="n">VaspTask</span><span class="p">):</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="k">class</span> <span class="nc">MatprojHSERelaxation</span><span class="p">(</span><span class="n">VaspTask</span><span class="p">):</span>
 </span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
 </span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="sd">    [MPHSERelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPHSERelaxSet).</span>
@@ -220,119 +223,119 @@
 
 
             </section>
-                <section id="MatProjHSERelaxation">
-                            <input id="MatProjHSERelaxation-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                <section id="MatprojHSERelaxation">
+                            <input id="MatprojHSERelaxation-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">MatProjHSERelaxation</span><wbr>(<span class="base"><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></span>):
+    <span class="name">MatprojHSERelaxation</span><wbr>(<span class="base"><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></span>):
 
-                <label class="view-source-button" for="MatProjHSERelaxation-view-source"><span>View Source</span></label>
+                <label class="view-source-button" for="MatprojHSERelaxation-view-source"><span>View Source</span></label>
 
     </div>
-    <a class="headerlink" href="#MatProjHSERelaxation"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="MatProjHSERelaxation-45"><a href="#MatProjHSERelaxation-45"><span class="linenos"> 45</span></a><span class="k">class</span> <span class="nc">MatProjHSERelaxation</span><span class="p">(</span><span class="n">VaspTask</span><span class="p">):</span>
-</span><span id="MatProjHSERelaxation-46"><a href="#MatProjHSERelaxation-46"><span class="linenos"> 46</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="MatProjHSERelaxation-47"><a href="#MatProjHSERelaxation-47"><span class="linenos"> 47</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
-</span><span id="MatProjHSERelaxation-48"><a href="#MatProjHSERelaxation-48"><span class="linenos"> 48</span></a><span class="sd">    [MPHSERelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPHSERelaxSet).</span>
-</span><span id="MatProjHSERelaxation-49"><a href="#MatProjHSERelaxation-49"><span class="linenos"> 49</span></a>
-</span><span id="MatProjHSERelaxation-50"><a href="#MatProjHSERelaxation-50"><span class="linenos"> 50</span></a><span class="sd">    Runs a VASP relaxation calculation using Materials Project HSE settings.</span>
-</span><span id="MatProjHSERelaxation-51"><a href="#MatProjHSERelaxation-51"><span class="linenos"> 51</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="MatProjHSERelaxation-52"><a href="#MatProjHSERelaxation-52"><span class="linenos"> 52</span></a>
-</span><span id="MatProjHSERelaxation-53"><a href="#MatProjHSERelaxation-53"><span class="linenos"> 53</span></a>    <span class="n">functional</span> <span class="o">=</span> <span class="s2">&quot;PBE&quot;</span>
-</span><span id="MatProjHSERelaxation-54"><a href="#MatProjHSERelaxation-54"><span class="linenos"> 54</span></a>    <span class="n">potcar_mappings</span> <span class="o">=</span> <span class="n">PBE_ELEMENT_MAPPINGS</span>
-</span><span id="MatProjHSERelaxation-55"><a href="#MatProjHSERelaxation-55"><span class="linenos"> 55</span></a>
-</span><span id="MatProjHSERelaxation-56"><a href="#MatProjHSERelaxation-56"><span class="linenos"> 56</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-</span><span id="MatProjHSERelaxation-57"><a href="#MatProjHSERelaxation-57"><span class="linenos"> 57</span></a>        <span class="n">ALGO</span><span class="o">=</span><span class="s2">&quot;All&quot;</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-58"><a href="#MatProjHSERelaxation-58"><span class="linenos"> 58</span></a>        <span class="n">EDIFF__per_atom</span><span class="o">=</span><span class="mf">5.0e-05</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-59"><a href="#MatProjHSERelaxation-59"><span class="linenos"> 59</span></a>        <span class="n">ENCUT</span><span class="o">=</span><span class="mi">520</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-60"><a href="#MatProjHSERelaxation-60"><span class="linenos"> 60</span></a>        <span class="n">HFSCREEN</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-61"><a href="#MatProjHSERelaxation-61"><span class="linenos"> 61</span></a>        <span class="n">IBRION</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-62"><a href="#MatProjHSERelaxation-62"><span class="linenos"> 62</span></a>        <span class="n">ICHARG</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-63"><a href="#MatProjHSERelaxation-63"><span class="linenos"> 63</span></a>        <span class="n">ISIF</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-64"><a href="#MatProjHSERelaxation-64"><span class="linenos"> 64</span></a>        <span class="n">ISMEAR</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-65"><a href="#MatProjHSERelaxation-65"><span class="linenos"> 65</span></a>        <span class="n">ISPIN</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-66"><a href="#MatProjHSERelaxation-66"><span class="linenos"> 66</span></a>        <span class="n">LHFCALC</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-67"><a href="#MatProjHSERelaxation-67"><span class="linenos"> 67</span></a>        <span class="n">LORBIT</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-68"><a href="#MatProjHSERelaxation-68"><span class="linenos"> 68</span></a>        <span class="n">LREAL</span><span class="o">=</span><span class="s2">&quot;Auto&quot;</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-69"><a href="#MatProjHSERelaxation-69"><span class="linenos"> 69</span></a>        <span class="n">LWAVE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-70"><a href="#MatProjHSERelaxation-70"><span class="linenos"> 70</span></a>        <span class="n">NELM</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-71"><a href="#MatProjHSERelaxation-71"><span class="linenos"> 71</span></a>        <span class="n">NSW</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-72"><a href="#MatProjHSERelaxation-72"><span class="linenos"> 72</span></a>        <span class="n">PREC</span><span class="o">=</span><span class="s2">&quot;Accurate&quot;</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-73"><a href="#MatProjHSERelaxation-73"><span class="linenos"> 73</span></a>        <span class="n">PRECFOCK</span><span class="o">=</span><span class="s2">&quot;Fast&quot;</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-74"><a href="#MatProjHSERelaxation-74"><span class="linenos"> 74</span></a>        <span class="n">SIGMA</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-75"><a href="#MatProjHSERelaxation-75"><span class="linenos"> 75</span></a>        <span class="n">KSPACING</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>  <span class="c1"># !!! This is where we are different from pymatgen right now</span>
-</span><span id="MatProjHSERelaxation-76"><a href="#MatProjHSERelaxation-76"><span class="linenos"> 76</span></a>        <span class="n">MAGMOM__smart_magmom</span><span class="o">=</span><span class="p">{</span>
-</span><span id="MatProjHSERelaxation-77"><a href="#MatProjHSERelaxation-77"><span class="linenos"> 77</span></a>            <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>  <span class="c1"># note this is different from the VASP default</span>
-</span><span id="MatProjHSERelaxation-78"><a href="#MatProjHSERelaxation-78"><span class="linenos"> 78</span></a>            <span class="s2">&quot;Ce&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-79"><a href="#MatProjHSERelaxation-79"><span class="linenos"> 79</span></a>            <span class="s2">&quot;Ce3+&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-80"><a href="#MatProjHSERelaxation-80"><span class="linenos"> 80</span></a>            <span class="s2">&quot;Co&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-81"><a href="#MatProjHSERelaxation-81"><span class="linenos"> 81</span></a>            <span class="s2">&quot;Co3+&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-82"><a href="#MatProjHSERelaxation-82"><span class="linenos"> 82</span></a>            <span class="s2">&quot;Co4+&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-83"><a href="#MatProjHSERelaxation-83"><span class="linenos"> 83</span></a>            <span class="s2">&quot;Cr&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-84"><a href="#MatProjHSERelaxation-84"><span class="linenos"> 84</span></a>            <span class="s2">&quot;Dy3+&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-85"><a href="#MatProjHSERelaxation-85"><span class="linenos"> 85</span></a>            <span class="s2">&quot;Er3+&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-86"><a href="#MatProjHSERelaxation-86"><span class="linenos"> 86</span></a>            <span class="s2">&quot;Eu&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-87"><a href="#MatProjHSERelaxation-87"><span class="linenos"> 87</span></a>            <span class="s2">&quot;Eu2+&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-88"><a href="#MatProjHSERelaxation-88"><span class="linenos"> 88</span></a>            <span class="s2">&quot;Eu3+&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-89"><a href="#MatProjHSERelaxation-89"><span class="linenos"> 89</span></a>            <span class="s2">&quot;Fe&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-90"><a href="#MatProjHSERelaxation-90"><span class="linenos"> 90</span></a>            <span class="s2">&quot;Gd3+&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-91"><a href="#MatProjHSERelaxation-91"><span class="linenos"> 91</span></a>            <span class="s2">&quot;Ho3+&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-92"><a href="#MatProjHSERelaxation-92"><span class="linenos"> 92</span></a>            <span class="s2">&quot;La3+&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-93"><a href="#MatProjHSERelaxation-93"><span class="linenos"> 93</span></a>            <span class="s2">&quot;Lu3+&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-94"><a href="#MatProjHSERelaxation-94"><span class="linenos"> 94</span></a>            <span class="s2">&quot;Mn&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-95"><a href="#MatProjHSERelaxation-95"><span class="linenos"> 95</span></a>            <span class="s2">&quot;Mn3+&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-96"><a href="#MatProjHSERelaxation-96"><span class="linenos"> 96</span></a>            <span class="s2">&quot;Mn4+&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-97"><a href="#MatProjHSERelaxation-97"><span class="linenos"> 97</span></a>            <span class="s2">&quot;Mo&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-98"><a href="#MatProjHSERelaxation-98"><span class="linenos"> 98</span></a>            <span class="s2">&quot;Nd3+&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-99"><a href="#MatProjHSERelaxation-99"><span class="linenos"> 99</span></a>            <span class="s2">&quot;Ni&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-100"><a href="#MatProjHSERelaxation-100"><span class="linenos">100</span></a>            <span class="s2">&quot;Pm3+&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-101"><a href="#MatProjHSERelaxation-101"><span class="linenos">101</span></a>            <span class="s2">&quot;Pr3+&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-102"><a href="#MatProjHSERelaxation-102"><span class="linenos">102</span></a>            <span class="s2">&quot;Sm3+&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-103"><a href="#MatProjHSERelaxation-103"><span class="linenos">103</span></a>            <span class="s2">&quot;Tb3+&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-104"><a href="#MatProjHSERelaxation-104"><span class="linenos">104</span></a>            <span class="s2">&quot;Tm3+&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-105"><a href="#MatProjHSERelaxation-105"><span class="linenos">105</span></a>            <span class="s2">&quot;V&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-106"><a href="#MatProjHSERelaxation-106"><span class="linenos">106</span></a>            <span class="s2">&quot;W&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-107"><a href="#MatProjHSERelaxation-107"><span class="linenos">107</span></a>            <span class="s2">&quot;Yb3+&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-108"><a href="#MatProjHSERelaxation-108"><span class="linenos">108</span></a>        <span class="p">},</span>
-</span><span id="MatProjHSERelaxation-109"><a href="#MatProjHSERelaxation-109"><span class="linenos">109</span></a>        <span class="n">LMAXMIX__smart_lmaxmix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="MatProjHSERelaxation-110"><a href="#MatProjHSERelaxation-110"><span class="linenos">110</span></a>    <span class="p">)</span>
-</span><span id="MatProjHSERelaxation-111"><a href="#MatProjHSERelaxation-111"><span class="linenos">111</span></a>
-</span><span id="MatProjHSERelaxation-112"><a href="#MatProjHSERelaxation-112"><span class="linenos">112</span></a>    <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="MatProjHSERelaxation-113"><a href="#MatProjHSERelaxation-113"><span class="linenos">113</span></a>        <span class="n">TetrahedronMesh</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-114"><a href="#MatProjHSERelaxation-114"><span class="linenos">114</span></a>        <span class="n">RotationMatrix</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-115"><a href="#MatProjHSERelaxation-115"><span class="linenos">115</span></a>        <span class="n">Brmix</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-116"><a href="#MatProjHSERelaxation-116"><span class="linenos">116</span></a>        <span class="n">Zpotrf</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-117"><a href="#MatProjHSERelaxation-117"><span class="linenos">117</span></a>        <span class="n">SubspaceMatrix</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-118"><a href="#MatProjHSERelaxation-118"><span class="linenos">118</span></a>        <span class="n">IncorrectShift</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-119"><a href="#MatProjHSERelaxation-119"><span class="linenos">119</span></a>        <span class="n">RealOptlay</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-120"><a href="#MatProjHSERelaxation-120"><span class="linenos">120</span></a>        <span class="n">Tetirr</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-121"><a href="#MatProjHSERelaxation-121"><span class="linenos">121</span></a>        <span class="n">RotationNonIntMatrix</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-122"><a href="#MatProjHSERelaxation-122"><span class="linenos">122</span></a>        <span class="n">LongVector</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-123"><a href="#MatProjHSERelaxation-123"><span class="linenos">123</span></a>        <span class="n">TripleProduct</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-124"><a href="#MatProjHSERelaxation-124"><span class="linenos">124</span></a>        <span class="n">Pricel</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-125"><a href="#MatProjHSERelaxation-125"><span class="linenos">125</span></a>        <span class="n">Brions</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-126"><a href="#MatProjHSERelaxation-126"><span class="linenos">126</span></a>        <span class="n">Zbrent</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-127"><a href="#MatProjHSERelaxation-127"><span class="linenos">127</span></a>        <span class="n">InsufficientBands</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-128"><a href="#MatProjHSERelaxation-128"><span class="linenos">128</span></a>        <span class="n">Pssyevx</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-129"><a href="#MatProjHSERelaxation-129"><span class="linenos">129</span></a>        <span class="n">Eddrmm</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-130"><a href="#MatProjHSERelaxation-130"><span class="linenos">130</span></a>        <span class="n">Edddav</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-131"><a href="#MatProjHSERelaxation-131"><span class="linenos">131</span></a>        <span class="n">Edwav</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-132"><a href="#MatProjHSERelaxation-132"><span class="linenos">132</span></a>        <span class="n">Zheev</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-133"><a href="#MatProjHSERelaxation-133"><span class="linenos">133</span></a>        <span class="n">ElfKpar</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-134"><a href="#MatProjHSERelaxation-134"><span class="linenos">134</span></a>        <span class="n">Rhosyg</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-135"><a href="#MatProjHSERelaxation-135"><span class="linenos">135</span></a>        <span class="n">Posmap</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-136"><a href="#MatProjHSERelaxation-136"><span class="linenos">136</span></a>        <span class="n">PointGroup</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-137"><a href="#MatProjHSERelaxation-137"><span class="linenos">137</span></a>        <span class="n">SymprecNoise</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-138"><a href="#MatProjHSERelaxation-138"><span class="linenos">138</span></a>        <span class="n">IncorrectSmearing</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-139"><a href="#MatProjHSERelaxation-139"><span class="linenos">139</span></a>        <span class="n">MeshSymmetry</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-140"><a href="#MatProjHSERelaxation-140"><span class="linenos">140</span></a>        <span class="n">Unconverged</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-141"><a href="#MatProjHSERelaxation-141"><span class="linenos">141</span></a>        <span class="n">NonConverging</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-142"><a href="#MatProjHSERelaxation-142"><span class="linenos">142</span></a>        <span class="n">Potim</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-143"><a href="#MatProjHSERelaxation-143"><span class="linenos">143</span></a>        <span class="n">PositiveEnergy</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-144"><a href="#MatProjHSERelaxation-144"><span class="linenos">144</span></a>        <span class="n">Frozen</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-145"><a href="#MatProjHSERelaxation-145"><span class="linenos">145</span></a>        <span class="n">LargeSigma</span><span class="p">(),</span>
-</span><span id="MatProjHSERelaxation-146"><a href="#MatProjHSERelaxation-146"><span class="linenos">146</span></a>    <span class="p">]</span>
+    <a class="headerlink" href="#MatprojHSERelaxation"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="MatprojHSERelaxation-45"><a href="#MatprojHSERelaxation-45"><span class="linenos"> 45</span></a><span class="k">class</span> <span class="nc">MatprojHSERelaxation</span><span class="p">(</span><span class="n">VaspTask</span><span class="p">):</span>
+</span><span id="MatprojHSERelaxation-46"><a href="#MatprojHSERelaxation-46"><span class="linenos"> 46</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="MatprojHSERelaxation-47"><a href="#MatprojHSERelaxation-47"><span class="linenos"> 47</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
+</span><span id="MatprojHSERelaxation-48"><a href="#MatprojHSERelaxation-48"><span class="linenos"> 48</span></a><span class="sd">    [MPHSERelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPHSERelaxSet).</span>
+</span><span id="MatprojHSERelaxation-49"><a href="#MatprojHSERelaxation-49"><span class="linenos"> 49</span></a>
+</span><span id="MatprojHSERelaxation-50"><a href="#MatprojHSERelaxation-50"><span class="linenos"> 50</span></a><span class="sd">    Runs a VASP relaxation calculation using Materials Project HSE settings.</span>
+</span><span id="MatprojHSERelaxation-51"><a href="#MatprojHSERelaxation-51"><span class="linenos"> 51</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="MatprojHSERelaxation-52"><a href="#MatprojHSERelaxation-52"><span class="linenos"> 52</span></a>
+</span><span id="MatprojHSERelaxation-53"><a href="#MatprojHSERelaxation-53"><span class="linenos"> 53</span></a>    <span class="n">functional</span> <span class="o">=</span> <span class="s2">&quot;PBE&quot;</span>
+</span><span id="MatprojHSERelaxation-54"><a href="#MatprojHSERelaxation-54"><span class="linenos"> 54</span></a>    <span class="n">potcar_mappings</span> <span class="o">=</span> <span class="n">PBE_ELEMENT_MAPPINGS</span>
+</span><span id="MatprojHSERelaxation-55"><a href="#MatprojHSERelaxation-55"><span class="linenos"> 55</span></a>
+</span><span id="MatprojHSERelaxation-56"><a href="#MatprojHSERelaxation-56"><span class="linenos"> 56</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+</span><span id="MatprojHSERelaxation-57"><a href="#MatprojHSERelaxation-57"><span class="linenos"> 57</span></a>        <span class="n">ALGO</span><span class="o">=</span><span class="s2">&quot;All&quot;</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-58"><a href="#MatprojHSERelaxation-58"><span class="linenos"> 58</span></a>        <span class="n">EDIFF__per_atom</span><span class="o">=</span><span class="mf">5.0e-05</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-59"><a href="#MatprojHSERelaxation-59"><span class="linenos"> 59</span></a>        <span class="n">ENCUT</span><span class="o">=</span><span class="mi">520</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-60"><a href="#MatprojHSERelaxation-60"><span class="linenos"> 60</span></a>        <span class="n">HFSCREEN</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-61"><a href="#MatprojHSERelaxation-61"><span class="linenos"> 61</span></a>        <span class="n">IBRION</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-62"><a href="#MatprojHSERelaxation-62"><span class="linenos"> 62</span></a>        <span class="n">ICHARG</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-63"><a href="#MatprojHSERelaxation-63"><span class="linenos"> 63</span></a>        <span class="n">ISIF</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-64"><a href="#MatprojHSERelaxation-64"><span class="linenos"> 64</span></a>        <span class="n">ISMEAR</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-65"><a href="#MatprojHSERelaxation-65"><span class="linenos"> 65</span></a>        <span class="n">ISPIN</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-66"><a href="#MatprojHSERelaxation-66"><span class="linenos"> 66</span></a>        <span class="n">LHFCALC</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-67"><a href="#MatprojHSERelaxation-67"><span class="linenos"> 67</span></a>        <span class="n">LORBIT</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-68"><a href="#MatprojHSERelaxation-68"><span class="linenos"> 68</span></a>        <span class="n">LREAL</span><span class="o">=</span><span class="s2">&quot;Auto&quot;</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-69"><a href="#MatprojHSERelaxation-69"><span class="linenos"> 69</span></a>        <span class="n">LWAVE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-70"><a href="#MatprojHSERelaxation-70"><span class="linenos"> 70</span></a>        <span class="n">NELM</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-71"><a href="#MatprojHSERelaxation-71"><span class="linenos"> 71</span></a>        <span class="n">NSW</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-72"><a href="#MatprojHSERelaxation-72"><span class="linenos"> 72</span></a>        <span class="n">PREC</span><span class="o">=</span><span class="s2">&quot;Accurate&quot;</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-73"><a href="#MatprojHSERelaxation-73"><span class="linenos"> 73</span></a>        <span class="n">PRECFOCK</span><span class="o">=</span><span class="s2">&quot;Fast&quot;</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-74"><a href="#MatprojHSERelaxation-74"><span class="linenos"> 74</span></a>        <span class="n">SIGMA</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-75"><a href="#MatprojHSERelaxation-75"><span class="linenos"> 75</span></a>        <span class="n">KSPACING</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>  <span class="c1"># !!! This is where we are different from pymatgen right now</span>
+</span><span id="MatprojHSERelaxation-76"><a href="#MatprojHSERelaxation-76"><span class="linenos"> 76</span></a>        <span class="n">MAGMOM__smart_magmom</span><span class="o">=</span><span class="p">{</span>
+</span><span id="MatprojHSERelaxation-77"><a href="#MatprojHSERelaxation-77"><span class="linenos"> 77</span></a>            <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>  <span class="c1"># note this is different from the VASP default</span>
+</span><span id="MatprojHSERelaxation-78"><a href="#MatprojHSERelaxation-78"><span class="linenos"> 78</span></a>            <span class="s2">&quot;Ce&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-79"><a href="#MatprojHSERelaxation-79"><span class="linenos"> 79</span></a>            <span class="s2">&quot;Ce3+&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-80"><a href="#MatprojHSERelaxation-80"><span class="linenos"> 80</span></a>            <span class="s2">&quot;Co&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-81"><a href="#MatprojHSERelaxation-81"><span class="linenos"> 81</span></a>            <span class="s2">&quot;Co3+&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-82"><a href="#MatprojHSERelaxation-82"><span class="linenos"> 82</span></a>            <span class="s2">&quot;Co4+&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-83"><a href="#MatprojHSERelaxation-83"><span class="linenos"> 83</span></a>            <span class="s2">&quot;Cr&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-84"><a href="#MatprojHSERelaxation-84"><span class="linenos"> 84</span></a>            <span class="s2">&quot;Dy3+&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-85"><a href="#MatprojHSERelaxation-85"><span class="linenos"> 85</span></a>            <span class="s2">&quot;Er3+&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-86"><a href="#MatprojHSERelaxation-86"><span class="linenos"> 86</span></a>            <span class="s2">&quot;Eu&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-87"><a href="#MatprojHSERelaxation-87"><span class="linenos"> 87</span></a>            <span class="s2">&quot;Eu2+&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-88"><a href="#MatprojHSERelaxation-88"><span class="linenos"> 88</span></a>            <span class="s2">&quot;Eu3+&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-89"><a href="#MatprojHSERelaxation-89"><span class="linenos"> 89</span></a>            <span class="s2">&quot;Fe&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-90"><a href="#MatprojHSERelaxation-90"><span class="linenos"> 90</span></a>            <span class="s2">&quot;Gd3+&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-91"><a href="#MatprojHSERelaxation-91"><span class="linenos"> 91</span></a>            <span class="s2">&quot;Ho3+&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-92"><a href="#MatprojHSERelaxation-92"><span class="linenos"> 92</span></a>            <span class="s2">&quot;La3+&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-93"><a href="#MatprojHSERelaxation-93"><span class="linenos"> 93</span></a>            <span class="s2">&quot;Lu3+&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-94"><a href="#MatprojHSERelaxation-94"><span class="linenos"> 94</span></a>            <span class="s2">&quot;Mn&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-95"><a href="#MatprojHSERelaxation-95"><span class="linenos"> 95</span></a>            <span class="s2">&quot;Mn3+&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-96"><a href="#MatprojHSERelaxation-96"><span class="linenos"> 96</span></a>            <span class="s2">&quot;Mn4+&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-97"><a href="#MatprojHSERelaxation-97"><span class="linenos"> 97</span></a>            <span class="s2">&quot;Mo&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-98"><a href="#MatprojHSERelaxation-98"><span class="linenos"> 98</span></a>            <span class="s2">&quot;Nd3+&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-99"><a href="#MatprojHSERelaxation-99"><span class="linenos"> 99</span></a>            <span class="s2">&quot;Ni&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-100"><a href="#MatprojHSERelaxation-100"><span class="linenos">100</span></a>            <span class="s2">&quot;Pm3+&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-101"><a href="#MatprojHSERelaxation-101"><span class="linenos">101</span></a>            <span class="s2">&quot;Pr3+&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-102"><a href="#MatprojHSERelaxation-102"><span class="linenos">102</span></a>            <span class="s2">&quot;Sm3+&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-103"><a href="#MatprojHSERelaxation-103"><span class="linenos">103</span></a>            <span class="s2">&quot;Tb3+&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-104"><a href="#MatprojHSERelaxation-104"><span class="linenos">104</span></a>            <span class="s2">&quot;Tm3+&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-105"><a href="#MatprojHSERelaxation-105"><span class="linenos">105</span></a>            <span class="s2">&quot;V&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-106"><a href="#MatprojHSERelaxation-106"><span class="linenos">106</span></a>            <span class="s2">&quot;W&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-107"><a href="#MatprojHSERelaxation-107"><span class="linenos">107</span></a>            <span class="s2">&quot;Yb3+&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-108"><a href="#MatprojHSERelaxation-108"><span class="linenos">108</span></a>        <span class="p">},</span>
+</span><span id="MatprojHSERelaxation-109"><a href="#MatprojHSERelaxation-109"><span class="linenos">109</span></a>        <span class="n">LMAXMIX__smart_lmaxmix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="MatprojHSERelaxation-110"><a href="#MatprojHSERelaxation-110"><span class="linenos">110</span></a>    <span class="p">)</span>
+</span><span id="MatprojHSERelaxation-111"><a href="#MatprojHSERelaxation-111"><span class="linenos">111</span></a>
+</span><span id="MatprojHSERelaxation-112"><a href="#MatprojHSERelaxation-112"><span class="linenos">112</span></a>    <span class="n">error_handlers</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="MatprojHSERelaxation-113"><a href="#MatprojHSERelaxation-113"><span class="linenos">113</span></a>        <span class="n">TetrahedronMesh</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-114"><a href="#MatprojHSERelaxation-114"><span class="linenos">114</span></a>        <span class="n">RotationMatrix</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-115"><a href="#MatprojHSERelaxation-115"><span class="linenos">115</span></a>        <span class="n">Brmix</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-116"><a href="#MatprojHSERelaxation-116"><span class="linenos">116</span></a>        <span class="n">Zpotrf</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-117"><a href="#MatprojHSERelaxation-117"><span class="linenos">117</span></a>        <span class="n">SubspaceMatrix</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-118"><a href="#MatprojHSERelaxation-118"><span class="linenos">118</span></a>        <span class="n">IncorrectShift</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-119"><a href="#MatprojHSERelaxation-119"><span class="linenos">119</span></a>        <span class="n">RealOptlay</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-120"><a href="#MatprojHSERelaxation-120"><span class="linenos">120</span></a>        <span class="n">Tetirr</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-121"><a href="#MatprojHSERelaxation-121"><span class="linenos">121</span></a>        <span class="n">RotationNonIntMatrix</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-122"><a href="#MatprojHSERelaxation-122"><span class="linenos">122</span></a>        <span class="n">LongVector</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-123"><a href="#MatprojHSERelaxation-123"><span class="linenos">123</span></a>        <span class="n">TripleProduct</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-124"><a href="#MatprojHSERelaxation-124"><span class="linenos">124</span></a>        <span class="n">Pricel</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-125"><a href="#MatprojHSERelaxation-125"><span class="linenos">125</span></a>        <span class="n">Brions</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-126"><a href="#MatprojHSERelaxation-126"><span class="linenos">126</span></a>        <span class="n">Zbrent</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-127"><a href="#MatprojHSERelaxation-127"><span class="linenos">127</span></a>        <span class="n">InsufficientBands</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-128"><a href="#MatprojHSERelaxation-128"><span class="linenos">128</span></a>        <span class="n">Pssyevx</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-129"><a href="#MatprojHSERelaxation-129"><span class="linenos">129</span></a>        <span class="n">Eddrmm</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-130"><a href="#MatprojHSERelaxation-130"><span class="linenos">130</span></a>        <span class="n">Edddav</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-131"><a href="#MatprojHSERelaxation-131"><span class="linenos">131</span></a>        <span class="n">Edwav</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-132"><a href="#MatprojHSERelaxation-132"><span class="linenos">132</span></a>        <span class="n">Zheev</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-133"><a href="#MatprojHSERelaxation-133"><span class="linenos">133</span></a>        <span class="n">ElfKpar</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-134"><a href="#MatprojHSERelaxation-134"><span class="linenos">134</span></a>        <span class="n">Rhosyg</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-135"><a href="#MatprojHSERelaxation-135"><span class="linenos">135</span></a>        <span class="n">Posmap</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-136"><a href="#MatprojHSERelaxation-136"><span class="linenos">136</span></a>        <span class="n">PointGroup</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-137"><a href="#MatprojHSERelaxation-137"><span class="linenos">137</span></a>        <span class="n">SymprecNoise</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-138"><a href="#MatprojHSERelaxation-138"><span class="linenos">138</span></a>        <span class="n">IncorrectSmearing</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-139"><a href="#MatprojHSERelaxation-139"><span class="linenos">139</span></a>        <span class="n">MeshSymmetry</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-140"><a href="#MatprojHSERelaxation-140"><span class="linenos">140</span></a>        <span class="n">Unconverged</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-141"><a href="#MatprojHSERelaxation-141"><span class="linenos">141</span></a>        <span class="n">NonConverging</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-142"><a href="#MatprojHSERelaxation-142"><span class="linenos">142</span></a>        <span class="n">Potim</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-143"><a href="#MatprojHSERelaxation-143"><span class="linenos">143</span></a>        <span class="n">PositiveEnergy</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-144"><a href="#MatprojHSERelaxation-144"><span class="linenos">144</span></a>        <span class="n">Frozen</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-145"><a href="#MatprojHSERelaxation-145"><span class="linenos">145</span></a>        <span class="n">LargeSigma</span><span class="p">(),</span>
+</span><span id="MatprojHSERelaxation-146"><a href="#MatprojHSERelaxation-146"><span class="linenos">146</span></a>    <span class="p">]</span>
 </span></pre></div>
 
 
@@ -343,13 +346,25 @@
 </div>
 
 
-                            <div id="MatProjHSERelaxation.functional" class="classattr">
+                            <div id="MatprojHSERelaxation.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MatprojHSERelaxation</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatprojHSERelaxation.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="MatprojHSERelaxation.functional" class="classattr">
                                 <div class="attr variable">
             <span class="name">functional</span><span class="annotation">: str</span><span class="default_value"> = &#39;PBE&#39;</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjHSERelaxation.functional"></a>
+    <a class="headerlink" href="#MatprojHSERelaxation.functional"></a>
     
             <div class="docstring"><p>This directs which Potcar files to grab. You would set this to a string
 of what you want, such as "PBE", "PBE_GW", or "LDA".</p>
@@ -357,13 +372,13 @@ of what you want, such as "PBE", "PBE_GW", or "LDA".</p>
 
 
                             </div>
-                            <div id="MatProjHSERelaxation.potcar_mappings" class="classattr">
+                            <div id="MatprojHSERelaxation.potcar_mappings" class="classattr">
                                 <div class="attr variable">
             <span class="name">potcar_mappings</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;Ac&#39;: &#39;Ac&#39;, &#39;Ag&#39;: &#39;Ag&#39;, &#39;Al&#39;: &#39;Al&#39;, &#39;Ar&#39;: &#39;Ar&#39;, &#39;As&#39;: &#39;As&#39;, &#39;Au&#39;: &#39;Au&#39;, &#39;B&#39;: &#39;B&#39;, &#39;Ba&#39;: &#39;Ba_sv&#39;, &#39;Be&#39;: &#39;Be_sv&#39;, &#39;Bi&#39;: &#39;Bi&#39;, &#39;Br&#39;: &#39;Br&#39;, &#39;C&#39;: &#39;C&#39;, &#39;Ca&#39;: &#39;Ca_sv&#39;, &#39;Cd&#39;: &#39;Cd&#39;, &#39;Ce&#39;: &#39;Ce&#39;, &#39;Cl&#39;: &#39;Cl&#39;, &#39;Co&#39;: &#39;Co&#39;, &#39;Cr&#39;: &#39;Cr_pv&#39;, &#39;Cs&#39;: &#39;Cs_sv&#39;, &#39;Cu&#39;: &#39;Cu_pv&#39;, &#39;Dy&#39;: &#39;Dy_3&#39;, &#39;Er&#39;: &#39;Er_3&#39;, &#39;Eu&#39;: &#39;Eu&#39;, &#39;F&#39;: &#39;F&#39;, &#39;Fe&#39;: &#39;Fe_pv&#39;, &#39;Ga&#39;: &#39;Ga_d&#39;, &#39;Gd&#39;: &#39;Gd&#39;, &#39;Ge&#39;: &#39;Ge_d&#39;, &#39;H&#39;: &#39;H&#39;, &#39;He&#39;: &#39;He&#39;, &#39;Hf&#39;: &#39;Hf_pv&#39;, &#39;Hg&#39;: &#39;Hg&#39;, &#39;Ho&#39;: &#39;Ho_3&#39;, &#39;I&#39;: &#39;I&#39;, &#39;In&#39;: &#39;In_d&#39;, &#39;Ir&#39;: &#39;Ir&#39;, &#39;K&#39;: &#39;K_sv&#39;, &#39;Kr&#39;: &#39;Kr&#39;, &#39;La&#39;: &#39;La&#39;, &#39;Li&#39;: &#39;Li_sv&#39;, &#39;Lu&#39;: &#39;Lu_3&#39;, &#39;Mg&#39;: &#39;Mg_pv&#39;, &#39;Mn&#39;: &#39;Mn_pv&#39;, &#39;Mo&#39;: &#39;Mo_pv&#39;, &#39;N&#39;: &#39;N&#39;, &#39;Na&#39;: &#39;Na_pv&#39;, &#39;Nb&#39;: &#39;Nb_pv&#39;, &#39;Nd&#39;: &#39;Nd_3&#39;, &#39;Ne&#39;: &#39;Ne&#39;, &#39;Ni&#39;: &#39;Ni_pv&#39;, &#39;Np&#39;: &#39;Np&#39;, &#39;O&#39;: &#39;O&#39;, &#39;Os&#39;: &#39;Os_pv&#39;, &#39;P&#39;: &#39;P&#39;, &#39;Pa&#39;: &#39;Pa&#39;, &#39;Pb&#39;: &#39;Pb_d&#39;, &#39;Pd&#39;: &#39;Pd&#39;, &#39;Pm&#39;: &#39;Pm_3&#39;, &#39;Pr&#39;: &#39;Pr_3&#39;, &#39;Pt&#39;: &#39;Pt&#39;, &#39;Pu&#39;: &#39;Pu&#39;, &#39;Rb&#39;: &#39;Rb_sv&#39;, &#39;Re&#39;: &#39;Re_pv&#39;, &#39;Rh&#39;: &#39;Rh_pv&#39;, &#39;Ru&#39;: &#39;Ru_pv&#39;, &#39;S&#39;: &#39;S&#39;, &#39;Sb&#39;: &#39;Sb&#39;, &#39;Sc&#39;: &#39;Sc_sv&#39;, &#39;Se&#39;: &#39;Se&#39;, &#39;Si&#39;: &#39;Si&#39;, &#39;Sm&#39;: &#39;Sm_3&#39;, &#39;Sn&#39;: &#39;Sn_d&#39;, &#39;Sr&#39;: &#39;Sr_sv&#39;, &#39;Ta&#39;: &#39;Ta_pv&#39;, &#39;Tb&#39;: &#39;Tb_3&#39;, &#39;Tc&#39;: &#39;Tc_pv&#39;, &#39;Te&#39;: &#39;Te&#39;, &#39;Th&#39;: &#39;Th&#39;, &#39;Ti&#39;: &#39;Ti_pv&#39;, &#39;Tl&#39;: &#39;Tl_d&#39;, &#39;Tm&#39;: &#39;Tm_3&#39;, &#39;U&#39;: &#39;U&#39;, &#39;V&#39;: &#39;V_pv&#39;, &#39;W&#39;: &#39;W_pv&#39;, &#39;Xe&#39;: &#39;Xe&#39;, &#39;Y&#39;: &#39;Y_sv&#39;, &#39;Yb&#39;: &#39;Yb_2&#39;, &#39;Zn&#39;: &#39;Zn&#39;, &#39;Zr&#39;: &#39;Zr_sv&#39;}</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjHSERelaxation.potcar_mappings"></a>
+    <a class="headerlink" href="#MatprojHSERelaxation.potcar_mappings"></a>
     
             <div class="docstring"><p>This is an optional parameter to override Simmate's default selection of
 potentials based off of the functional chosen. The defaults are located
@@ -386,13 +401,13 @@ For example:</p>
 
 
                             </div>
-                            <div id="MatProjHSERelaxation.incar" class="classattr">
+                            <div id="MatprojHSERelaxation.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;All&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;HFSCREEN&#39;: 0.2, &#39;IBRION&#39;: 2, &#39;ICHARG&#39;: 1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: 0, &#39;ISPIN&#39;: 2, &#39;LHFCALC&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 99, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;PRECFOCK&#39;: &#39;Fast&#39;, &#39;SIGMA&#39;: 0.05, &#39;KSPACING&#39;: 0.4, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;LMAXMIX__smart_lmaxmix&#39;: True}</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjHSERelaxation.incar"></a>
+    <a class="headerlink" href="#MatprojHSERelaxation.incar"></a>
     
             <div class="docstring"><p>This sets the default vasp settings from a dictionary. This is the one thing
 you <em>must</em> set when subclassing VaspTask. An example is:</p>
@@ -403,13 +418,13 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
 
 
                             </div>
-                            <div id="MatProjHSERelaxation.error_handlers" class="classattr">
+                            <div id="MatprojHSERelaxation.error_handlers" class="classattr">
                                 <div class="attr variable">
             <span class="name">error_handlers</span><span class="annotation">: List[<a href="../../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a>]</span><span class="default_value"> = [&lt;<a href="../../error_handlers/tetrahedron_mesh.html#TetrahedronMesh">simmate.calculators.vasp.error_handlers.tetrahedron_mesh.TetrahedronMesh</a> object&gt;, &lt;<a href="../../error_handlers/rotation_matrix.html#RotationMatrix">simmate.calculators.vasp.error_handlers.rotation_matrix.RotationMatrix</a> object&gt;, &lt;<a href="../../error_handlers/brmix.html#Brmix">simmate.calculators.vasp.error_handlers.brmix.Brmix</a> object&gt;, &lt;<a href="../../error_handlers/zpotrf.html#Zpotrf">simmate.calculators.vasp.error_handlers.zpotrf.Zpotrf</a> object&gt;, &lt;<a href="../../error_handlers/subspace_matrix.html#SubspaceMatrix">simmate.calculators.vasp.error_handlers.subspace_matrix.SubspaceMatrix</a> object&gt;, &lt;<a href="../../error_handlers/incorrect_shift.html#IncorrectShift">simmate.calculators.vasp.error_handlers.incorrect_shift.IncorrectShift</a> object&gt;, &lt;<a href="../../error_handlers/real_optlay.html#RealOptlay">simmate.calculators.vasp.error_handlers.real_optlay.RealOptlay</a> object&gt;, &lt;<a href="../../error_handlers/tetirr.html#Tetirr">simmate.calculators.vasp.error_handlers.tetirr.Tetirr</a> object&gt;, &lt;<a href="../../error_handlers/rotation_matrix_nonint.html#RotationNonIntMatrix">simmate.calculators.vasp.error_handlers.rotation_matrix_nonint.RotationNonIntMatrix</a> object&gt;, &lt;<a href="../../error_handlers/long_vector.html#LongVector">simmate.calculators.vasp.error_handlers.long_vector.LongVector</a> object&gt;, &lt;<a href="../../error_handlers/triple_product.html#TripleProduct">simmate.calculators.vasp.error_handlers.triple_product.TripleProduct</a> object&gt;, &lt;<a href="../../error_handlers/pricel.html#Pricel">simmate.calculators.vasp.error_handlers.pricel.Pricel</a> object&gt;, &lt;<a href="../../error_handlers/brions.html#Brions">simmate.calculators.vasp.error_handlers.brions.Brions</a> object&gt;, &lt;<a href="../../error_handlers/zbrent.html#Zbrent">simmate.calculators.vasp.error_handlers.zbrent.Zbrent</a> object&gt;, &lt;<a href="../../error_handlers/insufficient_bands.html#InsufficientBands">simmate.calculators.vasp.error_handlers.insufficient_bands.InsufficientBands</a> object&gt;, &lt;<a href="../../error_handlers/pssyevx.html#Pssyevx">simmate.calculators.vasp.error_handlers.pssyevx.Pssyevx</a> object&gt;, &lt;<a href="../../error_handlers/eddrmm.html#Eddrmm">simmate.calculators.vasp.error_handlers.eddrmm.Eddrmm</a> object&gt;, &lt;<a href="../../error_handlers/edddav.html#Edddav">simmate.calculators.vasp.error_handlers.edddav.Edddav</a> object&gt;, &lt;<a href="../../error_handlers/edwav.html#Edwav">simmate.calculators.vasp.error_handlers.edwav.Edwav</a> object&gt;, &lt;<a href="../../error_handlers/zheev.html#Zheev">simmate.calculators.vasp.error_handlers.zheev.Zheev</a> object&gt;, &lt;<a href="../../error_handlers/elf_kpar.html#ElfKpar">simmate.calculators.vasp.error_handlers.elf_kpar.ElfKpar</a> object&gt;, &lt;<a href="../../error_handlers/rhosyg.html#Rhosyg">simmate.calculators.vasp.error_handlers.rhosyg.Rhosyg</a> object&gt;, &lt;<a href="../../error_handlers/posmap.html#Posmap">simmate.calculators.vasp.error_handlers.posmap.Posmap</a> object&gt;, &lt;<a href="../../error_handlers/point_group.html#PointGroup">simmate.calculators.vasp.error_handlers.point_group.PointGroup</a> object&gt;, &lt;<a href="../../error_handlers/symprec_noise.html#SymprecNoise">simmate.calculators.vasp.error_handlers.symprec_noise.SymprecNoise</a> object&gt;, &lt;<a href="../../error_handlers/incorrect_smearing.html#IncorrectSmearing">simmate.calculators.vasp.error_handlers.incorrect_smearing.IncorrectSmearing</a> object&gt;, &lt;<a href="../../error_handlers/mesh_symmetry.html#MeshSymmetry">simmate.calculators.vasp.error_handlers.mesh_symmetry.MeshSymmetry</a> object&gt;, &lt;<a href="../../error_handlers/unconverged.html#Unconverged">simmate.calculators.vasp.error_handlers.unconverged.Unconverged</a> object&gt;, &lt;<a href="../../error_handlers/nonconverging.html#NonConverging">simmate.calculators.vasp.error_handlers.nonconverging.NonConverging</a> object&gt;, &lt;<a href="../../error_handlers/potim.html#Potim">simmate.calculators.vasp.error_handlers.potim.Potim</a> object&gt;, &lt;<a href="../../error_handlers/positive_energy.html#PositiveEnergy">simmate.calculators.vasp.error_handlers.positive_energy.PositiveEnergy</a> object&gt;, &lt;<a href="../../error_handlers/frozen.html#Frozen">simmate.calculators.vasp.error_handlers.frozen.Frozen</a> object&gt;, &lt;<a href="../../error_handlers/large_sigma.html#LargeSigma">simmate.calculators.vasp.error_handlers.large_sigma.LargeSigma</a> object&gt;]</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjHSERelaxation.error_handlers"></a>
+    <a class="headerlink" href="#MatprojHSERelaxation.error_handlers"></a>
     
             <div class="docstring"><p>A list of ErrorHandler objects to use in order of priority (that is, highest
 priority is first). If one handler is triggered, the correction will be 
@@ -421,41 +436,32 @@ applied and none of the following handlers will be checked.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatProjHSERelaxation.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatProjHSERelaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatProjHSERelaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatProjHSERelaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                    <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
+                                <dd id="MatprojHSERelaxation.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
+                <dd id="MatprojHSERelaxation.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
+                <dd id="MatprojHSERelaxation.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="MatprojHSERelaxation.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="MatprojHSERelaxation.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="MatprojHSERelaxation.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="MatprojHSERelaxation.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="MatprojHSERelaxation.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
+                <dd id="MatprojHSERelaxation.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
+                <dd id="MatprojHSERelaxation.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MatProjHSERelaxation.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="MatProjHSERelaxation.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
-                <dd id="MatProjHSERelaxation.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
-                <dd id="MatProjHSERelaxation.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
-                <dd id="MatProjHSERelaxation.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
-                <dd id="MatProjHSERelaxation.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
-                <dd id="MatProjHSERelaxation.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
-                <dd id="MatProjHSERelaxation.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
-                <dd id="MatProjHSERelaxation.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
-                <dd id="MatProjHSERelaxation.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
-
-            </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MatProjHSERelaxation.copy" class="function">copy</dd>
-                <dd id="MatProjHSERelaxation.bind" class="function">bind</dd>
-                <dd id="MatProjHSERelaxation.map" class="function">map</dd>
-                <dd id="MatProjHSERelaxation.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MatProjHSERelaxation.set_upstream" class="function">set_upstream</dd>
-                <dd id="MatProjHSERelaxation.set_downstream" class="function">set_downstream</dd>
-                <dd id="MatProjHSERelaxation.inputs" class="function">inputs</dd>
-                <dd id="MatProjHSERelaxation.outputs" class="function">outputs</dd>
-                <dd id="MatProjHSERelaxation.pipe" class="function">pipe</dd>
-                <dd id="MatProjHSERelaxation.serialize" class="function">serialize</dd>
-                <dd id="MatProjHSERelaxation.is_equal" class="function">is_equal</dd>
-                <dd id="MatProjHSERelaxation.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MatProjHSERelaxation.not_" class="function">not_</dd>
-                <dd id="MatProjHSERelaxation.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatprojHSERelaxation.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatprojHSERelaxation.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatprojHSERelaxation.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatprojHSERelaxation.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatprojHSERelaxation.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MatprojHSERelaxation.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MatprojHSERelaxation.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MatprojHSERelaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatprojHSERelaxation.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MatprojHSERelaxation.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MatprojHSERelaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatprojHSERelaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>
