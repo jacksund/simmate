@@ -24,6 +24,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add full-run unittests that call workflows and vasp (without emulation)
 
 **Refactors**
+- refactor `start-worker` command to use prefect instead of the experimental django executor
 - remove experimental `workflow_engine.executor`
 - move contents of `configuration.django.database` to `database.utilities`
 - :warning: upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire `workflow_engine` module, and therefore the entire workflow library. Users should therefore go back through tutorials from the beginning to see everything that has changed. ([#185](https://github.com/jacksund/simmate/pull/185)).
