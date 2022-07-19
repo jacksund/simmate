@@ -29,6 +29,28 @@
 
 
 
+        <h2>API Documentation</h2>
+            <ul class="memberlist">
+            <li>
+                    <a class="class" href="#Relaxation__Vasp__NebEndpoint">Relaxation__Vasp__NebEndpoint</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#Relaxation__Vasp__NebEndpoint.__init__">Relaxation__Vasp__NebEndpoint</a>
+                        </li>
+                        <li>
+                                <a class="class" href="#Relaxation__Vasp__NebEndpoint.s3task">Relaxation__Vasp__NebEndpoint.s3task</a>
+                        </li>
+                        <li>
+                                <a class="class" href="#Relaxation__Vasp__NebEndpoint.database_table">Relaxation__Vasp__NebEndpoint.database_table</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Relaxation__Vasp__NebEndpoint.description_doc_short">description_doc_short</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
+
 
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev" target="_blank">
@@ -51,7 +73,7 @@
 
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="c1"># -*- coding: utf-8 -*-</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a>
-</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">s3task_to_workflow</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">Workflow</span>
 </span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.relaxation</span> <span class="kn">import</span> <span class="p">(</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>    <span class="n">MatVirtualLabCINEBEndpointRelaxation</span> <span class="k">as</span> <span class="n">NEBEndpointRelaxationTask</span><span class="p">,</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="p">)</span>
@@ -59,19 +81,326 @@
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>    <span class="n">MatVirtualLabCINEBEndpointRelaxation</span> <span class="k">as</span> <span class="n">NEBEndpointRelaxationResults</span><span class="p">,</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="p">)</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>
-</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="n">workflow</span> <span class="o">=</span> <span class="n">s3task_to_workflow</span><span class="p">(</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;relaxation/neb-endpoint&quot;</span><span class="p">,</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>    <span class="n">module</span><span class="o">=</span><span class="vm">__name__</span><span class="p">,</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>    <span class="n">project_name</span><span class="o">=</span><span class="s2">&quot;Simmate-Relaxation&quot;</span><span class="p">,</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>    <span class="n">s3task</span><span class="o">=</span><span class="n">NEBEndpointRelaxationTask</span><span class="p">,</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">database_table</span><span class="o">=</span><span class="n">NEBEndpointRelaxationResults</span><span class="p">,</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">register_kwargs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">],</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="n">description_doc_short</span><span class="o">=</span><span class="s2">&quot;uses Materials Project settings and meant for endpoint supercells&quot;</span><span class="p">,</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="p">)</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="k">class</span> <span class="nc">Relaxation__Vasp__NebEndpoint</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>    <span class="n">s3task</span> <span class="o">=</span> <span class="n">NEBEndpointRelaxationTask</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">NEBEndpointRelaxationResults</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>    <span class="n">description_doc_short</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>        <span class="s2">&quot;uses Materials Project settings and meant for endpoint supercells&quot;</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="p">)</span>
 </span></pre></div>
 
 
             </section>
+                <section id="Relaxation__Vasp__NebEndpoint">
+                            <input id="Relaxation__Vasp__NebEndpoint-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">Relaxation__Vasp__NebEndpoint</span><wbr>(<span class="base"><a href="../../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></span>):
+
+                <label class="view-source-button" for="Relaxation__Vasp__NebEndpoint-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#Relaxation__Vasp__NebEndpoint"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Relaxation__Vasp__NebEndpoint-13"><a href="#Relaxation__Vasp__NebEndpoint-13"><span class="linenos">13</span></a><span class="k">class</span> <span class="nc">Relaxation__Vasp__NebEndpoint</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="Relaxation__Vasp__NebEndpoint-14"><a href="#Relaxation__Vasp__NebEndpoint-14"><span class="linenos">14</span></a>    <span class="n">s3task</span> <span class="o">=</span> <span class="n">NEBEndpointRelaxationTask</span>
+</span><span id="Relaxation__Vasp__NebEndpoint-15"><a href="#Relaxation__Vasp__NebEndpoint-15"><span class="linenos">15</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">NEBEndpointRelaxationResults</span>
+</span><span id="Relaxation__Vasp__NebEndpoint-16"><a href="#Relaxation__Vasp__NebEndpoint-16"><span class="linenos">16</span></a>    <span class="n">description_doc_short</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="Relaxation__Vasp__NebEndpoint-17"><a href="#Relaxation__Vasp__NebEndpoint-17"><span class="linenos">17</span></a>        <span class="s2">&quot;uses Materials Project settings and meant for endpoint supercells&quot;</span>
+</span><span id="Relaxation__Vasp__NebEndpoint-18"><a href="#Relaxation__Vasp__NebEndpoint-18"><span class="linenos">18</span></a>    <span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>An abstract base class for all Simmate workflows. Default methods are configured
+for use with S3Tasks and Workflows.</p>
+</div>
+
+
+                            <div id="Relaxation__Vasp__NebEndpoint.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">Relaxation__Vasp__NebEndpoint</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Relaxation__Vasp__NebEndpoint.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="Relaxation__Vasp__NebEndpoint.description_doc_short" class="classattr">
+                                <div class="attr variable">
+            <span class="name">description_doc_short</span><span class="annotation">: str</span><span class="default_value"> = &#39;uses Materials Project settings and meant for endpoint supercells&#39;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Relaxation__Vasp__NebEndpoint.description_doc_short"></a>
+    
+            <div class="docstring"><p>A quick description for this workflow. This will be shown in the website UI
+in the list-view of all different workflow presets.</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="../../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.version" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.version">version</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.run_config" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run_config">run_config</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.to_prefect_flow" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.to_prefect_flow">to_prefect_flow</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.run" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run">run</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.name_full" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_full">name_full</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.name_project" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_project">name_project</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.name_calculator" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_calculator">name_calculator</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.name_preset" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_preset">name_preset</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.description_doc" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.description_doc">description_doc</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.parameter_names" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameter_names">parameter_names</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.parameter_names_required" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameter_names_required">parameter_names_required</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.show_parameters" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.show_parameters">show_parameters</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.parameters_to_register" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameters_to_register">parameters_to_register</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.deployment_id" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.deployment_id">deployment_id</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.run_cloud" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run_cloud">run_cloud</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.nflows_submitted" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.nflows_submitted">nflows_submitted</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="Relaxation__Vasp__NebEndpoint.s3task">
+                            <input id="Relaxation__Vasp__NebEndpoint.s3task-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">Relaxation__Vasp__NebEndpoint.s3task</span><wbr>(<span class="base"><a href="../../tasks/relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></span>):
+
+                <label class="view-source-button" for="Relaxation__Vasp__NebEndpoint.s3task-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#Relaxation__Vasp__NebEndpoint.s3task"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Relaxation__Vasp__NebEndpoint.s3task-7"><a href="#Relaxation__Vasp__NebEndpoint.s3task-7"><span class="linenos"> 7</span></a><span class="k">class</span> <span class="nc">MatVirtualLabCINEBEndpointRelaxation</span><span class="p">(</span><span class="n">MITRelaxation</span><span class="p">):</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-8"><a href="#Relaxation__Vasp__NebEndpoint.s3task-8"><span class="linenos"> 8</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-9"><a href="#Relaxation__Vasp__NebEndpoint.s3task-9"><span class="linenos"> 9</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-10"><a href="#Relaxation__Vasp__NebEndpoint.s3task-10"><span class="linenos">10</span></a><span class="sd">    [MVLCINEBEndPointSet](http://guide.materialsvirtuallab.org/pymatgen-analysis-diffusion/pymatgen.analysis.diffusion.neb.io.html#pymatgen.analysis.diffusion.neb.io.MVLCINEBEndPointSet).</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-11"><a href="#Relaxation__Vasp__NebEndpoint.s3task-11"><span class="linenos">11</span></a>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-12"><a href="#Relaxation__Vasp__NebEndpoint.s3task-12"><span class="linenos">12</span></a><span class="sd">    Runs a VASP relaxation calculation using MIT Project settings, where some</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-13"><a href="#Relaxation__Vasp__NebEndpoint.s3task-13"><span class="linenos">13</span></a><span class="sd">    settings are adjusted to accomodate large supercells with defects. Most</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-14"><a href="#Relaxation__Vasp__NebEndpoint.s3task-14"><span class="linenos">14</span></a><span class="sd">    notably, the lattice remains fixed and symmetry is turned off for this</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-15"><a href="#Relaxation__Vasp__NebEndpoint.s3task-15"><span class="linenos">15</span></a><span class="sd">    relaxation.</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-16"><a href="#Relaxation__Vasp__NebEndpoint.s3task-16"><span class="linenos">16</span></a>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-17"><a href="#Relaxation__Vasp__NebEndpoint.s3task-17"><span class="linenos">17</span></a><span class="sd">    These settings are closely related to relaxation/mit, but only meant to be</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-18"><a href="#Relaxation__Vasp__NebEndpoint.s3task-18"><span class="linenos">18</span></a><span class="sd">    used on start/end supercell structures of a NEB calculation.</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-19"><a href="#Relaxation__Vasp__NebEndpoint.s3task-19"><span class="linenos">19</span></a>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-20"><a href="#Relaxation__Vasp__NebEndpoint.s3task-20"><span class="linenos">20</span></a><span class="sd">    You typically shouldn&#39;t use this workflow directly, but instead use the</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-21"><a href="#Relaxation__Vasp__NebEndpoint.s3task-21"><span class="linenos">21</span></a><span class="sd">    higher-level NEB workflows (e.g. diffusion/neb_all_paths or</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-22"><a href="#Relaxation__Vasp__NebEndpoint.s3task-22"><span class="linenos">22</span></a><span class="sd">    diffusion/neb_from_endpoints), which call this workflow for you.</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-23"><a href="#Relaxation__Vasp__NebEndpoint.s3task-23"><span class="linenos">23</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-24"><a href="#Relaxation__Vasp__NebEndpoint.s3task-24"><span class="linenos">24</span></a>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-25"><a href="#Relaxation__Vasp__NebEndpoint.s3task-25"><span class="linenos">25</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MITRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-26"><a href="#Relaxation__Vasp__NebEndpoint.s3task-26"><span class="linenos">26</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-27"><a href="#Relaxation__Vasp__NebEndpoint.s3task-27"><span class="linenos">27</span></a>        <span class="nb">dict</span><span class="p">(</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-28"><a href="#Relaxation__Vasp__NebEndpoint.s3task-28"><span class="linenos">28</span></a>            <span class="n">EDIFF</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-29"><a href="#Relaxation__Vasp__NebEndpoint.s3task-29"><span class="linenos">29</span></a>            <span class="n">ISIF</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># hold lattice volume and shape constant</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-30"><a href="#Relaxation__Vasp__NebEndpoint.s3task-30"><span class="linenos">30</span></a>            <span class="n">EDIFFG</span><span class="o">=-</span><span class="mf">0.02</span><span class="p">,</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-31"><a href="#Relaxation__Vasp__NebEndpoint.s3task-31"><span class="linenos">31</span></a>            <span class="n">ISMEAR</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-32"><a href="#Relaxation__Vasp__NebEndpoint.s3task-32"><span class="linenos">32</span></a>            <span class="n">ISYM</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-33"><a href="#Relaxation__Vasp__NebEndpoint.s3task-33"><span class="linenos">33</span></a>            <span class="n">LCHARG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-34"><a href="#Relaxation__Vasp__NebEndpoint.s3task-34"><span class="linenos">34</span></a>            <span class="c1"># LDAU=False,</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-35"><a href="#Relaxation__Vasp__NebEndpoint.s3task-35"><span class="linenos">35</span></a>            <span class="n">NELMIN</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-36"><a href="#Relaxation__Vasp__NebEndpoint.s3task-36"><span class="linenos">36</span></a>        <span class="p">)</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-37"><a href="#Relaxation__Vasp__NebEndpoint.s3task-37"><span class="linenos">37</span></a>    <span class="p">)</span>
+</span><span id="Relaxation__Vasp__NebEndpoint.s3task-38"><a href="#Relaxation__Vasp__NebEndpoint.s3task-38"><span class="linenos">38</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;multiple_keywords__smart_ldau&quot;</span><span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>The supervised-staged-shell task (or S3Task) that this workflow uses to run.
+For understanding what the calculation does and the settings it uses, users
+should start here. You can also use a workflows <code><a href="#Relaxation__Vasp__NebEndpoint.s3task.run">s3task.run</a></code> to run the workflow
+without storing results in the database.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="../../tasks/relaxation/materials_virtual_lab_endpoint.html#MatVirtualLabCINEBEndpointRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_virtual_lab_endpoint.MatVirtualLabCINEBEndpointRelaxation</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.s3task.__init__" class="function"><a href="../../tasks/relaxation/materials_virtual_lab_endpoint.html#MatVirtualLabCINEBEndpointRelaxation.__init__">MatVirtualLabCINEBEndpointRelaxation</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.incar" class="variable"><a href="../../tasks/relaxation/materials_virtual_lab_endpoint.html#MatVirtualLabCINEBEndpointRelaxation.incar">incar</a></dd>
+
+            </div>
+            <div><dt><a href="../../tasks/relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.s3task.functional" class="variable"><a href="../../tasks/relaxation/mit.html#MITRelaxation.functional">functional</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.potcar_mappings" class="variable"><a href="../../tasks/relaxation/mit.html#MITRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.error_handlers" class="variable"><a href="../../tasks/relaxation/mit.html#MITRelaxation.error_handlers">error_handlers</a></dd>
+
+            </div>
+            <div><dt><a href="../../tasks/base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.s3task.required_files" class="variable"><a href="../../tasks/base.html#VaspTask.required_files">required_files</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.command" class="variable"><a href="../../tasks/base.html#VaspTask.command">command</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.incar_parallel_settings" class="variable"><a href="../../tasks/base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.kpoints" class="variable"><a href="../../tasks/base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.confirm_convergence" class="variable"><a href="../../tasks/base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.pre_sanitize_structure" class="variable"><a href="../../tasks/base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.pre_standardize_structure" class="variable"><a href="../../tasks/base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.setup" class="function"><a href="../../tasks/base.html#VaspTask.setup">setup</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.workup" class="function"><a href="../../tasks/base.html#VaspTask.workup">workup</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.get_config" class="function"><a href="../../tasks/base.html#VaspTask.get_config">get_config</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.s3task.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.s3task.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="Relaxation__Vasp__NebEndpoint.database_table">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">Relaxation__Vasp__NebEndpoint.database_table</span><wbr>(<span class="base"><a href="../../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></span>):
+
+        
+    </div>
+    <a class="headerlink" href="#Relaxation__Vasp__NebEndpoint.database_table"></a>
+    
+            <div class="docstring"><p>The database table where calculation information (such as the prefect_flow_run_id)
+is stored. The table should use <code>simmate.database.base_data_types.Calculation</code></p>
+
+<p>In many cases, this table will contain all of the results you need. However,
+pay special attention to NestedWorkflows, where your results are often tied
+to a final task.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>django.db.models.base.Model</dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.database_table.__init__" class="function">Model</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.from_db" class="function">from_db</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.pk" class="variable">pk</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.get_deferred_fields" class="function">get_deferred_fields</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.refresh_from_db" class="function">refresh_from_db</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.serializable_value" class="function">serializable_value</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.save" class="function">save</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.save_base" class="function">save_base</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.delete" class="function">delete</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.prepare_database_save" class="function">prepare_database_save</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.clean" class="function">clean</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.validate_unique" class="function">validate_unique</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.date_error_message" class="function">date_error_message</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.unique_error_message" class="function">unique_error_message</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.full_clean" class="function">full_clean</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.clean_fields" class="function">clean_fields</dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.check" class="function">check</dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/relaxation.html#Relaxation">simmate.database.base_data_types.relaxation.Relaxation</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.database_table.Meta" class="class"><a href="../../../../database/base_data_types/relaxation.html#Relaxation.Meta">Meta</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.base_info" class="variable"><a href="../../../../database/base_data_types/relaxation.html#Relaxation.base_info">base_info</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.create_subclasses" class="function"><a href="../../../../database/base_data_types/relaxation.html#Relaxation.create_subclasses">create_subclasses</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.from_directory" class="function"><a href="../../../../database/base_data_types/relaxation.html#Relaxation.from_directory">from_directory</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.from_vasp_run" class="function"><a href="../../../../database/base_data_types/relaxation.html#Relaxation.from_vasp_run">from_vasp_run</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.update_from_vasp_run" class="function"><a href="../../../../database/base_data_types/relaxation.html#Relaxation.update_from_vasp_run">update_from_vasp_run</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.get_convergence_plot" class="function"><a href="../../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot">get_convergence_plot</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.view_convergence_plot" class="function"><a href="../../../../database/base_data_types/relaxation.html#Relaxation.view_convergence_plot">view_convergence_plot</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.get_convergence_plot_html" class="function"><a href="../../../../database/base_data_types/relaxation.html#Relaxation.get_convergence_plot_html">get_convergence_plot_html</a></dd>
+
+            </div>
+            <div><dt><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation">simmate.calculators.vasp.database.relaxation.MatVirtualLabCINEBEndpointRelaxation</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.database_table.band_gap" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.band_gap">band_gap</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.is_gap_direct" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.is_gap_direct">is_gap_direct</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.energy_fermi" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.energy_fermi">energy_fermi</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.conduction_band_minimum" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.conduction_band_minimum">conduction_band_minimum</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.valence_band_maximum" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.valence_band_maximum">valence_band_maximum</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.volume_change" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.volume_change">volume_change</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.structure_string" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.structure_string">structure_string</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.nsites" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.nsites">nsites</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.nelements" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.nelements">nelements</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.elements" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.elements">elements</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.chemical_system" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.chemical_system">chemical_system</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.density" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.density">density</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.density_atomic" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.density_atomic">density_atomic</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.volume" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.volume">volume</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.volume_molar" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.volume_molar">volume_molar</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.formula_full" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.formula_full">formula_full</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.formula_reduced" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.formula_reduced">formula_reduced</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.formula_anonymous" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.formula_anonymous">formula_anonymous</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.spacegroup" class="variable"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.spacegroup">spacegroup</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.energy" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.energy">energy</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.energy_per_atom" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.energy_per_atom">energy_per_atom</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.energy_above_hull" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.energy_above_hull">energy_above_hull</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.is_stable" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.is_stable">is_stable</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.decomposes_to" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.decomposes_to">decomposes_to</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.formation_energy" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.formation_energy">formation_energy</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.formation_energy_per_atom" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.formation_energy_per_atom">formation_energy_per_atom</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.directory" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.directory">directory</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.prefect_flow_run_id" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.prefect_flow_run_id">prefect_flow_run_id</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.corrections" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.corrections">corrections</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.created_at" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.created_at">created_at</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.updated_at" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.updated_at">updated_at</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.source" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.source">source</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.DoesNotExist" class="class"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.DoesNotExist">DoesNotExist</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.MultipleObjectsReturned" class="class"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.structure_start_id" class="variable"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.structure_start_id">structure_start_id</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.structure_start" class="variable"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.structure_start">structure_start</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.structure_final_id" class="variable"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.structure_final_id">structure_final_id</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.structure_final" class="variable"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.structure_final">structure_final</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.spacegroup_id" class="variable"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.spacegroup_id">spacegroup_id</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.id" class="function"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.id">id</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.structures" class="variable"><a href="../../database/relaxation.html#MatVirtualLabCINEBEndpointRelaxation.structures">structures</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.database_table.to_toolkit" class="function"><a href="../../../../database/base_data_types/structure.html#Structure.to_toolkit">to_toolkit</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.database_table.update_chemical_system_stabilities" class="function"><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.update_all_stabilities" class="function"><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.database_table.prefect_cloud_link" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.flow_run_view" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.prefect_flow_run_name" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.prefect_state" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.from_prefect_id" class="function"><a href="../../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
+                                <dd id="Relaxation__Vasp__NebEndpoint.database_table.source_doi" class="variable"><a href="../../../../database/base_data_types/base.html#DatabaseTable.source_doi">source_doi</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.remote_archive_link" class="variable"><a href="../../../../database/base_data_types/base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.objects" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.get_table_name" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.create_subclass" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.from_toolkit" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.update_from_toolkit" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.load_archive" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.load_remote_archive" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.get_column_names" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.show_columns" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.get_mixins" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_mixins">get_mixins</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.get_mixin_names" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_mixin_names">get_mixin_names</a></dd>
+                <dd id="Relaxation__Vasp__NebEndpoint.database_table.get_extra_columns" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_extra_columns">get_extra_columns</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

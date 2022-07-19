@@ -677,6 +677,27 @@
                                 <a class="variable" href="#TestRelaxation.spacegroup">spacegroup</a>
                         </li>
                         <li>
+                                <a class="function" href="#TestRelaxation.energy">energy</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TestRelaxation.energy_per_atom">energy_per_atom</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TestRelaxation.energy_above_hull">energy_above_hull</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TestRelaxation.is_stable">is_stable</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TestRelaxation.decomposes_to">decomposes_to</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TestRelaxation.formation_energy">formation_energy</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#TestRelaxation.formation_energy_per_atom">formation_energy_per_atom</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#TestRelaxation.directory">directory</a>
                         </li>
                         <li>
@@ -1313,7 +1334,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -1330,14 +1351,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1414,6 +1435,7 @@ relation.</p>
                 <dd id="TestDatabaseTable.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestDatabaseTable.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestDatabaseTable.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestDatabaseTable.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestDatabaseTable.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestDatabaseTable.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestDatabaseTable.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -1592,6 +1614,7 @@ object the first time, the query is executed.</p>
                 <dd id="TestDatabaseTable2.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestDatabaseTable2.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestDatabaseTable2.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestDatabaseTable2.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestDatabaseTable2.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestDatabaseTable2.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestDatabaseTable2.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -1962,7 +1985,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -1979,14 +2002,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -2057,6 +2080,7 @@ object the first time, the query is executed.</p>
                 <dd id="TestStructure.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestStructure.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestStructure.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestStructure.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestStructure.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestStructure.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestStructure.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -2269,7 +2293,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -2286,14 +2310,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -2357,6 +2381,7 @@ object the first time, the query is executed.</p>
                 <dd id="TestCalculation.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestCalculation.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestCalculation.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestCalculation.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestCalculation.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestCalculation.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestCalculation.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -2779,7 +2804,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -2796,14 +2821,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -2882,6 +2907,7 @@ object the first time, the query is executed.</p>
                 <dd id="TestStructureCalculation.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestStructureCalculation.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestStructureCalculation.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestStructureCalculation.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestStructureCalculation.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestStructureCalculation.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestStructureCalculation.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -3369,7 +3395,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -3386,14 +3412,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -3464,6 +3490,7 @@ object the first time, the query is executed.</p>
                 <dd id="TestForces.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestForces.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestForces.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestForces.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestForces.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestForces.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestForces.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -3942,7 +3969,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -3959,14 +3986,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -4042,6 +4069,7 @@ object the first time, the query is executed.</p>
                 <dd id="TestThermodynamics.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestThermodynamics.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestThermodynamics.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestThermodynamics.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestThermodynamics.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestThermodynamics.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestThermodynamics.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -4764,7 +4792,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -4781,14 +4809,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -4878,6 +4906,7 @@ object the first time, the query is executed.</p>
                 <dd id="TestStaticEnergy.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestStaticEnergy.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestStaticEnergy.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestStaticEnergy.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestStaticEnergy.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestStaticEnergy.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestStaticEnergy.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -4962,7 +4991,7 @@ object the first time, the query is executed.</p>
     </div>
     <a class="headerlink" href="#TestRelaxation"></a>
     
-            <div class="docstring"><p>TestRelaxation(id, created_at, updated_at, source, structure_string, nsites, nelements, elements, chemical_system, density, density_atomic, volume, volume_molar, formula_full, formula_reduced, formula_anonymous, spacegroup, directory, prefect_flow_run_id, corrections, band_gap, is_gap_direct, energy_fermi, conduction_band_minimum, valence_band_maximum, volume_change, structure_start, structure_final)</p>
+            <div class="docstring"><p>TestRelaxation(id, created_at, updated_at, source, structure_string, nsites, nelements, elements, chemical_system, density, density_atomic, volume, volume_molar, formula_full, formula_reduced, formula_anonymous, spacegroup, directory, prefect_flow_run_id, corrections, energy, energy_per_atom, energy_above_hull, is_stable, decomposes_to, formation_energy, formation_energy_per_atom, band_gap, is_gap_direct, energy_fermi, conduction_band_minimum, valence_band_maximum, volume_change, structure_start, structure_final)</p>
 </div>
 
 
@@ -5271,6 +5300,114 @@ columns:
 
 
                             </div>
+                            <div id="TestRelaxation.energy" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">energy</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">unknown</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TestRelaxation.energy"></a>
+    
+            <div class="docstring"><p>The calculated total energy. Units are in eV.</p>
+</div>
+
+
+                            </div>
+                            <div id="TestRelaxation.energy_per_atom" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">energy_per_atom</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">unknown</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TestRelaxation.energy_per_atom"></a>
+    
+            <div class="docstring"><p>The <code><a href="#TestRelaxation.energy">energy</a></code> divided by <code><a href="#TestRelaxation.nsites">nsites</a></code>. Units are in eV.</p>
+</div>
+
+
+                            </div>
+                            <div id="TestRelaxation.energy_above_hull" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">energy_above_hull</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">unknown</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TestRelaxation.energy_above_hull"></a>
+    
+            <div class="docstring"><p>The hull energy (aka "stability") of this structure compared to all other
+structures in this database table. Units are in eV.</p>
+</div>
+
+
+                            </div>
+                            <div id="TestRelaxation.is_stable" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">is_stable</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">unknown</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TestRelaxation.is_stable"></a>
+    
+            <div class="docstring"><p>Whether <code><a href="#TestRelaxation.energy_above_hull">energy_above_hull</a></code> is 0 -- if so, this is considered stable.</p>
+</div>
+
+
+                            </div>
+                            <div id="TestRelaxation.decomposes_to" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">decomposes_to</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">unknown</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TestRelaxation.decomposes_to"></a>
+    
+            <div class="docstring"><p>If <code><a href="#TestRelaxation.energy_above_hull">energy_above_hull</a></code> is above 0, these are the compositions that the 
+structure will decompose to (e.g. ["Y2C", "C", "YF3"])</p>
+</div>
+
+
+                            </div>
+                            <div id="TestRelaxation.formation_energy" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">formation_energy</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">unknown</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TestRelaxation.formation_energy"></a>
+    
+            <div class="docstring"><p>The formation energy of the structure relative to all other
+structures in this database table. Units are in eV.</p>
+</div>
+
+
+                            </div>
+                            <div id="TestRelaxation.formation_energy_per_atom" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">formation_energy_per_atom</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">unknown</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TestRelaxation.formation_energy_per_atom"></a>
+    
+            <div class="docstring"><p>The <code><a href="#TestRelaxation.formation_energy">formation_energy</a></code> divided by <code><a href="#TestRelaxation.nsites">nsites</a></code>.</p>
+</div>
+
+
+                            </div>
                             <div id="TestRelaxation.directory" class="classattr">
                                 <div class="attr function">
             
@@ -5389,7 +5526,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -5406,14 +5543,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -5576,6 +5713,11 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
                                 <dd id="TestRelaxation.to_toolkit" class="function"><a href="../../database/base_data_types/structure.html#Structure.to_toolkit">to_toolkit</a></dd>
 
             </div>
+            <div><dt><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></dt>
+                                <dd id="TestRelaxation.update_chemical_system_stabilities" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
+                <dd id="TestRelaxation.update_all_stabilities" class="function"><a href="../../database/base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
+
+            </div>
             <div><dt><a href="../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
                                 <dd id="TestRelaxation.prefect_cloud_link" class="variable"><a href="../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
                 <dd id="TestRelaxation.flow_run_view" class="variable"><a href="../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
@@ -5591,6 +5733,7 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
                 <dd id="TestRelaxation.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestRelaxation.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestRelaxation.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestRelaxation.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestRelaxation.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestRelaxation.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestRelaxation.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -6195,7 +6338,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -6212,14 +6355,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -6376,6 +6519,7 @@ relation.</p>
                 <dd id="TestIonicStep.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestIonicStep.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestIonicStep.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestIonicStep.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestIonicStep.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestIonicStep.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestIonicStep.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -6854,7 +6998,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -6871,14 +7015,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -6987,6 +7131,7 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
                 <dd id="TestDynamicsRun.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestDynamicsRun.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestDynamicsRun.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestDynamicsRun.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestDynamicsRun.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestDynamicsRun.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestDynamicsRun.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -7609,7 +7754,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -7626,14 +7771,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7746,6 +7891,7 @@ object the first time, the query is executed.</p>
                 <dd id="TestDynamicsIonicStep.get_table_name" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="TestDynamicsIonicStep.create_subclass" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="TestDynamicsIonicStep.from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="TestDynamicsIonicStep.update_from_toolkit" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="TestDynamicsIonicStep.load_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="TestDynamicsIonicStep.load_remote_archive" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="TestDynamicsIonicStep.get_column_names" class="function"><a href="../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>

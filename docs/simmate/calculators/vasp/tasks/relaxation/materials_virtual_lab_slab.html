@@ -35,6 +35,9 @@
                     <a class="class" href="#MatVirtualLabSlabRelaxation">MatVirtualLabSlabRelaxation</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#MatVirtualLabSlabRelaxation.__init__">MatVirtualLabSlabRelaxation</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#MatVirtualLabSlabRelaxation.incar">incar</a>
                         </li>
                 </ul>
@@ -125,6 +128,18 @@ with slab_mode=True.</p>
 </div>
 
 
+                            <div id="MatVirtualLabSlabRelaxation.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MatVirtualLabSlabRelaxation</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatVirtualLabSlabRelaxation.__init__"></a>
+    
+    
+
+                            </div>
                             <div id="MatVirtualLabSlabRelaxation.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: 2, &#39;ISIF&#39;: 2, &#39;ISMEAR&#39;: 1, &#39;ISPIN&#39;: 2, &#39;KSPACING&#39;: 0.35, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 60, &#39;NSW&#39;: 200, &#39;PREC&#39;: &#39;Normal&#39;, &#39;SIGMA&#39;: 0.05, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;LCHARG&#39;: False, &#39;EDIFFG&#39;: -0.02, &#39;ICHARG&#39;: 0, &#39;EDIFF&#39;: 0.0001, &#39;LDAU&#39;: False, &#39;NELMIN&#39;: 8}</span>
@@ -145,21 +160,14 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatVirtualLabSlabRelaxation.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatVirtualLabSlabRelaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatVirtualLabSlabRelaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatVirtualLabSlabRelaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
-                                <dd id="MatVirtualLabSlabRelaxation.functional" class="variable"><a href="materials_project.html#MatProjRelaxation.functional">functional</a></dd>
-                <dd id="MatVirtualLabSlabRelaxation.potcar_mappings" class="variable"><a href="materials_project.html#MatProjRelaxation.potcar_mappings">potcar_mappings</a></dd>
-                <dd id="MatVirtualLabSlabRelaxation.error_handlers" class="variable"><a href="materials_project.html#MatProjRelaxation.error_handlers">error_handlers</a></dd>
+                                    <div><dt><a href="materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="MatVirtualLabSlabRelaxation.functional" class="variable"><a href="materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.potcar_mappings" class="variable"><a href="materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.error_handlers" class="variable"><a href="materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MatVirtualLabSlabRelaxation.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
+                                <dd id="MatVirtualLabSlabRelaxation.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
                 <dd id="MatVirtualLabSlabRelaxation.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
                 <dd id="MatVirtualLabSlabRelaxation.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
                 <dd id="MatVirtualLabSlabRelaxation.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
@@ -171,21 +179,19 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                 <dd id="MatVirtualLabSlabRelaxation.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MatVirtualLabSlabRelaxation.copy" class="function">copy</dd>
-                <dd id="MatVirtualLabSlabRelaxation.bind" class="function">bind</dd>
-                <dd id="MatVirtualLabSlabRelaxation.map" class="function">map</dd>
-                <dd id="MatVirtualLabSlabRelaxation.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MatVirtualLabSlabRelaxation.set_upstream" class="function">set_upstream</dd>
-                <dd id="MatVirtualLabSlabRelaxation.set_downstream" class="function">set_downstream</dd>
-                <dd id="MatVirtualLabSlabRelaxation.inputs" class="function">inputs</dd>
-                <dd id="MatVirtualLabSlabRelaxation.outputs" class="function">outputs</dd>
-                <dd id="MatVirtualLabSlabRelaxation.pipe" class="function">pipe</dd>
-                <dd id="MatVirtualLabSlabRelaxation.serialize" class="function">serialize</dd>
-                <dd id="MatVirtualLabSlabRelaxation.is_equal" class="function">is_equal</dd>
-                <dd id="MatVirtualLabSlabRelaxation.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MatVirtualLabSlabRelaxation.not_" class="function">not_</dd>
-                <dd id="MatVirtualLabSlabRelaxation.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatVirtualLabSlabRelaxation.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatVirtualLabSlabRelaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

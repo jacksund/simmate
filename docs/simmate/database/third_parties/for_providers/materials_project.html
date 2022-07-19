@@ -85,7 +85,7 @@ installed. For now, we only pull the mp-id, structure, and final energy.</p>
 </span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 </span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="kn">from</span> <span class="nn">pymatgen.ext.matproj</span> <span class="kn">import</span> <span class="n">MPRester</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a>
-</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a><span class="kn">from</span> <span class="nn">simmate.database.third_parties</span> <span class="kn">import</span> <span class="n">MatProjStructure</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a><span class="kn">from</span> <span class="nn">simmate.database.third_parties</span> <span class="kn">import</span> <span class="n">MatprojStructure</span>
 </span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a>
 </span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>
 </span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a><span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
@@ -164,7 +164,7 @@ installed. For now, we only pull the mp-id, structure, and final energy.</p>
 </span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>        <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>
 </span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>        <span class="c1"># convert the data to a Simmate database object</span>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>        <span class="n">structure_db</span> <span class="o">=</span> <span class="n">MatProjStructure</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>        <span class="n">structure_db</span> <span class="o">=</span> <span class="n">MatprojStructure</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
 </span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>            <span class="nb">id</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;material_id&quot;</span><span class="p">],</span>
 </span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">],</span>
 </span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>            <span class="n">energy</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;final_energy&quot;</span><span class="p">],</span>
@@ -175,7 +175,7 @@ installed. For now, we only pull the mp-id, structure, and final energy.</p>
 </span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>
 </span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>    <span class="c1"># once all structures are saved, let&#39;s update the Thermodynamic columns</span>
 </span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>    <span class="k">if</span> <span class="n">update_stabilities</span><span class="p">:</span>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>        <span class="n">MatProjStructure</span><span class="o">.</span><span class="n">update_all_stabilities</span><span class="p">()</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>        <span class="n">MatprojStructure</span><span class="o">.</span><span class="n">update_all_stabilities</span><span class="p">()</span>
 </span></pre></div>
 
 
@@ -268,7 +268,7 @@ installed. For now, we only pull the mp-id, structure, and final energy.</p>
 </span><span id="load_all_structures-97"><a href="#load_all_structures-97"><span class="linenos"> 97</span></a>        <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </span><span id="load_all_structures-98"><a href="#load_all_structures-98"><span class="linenos"> 98</span></a>
 </span><span id="load_all_structures-99"><a href="#load_all_structures-99"><span class="linenos"> 99</span></a>        <span class="c1"># convert the data to a Simmate database object</span>
-</span><span id="load_all_structures-100"><a href="#load_all_structures-100"><span class="linenos">100</span></a>        <span class="n">structure_db</span> <span class="o">=</span> <span class="n">MatProjStructure</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
+</span><span id="load_all_structures-100"><a href="#load_all_structures-100"><span class="linenos">100</span></a>        <span class="n">structure_db</span> <span class="o">=</span> <span class="n">MatprojStructure</span><span class="o">.</span><span class="n">from_toolkit</span><span class="p">(</span>
 </span><span id="load_all_structures-101"><a href="#load_all_structures-101"><span class="linenos">101</span></a>            <span class="nb">id</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;material_id&quot;</span><span class="p">],</span>
 </span><span id="load_all_structures-102"><a href="#load_all_structures-102"><span class="linenos">102</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">],</span>
 </span><span id="load_all_structures-103"><a href="#load_all_structures-103"><span class="linenos">103</span></a>            <span class="n">energy</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;final_energy&quot;</span><span class="p">],</span>
@@ -279,7 +279,7 @@ installed. For now, we only pull the mp-id, structure, and final energy.</p>
 </span><span id="load_all_structures-108"><a href="#load_all_structures-108"><span class="linenos">108</span></a>
 </span><span id="load_all_structures-109"><a href="#load_all_structures-109"><span class="linenos">109</span></a>    <span class="c1"># once all structures are saved, let&#39;s update the Thermodynamic columns</span>
 </span><span id="load_all_structures-110"><a href="#load_all_structures-110"><span class="linenos">110</span></a>    <span class="k">if</span> <span class="n">update_stabilities</span><span class="p">:</span>
-</span><span id="load_all_structures-111"><a href="#load_all_structures-111"><span class="linenos">111</span></a>        <span class="n">MatProjStructure</span><span class="o">.</span><span class="n">update_all_stabilities</span><span class="p">()</span>
+</span><span id="load_all_structures-111"><a href="#load_all_structures-111"><span class="linenos">111</span></a>        <span class="n">MatprojStructure</span><span class="o">.</span><span class="n">update_all_stabilities</span><span class="p">()</span>
 </span></pre></div>
 
 

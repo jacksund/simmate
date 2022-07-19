@@ -64,7 +64,8 @@
 
 <p>Note, nearly all of the commands in this module wrap a lower-level function, so little code is located here. For example, the <code>simmate database reset</code> command is just a wrapper for the following python code:</p>
 
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="configuration/django/database.html">simmate.configuration.django.database</a></span> <span class="kn">import</span> <span class="n">reset_database</span>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="database.html">simmate.database</a></span> <span class="kn">import</span> <span class="n">connect</span>
+<span class="kn">from</span> <span class="nn"><a href="database/utilities.html">simmate.database.utilities</a></span> <span class="kn">import</span> <span class="n">reset_database</span>
 
 <span class="n">reset_database</span><span class="p">()</span>
 </code></pre></div>

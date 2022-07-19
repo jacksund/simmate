@@ -35,6 +35,9 @@
                     <a class="class" href="#BaderELFAnalysis">BaderELFAnalysis</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#BaderELFAnalysis.__init__">BaderELFAnalysis</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#BaderELFAnalysis.command">command</a>
                         </li>
                         <li>
@@ -90,36 +93,34 @@
 </span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>
 </span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;bader CHGCAR_empty -ref ELFCAR_empty &gt; bader.out&quot;</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>    <span class="n">requires_structure</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># !!! This may change in the future</span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="n">BaderAnalysis</span><span class="o">.</span><span class="n">required_files</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;ELFCAR&quot;</span><span class="p">]</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;ELFCAR&quot;</span><span class="p">]</span>
 </span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>
-</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">        - typically using VASP. This setup involves ensuring that</span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">        the proper files are present. In addition, it creates new CHGCAR and</span>
-</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">        ELFCAR files with an update structure -- typically containing empty atoms.</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a><span class="sd">        #### Parameters</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="sd">        - `structure`:</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">            The structure to use when rewriting the ELFCAR and CHGCAR files.</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>        <span class="c1"># Run the default method of the parent class.</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>        <span class="c1"># establish file names</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>        <span class="n">elfcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ELFCAR&quot;</span><span class="p">)</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>        <span class="c1"># Load ELFCAR + CHGCAR and replace the structure with the one we created that includes</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>        <span class="c1"># empty atoms.</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>        <span class="n">elfcar</span> <span class="o">=</span> <span class="n">Elfcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">elfcar_filename</span><span class="p">)</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elfcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">chgcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">        - typically using VASP. This setup involves ensuring that</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">        the proper files are present. In addition, it creates new CHGCAR and</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">        ELFCAR files with an update structure -- typically containing empty atoms.</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="sd">        #### Parameters</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">        - `structure`:</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a><span class="sd">            The structure to use when rewriting the ELFCAR and CHGCAR files.</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>        <span class="c1"># establish file names</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>        <span class="n">elfcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ELFCAR&quot;</span><span class="p">)</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>        <span class="c1"># Load ELFCAR + CHGCAR and replace the structure with the one we created that includes</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>        <span class="c1"># empty atoms.</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>        <span class="n">elfcar</span> <span class="o">=</span> <span class="n">Elfcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">elfcar_filename</span><span class="p">)</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elfcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">chgcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -143,36 +144,34 @@
 </span><span id="BaderELFAnalysis-18"><a href="#BaderELFAnalysis-18"><span class="linenos">18</span></a>
 </span><span id="BaderELFAnalysis-19"><a href="#BaderELFAnalysis-19"><span class="linenos">19</span></a>    <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;bader CHGCAR_empty -ref ELFCAR_empty &gt; bader.out&quot;</span>
 </span><span id="BaderELFAnalysis-20"><a href="#BaderELFAnalysis-20"><span class="linenos">20</span></a>    <span class="n">requires_structure</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># !!! This may change in the future</span>
-</span><span id="BaderELFAnalysis-21"><a href="#BaderELFAnalysis-21"><span class="linenos">21</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="n">BaderAnalysis</span><span class="o">.</span><span class="n">required_files</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;ELFCAR&quot;</span><span class="p">]</span>
+</span><span id="BaderELFAnalysis-21"><a href="#BaderELFAnalysis-21"><span class="linenos">21</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;ELFCAR&quot;</span><span class="p">]</span>
 </span><span id="BaderELFAnalysis-22"><a href="#BaderELFAnalysis-22"><span class="linenos">22</span></a>
-</span><span id="BaderELFAnalysis-23"><a href="#BaderELFAnalysis-23"><span class="linenos">23</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="BaderELFAnalysis-24"><a href="#BaderELFAnalysis-24"><span class="linenos">24</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="BaderELFAnalysis-25"><a href="#BaderELFAnalysis-25"><span class="linenos">25</span></a><span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
-</span><span id="BaderELFAnalysis-26"><a href="#BaderELFAnalysis-26"><span class="linenos">26</span></a><span class="sd">        - typically using VASP. This setup involves ensuring that</span>
-</span><span id="BaderELFAnalysis-27"><a href="#BaderELFAnalysis-27"><span class="linenos">27</span></a><span class="sd">        the proper files are present. In addition, it creates new CHGCAR and</span>
-</span><span id="BaderELFAnalysis-28"><a href="#BaderELFAnalysis-28"><span class="linenos">28</span></a><span class="sd">        ELFCAR files with an update structure -- typically containing empty atoms.</span>
-</span><span id="BaderELFAnalysis-29"><a href="#BaderELFAnalysis-29"><span class="linenos">29</span></a>
-</span><span id="BaderELFAnalysis-30"><a href="#BaderELFAnalysis-30"><span class="linenos">30</span></a><span class="sd">        #### Parameters</span>
-</span><span id="BaderELFAnalysis-31"><a href="#BaderELFAnalysis-31"><span class="linenos">31</span></a>
-</span><span id="BaderELFAnalysis-32"><a href="#BaderELFAnalysis-32"><span class="linenos">32</span></a><span class="sd">        - `structure`:</span>
-</span><span id="BaderELFAnalysis-33"><a href="#BaderELFAnalysis-33"><span class="linenos">33</span></a><span class="sd">            The structure to use when rewriting the ELFCAR and CHGCAR files.</span>
-</span><span id="BaderELFAnalysis-34"><a href="#BaderELFAnalysis-34"><span class="linenos">34</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="BaderELFAnalysis-35"><a href="#BaderELFAnalysis-35"><span class="linenos">35</span></a>
-</span><span id="BaderELFAnalysis-36"><a href="#BaderELFAnalysis-36"><span class="linenos">36</span></a>        <span class="c1"># Run the default method of the parent class.</span>
-</span><span id="BaderELFAnalysis-37"><a href="#BaderELFAnalysis-37"><span class="linenos">37</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis-38"><a href="#BaderELFAnalysis-38"><span class="linenos">38</span></a>
-</span><span id="BaderELFAnalysis-39"><a href="#BaderELFAnalysis-39"><span class="linenos">39</span></a>        <span class="c1"># establish file names</span>
-</span><span id="BaderELFAnalysis-40"><a href="#BaderELFAnalysis-40"><span class="linenos">40</span></a>        <span class="n">elfcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ELFCAR&quot;</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis-41"><a href="#BaderELFAnalysis-41"><span class="linenos">41</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis-42"><a href="#BaderELFAnalysis-42"><span class="linenos">42</span></a>
-</span><span id="BaderELFAnalysis-43"><a href="#BaderELFAnalysis-43"><span class="linenos">43</span></a>        <span class="c1"># Load ELFCAR + CHGCAR and replace the structure with the one we created that includes</span>
-</span><span id="BaderELFAnalysis-44"><a href="#BaderELFAnalysis-44"><span class="linenos">44</span></a>        <span class="c1"># empty atoms.</span>
-</span><span id="BaderELFAnalysis-45"><a href="#BaderELFAnalysis-45"><span class="linenos">45</span></a>        <span class="n">elfcar</span> <span class="o">=</span> <span class="n">Elfcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">elfcar_filename</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis-46"><a href="#BaderELFAnalysis-46"><span class="linenos">46</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
-</span><span id="BaderELFAnalysis-47"><a href="#BaderELFAnalysis-47"><span class="linenos">47</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elfcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis-48"><a href="#BaderELFAnalysis-48"><span class="linenos">48</span></a>        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis-49"><a href="#BaderELFAnalysis-49"><span class="linenos">49</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
-</span><span id="BaderELFAnalysis-50"><a href="#BaderELFAnalysis-50"><span class="linenos">50</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">chgcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis-23"><a href="#BaderELFAnalysis-23"><span class="linenos">23</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="BaderELFAnalysis-24"><a href="#BaderELFAnalysis-24"><span class="linenos">24</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="BaderELFAnalysis-25"><a href="#BaderELFAnalysis-25"><span class="linenos">25</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="BaderELFAnalysis-26"><a href="#BaderELFAnalysis-26"><span class="linenos">26</span></a><span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
+</span><span id="BaderELFAnalysis-27"><a href="#BaderELFAnalysis-27"><span class="linenos">27</span></a><span class="sd">        - typically using VASP. This setup involves ensuring that</span>
+</span><span id="BaderELFAnalysis-28"><a href="#BaderELFAnalysis-28"><span class="linenos">28</span></a><span class="sd">        the proper files are present. In addition, it creates new CHGCAR and</span>
+</span><span id="BaderELFAnalysis-29"><a href="#BaderELFAnalysis-29"><span class="linenos">29</span></a><span class="sd">        ELFCAR files with an update structure -- typically containing empty atoms.</span>
+</span><span id="BaderELFAnalysis-30"><a href="#BaderELFAnalysis-30"><span class="linenos">30</span></a>
+</span><span id="BaderELFAnalysis-31"><a href="#BaderELFAnalysis-31"><span class="linenos">31</span></a><span class="sd">        #### Parameters</span>
+</span><span id="BaderELFAnalysis-32"><a href="#BaderELFAnalysis-32"><span class="linenos">32</span></a>
+</span><span id="BaderELFAnalysis-33"><a href="#BaderELFAnalysis-33"><span class="linenos">33</span></a><span class="sd">        - `structure`:</span>
+</span><span id="BaderELFAnalysis-34"><a href="#BaderELFAnalysis-34"><span class="linenos">34</span></a><span class="sd">            The structure to use when rewriting the ELFCAR and CHGCAR files.</span>
+</span><span id="BaderELFAnalysis-35"><a href="#BaderELFAnalysis-35"><span class="linenos">35</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="BaderELFAnalysis-36"><a href="#BaderELFAnalysis-36"><span class="linenos">36</span></a>
+</span><span id="BaderELFAnalysis-37"><a href="#BaderELFAnalysis-37"><span class="linenos">37</span></a>        <span class="c1"># establish file names</span>
+</span><span id="BaderELFAnalysis-38"><a href="#BaderELFAnalysis-38"><span class="linenos">38</span></a>        <span class="n">elfcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ELFCAR&quot;</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis-39"><a href="#BaderELFAnalysis-39"><span class="linenos">39</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis-40"><a href="#BaderELFAnalysis-40"><span class="linenos">40</span></a>
+</span><span id="BaderELFAnalysis-41"><a href="#BaderELFAnalysis-41"><span class="linenos">41</span></a>        <span class="c1"># Load ELFCAR + CHGCAR and replace the structure with the one we created that includes</span>
+</span><span id="BaderELFAnalysis-42"><a href="#BaderELFAnalysis-42"><span class="linenos">42</span></a>        <span class="c1"># empty atoms.</span>
+</span><span id="BaderELFAnalysis-43"><a href="#BaderELFAnalysis-43"><span class="linenos">43</span></a>        <span class="n">elfcar</span> <span class="o">=</span> <span class="n">Elfcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">elfcar_filename</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis-44"><a href="#BaderELFAnalysis-44"><span class="linenos">44</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
+</span><span id="BaderELFAnalysis-45"><a href="#BaderELFAnalysis-45"><span class="linenos">45</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elfcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis-46"><a href="#BaderELFAnalysis-46"><span class="linenos">46</span></a>        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis-47"><a href="#BaderELFAnalysis-47"><span class="linenos">47</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
+</span><span id="BaderELFAnalysis-48"><a href="#BaderELFAnalysis-48"><span class="linenos">48</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">chgcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -181,6 +180,18 @@ instead of CHGCAR.</p>
 </div>
 
 
+                            <div id="BaderELFAnalysis.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">BaderELFAnalysis</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#BaderELFAnalysis.__init__"></a>
+    
+    
+
+                            </div>
                             <div id="BaderELFAnalysis.command" class="classattr">
                                 <div class="attr variable">
             <span class="name">command</span><span class="annotation">: str</span><span class="default_value"> = &#39;bader CHGCAR_empty -ref ELFCAR_empty &gt; bader.out&#39;</span>
@@ -207,27 +218,26 @@ you will see files like "CHGCAR_empty" used in the command.</p>
                             </div>
                             <div id="BaderELFAnalysis.requires_structure" class="classattr">
                                 <div class="attr variable">
-            <span class="name">requires_structure</span><span class="annotation">: bool</span><span class="default_value"> = True</span>
+            <span class="name">requires_structure</span><span class="default_value"> = True</span>
 
         
     </div>
     <a class="headerlink" href="#BaderELFAnalysis.requires_structure"></a>
     
-            <div class="docstring"><p>Indicates whether a structure is needed if for the run() method.</p>
-</div>
-
+    
 
                             </div>
                             <div id="BaderELFAnalysis.required_files" class="classattr">
                                 <div class="attr variable">
-            <span class="name">required_files</span><span class="default_value"> = [&#39;CHGCAR&#39;, &#39;AECCAR0&#39;, &#39;AECCAR2&#39;, &#39;POTCAR&#39;, &#39;ELFCAR&#39;]</span>
+            <span class="name">required_files</span><span class="default_value"> = [&#39;CHGCAR&#39;, &#39;ELFCAR&#39;]</span>
 
         
     </div>
     <a class="headerlink" href="#BaderELFAnalysis.required_files"></a>
     
-            <div class="docstring"><p>In order for bader analysis to run properly, all of these files must be
-present in the provided directory.</p>
+            <div class="docstring"><p>Before the command is executed, this list of files should be present
+in the working directory. This check will be made after <code><a href="#BaderELFAnalysis.setup">setup</a></code> is called
+and before <code><a href="#BaderELFAnalysis.execute">execute</a></code> is called. By default, no input files are required.</p>
 </div>
 
 
@@ -235,42 +245,41 @@ present in the provided directory.</p>
                             <div id="BaderELFAnalysis.setup" class="classattr">
                                         <input id="BaderELFAnalysis.setup-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+                    <div class="decorator">@staticmethod</div>
+
         <span class="def">def</span>
-        <span class="name">setup</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">structure</span><span class="p">:</span> <span class="n"><a href="../../../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a></span>,</span><span class="param">	<span class="n">directory</span><span class="p">:</span> <span class="nb">str</span></span>)</span>
+        <span class="name">setup</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">structure</span><span class="p">:</span> <span class="n"><a href="../../../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a></span>,</span><span class="param">	<span class="n">directory</span><span class="p">:</span> <span class="nb">str</span></span>)</span>
 
                 <label class="view-source-button" for="BaderELFAnalysis.setup-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#BaderELFAnalysis.setup"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="BaderELFAnalysis.setup-23"><a href="#BaderELFAnalysis.setup-23"><span class="linenos">23</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="BaderELFAnalysis.setup-24"><a href="#BaderELFAnalysis.setup-24"><span class="linenos">24</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="BaderELFAnalysis.setup-25"><a href="#BaderELFAnalysis.setup-25"><span class="linenos">25</span></a><span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
-</span><span id="BaderELFAnalysis.setup-26"><a href="#BaderELFAnalysis.setup-26"><span class="linenos">26</span></a><span class="sd">        - typically using VASP. This setup involves ensuring that</span>
-</span><span id="BaderELFAnalysis.setup-27"><a href="#BaderELFAnalysis.setup-27"><span class="linenos">27</span></a><span class="sd">        the proper files are present. In addition, it creates new CHGCAR and</span>
-</span><span id="BaderELFAnalysis.setup-28"><a href="#BaderELFAnalysis.setup-28"><span class="linenos">28</span></a><span class="sd">        ELFCAR files with an update structure -- typically containing empty atoms.</span>
-</span><span id="BaderELFAnalysis.setup-29"><a href="#BaderELFAnalysis.setup-29"><span class="linenos">29</span></a>
-</span><span id="BaderELFAnalysis.setup-30"><a href="#BaderELFAnalysis.setup-30"><span class="linenos">30</span></a><span class="sd">        #### Parameters</span>
-</span><span id="BaderELFAnalysis.setup-31"><a href="#BaderELFAnalysis.setup-31"><span class="linenos">31</span></a>
-</span><span id="BaderELFAnalysis.setup-32"><a href="#BaderELFAnalysis.setup-32"><span class="linenos">32</span></a><span class="sd">        - `structure`:</span>
-</span><span id="BaderELFAnalysis.setup-33"><a href="#BaderELFAnalysis.setup-33"><span class="linenos">33</span></a><span class="sd">            The structure to use when rewriting the ELFCAR and CHGCAR files.</span>
-</span><span id="BaderELFAnalysis.setup-34"><a href="#BaderELFAnalysis.setup-34"><span class="linenos">34</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="BaderELFAnalysis.setup-35"><a href="#BaderELFAnalysis.setup-35"><span class="linenos">35</span></a>
-</span><span id="BaderELFAnalysis.setup-36"><a href="#BaderELFAnalysis.setup-36"><span class="linenos">36</span></a>        <span class="c1"># Run the default method of the parent class.</span>
-</span><span id="BaderELFAnalysis.setup-37"><a href="#BaderELFAnalysis.setup-37"><span class="linenos">37</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis.setup-38"><a href="#BaderELFAnalysis.setup-38"><span class="linenos">38</span></a>
-</span><span id="BaderELFAnalysis.setup-39"><a href="#BaderELFAnalysis.setup-39"><span class="linenos">39</span></a>        <span class="c1"># establish file names</span>
-</span><span id="BaderELFAnalysis.setup-40"><a href="#BaderELFAnalysis.setup-40"><span class="linenos">40</span></a>        <span class="n">elfcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ELFCAR&quot;</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis.setup-41"><a href="#BaderELFAnalysis.setup-41"><span class="linenos">41</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis.setup-42"><a href="#BaderELFAnalysis.setup-42"><span class="linenos">42</span></a>
-</span><span id="BaderELFAnalysis.setup-43"><a href="#BaderELFAnalysis.setup-43"><span class="linenos">43</span></a>        <span class="c1"># Load ELFCAR + CHGCAR and replace the structure with the one we created that includes</span>
-</span><span id="BaderELFAnalysis.setup-44"><a href="#BaderELFAnalysis.setup-44"><span class="linenos">44</span></a>        <span class="c1"># empty atoms.</span>
-</span><span id="BaderELFAnalysis.setup-45"><a href="#BaderELFAnalysis.setup-45"><span class="linenos">45</span></a>        <span class="n">elfcar</span> <span class="o">=</span> <span class="n">Elfcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">elfcar_filename</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis.setup-46"><a href="#BaderELFAnalysis.setup-46"><span class="linenos">46</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
-</span><span id="BaderELFAnalysis.setup-47"><a href="#BaderELFAnalysis.setup-47"><span class="linenos">47</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elfcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis.setup-48"><a href="#BaderELFAnalysis.setup-48"><span class="linenos">48</span></a>        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
-</span><span id="BaderELFAnalysis.setup-49"><a href="#BaderELFAnalysis.setup-49"><span class="linenos">49</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
-</span><span id="BaderELFAnalysis.setup-50"><a href="#BaderELFAnalysis.setup-50"><span class="linenos">50</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">chgcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="BaderELFAnalysis.setup-23"><a href="#BaderELFAnalysis.setup-23"><span class="linenos">23</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="BaderELFAnalysis.setup-24"><a href="#BaderELFAnalysis.setup-24"><span class="linenos">24</span></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="BaderELFAnalysis.setup-25"><a href="#BaderELFAnalysis.setup-25"><span class="linenos">25</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="BaderELFAnalysis.setup-26"><a href="#BaderELFAnalysis.setup-26"><span class="linenos">26</span></a><span class="sd">        Bader analysis requires that a static-energy calculation be ran beforehand</span>
+</span><span id="BaderELFAnalysis.setup-27"><a href="#BaderELFAnalysis.setup-27"><span class="linenos">27</span></a><span class="sd">        - typically using VASP. This setup involves ensuring that</span>
+</span><span id="BaderELFAnalysis.setup-28"><a href="#BaderELFAnalysis.setup-28"><span class="linenos">28</span></a><span class="sd">        the proper files are present. In addition, it creates new CHGCAR and</span>
+</span><span id="BaderELFAnalysis.setup-29"><a href="#BaderELFAnalysis.setup-29"><span class="linenos">29</span></a><span class="sd">        ELFCAR files with an update structure -- typically containing empty atoms.</span>
+</span><span id="BaderELFAnalysis.setup-30"><a href="#BaderELFAnalysis.setup-30"><span class="linenos">30</span></a>
+</span><span id="BaderELFAnalysis.setup-31"><a href="#BaderELFAnalysis.setup-31"><span class="linenos">31</span></a><span class="sd">        #### Parameters</span>
+</span><span id="BaderELFAnalysis.setup-32"><a href="#BaderELFAnalysis.setup-32"><span class="linenos">32</span></a>
+</span><span id="BaderELFAnalysis.setup-33"><a href="#BaderELFAnalysis.setup-33"><span class="linenos">33</span></a><span class="sd">        - `structure`:</span>
+</span><span id="BaderELFAnalysis.setup-34"><a href="#BaderELFAnalysis.setup-34"><span class="linenos">34</span></a><span class="sd">            The structure to use when rewriting the ELFCAR and CHGCAR files.</span>
+</span><span id="BaderELFAnalysis.setup-35"><a href="#BaderELFAnalysis.setup-35"><span class="linenos">35</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="BaderELFAnalysis.setup-36"><a href="#BaderELFAnalysis.setup-36"><span class="linenos">36</span></a>
+</span><span id="BaderELFAnalysis.setup-37"><a href="#BaderELFAnalysis.setup-37"><span class="linenos">37</span></a>        <span class="c1"># establish file names</span>
+</span><span id="BaderELFAnalysis.setup-38"><a href="#BaderELFAnalysis.setup-38"><span class="linenos">38</span></a>        <span class="n">elfcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;ELFCAR&quot;</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis.setup-39"><a href="#BaderELFAnalysis.setup-39"><span class="linenos">39</span></a>        <span class="n">chgcar_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;CHGCAR&quot;</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis.setup-40"><a href="#BaderELFAnalysis.setup-40"><span class="linenos">40</span></a>
+</span><span id="BaderELFAnalysis.setup-41"><a href="#BaderELFAnalysis.setup-41"><span class="linenos">41</span></a>        <span class="c1"># Load ELFCAR + CHGCAR and replace the structure with the one we created that includes</span>
+</span><span id="BaderELFAnalysis.setup-42"><a href="#BaderELFAnalysis.setup-42"><span class="linenos">42</span></a>        <span class="c1"># empty atoms.</span>
+</span><span id="BaderELFAnalysis.setup-43"><a href="#BaderELFAnalysis.setup-43"><span class="linenos">43</span></a>        <span class="n">elfcar</span> <span class="o">=</span> <span class="n">Elfcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">elfcar_filename</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis.setup-44"><a href="#BaderELFAnalysis.setup-44"><span class="linenos">44</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
+</span><span id="BaderELFAnalysis.setup-45"><a href="#BaderELFAnalysis.setup-45"><span class="linenos">45</span></a>        <span class="n">elfcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elfcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis.setup-46"><a href="#BaderELFAnalysis.setup-46"><span class="linenos">46</span></a>        <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">chgcar_filename</span><span class="p">)</span>
+</span><span id="BaderELFAnalysis.setup-47"><a href="#BaderELFAnalysis.setup-47"><span class="linenos">47</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>  <span class="c1"># replaces the original structure in file</span>
+</span><span id="BaderELFAnalysis.setup-48"><a href="#BaderELFAnalysis.setup-48"><span class="linenos">48</span></a>        <span class="n">chgcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">chgcar_filename</span><span class="si">}</span><span class="s2">_empty&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -295,34 +304,25 @@ The structure to use when rewriting the ELFCAR and CHGCAR files.</li>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="BaderELFAnalysis.__init__" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="BaderELFAnalysis.error_handlers" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
-                <dd id="BaderELFAnalysis.execute" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="BaderELFAnalysis.run" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="BaderELFAnalysis.get_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.get_config">get_config</a></dd>
-                <dd id="BaderELFAnalysis.print_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="bader.html#BaderAnalysis">simmate.calculators.bader.tasks.bader.BaderAnalysis</a></dt>
+                                    <div><dt><a href="bader.html#BaderAnalysis">simmate.calculators.bader.tasks.bader.BaderAnalysis</a></dt>
                                 <dd id="BaderELFAnalysis.workup" class="function"><a href="bader.html#BaderAnalysis.workup">workup</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="BaderELFAnalysis.copy" class="function">copy</dd>
-                <dd id="BaderELFAnalysis.bind" class="function">bind</dd>
-                <dd id="BaderELFAnalysis.map" class="function">map</dd>
-                <dd id="BaderELFAnalysis.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="BaderELFAnalysis.set_upstream" class="function">set_upstream</dd>
-                <dd id="BaderELFAnalysis.set_downstream" class="function">set_downstream</dd>
-                <dd id="BaderELFAnalysis.inputs" class="function">inputs</dd>
-                <dd id="BaderELFAnalysis.outputs" class="function">outputs</dd>
-                <dd id="BaderELFAnalysis.pipe" class="function">pipe</dd>
-                <dd id="BaderELFAnalysis.serialize" class="function">serialize</dd>
-                <dd id="BaderELFAnalysis.is_equal" class="function">is_equal</dd>
-                <dd id="BaderELFAnalysis.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="BaderELFAnalysis.not_" class="function">not_</dd>
-                <dd id="BaderELFAnalysis.or_" class="function">or_</dd>
+            <div><dt><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="BaderELFAnalysis.error_handlers" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                <dd id="BaderELFAnalysis.max_corrections" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="BaderELFAnalysis.monitor" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="BaderELFAnalysis.polling_timestep" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="BaderELFAnalysis.monitor_freq" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="BaderELFAnalysis.save_corrections_to_file" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="BaderELFAnalysis.corrections_filename" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="BaderELFAnalysis.compress_output" class="variable"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="BaderELFAnalysis.execute" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="BaderELFAnalysis.run_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="BaderELFAnalysis.to_prefect_task" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="BaderELFAnalysis.run" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="BaderELFAnalysis.get_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.get_config">get_config</a></dd>
+                <dd id="BaderELFAnalysis.print_config" class="function"><a href="../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

@@ -31,6 +31,7 @@
         <ul>
   <li><a href="#the-bader-calculator">The Bader Calculator</a></li>
   <li><a href="#helpful-links">Helpful links</a></li>
+  <li><a href="#installation-ubuntu-2204">Installation (Ubuntu 22.04)</a></li>
 </ul>
 
 
@@ -67,6 +68,41 @@
 <ul>
 <li><a href="http://theory.cm.utexas.edu/henkelman/code/bader/">website</a> (includes docs + guide)</li>
 </ul>
+
+<h2 id="installation-ubuntu-2204">Installation (Ubuntu 22.04)</h2>
+
+<p>Both sections are required for use of Simmate workflows.</p>
+
+<p><strong>For the <code>bader</code> command...</strong></p>
+
+<ol>
+<li>Download <code>Linux x86-64</code> from the Henkelman website <a href="http://theory.cm.utexas.edu/henkelman/code/bader/">here</a></li>
+<li>Unpack the compressed file. There should only be one "file" in it named bader. This is the executable.</li>
+<li>Move the <code>bader</code> executable to a folder of your choosing. For example, <code>~/jacksund/bader/bader</code> (within a folder named bader in my home directory)</li>
+<li>run <code>nano ~./bashrc</code> to edit your bash and add this line to the bottom:</li>
+</ol>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span>/home/jacksund/bader/:<span class="nv">$PATH</span>
+</code></pre></div>
+
+<ol>
+<li>restart your terminal and try the command <code>bader --help</code></li>
+</ol>
+
+<p><strong>For the <code>chgsum.pl</code> and extra scripts</strong></p>
+
+<ol>
+<li>Download the scripts from <a href="http://theory.cm.utexas.edu/vtsttools/scripts.html">VTST-tools</a></li>
+<li>Unpack the folder (<code>vtstscripts-1021</code>) and move it into the folder with your bader executable</li>
+<li>run <code>nano ~./bashrc</code> to edit your bash and add this line to the bottom:</li>
+</ol>
+
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span>/home/jacksund/bader/vtstscripts-1021:<span class="nv">$PATH</span>
+</code></pre></div>
+
+<ol>
+<li>restart your terminal and you're ready to try Bader analyses with Simmate!</li>
+</ol>
 </div>
 
                         <input id="bader-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">

@@ -694,7 +694,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -711,14 +711,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -819,6 +819,7 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
                 <dd id="MITDiffusionAnalysis.objects" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
                 <dd id="MITDiffusionAnalysis.get_table_name" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="MITDiffusionAnalysis.create_subclass" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
+                <dd id="MITDiffusionAnalysis.update_from_toolkit" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="MITDiffusionAnalysis.load_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="MITDiffusionAnalysis.load_remote_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="MITDiffusionAnalysis.get_column_names" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -1112,7 +1113,7 @@ values used in this column:</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># from a thirdparty database or separate table</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -1129,14 +1130,14 @@ values used in this column:</p>
 <span class="c1"># from a transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;MirrorMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;mp-123&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># from a multi-structure transformation</span>
 <span class="n">source</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;HereditaryMutation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatProjStructure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;table&quot;</span><span class="p">:</span> <span class="s2">&quot;MatprojStructure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mp-123&quot;</span><span class="p">,</span> <span class="s2">&quot;mp-321&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1257,6 +1258,7 @@ class built by <code>create_forward_many_to_many_manager()</code> defined below.
                 <dd id="MITMigrationHop.get_table_name" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="MITMigrationHop.create_subclass" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="MITMigrationHop.from_toolkit" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="MITMigrationHop.update_from_toolkit" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="MITMigrationHop.load_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="MITMigrationHop.load_remote_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="MITMigrationHop.get_column_names" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -1750,6 +1752,7 @@ object the first time, the query is executed.</p>
                 <dd id="MITMigrationImage.get_table_name" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="MITMigrationImage.create_subclass" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="MITMigrationImage.from_toolkit" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="MITMigrationImage.update_from_toolkit" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="MITMigrationImage.load_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="MITMigrationImage.load_remote_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="MITMigrationImage.get_column_names" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>

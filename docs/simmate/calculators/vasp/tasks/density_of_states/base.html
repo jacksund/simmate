@@ -34,6 +34,12 @@
             <li>
                     <a class="class" href="#VaspDensityOfStates">VaspDensityOfStates</a>
                             <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#VaspDensityOfStates.__init__">VaspDensityOfStates</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#VaspDensityOfStates.required_files">required_files</a>
+                        </li>
                 </ul>
 
             </li>
@@ -66,11 +72,11 @@
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="kn">from</span> <span class="nn">pymatgen.electronic_structure.plotter</span> <span class="kn">import</span> <span class="n">DosPlotter</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy.materials_project</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>    <span class="n">MatProjStaticEnergy</span><span class="p">,</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>    <span class="n">MatprojStaticEnergy</span><span class="p">,</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="p">)</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="k">class</span> <span class="nc">VaspDensityOfStates</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="k">class</span> <span class="nc">VaspDensityOfStates</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">    A base class for density of states (DOS) calculations. This is not meant</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd">    to be used directly but instead should be inherited from.</span>
@@ -79,34 +85,37 @@
 </span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="sd">    the a fixed charge density from a previous static energy calculation.</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>
-</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a><span class="sd">        In addition to writing the normal VASP output summary, this also plots</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="sd">        the DOS to &quot;density_of_states.png&quot;</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>
-</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>        <span class="c1"># run the normal output</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">required_files</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">]</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>
+</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">        In addition to writing the normal VASP output summary, this also plots</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">        the DOS to &quot;density_of_states.png&quot;</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>        <span class="c1"># and then generate a DOS plot</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>        <span class="n">plotter</span> <span class="o">=</span> <span class="n">DosPlotter</span><span class="p">()</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>        <span class="c1"># run the normal output</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>        <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
 </span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>        <span class="c1"># Add the total density of States</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>        <span class="n">plotter</span><span class="o">.</span><span class="n">add_dos</span><span class="p">(</span><span class="s2">&quot;Total DOS&quot;</span><span class="p">,</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">complete_dos</span><span class="p">)</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>        <span class="c1"># and then generate a DOS plot</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>        <span class="n">plotter</span> <span class="o">=</span> <span class="n">DosPlotter</span><span class="p">()</span>
 </span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>        <span class="c1"># add element-projected density of states</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>        <span class="n">plotter</span><span class="o">.</span><span class="n">add_dos_dict</span><span class="p">(</span><span class="n">vasprun</span><span class="o">.</span><span class="n">complete_dos</span><span class="o">.</span><span class="n">get_element_dos</span><span class="p">())</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>        <span class="c1"># Add the total density of States</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>        <span class="n">plotter</span><span class="o">.</span><span class="n">add_dos</span><span class="p">(</span><span class="s2">&quot;Total DOS&quot;</span><span class="p">,</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">complete_dos</span><span class="p">)</span>
 </span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>        <span class="c1"># If I want plots for individual orbitals</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>        <span class="c1"># for site in vasprun.final_structure:</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>        <span class="c1">#     spd_dos = vasprun.complete_dos.get_site_spd_dos(site)</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>        <span class="c1">#     plotter.add_dos_dict(spd_dos)</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>        <span class="c1"># NOTE: get_dos_dict may be useful in the future</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>        <span class="n">plot</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">get_plot</span><span class="p">()</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>        <span class="n">plot_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;density_of_states.png&quot;</span><span class="p">)</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>        <span class="n">plot</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_filename</span><span class="p">)</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>        <span class="c1"># add element-projected density of states</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>        <span class="n">plotter</span><span class="o">.</span><span class="n">add_dos_dict</span><span class="p">(</span><span class="n">vasprun</span><span class="o">.</span><span class="n">complete_dos</span><span class="o">.</span><span class="n">get_element_dos</span><span class="p">())</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>        <span class="c1"># If I want plots for individual orbitals</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>        <span class="c1"># for site in vasprun.final_structure:</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>        <span class="c1">#     spd_dos = vasprun.complete_dos.get_site_spd_dos(site)</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>        <span class="c1">#     plotter.add_dos_dict(spd_dos)</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>        <span class="c1"># NOTE: get_dos_dict may be useful in the future</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>        <span class="n">plot</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">get_plot</span><span class="p">()</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>        <span class="n">plot_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;density_of_states.png&quot;</span><span class="p">)</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a>        <span class="n">plot</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_filename</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -116,13 +125,13 @@
 <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">VaspDensityOfStates</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></span>):
+    <span class="name">VaspDensityOfStates</span><wbr>(<span class="base"><a href="../static_energy/materials_project.html#MatprojStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatprojStaticEnergy</a></span>):
 
                 <label class="view-source-button" for="VaspDensityOfStates-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#VaspDensityOfStates"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="VaspDensityOfStates-13"><a href="#VaspDensityOfStates-13"><span class="linenos">13</span></a><span class="k">class</span> <span class="nc">VaspDensityOfStates</span><span class="p">(</span><span class="n">MatProjStaticEnergy</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="VaspDensityOfStates-13"><a href="#VaspDensityOfStates-13"><span class="linenos">13</span></a><span class="k">class</span> <span class="nc">VaspDensityOfStates</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
 </span><span id="VaspDensityOfStates-14"><a href="#VaspDensityOfStates-14"><span class="linenos">14</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="VaspDensityOfStates-15"><a href="#VaspDensityOfStates-15"><span class="linenos">15</span></a><span class="sd">    A base class for density of states (DOS) calculations. This is not meant</span>
 </span><span id="VaspDensityOfStates-16"><a href="#VaspDensityOfStates-16"><span class="linenos">16</span></a><span class="sd">    to be used directly but instead should be inherited from.</span>
@@ -131,34 +140,37 @@
 </span><span id="VaspDensityOfStates-19"><a href="#VaspDensityOfStates-19"><span class="linenos">19</span></a><span class="sd">    the a fixed charge density from a previous static energy calculation.</span>
 </span><span id="VaspDensityOfStates-20"><a href="#VaspDensityOfStates-20"><span class="linenos">20</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="VaspDensityOfStates-21"><a href="#VaspDensityOfStates-21"><span class="linenos">21</span></a>
-</span><span id="VaspDensityOfStates-22"><a href="#VaspDensityOfStates-22"><span class="linenos">22</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
-</span><span id="VaspDensityOfStates-23"><a href="#VaspDensityOfStates-23"><span class="linenos">23</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="VaspDensityOfStates-24"><a href="#VaspDensityOfStates-24"><span class="linenos">24</span></a><span class="sd">        In addition to writing the normal VASP output summary, this also plots</span>
-</span><span id="VaspDensityOfStates-25"><a href="#VaspDensityOfStates-25"><span class="linenos">25</span></a><span class="sd">        the DOS to &quot;density_of_states.png&quot;</span>
-</span><span id="VaspDensityOfStates-26"><a href="#VaspDensityOfStates-26"><span class="linenos">26</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="VaspDensityOfStates-27"><a href="#VaspDensityOfStates-27"><span class="linenos">27</span></a>
-</span><span id="VaspDensityOfStates-28"><a href="#VaspDensityOfStates-28"><span class="linenos">28</span></a>        <span class="c1"># run the normal output</span>
-</span><span id="VaspDensityOfStates-29"><a href="#VaspDensityOfStates-29"><span class="linenos">29</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
+</span><span id="VaspDensityOfStates-22"><a href="#VaspDensityOfStates-22"><span class="linenos">22</span></a>    <span class="n">required_files</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">required_files</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;CHGCAR&quot;</span><span class="p">]</span>
+</span><span id="VaspDensityOfStates-23"><a href="#VaspDensityOfStates-23"><span class="linenos">23</span></a>
+</span><span id="VaspDensityOfStates-24"><a href="#VaspDensityOfStates-24"><span class="linenos">24</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="VaspDensityOfStates-25"><a href="#VaspDensityOfStates-25"><span class="linenos">25</span></a>    <span class="k">def</span> <span class="nf">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
+</span><span id="VaspDensityOfStates-26"><a href="#VaspDensityOfStates-26"><span class="linenos">26</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="VaspDensityOfStates-27"><a href="#VaspDensityOfStates-27"><span class="linenos">27</span></a><span class="sd">        In addition to writing the normal VASP output summary, this also plots</span>
+</span><span id="VaspDensityOfStates-28"><a href="#VaspDensityOfStates-28"><span class="linenos">28</span></a><span class="sd">        the DOS to &quot;density_of_states.png&quot;</span>
+</span><span id="VaspDensityOfStates-29"><a href="#VaspDensityOfStates-29"><span class="linenos">29</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="VaspDensityOfStates-30"><a href="#VaspDensityOfStates-30"><span class="linenos">30</span></a>
-</span><span id="VaspDensityOfStates-31"><a href="#VaspDensityOfStates-31"><span class="linenos">31</span></a>        <span class="c1"># and then generate a DOS plot</span>
-</span><span id="VaspDensityOfStates-32"><a href="#VaspDensityOfStates-32"><span class="linenos">32</span></a>        <span class="n">plotter</span> <span class="o">=</span> <span class="n">DosPlotter</span><span class="p">()</span>
+</span><span id="VaspDensityOfStates-31"><a href="#VaspDensityOfStates-31"><span class="linenos">31</span></a>        <span class="c1"># run the normal output</span>
+</span><span id="VaspDensityOfStates-32"><a href="#VaspDensityOfStates-32"><span class="linenos">32</span></a>        <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">_write_output_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">)</span>
 </span><span id="VaspDensityOfStates-33"><a href="#VaspDensityOfStates-33"><span class="linenos">33</span></a>
-</span><span id="VaspDensityOfStates-34"><a href="#VaspDensityOfStates-34"><span class="linenos">34</span></a>        <span class="c1"># Add the total density of States</span>
-</span><span id="VaspDensityOfStates-35"><a href="#VaspDensityOfStates-35"><span class="linenos">35</span></a>        <span class="n">plotter</span><span class="o">.</span><span class="n">add_dos</span><span class="p">(</span><span class="s2">&quot;Total DOS&quot;</span><span class="p">,</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">complete_dos</span><span class="p">)</span>
+</span><span id="VaspDensityOfStates-34"><a href="#VaspDensityOfStates-34"><span class="linenos">34</span></a>        <span class="c1"># and then generate a DOS plot</span>
+</span><span id="VaspDensityOfStates-35"><a href="#VaspDensityOfStates-35"><span class="linenos">35</span></a>        <span class="n">plotter</span> <span class="o">=</span> <span class="n">DosPlotter</span><span class="p">()</span>
 </span><span id="VaspDensityOfStates-36"><a href="#VaspDensityOfStates-36"><span class="linenos">36</span></a>
-</span><span id="VaspDensityOfStates-37"><a href="#VaspDensityOfStates-37"><span class="linenos">37</span></a>        <span class="c1"># add element-projected density of states</span>
-</span><span id="VaspDensityOfStates-38"><a href="#VaspDensityOfStates-38"><span class="linenos">38</span></a>        <span class="n">plotter</span><span class="o">.</span><span class="n">add_dos_dict</span><span class="p">(</span><span class="n">vasprun</span><span class="o">.</span><span class="n">complete_dos</span><span class="o">.</span><span class="n">get_element_dos</span><span class="p">())</span>
+</span><span id="VaspDensityOfStates-37"><a href="#VaspDensityOfStates-37"><span class="linenos">37</span></a>        <span class="c1"># Add the total density of States</span>
+</span><span id="VaspDensityOfStates-38"><a href="#VaspDensityOfStates-38"><span class="linenos">38</span></a>        <span class="n">plotter</span><span class="o">.</span><span class="n">add_dos</span><span class="p">(</span><span class="s2">&quot;Total DOS&quot;</span><span class="p">,</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">complete_dos</span><span class="p">)</span>
 </span><span id="VaspDensityOfStates-39"><a href="#VaspDensityOfStates-39"><span class="linenos">39</span></a>
-</span><span id="VaspDensityOfStates-40"><a href="#VaspDensityOfStates-40"><span class="linenos">40</span></a>        <span class="c1"># If I want plots for individual orbitals</span>
-</span><span id="VaspDensityOfStates-41"><a href="#VaspDensityOfStates-41"><span class="linenos">41</span></a>        <span class="c1"># for site in vasprun.final_structure:</span>
-</span><span id="VaspDensityOfStates-42"><a href="#VaspDensityOfStates-42"><span class="linenos">42</span></a>        <span class="c1">#     spd_dos = vasprun.complete_dos.get_site_spd_dos(site)</span>
-</span><span id="VaspDensityOfStates-43"><a href="#VaspDensityOfStates-43"><span class="linenos">43</span></a>        <span class="c1">#     plotter.add_dos_dict(spd_dos)</span>
-</span><span id="VaspDensityOfStates-44"><a href="#VaspDensityOfStates-44"><span class="linenos">44</span></a>
-</span><span id="VaspDensityOfStates-45"><a href="#VaspDensityOfStates-45"><span class="linenos">45</span></a>        <span class="c1"># NOTE: get_dos_dict may be useful in the future</span>
-</span><span id="VaspDensityOfStates-46"><a href="#VaspDensityOfStates-46"><span class="linenos">46</span></a>
-</span><span id="VaspDensityOfStates-47"><a href="#VaspDensityOfStates-47"><span class="linenos">47</span></a>        <span class="n">plot</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">get_plot</span><span class="p">()</span>
-</span><span id="VaspDensityOfStates-48"><a href="#VaspDensityOfStates-48"><span class="linenos">48</span></a>        <span class="n">plot_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;density_of_states.png&quot;</span><span class="p">)</span>
-</span><span id="VaspDensityOfStates-49"><a href="#VaspDensityOfStates-49"><span class="linenos">49</span></a>        <span class="n">plot</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_filename</span><span class="p">)</span>
+</span><span id="VaspDensityOfStates-40"><a href="#VaspDensityOfStates-40"><span class="linenos">40</span></a>        <span class="c1"># add element-projected density of states</span>
+</span><span id="VaspDensityOfStates-41"><a href="#VaspDensityOfStates-41"><span class="linenos">41</span></a>        <span class="n">plotter</span><span class="o">.</span><span class="n">add_dos_dict</span><span class="p">(</span><span class="n">vasprun</span><span class="o">.</span><span class="n">complete_dos</span><span class="o">.</span><span class="n">get_element_dos</span><span class="p">())</span>
+</span><span id="VaspDensityOfStates-42"><a href="#VaspDensityOfStates-42"><span class="linenos">42</span></a>
+</span><span id="VaspDensityOfStates-43"><a href="#VaspDensityOfStates-43"><span class="linenos">43</span></a>        <span class="c1"># If I want plots for individual orbitals</span>
+</span><span id="VaspDensityOfStates-44"><a href="#VaspDensityOfStates-44"><span class="linenos">44</span></a>        <span class="c1"># for site in vasprun.final_structure:</span>
+</span><span id="VaspDensityOfStates-45"><a href="#VaspDensityOfStates-45"><span class="linenos">45</span></a>        <span class="c1">#     spd_dos = vasprun.complete_dos.get_site_spd_dos(site)</span>
+</span><span id="VaspDensityOfStates-46"><a href="#VaspDensityOfStates-46"><span class="linenos">46</span></a>        <span class="c1">#     plotter.add_dos_dict(spd_dos)</span>
+</span><span id="VaspDensityOfStates-47"><a href="#VaspDensityOfStates-47"><span class="linenos">47</span></a>
+</span><span id="VaspDensityOfStates-48"><a href="#VaspDensityOfStates-48"><span class="linenos">48</span></a>        <span class="c1"># NOTE: get_dos_dict may be useful in the future</span>
+</span><span id="VaspDensityOfStates-49"><a href="#VaspDensityOfStates-49"><span class="linenos">49</span></a>
+</span><span id="VaspDensityOfStates-50"><a href="#VaspDensityOfStates-50"><span class="linenos">50</span></a>        <span class="n">plot</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">get_plot</span><span class="p">()</span>
+</span><span id="VaspDensityOfStates-51"><a href="#VaspDensityOfStates-51"><span class="linenos">51</span></a>        <span class="n">plot_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;density_of_states.png&quot;</span><span class="p">)</span>
+</span><span id="VaspDensityOfStates-52"><a href="#VaspDensityOfStates-52"><span class="linenos">52</span></a>        <span class="n">plot</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_filename</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -170,29 +182,48 @@ the a fixed charge density from a previous static energy calculation.</p>
 </div>
 
 
+                            <div id="VaspDensityOfStates.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">VaspDensityOfStates</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#VaspDensityOfStates.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="VaspDensityOfStates.required_files" class="classattr">
+                                <div class="attr variable">
+            <span class="name">required_files</span><span class="default_value"> = [&#39;INCAR&#39;, &#39;POTCAR&#39;, &#39;POSCAR&#39;, &#39;CHGCAR&#39;]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#VaspDensityOfStates.required_files"></a>
+    
+            <div class="docstring"><p>Before the command is executed, this list of files should be present
+in the working directory. This check will be made after <code><a href="#VaspDensityOfStates.setup">setup</a></code> is called
+and before <code><a href="#VaspDensityOfStates.execute">execute</a></code> is called. By default, no input files are required.</p>
+</div>
+
+
+                            </div>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="VaspDensityOfStates.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="VaspDensityOfStates.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="VaspDensityOfStates.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="VaspDensityOfStates.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                    <div><dt><a href="../static_energy/materials_project.html#MatprojStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatprojStaticEnergy</a></dt>
+                                <dd id="VaspDensityOfStates.incar" class="variable"><a href="../static_energy/materials_project.html#MatprojStaticEnergy.incar">incar</a></dd>
 
             </div>
-            <div><dt><a href="../static_energy/materials_project.html#MatProjStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatProjStaticEnergy</a></dt>
-                                <dd id="VaspDensityOfStates.incar" class="variable"><a href="../static_energy/materials_project.html#MatProjStaticEnergy.incar">incar</a></dd>
-
-            </div>
-            <div><dt><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
-                                <dd id="VaspDensityOfStates.functional" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.functional">functional</a></dd>
-                <dd id="VaspDensityOfStates.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.potcar_mappings">potcar_mappings</a></dd>
-                <dd id="VaspDensityOfStates.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.error_handlers">error_handlers</a></dd>
+            <div><dt><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="VaspDensityOfStates.functional" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="VaspDensityOfStates.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="VaspDensityOfStates.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="VaspDensityOfStates.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="VaspDensityOfStates.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
+                                <dd id="VaspDensityOfStates.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
                 <dd id="VaspDensityOfStates.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
                 <dd id="VaspDensityOfStates.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
                 <dd id="VaspDensityOfStates.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
@@ -203,21 +234,19 @@ the a fixed charge density from a previous static energy calculation.</p>
                 <dd id="VaspDensityOfStates.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="VaspDensityOfStates.copy" class="function">copy</dd>
-                <dd id="VaspDensityOfStates.bind" class="function">bind</dd>
-                <dd id="VaspDensityOfStates.map" class="function">map</dd>
-                <dd id="VaspDensityOfStates.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="VaspDensityOfStates.set_upstream" class="function">set_upstream</dd>
-                <dd id="VaspDensityOfStates.set_downstream" class="function">set_downstream</dd>
-                <dd id="VaspDensityOfStates.inputs" class="function">inputs</dd>
-                <dd id="VaspDensityOfStates.outputs" class="function">outputs</dd>
-                <dd id="VaspDensityOfStates.pipe" class="function">pipe</dd>
-                <dd id="VaspDensityOfStates.serialize" class="function">serialize</dd>
-                <dd id="VaspDensityOfStates.is_equal" class="function">is_equal</dd>
-                <dd id="VaspDensityOfStates.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="VaspDensityOfStates.not_" class="function">not_</dd>
-                <dd id="VaspDensityOfStates.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="VaspDensityOfStates.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="VaspDensityOfStates.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="VaspDensityOfStates.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="VaspDensityOfStates.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="VaspDensityOfStates.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="VaspDensityOfStates.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="VaspDensityOfStates.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="VaspDensityOfStates.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="VaspDensityOfStates.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="VaspDensityOfStates.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="VaspDensityOfStates.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="VaspDensityOfStates.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

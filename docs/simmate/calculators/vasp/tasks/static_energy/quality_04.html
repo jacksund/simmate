@@ -35,6 +35,9 @@
                     <a class="class" href="#Quality04Energy">Quality04Energy</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#Quality04Energy.__init__">Quality04Energy</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Quality04Energy.incar">incar</a>
                         </li>
                 </ul>
@@ -167,6 +170,18 @@ of rough relaxations are done.</p>
 </div>
 
 
+                            <div id="Quality04Energy.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">Quality04Energy</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Quality04Energy.__init__"></a>
+    
+    
+
+                            </div>
                             <div id="Quality04Energy.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;PREC&#39;: &#39;Normal&#39;, &#39;EDIFF&#39;: 1e-05, &#39;ENCUT&#39;: 450, &#39;ISIF&#39;: 3, &#39;NSW&#39;: 0, &#39;IBRION&#39;: -1, &#39;POTIM&#39;: 0.02, &#39;LCHARG&#39;: False, &#39;LWAVE&#39;: False, &#39;KSPACING&#39;: 0.4, &#39;ALGO&#39;: &#39;Normal&#39;, &#39;ISMEAR&#39;: -5, &#39;SIGMA&#39;: 0.05}</span>
@@ -187,15 +202,7 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="Quality04Energy.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="Quality04Energy.error_handlers" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
-                <dd id="Quality04Energy.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="Quality04Energy.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="Quality04Energy.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="../relaxation/quality_04.html#Quality04Relaxation">simmate.calculators.vasp.tasks.relaxation.quality_04.Quality04Relaxation</a></dt>
+                                    <div><dt><a href="../relaxation/quality_04.html#Quality04Relaxation">simmate.calculators.vasp.tasks.relaxation.quality_04.Quality04Relaxation</a></dt>
                                 <dd id="Quality04Energy.functional" class="variable"><a href="../relaxation/quality_04.html#Quality04Relaxation.functional">functional</a></dd>
                 <dd id="Quality04Energy.potcar_mappings" class="variable"><a href="../relaxation/quality_04.html#Quality04Relaxation.potcar_mappings">potcar_mappings</a></dd>
                 <dd id="Quality04Energy.confirm_convergence" class="variable"><a href="../relaxation/quality_04.html#Quality04Relaxation.confirm_convergence">confirm_convergence</a></dd>
@@ -203,7 +210,7 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="Quality04Energy.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
+                                <dd id="Quality04Energy.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
                 <dd id="Quality04Energy.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
                 <dd id="Quality04Energy.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
                 <dd id="Quality04Energy.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
@@ -213,21 +220,20 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                 <dd id="Quality04Energy.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="Quality04Energy.copy" class="function">copy</dd>
-                <dd id="Quality04Energy.bind" class="function">bind</dd>
-                <dd id="Quality04Energy.map" class="function">map</dd>
-                <dd id="Quality04Energy.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="Quality04Energy.set_upstream" class="function">set_upstream</dd>
-                <dd id="Quality04Energy.set_downstream" class="function">set_downstream</dd>
-                <dd id="Quality04Energy.inputs" class="function">inputs</dd>
-                <dd id="Quality04Energy.outputs" class="function">outputs</dd>
-                <dd id="Quality04Energy.pipe" class="function">pipe</dd>
-                <dd id="Quality04Energy.serialize" class="function">serialize</dd>
-                <dd id="Quality04Energy.is_equal" class="function">is_equal</dd>
-                <dd id="Quality04Energy.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="Quality04Energy.not_" class="function">not_</dd>
-                <dd id="Quality04Energy.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="Quality04Energy.error_handlers" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                <dd id="Quality04Energy.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="Quality04Energy.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="Quality04Energy.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="Quality04Energy.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="Quality04Energy.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="Quality04Energy.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="Quality04Energy.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="Quality04Energy.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="Quality04Energy.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="Quality04Energy.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="Quality04Energy.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="Quality04Energy.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

@@ -38,6 +38,9 @@ direct
 3. View a list of all workflows available with `simmate workflows list-all`
 4. Interactively learn about all workflows with `simmate workflows explore`
 5. View the settings used for the `static-energy.vasp.mit` workflow with `simmate workflows show-config static-energy.vasp.mit`
+
+> :warning: If this command fails with a "workflow not found" error, make sure you are viewing the tutorials for the correct simmate version. See the warning at the top of the [previous tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/01_Installation.md).
+
 6. Copy and paste VASP POTCAR files to the folder `~/simmate/vasp/Potentials`. Be sure to unpack the `tar.gz` files. This folder will have the potentials that came with VASP -- and with their original folder+file names:
 ```
 # Located at /home/my_username (~)

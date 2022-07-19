@@ -32,13 +32,43 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
+                    <a class="class" href="#PopulationAnalysis__Vasp__BadelfMatproj">PopulationAnalysis__Vasp__BadelfMatproj</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#PopulationAnalysis__Vasp__BadelfMatproj.__init__">PopulationAnalysis__Vasp__BadelfMatproj</a>
+                        </li>
+                        <li>
+                                <a class="class" href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table">PopulationAnalysis__Vasp__BadelfMatproj.database_table</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config">run_config</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#PopulationAnalysis__Vasp__PrebadelfMatproj">PopulationAnalysis__Vasp__PrebadelfMatproj</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#PopulationAnalysis__Vasp__PrebadelfMatproj.__init__">PopulationAnalysis__Vasp__PrebadelfMatproj</a>
+                        </li>
+                        <li>
+                                <a class="class" href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task">PopulationAnalysis__Vasp__PrebadelfMatproj.s3task</a>
+                        </li>
+                        <li>
+                                <a class="class" href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table">PopulationAnalysis__Vasp__PrebadelfMatproj.database_table</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#PopulationAnalysis__Vasp__PrebadelfMatproj.description_doc_short">description_doc_short</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
                     <a class="variable" href="#get_structure_w_empties">get_structure_w_empties</a>
             </li>
             <li>
-                    <a class="variable" href="#save_bader_results">save_bader_results</a>
-            </li>
-            <li>
-                    <a class="variable" href="#structure_w_empties">structure_w_empties</a>
+                    <a class="variable" href="#save_badelf_results">save_badelf_results</a>
             </li>
     </ul>
 
@@ -67,179 +97,796 @@
 </span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="kn">from</span> <span class="nn">pymatgen.analysis.structure_matcher</span> <span class="kn">import</span> <span class="n">StructureMatcher</span>
 </span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a>
 </span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a><span class="kn">from</span> <span class="nn">simmate.toolkit</span> <span class="kn">import</span> <span class="n">Structure</span>
-</span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a>    <span class="n">s3task_to_workflow</span><span class="p">,</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a>    <span class="n">task</span><span class="p">,</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a>    <span class="n">Parameter</span><span class="p">,</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a>    <span class="n">Workflow</span><span class="p">,</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>    <span class="n">ModuleStorage</span><span class="p">,</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="p">)</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="kn">from</span> <span class="nn">simmate.database</span> <span class="kn">import</span> <span class="n">connect</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="kn">from</span> <span class="nn">simmate.database.third_parties</span> <span class="kn">import</span> <span class="n">MatProjStructure</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.population_analysis</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a>    <span class="n">MatProjPreBaderELF</span><span class="p">,</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="p">)</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.bader.tasks</span> <span class="kn">import</span> <span class="n">BaderELFAnalysis</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.database.population_analysis</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a>    <span class="n">MatProjBaderELFAnalysis</span> <span class="k">as</span> <span class="n">MPBadelfResults</span><span class="p">,</span>
-</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="p">)</span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>
-</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a><span class="n">prebadelf_matproj_workflow</span> <span class="o">=</span> <span class="n">s3task_to_workflow</span><span class="p">(</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;population-analysis/prebadelf-matproj&quot;</span><span class="p">,</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a>    <span class="n">module</span><span class="o">=</span><span class="vm">__name__</span><span class="p">,</span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>    <span class="n">project_name</span><span class="o">=</span><span class="s2">&quot;Simmate-PopulationAnalysis&quot;</span><span class="p">,</span>
-</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a>    <span class="n">s3task</span><span class="o">=</span><span class="n">MatProjPreBaderELF</span><span class="p">,</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a>    <span class="n">database_table</span><span class="o">=</span><span class="n">MPBadelfResults</span><span class="p">,</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a>    <span class="n">register_kwargs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">],</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a>    <span class="n">description_doc_short</span><span class="o">=</span><span class="s2">&quot;runs Bader analysis with ELFCAR as reference&quot;</span><span class="p">,</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a><span class="p">)</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a>
-</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="n">prebadelf_task</span> <span class="o">=</span> <span class="n">prebadelf_matproj_workflow</span><span class="o">.</span><span class="n">to_workflow_task</span><span class="p">()</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">task</span><span class="p">,</span> <span class="n">Workflow</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="kn">from</span> <span class="nn">simmate.database.third_parties</span> <span class="kn">import</span> <span class="n">MatprojStructure</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.population_analysis</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a>    <span class="n">MatprojPreBaderELF</span><span class="p">,</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="p">)</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.bader.tasks</span> <span class="kn">import</span> <span class="n">BaderELFAnalysis</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.database.population_analysis</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a>    <span class="n">MatprojBaderELFAnalysis</span> <span class="k">as</span> <span class="n">MPBadelfResults</span><span class="p">,</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="p">)</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a>
+</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a>
+</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="k">class</span> <span class="nc">PopulationAnalysis__Vasp__BadelfMatproj</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a><span class="sd">    Runs a static energy calculation using an extra-fine FFT grid and then</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a><span class="sd">    carries out Bader analysis on the resulting charge density using the ELFCAR</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="sd">    as a reference when partitioning.</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a>
+</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">MPBadelfResults</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a>
+</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>    <span class="nd">@classmethod</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a>    <span class="k">def</span> <span class="nf">run_config</span><span class="p">(</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a>        <span class="bp">cls</span><span class="p">,</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a>        <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a>        <span class="n">command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a>        <span class="n">source</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a>        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a>    <span class="p">):</span>
 </span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>
-</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="n">badelf_task</span> <span class="o">=</span> <span class="n">BaderELFAnalysis</span><span class="p">()</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a>
-</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a>
-</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="nd">@task</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="k">def</span> <span class="nf">get_structure_w_empties</span><span class="p">(</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>    <span class="n">structure</span><span class="p">,</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>    <span class="n">empty_ion_template</span><span class="p">,</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>    <span class="c1"># directory,</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="p">):</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">    Searches the Materials Project database for a structure that contains</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">    the extra ion and matching host lattice, and uses it to introduce</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="sd">    empty atoms into the original structure. For example, if your input</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="sd">    gave a Ca2N structure and Cl ion for the template, this function will</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a><span class="sd">    find Ca2NCl in the MatProj database and then use the Cl sites to</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="sd">    add dummy &quot;H&quot; atoms into the Ca2N structure. This is particularly useful</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a><span class="sd">    if you would like to analyze electrides.</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>
-</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>    <span class="c1"># !!! It might make more sense to have this accept a database Structure object</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>    <span class="c1"># and also search the same table for a match (rather than the MatProj).</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>
-</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>    <span class="c1"># Grab the chemical system of the structure when it includes the empty ion template</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>    <span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>        <span class="n">structure</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>    <span class="p">)</span>  <span class="c1"># !!! because we don&#39;t load input in this flow yet</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>    <span class="n">structure_dummy</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>    <span class="n">structure_dummy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>        <span class="n">empty_ion_template</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>    <span class="p">)</span>  <span class="c1"># coords don&#39;t matter here bc I&#39;m just after the chemical_system</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>    <span class="n">template_system</span> <span class="o">=</span> <span class="n">structure_dummy</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">chemical_system</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>    <span class="c1"># Go through the Materials Project database and find a structure that</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>    <span class="c1"># is matching when the empty ion type is ignored.</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>    <span class="n">matcher</span> <span class="o">=</span> <span class="n">StructureMatcher</span><span class="p">(</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>        <span class="n">ignored_species</span><span class="o">=</span><span class="n">empty_ion_template</span><span class="p">,</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>        <span class="n">primitive_cell</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># required for the get_s2_like_s1 method</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>    <span class="p">)</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>    <span class="n">potential_matches</span> <span class="o">=</span> <span class="n">MatProjStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>        <span class="n">chemical_system</span><span class="o">=</span><span class="n">template_system</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>    <span class="k">for</span> <span class="n">potential_match</span> <span class="ow">in</span> <span class="n">potential_matches</span><span class="p">:</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>        <span class="n">structure_template</span> <span class="o">=</span> <span class="n">potential_match</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>        <span class="n">is_match</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">structure_template</span><span class="p">)</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>        <span class="c1"># Once we find a match, stop searching</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>        <span class="k">if</span> <span class="n">is_match</span><span class="p">:</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>            <span class="k">break</span>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>    <span class="c1"># confirm that we successfully found a match</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_match</span><span class="p">:</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No match found when trying to generate empty sites&quot;</span><span class="p">)</span>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="c1"># convert our match to an equivalent basis set as the original input</span>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="c1"># structure -- this ensures frac coords are matches.</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="n">structure_template</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_s2_like_s1</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">structure_template</span><span class="p">)</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>    <span class="c1"># make a copy because we will be modifying the structure</span>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="n">structure_w_empties</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure_template</span><span class="o">.</span><span class="n">sites</span><span class="p">:</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>        <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">empty_ion_template</span><span class="p">:</span>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>            <span class="n">structure_w_empties</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">)</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>    <span class="c1"># TODO: consider doing a check to ensure the H atoms added are reasonable.</span>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="c1"># A simple check could be to use the SiteDistance validator and make sure</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>    <span class="c1"># the hydrogen isn&#39;t too close to another atom.</span>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>    <span class="c1"># write the new structure to file</span>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>    <span class="c1"># filename = os.path.join(directory, &quot;simmate_structure_w_empties.cif&quot;)</span>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>    <span class="c1"># structure_w_empties.to(&quot;cif&quot;, filename)</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>    <span class="k">return</span> <span class="n">structure_w_empties</span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a><span class="c1"># THIS IS A COPY/PASTE FROM THE BADER WORKFLOW -- I need to condense these</span>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a><span class="nd">@task</span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a><span class="k">def</span> <span class="nf">save_bader_results</span><span class="p">(</span><span class="n">bader_result</span><span class="p">,</span> <span class="n">prefect_flow_run_id</span><span class="p">):</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>    <span class="c1"># load the results. We are particullary after the first result with</span>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>    <span class="c1"># is a pandas dataframe of oxidation states.</span>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>    <span class="n">oxidation_data</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">bader_result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>    <span class="c1"># load the calculation entry for this workflow run. This should already</span>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>    <span class="c1"># exist thanks to the load_input_and_register task of the prebader workflow</span>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>    <span class="n">calculation</span> <span class="o">=</span> <span class="n">MPBadelfResults</span><span class="o">.</span><span class="n">from_prefect_id</span><span class="p">(</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>        <span class="n">prefect_flow_run_id</span><span class="p">,</span>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>    <span class="p">)</span>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>    <span class="c1"># BUG: can&#39;t use context to grab the id because workflow tasks generate a</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>    <span class="c1"># different id than the main workflow</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>    <span class="c1"># now update the calculation entry with our results</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>    <span class="n">calculation</span><span class="o">.</span><span class="n">oxidation_states</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">oxidation_data</span><span class="o">.</span><span class="n">oxidation_state</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>    <span class="n">calculation</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="k">with</span> <span class="n">Workflow</span><span class="p">(</span><span class="s2">&quot;population-analysis/badelf-matproj&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">workflow</span><span class="p">:</span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>    <span class="n">structure</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;structure&quot;</span><span class="p">)</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>    <span class="n">command</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;vasp_std &gt; vasp.out&quot;</span><span class="p">)</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>    <span class="n">source</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="n">directory</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>    <span class="n">prebadelf_result</span> <span class="o">=</span> <span class="n">prebadelf_task</span><span class="p">(</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>        <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>        <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>        <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>    <span class="p">)</span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>    <span class="c1"># load the structure that contains dummy atoms in it</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>    <span class="n">structure_w_empties</span> <span class="o">=</span> <span class="n">get_structure_w_empties</span><span class="p">(</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>        <span class="n">empty_ion_template</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">,</span>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>    <span class="p">)</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>    <span class="c1"># Bader only adds files and doesn&#39;t overwrite any, so I just run it</span>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>    <span class="c1"># in the original directory. I may switch to copying over to a new</span>
-</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>    <span class="c1"># directory in the future though.</span>
-</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>    <span class="n">badelf_result</span> <span class="o">=</span> <span class="n">badelf_task</span><span class="p">(</span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>        <span class="n">structure</span><span class="o">=</span><span class="n">structure_w_empties</span><span class="p">,</span>
-</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>        <span class="n">directory</span><span class="o">=</span><span class="n">prebadelf_result</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">],</span>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="p">)</span>
-</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>
-</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>    <span class="n">save_bader_results</span><span class="p">(</span><span class="n">badelf_result</span><span class="p">,</span> <span class="n">prebadelf_result</span><span class="p">[</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">])</span>
-</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>
-</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>
-</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a><span class="n">workflow</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">ModuleStorage</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a><span class="n">workflow</span><span class="o">.</span><span class="n">project_name</span> <span class="o">=</span> <span class="s2">&quot;Simmate-PopulationAnalysis&quot;</span>
-</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a><span class="n">workflow</span><span class="o">.</span><span class="n">database_table</span> <span class="o">=</span> <span class="n">MPBadelfResults</span>
-</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a><span class="n">workflow</span><span class="o">.</span><span class="n">register_kwargs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">]</span>
-</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a><span class="n">workflow</span><span class="o">.</span><span class="n">result_task</span> <span class="o">=</span> <span class="n">prebadelf_result</span>
-</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a><span class="n">workflow</span><span class="o">.</span><span class="n">s3tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">MatProjPreBaderELF</span><span class="p">,</span> <span class="n">BaderELFAnalysis</span><span class="p">]</span>
-</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a><span class="n">workflow</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a><span class="s2">    Runs a static energy calculation using an extra-fine FFT grid and then</span>
-</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a><span class="s2">    carries out Bader analysis on the resulting charge density using the ELFCAR</span>
-</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a><span class="s2">    as a reference when partitioning.</span>
-</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a><span class="s2">&quot;&quot;&quot;</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a>        <span class="n">prebadelf_result</span> <span class="o">=</span> <span class="n">PopulationAnalysis__Vasp__PrebadelfMatproj</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a>            <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>            <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>            <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>        <span class="c1"># load the structure that contains dummy atoms in it</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>        <span class="n">structure_w_empties</span> <span class="o">=</span> <span class="n">get_structure_w_empties</span><span class="p">(</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>            <span class="n">empty_ion_template</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">,</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>        <span class="c1"># Bader only adds files and doesn&#39;t overwrite any, so I just run it</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>        <span class="c1"># in the original directory. I may switch to copying over to a new</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>        <span class="c1"># directory in the future though.</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>        <span class="n">badelf_result</span> <span class="o">=</span> <span class="n">BaderELFAnalysis</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure_w_empties</span><span class="p">,</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>            <span class="n">directory</span><span class="o">=</span><span class="n">prebadelf_result</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">],</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>        <span class="n">save_badelf_results</span><span class="p">(</span><span class="n">badelf_result</span><span class="p">,</span> <span class="n">prebadelf_result</span><span class="p">[</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">])</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="c1"># -----------------------------------------------------------------------------</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="c1"># Below are extra tasks and subflows for the workflow that is defined above</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="k">class</span> <span class="nc">PopulationAnalysis__Vasp__PrebadelfMatproj</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>    <span class="n">s3task</span> <span class="o">=</span> <span class="n">MatprojPreBaderELF</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">MPBadelfResults</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>    <span class="n">description_doc_short</span> <span class="o">=</span> <span class="s2">&quot;runs Bader analysis with ELFCAR as reference&quot;</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="nd">@task</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="k">def</span> <span class="nf">get_structure_w_empties</span><span class="p">(</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>    <span class="n">structure</span><span class="p">,</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>    <span class="n">empty_ion_template</span><span class="p">,</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>    <span class="c1"># directory,</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="p">):</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">    Searches the Materials Project database for a structure that contains</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">    the extra ion and matching host lattice, and uses it to introduce</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">    empty atoms into the original structure. For example, if your input</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">    gave a Ca2N structure and Cl ion for the template, this function will</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    find Ca2NCl in the Matproj database and then use the Cl sites to</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">    add dummy &quot;H&quot; atoms into the Ca2N structure. This is particularly useful</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">    if you would like to analyze electrides.</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>    <span class="c1"># !!! It might make more sense to have this accept a database Structure object</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="c1"># and also search the same table for a match (rather than the Matproj).</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="c1"># Grab the chemical system of the structure when it includes the empty ion template</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dynamic</span><span class="p">(</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>        <span class="n">structure</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="p">)</span>  <span class="c1"># !!! because we don&#39;t load input in this flow yet</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>    <span class="n">structure_dummy</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="n">structure_dummy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>        <span class="n">empty_ion_template</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>    <span class="p">)</span>  <span class="c1"># coords don&#39;t matter here bc I&#39;m just after the chemical_system</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>    <span class="n">template_system</span> <span class="o">=</span> <span class="n">structure_dummy</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">chemical_system</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="c1"># Go through the Materials Project database and find a structure that</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>    <span class="c1"># is matching when the empty ion type is ignored.</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>    <span class="n">matcher</span> <span class="o">=</span> <span class="n">StructureMatcher</span><span class="p">(</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>        <span class="n">ignored_species</span><span class="o">=</span><span class="n">empty_ion_template</span><span class="p">,</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>        <span class="n">primitive_cell</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># required for the get_s2_like_s1 method</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>    <span class="p">)</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>    <span class="n">potential_matches</span> <span class="o">=</span> <span class="n">MatprojStructure</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>        <span class="n">chemical_system</span><span class="o">=</span><span class="n">template_system</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>    <span class="k">for</span> <span class="n">potential_match</span> <span class="ow">in</span> <span class="n">potential_matches</span><span class="p">:</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>        <span class="n">structure_template</span> <span class="o">=</span> <span class="n">potential_match</span><span class="o">.</span><span class="n">to_toolkit</span><span class="p">()</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>        <span class="n">is_match</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">structure_template</span><span class="p">)</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>        <span class="c1"># Once we find a match, stop searching</span>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>        <span class="k">if</span> <span class="n">is_match</span><span class="p">:</span>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>            <span class="k">break</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>    <span class="c1"># confirm that we successfully found a match</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_match</span><span class="p">:</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No match found when trying to generate empty sites&quot;</span><span class="p">)</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>    <span class="c1"># convert our match to an equivalent basis set as the original input</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>    <span class="c1"># structure -- this ensures frac coords are matches.</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>    <span class="n">structure_template</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_s2_like_s1</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">structure_template</span><span class="p">)</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>    <span class="c1"># make a copy because we will be modifying the structure</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>    <span class="n">structure_w_empties</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>    <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure_template</span><span class="o">.</span><span class="n">sites</span><span class="p">:</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>        <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">empty_ion_template</span><span class="p">:</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>            <span class="n">structure_w_empties</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">)</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>    <span class="c1"># TODO: consider doing a check to ensure the H atoms added are reasonable.</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>    <span class="c1"># A simple check could be to use the SiteDistance validator and make sure</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>    <span class="c1"># the hydrogen isn&#39;t too close to another atom.</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="c1"># write the new structure to file</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>    <span class="c1"># filename = os.path.join(directory, &quot;simmate_structure_w_empties.cif&quot;)</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>    <span class="c1"># structure_w_empties.to(&quot;cif&quot;, filename)</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>    <span class="k">return</span> <span class="n">structure_w_empties</span>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a><span class="c1"># THIS IS A COPY/PASTE FROM THE BADER WORKFLOW -- I need to condense these</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a><span class="nd">@task</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a><span class="k">def</span> <span class="nf">save_badelf_results</span><span class="p">(</span><span class="n">bader_result</span><span class="p">,</span> <span class="n">prefect_flow_run_id</span><span class="p">):</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>    <span class="c1"># load the results. We are particullary after the first result with</span>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>    <span class="c1"># is a pandas dataframe of oxidation states.</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>    <span class="n">oxidation_data</span><span class="p">,</span> <span class="n">extra_data</span> <span class="o">=</span> <span class="n">bader_result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>    <span class="c1"># load the calculation entry for this workflow run. This should already</span>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>    <span class="c1"># exist thanks to the load_input_and_register task of the prebader workflow</span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>    <span class="n">calculation</span> <span class="o">=</span> <span class="n">MPBadelfResults</span><span class="o">.</span><span class="n">from_prefect_id</span><span class="p">(</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>        <span class="n">prefect_flow_run_id</span><span class="p">,</span>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>    <span class="p">)</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>    <span class="c1"># BUG: can&#39;t use context to grab the id because workflow tasks generate a</span>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>    <span class="c1"># different id than the main workflow</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>    <span class="c1"># now update the calculation entry with our results</span>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>    <span class="n">calculation</span><span class="o">.</span><span class="n">oxidation_states</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">oxidation_data</span><span class="o">.</span><span class="n">oxidation_state</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>    <span class="n">calculation</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 </span></pre></div>
 
 
             </section>
+                <section id="PopulationAnalysis__Vasp__BadelfMatproj">
+                            <input id="PopulationAnalysis__Vasp__BadelfMatproj-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">PopulationAnalysis__Vasp__BadelfMatproj</span><wbr>(<span class="base"><a href="../../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></span>):
+
+                <label class="view-source-button" for="PopulationAnalysis__Vasp__BadelfMatproj-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#PopulationAnalysis__Vasp__BadelfMatproj"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PopulationAnalysis__Vasp__BadelfMatproj-18"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-18"><span class="linenos">18</span></a><span class="k">class</span> <span class="nc">PopulationAnalysis__Vasp__BadelfMatproj</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-19"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-19"><span class="linenos">19</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-20"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-20"><span class="linenos">20</span></a><span class="sd">    Runs a static energy calculation using an extra-fine FFT grid and then</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-21"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-21"><span class="linenos">21</span></a><span class="sd">    carries out Bader analysis on the resulting charge density using the ELFCAR</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-22"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-22"><span class="linenos">22</span></a><span class="sd">    as a reference when partitioning.</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-23"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-23"><span class="linenos">23</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-24"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-24"><span class="linenos">24</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-25"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-25"><span class="linenos">25</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">MPBadelfResults</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-26"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-26"><span class="linenos">26</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-27"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-27"><span class="linenos">27</span></a>    <span class="nd">@classmethod</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-28"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-28"><span class="linenos">28</span></a>    <span class="k">def</span> <span class="nf">run_config</span><span class="p">(</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-29"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-29"><span class="linenos">29</span></a>        <span class="bp">cls</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-30"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-30"><span class="linenos">30</span></a>        <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-31"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-31"><span class="linenos">31</span></a>        <span class="n">command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-32"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-32"><span class="linenos">32</span></a>        <span class="n">source</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-33"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-33"><span class="linenos">33</span></a>        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-34"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-34"><span class="linenos">34</span></a>    <span class="p">):</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-35"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-35"><span class="linenos">35</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-36"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-36"><span class="linenos">36</span></a>        <span class="n">prebadelf_result</span> <span class="o">=</span> <span class="n">PopulationAnalysis__Vasp__PrebadelfMatproj</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-37"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-37"><span class="linenos">37</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-38"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-38"><span class="linenos">38</span></a>            <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-39"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-39"><span class="linenos">39</span></a>            <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-40"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-40"><span class="linenos">40</span></a>            <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-41"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-41"><span class="linenos">41</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-42"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-42"><span class="linenos">42</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-43"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-43"><span class="linenos">43</span></a>        <span class="c1"># load the structure that contains dummy atoms in it</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-44"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-44"><span class="linenos">44</span></a>        <span class="n">structure_w_empties</span> <span class="o">=</span> <span class="n">get_structure_w_empties</span><span class="p">(</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-45"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-45"><span class="linenos">45</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-46"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-46"><span class="linenos">46</span></a>            <span class="n">empty_ion_template</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-47"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-47"><span class="linenos">47</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-48"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-48"><span class="linenos">48</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-49"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-49"><span class="linenos">49</span></a>        <span class="c1"># Bader only adds files and doesn&#39;t overwrite any, so I just run it</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-50"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-50"><span class="linenos">50</span></a>        <span class="c1"># in the original directory. I may switch to copying over to a new</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-51"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-51"><span class="linenos">51</span></a>        <span class="c1"># directory in the future though.</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-52"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-52"><span class="linenos">52</span></a>        <span class="n">badelf_result</span> <span class="o">=</span> <span class="n">BaderELFAnalysis</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-53"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-53"><span class="linenos">53</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure_w_empties</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-54"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-54"><span class="linenos">54</span></a>            <span class="n">directory</span><span class="o">=</span><span class="n">prebadelf_result</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">],</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-55"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-55"><span class="linenos">55</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-56"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-56"><span class="linenos">56</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj-57"><a href="#PopulationAnalysis__Vasp__BadelfMatproj-57"><span class="linenos">57</span></a>        <span class="n">save_badelf_results</span><span class="p">(</span><span class="n">badelf_result</span><span class="p">,</span> <span class="n">prebadelf_result</span><span class="p">[</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">])</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Runs a static energy calculation using an extra-fine FFT grid and then
+carries out Bader analysis on the resulting charge density using the ELFCAR
+as a reference when partitioning.</p>
+</div>
+
+
+                            <div id="PopulationAnalysis__Vasp__BadelfMatproj.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">PopulationAnalysis__Vasp__BadelfMatproj</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PopulationAnalysis__Vasp__BadelfMatproj.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="PopulationAnalysis__Vasp__BadelfMatproj.run_config" class="classattr">
+                                        <input id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+                    <div class="decorator">@classmethod</div>
+
+        <span class="def">def</span>
+        <span class="name">run_config</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">cls</span>,</span><span class="param">	<span class="n">structure</span><span class="p">:</span> <span class="n"><a href="../../../../toolkit/base_data_types/structure.html#Structure">simmate.toolkit.base_data_types.structure.Structure</a></span>,</span><span class="param">	<span class="n">command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">source</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+
+                <label class="view-source-button" for="PopulationAnalysis__Vasp__BadelfMatproj.run_config-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-27"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-27"><span class="linenos">27</span></a>    <span class="nd">@classmethod</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-28"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-28"><span class="linenos">28</span></a>    <span class="k">def</span> <span class="nf">run_config</span><span class="p">(</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-29"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-29"><span class="linenos">29</span></a>        <span class="bp">cls</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-30"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-30"><span class="linenos">30</span></a>        <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-31"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-31"><span class="linenos">31</span></a>        <span class="n">command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-32"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-32"><span class="linenos">32</span></a>        <span class="n">source</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-33"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-33"><span class="linenos">33</span></a>        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-34"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-34"><span class="linenos">34</span></a>    <span class="p">):</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-35"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-35"><span class="linenos">35</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-36"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-36"><span class="linenos">36</span></a>        <span class="n">prebadelf_result</span> <span class="o">=</span> <span class="n">PopulationAnalysis__Vasp__PrebadelfMatproj</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-37"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-37"><span class="linenos">37</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-38"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-38"><span class="linenos">38</span></a>            <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-39"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-39"><span class="linenos">39</span></a>            <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-40"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-40"><span class="linenos">40</span></a>            <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-41"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-41"><span class="linenos">41</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-42"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-42"><span class="linenos">42</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-43"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-43"><span class="linenos">43</span></a>        <span class="c1"># load the structure that contains dummy atoms in it</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-44"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-44"><span class="linenos">44</span></a>        <span class="n">structure_w_empties</span> <span class="o">=</span> <span class="n">get_structure_w_empties</span><span class="p">(</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-45"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-45"><span class="linenos">45</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-46"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-46"><span class="linenos">46</span></a>            <span class="n">empty_ion_template</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-47"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-47"><span class="linenos">47</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-48"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-48"><span class="linenos">48</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-49"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-49"><span class="linenos">49</span></a>        <span class="c1"># Bader only adds files and doesn&#39;t overwrite any, so I just run it</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-50"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-50"><span class="linenos">50</span></a>        <span class="c1"># in the original directory. I may switch to copying over to a new</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-51"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-51"><span class="linenos">51</span></a>        <span class="c1"># directory in the future though.</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-52"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-52"><span class="linenos">52</span></a>        <span class="n">badelf_result</span> <span class="o">=</span> <span class="n">BaderELFAnalysis</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-53"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-53"><span class="linenos">53</span></a>            <span class="n">structure</span><span class="o">=</span><span class="n">structure_w_empties</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-54"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-54"><span class="linenos">54</span></a>            <span class="n">directory</span><span class="o">=</span><span class="n">prebadelf_result</span><span class="p">[</span><span class="s2">&quot;directory&quot;</span><span class="p">],</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-55"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-55"><span class="linenos">55</span></a>        <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-56"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-56"><span class="linenos">56</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.run_config-57"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.run_config-57"><span class="linenos">57</span></a>        <span class="n">save_badelf_results</span><span class="p">(</span><span class="n">badelf_result</span><span class="p">,</span> <span class="n">prebadelf_result</span><span class="p">[</span><span class="s2">&quot;prefect_flow_run_id&quot;</span><span class="p">])</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>The workflow method, which can be overwritten when inheriting from this
+class. This can be either a staticmethod or classmethod.</p>
+
+<h4 id="the-default-run-method">The default run method</h4>
+
+<p>There is a default run method implemented that is for S3Tasks.</p>
+
+<p>Builds a workflow from a S3Task and it's corresponding database table.</p>
+
+<p>Very often with Simmate's S3Tasks, the workflow for a single S3Task is
+the same. The workflow is typically made of three tasks:</p>
+
+<ol>
+<li>loading the input parameters and registering the calculation</li>
+<li>running the calculation (what this S3Task does on its own)</li>
+<li>saving the calculation results</li>
+</ol>
+
+<p>Task 1 and 3 always use the same functions, where we just need to tell
+it which database table we are registering/saving to.</p>
+
+<p>Because of this common recipe for workflows, we use this method to make
+the workflow for us.</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="../../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.version" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.version">version</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.s3task" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.s3task">s3task</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.description_doc_short" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.description_doc_short">description_doc_short</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.to_prefect_flow" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.to_prefect_flow">to_prefect_flow</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.run" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run">run</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.name_full" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_full">name_full</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.name_project" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_project">name_project</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.name_calculator" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_calculator">name_calculator</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.name_preset" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_preset">name_preset</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.description_doc" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.description_doc">description_doc</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.parameter_names" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameter_names">parameter_names</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.parameter_names_required" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameter_names_required">parameter_names_required</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.show_parameters" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.show_parameters">show_parameters</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.parameters_to_register" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameters_to_register">parameters_to_register</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.deployment_id" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.deployment_id">deployment_id</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.run_cloud" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run_cloud">run_cloud</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.nflows_submitted" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.nflows_submitted">nflows_submitted</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="PopulationAnalysis__Vasp__BadelfMatproj.database_table">
+                            <input id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">PopulationAnalysis__Vasp__BadelfMatproj.database_table</span><wbr>(<span class="base"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></span>):
+
+                <label class="view-source-button" for="PopulationAnalysis__Vasp__BadelfMatproj.database_table-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-22"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-22"><span class="linenos">22</span></a><span class="k">class</span> <span class="nc">MatprojBaderELFAnalysis</span><span class="p">(</span><span class="n">StaticEnergy</span><span class="p">):</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-23"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-23"><span class="linenos">23</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-24"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-24"><span class="linenos">24</span></a><span class="sd">    This table combines results from a static energy calculation and the follow-up</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-25"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-25"><span class="linenos">25</span></a><span class="sd">    bader analysis on the charge density.</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-26"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-26"><span class="linenos">26</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-27"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-27"><span class="linenos">27</span></a>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-28"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-28"><span class="linenos">28</span></a>    <span class="n">oxidation_states</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-29"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-29"><span class="linenos">29</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-30"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-30"><span class="linenos">30</span></a><span class="sd">    A list of calculated oxidation states based on Bader analysis. This is </span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-31"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-31"><span class="linenos">31</span></a><span class="sd">    given back as a list of float values in the same order as sites in the</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-32"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-32"><span class="linenos">32</span></a><span class="sd">    source structure.</span>
+</span><span id="PopulationAnalysis__Vasp__BadelfMatproj.database_table-33"><a href="#PopulationAnalysis__Vasp__BadelfMatproj.database_table-33"><span class="linenos">33</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>The database table where calculation information (such as the prefect_flow_run_id)
+is stored. The table should use <code>simmate.database.base_data_types.Calculation</code></p>
+
+<p>In many cases, this table will contain all of the results you need. However,
+pay special attention to NestedWorkflows, where your results are often tied
+to a final task.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>django.db.models.base.Model</dt>
+                                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.__init__" class="function">Model</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.from_db" class="function">from_db</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.pk" class="variable">pk</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.get_deferred_fields" class="function">get_deferred_fields</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.refresh_from_db" class="function">refresh_from_db</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.serializable_value" class="function">serializable_value</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.save" class="function">save</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.save_base" class="function">save_base</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.delete" class="function">delete</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.prepare_database_save" class="function">prepare_database_save</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.clean" class="function">clean</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.validate_unique" class="function">validate_unique</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.date_error_message" class="function">date_error_message</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.unique_error_message" class="function">unique_error_message</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.full_clean" class="function">full_clean</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.clean_fields" class="function">clean_fields</dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.check" class="function">check</dd>
+
+            </div>
+            <div><dt><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis">simmate.calculators.vasp.database.population_analysis.MatprojBaderELFAnalysis</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.oxidation_states" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.oxidation_states">oxidation_states</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.band_gap" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.band_gap">band_gap</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.is_gap_direct" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.is_gap_direct">is_gap_direct</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.energy_fermi" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.energy_fermi">energy_fermi</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.conduction_band_minimum" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.conduction_band_minimum">conduction_band_minimum</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.valence_band_maximum" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.valence_band_maximum">valence_band_maximum</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.structure_string" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.structure_string">structure_string</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.nsites" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.nsites">nsites</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.nelements" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.nelements">nelements</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.elements" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.elements">elements</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.chemical_system" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.chemical_system">chemical_system</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.density" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.density">density</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.density_atomic" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.density_atomic">density_atomic</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.volume" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.volume">volume</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.volume_molar" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.volume_molar">volume_molar</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.formula_full" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formula_full">formula_full</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.formula_reduced" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formula_reduced">formula_reduced</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.formula_anonymous" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formula_anonymous">formula_anonymous</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.spacegroup" class="variable"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.spacegroup">spacegroup</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.energy" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.energy">energy</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.energy_per_atom" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.energy_per_atom">energy_per_atom</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.energy_above_hull" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.energy_above_hull">energy_above_hull</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.is_stable" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.is_stable">is_stable</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.decomposes_to" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.decomposes_to">decomposes_to</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.formation_energy" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formation_energy">formation_energy</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.formation_energy_per_atom" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formation_energy_per_atom">formation_energy_per_atom</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.site_forces" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.site_forces">site_forces</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.lattice_stress" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.lattice_stress">lattice_stress</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.site_force_norm_max" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.site_force_norm_max">site_force_norm_max</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.site_forces_norm" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.site_forces_norm">site_forces_norm</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.site_forces_norm_per_atom" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.site_forces_norm_per_atom">site_forces_norm_per_atom</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.lattice_stress_norm" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.lattice_stress_norm">lattice_stress_norm</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.lattice_stress_norm_per_atom" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.lattice_stress_norm_per_atom">lattice_stress_norm_per_atom</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.directory" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.directory">directory</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.prefect_flow_run_id" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.prefect_flow_run_id">prefect_flow_run_id</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.corrections" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.corrections">corrections</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.created_at" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.created_at">created_at</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.updated_at" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.updated_at">updated_at</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.source" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.source">source</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.DoesNotExist" class="class"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.DoesNotExist">DoesNotExist</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.MultipleObjectsReturned" class="class"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.spacegroup_id" class="variable"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.spacegroup_id">spacegroup_id</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.id" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.id">id</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.Meta" class="class"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.Meta">Meta</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.base_info" class="variable"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.base_info">base_info</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.from_directory" class="function"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.from_directory">from_directory</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.from_vasp_run" class="function"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.from_vasp_run">from_vasp_run</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.update_from_vasp_run" class="function"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.update_from_vasp_run">update_from_vasp_run</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.to_toolkit" class="function"><a href="../../../../database/base_data_types/structure.html#Structure.to_toolkit">to_toolkit</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.update_chemical_system_stabilities" class="function"><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.update_all_stabilities" class="function"><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.prefect_cloud_link" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.flow_run_view" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.prefect_flow_run_name" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.prefect_state" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.from_prefect_id" class="function"><a href="../../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.source_doi" class="variable"><a href="../../../../database/base_data_types/base.html#DatabaseTable.source_doi">source_doi</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.remote_archive_link" class="variable"><a href="../../../../database/base_data_types/base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.objects" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.get_table_name" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.create_subclass" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.from_toolkit" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.update_from_toolkit" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.load_archive" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.load_remote_archive" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.get_column_names" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.show_columns" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.get_mixins" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_mixins">get_mixins</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.get_mixin_names" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_mixin_names">get_mixin_names</a></dd>
+                <dd id="PopulationAnalysis__Vasp__BadelfMatproj.database_table.get_extra_columns" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_extra_columns">get_extra_columns</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="PopulationAnalysis__Vasp__PrebadelfMatproj">
+                            <input id="PopulationAnalysis__Vasp__PrebadelfMatproj-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">PopulationAnalysis__Vasp__PrebadelfMatproj</span><wbr>(<span class="base"><a href="../../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></span>):
+
+                <label class="view-source-button" for="PopulationAnalysis__Vasp__PrebadelfMatproj-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#PopulationAnalysis__Vasp__PrebadelfMatproj"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj-65"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj-65"><span class="linenos">65</span></a><span class="k">class</span> <span class="nc">PopulationAnalysis__Vasp__PrebadelfMatproj</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj-66"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj-66"><span class="linenos">66</span></a>    <span class="n">s3task</span> <span class="o">=</span> <span class="n">MatprojPreBaderELF</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj-67"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj-67"><span class="linenos">67</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">MPBadelfResults</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj-68"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj-68"><span class="linenos">68</span></a>    <span class="n">description_doc_short</span> <span class="o">=</span> <span class="s2">&quot;runs Bader analysis with ELFCAR as reference&quot;</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>An abstract base class for all Simmate workflows. Default methods are configured
+for use with S3Tasks and Workflows.</p>
+</div>
+
+
+                            <div id="PopulationAnalysis__Vasp__PrebadelfMatproj.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">PopulationAnalysis__Vasp__PrebadelfMatproj</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PopulationAnalysis__Vasp__PrebadelfMatproj.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="PopulationAnalysis__Vasp__PrebadelfMatproj.description_doc_short" class="classattr">
+                                <div class="attr variable">
+            <span class="name">description_doc_short</span><span class="annotation">: str</span><span class="default_value"> = &#39;runs Bader analysis with ELFCAR as reference&#39;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PopulationAnalysis__Vasp__PrebadelfMatproj.description_doc_short"></a>
+    
+            <div class="docstring"><p>A quick description for this workflow. This will be shown in the website UI
+in the list-view of all different workflow presets.</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="../../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.version" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.version">version</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.run_config" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run_config">run_config</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.to_prefect_flow" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.to_prefect_flow">to_prefect_flow</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.run" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run">run</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.name_full" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_full">name_full</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.name_project" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_project">name_project</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.name_calculator" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_calculator">name_calculator</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.name_preset" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_preset">name_preset</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.description_doc" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.description_doc">description_doc</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.parameter_names" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameter_names">parameter_names</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.parameter_names_required" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameter_names_required">parameter_names_required</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.show_parameters" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.show_parameters">show_parameters</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.parameters_to_register" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameters_to_register">parameters_to_register</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.deployment_id" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.deployment_id">deployment_id</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.run_cloud" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run_cloud">run_cloud</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.nflows_submitted" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.nflows_submitted">nflows_submitted</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task">
+                            <input id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">PopulationAnalysis__Vasp__PrebadelfMatproj.s3task</span><wbr>(<span class="base"><a href="../../tasks/static_energy/materials_project.html#MatprojStaticEnergy">simmate.calculators.vasp.tasks.static_energy.materials_project.MatprojStaticEnergy</a></span>):
+
+                <label class="view-source-button" for="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-9"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-9"><span class="linenos"> 9</span></a><span class="k">class</span> <span class="nc">MatprojPreBaderELF</span><span class="p">(</span><span class="n">MatprojStaticEnergy</span><span class="p">):</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-10"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-10"><span class="linenos">10</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-11"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-11"><span class="linenos">11</span></a><span class="sd">    Runs a static energy calculation with a high-density FFT grid under settings</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-12"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-12"><span class="linenos">12</span></a><span class="sd">    from the Materials Project. Results can be used for Bader analysis where</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-13"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-13"><span class="linenos">13</span></a><span class="sd">    the ELF is used as the reference instead of the CHGCAR.</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-14"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-14"><span class="linenos">14</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-15"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-15"><span class="linenos">15</span></a>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-16"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-16"><span class="linenos">16</span></a>    <span class="c1"># The key thing for bader analysis is that we need a very fine FFT mesh. Other</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-17"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-17"><span class="linenos">17</span></a>    <span class="c1"># than that, it&#39;s the same as a static energy calculation.</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-18"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-18"><span class="linenos">18</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojStaticEnergy</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-19"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-19"><span class="linenos">19</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-20"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-20"><span class="linenos">20</span></a>        <span class="n">LAECHG</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># write core charge density to AECCAR0 and valence to AECCAR2</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-21"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-21"><span class="linenos">21</span></a>        <span class="n">LELF</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># writes ELFCAR</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-22"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-22"><span class="linenos">22</span></a>        <span class="n">NPAR</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># must be set if LELF is set to True</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-23"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-23"><span class="linenos">23</span></a>        <span class="n">PREC</span><span class="o">=</span><span class="s2">&quot;Single&quot;</span><span class="p">,</span>  <span class="c1"># ensures CHGCAR grid matches ELFCAR grid</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-24"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-24"><span class="linenos">24</span></a>        <span class="c1"># Note that these set the FFT grid while the pre-Bader task sets the</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-25"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-25"><span class="linenos">25</span></a>        <span class="c1"># fine FFT grid (e.g. useds NGX instead of NGXF)</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-26"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-26"><span class="linenos">26</span></a>        <span class="n">NGX__density_a</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-27"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-27"><span class="linenos">27</span></a>        <span class="n">NGY__density_b</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-28"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-28"><span class="linenos">28</span></a>        <span class="n">NGZ__density_c</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-29"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task-29"><span class="linenos">29</span></a>    <span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>The supervised-staged-shell task (or S3Task) that this workflow uses to run.
+For understanding what the calculation does and the settings it uses, users
+should start here. You can also use a workflows <code><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.run">s3task.run</a></code> to run the workflow
+without storing results in the database.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="../../tasks/population_analysis/pre_badelf.html#MatprojPreBaderELF">simmate.calculators.vasp.tasks.population_analysis.pre_badelf.MatprojPreBaderELF</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.__init__" class="function"><a href="../../tasks/population_analysis/pre_badelf.html#MatprojPreBaderELF.__init__">MatprojPreBaderELF</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.incar" class="variable"><a href="../../tasks/population_analysis/pre_badelf.html#MatprojPreBaderELF.incar">incar</a></dd>
+
+            </div>
+            <div><dt><a href="../../tasks/relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.functional" class="variable"><a href="../../tasks/relaxation/materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.potcar_mappings" class="variable"><a href="../../tasks/relaxation/materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.error_handlers" class="variable"><a href="../../tasks/relaxation/materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
+
+            </div>
+            <div><dt><a href="../../tasks/base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.required_files" class="variable"><a href="../../tasks/base.html#VaspTask.required_files">required_files</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.command" class="variable"><a href="../../tasks/base.html#VaspTask.command">command</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.incar_parallel_settings" class="variable"><a href="../../tasks/base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.kpoints" class="variable"><a href="../../tasks/base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.confirm_convergence" class="variable"><a href="../../tasks/base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.pre_sanitize_structure" class="variable"><a href="../../tasks/base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.pre_standardize_structure" class="variable"><a href="../../tasks/base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.setup" class="function"><a href="../../tasks/base.html#VaspTask.setup">setup</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.workup" class="function"><a href="../../tasks/base.html#VaspTask.workup">workup</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.get_config" class="function"><a href="../../tasks/base.html#VaspTask.get_config">get_config</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.s3task.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table">
+                            <input id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">PopulationAnalysis__Vasp__PrebadelfMatproj.database_table</span><wbr>(<span class="base"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></span>):
+
+                <label class="view-source-button" for="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-22"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-22"><span class="linenos">22</span></a><span class="k">class</span> <span class="nc">MatprojBaderELFAnalysis</span><span class="p">(</span><span class="n">StaticEnergy</span><span class="p">):</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-23"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-23"><span class="linenos">23</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-24"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-24"><span class="linenos">24</span></a><span class="sd">    This table combines results from a static energy calculation and the follow-up</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-25"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-25"><span class="linenos">25</span></a><span class="sd">    bader analysis on the charge density.</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-26"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-26"><span class="linenos">26</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-27"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-27"><span class="linenos">27</span></a>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-28"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-28"><span class="linenos">28</span></a>    <span class="n">oxidation_states</span> <span class="o">=</span> <span class="n">table_column</span><span class="o">.</span><span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-29"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-29"><span class="linenos">29</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-30"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-30"><span class="linenos">30</span></a><span class="sd">    A list of calculated oxidation states based on Bader analysis. This is </span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-31"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-31"><span class="linenos">31</span></a><span class="sd">    given back as a list of float values in the same order as sites in the</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-32"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-32"><span class="linenos">32</span></a><span class="sd">    source structure.</span>
+</span><span id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-33"><a href="#PopulationAnalysis__Vasp__PrebadelfMatproj.database_table-33"><span class="linenos">33</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>The database table where calculation information (such as the prefect_flow_run_id)
+is stored. The table should use <code>simmate.database.base_data_types.Calculation</code></p>
+
+<p>In many cases, this table will contain all of the results you need. However,
+pay special attention to NestedWorkflows, where your results are often tied
+to a final task.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>django.db.models.base.Model</dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.__init__" class="function">Model</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.from_db" class="function">from_db</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.pk" class="variable">pk</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.get_deferred_fields" class="function">get_deferred_fields</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.refresh_from_db" class="function">refresh_from_db</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.serializable_value" class="function">serializable_value</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.save" class="function">save</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.save_base" class="function">save_base</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.delete" class="function">delete</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.prepare_database_save" class="function">prepare_database_save</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.clean" class="function">clean</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.validate_unique" class="function">validate_unique</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.date_error_message" class="function">date_error_message</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.unique_error_message" class="function">unique_error_message</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.full_clean" class="function">full_clean</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.clean_fields" class="function">clean_fields</dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.check" class="function">check</dd>
+
+            </div>
+            <div><dt><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis">simmate.calculators.vasp.database.population_analysis.MatprojBaderELFAnalysis</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.oxidation_states" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.oxidation_states">oxidation_states</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.band_gap" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.band_gap">band_gap</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.is_gap_direct" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.is_gap_direct">is_gap_direct</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.energy_fermi" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.energy_fermi">energy_fermi</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.conduction_band_minimum" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.conduction_band_minimum">conduction_band_minimum</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.valence_band_maximum" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.valence_band_maximum">valence_band_maximum</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.structure_string" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.structure_string">structure_string</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.nsites" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.nsites">nsites</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.nelements" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.nelements">nelements</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.elements" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.elements">elements</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.chemical_system" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.chemical_system">chemical_system</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.density" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.density">density</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.density_atomic" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.density_atomic">density_atomic</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.volume" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.volume">volume</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.volume_molar" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.volume_molar">volume_molar</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.formula_full" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formula_full">formula_full</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.formula_reduced" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formula_reduced">formula_reduced</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.formula_anonymous" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formula_anonymous">formula_anonymous</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.spacegroup" class="variable"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.spacegroup">spacegroup</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.energy" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.energy">energy</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.energy_per_atom" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.energy_per_atom">energy_per_atom</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.energy_above_hull" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.energy_above_hull">energy_above_hull</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.is_stable" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.is_stable">is_stable</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.decomposes_to" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.decomposes_to">decomposes_to</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.formation_energy" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formation_energy">formation_energy</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.formation_energy_per_atom" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.formation_energy_per_atom">formation_energy_per_atom</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.site_forces" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.site_forces">site_forces</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.lattice_stress" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.lattice_stress">lattice_stress</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.site_force_norm_max" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.site_force_norm_max">site_force_norm_max</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.site_forces_norm" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.site_forces_norm">site_forces_norm</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.site_forces_norm_per_atom" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.site_forces_norm_per_atom">site_forces_norm_per_atom</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.lattice_stress_norm" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.lattice_stress_norm">lattice_stress_norm</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.lattice_stress_norm_per_atom" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.lattice_stress_norm_per_atom">lattice_stress_norm_per_atom</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.directory" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.directory">directory</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.prefect_flow_run_id" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.prefect_flow_run_id">prefect_flow_run_id</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.corrections" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.corrections">corrections</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.created_at" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.created_at">created_at</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.updated_at" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.updated_at">updated_at</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.source" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.source">source</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.DoesNotExist" class="class"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.DoesNotExist">DoesNotExist</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.MultipleObjectsReturned" class="class"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.spacegroup_id" class="variable"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.spacegroup_id">spacegroup_id</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.id" class="function"><a href="../../database/population_analysis.html#MatprojBaderELFAnalysis.id">id</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.Meta" class="class"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.Meta">Meta</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.base_info" class="variable"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.base_info">base_info</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.from_directory" class="function"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.from_directory">from_directory</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.from_vasp_run" class="function"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.from_vasp_run">from_vasp_run</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.update_from_vasp_run" class="function"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.update_from_vasp_run">update_from_vasp_run</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.to_toolkit" class="function"><a href="../../../../database/base_data_types/structure.html#Structure.to_toolkit">to_toolkit</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.update_chemical_system_stabilities" class="function"><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.update_all_stabilities" class="function"><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.prefect_cloud_link" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.flow_run_view" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.prefect_flow_run_name" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.prefect_state" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.from_prefect_id" class="function"><a href="../../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
+                                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.source_doi" class="variable"><a href="../../../../database/base_data_types/base.html#DatabaseTable.source_doi">source_doi</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.remote_archive_link" class="variable"><a href="../../../../database/base_data_types/base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.objects" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.get_table_name" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.create_subclass" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.from_toolkit" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.update_from_toolkit" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.load_archive" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.load_remote_archive" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.get_column_names" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.show_columns" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.get_mixins" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_mixins">get_mixins</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.get_mixin_names" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_mixin_names">get_mixin_names</a></dd>
+                <dd id="PopulationAnalysis__Vasp__PrebadelfMatproj.database_table.get_extra_columns" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_extra_columns">get_extra_columns</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
                 <section id="get_structure_w_empties">
                     <div class="attr variable">
-            <span class="name">get_structure_w_empties</span><span class="default_value"> = &lt;Task: get_structure_w_empties&gt;</span>
+            <span class="name">get_structure_w_empties</span><span class="default_value"> = &lt;prefect.tasks.Task object&gt;</span>
 
         
     </div>
@@ -248,24 +895,13 @@
     
 
                 </section>
-                <section id="save_bader_results">
+                <section id="save_badelf_results">
                     <div class="attr variable">
-            <span class="name">save_bader_results</span><span class="default_value"> = &lt;Task: save_bader_results&gt;</span>
+            <span class="name">save_badelf_results</span><span class="default_value"> = &lt;prefect.tasks.Task object&gt;</span>
 
         
     </div>
-    <a class="headerlink" href="#save_bader_results"></a>
-    
-    
-
-                </section>
-                <section id="structure_w_empties">
-                    <div class="attr variable">
-            <span class="name">structure_w_empties</span><span class="default_value"> = &lt;Task: get_structure_w_empties&gt;</span>
-
-        
-    </div>
-    <a class="headerlink" href="#structure_w_empties"></a>
+    <a class="headerlink" href="#save_badelf_results"></a>
     
     
 

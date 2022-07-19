@@ -1924,14 +1924,14 @@ handler to fix this as VASP runs.</p>
 
     </div>
     <a class="headerlink" href="#Incar.keyword_modifier_smart_langevin"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="Incar.keyword_modifier_smart_langevin-31"><a href="#Incar.keyword_modifier_smart_langevin-31"><span class="linenos">31</span></a><span class="k">def</span> <span class="nf">keyword_modifier_smart_langevin</span><span class="p">(</span>
-</span><span id="Incar.keyword_modifier_smart_langevin-32"><a href="#Incar.keyword_modifier_smart_langevin-32"><span class="linenos">32</span></a>    <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
-</span><span id="Incar.keyword_modifier_smart_langevin-33"><a href="#Incar.keyword_modifier_smart_langevin-33"><span class="linenos">33</span></a>    <span class="n">langevin_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># not required</span>
-</span><span id="Incar.keyword_modifier_smart_langevin-34"><a href="#Incar.keyword_modifier_smart_langevin-34"><span class="linenos">34</span></a><span class="p">):</span>
-</span><span id="Incar.keyword_modifier_smart_langevin-35"><a href="#Incar.keyword_modifier_smart_langevin-35"><span class="linenos">35</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="Incar.keyword_modifier_smart_langevin-36"><a href="#Incar.keyword_modifier_smart_langevin-36"><span class="linenos">36</span></a><span class="sd">    Expands LANGEVIN_GAMMA setting based on number of species present</span>
-</span><span id="Incar.keyword_modifier_smart_langevin-37"><a href="#Incar.keyword_modifier_smart_langevin-37"><span class="linenos">37</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="Incar.keyword_modifier_smart_langevin-38"><a href="#Incar.keyword_modifier_smart_langevin-38"><span class="linenos">38</span></a>    <span class="k">return</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">structure</span><span class="o">.</span><span class="n">ntypesp</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Incar.keyword_modifier_smart_langevin-33"><a href="#Incar.keyword_modifier_smart_langevin-33"><span class="linenos">33</span></a><span class="k">def</span> <span class="nf">keyword_modifier_smart_langevin</span><span class="p">(</span>
+</span><span id="Incar.keyword_modifier_smart_langevin-34"><a href="#Incar.keyword_modifier_smart_langevin-34"><span class="linenos">34</span></a>    <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+</span><span id="Incar.keyword_modifier_smart_langevin-35"><a href="#Incar.keyword_modifier_smart_langevin-35"><span class="linenos">35</span></a>    <span class="n">langevin_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># not required</span>
+</span><span id="Incar.keyword_modifier_smart_langevin-36"><a href="#Incar.keyword_modifier_smart_langevin-36"><span class="linenos">36</span></a><span class="p">):</span>
+</span><span id="Incar.keyword_modifier_smart_langevin-37"><a href="#Incar.keyword_modifier_smart_langevin-37"><span class="linenos">37</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Incar.keyword_modifier_smart_langevin-38"><a href="#Incar.keyword_modifier_smart_langevin-38"><span class="linenos">38</span></a><span class="sd">    Expands LANGEVIN_GAMMA setting based on number of species present</span>
+</span><span id="Incar.keyword_modifier_smart_langevin-39"><a href="#Incar.keyword_modifier_smart_langevin-39"><span class="linenos">39</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="Incar.keyword_modifier_smart_langevin-40"><a href="#Incar.keyword_modifier_smart_langevin-40"><span class="linenos">40</span></a>    <span class="k">return</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">structure</span><span class="o">.</span><span class="n">ntypesp</span>
 </span></pre></div>
 
 

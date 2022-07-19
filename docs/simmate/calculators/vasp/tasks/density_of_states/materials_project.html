@@ -32,10 +32,13 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#MatProjDensityOfStates">MatProjDensityOfStates</a>
+                    <a class="class" href="#MatprojDensityOfStates">MatprojDensityOfStates</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#MatProjDensityOfStates.incar">incar</a>
+                                <a class="function" href="#MatprojDensityOfStates.__init__">MatprojDensityOfStates</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatprojDensityOfStates.incar">incar</a>
                         </li>
                 </ul>
 
@@ -65,10 +68,10 @@
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="c1"># -*- coding: utf-8 -*-</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a>
 </span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.density_of_states</span> <span class="kn">import</span> <span class="n">VaspDensityOfStates</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.relaxation</span> <span class="kn">import</span> <span class="n">MatProjRelaxation</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.relaxation</span> <span class="kn">import</span> <span class="n">MatprojRelaxation</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="k">class</span> <span class="nc">MatProjDensityOfStates</span><span class="p">(</span><span class="n">VaspDensityOfStates</span><span class="p">,</span> <span class="n">MatProjRelaxation</span><span class="p">):</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="k">class</span> <span class="nc">MatprojDensityOfStates</span><span class="p">(</span><span class="n">VaspDensityOfStates</span><span class="p">,</span> <span class="n">MatprojRelaxation</span><span class="p">):</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    [MPNonSCFSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)</span>
@@ -77,7 +80,7 @@
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd">    Calculates the band structure using Materials Project HSE settings.</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
 </span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>        <span class="n">IBRION</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>        <span class="n">LCHARG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -94,39 +97,39 @@
 
 
             </section>
-                <section id="MatProjDensityOfStates">
-                            <input id="MatProjDensityOfStates-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                <section id="MatprojDensityOfStates">
+                            <input id="MatprojDensityOfStates-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">MatProjDensityOfStates</span><wbr>(<span class="base"><a href="base.html#VaspDensityOfStates">simmate.calculators.vasp.tasks.density_of_states.base.VaspDensityOfStates</a></span>, <span class="base"><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></span>):
+    <span class="name">MatprojDensityOfStates</span><wbr>(<span class="base"><a href="base.html#VaspDensityOfStates">simmate.calculators.vasp.tasks.density_of_states.base.VaspDensityOfStates</a></span>, <span class="base"><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></span>):
 
-                <label class="view-source-button" for="MatProjDensityOfStates-view-source"><span>View Source</span></label>
+                <label class="view-source-button" for="MatprojDensityOfStates-view-source"><span>View Source</span></label>
 
     </div>
-    <a class="headerlink" href="#MatProjDensityOfStates"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="MatProjDensityOfStates-8"><a href="#MatProjDensityOfStates-8"><span class="linenos"> 8</span></a><span class="k">class</span> <span class="nc">MatProjDensityOfStates</span><span class="p">(</span><span class="n">VaspDensityOfStates</span><span class="p">,</span> <span class="n">MatProjRelaxation</span><span class="p">):</span>
-</span><span id="MatProjDensityOfStates-9"><a href="#MatProjDensityOfStates-9"><span class="linenos"> 9</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="MatProjDensityOfStates-10"><a href="#MatProjDensityOfStates-10"><span class="linenos">10</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
-</span><span id="MatProjDensityOfStates-11"><a href="#MatProjDensityOfStates-11"><span class="linenos">11</span></a><span class="sd">    [MPNonSCFSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)</span>
-</span><span id="MatProjDensityOfStates-12"><a href="#MatProjDensityOfStates-12"><span class="linenos">12</span></a><span class="sd">    with mode=&quot;uniform&quot;.</span>
-</span><span id="MatProjDensityOfStates-13"><a href="#MatProjDensityOfStates-13"><span class="linenos">13</span></a>
-</span><span id="MatProjDensityOfStates-14"><a href="#MatProjDensityOfStates-14"><span class="linenos">14</span></a><span class="sd">    Calculates the band structure using Materials Project HSE settings.</span>
-</span><span id="MatProjDensityOfStates-15"><a href="#MatProjDensityOfStates-15"><span class="linenos">15</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="MatProjDensityOfStates-16"><a href="#MatProjDensityOfStates-16"><span class="linenos">16</span></a>
-</span><span id="MatProjDensityOfStates-17"><a href="#MatProjDensityOfStates-17"><span class="linenos">17</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="MatProjDensityOfStates-18"><a href="#MatProjDensityOfStates-18"><span class="linenos">18</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-</span><span id="MatProjDensityOfStates-19"><a href="#MatProjDensityOfStates-19"><span class="linenos">19</span></a>        <span class="n">IBRION</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="MatProjDensityOfStates-20"><a href="#MatProjDensityOfStates-20"><span class="linenos">20</span></a>        <span class="n">LCHARG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="MatProjDensityOfStates-21"><a href="#MatProjDensityOfStates-21"><span class="linenos">21</span></a>        <span class="n">LORBIT</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
-</span><span id="MatProjDensityOfStates-22"><a href="#MatProjDensityOfStates-22"><span class="linenos">22</span></a>        <span class="n">LWAVE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="MatProjDensityOfStates-23"><a href="#MatProjDensityOfStates-23"><span class="linenos">23</span></a>        <span class="n">NSW</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="MatProjDensityOfStates-24"><a href="#MatProjDensityOfStates-24"><span class="linenos">24</span></a>        <span class="n">ISYM</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-</span><span id="MatProjDensityOfStates-25"><a href="#MatProjDensityOfStates-25"><span class="linenos">25</span></a>        <span class="n">ICHARG</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
-</span><span id="MatProjDensityOfStates-26"><a href="#MatProjDensityOfStates-26"><span class="linenos">26</span></a>        <span class="n">ISMEAR</span><span class="o">=-</span><span class="mi">5</span><span class="p">,</span>
-</span><span id="MatProjDensityOfStates-27"><a href="#MatProjDensityOfStates-27"><span class="linenos">27</span></a>        <span class="n">NEDOS</span><span class="o">=</span><span class="mi">2001</span><span class="p">,</span>
-</span><span id="MatProjDensityOfStates-28"><a href="#MatProjDensityOfStates-28"><span class="linenos">28</span></a>    <span class="p">)</span>
-</span><span id="MatProjDensityOfStates-29"><a href="#MatProjDensityOfStates-29"><span class="linenos">29</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;MAGMOM__smart_magmom&quot;</span><span class="p">)</span>
+    <a class="headerlink" href="#MatprojDensityOfStates"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="MatprojDensityOfStates-8"><a href="#MatprojDensityOfStates-8"><span class="linenos"> 8</span></a><span class="k">class</span> <span class="nc">MatprojDensityOfStates</span><span class="p">(</span><span class="n">VaspDensityOfStates</span><span class="p">,</span> <span class="n">MatprojRelaxation</span><span class="p">):</span>
+</span><span id="MatprojDensityOfStates-9"><a href="#MatprojDensityOfStates-9"><span class="linenos"> 9</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="MatprojDensityOfStates-10"><a href="#MatprojDensityOfStates-10"><span class="linenos">10</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
+</span><span id="MatprojDensityOfStates-11"><a href="#MatprojDensityOfStates-11"><span class="linenos">11</span></a><span class="sd">    [MPNonSCFSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)</span>
+</span><span id="MatprojDensityOfStates-12"><a href="#MatprojDensityOfStates-12"><span class="linenos">12</span></a><span class="sd">    with mode=&quot;uniform&quot;.</span>
+</span><span id="MatprojDensityOfStates-13"><a href="#MatprojDensityOfStates-13"><span class="linenos">13</span></a>
+</span><span id="MatprojDensityOfStates-14"><a href="#MatprojDensityOfStates-14"><span class="linenos">14</span></a><span class="sd">    Calculates the band structure using Materials Project HSE settings.</span>
+</span><span id="MatprojDensityOfStates-15"><a href="#MatprojDensityOfStates-15"><span class="linenos">15</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="MatprojDensityOfStates-16"><a href="#MatprojDensityOfStates-16"><span class="linenos">16</span></a>
+</span><span id="MatprojDensityOfStates-17"><a href="#MatprojDensityOfStates-17"><span class="linenos">17</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="MatprojDensityOfStates-18"><a href="#MatprojDensityOfStates-18"><span class="linenos">18</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="MatprojDensityOfStates-19"><a href="#MatprojDensityOfStates-19"><span class="linenos">19</span></a>        <span class="n">IBRION</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+</span><span id="MatprojDensityOfStates-20"><a href="#MatprojDensityOfStates-20"><span class="linenos">20</span></a>        <span class="n">LCHARG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="MatprojDensityOfStates-21"><a href="#MatprojDensityOfStates-21"><span class="linenos">21</span></a>        <span class="n">LORBIT</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+</span><span id="MatprojDensityOfStates-22"><a href="#MatprojDensityOfStates-22"><span class="linenos">22</span></a>        <span class="n">LWAVE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="MatprojDensityOfStates-23"><a href="#MatprojDensityOfStates-23"><span class="linenos">23</span></a>        <span class="n">NSW</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="MatprojDensityOfStates-24"><a href="#MatprojDensityOfStates-24"><span class="linenos">24</span></a>        <span class="n">ISYM</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+</span><span id="MatprojDensityOfStates-25"><a href="#MatprojDensityOfStates-25"><span class="linenos">25</span></a>        <span class="n">ICHARG</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+</span><span id="MatprojDensityOfStates-26"><a href="#MatprojDensityOfStates-26"><span class="linenos">26</span></a>        <span class="n">ISMEAR</span><span class="o">=-</span><span class="mi">5</span><span class="p">,</span>
+</span><span id="MatprojDensityOfStates-27"><a href="#MatprojDensityOfStates-27"><span class="linenos">27</span></a>        <span class="n">NEDOS</span><span class="o">=</span><span class="mi">2001</span><span class="p">,</span>
+</span><span id="MatprojDensityOfStates-28"><a href="#MatprojDensityOfStates-28"><span class="linenos">28</span></a>    <span class="p">)</span>
+</span><span id="MatprojDensityOfStates-29"><a href="#MatprojDensityOfStates-29"><span class="linenos">29</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;MAGMOM__smart_magmom&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -138,13 +141,25 @@ with mode="uniform".</p>
 </div>
 
 
-                            <div id="MatProjDensityOfStates.incar" class="classattr">
+                            <div id="MatprojDensityOfStates.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MatprojDensityOfStates</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatprojDensityOfStates.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="MatprojDensityOfStates.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: -5, &#39;ISPIN&#39;: 2, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;SIGMA&#39;: 0.05, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;LCHARG&#39;: False, &#39;ISYM&#39;: 2, &#39;ICHARG&#39;: 11, &#39;NEDOS&#39;: 2001}</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjDensityOfStates.incar"></a>
+    <a class="headerlink" href="#MatprojDensityOfStates.incar"></a>
     
             <div class="docstring"><p>This sets the default vasp settings from a dictionary. This is the one thing
 you <em>must</em> set when subclassing VaspTask. An example is:</p>
@@ -158,47 +173,41 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatProjDensityOfStates.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatProjDensityOfStates.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatProjDensityOfStates.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatProjDensityOfStates.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                    <div><dt><a href="base.html#VaspDensityOfStates">simmate.calculators.vasp.tasks.density_of_states.base.VaspDensityOfStates</a></dt>
+                                <dd id="MatprojDensityOfStates.required_files" class="variable"><a href="base.html#VaspDensityOfStates.required_files">required_files</a></dd>
 
             </div>
-            <div><dt><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
-                                <dd id="MatProjDensityOfStates.functional" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.functional">functional</a></dd>
-                <dd id="MatProjDensityOfStates.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.potcar_mappings">potcar_mappings</a></dd>
-                <dd id="MatProjDensityOfStates.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.error_handlers">error_handlers</a></dd>
+            <div><dt><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="MatprojDensityOfStates.functional" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="MatprojDensityOfStates.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="MatprojDensityOfStates.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MatProjDensityOfStates.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="MatProjDensityOfStates.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
-                <dd id="MatProjDensityOfStates.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
-                <dd id="MatProjDensityOfStates.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
-                <dd id="MatProjDensityOfStates.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
-                <dd id="MatProjDensityOfStates.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
-                <dd id="MatProjDensityOfStates.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
-                <dd id="MatProjDensityOfStates.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
-                <dd id="MatProjDensityOfStates.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
-                <dd id="MatProjDensityOfStates.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
+                                <dd id="MatprojDensityOfStates.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
+                <dd id="MatprojDensityOfStates.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="MatprojDensityOfStates.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="MatprojDensityOfStates.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="MatprojDensityOfStates.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="MatprojDensityOfStates.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="MatprojDensityOfStates.setup" class="function"><a href="../base.html#VaspTask.setup">setup</a></dd>
+                <dd id="MatprojDensityOfStates.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
+                <dd id="MatprojDensityOfStates.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MatProjDensityOfStates.copy" class="function">copy</dd>
-                <dd id="MatProjDensityOfStates.bind" class="function">bind</dd>
-                <dd id="MatProjDensityOfStates.map" class="function">map</dd>
-                <dd id="MatProjDensityOfStates.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MatProjDensityOfStates.set_upstream" class="function">set_upstream</dd>
-                <dd id="MatProjDensityOfStates.set_downstream" class="function">set_downstream</dd>
-                <dd id="MatProjDensityOfStates.inputs" class="function">inputs</dd>
-                <dd id="MatProjDensityOfStates.outputs" class="function">outputs</dd>
-                <dd id="MatProjDensityOfStates.pipe" class="function">pipe</dd>
-                <dd id="MatProjDensityOfStates.serialize" class="function">serialize</dd>
-                <dd id="MatProjDensityOfStates.is_equal" class="function">is_equal</dd>
-                <dd id="MatProjDensityOfStates.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MatProjDensityOfStates.not_" class="function">not_</dd>
-                <dd id="MatProjDensityOfStates.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatprojDensityOfStates.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatprojDensityOfStates.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatprojDensityOfStates.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatprojDensityOfStates.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatprojDensityOfStates.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MatprojDensityOfStates.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MatprojDensityOfStates.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MatprojDensityOfStates.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatprojDensityOfStates.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MatprojDensityOfStates.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MatprojDensityOfStates.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatprojDensityOfStates.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

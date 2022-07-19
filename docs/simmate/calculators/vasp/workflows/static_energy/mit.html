@@ -29,6 +29,28 @@
 
 
 
+        <h2>API Documentation</h2>
+            <ul class="memberlist">
+            <li>
+                    <a class="class" href="#StaticEnergy__Vasp__Mit">StaticEnergy__Vasp__Mit</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#StaticEnergy__Vasp__Mit.__init__">StaticEnergy__Vasp__Mit</a>
+                        </li>
+                        <li>
+                                <a class="class" href="#StaticEnergy__Vasp__Mit.s3task">StaticEnergy__Vasp__Mit.s3task</a>
+                        </li>
+                        <li>
+                                <a class="class" href="#StaticEnergy__Vasp__Mit.database_table">StaticEnergy__Vasp__Mit.database_table</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#StaticEnergy__Vasp__Mit.description_doc_short">description_doc_short</a>
+                        </li>
+                </ul>
+
+            </li>
+    </ul>
+
 
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev" target="_blank">
@@ -51,7 +73,7 @@
 
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="c1"># -*- coding: utf-8 -*-</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a>
-</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">s3task_to_workflow</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">from</span> <span class="nn">simmate.workflow_engine</span> <span class="kn">import</span> <span class="n">Workflow</span>
 </span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.static_energy</span> <span class="kn">import</span> <span class="p">(</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>    <span class="n">MITStaticEnergy</span> <span class="k">as</span> <span class="n">MITStaticEnergyTask</span><span class="p">,</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="p">)</span>
@@ -59,19 +81,311 @@
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>    <span class="n">MITStaticEnergy</span> <span class="k">as</span> <span class="n">MITStaticEnergyResults</span><span class="p">,</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="p">)</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>
-</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="n">workflow</span> <span class="o">=</span> <span class="n">s3task_to_workflow</span><span class="p">(</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;static-energy/mit&quot;</span><span class="p">,</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>    <span class="n">module</span><span class="o">=</span><span class="vm">__name__</span><span class="p">,</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>    <span class="n">project_name</span><span class="o">=</span><span class="s2">&quot;Simmate-Energy&quot;</span><span class="p">,</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>    <span class="n">s3task</span><span class="o">=</span><span class="n">MITStaticEnergyTask</span><span class="p">,</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">database_table</span><span class="o">=</span><span class="n">MITStaticEnergyResults</span><span class="p">,</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">register_kwargs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">],</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="n">description_doc_short</span><span class="o">=</span><span class="s2">&quot;uses MIT Project settings&quot;</span><span class="p">,</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="p">)</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="k">class</span> <span class="nc">StaticEnergy__Vasp__Mit</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>    <span class="n">s3task</span> <span class="o">=</span> <span class="n">MITStaticEnergyTask</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">MITStaticEnergyResults</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>    <span class="n">description_doc_short</span> <span class="o">=</span> <span class="s2">&quot;uses MIT Project settings&quot;</span>
 </span></pre></div>
 
 
             </section>
+                <section id="StaticEnergy__Vasp__Mit">
+                            <input id="StaticEnergy__Vasp__Mit-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">StaticEnergy__Vasp__Mit</span><wbr>(<span class="base"><a href="../../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></span>):
+
+                <label class="view-source-button" for="StaticEnergy__Vasp__Mit-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#StaticEnergy__Vasp__Mit"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="StaticEnergy__Vasp__Mit-13"><a href="#StaticEnergy__Vasp__Mit-13"><span class="linenos">13</span></a><span class="k">class</span> <span class="nc">StaticEnergy__Vasp__Mit</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+</span><span id="StaticEnergy__Vasp__Mit-14"><a href="#StaticEnergy__Vasp__Mit-14"><span class="linenos">14</span></a>    <span class="n">s3task</span> <span class="o">=</span> <span class="n">MITStaticEnergyTask</span>
+</span><span id="StaticEnergy__Vasp__Mit-15"><a href="#StaticEnergy__Vasp__Mit-15"><span class="linenos">15</span></a>    <span class="n">database_table</span> <span class="o">=</span> <span class="n">MITStaticEnergyResults</span>
+</span><span id="StaticEnergy__Vasp__Mit-16"><a href="#StaticEnergy__Vasp__Mit-16"><span class="linenos">16</span></a>    <span class="n">description_doc_short</span> <span class="o">=</span> <span class="s2">&quot;uses MIT Project settings&quot;</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>An abstract base class for all Simmate workflows. Default methods are configured
+for use with S3Tasks and Workflows.</p>
+</div>
+
+
+                            <div id="StaticEnergy__Vasp__Mit.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">StaticEnergy__Vasp__Mit</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#StaticEnergy__Vasp__Mit.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="StaticEnergy__Vasp__Mit.description_doc_short" class="classattr">
+                                <div class="attr variable">
+            <span class="name">description_doc_short</span><span class="annotation">: str</span><span class="default_value"> = &#39;uses MIT Project settings&#39;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#StaticEnergy__Vasp__Mit.description_doc_short"></a>
+    
+            <div class="docstring"><p>A quick description for this workflow. This will be shown in the website UI
+in the list-view of all different workflow presets.</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="../../../../workflow_engine/workflow.html#Workflow">simmate.workflow_engine.workflow.Workflow</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.version" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.version">version</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.run_config" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run_config">run_config</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.to_prefect_flow" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.to_prefect_flow">to_prefect_flow</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.run" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run">run</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.name_full" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_full">name_full</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.name_project" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_project">name_project</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.name_calculator" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_calculator">name_calculator</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.name_preset" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.name_preset">name_preset</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.description_doc" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.description_doc">description_doc</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.parameter_names" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameter_names">parameter_names</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.parameter_names_required" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameter_names_required">parameter_names_required</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.show_parameters" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.show_parameters">show_parameters</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.parameters_to_register" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.parameters_to_register">parameters_to_register</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.deployment_id" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.deployment_id">deployment_id</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.run_cloud" class="function"><a href="../../../../workflow_engine/workflow.html#Workflow.run_cloud">run_cloud</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.nflows_submitted" class="variable"><a href="../../../../workflow_engine/workflow.html#Workflow.nflows_submitted">nflows_submitted</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="StaticEnergy__Vasp__Mit.s3task">
+                            <input id="StaticEnergy__Vasp__Mit.s3task-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">StaticEnergy__Vasp__Mit.s3task</span><wbr>(<span class="base"><a href="../../tasks/relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></span>):
+
+                <label class="view-source-button" for="StaticEnergy__Vasp__Mit.s3task-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#StaticEnergy__Vasp__Mit.s3task"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="StaticEnergy__Vasp__Mit.s3task-13"><a href="#StaticEnergy__Vasp__Mit.s3task-13"><span class="linenos">13</span></a><span class="k">class</span> <span class="nc">MITStaticEnergy</span><span class="p">(</span><span class="n">MITRelaxation</span><span class="p">):</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-14"><a href="#StaticEnergy__Vasp__Mit.s3task-14"><span class="linenos">14</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-15"><a href="#StaticEnergy__Vasp__Mit.s3task-15"><span class="linenos">15</span></a><span class="sd">    Runs a VASP static energy calculation using MIT Project settings.</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-16"><a href="#StaticEnergy__Vasp__Mit.s3task-16"><span class="linenos">16</span></a>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-17"><a href="#StaticEnergy__Vasp__Mit.s3task-17"><span class="linenos">17</span></a><span class="sd">    This is identical to relaxation/mit, but just a single ionic step.</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-18"><a href="#StaticEnergy__Vasp__Mit.s3task-18"><span class="linenos">18</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-19"><a href="#StaticEnergy__Vasp__Mit.s3task-19"><span class="linenos">19</span></a>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-20"><a href="#StaticEnergy__Vasp__Mit.s3task-20"><span class="linenos">20</span></a>    <span class="c1"># The settings used for this calculation are based on the MITRelaxation, but</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-21"><a href="#StaticEnergy__Vasp__Mit.s3task-21"><span class="linenos">21</span></a>    <span class="c1"># we are updating/adding new settings here.</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-22"><a href="#StaticEnergy__Vasp__Mit.s3task-22"><span class="linenos">22</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MITRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-23"><a href="#StaticEnergy__Vasp__Mit.s3task-23"><span class="linenos">23</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-24"><a href="#StaticEnergy__Vasp__Mit.s3task-24"><span class="linenos">24</span></a>        <span class="nb">dict</span><span class="p">(</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-25"><a href="#StaticEnergy__Vasp__Mit.s3task-25"><span class="linenos">25</span></a>            <span class="n">ALGO</span><span class="o">=</span><span class="s2">&quot;Normal&quot;</span><span class="p">,</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-26"><a href="#StaticEnergy__Vasp__Mit.s3task-26"><span class="linenos">26</span></a>            <span class="n">IBRION</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># (optional) locks everything between ionic steps</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-27"><a href="#StaticEnergy__Vasp__Mit.s3task-27"><span class="linenos">27</span></a>            <span class="n">NSW</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># this is the main static energy setting</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-28"><a href="#StaticEnergy__Vasp__Mit.s3task-28"><span class="linenos">28</span></a>            <span class="n">KSPACING</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>  <span class="c1"># was 0.5 # !!! This is where we are different from pymatgen right now</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-29"><a href="#StaticEnergy__Vasp__Mit.s3task-29"><span class="linenos">29</span></a>        <span class="p">)</span>
+</span><span id="StaticEnergy__Vasp__Mit.s3task-30"><a href="#StaticEnergy__Vasp__Mit.s3task-30"><span class="linenos">30</span></a>    <span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>The supervised-staged-shell task (or S3Task) that this workflow uses to run.
+For understanding what the calculation does and the settings it uses, users
+should start here. You can also use a workflows <code><a href="#StaticEnergy__Vasp__Mit.s3task.run">s3task.run</a></code> to run the workflow
+without storing results in the database.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="../../tasks/static_energy/mit.html#MITStaticEnergy">simmate.calculators.vasp.tasks.static_energy.mit.MITStaticEnergy</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.s3task.__init__" class="function"><a href="../../tasks/static_energy/mit.html#MITStaticEnergy.__init__">MITStaticEnergy</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.incar" class="variable"><a href="../../tasks/static_energy/mit.html#MITStaticEnergy.incar">incar</a></dd>
+
+            </div>
+            <div><dt><a href="../../tasks/relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.s3task.functional" class="variable"><a href="../../tasks/relaxation/mit.html#MITRelaxation.functional">functional</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.potcar_mappings" class="variable"><a href="../../tasks/relaxation/mit.html#MITRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.error_handlers" class="variable"><a href="../../tasks/relaxation/mit.html#MITRelaxation.error_handlers">error_handlers</a></dd>
+
+            </div>
+            <div><dt><a href="../../tasks/base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.s3task.required_files" class="variable"><a href="../../tasks/base.html#VaspTask.required_files">required_files</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.command" class="variable"><a href="../../tasks/base.html#VaspTask.command">command</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.incar_parallel_settings" class="variable"><a href="../../tasks/base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.kpoints" class="variable"><a href="../../tasks/base.html#VaspTask.kpoints">kpoints</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.confirm_convergence" class="variable"><a href="../../tasks/base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.pre_sanitize_structure" class="variable"><a href="../../tasks/base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.pre_standardize_structure" class="variable"><a href="../../tasks/base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.setup" class="function"><a href="../../tasks/base.html#VaspTask.setup">setup</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.workup" class="function"><a href="../../tasks/base.html#VaspTask.workup">workup</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.get_config" class="function"><a href="../../tasks/base.html#VaspTask.get_config">get_config</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.s3task.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.s3task.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="StaticEnergy__Vasp__Mit.database_table">
+                            <input id="StaticEnergy__Vasp__Mit.database_table-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">StaticEnergy__Vasp__Mit.database_table</span><wbr>(<span class="base"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></span>):
+
+                <label class="view-source-button" for="StaticEnergy__Vasp__Mit.database_table-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#StaticEnergy__Vasp__Mit.database_table"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="StaticEnergy__Vasp__Mit.database_table-7"><a href="#StaticEnergy__Vasp__Mit.database_table-7"><span class="linenos">7</span></a><span class="k">class</span> <span class="nc">MITStaticEnergy</span><span class="p">(</span><span class="n">StaticEnergy</span><span class="p">):</span>
+</span><span id="StaticEnergy__Vasp__Mit.database_table-8"><a href="#StaticEnergy__Vasp__Mit.database_table-8"><span class="linenos">8</span></a>    <span class="k">pass</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>The database table where calculation information (such as the prefect_flow_run_id)
+is stored. The table should use <code>simmate.database.base_data_types.Calculation</code></p>
+
+<p>In many cases, this table will contain all of the results you need. However,
+pay special attention to NestedWorkflows, where your results are often tied
+to a final task.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>django.db.models.base.Model</dt>
+                                <dd id="StaticEnergy__Vasp__Mit.database_table.__init__" class="function">Model</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.from_db" class="function">from_db</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.pk" class="variable">pk</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.get_deferred_fields" class="function">get_deferred_fields</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.refresh_from_db" class="function">refresh_from_db</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.serializable_value" class="function">serializable_value</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.save" class="function">save</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.save_base" class="function">save_base</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.delete" class="function">delete</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.prepare_database_save" class="function">prepare_database_save</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.clean" class="function">clean</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.validate_unique" class="function">validate_unique</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.date_error_message" class="function">date_error_message</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.unique_error_message" class="function">unique_error_message</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.full_clean" class="function">full_clean</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.clean_fields" class="function">clean_fields</dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.check" class="function">check</dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy">simmate.database.base_data_types.static_energy.StaticEnergy</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.database_table.Meta" class="class"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.Meta">Meta</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.base_info" class="variable"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.base_info">base_info</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.from_directory" class="function"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.from_directory">from_directory</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.from_vasp_run" class="function"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.from_vasp_run">from_vasp_run</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.update_from_vasp_run" class="function"><a href="../../../../database/base_data_types/static_energy.html#StaticEnergy.update_from_vasp_run">update_from_vasp_run</a></dd>
+
+            </div>
+            <div><dt><a href="../../database/energy.html#MITStaticEnergy">simmate.calculators.vasp.database.energy.MITStaticEnergy</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.database_table.band_gap" class="function"><a href="../../database/energy.html#MITStaticEnergy.band_gap">band_gap</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.is_gap_direct" class="function"><a href="../../database/energy.html#MITStaticEnergy.is_gap_direct">is_gap_direct</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.energy_fermi" class="function"><a href="../../database/energy.html#MITStaticEnergy.energy_fermi">energy_fermi</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.conduction_band_minimum" class="function"><a href="../../database/energy.html#MITStaticEnergy.conduction_band_minimum">conduction_band_minimum</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.valence_band_maximum" class="function"><a href="../../database/energy.html#MITStaticEnergy.valence_band_maximum">valence_band_maximum</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.structure_string" class="function"><a href="../../database/energy.html#MITStaticEnergy.structure_string">structure_string</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.nsites" class="function"><a href="../../database/energy.html#MITStaticEnergy.nsites">nsites</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.nelements" class="function"><a href="../../database/energy.html#MITStaticEnergy.nelements">nelements</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.elements" class="function"><a href="../../database/energy.html#MITStaticEnergy.elements">elements</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.chemical_system" class="function"><a href="../../database/energy.html#MITStaticEnergy.chemical_system">chemical_system</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.density" class="function"><a href="../../database/energy.html#MITStaticEnergy.density">density</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.density_atomic" class="function"><a href="../../database/energy.html#MITStaticEnergy.density_atomic">density_atomic</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.volume" class="function"><a href="../../database/energy.html#MITStaticEnergy.volume">volume</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.volume_molar" class="function"><a href="../../database/energy.html#MITStaticEnergy.volume_molar">volume_molar</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.formula_full" class="function"><a href="../../database/energy.html#MITStaticEnergy.formula_full">formula_full</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.formula_reduced" class="function"><a href="../../database/energy.html#MITStaticEnergy.formula_reduced">formula_reduced</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.formula_anonymous" class="function"><a href="../../database/energy.html#MITStaticEnergy.formula_anonymous">formula_anonymous</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.spacegroup" class="variable"><a href="../../database/energy.html#MITStaticEnergy.spacegroup">spacegroup</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.energy" class="function"><a href="../../database/energy.html#MITStaticEnergy.energy">energy</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.energy_per_atom" class="function"><a href="../../database/energy.html#MITStaticEnergy.energy_per_atom">energy_per_atom</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.energy_above_hull" class="function"><a href="../../database/energy.html#MITStaticEnergy.energy_above_hull">energy_above_hull</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.is_stable" class="function"><a href="../../database/energy.html#MITStaticEnergy.is_stable">is_stable</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.decomposes_to" class="function"><a href="../../database/energy.html#MITStaticEnergy.decomposes_to">decomposes_to</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.formation_energy" class="function"><a href="../../database/energy.html#MITStaticEnergy.formation_energy">formation_energy</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.formation_energy_per_atom" class="function"><a href="../../database/energy.html#MITStaticEnergy.formation_energy_per_atom">formation_energy_per_atom</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.site_forces" class="function"><a href="../../database/energy.html#MITStaticEnergy.site_forces">site_forces</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.lattice_stress" class="function"><a href="../../database/energy.html#MITStaticEnergy.lattice_stress">lattice_stress</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.site_force_norm_max" class="function"><a href="../../database/energy.html#MITStaticEnergy.site_force_norm_max">site_force_norm_max</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.site_forces_norm" class="function"><a href="../../database/energy.html#MITStaticEnergy.site_forces_norm">site_forces_norm</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.site_forces_norm_per_atom" class="function"><a href="../../database/energy.html#MITStaticEnergy.site_forces_norm_per_atom">site_forces_norm_per_atom</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.lattice_stress_norm" class="function"><a href="../../database/energy.html#MITStaticEnergy.lattice_stress_norm">lattice_stress_norm</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.lattice_stress_norm_per_atom" class="function"><a href="../../database/energy.html#MITStaticEnergy.lattice_stress_norm_per_atom">lattice_stress_norm_per_atom</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.directory" class="function"><a href="../../database/energy.html#MITStaticEnergy.directory">directory</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.prefect_flow_run_id" class="function"><a href="../../database/energy.html#MITStaticEnergy.prefect_flow_run_id">prefect_flow_run_id</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.corrections" class="function"><a href="../../database/energy.html#MITStaticEnergy.corrections">corrections</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.created_at" class="function"><a href="../../database/energy.html#MITStaticEnergy.created_at">created_at</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.updated_at" class="function"><a href="../../database/energy.html#MITStaticEnergy.updated_at">updated_at</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.source" class="function"><a href="../../database/energy.html#MITStaticEnergy.source">source</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.DoesNotExist" class="class"><a href="../../database/energy.html#MITStaticEnergy.DoesNotExist">DoesNotExist</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.MultipleObjectsReturned" class="class"><a href="../../database/energy.html#MITStaticEnergy.MultipleObjectsReturned">MultipleObjectsReturned</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.spacegroup_id" class="variable"><a href="../../database/energy.html#MITStaticEnergy.spacegroup_id">spacegroup_id</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.id" class="function"><a href="../../database/energy.html#MITStaticEnergy.id">id</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/structure.html#Structure">simmate.database.base_data_types.structure.Structure</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.database_table.to_toolkit" class="function"><a href="../../../../database/base_data_types/structure.html#Structure.to_toolkit">to_toolkit</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics">simmate.database.base_data_types.thermodynamics.Thermodynamics</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.database_table.update_chemical_system_stabilities" class="function"><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics.update_chemical_system_stabilities">update_chemical_system_stabilities</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.update_all_stabilities" class="function"><a href="../../../../database/base_data_types/thermodynamics.html#Thermodynamics.update_all_stabilities">update_all_stabilities</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/calculation.html#Calculation">simmate.database.base_data_types.calculation.Calculation</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.database_table.prefect_cloud_link" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_cloud_link">prefect_cloud_link</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.flow_run_view" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.flow_run_view">flow_run_view</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.prefect_flow_run_name" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_flow_run_name">prefect_flow_run_name</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.prefect_state" class="variable"><a href="../../../../database/base_data_types/calculation.html#Calculation.prefect_state">prefect_state</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.from_prefect_id" class="function"><a href="../../../../database/base_data_types/calculation.html#Calculation.from_prefect_id">from_prefect_id</a></dd>
+
+            </div>
+            <div><dt><a href="../../../../database/base_data_types/base.html#DatabaseTable">simmate.database.base_data_types.base.DatabaseTable</a></dt>
+                                <dd id="StaticEnergy__Vasp__Mit.database_table.source_doi" class="variable"><a href="../../../../database/base_data_types/base.html#DatabaseTable.source_doi">source_doi</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.remote_archive_link" class="variable"><a href="../../../../database/base_data_types/base.html#DatabaseTable.remote_archive_link">remote_archive_link</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.objects" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.objects">objects</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.get_table_name" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.create_subclass" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.from_toolkit" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.update_from_toolkit" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.load_archive" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.load_remote_archive" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.get_column_names" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.show_columns" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.show_columns">show_columns</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.get_mixins" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_mixins">get_mixins</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.get_mixin_names" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_mixin_names">get_mixin_names</a></dd>
+                <dd id="StaticEnergy__Vasp__Mit.database_table.get_extra_columns" class="function"><a href="../../../../database/base_data_types/base.html#DatabaseTable.get_extra_columns">get_extra_columns</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

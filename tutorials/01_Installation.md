@@ -1,4 +1,4 @@
-> :warning: Before you begin, make sure you are viewing the tutorials for the correct Simmate version. To do this, select the drop-down menu that has `main` (Find it above this page on the left side. See the image below for what it looks like.) --> switch from the `Branches` to `Tags` tab --> select the version you are using (e.g. `v0.6.0`). If you are unsure which version to select, choose the newest version listed (the top one).
+> :warning: Before you begin, make sure you are viewing the tutorials for the correct Simmate version. To do this, select the drop-down menu that has `main` (Find it above this page on the left side. See the image below for what it looks like.) --> switch from the `Branches` to `Tags` tab --> select the version you are using (e.g. `v0.6.0`). If you are unsure which version to select, you can check the version with the command `conda list simmate`.
 
 <!-- Image showing the "branches" drop down -->
 <p align="center" style="margin-bottom:40px;">

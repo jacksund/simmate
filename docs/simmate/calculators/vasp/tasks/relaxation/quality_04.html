@@ -35,6 +35,9 @@
                     <a class="class" href="#Quality04Relaxation">Quality04Relaxation</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#Quality04Relaxation.__init__">Quality04Relaxation</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Quality04Relaxation.functional">functional</a>
                         </li>
                         <li>
@@ -226,6 +229,18 @@ workflow, which uses this calculation as a fifth step (and final relaxation).</p
 </div>
 
 
+                            <div id="Quality04Relaxation.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">Quality04Relaxation</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Quality04Relaxation.__init__"></a>
+    
+    
+
+                            </div>
                             <div id="Quality04Relaxation.functional" class="classattr">
                                 <div class="attr variable">
             <span class="name">functional</span><span class="annotation">: str</span><span class="default_value"> = &#39;PBE&#39;</span>
@@ -321,16 +336,8 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="Quality04Relaxation.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="Quality04Relaxation.error_handlers" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
-                <dd id="Quality04Relaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="Quality04Relaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="Quality04Relaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="Quality04Relaxation.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
+                                    <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
+                                <dd id="Quality04Relaxation.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
                 <dd id="Quality04Relaxation.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
                 <dd id="Quality04Relaxation.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
                 <dd id="Quality04Relaxation.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
@@ -340,21 +347,20 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                 <dd id="Quality04Relaxation.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="Quality04Relaxation.copy" class="function">copy</dd>
-                <dd id="Quality04Relaxation.bind" class="function">bind</dd>
-                <dd id="Quality04Relaxation.map" class="function">map</dd>
-                <dd id="Quality04Relaxation.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="Quality04Relaxation.set_upstream" class="function">set_upstream</dd>
-                <dd id="Quality04Relaxation.set_downstream" class="function">set_downstream</dd>
-                <dd id="Quality04Relaxation.inputs" class="function">inputs</dd>
-                <dd id="Quality04Relaxation.outputs" class="function">outputs</dd>
-                <dd id="Quality04Relaxation.pipe" class="function">pipe</dd>
-                <dd id="Quality04Relaxation.serialize" class="function">serialize</dd>
-                <dd id="Quality04Relaxation.is_equal" class="function">is_equal</dd>
-                <dd id="Quality04Relaxation.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="Quality04Relaxation.not_" class="function">not_</dd>
-                <dd id="Quality04Relaxation.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="Quality04Relaxation.error_handlers" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.error_handlers">error_handlers</a></dd>
+                <dd id="Quality04Relaxation.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="Quality04Relaxation.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="Quality04Relaxation.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="Quality04Relaxation.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="Quality04Relaxation.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="Quality04Relaxation.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="Quality04Relaxation.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="Quality04Relaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="Quality04Relaxation.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="Quality04Relaxation.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="Quality04Relaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="Quality04Relaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

@@ -15,6 +15,14 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 # Upcoming Release
 > :bulb: For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
 
+- no new changes have been merged into the `main` branch yet
+
+
+
+# v0.7.0 (2022.07.19)
+
+> :warning: This is a pypi-only release. Prefect Orion is still in beta (v2.0b8), and prevents us from making a release to conda-forge. You can stay up to date with Prefect's beta status on [the Prefect discourse page](https://discourse.prefect.io/tags/c/announcements/5/prefect-2-0).
+
 **Enhancements**
 - add guide for installing VASP v5 to Ubuntu v22.04 ([@scott-materials](https://github.com/scott-materials), [#183](https://github.com/jacksund/simmate/issues/183))
 - add `simmate database load-remote-archives` command and `load_remote_archives` utility that populates all tables from `database.third_parties`
@@ -27,12 +35,12 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - refactor `start-worker` command to use prefect instead of the experimental django executor
 - remove experimental `workflow_engine.executor`
 - move contents of `configuration.django.database` to `database.utilities`
-- :warning: upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire `workflow_engine` module, and therefore the entire workflow library. Users should therefore go back through tutorials from the beginning to see everything that has changed. ([#185](https://github.com/jacksund/simmate/pull/185)).
-
-> Prefect Orion is still in beta (v2.0b8), and the first stable release is expected in July 2022. However, this date is not definite, and there is a very good chance for delays. Until a stable release is made for Prefect, there will be no new Simmate release. You can stay up to date with Prefect's beta status on [the Prefect discourse page](https://discourse.prefect.io/tags/c/announcements/5/prefect-2-0). This message will be removed when a new release becomes available.
+- upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire `workflow_engine` module, and therefore the entire workflow library. ([#185](https://github.com/jacksund/simmate/pull/185)).
 
 **Fixes**
 - fix incorrect passing of `source` in NEB all-paths workflow causing it to fail
+
+
 
 # v0.6.0 (2022.06.25)
 

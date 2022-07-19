@@ -35,6 +35,9 @@
                     <a class="class" href="#MITStaticEnergy">MITStaticEnergy</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#MITStaticEnergy.__init__">MITStaticEnergy</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#MITStaticEnergy.incar">incar</a>
                         </li>
                 </ul>
@@ -133,6 +136,18 @@
 </div>
 
 
+                            <div id="MITStaticEnergy.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MITStaticEnergy</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MITStaticEnergy.__init__"></a>
+    
+    
+
+                            </div>
                             <div id="MITStaticEnergy.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Normal&#39;, &#39;EDIFF&#39;: 1e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ICHARG&#39;: 1, &#39;ISIF&#39;: 3, &#39;ISPIN&#39;: 2, &#39;ISYM&#39;: 0, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 200, &#39;NELMIN&#39;: 6, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;ISMEAR&#39;: -5, &#39;SIGMA&#39;: 0.05, &#39;KSPACING&#39;: 0.4, &#39;MAGMOM__smart_magmom&#39;: {&#39;default&#39;: 0.6, &#39;Ce&#39;: 5, &#39;Ce3+&#39;: 1, &#39;Co&#39;: 0.6, &#39;Co3+&#39;: 0.6, &#39;Co4+&#39;: 1, &#39;Cr&#39;: 5, &#39;Dy3+&#39;: 5, &#39;Er3+&#39;: 3, &#39;Eu&#39;: 10, &#39;Eu2+&#39;: 7, &#39;Eu3+&#39;: 6, &#39;Fe&#39;: 5, &#39;Gd3+&#39;: 7, &#39;Ho3+&#39;: 4, &#39;La3+&#39;: 0.6, &#39;Lu3+&#39;: 0.6, &#39;Mn&#39;: 5, &#39;Mn3+&#39;: 4, &#39;Mn4+&#39;: 3, &#39;Mo&#39;: 5, &#39;Nd3+&#39;: 3, &#39;Ni&#39;: 5, &#39;Pm3+&#39;: 4, &#39;Pr3+&#39;: 2, &#39;Sm3+&#39;: 5, &#39;Tb3+&#39;: 6, &#39;Tm3+&#39;: 2, &#39;V&#39;: 5, &#39;W&#39;: 5, &#39;Yb3+&#39;: 1}, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Ag&#39;: 2, &#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Cu&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Nb&#39;: 2, &#39;Ni&#39;: 2, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Ag&#39;: 2, &#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Cu&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Nb&#39;: 2, &#39;Ni&#39;: 2, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;S&#39;: {&#39;Fe&#39;: 2, &#39;Mn&#39;: 2.5}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Ag&#39;: 1.5, &#39;Co&#39;: 3.4, &#39;Cr&#39;: 3.5, &#39;Cu&#39;: 4, &#39;Fe&#39;: 4.0, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Nb&#39;: 1.5, &#39;Ni&#39;: 6, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 3.1, &#39;W&#39;: 4.0}, &#39;O&#39;: {&#39;Ag&#39;: 1.5, &#39;Co&#39;: 3.4, &#39;Cr&#39;: 3.5, &#39;Cu&#39;: 4, &#39;Fe&#39;: 4.0, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Nb&#39;: 1.5, &#39;Ni&#39;: 6, &#39;Re&#39;: 2, &#39;Ta&#39;: 2, &#39;V&#39;: 3.1, &#39;W&#39;: 4.0}, &#39;S&#39;: {&#39;Fe&#39;: 1.9, &#39;Mn&#39;: 2.5}}}}</span>
@@ -153,21 +168,14 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MITStaticEnergy.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MITStaticEnergy.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MITStaticEnergy.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MITStaticEnergy.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="../relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></dt>
+                                    <div><dt><a href="../relaxation/mit.html#MITRelaxation">simmate.calculators.vasp.tasks.relaxation.mit.MITRelaxation</a></dt>
                                 <dd id="MITStaticEnergy.functional" class="variable"><a href="../relaxation/mit.html#MITRelaxation.functional">functional</a></dd>
                 <dd id="MITStaticEnergy.potcar_mappings" class="variable"><a href="../relaxation/mit.html#MITRelaxation.potcar_mappings">potcar_mappings</a></dd>
                 <dd id="MITStaticEnergy.error_handlers" class="variable"><a href="../relaxation/mit.html#MITRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MITStaticEnergy.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
+                                <dd id="MITStaticEnergy.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
                 <dd id="MITStaticEnergy.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
                 <dd id="MITStaticEnergy.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
                 <dd id="MITStaticEnergy.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
@@ -179,21 +187,19 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                 <dd id="MITStaticEnergy.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MITStaticEnergy.copy" class="function">copy</dd>
-                <dd id="MITStaticEnergy.bind" class="function">bind</dd>
-                <dd id="MITStaticEnergy.map" class="function">map</dd>
-                <dd id="MITStaticEnergy.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MITStaticEnergy.set_upstream" class="function">set_upstream</dd>
-                <dd id="MITStaticEnergy.set_downstream" class="function">set_downstream</dd>
-                <dd id="MITStaticEnergy.inputs" class="function">inputs</dd>
-                <dd id="MITStaticEnergy.outputs" class="function">outputs</dd>
-                <dd id="MITStaticEnergy.pipe" class="function">pipe</dd>
-                <dd id="MITStaticEnergy.serialize" class="function">serialize</dd>
-                <dd id="MITStaticEnergy.is_equal" class="function">is_equal</dd>
-                <dd id="MITStaticEnergy.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MITStaticEnergy.not_" class="function">not_</dd>
-                <dd id="MITStaticEnergy.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MITStaticEnergy.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MITStaticEnergy.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MITStaticEnergy.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MITStaticEnergy.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MITStaticEnergy.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MITStaticEnergy.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MITStaticEnergy.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MITStaticEnergy.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MITStaticEnergy.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MITStaticEnergy.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MITStaticEnergy.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MITStaticEnergy.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

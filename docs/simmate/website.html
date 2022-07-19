@@ -46,7 +46,6 @@
                 <li><a href="website/core_components.html">core_components</a></li>
                 <li><a href="website/test_app.html">test_app</a></li>
                 <li><a href="website/third_parties.html">third_parties</a></li>
-                <li><a href="website/workflow_execution.html">workflow_execution</a></li>
                 <li><a href="website/workflows.html">workflows</a></li>
         </ul>
 
@@ -102,29 +101,29 @@ simmate run-server
 
 <p>While the accronym may not be super intuitive for beginners, "REST API" stands for "<strong>Re</strong>presentational <strong>s</strong>tate <strong>t</strong>ransfer (REST) <strong>A</strong>pplication <strong>P</strong>rogramming <strong>I</strong>nterfaces (API)". In simple terms, this is how we can access databases from a website url. </p>
 
-<p>The easiest way to understand our API is with some examples. In the examples below, we only look at the Materials Project database (at <a href="http://simmate.org/third-parties/MatProjStructure/"><code>/third-parties/MatProjStructure/</code></a>), but in addition to this example, nearly every URL within Simmate has REST API functionality! Our API endpoints are automatically built from our database module -- so it's very easy to implement new features and add new tables.</p>
+<p>The easiest way to understand our API is with some examples. In the examples below, we only look at the Materials Project database (at <a href="http://simmate.org/third-parties/MatprojStructure/"><code>/third-parties/MatprojStructure/</code></a>), but in addition to this example, nearly every URL within Simmate has REST API functionality! Our API endpoints are automatically built from our database module -- so it's very easy to implement new features and add new tables.</p>
 
 <h3 id="accessing-the-api">Accessing the API</h3>
 
 <p>Let's start with a normal URL and webpage:</p>
 
-<pre><code>http://simmate.org/third-parties/MatProjStructure/
+<pre><code>http://simmate.org/third-parties/MatprojStructure/
 </code></pre>
 
 <p>When you open that link, you are brought to a webpage that let's you search through all Materials Project structures. Under the hood, this URL is actually a REST API too! All we have to do is add <code>?format=api</code> to the end of the URL. Try opening this webpage:</p>
 
-<pre><code>http://simmate.org/third-parties/MatProjStructure/?format=api
+<pre><code>http://simmate.org/third-parties/MatprojStructure/?format=api
 </code></pre>
 
 <p>Likewise, if we use <code>?format=json</code>, we can get our data back as a JSON dictionary:</p>
 
-<pre><code>http://simmate.org/third-parties/MatProjStructure/?format=json
+<pre><code>http://simmate.org/third-parties/MatprojStructure/?format=json
 </code></pre>
 
 <p>The same can be done for individual entries too! For example, if we wanted all the data for the structure with id <code>mp-1</code>, then we can do...</p>
 
-<pre><code>http://simmate.org/third-parties/MatProjStructure/mp-1/?format=api
-http://simmate.org/third-parties/MatProjStructure/mp-1/?format=json
+<pre><code>http://simmate.org/third-parties/MatprojStructure/mp-1/?format=api
+http://simmate.org/third-parties/MatprojStructure/mp-1/?format=json
 </code></pre>
 
 <p>For these, you should see an output similar too...</p>
@@ -160,7 +159,7 @@ http://simmate.org/third-parties/MatProjStructure/mp-1/?format=json
 
 <p>Our URLs also support complex filtering too. As an example, let's make a search where we want all structures that have the spacegroup 229 and also are in the Cr-N chemcial system. When you make this search in the normal webpage, you'll notice the URL becomes...</p>
 
-<pre><code>http://simmate.org/third-parties/MatProjStructure/?chemical_system=Cr-N&amp;spacegroup__number=229
+<pre><code>http://simmate.org/third-parties/MatprojStructure/?chemical_system=Cr-N&amp;spacegroup__number=229
 </code></pre>
 
 <p>We specify our conditions by adding a question mark (<code>?</code>) at the end of the URL and then adding <code>example_key=desired_value</code> after that. As we add new conditions, we separate them with <code>&amp;</code> -- which results in <code>key1=value1&amp;key2=value2&amp;key3=value3</code> and so on. You can also add <code>format=api</code> at the end of this too!</p>
@@ -175,7 +174,7 @@ http://simmate.org/third-parties/MatProjStructure/mp-1/?format=json
 
 <p>For API and JSON formats, you can manually set the ordering of returned data by adding <code>ordering=example_column</code> to your URL. You can also reverse the ordering with <code>ordering=-example_column</code> (note the "<code>-</code>" symbol before the column name). For example:</p>
 
-<pre><code>http://simmate.org/third-parties/MatProjStructure/?ordering=density_atomic
+<pre><code>http://simmate.org/third-parties/MatprojStructure/?ordering=density_atomic
 </code></pre>
 
 <h3 id="the-api-for-experts">The API for experts</h3>

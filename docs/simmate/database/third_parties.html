@@ -44,6 +44,7 @@
                 <li><a href="third_parties/jarvis.html">jarvis</a></li>
                 <li><a href="third_parties/materials_project.html">materials_project</a></li>
                 <li><a href="third_parties/oqmd.html">oqmd</a></li>
+                <li><a href="third_parties/utilities.html">utilities</a></li>
         </ul>
 
 
@@ -88,23 +89,23 @@
 
 <h1 id="usage">Usage</h1>
 
-<p>Make sure you have completed <a href="https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md">our introductory tutorial</a> for downloading data from these providers. Below we show example usage with <code>MatProjStructure</code>, but the same process can be done with all other tables in this module. </p>
+<p>Make sure you have completed <a href="https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md">our introductory tutorial</a> for downloading data from these providers. Below we show example usage with <code>MatprojStructure</code>, but the same process can be done with all other tables in this module. </p>
 
 <p>WARNING: The first time you load archives of data, it can take a long time, so we recommend running some things overnight. Once completed, we also recommend backing up your database (by making a copy of your ~/simmate/my_env-database.sqlite3 file). This ensures you don't have to repeat this long process.</p>
 
 <p>To download all data into your database:</p>
 
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="">simmate.database.third_parties</a></span> <span class="kn">import</span> <span class="n">MatProjStructure</span>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn"><a href="">simmate.database.third_parties</a></span> <span class="kn">import</span> <span class="n">MatprojStructure</span>
 
 <span class="c1"># This can take &gt;1 hour for some providers. Optionally, you can</span>
 <span class="c1"># add `parallel=True` to speed up this process, but use caution when </span>
 <span class="c1"># parallelizing with SQLite (the default backend). We recommend </span>
 <span class="c1"># avoiding the use of parallel=True, and instead running</span>
 <span class="c1"># this line overnight.</span>
-<span class="n">MatProjStructure</span><span class="o">.</span><span class="n">load_remote_archive</span><span class="p">()</span>
+<span class="n">MatprojStructure</span><span class="o">.</span><span class="n">load_remote_archive</span><span class="p">()</span>
 
 <span class="c1"># If you use this providers data, be sure to cite them!</span>
-<span class="n">MatProjStructure</span><span class="o">.</span><span class="n">source_doi</span>
+<span class="n">MatprojStructure</span><span class="o">.</span><span class="n">source_doi</span>
 </code></pre></div>
 
 <p>Some database providers give a calculated energy, which can be used to populate stability information:</p>
@@ -112,11 +113,11 @@
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="c1"># updates ALL chemical systems.</span>
 <span class="c1"># Note, this can take over an hour for some providers. Try running </span>
 <span class="c1"># this overnight along with your call to load_remote_archive.</span>
-<span class="n">MatProjStructure</span><span class="o">.</span><span class="n">update_all_stabilities</span><span class="p">()</span>
+<span class="n">MatprojStructure</span><span class="o">.</span><span class="n">update_all_stabilities</span><span class="p">()</span>
 
 <span class="c1"># updates ONE chemical system</span>
 <span class="c1"># This can be used if you quickly want to update a specific system</span>
-<span class="n">MatProjStructure</span><span class="o">.</span><span class="n">update_chemical_system_stabilities</span><span class="p">(</span><span class="s2">&quot;Y-C-F&quot;</span><span class="p">)</span>
+<span class="n">MatprojStructure</span><span class="o">.</span><span class="n">update_chemical_system_stabilities</span><span class="p">(</span><span class="s2">&quot;Y-C-F&quot;</span><span class="p">)</span>
 </code></pre></div>
 
 <p>See <code><a href="../database.html">simmate.database</a></code> docs for a guide on filtering results and converting to toolkit/dataframes.</p>
@@ -148,8 +149,9 @@
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">from</span> <span class="nn">.aflow</span> <span class="kn">import</span> <span class="n">AflowStructure</span><span class="p">,</span> <span class="n">AflowPrototype</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="kn">from</span> <span class="nn">.cod</span> <span class="kn">import</span> <span class="n">CodStructure</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="kn">from</span> <span class="nn">.jarvis</span> <span class="kn">import</span> <span class="n">JarvisStructure</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="kn">from</span> <span class="nn">.materials_project</span> <span class="kn">import</span> <span class="n">MatProjStructure</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="kn">from</span> <span class="nn">.materials_project</span> <span class="kn">import</span> <span class="n">MatprojStructure</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="kn">from</span> <span class="nn">.oqmd</span> <span class="kn">import</span> <span class="n">OqmdStructure</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="n">load_remote_archives</span><span class="p">,</span> <span class="n">load_default_sqlite3_build</span>
 </span></pre></div>
 
 

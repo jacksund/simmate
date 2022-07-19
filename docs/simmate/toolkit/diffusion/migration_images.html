@@ -428,14 +428,18 @@
 </span><span id="L-340"><a href="#L-340"><span class="linenos">340</span></a>            <span class="n">migration_images_cleaned</span> <span class="o">=</span> <span class="n">migration_images</span>
 </span><span id="L-341"><a href="#L-341"><span class="linenos">341</span></a>
 </span><span id="L-342"><a href="#L-342"><span class="linenos">342</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="L-343"><a href="#L-343"><span class="linenos">343</span></a>            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown format provided for migration_images input.&quot;</span><span class="p">)</span>
-</span><span id="L-344"><a href="#L-344"><span class="linenos">344</span></a>
-</span><span id="L-345"><a href="#L-345"><span class="linenos">345</span></a>        <span class="n">migration_images_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span> <span class="o">=</span> <span class="n">is_from_past_calc</span>
-</span><span id="L-346"><a href="#L-346"><span class="linenos">346</span></a>
-</span><span id="L-347"><a href="#L-347"><span class="linenos">347</span></a>        <span class="k">return</span> <span class="n">migration_images_cleaned</span>
+</span><span id="L-343"><a href="#L-343"><span class="linenos">343</span></a>            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+</span><span id="L-344"><a href="#L-344"><span class="linenos">344</span></a>                <span class="s2">&quot;Unknown format provided for migration_images input.&quot;</span>
+</span><span id="L-345"><a href="#L-345"><span class="linenos">345</span></a>                <span class="sa">f</span><span class="s2">&quot;The following was provided: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">migration_images</span><span class="p">)</span><span class="si">}</span><span class="s2"> of type &quot;</span>
+</span><span id="L-346"><a href="#L-346"><span class="linenos">346</span></a>                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">migration_images</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="L-347"><a href="#L-347"><span class="linenos">347</span></a>            <span class="p">)</span>
 </span><span id="L-348"><a href="#L-348"><span class="linenos">348</span></a>
-</span><span id="L-349"><a href="#L-349"><span class="linenos">349</span></a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="L-350"><a href="#L-350"><span class="linenos">350</span></a>        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+</span><span id="L-349"><a href="#L-349"><span class="linenos">349</span></a>        <span class="n">migration_images_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span> <span class="o">=</span> <span class="n">is_from_past_calc</span>
+</span><span id="L-350"><a href="#L-350"><span class="linenos">350</span></a>
+</span><span id="L-351"><a href="#L-351"><span class="linenos">351</span></a>        <span class="k">return</span> <span class="n">migration_images_cleaned</span>
+</span><span id="L-352"><a href="#L-352"><span class="linenos">352</span></a>
+</span><span id="L-353"><a href="#L-353"><span class="linenos">353</span></a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="L-354"><a href="#L-354"><span class="linenos">354</span></a>        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
 </span></pre></div>
 
 
@@ -778,14 +782,18 @@
 </span><span id="MigrationImages-341"><a href="#MigrationImages-341"><span class="linenos">341</span></a>            <span class="n">migration_images_cleaned</span> <span class="o">=</span> <span class="n">migration_images</span>
 </span><span id="MigrationImages-342"><a href="#MigrationImages-342"><span class="linenos">342</span></a>
 </span><span id="MigrationImages-343"><a href="#MigrationImages-343"><span class="linenos">343</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="MigrationImages-344"><a href="#MigrationImages-344"><span class="linenos">344</span></a>            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown format provided for migration_images input.&quot;</span><span class="p">)</span>
-</span><span id="MigrationImages-345"><a href="#MigrationImages-345"><span class="linenos">345</span></a>
-</span><span id="MigrationImages-346"><a href="#MigrationImages-346"><span class="linenos">346</span></a>        <span class="n">migration_images_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span> <span class="o">=</span> <span class="n">is_from_past_calc</span>
-</span><span id="MigrationImages-347"><a href="#MigrationImages-347"><span class="linenos">347</span></a>
-</span><span id="MigrationImages-348"><a href="#MigrationImages-348"><span class="linenos">348</span></a>        <span class="k">return</span> <span class="n">migration_images_cleaned</span>
+</span><span id="MigrationImages-344"><a href="#MigrationImages-344"><span class="linenos">344</span></a>            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+</span><span id="MigrationImages-345"><a href="#MigrationImages-345"><span class="linenos">345</span></a>                <span class="s2">&quot;Unknown format provided for migration_images input.&quot;</span>
+</span><span id="MigrationImages-346"><a href="#MigrationImages-346"><span class="linenos">346</span></a>                <span class="sa">f</span><span class="s2">&quot;The following was provided: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">migration_images</span><span class="p">)</span><span class="si">}</span><span class="s2"> of type &quot;</span>
+</span><span id="MigrationImages-347"><a href="#MigrationImages-347"><span class="linenos">347</span></a>                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">migration_images</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="MigrationImages-348"><a href="#MigrationImages-348"><span class="linenos">348</span></a>            <span class="p">)</span>
 </span><span id="MigrationImages-349"><a href="#MigrationImages-349"><span class="linenos">349</span></a>
-</span><span id="MigrationImages-350"><a href="#MigrationImages-350"><span class="linenos">350</span></a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="MigrationImages-351"><a href="#MigrationImages-351"><span class="linenos">351</span></a>        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+</span><span id="MigrationImages-350"><a href="#MigrationImages-350"><span class="linenos">350</span></a>        <span class="n">migration_images_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span> <span class="o">=</span> <span class="n">is_from_past_calc</span>
+</span><span id="MigrationImages-351"><a href="#MigrationImages-351"><span class="linenos">351</span></a>
+</span><span id="MigrationImages-352"><a href="#MigrationImages-352"><span class="linenos">352</span></a>        <span class="k">return</span> <span class="n">migration_images_cleaned</span>
+</span><span id="MigrationImages-353"><a href="#MigrationImages-353"><span class="linenos">353</span></a>
+</span><span id="MigrationImages-354"><a href="#MigrationImages-354"><span class="linenos">354</span></a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="MigrationImages-355"><a href="#MigrationImages-355"><span class="linenos">355</span></a>        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
 </span></pre></div>
 
 
@@ -1376,11 +1384,15 @@ Any arguments that are normally accepted by <code><a href="#MigrationImages.from
 </span><span id="MigrationImages.from_dynamic-341"><a href="#MigrationImages.from_dynamic-341"><span class="linenos">341</span></a>            <span class="n">migration_images_cleaned</span> <span class="o">=</span> <span class="n">migration_images</span>
 </span><span id="MigrationImages.from_dynamic-342"><a href="#MigrationImages.from_dynamic-342"><span class="linenos">342</span></a>
 </span><span id="MigrationImages.from_dynamic-343"><a href="#MigrationImages.from_dynamic-343"><span class="linenos">343</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="MigrationImages.from_dynamic-344"><a href="#MigrationImages.from_dynamic-344"><span class="linenos">344</span></a>            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown format provided for migration_images input.&quot;</span><span class="p">)</span>
-</span><span id="MigrationImages.from_dynamic-345"><a href="#MigrationImages.from_dynamic-345"><span class="linenos">345</span></a>
-</span><span id="MigrationImages.from_dynamic-346"><a href="#MigrationImages.from_dynamic-346"><span class="linenos">346</span></a>        <span class="n">migration_images_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span> <span class="o">=</span> <span class="n">is_from_past_calc</span>
-</span><span id="MigrationImages.from_dynamic-347"><a href="#MigrationImages.from_dynamic-347"><span class="linenos">347</span></a>
-</span><span id="MigrationImages.from_dynamic-348"><a href="#MigrationImages.from_dynamic-348"><span class="linenos">348</span></a>        <span class="k">return</span> <span class="n">migration_images_cleaned</span>
+</span><span id="MigrationImages.from_dynamic-344"><a href="#MigrationImages.from_dynamic-344"><span class="linenos">344</span></a>            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+</span><span id="MigrationImages.from_dynamic-345"><a href="#MigrationImages.from_dynamic-345"><span class="linenos">345</span></a>                <span class="s2">&quot;Unknown format provided for migration_images input.&quot;</span>
+</span><span id="MigrationImages.from_dynamic-346"><a href="#MigrationImages.from_dynamic-346"><span class="linenos">346</span></a>                <span class="sa">f</span><span class="s2">&quot;The following was provided: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">migration_images</span><span class="p">)</span><span class="si">}</span><span class="s2"> of type &quot;</span>
+</span><span id="MigrationImages.from_dynamic-347"><a href="#MigrationImages.from_dynamic-347"><span class="linenos">347</span></a>                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">migration_images</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="MigrationImages.from_dynamic-348"><a href="#MigrationImages.from_dynamic-348"><span class="linenos">348</span></a>            <span class="p">)</span>
+</span><span id="MigrationImages.from_dynamic-349"><a href="#MigrationImages.from_dynamic-349"><span class="linenos">349</span></a>
+</span><span id="MigrationImages.from_dynamic-350"><a href="#MigrationImages.from_dynamic-350"><span class="linenos">350</span></a>        <span class="n">migration_images_cleaned</span><span class="o">.</span><span class="n">is_from_past_calc</span> <span class="o">=</span> <span class="n">is_from_past_calc</span>
+</span><span id="MigrationImages.from_dynamic-351"><a href="#MigrationImages.from_dynamic-351"><span class="linenos">351</span></a>
+</span><span id="MigrationImages.from_dynamic-352"><a href="#MigrationImages.from_dynamic-352"><span class="linenos">352</span></a>        <span class="k">return</span> <span class="n">migration_images_cleaned</span>
 </span></pre></div>
 
 
@@ -1402,8 +1414,8 @@ from_dynamic methods.</p>
 
     </div>
     <a class="headerlink" href="#MigrationImages.as_dict"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="MigrationImages.as_dict-350"><a href="#MigrationImages.as_dict-350"><span class="linenos">350</span></a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="MigrationImages.as_dict-351"><a href="#MigrationImages.as_dict-351"><span class="linenos">351</span></a>        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="MigrationImages.as_dict-354"><a href="#MigrationImages.as_dict-354"><span class="linenos">354</span></a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="MigrationImages.as_dict-355"><a href="#MigrationImages.as_dict-355"><span class="linenos">355</span></a>        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
 </span></pre></div>
 
 

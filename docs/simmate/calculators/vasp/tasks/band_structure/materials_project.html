@@ -32,10 +32,13 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="class" href="#MatProjBandStructure">MatProjBandStructure</a>
+                    <a class="class" href="#MatprojBandStructure">MatprojBandStructure</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="variable" href="#MatProjBandStructure.incar">incar</a>
+                                <a class="function" href="#MatprojBandStructure.__init__">MatprojBandStructure</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#MatprojBandStructure.incar">incar</a>
                         </li>
                 </ul>
 
@@ -65,10 +68,10 @@
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="c1"># -*- coding: utf-8 -*-</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a>
 </span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.band_structure</span> <span class="kn">import</span> <span class="n">VaspBandStructure</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.relaxation</span> <span class="kn">import</span> <span class="n">MatProjRelaxation</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">simmate.calculators.vasp.tasks.relaxation</span> <span class="kn">import</span> <span class="n">MatprojRelaxation</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="k">class</span> <span class="nc">MatProjBandStructure</span><span class="p">(</span><span class="n">VaspBandStructure</span><span class="p">,</span> <span class="n">MatProjRelaxation</span><span class="p">):</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="k">class</span> <span class="nc">MatprojBandStructure</span><span class="p">(</span><span class="n">VaspBandStructure</span><span class="p">,</span> <span class="n">MatprojRelaxation</span><span class="p">):</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>    <span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    [MPNonSCFSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)</span>
@@ -77,7 +80,7 @@
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd">    Calculates the band structure using Materials Project HSE settings.</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
 </span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>        <span class="n">IBRION</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>        <span class="n">LCHARG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -94,39 +97,39 @@
 
 
             </section>
-                <section id="MatProjBandStructure">
-                            <input id="MatProjBandStructure-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                <section id="MatprojBandStructure">
+                            <input id="MatprojBandStructure-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">MatProjBandStructure</span><wbr>(<span class="base"><a href="base.html#VaspBandStructure">simmate.calculators.vasp.tasks.band_structure.base.VaspBandStructure</a></span>, <span class="base"><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></span>):
+    <span class="name">MatprojBandStructure</span><wbr>(<span class="base"><a href="base.html#VaspBandStructure">simmate.calculators.vasp.tasks.band_structure.base.VaspBandStructure</a></span>, <span class="base"><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></span>):
 
-                <label class="view-source-button" for="MatProjBandStructure-view-source"><span>View Source</span></label>
+                <label class="view-source-button" for="MatprojBandStructure-view-source"><span>View Source</span></label>
 
     </div>
-    <a class="headerlink" href="#MatProjBandStructure"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="MatProjBandStructure-8"><a href="#MatProjBandStructure-8"><span class="linenos"> 8</span></a><span class="k">class</span> <span class="nc">MatProjBandStructure</span><span class="p">(</span><span class="n">VaspBandStructure</span><span class="p">,</span> <span class="n">MatProjRelaxation</span><span class="p">):</span>
-</span><span id="MatProjBandStructure-9"><a href="#MatProjBandStructure-9"><span class="linenos"> 9</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="MatProjBandStructure-10"><a href="#MatProjBandStructure-10"><span class="linenos">10</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
-</span><span id="MatProjBandStructure-11"><a href="#MatProjBandStructure-11"><span class="linenos">11</span></a><span class="sd">    [MPNonSCFSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)</span>
-</span><span id="MatProjBandStructure-12"><a href="#MatProjBandStructure-12"><span class="linenos">12</span></a><span class="sd">    with mode=&quot;line&quot;.</span>
-</span><span id="MatProjBandStructure-13"><a href="#MatProjBandStructure-13"><span class="linenos">13</span></a>
-</span><span id="MatProjBandStructure-14"><a href="#MatProjBandStructure-14"><span class="linenos">14</span></a><span class="sd">    Calculates the band structure using Materials Project HSE settings.</span>
-</span><span id="MatProjBandStructure-15"><a href="#MatProjBandStructure-15"><span class="linenos">15</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="MatProjBandStructure-16"><a href="#MatProjBandStructure-16"><span class="linenos">16</span></a>
-</span><span id="MatProjBandStructure-17"><a href="#MatProjBandStructure-17"><span class="linenos">17</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatProjRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="MatProjBandStructure-18"><a href="#MatProjBandStructure-18"><span class="linenos">18</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-</span><span id="MatProjBandStructure-19"><a href="#MatProjBandStructure-19"><span class="linenos">19</span></a>        <span class="n">IBRION</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="MatProjBandStructure-20"><a href="#MatProjBandStructure-20"><span class="linenos">20</span></a>        <span class="n">LCHARG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="MatProjBandStructure-21"><a href="#MatProjBandStructure-21"><span class="linenos">21</span></a>        <span class="n">LORBIT</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
-</span><span id="MatProjBandStructure-22"><a href="#MatProjBandStructure-22"><span class="linenos">22</span></a>        <span class="n">LWAVE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="MatProjBandStructure-23"><a href="#MatProjBandStructure-23"><span class="linenos">23</span></a>        <span class="n">NSW</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="MatProjBandStructure-24"><a href="#MatProjBandStructure-24"><span class="linenos">24</span></a>        <span class="n">ISYM</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="MatProjBandStructure-25"><a href="#MatProjBandStructure-25"><span class="linenos">25</span></a>        <span class="n">ICHARG</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
-</span><span id="MatProjBandStructure-26"><a href="#MatProjBandStructure-26"><span class="linenos">26</span></a>        <span class="n">ISMEAR</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="MatProjBandStructure-27"><a href="#MatProjBandStructure-27"><span class="linenos">27</span></a>        <span class="n">SIGMA</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-</span><span id="MatProjBandStructure-28"><a href="#MatProjBandStructure-28"><span class="linenos">28</span></a>    <span class="p">)</span>
-</span><span id="MatProjBandStructure-29"><a href="#MatProjBandStructure-29"><span class="linenos">29</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;MAGMOM__smart_magmom&quot;</span><span class="p">)</span>
+    <a class="headerlink" href="#MatprojBandStructure"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="MatprojBandStructure-8"><a href="#MatprojBandStructure-8"><span class="linenos"> 8</span></a><span class="k">class</span> <span class="nc">MatprojBandStructure</span><span class="p">(</span><span class="n">VaspBandStructure</span><span class="p">,</span> <span class="n">MatprojRelaxation</span><span class="p">):</span>
+</span><span id="MatprojBandStructure-9"><a href="#MatprojBandStructure-9"><span class="linenos"> 9</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="MatprojBandStructure-10"><a href="#MatprojBandStructure-10"><span class="linenos">10</span></a><span class="sd">    This task is a reimplementation of pymatgen&#39;s</span>
+</span><span id="MatprojBandStructure-11"><a href="#MatprojBandStructure-11"><span class="linenos">11</span></a><span class="sd">    [MPNonSCFSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)</span>
+</span><span id="MatprojBandStructure-12"><a href="#MatprojBandStructure-12"><span class="linenos">12</span></a><span class="sd">    with mode=&quot;line&quot;.</span>
+</span><span id="MatprojBandStructure-13"><a href="#MatprojBandStructure-13"><span class="linenos">13</span></a>
+</span><span id="MatprojBandStructure-14"><a href="#MatprojBandStructure-14"><span class="linenos">14</span></a><span class="sd">    Calculates the band structure using Materials Project HSE settings.</span>
+</span><span id="MatprojBandStructure-15"><a href="#MatprojBandStructure-15"><span class="linenos">15</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="MatprojBandStructure-16"><a href="#MatprojBandStructure-16"><span class="linenos">16</span></a>
+</span><span id="MatprojBandStructure-17"><a href="#MatprojBandStructure-17"><span class="linenos">17</span></a>    <span class="n">incar</span> <span class="o">=</span> <span class="n">MatprojRelaxation</span><span class="o">.</span><span class="n">incar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="MatprojBandStructure-18"><a href="#MatprojBandStructure-18"><span class="linenos">18</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="MatprojBandStructure-19"><a href="#MatprojBandStructure-19"><span class="linenos">19</span></a>        <span class="n">IBRION</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+</span><span id="MatprojBandStructure-20"><a href="#MatprojBandStructure-20"><span class="linenos">20</span></a>        <span class="n">LCHARG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="MatprojBandStructure-21"><a href="#MatprojBandStructure-21"><span class="linenos">21</span></a>        <span class="n">LORBIT</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+</span><span id="MatprojBandStructure-22"><a href="#MatprojBandStructure-22"><span class="linenos">22</span></a>        <span class="n">LWAVE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="MatprojBandStructure-23"><a href="#MatprojBandStructure-23"><span class="linenos">23</span></a>        <span class="n">NSW</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="MatprojBandStructure-24"><a href="#MatprojBandStructure-24"><span class="linenos">24</span></a>        <span class="n">ISYM</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="MatprojBandStructure-25"><a href="#MatprojBandStructure-25"><span class="linenos">25</span></a>        <span class="n">ICHARG</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+</span><span id="MatprojBandStructure-26"><a href="#MatprojBandStructure-26"><span class="linenos">26</span></a>        <span class="n">ISMEAR</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="MatprojBandStructure-27"><a href="#MatprojBandStructure-27"><span class="linenos">27</span></a>        <span class="n">SIGMA</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+</span><span id="MatprojBandStructure-28"><a href="#MatprojBandStructure-28"><span class="linenos">28</span></a>    <span class="p">)</span>
+</span><span id="MatprojBandStructure-29"><a href="#MatprojBandStructure-29"><span class="linenos">29</span></a>    <span class="n">incar</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;MAGMOM__smart_magmom&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -138,13 +141,25 @@ with mode="line".</p>
 </div>
 
 
-                            <div id="MatProjBandStructure.incar" class="classattr">
+                            <div id="MatprojBandStructure.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MatprojBandStructure</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MatprojBandStructure.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="MatprojBandStructure.incar" class="classattr">
                                 <div class="attr variable">
             <span class="name">incar</span><span class="annotation">: dict</span><span class="default_value"> = {&#39;ALGO&#39;: &#39;Fast&#39;, &#39;EDIFF__per_atom&#39;: 5e-05, &#39;ENCUT&#39;: 520, &#39;IBRION&#39;: -1, &#39;ISIF&#39;: 3, &#39;ISMEAR&#39;: 0, &#39;ISPIN&#39;: 2, &#39;KSPACING&#39;: 0.4, &#39;LASPH&#39;: True, &#39;LORBIT&#39;: 11, &#39;LREAL&#39;: &#39;Auto&#39;, &#39;LWAVE&#39;: False, &#39;NELM&#39;: 100, &#39;NSW&#39;: 0, &#39;PREC&#39;: &#39;Accurate&#39;, &#39;SIGMA&#39;: 0.01, &#39;LMAXMIX__smart_lmaxmix&#39;: True, &#39;multiple_keywords__smart_ldau&#39;: {&#39;LDAU__auto&#39;: True, &#39;LDAUTYPE&#39;: 2, &#39;LDAUPRINT&#39;: 1, &#39;LDAUJ&#39;: {}, &#39;LDAUL&#39;: {&#39;F&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}, &#39;O&#39;: {&#39;Co&#39;: 2, &#39;Cr&#39;: 2, &#39;Fe&#39;: 2, &#39;Mn&#39;: 2, &#39;Mo&#39;: 2, &#39;Ni&#39;: 2, &#39;V&#39;: 2, &#39;W&#39;: 2}}, &#39;LDAUU&#39;: {&#39;F&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}, &#39;O&#39;: {&#39;Co&#39;: 3.32, &#39;Cr&#39;: 3.7, &#39;Fe&#39;: 5.3, &#39;Mn&#39;: 3.9, &#39;Mo&#39;: 4.38, &#39;Ni&#39;: 6.2, &#39;V&#39;: 3.25, &#39;W&#39;: 6.2}}}, &#39;LCHARG&#39;: False, &#39;ISYM&#39;: 0, &#39;ICHARG&#39;: 11}</span>
 
         
     </div>
-    <a class="headerlink" href="#MatProjBandStructure.incar"></a>
+    <a class="headerlink" href="#MatprojBandStructure.incar"></a>
     
             <div class="docstring"><p>This sets the default vasp settings from a dictionary. This is the one thing
 you <em>must</em> set when subclassing VaspTask. An example is:</p>
@@ -158,51 +173,42 @@ you <em>must</em> set when subclassing VaspTask. An example is:</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MatProjBandStructure.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MatProjBandStructure.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MatProjBandStructure.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MatProjBandStructure.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
+                                    <div><dt><a href="base.html#VaspBandStructure">simmate.calculators.vasp.tasks.band_structure.base.VaspBandStructure</a></dt>
+                                <dd id="MatprojBandStructure.required_files" class="variable"><a href="base.html#VaspBandStructure.required_files">required_files</a></dd>
+                <dd id="MatprojBandStructure.kpoints" class="variable"><a href="base.html#VaspBandStructure.kpoints">kpoints</a></dd>
+                <dd id="MatprojBandStructure.kpoints_line_density" class="variable"><a href="base.html#VaspBandStructure.kpoints_line_density">kpoints_line_density</a></dd>
+                <dd id="MatprojBandStructure.setup" class="function"><a href="base.html#VaspBandStructure.setup">setup</a></dd>
 
             </div>
-            <div><dt><a href="base.html#VaspBandStructure">simmate.calculators.vasp.tasks.band_structure.base.VaspBandStructure</a></dt>
-                                <dd id="MatProjBandStructure.kpoints" class="variable"><a href="base.html#VaspBandStructure.kpoints">kpoints</a></dd>
-                <dd id="MatProjBandStructure.kpoints_line_density" class="variable"><a href="base.html#VaspBandStructure.kpoints_line_density">kpoints_line_density</a></dd>
-                <dd id="MatProjBandStructure.pre_standardize_structure" class="variable"><a href="base.html#VaspBandStructure.pre_standardize_structure">pre_standardize_structure</a></dd>
-                <dd id="MatProjBandStructure.setup" class="function"><a href="base.html#VaspBandStructure.setup">setup</a></dd>
-
-            </div>
-            <div><dt><a href="../relaxation/materials_project.html#MatProjRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatProjRelaxation</a></dt>
-                                <dd id="MatProjBandStructure.functional" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.functional">functional</a></dd>
-                <dd id="MatProjBandStructure.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.potcar_mappings">potcar_mappings</a></dd>
-                <dd id="MatProjBandStructure.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatProjRelaxation.error_handlers">error_handlers</a></dd>
+            <div><dt><a href="../relaxation/materials_project.html#MatprojRelaxation">simmate.calculators.vasp.tasks.relaxation.materials_project.MatprojRelaxation</a></dt>
+                                <dd id="MatprojBandStructure.functional" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.functional">functional</a></dd>
+                <dd id="MatprojBandStructure.potcar_mappings" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.potcar_mappings">potcar_mappings</a></dd>
+                <dd id="MatprojBandStructure.error_handlers" class="variable"><a href="../relaxation/materials_project.html#MatprojRelaxation.error_handlers">error_handlers</a></dd>
 
             </div>
             <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MatProjBandStructure.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
-                <dd id="MatProjBandStructure.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
-                <dd id="MatProjBandStructure.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
-                <dd id="MatProjBandStructure.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
-                <dd id="MatProjBandStructure.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
-                <dd id="MatProjBandStructure.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
-                <dd id="MatProjBandStructure.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
+                                <dd id="MatprojBandStructure.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
+                <dd id="MatprojBandStructure.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
+                <dd id="MatprojBandStructure.confirm_convergence" class="variable"><a href="../base.html#VaspTask.confirm_convergence">confirm_convergence</a></dd>
+                <dd id="MatprojBandStructure.pre_sanitize_structure" class="variable"><a href="../base.html#VaspTask.pre_sanitize_structure">pre_sanitize_structure</a></dd>
+                <dd id="MatprojBandStructure.pre_standardize_structure" class="variable"><a href="../base.html#VaspTask.pre_standardize_structure">pre_standardize_structure</a></dd>
+                <dd id="MatprojBandStructure.workup" class="function"><a href="../base.html#VaspTask.workup">workup</a></dd>
+                <dd id="MatprojBandStructure.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MatProjBandStructure.copy" class="function">copy</dd>
-                <dd id="MatProjBandStructure.bind" class="function">bind</dd>
-                <dd id="MatProjBandStructure.map" class="function">map</dd>
-                <dd id="MatProjBandStructure.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MatProjBandStructure.set_upstream" class="function">set_upstream</dd>
-                <dd id="MatProjBandStructure.set_downstream" class="function">set_downstream</dd>
-                <dd id="MatProjBandStructure.inputs" class="function">inputs</dd>
-                <dd id="MatProjBandStructure.outputs" class="function">outputs</dd>
-                <dd id="MatProjBandStructure.pipe" class="function">pipe</dd>
-                <dd id="MatProjBandStructure.serialize" class="function">serialize</dd>
-                <dd id="MatProjBandStructure.is_equal" class="function">is_equal</dd>
-                <dd id="MatProjBandStructure.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MatProjBandStructure.not_" class="function">not_</dd>
-                <dd id="MatProjBandStructure.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MatprojBandStructure.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MatprojBandStructure.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MatprojBandStructure.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MatprojBandStructure.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MatprojBandStructure.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MatprojBandStructure.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MatprojBandStructure.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MatprojBandStructure.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MatprojBandStructure.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MatprojBandStructure.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MatprojBandStructure.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MatprojBandStructure.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>

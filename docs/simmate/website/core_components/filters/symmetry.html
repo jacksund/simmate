@@ -272,7 +272,7 @@
 </span><span id="Spacegroup.Meta.model-54"><a href="#Spacegroup.Meta.model-54"><span class="linenos">54</span></a><span class="sd">        called when you first set up your database and should never be called</span>
 </span><span id="Spacegroup.Meta.model-55"><a href="#Spacegroup.Meta.model-55"><span class="linenos">55</span></a><span class="sd">        after that.</span>
 </span><span id="Spacegroup.Meta.model-56"><a href="#Spacegroup.Meta.model-56"><span class="linenos">56</span></a>
-</span><span id="Spacegroup.Meta.model-57"><a href="#Spacegroup.Meta.model-57"><span class="linenos">57</span></a><span class="sd">        See simmate.configuration.django.database.reset_database</span>
+</span><span id="Spacegroup.Meta.model-57"><a href="#Spacegroup.Meta.model-57"><span class="linenos">57</span></a><span class="sd">        See `simmate.database.utilities.reset_database`</span>
 </span><span id="Spacegroup.Meta.model-58"><a href="#Spacegroup.Meta.model-58"><span class="linenos">58</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="Spacegroup.Meta.model-59"><a href="#Spacegroup.Meta.model-59"><span class="linenos">59</span></a>
 </span><span id="Spacegroup.Meta.model-60"><a href="#Spacegroup.Meta.model-60"><span class="linenos">60</span></a>        <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">231</span><span class="p">):</span>
@@ -329,6 +329,7 @@
                 <dd id="Spacegroup.Meta.model.get_table_name" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_table_name">get_table_name</a></dd>
                 <dd id="Spacegroup.Meta.model.create_subclass" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.create_subclass">create_subclass</a></dd>
                 <dd id="Spacegroup.Meta.model.from_toolkit" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.from_toolkit">from_toolkit</a></dd>
+                <dd id="Spacegroup.Meta.model.update_from_toolkit" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.update_from_toolkit">update_from_toolkit</a></dd>
                 <dd id="Spacegroup.Meta.model.load_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_archive">load_archive</a></dd>
                 <dd id="Spacegroup.Meta.model.load_remote_archive" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.load_remote_archive">load_remote_archive</a></dd>
                 <dd id="Spacegroup.Meta.model.get_column_names" class="function"><a href="../../../database/base_data_types/base.html#DatabaseTable.get_column_names">get_column_names</a></dd>
@@ -358,8 +359,8 @@
                 <dd id="Spacegroup.Meta.model.mitionicstep_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.mitionicstep_set">mitionicstep_set</a></dd>
                 <dd id="Spacegroup.Meta.model.matprojrelaxation_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.matprojrelaxation_set">matprojrelaxation_set</a></dd>
                 <dd id="Spacegroup.Meta.model.matprojionicstep_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.matprojionicstep_set">matprojionicstep_set</a></dd>
-                <dd id="Spacegroup.Meta.model.nebendpointrelaxation_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.nebendpointrelaxation_set">nebendpointrelaxation_set</a></dd>
-                <dd id="Spacegroup.Meta.model.nebendpointionicstep_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.nebendpointionicstep_set">nebendpointionicstep_set</a></dd>
+                <dd id="Spacegroup.Meta.model.matvirtuallabcinebendpointrelaxation_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.matvirtuallabcinebendpointrelaxation_set">matvirtuallabcinebendpointrelaxation_set</a></dd>
+                <dd id="Spacegroup.Meta.model.matvirtuallabcinebendpointionicstep_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.matvirtuallabcinebendpointionicstep_set">matvirtuallabcinebendpointionicstep_set</a></dd>
                 <dd id="Spacegroup.Meta.model.quality00relaxation_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.quality00relaxation_set">quality00relaxation_set</a></dd>
                 <dd id="Spacegroup.Meta.model.quality00ionicstep_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.quality00ionicstep_set">quality00ionicstep_set</a></dd>
                 <dd id="Spacegroup.Meta.model.quality01relaxation_set" class="variable"><a href="../../../database/base_data_types/symmetry.html#Spacegroup.quality01relaxation_set">quality01relaxation_set</a></dd>

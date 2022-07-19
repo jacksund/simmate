@@ -35,6 +35,9 @@
                     <a class="class" href="#MITRelaxation">MITRelaxation</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#MITRelaxation.__init__">MITRelaxation</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#MITRelaxation.functional">functional</a>
                         </li>
                         <li>
@@ -530,6 +533,18 @@ methods.
 </div>
 
 
+                            <div id="MITRelaxation.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">MITRelaxation</span><span class="signature pdoc-code condensed">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#MITRelaxation.__init__"></a>
+    
+    
+
+                            </div>
                             <div id="MITRelaxation.functional" class="classattr">
                                 <div class="attr variable">
             <span class="name">functional</span><span class="annotation">: str</span><span class="default_value"> = &#39;PBE&#39;</span>
@@ -608,15 +623,8 @@ applied and none of the following handlers will be checked.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
-                                <dd id="MITRelaxation.__init__" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.__init__">S3Task</a></dd>
-                <dd id="MITRelaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
-                <dd id="MITRelaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
-                <dd id="MITRelaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
-
-            </div>
-            <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
-                                <dd id="MITRelaxation.requires_structure" class="variable"><a href="../base.html#VaspTask.requires_structure">requires_structure</a></dd>
+                                    <div><dt><a href="../base.html#VaspTask">simmate.calculators.vasp.tasks.base.VaspTask</a></dt>
+                                <dd id="MITRelaxation.required_files" class="variable"><a href="../base.html#VaspTask.required_files">required_files</a></dd>
                 <dd id="MITRelaxation.command" class="variable"><a href="../base.html#VaspTask.command">command</a></dd>
                 <dd id="MITRelaxation.incar_parallel_settings" class="variable"><a href="../base.html#VaspTask.incar_parallel_settings">incar_parallel_settings</a></dd>
                 <dd id="MITRelaxation.kpoints" class="variable"><a href="../base.html#VaspTask.kpoints">kpoints</a></dd>
@@ -628,21 +636,19 @@ applied and none of the following handlers will be checked.</p>
                 <dd id="MITRelaxation.get_config" class="function"><a href="../base.html#VaspTask.get_config">get_config</a></dd>
 
             </div>
-            <div><dt>prefect.core.task.Task</dt>
-                                <dd id="MITRelaxation.copy" class="function">copy</dd>
-                <dd id="MITRelaxation.bind" class="function">bind</dd>
-                <dd id="MITRelaxation.map" class="function">map</dd>
-                <dd id="MITRelaxation.set_dependencies" class="function">set_dependencies</dd>
-                <dd id="MITRelaxation.set_upstream" class="function">set_upstream</dd>
-                <dd id="MITRelaxation.set_downstream" class="function">set_downstream</dd>
-                <dd id="MITRelaxation.inputs" class="function">inputs</dd>
-                <dd id="MITRelaxation.outputs" class="function">outputs</dd>
-                <dd id="MITRelaxation.pipe" class="function">pipe</dd>
-                <dd id="MITRelaxation.serialize" class="function">serialize</dd>
-                <dd id="MITRelaxation.is_equal" class="function">is_equal</dd>
-                <dd id="MITRelaxation.is_not_equal" class="function">is_not_equal</dd>
-                <dd id="MITRelaxation.not_" class="function">not_</dd>
-                <dd id="MITRelaxation.or_" class="function">or_</dd>
+            <div><dt><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task">simmate.workflow_engine.supervised_staged_shell_task.S3Task</a></dt>
+                                <dd id="MITRelaxation.max_corrections" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.max_corrections">max_corrections</a></dd>
+                <dd id="MITRelaxation.monitor" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor">monitor</a></dd>
+                <dd id="MITRelaxation.polling_timestep" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.polling_timestep">polling_timestep</a></dd>
+                <dd id="MITRelaxation.monitor_freq" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.monitor_freq">monitor_freq</a></dd>
+                <dd id="MITRelaxation.save_corrections_to_file" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.save_corrections_to_file">save_corrections_to_file</a></dd>
+                <dd id="MITRelaxation.corrections_filename" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.corrections_filename">corrections_filename</a></dd>
+                <dd id="MITRelaxation.compress_output" class="variable"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.compress_output">compress_output</a></dd>
+                <dd id="MITRelaxation.execute" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.execute">execute</a></dd>
+                <dd id="MITRelaxation.run_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run_config">run_config</a></dd>
+                <dd id="MITRelaxation.to_prefect_task" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.to_prefect_task">to_prefect_task</a></dd>
+                <dd id="MITRelaxation.run" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.run">run</a></dd>
+                <dd id="MITRelaxation.print_config" class="function"><a href="../../../../workflow_engine/supervised_staged_shell_task.html#S3Task.print_config">print_config</a></dd>
 
             </div>
                                 </dl>
