@@ -1,0 +1,1 @@
+Please do NOT install Simmate with pip. We recommend conda instead. Visit our [github page](https://github.com/jacksund/simmate) for more information.

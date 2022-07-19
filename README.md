@@ -7,12 +7,17 @@
 <p align="center">
 <!-- Conda-forge OS support -->
 <a href="https://anaconda.org/conda-forge/simmate">
-    <img src="https://img.shields.io/badge/Operating Systems-Windows | Mac | Linux-043344">
+    <img src="https://img.shields.io/badge/-Windows | Mac | Linux-043344">
 </a>
 <!-- Pricing statement for begineers that are new to github -->
 <a href="https://anaconda.org/conda-forge/simmate">
-    <img src="https://img.shields.io/badge/-Free and Open Source-043344">
+    <img src="https://img.shields.io/badge/-Free & Open Source-043344">
 </a>
+<!-- link to JOSS paper -->
+<a href="https://doi.org/10.21105/joss.04364">
+    <img src="https://img.shields.io/badge/-DOI:10.21105/joss.04364-043344">
+</a>
+
 </br>
 <!-- Link to API documentation -->
 <a href="https://jacksund.github.io/simmate/simmate.html">
@@ -214,3 +219,4 @@ Even if it's something like "_How do I download all structures with x, y, and z 
 - [Joining our community & helping contribute](https://github.com/jacksund/simmate/tree/main/tutorials/Guides_for_contributors)
 - [Requesting a new feature](https://github.com/jacksund/simmate/discussions/categories/ideas)
 - [Exploring alternatives to Simmate](https://github.com/jacksund/simmate/tree/main/benchmarks)
+- [Citing Simmate](https://doi.org/10.21105/joss.04364)

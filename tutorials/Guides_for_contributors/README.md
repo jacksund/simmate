@@ -168,7 +168,7 @@ rm -r simmate/ index.html search.js simmate.html
 python make_docs.py
 ```
 
-2. Update the Simmate version number in `setup.py` ([here](https://github.com/jacksund/simmate/blob/main/setup.py))
+2. Update the Simmate version number in `pyproject.toml` ([here](https://github.com/jacksund/simmate/blob/main/pyproject.toml))
 
 3. Make a [release](https://github.com/jacksund/simmate/releases/new) on Github (which will automatically release to pypi)
 
