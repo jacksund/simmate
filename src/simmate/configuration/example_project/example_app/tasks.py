@@ -21,9 +21,10 @@ from simmate.calculators.vasp.inputs.potcar_mappings import (
     PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
 )
 from simmate.calculators.vasp.error_handlers import (
-    UnconvergedErrorHandler,
-    NonConvergingErrorHandler,
-    FrozenErrorHandler,
+    Unconverged,
+    NonConverging,
+    Frozen,
+    Walltime,
     # There are many more available too!
 )
 
@@ -70,9 +71,10 @@ class ExampleRelaxation(VaspTask):
     # Only the first error handler triggered in this list will be used before
     # restarting the job
     error_handlers = [
-        UnconvergedErrorHandler(),
-        NonConvergingErrorHandler(),
-        FrozenErrorHandler(),
+        Unconverged(),
+        NonConverging(),
+        Frozen(),
+        Walltime(),
     ]
 
 
