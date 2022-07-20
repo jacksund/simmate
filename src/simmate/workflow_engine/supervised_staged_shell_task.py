@@ -336,8 +336,9 @@ class S3Task:
                 stderr=subprocess.PIPE,
             )
 
-            # Assume the shelltask has no errors until proven otherwise
+            # Assume the shelltask has no errors and can retry until proven otherwise
             has_error = False
+            allow_retry = True
 
             # If monitor=True, then we want to supervise this shelltask as it
             # runs. If montors=[m1,m2,...], then we have monitors in place to actually
@@ -371,26 +372,35 @@ class S3Task:
                             # and grab the error if so
                             error = error_handler.check(directory)
                             if error:
-                                # determine if it is_terminating
-                                if error_handler.is_terminating:
+                                # determine if the error handler has a
+                                # custom termination method. If not, use our
+                                # default one from this class.
+                                # The "allow_retry" tells us whether we should
+                                # end the job even if we still have an error.
+                                # For example, our Walltime handler will tell
+                                # us to shutdown and not try anymore -- but
+                                # it won't raise an error in order to allow
+                                # our workup to run.
+                                if not error_handler.has_custom_termination:
                                     # If so, we kill the process but don't apply
                                     # the fix quite yet. That step is done below.
-                                    cls._terminate_job(process, command)
-                                # Otherwise apply the fix and let the shelltask end
-                                # naturally. An example of this is for codes
-                                # where you add a STOP file to get it to
-                                # finish rather than just killing the process.
-                                # This is the special case error_handler that I talk
-                                # about in my notes, where we really want to
-                                # end the shelltask right away.
+                                    allow_retry = cls._terminate_job(
+                                        directory=directory,
+                                        process=process,
+                                        command=command,
+                                    )
+
+                                # Otherwise use the custom termination. An
+                                # example of this is for codes where you add
+                                # a STOP file to get it to finish rather than
+                                # just killing the process. We use this feature
+                                # in our VASP Walltime handler.
                                 else:
-                                    # make a copy of the directory contents and
-                                    # store as an archive within the same directory
-                                    make_error_archive(directory)
-                                    # apply the fix now
-                                    correction = error_handler.correct(directory)
-                                    # record what's been changed
-                                    corrections.append((error_handler.name, correction))
+                                    allow_retry = error_handler.terminate_job(
+                                        directory=directory,
+                                        process=process,
+                                        command=command,
+                                    )
                                 # there's no need to look at the other monitors
                                 # so break from the for-loop. We also don't
                                 # need to monitor the stagedtask anymore since we just
@@ -398,11 +408,14 @@ class S3Task:
                                 # end. So update the while-loop condition.
                                 has_error = True
                                 break
+
                 # ------ end of monitor while loop ------
+
             # Now just wait for the process to finish. Note we use communicate
             # instead of the .wait() method. This is the recommended method
             # when we have stderr=subprocess.PIPE, which we use above.
             output, errors = process.communicate()
+
             # check if the return code is non-zero and thus failed.
             # The 'not has_error' is because terminate() will give a nonzero
             # when a monitor is triggered. We don't want to raise that
@@ -415,17 +428,12 @@ class S3Task:
                 raise NonZeroExitError(
                     f"The command ({command}) failed. The error output was...\n {errors}"
                 )
+
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered above (if there was one).
             # Since the error_handlers are in order of priority, only the first
             # will actually be applied and then we can retry the calc.
             for error_handler in cls.error_handlers:
-
-                # NOTE - The following special case is handled above:
-                #   error_handler.is_monitor and not error_handler.is_terminating
-                # BUG: I can see this being a source of bugs in the process so I
-                # need to reconsider subclassing this special case. For now,
-                # users should have this case at the lowest priority.
 
                 # check if there's an error with this error_handler and grab the
                 # error if there is one
@@ -445,6 +453,7 @@ class S3Task:
                     # break from the error_handler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break
+
             # write the log of corrections to file if requested. This is written
             # as a CSV file format and done every while-loop cycle because it
             # lets the user monitor the calculation and error handlers applied
@@ -460,15 +469,17 @@ class S3Task:
                     os.path.join(directory, cls.corrections_filename),
                     index=False,
                 )
-            # now that we've gone through the error_handlers, let's see if any
-            # non-terminating errors were found (terminating ones would raise
-            # an error above). If there are no errors, we've finished the
-            # calculation and can exit the while loop. Otherwise, just leave
-            # everything where it's at and restart the while-loop with a new
-            # attempt
-            if not has_error:
+
+            # If there are no errors, we've finished the calculation and can
+            # exit the while loop. Alternatively, some "soft" errors (such as
+            # Walltimes) signal us to finish even though there's technically
+            # a problem -- they do this will allow_retry=False. Otherwise,
+            # just leave everything where it's at and restart the
+            # while-loop with a new attempt.
+            if not has_error or not allow_retry:
                 # break the while-loop
                 break
+
         # ------ end of main while loop ------
 
         # make sure the while loop didn't exit because of the correction limit
@@ -482,7 +493,7 @@ class S3Task:
         return corrections
 
     @staticmethod
-    def _terminate_job(process: subprocess.Popen, command: str):
+    def _terminate_job(directory: str, process: subprocess.Popen, command: str):
         """
         Stopping the command we submitted can be a tricky business if we are running
         scripts in parallel (such as using mpirun). Different computers and OSs
@@ -497,12 +508,24 @@ class S3Task:
 
         #### Parameters
 
+        - `directory`:
+            The base directory the calculation is taking place in.
+
         - `process`:
             The process object that will be terminated.
 
         - `command`:
             the command used to launch the process. This is sometimes useful
             when searching for all running processes under this name.
+
+        #### Returns
+
+        - `allow_retry`:
+            if the job should be attempted again when there is a possible fix
+            from the correct() method. Defaults to True. In the case where
+            allow_retry=False and correct() does NOT raise an error, the
+            workup methods will still be called - despite the calculation
+            technically having an error.
         """
 
         # The operating system (Windows, OSX, or Linux) will give us the best guess
@@ -539,6 +562,10 @@ class S3Task:
         # TODO: make it so terminate scripts can be loaded from the user's config
         # directory, which will make it so they don't have to overwrite all the
         # classes that inherit from this one.
+
+        # By default, termination allows for restarts, so we return a
+        # "force_finish" value of False.
+        return False
 
     @staticmethod
     def workup(directory: str):
@@ -654,7 +681,7 @@ class S3Task:
     @cache
     def to_prefect_task(cls) -> Task:
         """
-        Converts this workflow into a Prefect task
+        Converts this Simmate s3task into a Prefect task
         """
 
         # Build the Task object directly instead of using prefect's @task decorator

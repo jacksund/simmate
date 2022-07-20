@@ -60,11 +60,17 @@ class AlwaysFailsMonitor(AlwaysFailsHandler):
 
 
 class AlwaysPassesSpecialMonitor(AlwaysPassesMonitor):
-    is_terminating = False
+    has_custom_termination = True
+
+    def terminate_job(self, directory, **kwargs):
+        return True
 
 
 class AlwaysFailsSpecialMonitor(AlwaysFailsMonitor):
-    is_terminating = False
+    has_custom_termination = True
+
+    def terminate_job(self, directory, **kwargs):
+        return False
 
 
 # ----------------------------------------------------------------------------

@@ -6,9 +6,10 @@ import datetime
 import subprocess
 
 import numpy
-from pymatgen.io.vasp.outputs import Outcar
+from pymatgen.io.vasp.outputs import Outcar, Vasprun
 
 from simmate.workflow_engine import ErrorHandler
+from simmate.calculators.vasp.error_handlers import Unconverged
 
 
 class Walltime(ErrorHandler):
@@ -27,10 +28,7 @@ class Walltime(ErrorHandler):
     """
 
     is_monitor = True
-
-    # The WalltimeHandler should not terminate as we want VASP to terminate
-    # itself naturally with the STOPCAR.
-    is_terminating = False
+    has_custom_termination = True
 
     def __init__(
         self,
@@ -82,19 +80,34 @@ class Walltime(ErrorHandler):
         if remaining_time == None:
             return False
 
-        if remaining_time < self.buffer_time:
-            return True
-
-        # If the remaining time is less than average time for 3
+        # If the remaining time is less than our buffer time or time for 3
         # steps, then we also want to begin shutdown out of caution.
         time_per_step = self._get_max_step_time(directory)
-        if remaining_time < time_per_step * 3:
+
+        if (remaining_time < self.buffer_time) or (remaining_time < time_per_step * 3):
+            # make sure the calculation didn't "finish at the buzzer"
+            is_finished = self._check_if_finished(directory)
+            if is_finished:
+                print(
+                    "BUZZER BEATER!!! This job finished right when it was "
+                    "about to hit the walltime!"
+                )
+                return False
+            # BUG: there may be a rare race condition here where the job completes
+            # in the time it takes to indicate this check
+
             return True
 
         # Otherwise we don't have this error.
         return False
 
-    def correct(self, directory: str) -> str:
+    def terminate_job(self, directory: str, **kwargs) -> bool:
+        """
+        When a walltime is about to be hit, we want to tell VASP to end
+        naturally by creating a STOPCAR file. We do not want to allow and
+        new VASP attempts, so we return a value of False for allow_retry
+        """
+
         stopcar_filename = os.path.join(directory, "STOPCAR")
         stopcar_content = (
             "LSTOP = .TRUE." if not self.electronic_step_stop else "LABORT = .TRUE."
@@ -103,7 +116,10 @@ class Walltime(ErrorHandler):
         with open(stopcar_filename, "w") as stopcar:
             stopcar.write(stopcar_content)
 
-        return f"Added {stopcar_content} to STOPCAR"
+        return False
+
+    def correct(self):
+        return "Added STOPCAR file to end job"  # ... and resubmitted
 
     def _get_remaining_time(self, directory: str) -> float:
         """
@@ -224,3 +240,9 @@ class Walltime(ErrorHandler):
             )
 
         return time_per_step
+
+    def _check_if_finished(self, directory: str):
+        # We can invert the unconverged check in order to see if the calc is done.
+        return not Unconverged().check(directory)
+        # BUG: Will this work properly for MD simulations? Should I check the
+        # number of steps completed?
