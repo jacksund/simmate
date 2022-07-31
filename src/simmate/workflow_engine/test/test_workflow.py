@@ -27,7 +27,7 @@ class DummyProject__DummyCaclulator__DummyPreset(Workflow):
     def run_config(source=None, structure=None, **kwargs):
         x = dummy_task_1(source)
         y = dummy_task_2(structure)
-        return x.result() + y.result()
+        return x + y
 
 
 # copy to variable for shorthand use
@@ -38,7 +38,7 @@ DummyFlow = DummyProject__DummyCaclulator__DummyPreset
 def test_workflow():
     # Run the workflow just like you would for the base Prefect class
     flow = DummyFlow.to_prefect_flow()
-    state = flow()
+    state = flow(return_state=True)
     assert state.is_completed()
     assert state.result() == 3
 
@@ -64,6 +64,11 @@ def test_workflow():
     ]
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 
+
+@pytest.mark.prefect_db
+@pytest.mark.django_db
+def test_workflow_cloud(mocker, sample_structures):
+
     # test cloud properties
     deployment_id = DummyFlow.deployment_id
     assert isinstance(deployment_id, str)
@@ -71,11 +76,6 @@ def test_workflow():
 
     n = DummyFlow.nflows_submitted
     assert isinstance(n, int)
-
-
-@pytest.mark.prefect_db
-@pytest.mark.django_db
-def test_workflow_cloud(mocker, sample_structures):
 
     # to test serialization of input parameters we grab a toolkit object
     structure = sample_structures["C_mp-48_primitive"]

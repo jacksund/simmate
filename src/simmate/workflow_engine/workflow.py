@@ -279,6 +279,7 @@ from prefect.client import get_client
 from prefect.orion.schemas.filters import FlowFilter, FlowRunFilter
 from prefect.packaging import OrionPackager
 from prefect.packaging.serializers import PickleSerializer
+from prefect.deployments import Deployment
 
 import simmate
 from simmate.toolkit import Structure
@@ -423,7 +424,7 @@ class Workflow:
         A convience method to run a workflow as a subflow in a prefect context.
         """
         subflow = cls.to_prefect_flow()
-        state = subflow(**kwargs)
+        state = subflow(return_state=True, **kwargs)
 
         # We don't want to block and wait because this might disable parallel
         # features of subflows. We therefore return the state and let the
@@ -809,37 +810,24 @@ class Workflow:
         other methods when appropriate
         """
 
-        # CREATE_DEPLOYMENT method is not yet updated in 2.0b8
-        #
-        # async with get_client() as client:
-        #     response = await client.create_deployment(
-        #         name="leonardo-deployment",
-        #         flow_location="./leo_flow.py",
-        #         tags=['tutorial','test'],
-        #         parameters={'name':'Leo'},
-        #     )
-
-        # For now, this is a modification of the create_deployment code
-        # until they fix the method.
-
-        from prefect.deployments import Deployment
+        # NOTE: we do not use the client.create_deployment method because it
+        # is called within the Deployment.create() method for us.
 
         deployment = Deployment(
-            flow=cls.to_prefect_flow(),
             name=cls.name_full,
+            flow=cls.to_prefect_flow(),
             packager=OrionPackager(serializer=PickleSerializer()),
+            # OPTIMIZE: it would be better if I could figure out the ImportSerializer
+            # here. Only issue is that prefect would need to know to import AND
+            # call a method.
             tags=[
                 "simmate",
                 cls.name_project,
                 cls.name_calculator,
             ],
         )
-        # OPTIMIZE: it would be better if I could figure out the ImportSerializer
-        # here. Only issue is that prefect would need to know to import AND
-        # call a method.
 
-        async with get_client() as client:
-            deployment_id = await deployment.create()
+        deployment_id = await deployment.create()
 
         return str(deployment_id)  # convert from UUID to str first
 
