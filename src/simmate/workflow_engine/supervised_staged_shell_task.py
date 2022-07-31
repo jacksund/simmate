@@ -676,7 +676,7 @@ class S3Task:
         A convience method to run this task as a registered task in a prefect context.
         """
         task = cls.to_prefect_task()
-        state = task(**kwargs)
+        state = task.submit(**kwargs)
 
         # We don't want to block and wait because this might disable parallel
         # features of subflows. We therefore return the state and let the
