@@ -206,12 +206,6 @@ class Worker:
             response = await client.create_work_queue(
                 name=self.queue_name,
                 tags=["simmate"],
-                flow_runner_types=[
-                    "universal",
-                    "kubernetes",
-                    "docker",
-                    "subprocess",
-                ],
             )
 
             # create_work_queue does not accept an input for concurrency, so
