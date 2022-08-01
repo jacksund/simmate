@@ -65,24 +65,24 @@ def test_workflow():
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 
 
-@pytest.mark.prefect_db
-@pytest.mark.django_db
-def test_workflow_cloud(mocker, sample_structures):
+# @pytest.mark.prefect_db
+# @pytest.mark.django_db
+# def test_workflow_cloud(mocker, sample_structures):
 
-    # test cloud properties
-    deployment_id = DummyFlow.deployment_id
-    assert isinstance(deployment_id, str)
-    # we dont check the actual value bc its randomly generated
+#     # test cloud properties
+#     deployment_id = DummyFlow.deployment_id
+#     assert isinstance(deployment_id, str)
+#     # we dont check the actual value bc its randomly generated
 
-    n = DummyFlow.nflows_submitted
-    assert isinstance(n, int)
+#     n = DummyFlow.nflows_submitted
+#     assert isinstance(n, int)
 
-    # to test serialization of input parameters we grab a toolkit object
-    structure = sample_structures["C_mp-48_primitive"]
+#     # to test serialization of input parameters we grab a toolkit object
+#     structure = sample_structures["C_mp-48_primitive"]
 
-    # Run the workflow through prefect cloud
-    flow_id = DummyFlow.run_cloud(structure=structure)
-    assert isinstance(flow_id, str)
+#     # Run the workflow through prefect cloud
+#     flow_id = DummyFlow.run_cloud(structure=structure)
+#     assert isinstance(flow_id, str)
 
 
 def test_serialize_parameters():

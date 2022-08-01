@@ -808,9 +808,15 @@ class Workflow:
         other methods when appropriate
         """
 
+        # raise error until python-deployments are supported again
+        raise Exception(
+            "Prefect 2.0 has removed the ability to create deployments in "
+            "python, so this feature is currently disabled."
+        )
+        # When this is removed, be sure to re-add the test_workflow_cloud unittest
+
         # NOTE: we do not use the client.create_deployment method because it
         # is called within the Deployment.create() method for us.
-
         deployment = Deployment(
             name=cls.name_full,
             flow=cls.to_prefect_flow(),
