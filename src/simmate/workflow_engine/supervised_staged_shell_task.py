@@ -564,8 +564,8 @@ class S3Task:
         # classes that inherit from this one.
 
         # By default, termination allows for restarts, so we return a
-        # "force_finish" value of False.
-        return False
+        # "allow_retry" value of True.
+        return True
 
     @staticmethod
     def workup(directory: str):
