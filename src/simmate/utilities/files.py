@@ -61,6 +61,87 @@ def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
     return os.path.abspath(directory)
 
 
+def copy_directory(
+    directory_old: str,
+    directory_new: str = None,
+    ignore_simmate_files: bool = False,
+) -> str:
+    """
+    Given an old directory, copies all of it's contents over to a new one.
+    Optionally, you can avoid copying any simmate_* files and archives within
+    that original directory to save on disk space.
+
+    #### Parameters
+
+    - `directory_old`:
+        Name of the directory to be copied over. Must exist.
+
+    - `directory_new`:
+        Name of the new directory (optional). This will be passed to the
+        `get_directory` utility.
+
+    - `ignore_simmate_files`:
+        Whether to ignore simmate_* files when copying over. Defaults to False.
+
+    #### Returns
+
+    - `directory`:
+        The path to the new directory as a string
+
+    """
+
+    # Start by creating a new directory or grabbing the one given.
+    directory_new_cleaned = get_directory(directory_new)
+
+    # First check if the previous directory exists. There are several
+    # possibilities that we need to check for:
+    #   1. directory exists on the same file system and can be found
+    #   2. directory exists on the same file system but is now an archive
+    #   3. directory/archive is on another file system (requires ssh to access)
+    #   4. directory was deleted and unavailable
+    # When copying over the directory, we ignore any `simmate_` files
+    # that correspond to metadata/results/corrections/etc.
+    if os.path.exists(directory_old):
+        # copy the old directory to the new one
+        shutil.copytree(
+            src=directory_old,
+            dst=directory_new_cleaned,
+            ignore=shutil.ignore_patterns("simmate_*")
+            if ignore_simmate_files
+            else None,
+            dirs_exist_ok=True,
+        )
+    elif os.path.exists(f"{directory_old}.zip"):
+        # unpack the old archive
+        shutil.unpack_archive(
+            filename=f"{directory_old}.zip",
+            extract_dir=os.path.dirname(directory_old),
+        )
+        # copy the old directory to the new one
+        shutil.copytree(
+            src=directory_old,
+            dst=directory_new_cleaned,
+            ignore=shutil.ignore_patterns("simmate_*")
+            if ignore_simmate_files
+            else None,
+            dirs_exist_ok=True,
+        )
+        # Then remove the unpacked archive now that we copied it.
+        # This leaves the original archive behind and unaltered too.
+        shutil.rmtree(directory_old)
+    else:
+        raise Exception(
+            "Unable to locate the previous directory to copy. Make sure the "
+            "past directory is located on the same file system. Directory that "
+            f"couldn't be found was... {directory_old}"
+        )
+    # TODO: for possibility 3, I could implement automatic copying with
+    # the "fabric" python package (uses ssh). I'd also need to store
+    # filesystem names (e.g. "WarWulf") to know where to connect.
+
+    return directory_new_cleaned
+
+
 def make_archive(directory: str):
     """
     Compresses the directory to a zip file of the same name. After compressing,

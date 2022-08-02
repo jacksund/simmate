@@ -201,6 +201,8 @@ INPUT_MAPPINGS = {
     ],
     "string": [
         "directory",
+        "directory_old",
+        "directory_new",
         "command",
         "migrating_specie",
     ],
@@ -218,5 +220,6 @@ INPUT_MAPPINGS = {
         "copy_previous_directory",
         "pre_standardize_structure",
         "pre_sanitize_structure",
+        "is_restart",
     ],
 }

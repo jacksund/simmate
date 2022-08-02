@@ -65,7 +65,8 @@ def get_list_of_workflows_by_type(
     workflow_names = []
     for attr_name in dir(flow_module):
         attr = getattr(flow_module, attr_name)
-        if hasattr(attr, "run_config"):  # issubclass(attr, Workflow) raises error
+        # OPTIMIZE: line below --> issubclass(attr, Workflow) --> raises error
+        if hasattr(attr, "run_config") and attr.__name__ != "Workflow":
             # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
             # and we can grab whichever name we'd like from it.
             if full_name:

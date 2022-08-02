@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import shutil
 
 import yaml
 
@@ -220,6 +221,29 @@ class VaspTask(S3Task):
             os.path.join(directory, "POTCAR"),
             cls.potcar_mappings,
         )
+
+    @classmethod
+    def setup_restart(cls, directory: str, structure: Structure, **kwargs):
+        """
+        From a working directory of a past calculation, sets up for the calculation
+        to be restarted. For relaxations/dynamics this involved just copying
+        the poscar to the contcar.
+        """
+
+        # establish filenames
+        poscar_filename = os.path.join(directory, "POSCAR")
+        poscar_orig_filename = os.path.join(directory, "POSCAR_original")
+        contcar_filename = os.path.join(directory, "CONTCAR")
+
+        # TODO:
+        # make an archive of the directory before we start editting files
+        # make_error_archive(directory)
+
+        # copy poscar to a new file
+        shutil.move(poscar_filename, poscar_orig_filename)
+
+        # then CONTCAR over to the POSCAR
+        shutil.move(contcar_filename, poscar_filename)
 
     @classmethod
     def workup(cls, directory: str):

@@ -237,7 +237,44 @@ class S3Task:
         is becuase `setup` is normally called within the `run` method.
 
         Some tasks don't require a `setup` method, so by default, this method
-        doesn't nothing but "pass".
+        does nothing but "pass".
+
+        #### Parameters
+
+        - `directory`:
+            The directory to run everything in. Must exist already.
+
+        - `**kwargs`:
+            Extra kwargs that may be passed to some function within. Because
+            Simmate prefers fixed settings for their workflows, this is typically
+            not used, but instead, keywords should be explicitly defined when
+            writing a setup method.
+        """
+        pass
+
+    @classmethod
+    def setup_restart(directory: str, **kwargs):
+        """
+        This method is used instead of `setup` when is_restart=True is passed
+        to the run/run_config methods.
+
+        This abstract method is ran before the command is actually executed. This
+        allows for some pre-processing, such as writing input files or any other
+        analysis.
+
+        When writing a custom S3Task, you can overwrite this method. The only
+        criteria is that you...
+
+        1. include `directory` as the 1st input parameter and add `**kwargs`
+        2. decorate your method with `@staticmethod` or `@classmethod`
+
+        These criteria allow for compatibility with higher-level functinality.
+
+        You should never call this method directly unless you are debugging. This
+        is becuase `setup_restart` is normally called within the `run` method.
+
+        Some tasks don't require a `setup_restart` method, so by default, this
+        method does nothing but "pass".
 
         #### Parameters
 
@@ -254,7 +291,10 @@ class S3Task:
 
     @classmethod
     def _check_input_files(cls, directory: str):
-        # Make sure that there are the proper output files from a VASP calc
+        """
+        Make sure that there are the proper input files to run this calc
+        """
+
         filenames = [os.path.join(directory, file) for file in cls.required_files]
         if not all(os.path.exists(filename) for filename in filenames):
             raise Exception(
@@ -601,6 +641,7 @@ class S3Task:
         cls,
         directory: str = None,
         command: str = None,
+        is_restart: bool = False,
         **kwargs,
     ):
         """
@@ -620,9 +661,16 @@ class S3Task:
 
          - `command`:
              The command that will be called during execution.
+
          - `directory`:
              The directory to run everything in. This is passed to the ulitities
              function simmate.ulitities.get_directory
+
+        - `is_restart`:
+            whether or not this calculation is a continuation of a previous run
+            (i.e. a restarted calculation). If so, the `setup_restart` will be
+            called instead of the setup method.
+
          - `**kwargs`:
              Any extra keywords that should be passed to the setup() method.
 
@@ -642,8 +690,12 @@ class S3Task:
         # establish the working directory
         directory = get_directory(directory)
 
-        # run the setup stage of the task
-        cls.setup(directory=directory, **kwargs)
+        # run the setup stage of the task, where there is a unique method
+        # if we are picking up from a previously paused run.
+        if not is_restart:
+            cls.setup(directory=directory, **kwargs)
+        else:
+            cls.setup_restart(directory=directory, **kwargs)
 
         # make sure proper files are present
         cls._check_input_files(directory)

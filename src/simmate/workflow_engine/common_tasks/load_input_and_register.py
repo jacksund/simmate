@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-import shutil
 import yaml
 from typing import Any
 
 from prefect import task
 from prefect.context import FlowRunContext
 
-from simmate.utilities import get_directory
+from simmate.utilities import get_directory, copy_directory
 from simmate.workflow_engine import Workflow
 
 # OPTIMIZE: consider splitting this task into load_structure, load_directory,
@@ -115,47 +114,13 @@ def load_input_and_register(
         # the past directory should be stored on the input object
         previous_directory = primary_input_cleaned.database_object.directory
 
-        # First check if the previous directory exists. There are several
-        # possibilities that we need to check for:
-        #   1. directory exists on the same file system and can be found
-        #   2. directory exists on the same file system but is now an archive
-        #   3. directory/archive is on another file system (requires ssh to access)
-        #   4. directory was deleted and unavailable
-        # When copying over the directory, we ignore any `simmate_` files
-        # that correspond to metadata/results/corrections/etc.
-        if os.path.exists(previous_directory):
-            # copy the old directory to the new one
-            shutil.copytree(
-                src=previous_directory,
-                dst=directory_cleaned,
-                ignore=shutil.ignore_patterns("simmate_*"),
-                dirs_exist_ok=True,
-            )
-        elif os.path.exists(f"{previous_directory}.zip"):
-            # unpack the old archive
-            shutil.unpack_archive(
-                filename=f"{previous_directory}.zip",
-                extract_dir=os.path.dirname(previous_directory),
-            )
-            # copy the old directory to the new one
-            shutil.copytree(
-                src=previous_directory,
-                dst=directory_cleaned,
-                ignore=shutil.ignore_patterns("simmate_*"),
-                dirs_exist_ok=True,
-            )
-            # Then remove the unpacked archive now that we copied it.
-            # This leaves the original archive behind and unaltered too.
-            shutil.rmtree(previous_directory)
-        else:
-            raise Exception(
-                "Unable to locate the previous calculation to copy. Make sure the "
-                "past directory is located on the same file system. Directory that "
-                f"couldn't be found was... {previous_directory}"
-            )
-        # TODO: for possibility 3, I could implement automatic copying with
-        # the "fabric" python package (uses ssh). I'd also need to store
-        # filesystem names (e.g. "WarWulf") to know where to connect.
+        # Copy over all files except simmate one (we have no need for the
+        # summaries or error archives)
+        copy_directory(
+            directory_old=previous_directory,
+            directory_new=directory_cleaned,
+            ignore_simmate_files=True,
+        )
 
     # SPECIAL CASE for customized flows
     if "workflow_base" not in parameters_cleaned:

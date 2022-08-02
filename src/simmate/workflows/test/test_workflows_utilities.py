@@ -21,6 +21,7 @@ def test_get_workflow_types():
         "electronic-structure",
         "population-analysis",
         "relaxation",
+        "restart",
         "static-energy",
     ]
 
@@ -47,6 +48,7 @@ def test_list_of_all_workflows():
         "relaxation.vasp.quality03",
         "relaxation.vasp.quality04",
         "relaxation.vasp.staged",
+        "restart.simmate.automatic",
         "static-energy.vasp.matproj",
         "static-energy.vasp.mit",
         "static-energy.vasp.neb-endpoint",
@@ -82,7 +84,10 @@ def test_get_unique_paramters():
         "copy_previous_directory",
         "diffusion_analysis_id",
         "directory",
+        "directory_new",
+        "directory_old",
         "input_parameters",
+        "is_restart",
         "migrating_specie",
         "migration_hop",
         "migration_hop_id",
