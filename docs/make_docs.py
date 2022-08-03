@@ -11,6 +11,9 @@ import pdoc
 
 import django
 
+# grab current working directory. This should be the main repo dir
+here = Path(__file__).parent
+
 if __name__ == "__main__":
 
     # We must load Django settings first -- otherwise model imports will raise errors
@@ -41,6 +44,6 @@ if __name__ == "__main__":
     # Now generate all documentation
     all_docs = pdoc.pdoc(
         "../src/simmate",
-        output_directory=Path("."),
+        output_directory=here / "docs",
         format="html",
     )
