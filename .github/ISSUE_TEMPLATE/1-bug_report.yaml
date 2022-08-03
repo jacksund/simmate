@@ -41,6 +41,7 @@ body:
   - type: textarea
     attributes:
       label: Versions
+      description: If you can access them, input your system info. HINT: you can find python and simmate versions with the command `conda list python` and `conda list simmate` while in your working env.
       value: |
         - Operating System:
         - Python version:
