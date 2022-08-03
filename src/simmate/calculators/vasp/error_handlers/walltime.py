@@ -6,7 +6,7 @@ import datetime
 import subprocess
 
 import numpy
-from pymatgen.io.vasp.outputs import Outcar, Vasprun
+from pymatgen.io.vasp.outputs import Outcar
 
 from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.error_handlers import Unconverged
@@ -80,11 +80,11 @@ class Walltime(ErrorHandler):
         if remaining_time == None:
             return False
 
-        # If the remaining time is less than our buffer time or time for 3
+        # If the remaining time is less than our buffer time or time for 2
         # steps, then we also want to begin shutdown out of caution.
         time_per_step = self._get_max_step_time(directory)
 
-        if (remaining_time < self.buffer_time) or (remaining_time < time_per_step * 3):
+        if (remaining_time < self.buffer_time) or (remaining_time < time_per_step * 2):
             # make sure the calculation didn't "finish at the buzzer"
             is_finished = self._check_if_finished(directory)
             if is_finished:
