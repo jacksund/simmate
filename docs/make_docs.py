@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # Now generate all documentation
     all_docs = pdoc.pdoc(
-        "../src/simmate",
+        here.parent / "src" / "simmate",
         output_directory=here,
         format="html",
     )
