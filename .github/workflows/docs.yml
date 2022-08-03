@@ -16,9 +16,8 @@ on:
 #     types: [published]
 
 # security: restrict permissions for CI jobs.
-# permissions:
-#   contents: read
-# !!! Commented out during debugging
+permissions:
+  contents: read
 
 jobs:
   # Build the documentation and upload the static HTML files as an artifact.
@@ -36,7 +35,6 @@ jobs:
       # Note, we use a custom build script for pdoc itself, but ideally you 
       # just run `pdoc -o docs/ ...` here.
       - run: python docs/make_docs.py
-      # !!! BUG: This line fails due to permission error
       
       # upload the docs/ directory (which now has all the html files) as an artifact
       - run: tar --directory docs/ -hcf artifact.tar .
