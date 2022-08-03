@@ -284,18 +284,21 @@ class S3Task:
         pass
 
     @classmethod
-    def _check_input_files(cls, directory: str):
+    def _check_input_files(cls, directory: str, raise_if_missing: bool = True):
         """
         Make sure that there are the proper input files to run this calc
         """
 
         filenames = [os.path.join(directory, file) for file in cls.required_files]
         if not all(os.path.exists(filename) for filename in filenames):
-            raise Exception(
-                "Make sure your `setup` method directory source is set up correctly"
-                "The following files must exist in the directory where "
-                f"this task is ran but some are missing: {cls.required_files}"
-            )
+            if raise_if_missing:
+                raise Exception(
+                    "Make sure your `setup` method directory source is set up correctly"
+                    "The following files must exist in the directory where "
+                    f"this task is ran but some are missing: {cls.required_files}"
+                )
+            return False  # indicates something is missing
+        return True  # indicates all files are present
 
     @classmethod
     def execute(cls, directory: str, command: str) -> List[Tuple[str]]:
@@ -694,10 +697,11 @@ class S3Task:
         # workflows where we don't know which task to restart at.
         summary_filename = os.path.join(directory, "simmate_summary.yaml")
         is_complete = os.path.exists(summary_filename)
+        is_dir_setup = cls._check_input_files(directory, raise_if_missing=False)
 
         # run the setup stage of the task, where there is a unique method
         # if we are picking up from a previously paused run.
-        if not is_restart and not is_complete:
+        if (not is_restart and not is_complete) or not is_dir_setup:
             cls.setup(directory=directory, **kwargs)
         elif is_restart and not is_complete:
             cls.setup_restart(directory=directory, **kwargs)

@@ -45,6 +45,7 @@ class Restart__Simmate__Automatic(Workflow):
         input_parameters.pop("prefect_flow_run_id", None)
         input_parameters.pop("directory", None)
         input_parameters.pop("copy_previous_directory", None)
+        input_parameters.pop("is_restart", None)
 
         # grab the workflow we need to run
         workflow_name = input_parameters.pop("workflow_name")
@@ -62,7 +63,11 @@ class Restart__Simmate__Automatic(Workflow):
         }
 
         # now instead of calling the workflow's run method, we use its run_restart
-        state = workflow.run_restart(directory=directory_new, **input_parameters)
+        state = workflow.run(
+            directory=directory_new_cleaned,
+            is_restart=True,
+            **input_parameters,
+        )
         result = state.result()
 
         return result

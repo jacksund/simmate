@@ -433,21 +433,6 @@ class Workflow:
         return state
 
     @classmethod
-    def run_restart(cls, **kwargs) -> State:
-        """
-        This method should not be called directly! Instead, use the
-        `restart.simmate.automatic` workflow to restart your calculation
-        properly.
-
-        For complex workflows, you can override this method to one that properly
-        handles restarting your calculation depending on parameters gathered
-        from the simmate_metadata.yaml.
-        """
-        # by default, just run the normal run method and pass the extra kwarg
-        # is_restart=True as an extra.
-        return cls.run(is_restart=True, **kwargs)
-
-    @classmethod
     @property
     def name_full(cls) -> str:
         """
