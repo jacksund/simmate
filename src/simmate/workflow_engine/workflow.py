@@ -279,7 +279,6 @@ from prefect.client import get_client
 from prefect.orion.schemas.filters import FlowFilter, FlowRunFilter
 from prefect.packaging import OrionPackager
 from prefect.packaging.serializers import PickleSerializer
-from prefect.deployments import Deployment
 
 import simmate
 from simmate.toolkit import Structure
@@ -816,6 +815,8 @@ class Workflow:
             "python, so this feature is currently disabled."
         )
         # When this is removed, be sure to re-add the test_workflow_cloud unittest
+
+        from prefect.deployments import Deployment
 
         # NOTE: we do not use the client.create_deployment method because it
         # is called within the Deployment.create() method for us.
