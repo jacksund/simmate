@@ -67,6 +67,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
         # TODO: Can the hop id be inferred from the migration_hop or somewhere
         # else in this context? Maybe even load_input_and_register will use
         # prefect id once it's a Calculation?
+        is_restart: bool = False,
     ):
 
         # split the command if separate ones were given
@@ -84,6 +85,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
             command=command,
             diffusion_analysis_id=diffusion_analysis_id,
             migration_hop_id=migration_hop_id,
+            is_restart=is_restart,
             register_run=False,
         ).result()
 
@@ -99,6 +101,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + f"{Relaxation__Vasp__NebEndpoint.name_full}.start",
+            is_restart=is_restart,
         )
 
         # Relax the ending supercell structure
@@ -108,6 +111,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + f"{Relaxation__Vasp__NebEndpoint.name_full}.end",
+            is_restart=is_restart,
         )
 
         # wait for the endpoint relaxations to finish
@@ -135,6 +139,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
             directory=parameters_cleaned["directory"],
             diffusion_analysis_id=diffusion_analysis_id,
             migration_hop_id=migration_hop_id,
+            is_restart=is_restart,
         )
 
 

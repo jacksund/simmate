@@ -167,7 +167,7 @@ class S3Task:
     applied and none of the following handlers will be checked.
     """
 
-    max_corrections: int = 5
+    max_corrections: int = 10
     """
     The maximum number of times we can apply a correction and retry the shell
     command. The maximum number of times that corrections will be made (and
@@ -205,12 +205,6 @@ class S3Task:
     Whether to write a log file of the corrections made. The default is True.
     """
 
-    corrections_filename: str = "simmate_corrections.csv"
-    """
-    If save_corrections_to_file is True, this is the filename of where
-    to write the corrections. The default is "simmate_corrections.csv".
-    """
-
     compress_output: bool = False
     """
     Whether to compress the directory to a zip file at the end of the
@@ -237,7 +231,7 @@ class S3Task:
         is becuase `setup` is normally called within the `run` method.
 
         Some tasks don't require a `setup` method, so by default, this method
-        doesn't nothing but "pass".
+        does nothing but "pass".
 
         #### Parameters
 
@@ -253,15 +247,58 @@ class S3Task:
         pass
 
     @classmethod
-    def _check_input_files(cls, directory: str):
-        # Make sure that there are the proper output files from a VASP calc
+    def setup_restart(directory: str, **kwargs):
+        """
+        This method is used instead of `setup` when is_restart=True is passed
+        to the run/run_config methods.
+
+        This abstract method is ran before the command is actually executed. This
+        allows for some pre-processing, such as writing input files or any other
+        analysis.
+
+        When writing a custom S3Task, you can overwrite this method. The only
+        criteria is that you...
+
+        1. include `directory` as the 1st input parameter and add `**kwargs`
+        2. decorate your method with `@staticmethod` or `@classmethod`
+
+        These criteria allow for compatibility with higher-level functinality.
+
+        You should never call this method directly unless you are debugging. This
+        is becuase `setup_restart` is normally called within the `run` method.
+
+        Some tasks don't require a `setup_restart` method, so by default, this
+        method does nothing but "pass".
+
+        #### Parameters
+
+        - `directory`:
+            The directory to run everything in. Must exist already.
+
+        - `**kwargs`:
+            Extra kwargs that may be passed to some function within. Because
+            Simmate prefers fixed settings for their workflows, this is typically
+            not used, but instead, keywords should be explicitly defined when
+            writing a setup method.
+        """
+        pass
+
+    @classmethod
+    def _check_input_files(cls, directory: str, raise_if_missing: bool = True):
+        """
+        Make sure that there are the proper input files to run this calc
+        """
+
         filenames = [os.path.join(directory, file) for file in cls.required_files]
         if not all(os.path.exists(filename) for filename in filenames):
-            raise Exception(
-                "Make sure your `setup` method directory source is set up correctly"
-                "The following files must exist in the directory where "
-                f"this task is ran but some are missing: {cls.required_files}"
-            )
+            if raise_if_missing:
+                raise Exception(
+                    "Make sure your `setup` method directory source is set up correctly"
+                    "The following files must exist in the directory where "
+                    f"this task is ran but some are missing: {cls.required_files}"
+                )
+            return False  # indicates something is missing
+        return True  # indicates all files are present
 
     @classmethod
     def execute(cls, directory: str, command: str) -> List[Tuple[str]]:
@@ -295,11 +332,17 @@ class S3Task:
         # to separate these out from other error_handlers.
         cls.monitors = [handler for handler in cls.error_handlers if handler.is_monitor]
 
-        # We start with zero corrections that we slowly add to. This can be
-        # thought of as a table with headers of...
+        # in case this is a restarted calculation, check if there is a list
+        # of corrections in the current directory and load those as the start point
+        corrections_filename = os.path.join(directory, "simmate_corrections.csv")
+        if os.path.exists(corrections_filename):
+            data = pandas.read_csv(corrections_filename)
+            corrections = data.values.tolist()
+        # Otherwise we start with zero corrections that we slowly add to. This
+        # can be thought of as a table with headers of...
         #   ("applied_errorhandler", "correction_applied")
-        # NOTE: I took out the table headers and may add them back in
-        corrections = []
+        else:
+            corrections = []
 
         # ------ start of main while loop ------
 
@@ -336,8 +379,9 @@ class S3Task:
                 stderr=subprocess.PIPE,
             )
 
-            # Assume the shelltask has no errors until proven otherwise
+            # Assume the shelltask has no errors and can retry until proven otherwise
             has_error = False
+            allow_retry = True
 
             # If monitor=True, then we want to supervise this shelltask as it
             # runs. If montors=[m1,m2,...], then we have monitors in place to actually
@@ -371,26 +415,35 @@ class S3Task:
                             # and grab the error if so
                             error = error_handler.check(directory)
                             if error:
-                                # determine if it is_terminating
-                                if error_handler.is_terminating:
+                                # determine if the error handler has a
+                                # custom termination method. If not, use our
+                                # default one from this class.
+                                # The "allow_retry" tells us whether we should
+                                # end the job even if we still have an error.
+                                # For example, our Walltime handler will tell
+                                # us to shutdown and not try anymore -- but
+                                # it won't raise an error in order to allow
+                                # our workup to run.
+                                if not error_handler.has_custom_termination:
                                     # If so, we kill the process but don't apply
                                     # the fix quite yet. That step is done below.
-                                    cls._terminate_job(process, command)
-                                # Otherwise apply the fix and let the shelltask end
-                                # naturally. An example of this is for codes
-                                # where you add a STOP file to get it to
-                                # finish rather than just killing the process.
-                                # This is the special case error_handler that I talk
-                                # about in my notes, where we really want to
-                                # end the shelltask right away.
+                                    allow_retry = cls._terminate_job(
+                                        directory=directory,
+                                        process=process,
+                                        command=command,
+                                    )
+
+                                # Otherwise use the custom termination. An
+                                # example of this is for codes where you add
+                                # a STOP file to get it to finish rather than
+                                # just killing the process. We use this feature
+                                # in our VASP Walltime handler.
                                 else:
-                                    # make a copy of the directory contents and
-                                    # store as an archive within the same directory
-                                    make_error_archive(directory)
-                                    # apply the fix now
-                                    correction = error_handler.correct(directory)
-                                    # record what's been changed
-                                    corrections.append((error_handler.name, correction))
+                                    allow_retry = error_handler.terminate_job(
+                                        directory=directory,
+                                        process=process,
+                                        command=command,
+                                    )
                                 # there's no need to look at the other monitors
                                 # so break from the for-loop. We also don't
                                 # need to monitor the stagedtask anymore since we just
@@ -398,11 +451,14 @@ class S3Task:
                                 # end. So update the while-loop condition.
                                 has_error = True
                                 break
+
                 # ------ end of monitor while loop ------
+
             # Now just wait for the process to finish. Note we use communicate
             # instead of the .wait() method. This is the recommended method
             # when we have stderr=subprocess.PIPE, which we use above.
             output, errors = process.communicate()
+
             # check if the return code is non-zero and thus failed.
             # The 'not has_error' is because terminate() will give a nonzero
             # when a monitor is triggered. We don't want to raise that
@@ -415,17 +471,12 @@ class S3Task:
                 raise NonZeroExitError(
                     f"The command ({command}) failed. The error output was...\n {errors}"
                 )
+
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered above (if there was one).
             # Since the error_handlers are in order of priority, only the first
             # will actually be applied and then we can retry the calc.
             for error_handler in cls.error_handlers:
-
-                # NOTE - The following special case is handled above:
-                #   error_handler.is_monitor and not error_handler.is_terminating
-                # BUG: I can see this being a source of bugs in the process so I
-                # need to reconsider subclassing this special case. For now,
-                # users should have this case at the lowest priority.
 
                 # check if there's an error with this error_handler and grab the
                 # error if there is one
@@ -445,6 +496,7 @@ class S3Task:
                     # break from the error_handler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break
+
             # write the log of corrections to file if requested. This is written
             # as a CSV file format and done every while-loop cycle because it
             # lets the user monitor the calculation and error handlers applied
@@ -456,19 +508,18 @@ class S3Task:
                     columns=["error_handler", "correction_applied"],
                 )
                 # write the dataframe to a csv file
-                data.to_csv(
-                    os.path.join(directory, cls.corrections_filename),
-                    index=False,
-                )
-            # now that we've gone through the error_handlers, let's see if any
-            # non-terminating errors were found (terminating ones would raise
-            # an error above). If there are no errors, we've finished the
-            # calculation and can exit the while loop. Otherwise, just leave
-            # everything where it's at and restart the while-loop with a new
-            # attempt
-            if not has_error:
+                data.to_csv(corrections_filename, index=False)
+
+            # If there are no errors, we've finished the calculation and can
+            # exit the while loop. Alternatively, some "soft" errors (such as
+            # Walltimes) signal us to finish even though there's technically
+            # a problem -- they do this will allow_retry=False. Otherwise,
+            # just leave everything where it's at and restart the
+            # while-loop with a new attempt.
+            if not has_error or not allow_retry:
                 # break the while-loop
                 break
+
         # ------ end of main while loop ------
 
         # make sure the while loop didn't exit because of the correction limit
@@ -482,7 +533,7 @@ class S3Task:
         return corrections
 
     @staticmethod
-    def _terminate_job(process: subprocess.Popen, command: str):
+    def _terminate_job(directory: str, process: subprocess.Popen, command: str):
         """
         Stopping the command we submitted can be a tricky business if we are running
         scripts in parallel (such as using mpirun). Different computers and OSs
@@ -497,12 +548,24 @@ class S3Task:
 
         #### Parameters
 
+        - `directory`:
+            The base directory the calculation is taking place in.
+
         - `process`:
             The process object that will be terminated.
 
         - `command`:
             the command used to launch the process. This is sometimes useful
             when searching for all running processes under this name.
+
+        #### Returns
+
+        - `allow_retry`:
+            if the job should be attempted again when there is a possible fix
+            from the correct() method. Defaults to True. In the case where
+            allow_retry=False and correct() does NOT raise an error, the
+            workup methods will still be called - despite the calculation
+            technically having an error.
         """
 
         # The operating system (Windows, OSX, or Linux) will give us the best guess
@@ -540,6 +603,10 @@ class S3Task:
         # directory, which will make it so they don't have to overwrite all the
         # classes that inherit from this one.
 
+        # By default, termination allows for restarts, so we return a
+        # "allow_retry" value of True.
+        return True
+
     @staticmethod
     def workup(directory: str):
         """
@@ -574,6 +641,7 @@ class S3Task:
         cls,
         directory: str = None,
         command: str = None,
+        is_restart: bool = False,
         **kwargs,
     ):
         """
@@ -593,9 +661,17 @@ class S3Task:
 
          - `command`:
              The command that will be called during execution.
+
          - `directory`:
              The directory to run everything in. This is passed to the ulitities
              function simmate.ulitities.get_directory
+
+        - `is_restart`:
+            whether or not this calculation is a continuation of a previous run
+            (i.e. a restarted calculation). If so, the `setup_restart` will be
+            called instead of the setup method. Extra checks will be made to
+            see if the calculation completed already too.
+
          - `**kwargs`:
              Any extra keywords that should be passed to the setup() method.
 
@@ -615,17 +691,47 @@ class S3Task:
         # establish the working directory
         directory = get_directory(directory)
 
-        # run the setup stage of the task
-        cls.setup(directory=directory, **kwargs)
+        # When handling restarted calculations, we check for the final summary
+        # file and if it exists, we know the calculation has already completed
+        # (and therefore doesn't require a restart). This helps handle nested
+        # workflows where we don't know which task to restart at.
+        summary_filename = os.path.join(directory, "simmate_summary.yaml")
+        is_complete = os.path.exists(summary_filename)
+        is_dir_setup = cls._check_input_files(directory, raise_if_missing=False)
 
-        # make sure proper files are present
-        cls._check_input_files(directory)
+        # run the setup stage of the task, where there is a unique method
+        # if we are picking up from a previously paused run.
+        if (not is_restart and not is_complete) or not is_dir_setup:
+            cls.setup(directory=directory, **kwargs)
+        elif is_restart and not is_complete:
+            cls.setup_restart(directory=directory, **kwargs)
+        else:
+            print("Calculation is already completed. Skipping setup.")
 
-        # run the shelltask and error supervision stages. This method returns
-        # a list of any corrections applied during the run.
-        corrections = cls.execute(directory, command)
+        # now if we have a restart OR have an incomplete calculation that is being
+        # restarted, we can check our files and run the external program
+        if not is_restart or not is_complete:
 
-        # run the workup stage of the task. This is where the data/info is pull
+            # make sure proper files are present
+            cls._check_input_files(directory)
+
+            # run the shelltask and error supervision stages. This method returns
+            # a list of any corrections applied during the run.
+            corrections = cls.execute(directory, command)
+        else:
+            print("Calculation is already completed. Skipping execution.")
+
+            # load the corrections from file for reference
+            corrections_filename = os.path.join(directory, "simmate_corrections.csv")
+            if os.path.exists(corrections_filename):
+                data = pandas.read_csv(corrections_filename)
+                corrections = data.values.tolist()
+            else:
+                corrections = []
+            # OPTIMIZE: this same code is at the start of the execute method.
+            # Consider making it into a utility.
+
+        # run the workup stage of the task. This is where the data/info is pulled
         # out from the calculation and is thus our "result".
         result = cls.workup(directory=directory)
 
@@ -654,7 +760,7 @@ class S3Task:
     @cache
     def to_prefect_task(cls) -> Task:
         """
-        Converts this workflow into a Prefect task
+        Converts this Simmate s3task into a Prefect task
         """
 
         # Build the Task object directly instead of using prefect's @task decorator

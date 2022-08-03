@@ -339,6 +339,7 @@ class Workflow:
         copy_previous_directory: bool = False,
         pre_sanitize_structure: bool = None,
         pre_standardize_structure: bool = None,
+        is_restart: bool = False,
     ):
         """
         The workflow method, which can be overwritten when inheriting from this
@@ -383,6 +384,7 @@ class Workflow:
             copy_previous_directory=copy_previous_directory,
             pre_sanitize_structure=pre_sanitize_structure,
             pre_standardize_structure=pre_standardize_structure,
+            is_restart=is_restart,
         ).result()
 
         result = cls.s3task.run(**parameters_cleaned).result()

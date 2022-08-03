@@ -60,11 +60,24 @@ class AlwaysFailsMonitor(AlwaysFailsHandler):
 
 
 class AlwaysPassesSpecialMonitor(AlwaysPassesMonitor):
-    is_terminating = False
+    has_custom_termination = True
+
+    def terminate_job(self, directory, **kwargs):
+        return True
 
 
-class AlwaysFailsSpecialMonitor(AlwaysFailsMonitor):
-    is_terminating = False
+class AlwaysFailsSpecialMonitorRetry(AlwaysFailsMonitor):
+    has_custom_termination = True
+
+    def terminate_job(self, directory, **kwargs):
+        return True
+
+
+class AlwaysFailsSpecialMonitorNoRetry(AlwaysFailsMonitor):
+    has_custom_termination = True
+
+    def terminate_job(self, directory, **kwargs):
+        return False
 
 
 # ----------------------------------------------------------------------------
@@ -211,13 +224,27 @@ def test_s3task_7(tmpdir):
         command = "echo dummy"
         polling_timestep = 0
         monitor_freq = 2
-        error_handlers = [AlwaysFailsSpecialMonitor()]
+        error_handlers = [AlwaysFailsSpecialMonitorRetry()]
 
     pytest.raises(
         MaxCorrectionsError,
         DummyTask.run_config,
         directory=tmpdir,
     )
+
+
+def test_s3task_8(tmpdir):
+    # check that monitor exits cleanly when retries are not allowed and no
+    # workup method raises an error
+
+    class DummyTask(S3Task):
+        command = "echo dummy"
+        polling_timestep = 0
+        monitor_freq = 2
+        error_handlers = [AlwaysFailsSpecialMonitorRetry()]
+
+    result = DummyTask.run_config(directory=tmpdir)
+    assert len(result["corrections"]) == 1
 
 
 def test_s3task_8(tmpdir):

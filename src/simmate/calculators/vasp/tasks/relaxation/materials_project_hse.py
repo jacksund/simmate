@@ -38,6 +38,7 @@ from simmate.calculators.vasp.error_handlers import (
     PositiveEnergy,
     Frozen,
     LargeSigma,
+    Walltime,
 )
 
 
@@ -142,4 +143,5 @@ class MatprojHSERelaxation(VaspTask):
         PositiveEnergy(),
         Frozen(),
         LargeSigma(),
+        Walltime(),
     ]

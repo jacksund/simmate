@@ -46,6 +46,7 @@ class Diffusion__Vasp__NebFromImages(Workflow):
         # TODO: Can the hop id be inferred from the migration_hop or somewhere
         # else in this context? Maybe even load_input_and_register will use
         # prefect id once it's a Calculation?
+        is_restart: bool = False,
     ):
 
         # Load our input and make a base directory for all other workflows to run
@@ -55,6 +56,7 @@ class Diffusion__Vasp__NebFromImages(Workflow):
             source=source,
             directory=directory,
             command=command,
+            is_restart=is_restart,
             register_run=False,  # temporary fix bc no calc table exists yet
         ).result()
 

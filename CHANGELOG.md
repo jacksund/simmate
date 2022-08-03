@@ -30,6 +30,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - standardize workflow naming. Note this breaks from python naming conventions for classes ([#150](https://github.com/jacksund/simmate/issues/150))
 - dynamically determine `register_kwargs` and rename property to `parameters_to_register`
 - add full-run unittests that call workflows and vasp (without emulation)
+- add walltime error handler that properly shuts down calculations when a SLURM job is about to expire
+- add option to restart workflows from a checkpoint
 
 **Refactors**
 - refactor `start-worker` command to use prefect instead of the experimental django executor

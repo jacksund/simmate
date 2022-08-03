@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
-
 import os
+from abc import ABC, abstractmethod
+import subprocess
 
 
 class ErrorHandler(ABC):
@@ -36,7 +36,7 @@ class ErrorHandler(ABC):
     ```
     """
 
-    is_monitor = False
+    is_monitor: bool = False
     """
     This class property indicates whether the error handler is a monitor,
     i.e., a handler that monitors a job as it is running. If a
@@ -44,33 +44,37 @@ class ErrorHandler(ABC):
     termination signal, the error is then corrected,
     and then the job is restarted. This is useful for catching errors
     that occur early in the run but do not cause immediate failure.
-    Also, is_monitor=True and is_terminating=False is a special case. See the
-    is_terminating description below for why!
     """
 
-    is_terminating = True
+    has_custom_termination: bool = False
     """
-    Whether this handler terminates a job upon error detection. By
-    default, this is True, which means that the current Job will be
-    stopped when an error is found, then the corrections are applied,
-    and job restarted. In some instances, some errors may not need the job to be
-    terminated or may need to wait for some other event to terminate a job.
-    For example, a particular error may require a flag to be set to request
-    a job to terminate gracefully once it finishes its current task. The
-    handler to set the flag should be classified as is_terminating = False to
-    not terminate the job.
+    If this error handler has a custom method to end the job. This is useful in
+    scenarios where we want a calculation to gracefully finish, rather than just
+    killing the running process. For example, some programs allow us to create
+    a STOP file or keyword that tells the program to wrap things up and finish.
+    
+    By default, this is False, which means that the S3Task._terminate_job 
+    method will be used to kill a command.
+    
+    If set to True, make sure the class has a custom `terminate_job` method.
     """
+    # The "allow_retry" tells us whether we should
+    # end the job even if we still have an error.
+    # For example, our Walltime handler will tell
+    # us to shutdown and not try anymore -- but
+    # it won't raise an error in order to allow
+    # our workup to run.
 
     # NOTE: if you are using the default check() method (shown below), then you'll
     # need two extra attributes: filename_to_check and possible_error_messages.
-    filename_to_check = None
+    filename_to_check: str = None
     """
     If you are using the default check() method, this is the file to check for
     errors (using `possible_error_messages`). This should be a string of the 
     filename relative path to main directory.
     """
 
-    possible_error_messages = None
+    possible_error_messages: list[str] = None
     """
     If you are using the default check() method, then this is the list of messages
     to find in the file (filename_to_check). As soon as one of these messages is
@@ -149,3 +153,40 @@ class ErrorHandler(ABC):
         of this class.
         """
         return self.__class__.__name__
+
+    def terminate_job(directory: str, process: subprocess.Popen, command: str):
+        """
+        Signals for the end of a job or forces the end of the job. This method
+        will only be used if `has_custom_termination` is set to True. Otherwise,
+        the S3Task will handle job termination. Higher level features always
+        pass three parameters (directory, process, and command) to help with
+        different scenarios needed to end a job -- but it is optional to use
+        them (if you don't make sure to include **kwargs though).
+
+        #### Parameters
+
+        - `directory`:
+            The base directory the calculation is taking place in.
+
+        - `process`:
+            The process object that will be terminated.
+
+        - `command`:
+            the command used to launch the process. This is sometimes useful
+            when searching for all running processes under this name.
+
+        #### Returns
+
+        - `allow_retry`:
+            if the job should be attempted again when there is a possible fix
+            from the correct() method. Defaults to True. In the case where
+            allow_retry=False and correct() does NOT raise an error, the
+            workup methods will still be called - despite the calculation
+            technically having an error.
+
+        """
+        # by default, we raise an error to prevent incorrect usage.
+        raise NotImplementedError(
+            "This error handler is missing a terminate_job method even though"
+            " has_custom_termination=True."
+        )

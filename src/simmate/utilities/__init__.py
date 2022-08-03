@@ -7,6 +7,7 @@ from .files import (
     make_error_archive,
     archive_old_runs,
     empty_directory,
+    copy_directory,
 )
 from .other import (
     get_conda_env,

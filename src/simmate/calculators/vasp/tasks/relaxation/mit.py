@@ -38,6 +38,7 @@ from simmate.calculators.vasp.error_handlers import (
     PositiveEnergy,
     Frozen,
     LargeSigma,
+    Walltime,
 )
 
 
@@ -230,4 +231,5 @@ class MITRelaxation(VaspTask):
         PositiveEnergy(),
         Frozen(),
         LargeSigma(),
+        Walltime(),
     ]

@@ -38,3 +38,4 @@ from .rhosyg import Rhosyg
 from .posmap import Posmap
 from .point_group import PointGroup
 from .symprec_noise import SymprecNoise
+from .walltime import Walltime
