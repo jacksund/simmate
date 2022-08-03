@@ -1,3 +1,4 @@
+blank_issues_enabled: true
 contact_links:
   - name: Discussions page
     url: https://github.com/jacksund/simmate/discussions
