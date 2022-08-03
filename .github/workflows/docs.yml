@@ -9,7 +9,7 @@ name: api-docs
 on:
   push:
     branches:
-      - update-pdoc  # !!! switch to main for merging
+      - main
 # TODO: switch to releases
 # on:
 #   release:
