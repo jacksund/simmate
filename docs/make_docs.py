@@ -11,7 +11,7 @@ import pdoc
 
 import django
 
-# grab current working directory. This should be the main repo dir
+# grab current directory of this file. This is also where we want to write the output.
 here = Path(__file__).parent
 
 if __name__ == "__main__":
@@ -44,6 +44,6 @@ if __name__ == "__main__":
     # Now generate all documentation
     all_docs = pdoc.pdoc(
         "../src/simmate",
-        output_directory=here / "docs",
+        output_directory=here,
         format="html",
     )
