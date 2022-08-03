@@ -35,7 +35,7 @@ jobs:
       # build your documentation into docs/.
       # Note, we use a custom build script for pdoc itself, but ideally you 
       # just run `pdoc -o docs/ ...` here.
-      - run: docs/make_docs.py
+      - run: python docs/make_docs.py
       # !!! BUG: This line fails due to permission error
       
       # upload the docs/ directory (which now has all the html files) as an artifact
