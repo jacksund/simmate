@@ -5,8 +5,6 @@ name: Bug report
 description: Report any errors or problems with your example test case and/or full error messages.
 labels: 'bug'
 body:
-
-
   - type: markdown
     attributes:
       value: "
@@ -18,24 +16,18 @@ If you have a question about getting started or how a feature works, please repo
 If you indeed have a bug, it helps to include things like the structure you used, the code, & input files while completing this form. For the code, try not to add long scripts if the error is only happening in one small part of it. Instead, try to generate your issue/error with as little code as possible or even using a illustrative example.
 
 "
-
-
   - type: textarea
     attributes:
       label: Describe the bug
       description: A clear and concise description of what the bug is.
     validations:
       required: true
-
-
   - type: textarea
     attributes:
       label: To Reproduce
       description: "
 Provide your [Minimal, Complete, and Verifiable](https://stackoverflow.com/help/mcve) example here.
       placeholder: "# Insert code here"
-
-
   - type: textarea
     attributes:
       label: Error
@@ -48,7 +40,6 @@ Provide your [Minimal, Complete, and Verifiable](https://stackoverflow.com/help/
 # You can also use coloring for "bash", "yaml", etc. depending on where your error came from.
 ```
 "
-
   - type: textarea
     attributes:
       label: Versions
@@ -56,14 +47,10 @@ Provide your [Minimal, Complete, and Verifiable](https://stackoverflow.com/help/
         - Operating System:
         - Python version:
         - Simmate version:
-
-
   - type: textarea
     attributes:
       label: Additional details
       description: Add any other context about the problem here. If you have a suggested fix, you can include it here.
-
-
   - type: markdown
     attributes:
       value: "**Thank you for using our software and helping us improve it!!**"
