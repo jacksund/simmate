@@ -99,7 +99,7 @@ def test_s3task_methods():
         task = DummyTask.run()
         return task.result()
 
-    state = test()
+    state = test(return_state=True)
     result = state.result()
 
     assert state.is_completed()
