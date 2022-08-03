@@ -1,0 +1,31 @@
+# docs https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+
+name: ⭐ New feature request
+description: Propose a new feature or an enhancement
+labels: 'enhancement'
+body:
+      
+  - type: textarea
+    attributes:
+      label: Describe the desired feature
+      description: A clear and concise description of what new feature or behavior you would like to see
+
+  - type: textarea
+    attributes:
+      label: Current behavior and/or alternatives
+      description: A clear and concise description of any alternative solutions or features you have considered. How would you currently do this?
+
+  - type: textarea
+    attributes:
+      label: Example Use
+      description: Provide an example or description of how this would help users. 
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Provide additional context about the use case here.
+
+  - type: markdown
+    attributes:
+      value: Thank you for using our software and helping us improve it!!
