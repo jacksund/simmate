@@ -177,7 +177,7 @@
                             </div>
                             <div id="Zbrent.is_monitor" class="classattr">
                                 <div class="attr variable">
-            <span class="name">is_monitor</span><span class="default_value"> = True</span>
+            <span class="name">is_monitor</span><span class="annotation">: bool</span><span class="default_value"> = True</span>
 
         
     </div>
@@ -188,16 +188,14 @@ i.e., a handler that monitors a job as it is running. If a
 monitor-type handler notices an error, the job will be sent a
 termination signal, the error is then corrected,
 and then the job is restarted. This is useful for catching errors
-that occur early in the run but do not cause immediate failure.
-Also, is_monitor=True and is_terminating=False is a special case. See the
-is_terminating description below for why!</p>
+that occur early in the run but do not cause immediate failure.</p>
 </div>
 
 
                             </div>
                             <div id="Zbrent.filename_to_check" class="classattr">
                                 <div class="attr variable">
-            <span class="name">filename_to_check</span><span class="default_value"> = &#39;vasp.out&#39;</span>
+            <span class="name">filename_to_check</span><span class="annotation">: str</span><span class="default_value"> = &#39;vasp.out&#39;</span>
 
         
     </div>
@@ -212,7 +210,7 @@ filename relative path to main directory.</p>
                             </div>
                             <div id="Zbrent.possible_error_messages" class="classattr">
                                 <div class="attr variable">
-            <span class="name">possible_error_messages</span><span class="default_value"> = [&#39;ZBRENT: fatal internal in&#39;, &#39;ZBRENT: fatal error in bracketing&#39;]</span>
+            <span class="name">possible_error_messages</span><span class="annotation">: list[str]</span><span class="default_value"> = [&#39;ZBRENT: fatal internal in&#39;, &#39;ZBRENT: fatal error in bracketing&#39;]</span>
 
         
     </div>
@@ -267,9 +265,10 @@ error. It then returns the fix or list of fixes made.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="../../../workflow_engine/error_handler.html#ErrorHandler">simmate.workflow_engine.error_handler.ErrorHandler</a></dt>
-                                <dd id="Zbrent.is_terminating" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.is_terminating">is_terminating</a></dd>
+                                <dd id="Zbrent.has_custom_termination" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.has_custom_termination">has_custom_termination</a></dd>
                 <dd id="Zbrent.check" class="function"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.check">check</a></dd>
                 <dd id="Zbrent.name" class="variable"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.name">name</a></dd>
+                <dd id="Zbrent.terminate_job" class="function"><a href="../../../workflow_engine/error_handler.html#ErrorHandler.terminate_job">terminate_job</a></dd>
 
             </div>
                                 </dl>

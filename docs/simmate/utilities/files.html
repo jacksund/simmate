@@ -35,6 +35,9 @@
                     <a class="function" href="#get_directory">get_directory</a>
             </li>
             <li>
+                    <a class="function" href="#copy_directory">copy_directory</a>
+            </li>
+            <li>
                     <a class="function" href="#make_archive">make_archive</a>
             </li>
             <li>
@@ -131,138 +134,219 @@
 </span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
 </span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>
 </span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="k">def</span> <span class="nf">make_archive</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">    Compresses the directory to a zip file of the same name. After compressing,</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">    it then deletes the original directory.</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="sd">    #### Parameters</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">    - `directory`:</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">        Path to the folder that should be archived</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>    <span class="c1"># This wraps shutil.make_archive to change the default parameters. Normally,</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>    <span class="c1"># it writes the archive in the working directory, but we update it to use the</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>    <span class="c1"># the same directory as the folder being archived. The format is also set</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>    <span class="c1"># to zip.</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">make_archive</span><span class="p">(</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>        <span class="c1"># By default I choose within the current directory and save</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>        <span class="c1"># it as the same name of the directory (+ zip ending)</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>        <span class="n">base_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>        <span class="c1"># format to use switch to gztar after testing</span>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>        <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;zip&quot;</span><span class="p">,</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>        <span class="c1"># full path to up tp directory that will be archived</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>        <span class="n">root_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>        <span class="c1"># directory within root_directory to archive</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>        <span class="n">base_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="p">)</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="c1"># now remove the directory we just archived</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="k">def</span> <span class="nf">copy_directory</span><span class="p">(</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>    <span class="n">directory_old</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>    <span class="n">directory_new</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>    <span class="n">ignore_simmate_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">    Given an old directory, copies all of it&#39;s contents over to a new one.</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">    Optionally, you can avoid copying any simmate_* files and archives within</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">    that original directory to save on disk space.</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">    #### Parameters</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">    - `directory_old`:</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">        Name of the directory to be copied over. Must exist.</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">    - `directory_new`:</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">        Name of the new directory (optional). This will be passed to the</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">        `get_directory` utility.</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">    - `ignore_simmate_files`:</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">        Whether to ignore simmate_* files when copying over. Defaults to False.</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a><span class="sd">    #### Returns</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a><span class="sd">    - `directory`:</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a><span class="sd">        The path to the new directory as a string</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a><span class="k">def</span> <span class="nf">make_error_archive</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a><span class="sd">    Compresses the directory to a zip file and stores the new archive within the</span>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a><span class="sd">    original. This utility is meant for creating archives within the directory</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a><span class="sd">    of a failed calculation, so the new archive will be named something like</span>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a><span class="sd">    `simmate_attempt_01.zip`, where the number is automatically determined. When</span>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a><span class="sd">    archiving the folder, all &quot;simmate_*&quot; files within the directory are ignore</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a><span class="sd">    (this is includes earlier simmate_attempt_*.zip archives).</span>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a><span class="sd">    #### Parameters</span>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="sd">    - `directory`:</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="sd">        Path to the folder that should be archived</span>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>    <span class="c1"># check the directory and see how many other &quot;simmate_attempt_*.zip&quot; files</span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>    <span class="c1"># already exist. Our archive number will be based off of this.</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>    <span class="n">count</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>        <span class="nb">len</span><span class="p">([</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;simmate_attempt_&quot;</span><span class="p">)])</span> <span class="o">+</span> <span class="mi">1</span>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>    <span class="p">)</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>    <span class="n">count_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>    <span class="n">base_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;simmate_attempt_</span><span class="si">{</span><span class="n">count_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>    <span class="c1"># Before we make the archive, we want to avoid also storing other simmate</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>    <span class="c1"># archives and files within this new archive. We therefore copy all files</span>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>    <span class="c1"># that do NOT start with &quot;simmate_&quot; over into a folder and then archive it.</span>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>        <span class="n">src</span><span class="o">=</span><span class="n">full_path</span><span class="p">,</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>        <span class="n">dst</span><span class="o">=</span><span class="n">base_name</span><span class="p">,</span>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>        <span class="n">ignore</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">ignore_patterns</span><span class="p">(</span><span class="s2">&quot;simmate_*&quot;</span><span class="p">),</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>    <span class="p">)</span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>    <span class="c1"># now convert the copied files to a new archive</span>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>    <span class="n">make_archive</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="k">def</span> <span class="nf">archive_old_runs</span><span class="p">(</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>    <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>    <span class="n">time_cutoff</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">7</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>  <span class="c1"># equal to 3 weeks</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="p">):</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a><span class="sd">    Goes through a given directory and finds all &quot;simmate-task-&quot; folders that</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="sd">    are older than a given time cutoff. Each of these folders is then compressed</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a><span class="sd">    to a zip file and then the original folder is removed.</span>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a><span class="sd">    #### Parameters</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>    <span class="c1"># Start by creating a new directory or grabbing the one given.</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="n">directory_new_cleaned</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">directory_new</span><span class="p">)</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>    <span class="c1"># First check if the previous directory exists. There are several</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>    <span class="c1"># possibilities that we need to check for:</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>    <span class="c1">#   1. directory exists on the same file system and can be found</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="c1">#   2. directory exists on the same file system but is now an archive</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>    <span class="c1">#   3. directory/archive is on another file system (requires ssh to access)</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>    <span class="c1">#   4. directory was deleted and unavailable</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>    <span class="c1"># When copying over the directory, we ignore any `simmate_` files</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>    <span class="c1"># that correspond to metadata/results/corrections/etc.</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory_old</span><span class="p">):</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>        <span class="c1"># copy the old directory to the new one</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>            <span class="n">src</span><span class="o">=</span><span class="n">directory_old</span><span class="p">,</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>            <span class="n">dst</span><span class="o">=</span><span class="n">directory_new_cleaned</span><span class="p">,</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>            <span class="n">ignore</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">ignore_patterns</span><span class="p">(</span><span class="s2">&quot;simmate_*&quot;</span><span class="p">)</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>            <span class="k">if</span> <span class="n">ignore_simmate_files</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>            <span class="n">dirs_exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>        <span class="p">)</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory_old</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">):</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>        <span class="c1"># unpack the old archive</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>            <span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory_old</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">,</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>            <span class="n">extract_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory_old</span><span class="p">),</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>        <span class="p">)</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>        <span class="c1"># copy the old directory to the new one</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>            <span class="n">src</span><span class="o">=</span><span class="n">directory_old</span><span class="p">,</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>            <span class="n">dst</span><span class="o">=</span><span class="n">directory_new_cleaned</span><span class="p">,</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>            <span class="n">ignore</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">ignore_patterns</span><span class="p">(</span><span class="s2">&quot;simmate_*&quot;</span><span class="p">)</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>            <span class="k">if</span> <span class="n">ignore_simmate_files</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>            <span class="n">dirs_exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>        <span class="p">)</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>        <span class="c1"># Then remove the unpacked archive now that we copied it.</span>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>        <span class="c1"># This leaves the original archive behind and unaltered too.</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">directory_old</span><span class="p">)</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>            <span class="s2">&quot;Unable to locate the previous directory to copy. Make sure the &quot;</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>            <span class="s2">&quot;past directory is located on the same file system. Directory that &quot;</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>            <span class="sa">f</span><span class="s2">&quot;couldn&#39;t be found was... </span><span class="si">{</span><span class="n">directory_old</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>        <span class="p">)</span>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>    <span class="c1"># TODO: for possibility 3, I could implement automatic copying with</span>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>    <span class="c1"># the &quot;fabric&quot; python package (uses ssh). I&#39;d also need to store</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>    <span class="c1"># filesystem names (e.g. &quot;WarWulf&quot;) to know where to connect.</span>
 </span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a><span class="sd">    - `directory`:</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a><span class="sd">        base directory that will contain folders to archive. Defaults to the</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a><span class="sd">        working directory.</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a><span class="sd">    - `time_cutoff`:</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a><span class="sd">        The time (in seconds) required to determine whether a folder is old or not.</span>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="sd">        If the folder is considered old, then it will be archived and then deleted.</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">        The default is 3 weeks.</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>    <span class="k">return</span> <span class="n">directory_new_cleaned</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a><span class="k">def</span> <span class="nf">make_archive</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="sd">    Compresses the directory to a zip file of the same name. After compressing,</span>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">    it then deletes the original directory.</span>
 </span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>    <span class="c1"># load the full path to the desired directory</span>
-</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>    <span class="n">directory</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>
-</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>    <span class="c1"># grab all files/folders in this directory and then limit this list to those</span>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="c1"># that are...</span>
-</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>    <span class="c1">#   1. folders</span>
-</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>    <span class="c1">#   2. start with &quot;simmate-task-&quot;</span>
-</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>    <span class="c1">#   3. haven&#39;t been modified for at least time_cutoff</span>
-</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>    <span class="n">foldernames</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>    <span class="k">for</span> <span class="n">foldername</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>        <span class="n">foldername_full</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">foldername</span><span class="p">)</span>
-</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>        <span class="k">if</span> <span class="p">(</span>
-</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span>
-</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>            <span class="ow">and</span> <span class="s2">&quot;simmate-task-&quot;</span> <span class="ow">in</span> <span class="n">foldername</span>
-</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>            <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_cutoff</span>
-</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>        <span class="p">):</span>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>            <span class="n">foldernames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span>
-</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>
-</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>    <span class="c1"># now go through this list and archive the folders that met the criteria</span>
-</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>    <span class="p">[</span><span class="n">make_archive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">foldernames</span><span class="p">]</span>
-</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">    #### Parameters</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a><span class="sd">    - `directory`:</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="sd">        Path to the folder that should be archived</span>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="c1"># This wraps shutil.make_archive to change the default parameters. Normally,</span>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>    <span class="c1"># it writes the archive in the working directory, but we update it to use the</span>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>    <span class="c1"># the same directory as the folder being archived. The format is also set</span>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>    <span class="c1"># to zip.</span>
+</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">make_archive</span><span class="p">(</span>
+</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>        <span class="c1"># By default I choose within the current directory and save</span>
+</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>        <span class="c1"># it as the same name of the directory (+ zip ending)</span>
+</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>        <span class="n">base_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
+</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>        <span class="c1"># format to use switch to gztar after testing</span>
+</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>        <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;zip&quot;</span><span class="p">,</span>
+</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>        <span class="c1"># full path to up tp directory that will be archived</span>
+</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>        <span class="n">root_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>        <span class="c1"># directory within root_directory to archive</span>
+</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>        <span class="n">base_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
+</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>    <span class="p">)</span>
+</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>    <span class="c1"># now remove the directory we just archived</span>
+</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
 </span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a>
-</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a><span class="k">def</span> <span class="nf">empty_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">files_to_keep</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]):</span>
-</span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a><span class="sd">    Deletes all files and folders within a directory, except for those provided</span>
-</span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a><span class="sd">    to the files_to_keep parameter.</span>
-</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a>
-</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a><span class="sd">    #### Parameters</span>
-</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a>
-</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a><span class="sd">    - `directory`:</span>
-</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="sd">        base directory that should be emptied</span>
-</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a><span class="sd">    - `files_to_keep`:</span>
-</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a><span class="sd">        A list of file and folder names within the base directory that should</span>
-</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a><span class="sd">        not be deleted. The default is [].</span>
-</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a>    <span class="c1"># grab all of the files and folders inside the listed directory</span>
-</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a>    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a>        <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a>        <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">files_to_keep</span><span class="p">:</span>
-</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a>            <span class="c1"># check if we have a folder or a file.</span>
-</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a>            <span class="c1"># Folders we delete with shutil and files with the os module</span>
-</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a>            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
-</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a>                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>  <span class="c1"># ignore_errors=False</span>
-</span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a>                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
+</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a>
+</span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a><span class="k">def</span> <span class="nf">make_error_archive</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a><span class="sd">    Compresses the directory to a zip file and stores the new archive within the</span>
+</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a><span class="sd">    original. This utility is meant for creating archives within the directory</span>
+</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a><span class="sd">    of a failed calculation, so the new archive will be named something like</span>
+</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a><span class="sd">    `simmate_attempt_01.zip`, where the number is automatically determined. When</span>
+</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a><span class="sd">    archiving the folder, all &quot;simmate_*&quot; files within the directory are ignore</span>
+</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="sd">    (this is includes earlier simmate_attempt_*.zip archives).</span>
+</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a>
+</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a><span class="sd">    #### Parameters</span>
+</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>
+</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a><span class="sd">    - `directory`:</span>
+</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a><span class="sd">        Path to the folder that should be archived</span>
+</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a>
+</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a>    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a>
+</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a>    <span class="c1"># check the directory and see how many other &quot;simmate_attempt_*.zip&quot; files</span>
+</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a>    <span class="c1"># already exist. Our archive number will be based off of this.</span>
+</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a>    <span class="n">count</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a>        <span class="nb">len</span><span class="p">([</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;simmate_attempt_&quot;</span><span class="p">)])</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a>    <span class="p">)</span>
+</span><span id="L-196"><a href="#L-196"><span class="linenos">196</span></a>    <span class="n">count_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span id="L-197"><a href="#L-197"><span class="linenos">197</span></a>    <span class="n">base_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;simmate_attempt_</span><span class="si">{</span><span class="n">count_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="L-198"><a href="#L-198"><span class="linenos">198</span></a>
+</span><span id="L-199"><a href="#L-199"><span class="linenos">199</span></a>    <span class="c1"># Before we make the archive, we want to avoid also storing other simmate</span>
+</span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a>    <span class="c1"># archives and files within this new archive. We therefore copy all files</span>
+</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a>    <span class="c1"># that do NOT start with &quot;simmate_&quot; over into a folder and then archive it.</span>
+</span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
+</span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a>        <span class="n">src</span><span class="o">=</span><span class="n">full_path</span><span class="p">,</span>
+</span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a>        <span class="n">dst</span><span class="o">=</span><span class="n">base_name</span><span class="p">,</span>
+</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a>        <span class="n">ignore</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">ignore_patterns</span><span class="p">(</span><span class="s2">&quot;simmate_*&quot;</span><span class="p">),</span>
+</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a>    <span class="p">)</span>
+</span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a>
+</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a>    <span class="c1"># now convert the copied files to a new archive</span>
+</span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a>    <span class="n">make_archive</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+</span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a>
+</span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a>
+</span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a><span class="k">def</span> <span class="nf">archive_old_runs</span><span class="p">(</span>
+</span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a>    <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a>    <span class="n">time_cutoff</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">7</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>  <span class="c1"># equal to 3 weeks</span>
+</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a><span class="p">):</span>
+</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a><span class="sd">    Goes through a given directory and finds all &quot;simmate-task-&quot; folders that</span>
+</span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a><span class="sd">    are older than a given time cutoff. Each of these folders is then compressed</span>
+</span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a><span class="sd">    to a zip file and then the original folder is removed.</span>
+</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a>
+</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a><span class="sd">    #### Parameters</span>
+</span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a>
+</span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a><span class="sd">    - `directory`:</span>
+</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a><span class="sd">        base directory that will contain folders to archive. Defaults to the</span>
+</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a><span class="sd">        working directory.</span>
+</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a><span class="sd">    - `time_cutoff`:</span>
+</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a><span class="sd">        The time (in seconds) required to determine whether a folder is old or not.</span>
+</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a><span class="sd">        If the folder is considered old, then it will be archived and then deleted.</span>
+</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a><span class="sd">        The default is 3 weeks.</span>
+</span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a>
+</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a>    <span class="c1"># load the full path to the desired directory</span>
+</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a>    <span class="n">directory</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a>
+</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a>    <span class="c1"># grab all files/folders in this directory and then limit this list to those</span>
+</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a>    <span class="c1"># that are...</span>
+</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a>    <span class="c1">#   1. folders</span>
+</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a>    <span class="c1">#   2. start with &quot;simmate-task-&quot;</span>
+</span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a>    <span class="c1">#   3. haven&#39;t been modified for at least time_cutoff</span>
+</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a>    <span class="n">foldernames</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a>    <span class="k">for</span> <span class="n">foldername</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a>        <span class="n">foldername_full</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">foldername</span><span class="p">)</span>
+</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a>        <span class="k">if</span> <span class="p">(</span>
+</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span>
+</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a>            <span class="ow">and</span> <span class="s2">&quot;simmate-task-&quot;</span> <span class="ow">in</span> <span class="n">foldername</span>
+</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a>            <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_cutoff</span>
+</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a>        <span class="p">):</span>
+</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a>            <span class="n">foldernames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span>
+</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a>
+</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a>    <span class="c1"># now go through this list and archive the folders that met the criteria</span>
+</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a>    <span class="p">[</span><span class="n">make_archive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">foldernames</span><span class="p">]</span>
+</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a>
+</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a>
+</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a><span class="k">def</span> <span class="nf">empty_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">files_to_keep</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]):</span>
+</span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a><span class="sd">    Deletes all files and folders within a directory, except for those provided</span>
+</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a><span class="sd">    to the files_to_keep parameter.</span>
+</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a>
+</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a><span class="sd">    #### Parameters</span>
+</span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a>
+</span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a><span class="sd">    - `directory`:</span>
+</span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a><span class="sd">        base directory that should be emptied</span>
+</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a><span class="sd">    - `files_to_keep`:</span>
+</span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a><span class="sd">        A list of file and folder names within the base directory that should</span>
+</span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a><span class="sd">        not be deleted. The default is [].</span>
+</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-267"><a href="#L-267"><span class="linenos">267</span></a>    <span class="c1"># grab all of the files and folders inside the listed directory</span>
+</span><span id="L-268"><a href="#L-268"><span class="linenos">268</span></a>    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+</span><span id="L-269"><a href="#L-269"><span class="linenos">269</span></a>        <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+</span><span id="L-270"><a href="#L-270"><span class="linenos">270</span></a>        <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">files_to_keep</span><span class="p">:</span>
+</span><span id="L-271"><a href="#L-271"><span class="linenos">271</span></a>            <span class="c1"># check if we have a folder or a file.</span>
+</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a>            <span class="c1"># Folders we delete with shutil and files with the os module</span>
+</span><span id="L-273"><a href="#L-273"><span class="linenos">273</span></a>            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+</span><span id="L-274"><a href="#L-274"><span class="linenos">274</span></a>                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>  <span class="c1"># ignore_errors=False</span>
+</span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a>            <span class="k">else</span><span class="p">:</span>
+</span><span id="L-276"><a href="#L-276"><span class="linenos">276</span></a>                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -367,6 +451,125 @@ The path to the initialized directory as a string</li>
 
 
                 </section>
+                <section id="copy_directory">
+                            <input id="copy_directory-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">copy_directory</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">directory_old</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">directory_new</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">ignore_simmate_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+
+                <label class="view-source-button" for="copy_directory-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#copy_directory"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="copy_directory-65"><a href="#copy_directory-65"><span class="linenos"> 65</span></a><span class="k">def</span> <span class="nf">copy_directory</span><span class="p">(</span>
+</span><span id="copy_directory-66"><a href="#copy_directory-66"><span class="linenos"> 66</span></a>    <span class="n">directory_old</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="copy_directory-67"><a href="#copy_directory-67"><span class="linenos"> 67</span></a>    <span class="n">directory_new</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="copy_directory-68"><a href="#copy_directory-68"><span class="linenos"> 68</span></a>    <span class="n">ignore_simmate_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="copy_directory-69"><a href="#copy_directory-69"><span class="linenos"> 69</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="copy_directory-70"><a href="#copy_directory-70"><span class="linenos"> 70</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="copy_directory-71"><a href="#copy_directory-71"><span class="linenos"> 71</span></a><span class="sd">    Given an old directory, copies all of it&#39;s contents over to a new one.</span>
+</span><span id="copy_directory-72"><a href="#copy_directory-72"><span class="linenos"> 72</span></a><span class="sd">    Optionally, you can avoid copying any simmate_* files and archives within</span>
+</span><span id="copy_directory-73"><a href="#copy_directory-73"><span class="linenos"> 73</span></a><span class="sd">    that original directory to save on disk space.</span>
+</span><span id="copy_directory-74"><a href="#copy_directory-74"><span class="linenos"> 74</span></a>
+</span><span id="copy_directory-75"><a href="#copy_directory-75"><span class="linenos"> 75</span></a><span class="sd">    #### Parameters</span>
+</span><span id="copy_directory-76"><a href="#copy_directory-76"><span class="linenos"> 76</span></a>
+</span><span id="copy_directory-77"><a href="#copy_directory-77"><span class="linenos"> 77</span></a><span class="sd">    - `directory_old`:</span>
+</span><span id="copy_directory-78"><a href="#copy_directory-78"><span class="linenos"> 78</span></a><span class="sd">        Name of the directory to be copied over. Must exist.</span>
+</span><span id="copy_directory-79"><a href="#copy_directory-79"><span class="linenos"> 79</span></a>
+</span><span id="copy_directory-80"><a href="#copy_directory-80"><span class="linenos"> 80</span></a><span class="sd">    - `directory_new`:</span>
+</span><span id="copy_directory-81"><a href="#copy_directory-81"><span class="linenos"> 81</span></a><span class="sd">        Name of the new directory (optional). This will be passed to the</span>
+</span><span id="copy_directory-82"><a href="#copy_directory-82"><span class="linenos"> 82</span></a><span class="sd">        `get_directory` utility.</span>
+</span><span id="copy_directory-83"><a href="#copy_directory-83"><span class="linenos"> 83</span></a>
+</span><span id="copy_directory-84"><a href="#copy_directory-84"><span class="linenos"> 84</span></a><span class="sd">    - `ignore_simmate_files`:</span>
+</span><span id="copy_directory-85"><a href="#copy_directory-85"><span class="linenos"> 85</span></a><span class="sd">        Whether to ignore simmate_* files when copying over. Defaults to False.</span>
+</span><span id="copy_directory-86"><a href="#copy_directory-86"><span class="linenos"> 86</span></a>
+</span><span id="copy_directory-87"><a href="#copy_directory-87"><span class="linenos"> 87</span></a><span class="sd">    #### Returns</span>
+</span><span id="copy_directory-88"><a href="#copy_directory-88"><span class="linenos"> 88</span></a>
+</span><span id="copy_directory-89"><a href="#copy_directory-89"><span class="linenos"> 89</span></a><span class="sd">    - `directory`:</span>
+</span><span id="copy_directory-90"><a href="#copy_directory-90"><span class="linenos"> 90</span></a><span class="sd">        The path to the new directory as a string</span>
+</span><span id="copy_directory-91"><a href="#copy_directory-91"><span class="linenos"> 91</span></a>
+</span><span id="copy_directory-92"><a href="#copy_directory-92"><span class="linenos"> 92</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="copy_directory-93"><a href="#copy_directory-93"><span class="linenos"> 93</span></a>
+</span><span id="copy_directory-94"><a href="#copy_directory-94"><span class="linenos"> 94</span></a>    <span class="c1"># Start by creating a new directory or grabbing the one given.</span>
+</span><span id="copy_directory-95"><a href="#copy_directory-95"><span class="linenos"> 95</span></a>    <span class="n">directory_new_cleaned</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">directory_new</span><span class="p">)</span>
+</span><span id="copy_directory-96"><a href="#copy_directory-96"><span class="linenos"> 96</span></a>
+</span><span id="copy_directory-97"><a href="#copy_directory-97"><span class="linenos"> 97</span></a>    <span class="c1"># First check if the previous directory exists. There are several</span>
+</span><span id="copy_directory-98"><a href="#copy_directory-98"><span class="linenos"> 98</span></a>    <span class="c1"># possibilities that we need to check for:</span>
+</span><span id="copy_directory-99"><a href="#copy_directory-99"><span class="linenos"> 99</span></a>    <span class="c1">#   1. directory exists on the same file system and can be found</span>
+</span><span id="copy_directory-100"><a href="#copy_directory-100"><span class="linenos">100</span></a>    <span class="c1">#   2. directory exists on the same file system but is now an archive</span>
+</span><span id="copy_directory-101"><a href="#copy_directory-101"><span class="linenos">101</span></a>    <span class="c1">#   3. directory/archive is on another file system (requires ssh to access)</span>
+</span><span id="copy_directory-102"><a href="#copy_directory-102"><span class="linenos">102</span></a>    <span class="c1">#   4. directory was deleted and unavailable</span>
+</span><span id="copy_directory-103"><a href="#copy_directory-103"><span class="linenos">103</span></a>    <span class="c1"># When copying over the directory, we ignore any `simmate_` files</span>
+</span><span id="copy_directory-104"><a href="#copy_directory-104"><span class="linenos">104</span></a>    <span class="c1"># that correspond to metadata/results/corrections/etc.</span>
+</span><span id="copy_directory-105"><a href="#copy_directory-105"><span class="linenos">105</span></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory_old</span><span class="p">):</span>
+</span><span id="copy_directory-106"><a href="#copy_directory-106"><span class="linenos">106</span></a>        <span class="c1"># copy the old directory to the new one</span>
+</span><span id="copy_directory-107"><a href="#copy_directory-107"><span class="linenos">107</span></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
+</span><span id="copy_directory-108"><a href="#copy_directory-108"><span class="linenos">108</span></a>            <span class="n">src</span><span class="o">=</span><span class="n">directory_old</span><span class="p">,</span>
+</span><span id="copy_directory-109"><a href="#copy_directory-109"><span class="linenos">109</span></a>            <span class="n">dst</span><span class="o">=</span><span class="n">directory_new_cleaned</span><span class="p">,</span>
+</span><span id="copy_directory-110"><a href="#copy_directory-110"><span class="linenos">110</span></a>            <span class="n">ignore</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">ignore_patterns</span><span class="p">(</span><span class="s2">&quot;simmate_*&quot;</span><span class="p">)</span>
+</span><span id="copy_directory-111"><a href="#copy_directory-111"><span class="linenos">111</span></a>            <span class="k">if</span> <span class="n">ignore_simmate_files</span>
+</span><span id="copy_directory-112"><a href="#copy_directory-112"><span class="linenos">112</span></a>            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="copy_directory-113"><a href="#copy_directory-113"><span class="linenos">113</span></a>            <span class="n">dirs_exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="copy_directory-114"><a href="#copy_directory-114"><span class="linenos">114</span></a>        <span class="p">)</span>
+</span><span id="copy_directory-115"><a href="#copy_directory-115"><span class="linenos">115</span></a>    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory_old</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">):</span>
+</span><span id="copy_directory-116"><a href="#copy_directory-116"><span class="linenos">116</span></a>        <span class="c1"># unpack the old archive</span>
+</span><span id="copy_directory-117"><a href="#copy_directory-117"><span class="linenos">117</span></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span>
+</span><span id="copy_directory-118"><a href="#copy_directory-118"><span class="linenos">118</span></a>            <span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory_old</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">,</span>
+</span><span id="copy_directory-119"><a href="#copy_directory-119"><span class="linenos">119</span></a>            <span class="n">extract_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory_old</span><span class="p">),</span>
+</span><span id="copy_directory-120"><a href="#copy_directory-120"><span class="linenos">120</span></a>        <span class="p">)</span>
+</span><span id="copy_directory-121"><a href="#copy_directory-121"><span class="linenos">121</span></a>        <span class="c1"># copy the old directory to the new one</span>
+</span><span id="copy_directory-122"><a href="#copy_directory-122"><span class="linenos">122</span></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
+</span><span id="copy_directory-123"><a href="#copy_directory-123"><span class="linenos">123</span></a>            <span class="n">src</span><span class="o">=</span><span class="n">directory_old</span><span class="p">,</span>
+</span><span id="copy_directory-124"><a href="#copy_directory-124"><span class="linenos">124</span></a>            <span class="n">dst</span><span class="o">=</span><span class="n">directory_new_cleaned</span><span class="p">,</span>
+</span><span id="copy_directory-125"><a href="#copy_directory-125"><span class="linenos">125</span></a>            <span class="n">ignore</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">ignore_patterns</span><span class="p">(</span><span class="s2">&quot;simmate_*&quot;</span><span class="p">)</span>
+</span><span id="copy_directory-126"><a href="#copy_directory-126"><span class="linenos">126</span></a>            <span class="k">if</span> <span class="n">ignore_simmate_files</span>
+</span><span id="copy_directory-127"><a href="#copy_directory-127"><span class="linenos">127</span></a>            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="copy_directory-128"><a href="#copy_directory-128"><span class="linenos">128</span></a>            <span class="n">dirs_exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="copy_directory-129"><a href="#copy_directory-129"><span class="linenos">129</span></a>        <span class="p">)</span>
+</span><span id="copy_directory-130"><a href="#copy_directory-130"><span class="linenos">130</span></a>        <span class="c1"># Then remove the unpacked archive now that we copied it.</span>
+</span><span id="copy_directory-131"><a href="#copy_directory-131"><span class="linenos">131</span></a>        <span class="c1"># This leaves the original archive behind and unaltered too.</span>
+</span><span id="copy_directory-132"><a href="#copy_directory-132"><span class="linenos">132</span></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">directory_old</span><span class="p">)</span>
+</span><span id="copy_directory-133"><a href="#copy_directory-133"><span class="linenos">133</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="copy_directory-134"><a href="#copy_directory-134"><span class="linenos">134</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+</span><span id="copy_directory-135"><a href="#copy_directory-135"><span class="linenos">135</span></a>            <span class="s2">&quot;Unable to locate the previous directory to copy. Make sure the &quot;</span>
+</span><span id="copy_directory-136"><a href="#copy_directory-136"><span class="linenos">136</span></a>            <span class="s2">&quot;past directory is located on the same file system. Directory that &quot;</span>
+</span><span id="copy_directory-137"><a href="#copy_directory-137"><span class="linenos">137</span></a>            <span class="sa">f</span><span class="s2">&quot;couldn&#39;t be found was... </span><span class="si">{</span><span class="n">directory_old</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="copy_directory-138"><a href="#copy_directory-138"><span class="linenos">138</span></a>        <span class="p">)</span>
+</span><span id="copy_directory-139"><a href="#copy_directory-139"><span class="linenos">139</span></a>    <span class="c1"># TODO: for possibility 3, I could implement automatic copying with</span>
+</span><span id="copy_directory-140"><a href="#copy_directory-140"><span class="linenos">140</span></a>    <span class="c1"># the &quot;fabric&quot; python package (uses ssh). I&#39;d also need to store</span>
+</span><span id="copy_directory-141"><a href="#copy_directory-141"><span class="linenos">141</span></a>    <span class="c1"># filesystem names (e.g. &quot;WarWulf&quot;) to know where to connect.</span>
+</span><span id="copy_directory-142"><a href="#copy_directory-142"><span class="linenos">142</span></a>
+</span><span id="copy_directory-143"><a href="#copy_directory-143"><span class="linenos">143</span></a>    <span class="k">return</span> <span class="n">directory_new_cleaned</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Given an old directory, copies all of it's contents over to a new one.
+Optionally, you can avoid copying any simmate_* files and archives within
+that original directory to save on disk space.</p>
+
+<h4 id="parameters">Parameters</h4>
+
+<ul>
+<li><p><code>directory_old</code>:
+Name of the directory to be copied over. Must exist.</p></li>
+<li><p><code>directory_new</code>:
+Name of the new directory (optional). This will be passed to the
+<code><a href="#get_directory">get_directory</a></code> utility.</p></li>
+<li><p><code>ignore_simmate_files</code>:
+Whether to ignore simmate_* files when copying over. Defaults to False.</p></li>
+</ul>
+
+<h4 id="returns">Returns</h4>
+
+<ul>
+<li><code>directory</code>:
+The path to the new directory as a string</li>
+</ul>
+</div>
+
+
+                </section>
                 <section id="make_archive">
                             <input id="make_archive-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
@@ -378,33 +581,33 @@ The path to the initialized directory as a string</li>
 
     </div>
     <a class="headerlink" href="#make_archive"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="make_archive-65"><a href="#make_archive-65"><span class="linenos">65</span></a><span class="k">def</span> <span class="nf">make_archive</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="make_archive-66"><a href="#make_archive-66"><span class="linenos">66</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="make_archive-67"><a href="#make_archive-67"><span class="linenos">67</span></a><span class="sd">    Compresses the directory to a zip file of the same name. After compressing,</span>
-</span><span id="make_archive-68"><a href="#make_archive-68"><span class="linenos">68</span></a><span class="sd">    it then deletes the original directory.</span>
-</span><span id="make_archive-69"><a href="#make_archive-69"><span class="linenos">69</span></a>
-</span><span id="make_archive-70"><a href="#make_archive-70"><span class="linenos">70</span></a><span class="sd">    #### Parameters</span>
-</span><span id="make_archive-71"><a href="#make_archive-71"><span class="linenos">71</span></a>
-</span><span id="make_archive-72"><a href="#make_archive-72"><span class="linenos">72</span></a><span class="sd">    - `directory`:</span>
-</span><span id="make_archive-73"><a href="#make_archive-73"><span class="linenos">73</span></a><span class="sd">        Path to the folder that should be archived</span>
-</span><span id="make_archive-74"><a href="#make_archive-74"><span class="linenos">74</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="make_archive-75"><a href="#make_archive-75"><span class="linenos">75</span></a>    <span class="c1"># This wraps shutil.make_archive to change the default parameters. Normally,</span>
-</span><span id="make_archive-76"><a href="#make_archive-76"><span class="linenos">76</span></a>    <span class="c1"># it writes the archive in the working directory, but we update it to use the</span>
-</span><span id="make_archive-77"><a href="#make_archive-77"><span class="linenos">77</span></a>    <span class="c1"># the same directory as the folder being archived. The format is also set</span>
-</span><span id="make_archive-78"><a href="#make_archive-78"><span class="linenos">78</span></a>    <span class="c1"># to zip.</span>
-</span><span id="make_archive-79"><a href="#make_archive-79"><span class="linenos">79</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">make_archive</span><span class="p">(</span>
-</span><span id="make_archive-80"><a href="#make_archive-80"><span class="linenos">80</span></a>        <span class="c1"># By default I choose within the current directory and save</span>
-</span><span id="make_archive-81"><a href="#make_archive-81"><span class="linenos">81</span></a>        <span class="c1"># it as the same name of the directory (+ zip ending)</span>
-</span><span id="make_archive-82"><a href="#make_archive-82"><span class="linenos">82</span></a>        <span class="n">base_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
-</span><span id="make_archive-83"><a href="#make_archive-83"><span class="linenos">83</span></a>        <span class="c1"># format to use switch to gztar after testing</span>
-</span><span id="make_archive-84"><a href="#make_archive-84"><span class="linenos">84</span></a>        <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;zip&quot;</span><span class="p">,</span>
-</span><span id="make_archive-85"><a href="#make_archive-85"><span class="linenos">85</span></a>        <span class="c1"># full path to up tp directory that will be archived</span>
-</span><span id="make_archive-86"><a href="#make_archive-86"><span class="linenos">86</span></a>        <span class="n">root_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
-</span><span id="make_archive-87"><a href="#make_archive-87"><span class="linenos">87</span></a>        <span class="c1"># directory within root_directory to archive</span>
-</span><span id="make_archive-88"><a href="#make_archive-88"><span class="linenos">88</span></a>        <span class="n">base_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
-</span><span id="make_archive-89"><a href="#make_archive-89"><span class="linenos">89</span></a>    <span class="p">)</span>
-</span><span id="make_archive-90"><a href="#make_archive-90"><span class="linenos">90</span></a>    <span class="c1"># now remove the directory we just archived</span>
-</span><span id="make_archive-91"><a href="#make_archive-91"><span class="linenos">91</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="make_archive-146"><a href="#make_archive-146"><span class="linenos">146</span></a><span class="k">def</span> <span class="nf">make_archive</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="make_archive-147"><a href="#make_archive-147"><span class="linenos">147</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="make_archive-148"><a href="#make_archive-148"><span class="linenos">148</span></a><span class="sd">    Compresses the directory to a zip file of the same name. After compressing,</span>
+</span><span id="make_archive-149"><a href="#make_archive-149"><span class="linenos">149</span></a><span class="sd">    it then deletes the original directory.</span>
+</span><span id="make_archive-150"><a href="#make_archive-150"><span class="linenos">150</span></a>
+</span><span id="make_archive-151"><a href="#make_archive-151"><span class="linenos">151</span></a><span class="sd">    #### Parameters</span>
+</span><span id="make_archive-152"><a href="#make_archive-152"><span class="linenos">152</span></a>
+</span><span id="make_archive-153"><a href="#make_archive-153"><span class="linenos">153</span></a><span class="sd">    - `directory`:</span>
+</span><span id="make_archive-154"><a href="#make_archive-154"><span class="linenos">154</span></a><span class="sd">        Path to the folder that should be archived</span>
+</span><span id="make_archive-155"><a href="#make_archive-155"><span class="linenos">155</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="make_archive-156"><a href="#make_archive-156"><span class="linenos">156</span></a>    <span class="c1"># This wraps shutil.make_archive to change the default parameters. Normally,</span>
+</span><span id="make_archive-157"><a href="#make_archive-157"><span class="linenos">157</span></a>    <span class="c1"># it writes the archive in the working directory, but we update it to use the</span>
+</span><span id="make_archive-158"><a href="#make_archive-158"><span class="linenos">158</span></a>    <span class="c1"># the same directory as the folder being archived. The format is also set</span>
+</span><span id="make_archive-159"><a href="#make_archive-159"><span class="linenos">159</span></a>    <span class="c1"># to zip.</span>
+</span><span id="make_archive-160"><a href="#make_archive-160"><span class="linenos">160</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">make_archive</span><span class="p">(</span>
+</span><span id="make_archive-161"><a href="#make_archive-161"><span class="linenos">161</span></a>        <span class="c1"># By default I choose within the current directory and save</span>
+</span><span id="make_archive-162"><a href="#make_archive-162"><span class="linenos">162</span></a>        <span class="c1"># it as the same name of the directory (+ zip ending)</span>
+</span><span id="make_archive-163"><a href="#make_archive-163"><span class="linenos">163</span></a>        <span class="n">base_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
+</span><span id="make_archive-164"><a href="#make_archive-164"><span class="linenos">164</span></a>        <span class="c1"># format to use switch to gztar after testing</span>
+</span><span id="make_archive-165"><a href="#make_archive-165"><span class="linenos">165</span></a>        <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;zip&quot;</span><span class="p">,</span>
+</span><span id="make_archive-166"><a href="#make_archive-166"><span class="linenos">166</span></a>        <span class="c1"># full path to up tp directory that will be archived</span>
+</span><span id="make_archive-167"><a href="#make_archive-167"><span class="linenos">167</span></a>        <span class="n">root_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
+</span><span id="make_archive-168"><a href="#make_archive-168"><span class="linenos">168</span></a>        <span class="c1"># directory within root_directory to archive</span>
+</span><span id="make_archive-169"><a href="#make_archive-169"><span class="linenos">169</span></a>        <span class="n">base_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>
+</span><span id="make_archive-170"><a href="#make_archive-170"><span class="linenos">170</span></a>    <span class="p">)</span>
+</span><span id="make_archive-171"><a href="#make_archive-171"><span class="linenos">171</span></a>    <span class="c1"># now remove the directory we just archived</span>
+</span><span id="make_archive-172"><a href="#make_archive-172"><span class="linenos">172</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -432,42 +635,42 @@ Path to the folder that should be archived</li>
 
     </div>
     <a class="headerlink" href="#make_error_archive"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="make_error_archive-94"><a href="#make_error_archive-94"><span class="linenos"> 94</span></a><span class="k">def</span> <span class="nf">make_error_archive</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="make_error_archive-95"><a href="#make_error_archive-95"><span class="linenos"> 95</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="make_error_archive-96"><a href="#make_error_archive-96"><span class="linenos"> 96</span></a><span class="sd">    Compresses the directory to a zip file and stores the new archive within the</span>
-</span><span id="make_error_archive-97"><a href="#make_error_archive-97"><span class="linenos"> 97</span></a><span class="sd">    original. This utility is meant for creating archives within the directory</span>
-</span><span id="make_error_archive-98"><a href="#make_error_archive-98"><span class="linenos"> 98</span></a><span class="sd">    of a failed calculation, so the new archive will be named something like</span>
-</span><span id="make_error_archive-99"><a href="#make_error_archive-99"><span class="linenos"> 99</span></a><span class="sd">    `simmate_attempt_01.zip`, where the number is automatically determined. When</span>
-</span><span id="make_error_archive-100"><a href="#make_error_archive-100"><span class="linenos">100</span></a><span class="sd">    archiving the folder, all &quot;simmate_*&quot; files within the directory are ignore</span>
-</span><span id="make_error_archive-101"><a href="#make_error_archive-101"><span class="linenos">101</span></a><span class="sd">    (this is includes earlier simmate_attempt_*.zip archives).</span>
-</span><span id="make_error_archive-102"><a href="#make_error_archive-102"><span class="linenos">102</span></a>
-</span><span id="make_error_archive-103"><a href="#make_error_archive-103"><span class="linenos">103</span></a><span class="sd">    #### Parameters</span>
-</span><span id="make_error_archive-104"><a href="#make_error_archive-104"><span class="linenos">104</span></a>
-</span><span id="make_error_archive-105"><a href="#make_error_archive-105"><span class="linenos">105</span></a><span class="sd">    - `directory`:</span>
-</span><span id="make_error_archive-106"><a href="#make_error_archive-106"><span class="linenos">106</span></a><span class="sd">        Path to the folder that should be archived</span>
-</span><span id="make_error_archive-107"><a href="#make_error_archive-107"><span class="linenos">107</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="make_error_archive-108"><a href="#make_error_archive-108"><span class="linenos">108</span></a>
-</span><span id="make_error_archive-109"><a href="#make_error_archive-109"><span class="linenos">109</span></a>    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="make_error_archive-110"><a href="#make_error_archive-110"><span class="linenos">110</span></a>
-</span><span id="make_error_archive-111"><a href="#make_error_archive-111"><span class="linenos">111</span></a>    <span class="c1"># check the directory and see how many other &quot;simmate_attempt_*.zip&quot; files</span>
-</span><span id="make_error_archive-112"><a href="#make_error_archive-112"><span class="linenos">112</span></a>    <span class="c1"># already exist. Our archive number will be based off of this.</span>
-</span><span id="make_error_archive-113"><a href="#make_error_archive-113"><span class="linenos">113</span></a>    <span class="n">count</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="make_error_archive-114"><a href="#make_error_archive-114"><span class="linenos">114</span></a>        <span class="nb">len</span><span class="p">([</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;simmate_attempt_&quot;</span><span class="p">)])</span> <span class="o">+</span> <span class="mi">1</span>
-</span><span id="make_error_archive-115"><a href="#make_error_archive-115"><span class="linenos">115</span></a>    <span class="p">)</span>
-</span><span id="make_error_archive-116"><a href="#make_error_archive-116"><span class="linenos">116</span></a>    <span class="n">count_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span id="make_error_archive-117"><a href="#make_error_archive-117"><span class="linenos">117</span></a>    <span class="n">base_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;simmate_attempt_</span><span class="si">{</span><span class="n">count_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="make_error_archive-118"><a href="#make_error_archive-118"><span class="linenos">118</span></a>
-</span><span id="make_error_archive-119"><a href="#make_error_archive-119"><span class="linenos">119</span></a>    <span class="c1"># Before we make the archive, we want to avoid also storing other simmate</span>
-</span><span id="make_error_archive-120"><a href="#make_error_archive-120"><span class="linenos">120</span></a>    <span class="c1"># archives and files within this new archive. We therefore copy all files</span>
-</span><span id="make_error_archive-121"><a href="#make_error_archive-121"><span class="linenos">121</span></a>    <span class="c1"># that do NOT start with &quot;simmate_&quot; over into a folder and then archive it.</span>
-</span><span id="make_error_archive-122"><a href="#make_error_archive-122"><span class="linenos">122</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
-</span><span id="make_error_archive-123"><a href="#make_error_archive-123"><span class="linenos">123</span></a>        <span class="n">src</span><span class="o">=</span><span class="n">full_path</span><span class="p">,</span>
-</span><span id="make_error_archive-124"><a href="#make_error_archive-124"><span class="linenos">124</span></a>        <span class="n">dst</span><span class="o">=</span><span class="n">base_name</span><span class="p">,</span>
-</span><span id="make_error_archive-125"><a href="#make_error_archive-125"><span class="linenos">125</span></a>        <span class="n">ignore</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">ignore_patterns</span><span class="p">(</span><span class="s2">&quot;simmate_*&quot;</span><span class="p">),</span>
-</span><span id="make_error_archive-126"><a href="#make_error_archive-126"><span class="linenos">126</span></a>    <span class="p">)</span>
-</span><span id="make_error_archive-127"><a href="#make_error_archive-127"><span class="linenos">127</span></a>
-</span><span id="make_error_archive-128"><a href="#make_error_archive-128"><span class="linenos">128</span></a>    <span class="c1"># now convert the copied files to a new archive</span>
-</span><span id="make_error_archive-129"><a href="#make_error_archive-129"><span class="linenos">129</span></a>    <span class="n">make_archive</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="make_error_archive-175"><a href="#make_error_archive-175"><span class="linenos">175</span></a><span class="k">def</span> <span class="nf">make_error_archive</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="make_error_archive-176"><a href="#make_error_archive-176"><span class="linenos">176</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="make_error_archive-177"><a href="#make_error_archive-177"><span class="linenos">177</span></a><span class="sd">    Compresses the directory to a zip file and stores the new archive within the</span>
+</span><span id="make_error_archive-178"><a href="#make_error_archive-178"><span class="linenos">178</span></a><span class="sd">    original. This utility is meant for creating archives within the directory</span>
+</span><span id="make_error_archive-179"><a href="#make_error_archive-179"><span class="linenos">179</span></a><span class="sd">    of a failed calculation, so the new archive will be named something like</span>
+</span><span id="make_error_archive-180"><a href="#make_error_archive-180"><span class="linenos">180</span></a><span class="sd">    `simmate_attempt_01.zip`, where the number is automatically determined. When</span>
+</span><span id="make_error_archive-181"><a href="#make_error_archive-181"><span class="linenos">181</span></a><span class="sd">    archiving the folder, all &quot;simmate_*&quot; files within the directory are ignore</span>
+</span><span id="make_error_archive-182"><a href="#make_error_archive-182"><span class="linenos">182</span></a><span class="sd">    (this is includes earlier simmate_attempt_*.zip archives).</span>
+</span><span id="make_error_archive-183"><a href="#make_error_archive-183"><span class="linenos">183</span></a>
+</span><span id="make_error_archive-184"><a href="#make_error_archive-184"><span class="linenos">184</span></a><span class="sd">    #### Parameters</span>
+</span><span id="make_error_archive-185"><a href="#make_error_archive-185"><span class="linenos">185</span></a>
+</span><span id="make_error_archive-186"><a href="#make_error_archive-186"><span class="linenos">186</span></a><span class="sd">    - `directory`:</span>
+</span><span id="make_error_archive-187"><a href="#make_error_archive-187"><span class="linenos">187</span></a><span class="sd">        Path to the folder that should be archived</span>
+</span><span id="make_error_archive-188"><a href="#make_error_archive-188"><span class="linenos">188</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="make_error_archive-189"><a href="#make_error_archive-189"><span class="linenos">189</span></a>
+</span><span id="make_error_archive-190"><a href="#make_error_archive-190"><span class="linenos">190</span></a>    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+</span><span id="make_error_archive-191"><a href="#make_error_archive-191"><span class="linenos">191</span></a>
+</span><span id="make_error_archive-192"><a href="#make_error_archive-192"><span class="linenos">192</span></a>    <span class="c1"># check the directory and see how many other &quot;simmate_attempt_*.zip&quot; files</span>
+</span><span id="make_error_archive-193"><a href="#make_error_archive-193"><span class="linenos">193</span></a>    <span class="c1"># already exist. Our archive number will be based off of this.</span>
+</span><span id="make_error_archive-194"><a href="#make_error_archive-194"><span class="linenos">194</span></a>    <span class="n">count</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="make_error_archive-195"><a href="#make_error_archive-195"><span class="linenos">195</span></a>        <span class="nb">len</span><span class="p">([</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;simmate_attempt_&quot;</span><span class="p">)])</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span id="make_error_archive-196"><a href="#make_error_archive-196"><span class="linenos">196</span></a>    <span class="p">)</span>
+</span><span id="make_error_archive-197"><a href="#make_error_archive-197"><span class="linenos">197</span></a>    <span class="n">count_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span id="make_error_archive-198"><a href="#make_error_archive-198"><span class="linenos">198</span></a>    <span class="n">base_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;simmate_attempt_</span><span class="si">{</span><span class="n">count_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="make_error_archive-199"><a href="#make_error_archive-199"><span class="linenos">199</span></a>
+</span><span id="make_error_archive-200"><a href="#make_error_archive-200"><span class="linenos">200</span></a>    <span class="c1"># Before we make the archive, we want to avoid also storing other simmate</span>
+</span><span id="make_error_archive-201"><a href="#make_error_archive-201"><span class="linenos">201</span></a>    <span class="c1"># archives and files within this new archive. We therefore copy all files</span>
+</span><span id="make_error_archive-202"><a href="#make_error_archive-202"><span class="linenos">202</span></a>    <span class="c1"># that do NOT start with &quot;simmate_&quot; over into a folder and then archive it.</span>
+</span><span id="make_error_archive-203"><a href="#make_error_archive-203"><span class="linenos">203</span></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
+</span><span id="make_error_archive-204"><a href="#make_error_archive-204"><span class="linenos">204</span></a>        <span class="n">src</span><span class="o">=</span><span class="n">full_path</span><span class="p">,</span>
+</span><span id="make_error_archive-205"><a href="#make_error_archive-205"><span class="linenos">205</span></a>        <span class="n">dst</span><span class="o">=</span><span class="n">base_name</span><span class="p">,</span>
+</span><span id="make_error_archive-206"><a href="#make_error_archive-206"><span class="linenos">206</span></a>        <span class="n">ignore</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">ignore_patterns</span><span class="p">(</span><span class="s2">&quot;simmate_*&quot;</span><span class="p">),</span>
+</span><span id="make_error_archive-207"><a href="#make_error_archive-207"><span class="linenos">207</span></a>    <span class="p">)</span>
+</span><span id="make_error_archive-208"><a href="#make_error_archive-208"><span class="linenos">208</span></a>
+</span><span id="make_error_archive-209"><a href="#make_error_archive-209"><span class="linenos">209</span></a>    <span class="c1"># now convert the copied files to a new archive</span>
+</span><span id="make_error_archive-210"><a href="#make_error_archive-210"><span class="linenos">210</span></a>    <span class="n">make_archive</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -499,46 +702,46 @@ Path to the folder that should be archived</li>
 
     </div>
     <a class="headerlink" href="#archive_old_runs"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="archive_old_runs-132"><a href="#archive_old_runs-132"><span class="linenos">132</span></a><span class="k">def</span> <span class="nf">archive_old_runs</span><span class="p">(</span>
-</span><span id="archive_old_runs-133"><a href="#archive_old_runs-133"><span class="linenos">133</span></a>    <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-</span><span id="archive_old_runs-134"><a href="#archive_old_runs-134"><span class="linenos">134</span></a>    <span class="n">time_cutoff</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">7</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>  <span class="c1"># equal to 3 weeks</span>
-</span><span id="archive_old_runs-135"><a href="#archive_old_runs-135"><span class="linenos">135</span></a><span class="p">):</span>
-</span><span id="archive_old_runs-136"><a href="#archive_old_runs-136"><span class="linenos">136</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="archive_old_runs-137"><a href="#archive_old_runs-137"><span class="linenos">137</span></a><span class="sd">    Goes through a given directory and finds all &quot;simmate-task-&quot; folders that</span>
-</span><span id="archive_old_runs-138"><a href="#archive_old_runs-138"><span class="linenos">138</span></a><span class="sd">    are older than a given time cutoff. Each of these folders is then compressed</span>
-</span><span id="archive_old_runs-139"><a href="#archive_old_runs-139"><span class="linenos">139</span></a><span class="sd">    to a zip file and then the original folder is removed.</span>
-</span><span id="archive_old_runs-140"><a href="#archive_old_runs-140"><span class="linenos">140</span></a>
-</span><span id="archive_old_runs-141"><a href="#archive_old_runs-141"><span class="linenos">141</span></a><span class="sd">    #### Parameters</span>
-</span><span id="archive_old_runs-142"><a href="#archive_old_runs-142"><span class="linenos">142</span></a>
-</span><span id="archive_old_runs-143"><a href="#archive_old_runs-143"><span class="linenos">143</span></a><span class="sd">    - `directory`:</span>
-</span><span id="archive_old_runs-144"><a href="#archive_old_runs-144"><span class="linenos">144</span></a><span class="sd">        base directory that will contain folders to archive. Defaults to the</span>
-</span><span id="archive_old_runs-145"><a href="#archive_old_runs-145"><span class="linenos">145</span></a><span class="sd">        working directory.</span>
-</span><span id="archive_old_runs-146"><a href="#archive_old_runs-146"><span class="linenos">146</span></a><span class="sd">    - `time_cutoff`:</span>
-</span><span id="archive_old_runs-147"><a href="#archive_old_runs-147"><span class="linenos">147</span></a><span class="sd">        The time (in seconds) required to determine whether a folder is old or not.</span>
-</span><span id="archive_old_runs-148"><a href="#archive_old_runs-148"><span class="linenos">148</span></a><span class="sd">        If the folder is considered old, then it will be archived and then deleted.</span>
-</span><span id="archive_old_runs-149"><a href="#archive_old_runs-149"><span class="linenos">149</span></a><span class="sd">        The default is 3 weeks.</span>
-</span><span id="archive_old_runs-150"><a href="#archive_old_runs-150"><span class="linenos">150</span></a>
-</span><span id="archive_old_runs-151"><a href="#archive_old_runs-151"><span class="linenos">151</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="archive_old_runs-152"><a href="#archive_old_runs-152"><span class="linenos">152</span></a>    <span class="c1"># load the full path to the desired directory</span>
-</span><span id="archive_old_runs-153"><a href="#archive_old_runs-153"><span class="linenos">153</span></a>    <span class="n">directory</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-</span><span id="archive_old_runs-154"><a href="#archive_old_runs-154"><span class="linenos">154</span></a>
-</span><span id="archive_old_runs-155"><a href="#archive_old_runs-155"><span class="linenos">155</span></a>    <span class="c1"># grab all files/folders in this directory and then limit this list to those</span>
-</span><span id="archive_old_runs-156"><a href="#archive_old_runs-156"><span class="linenos">156</span></a>    <span class="c1"># that are...</span>
-</span><span id="archive_old_runs-157"><a href="#archive_old_runs-157"><span class="linenos">157</span></a>    <span class="c1">#   1. folders</span>
-</span><span id="archive_old_runs-158"><a href="#archive_old_runs-158"><span class="linenos">158</span></a>    <span class="c1">#   2. start with &quot;simmate-task-&quot;</span>
-</span><span id="archive_old_runs-159"><a href="#archive_old_runs-159"><span class="linenos">159</span></a>    <span class="c1">#   3. haven&#39;t been modified for at least time_cutoff</span>
-</span><span id="archive_old_runs-160"><a href="#archive_old_runs-160"><span class="linenos">160</span></a>    <span class="n">foldernames</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="archive_old_runs-161"><a href="#archive_old_runs-161"><span class="linenos">161</span></a>    <span class="k">for</span> <span class="n">foldername</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-</span><span id="archive_old_runs-162"><a href="#archive_old_runs-162"><span class="linenos">162</span></a>        <span class="n">foldername_full</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">foldername</span><span class="p">)</span>
-</span><span id="archive_old_runs-163"><a href="#archive_old_runs-163"><span class="linenos">163</span></a>        <span class="k">if</span> <span class="p">(</span>
-</span><span id="archive_old_runs-164"><a href="#archive_old_runs-164"><span class="linenos">164</span></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span>
-</span><span id="archive_old_runs-165"><a href="#archive_old_runs-165"><span class="linenos">165</span></a>            <span class="ow">and</span> <span class="s2">&quot;simmate-task-&quot;</span> <span class="ow">in</span> <span class="n">foldername</span>
-</span><span id="archive_old_runs-166"><a href="#archive_old_runs-166"><span class="linenos">166</span></a>            <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_cutoff</span>
-</span><span id="archive_old_runs-167"><a href="#archive_old_runs-167"><span class="linenos">167</span></a>        <span class="p">):</span>
-</span><span id="archive_old_runs-168"><a href="#archive_old_runs-168"><span class="linenos">168</span></a>            <span class="n">foldernames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span>
-</span><span id="archive_old_runs-169"><a href="#archive_old_runs-169"><span class="linenos">169</span></a>
-</span><span id="archive_old_runs-170"><a href="#archive_old_runs-170"><span class="linenos">170</span></a>    <span class="c1"># now go through this list and archive the folders that met the criteria</span>
-</span><span id="archive_old_runs-171"><a href="#archive_old_runs-171"><span class="linenos">171</span></a>    <span class="p">[</span><span class="n">make_archive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">foldernames</span><span class="p">]</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="archive_old_runs-213"><a href="#archive_old_runs-213"><span class="linenos">213</span></a><span class="k">def</span> <span class="nf">archive_old_runs</span><span class="p">(</span>
+</span><span id="archive_old_runs-214"><a href="#archive_old_runs-214"><span class="linenos">214</span></a>    <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+</span><span id="archive_old_runs-215"><a href="#archive_old_runs-215"><span class="linenos">215</span></a>    <span class="n">time_cutoff</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">7</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>  <span class="c1"># equal to 3 weeks</span>
+</span><span id="archive_old_runs-216"><a href="#archive_old_runs-216"><span class="linenos">216</span></a><span class="p">):</span>
+</span><span id="archive_old_runs-217"><a href="#archive_old_runs-217"><span class="linenos">217</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="archive_old_runs-218"><a href="#archive_old_runs-218"><span class="linenos">218</span></a><span class="sd">    Goes through a given directory and finds all &quot;simmate-task-&quot; folders that</span>
+</span><span id="archive_old_runs-219"><a href="#archive_old_runs-219"><span class="linenos">219</span></a><span class="sd">    are older than a given time cutoff. Each of these folders is then compressed</span>
+</span><span id="archive_old_runs-220"><a href="#archive_old_runs-220"><span class="linenos">220</span></a><span class="sd">    to a zip file and then the original folder is removed.</span>
+</span><span id="archive_old_runs-221"><a href="#archive_old_runs-221"><span class="linenos">221</span></a>
+</span><span id="archive_old_runs-222"><a href="#archive_old_runs-222"><span class="linenos">222</span></a><span class="sd">    #### Parameters</span>
+</span><span id="archive_old_runs-223"><a href="#archive_old_runs-223"><span class="linenos">223</span></a>
+</span><span id="archive_old_runs-224"><a href="#archive_old_runs-224"><span class="linenos">224</span></a><span class="sd">    - `directory`:</span>
+</span><span id="archive_old_runs-225"><a href="#archive_old_runs-225"><span class="linenos">225</span></a><span class="sd">        base directory that will contain folders to archive. Defaults to the</span>
+</span><span id="archive_old_runs-226"><a href="#archive_old_runs-226"><span class="linenos">226</span></a><span class="sd">        working directory.</span>
+</span><span id="archive_old_runs-227"><a href="#archive_old_runs-227"><span class="linenos">227</span></a><span class="sd">    - `time_cutoff`:</span>
+</span><span id="archive_old_runs-228"><a href="#archive_old_runs-228"><span class="linenos">228</span></a><span class="sd">        The time (in seconds) required to determine whether a folder is old or not.</span>
+</span><span id="archive_old_runs-229"><a href="#archive_old_runs-229"><span class="linenos">229</span></a><span class="sd">        If the folder is considered old, then it will be archived and then deleted.</span>
+</span><span id="archive_old_runs-230"><a href="#archive_old_runs-230"><span class="linenos">230</span></a><span class="sd">        The default is 3 weeks.</span>
+</span><span id="archive_old_runs-231"><a href="#archive_old_runs-231"><span class="linenos">231</span></a>
+</span><span id="archive_old_runs-232"><a href="#archive_old_runs-232"><span class="linenos">232</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="archive_old_runs-233"><a href="#archive_old_runs-233"><span class="linenos">233</span></a>    <span class="c1"># load the full path to the desired directory</span>
+</span><span id="archive_old_runs-234"><a href="#archive_old_runs-234"><span class="linenos">234</span></a>    <span class="n">directory</span> <span class="o">=</span> <span class="n">get_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+</span><span id="archive_old_runs-235"><a href="#archive_old_runs-235"><span class="linenos">235</span></a>
+</span><span id="archive_old_runs-236"><a href="#archive_old_runs-236"><span class="linenos">236</span></a>    <span class="c1"># grab all files/folders in this directory and then limit this list to those</span>
+</span><span id="archive_old_runs-237"><a href="#archive_old_runs-237"><span class="linenos">237</span></a>    <span class="c1"># that are...</span>
+</span><span id="archive_old_runs-238"><a href="#archive_old_runs-238"><span class="linenos">238</span></a>    <span class="c1">#   1. folders</span>
+</span><span id="archive_old_runs-239"><a href="#archive_old_runs-239"><span class="linenos">239</span></a>    <span class="c1">#   2. start with &quot;simmate-task-&quot;</span>
+</span><span id="archive_old_runs-240"><a href="#archive_old_runs-240"><span class="linenos">240</span></a>    <span class="c1">#   3. haven&#39;t been modified for at least time_cutoff</span>
+</span><span id="archive_old_runs-241"><a href="#archive_old_runs-241"><span class="linenos">241</span></a>    <span class="n">foldernames</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="archive_old_runs-242"><a href="#archive_old_runs-242"><span class="linenos">242</span></a>    <span class="k">for</span> <span class="n">foldername</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+</span><span id="archive_old_runs-243"><a href="#archive_old_runs-243"><span class="linenos">243</span></a>        <span class="n">foldername_full</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">foldername</span><span class="p">)</span>
+</span><span id="archive_old_runs-244"><a href="#archive_old_runs-244"><span class="linenos">244</span></a>        <span class="k">if</span> <span class="p">(</span>
+</span><span id="archive_old_runs-245"><a href="#archive_old_runs-245"><span class="linenos">245</span></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span>
+</span><span id="archive_old_runs-246"><a href="#archive_old_runs-246"><span class="linenos">246</span></a>            <span class="ow">and</span> <span class="s2">&quot;simmate-task-&quot;</span> <span class="ow">in</span> <span class="n">foldername</span>
+</span><span id="archive_old_runs-247"><a href="#archive_old_runs-247"><span class="linenos">247</span></a>            <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_cutoff</span>
+</span><span id="archive_old_runs-248"><a href="#archive_old_runs-248"><span class="linenos">248</span></a>        <span class="p">):</span>
+</span><span id="archive_old_runs-249"><a href="#archive_old_runs-249"><span class="linenos">249</span></a>            <span class="n">foldernames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">foldername_full</span><span class="p">)</span>
+</span><span id="archive_old_runs-250"><a href="#archive_old_runs-250"><span class="linenos">250</span></a>
+</span><span id="archive_old_runs-251"><a href="#archive_old_runs-251"><span class="linenos">251</span></a>    <span class="c1"># now go through this list and archive the folders that met the criteria</span>
+</span><span id="archive_old_runs-252"><a href="#archive_old_runs-252"><span class="linenos">252</span></a>    <span class="p">[</span><span class="n">make_archive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">foldernames</span><span class="p">]</span>
 </span></pre></div>
 
 
@@ -572,29 +775,29 @@ The default is 3 weeks.</li>
 
     </div>
     <a class="headerlink" href="#empty_directory"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="empty_directory-174"><a href="#empty_directory-174"><span class="linenos">174</span></a><span class="k">def</span> <span class="nf">empty_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">files_to_keep</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]):</span>
-</span><span id="empty_directory-175"><a href="#empty_directory-175"><span class="linenos">175</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="empty_directory-176"><a href="#empty_directory-176"><span class="linenos">176</span></a><span class="sd">    Deletes all files and folders within a directory, except for those provided</span>
-</span><span id="empty_directory-177"><a href="#empty_directory-177"><span class="linenos">177</span></a><span class="sd">    to the files_to_keep parameter.</span>
-</span><span id="empty_directory-178"><a href="#empty_directory-178"><span class="linenos">178</span></a>
-</span><span id="empty_directory-179"><a href="#empty_directory-179"><span class="linenos">179</span></a><span class="sd">    #### Parameters</span>
-</span><span id="empty_directory-180"><a href="#empty_directory-180"><span class="linenos">180</span></a>
-</span><span id="empty_directory-181"><a href="#empty_directory-181"><span class="linenos">181</span></a><span class="sd">    - `directory`:</span>
-</span><span id="empty_directory-182"><a href="#empty_directory-182"><span class="linenos">182</span></a><span class="sd">        base directory that should be emptied</span>
-</span><span id="empty_directory-183"><a href="#empty_directory-183"><span class="linenos">183</span></a><span class="sd">    - `files_to_keep`:</span>
-</span><span id="empty_directory-184"><a href="#empty_directory-184"><span class="linenos">184</span></a><span class="sd">        A list of file and folder names within the base directory that should</span>
-</span><span id="empty_directory-185"><a href="#empty_directory-185"><span class="linenos">185</span></a><span class="sd">        not be deleted. The default is [].</span>
-</span><span id="empty_directory-186"><a href="#empty_directory-186"><span class="linenos">186</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="empty_directory-187"><a href="#empty_directory-187"><span class="linenos">187</span></a>    <span class="c1"># grab all of the files and folders inside the listed directory</span>
-</span><span id="empty_directory-188"><a href="#empty_directory-188"><span class="linenos">188</span></a>    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-</span><span id="empty_directory-189"><a href="#empty_directory-189"><span class="linenos">189</span></a>        <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-</span><span id="empty_directory-190"><a href="#empty_directory-190"><span class="linenos">190</span></a>        <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">files_to_keep</span><span class="p">:</span>
-</span><span id="empty_directory-191"><a href="#empty_directory-191"><span class="linenos">191</span></a>            <span class="c1"># check if we have a folder or a file.</span>
-</span><span id="empty_directory-192"><a href="#empty_directory-192"><span class="linenos">192</span></a>            <span class="c1"># Folders we delete with shutil and files with the os module</span>
-</span><span id="empty_directory-193"><a href="#empty_directory-193"><span class="linenos">193</span></a>            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
-</span><span id="empty_directory-194"><a href="#empty_directory-194"><span class="linenos">194</span></a>                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>  <span class="c1"># ignore_errors=False</span>
-</span><span id="empty_directory-195"><a href="#empty_directory-195"><span class="linenos">195</span></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="empty_directory-196"><a href="#empty_directory-196"><span class="linenos">196</span></a>                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="empty_directory-255"><a href="#empty_directory-255"><span class="linenos">255</span></a><span class="k">def</span> <span class="nf">empty_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">files_to_keep</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]):</span>
+</span><span id="empty_directory-256"><a href="#empty_directory-256"><span class="linenos">256</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="empty_directory-257"><a href="#empty_directory-257"><span class="linenos">257</span></a><span class="sd">    Deletes all files and folders within a directory, except for those provided</span>
+</span><span id="empty_directory-258"><a href="#empty_directory-258"><span class="linenos">258</span></a><span class="sd">    to the files_to_keep parameter.</span>
+</span><span id="empty_directory-259"><a href="#empty_directory-259"><span class="linenos">259</span></a>
+</span><span id="empty_directory-260"><a href="#empty_directory-260"><span class="linenos">260</span></a><span class="sd">    #### Parameters</span>
+</span><span id="empty_directory-261"><a href="#empty_directory-261"><span class="linenos">261</span></a>
+</span><span id="empty_directory-262"><a href="#empty_directory-262"><span class="linenos">262</span></a><span class="sd">    - `directory`:</span>
+</span><span id="empty_directory-263"><a href="#empty_directory-263"><span class="linenos">263</span></a><span class="sd">        base directory that should be emptied</span>
+</span><span id="empty_directory-264"><a href="#empty_directory-264"><span class="linenos">264</span></a><span class="sd">    - `files_to_keep`:</span>
+</span><span id="empty_directory-265"><a href="#empty_directory-265"><span class="linenos">265</span></a><span class="sd">        A list of file and folder names within the base directory that should</span>
+</span><span id="empty_directory-266"><a href="#empty_directory-266"><span class="linenos">266</span></a><span class="sd">        not be deleted. The default is [].</span>
+</span><span id="empty_directory-267"><a href="#empty_directory-267"><span class="linenos">267</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="empty_directory-268"><a href="#empty_directory-268"><span class="linenos">268</span></a>    <span class="c1"># grab all of the files and folders inside the listed directory</span>
+</span><span id="empty_directory-269"><a href="#empty_directory-269"><span class="linenos">269</span></a>    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+</span><span id="empty_directory-270"><a href="#empty_directory-270"><span class="linenos">270</span></a>        <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+</span><span id="empty_directory-271"><a href="#empty_directory-271"><span class="linenos">271</span></a>        <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">files_to_keep</span><span class="p">:</span>
+</span><span id="empty_directory-272"><a href="#empty_directory-272"><span class="linenos">272</span></a>            <span class="c1"># check if we have a folder or a file.</span>
+</span><span id="empty_directory-273"><a href="#empty_directory-273"><span class="linenos">273</span></a>            <span class="c1"># Folders we delete with shutil and files with the os module</span>
+</span><span id="empty_directory-274"><a href="#empty_directory-274"><span class="linenos">274</span></a>            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+</span><span id="empty_directory-275"><a href="#empty_directory-275"><span class="linenos">275</span></a>                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>  <span class="c1"># ignore_errors=False</span>
+</span><span id="empty_directory-276"><a href="#empty_directory-276"><span class="linenos">276</span></a>            <span class="k">else</span><span class="p">:</span>
+</span><span id="empty_directory-277"><a href="#empty_directory-277"><span class="linenos">277</span></a>                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
 </span></pre></div>
 
 
