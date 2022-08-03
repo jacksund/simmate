@@ -167,7 +167,7 @@ class S3Task:
     applied and none of the following handlers will be checked.
     """
 
-    max_corrections: int = 5
+    max_corrections: int = 10
     """
     The maximum number of times we can apply a correction and retry the shell
     command. The maximum number of times that corrections will be made (and
@@ -203,12 +203,6 @@ class S3Task:
     save_corrections_to_file: bool = True
     """
     Whether to write a log file of the corrections made. The default is True.
-    """
-
-    corrections_filename: str = "simmate_corrections.csv"
-    """
-    If save_corrections_to_file is True, this is the filename of where
-    to write the corrections. The default is "simmate_corrections.csv".
     """
 
     compress_output: bool = False
@@ -335,11 +329,17 @@ class S3Task:
         # to separate these out from other error_handlers.
         cls.monitors = [handler for handler in cls.error_handlers if handler.is_monitor]
 
-        # We start with zero corrections that we slowly add to. This can be
-        # thought of as a table with headers of...
+        # in case this is a restarted calculation, check if there is a list
+        # of corrections in the current directory and load those as the start point
+        corrections_filename = os.path.join(directory, "simmate_corrections.csv")
+        if os.path.exists(corrections_filename):
+            data = pandas.read_csv(corrections_filename)
+            corrections = data.values.tolist()
+        # Otherwise we start with zero corrections that we slowly add to. This
+        # can be thought of as a table with headers of...
         #   ("applied_errorhandler", "correction_applied")
-        # NOTE: I took out the table headers and may add them back in
-        corrections = []
+        else:
+            corrections = []
 
         # ------ start of main while loop ------
 
@@ -505,10 +505,7 @@ class S3Task:
                     columns=["error_handler", "correction_applied"],
                 )
                 # write the dataframe to a csv file
-                data.to_csv(
-                    os.path.join(directory, cls.corrections_filename),
-                    index=False,
-                )
+                data.to_csv(corrections_filename, index=False)
 
             # If there are no errors, we've finished the calculation and can
             # exit the while loop. Alternatively, some "soft" errors (such as
@@ -669,7 +666,8 @@ class S3Task:
         - `is_restart`:
             whether or not this calculation is a continuation of a previous run
             (i.e. a restarted calculation). If so, the `setup_restart` will be
-            called instead of the setup method.
+            called instead of the setup method. Extra checks will be made to
+            see if the calculation completed already too.
 
          - `**kwargs`:
              Any extra keywords that should be passed to the setup() method.
@@ -690,21 +688,46 @@ class S3Task:
         # establish the working directory
         directory = get_directory(directory)
 
+        # When handling restarted calculations, we check for the final summary
+        # file and if it exists, we know the calculation has already completed
+        # (and therefore doesn't require a restart). This helps handle nested
+        # workflows where we don't know which task to restart at.
+        summary_filename = os.path.join(directory, "simmate_summary.yaml")
+        is_complete = os.path.exists(summary_filename)
+
         # run the setup stage of the task, where there is a unique method
         # if we are picking up from a previously paused run.
-        if not is_restart:
+        if not is_restart and not is_complete:
             cls.setup(directory=directory, **kwargs)
-        else:
+        elif is_restart and not is_complete:
             cls.setup_restart(directory=directory, **kwargs)
+        else:
+            print("Calculation is already completed. Skipping setup.")
 
-        # make sure proper files are present
-        cls._check_input_files(directory)
+        # now if we have a restart OR have an incomplete calculation that is being
+        # restarted, we can check our files and run the external program
+        if not is_restart or not is_complete:
 
-        # run the shelltask and error supervision stages. This method returns
-        # a list of any corrections applied during the run.
-        corrections = cls.execute(directory, command)
+            # make sure proper files are present
+            cls._check_input_files(directory)
 
-        # run the workup stage of the task. This is where the data/info is pull
+            # run the shelltask and error supervision stages. This method returns
+            # a list of any corrections applied during the run.
+            corrections = cls.execute(directory, command)
+        else:
+            print("Calculation is already completed. Skipping execution.")
+
+            # load the corrections from file for reference
+            corrections_filename = os.path.join(directory, "simmate_corrections.csv")
+            if os.path.exists(corrections_filename):
+                data = pandas.read_csv(corrections_filename)
+                corrections = data.values.tolist()
+            else:
+                corrections = []
+            # OPTIMIZE: this same code is at the start of the execute method.
+            # Consider making it into a utility.
+
+        # run the workup stage of the task. This is where the data/info is pulled
         # out from the calculation and is thus our "result".
         result = cls.workup(directory=directory)
 

@@ -97,6 +97,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
         command: str = None,
         source: dict = None,
         directory: str = None,
+        is_restart: bool = False,
     ):
         # command list expects three subcommands:
         #   command_bulk, command_supercell, and command_neb
@@ -118,6 +119,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             directory=directory,
             command=command,
             migrating_specie=migrating_specie,
+            is_restart=is_restart,
             register_run=False,
         ).result()
 
@@ -129,6 +131,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + Relaxation__Vasp__Mit.name_full,
+            is_restart=is_restart,
         ).result()
 
         # A static energy calculation on the relaxed structure. This isn't necessarily
@@ -143,6 +146,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + StaticEnergy__Vasp__Mit.name_full,
+            is_restart=is_restart,
         ).result()
 
         # This step does NOT run any calculation, but instead, identifies all
@@ -173,6 +177,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
                 command=subcommands["command_supercell"]
                 + ";"
                 + subcommands["command_neb"],
+                is_restart=is_restart,
             )  # we don't want to wait on results to in order to allow parallel runs
 
 

@@ -71,6 +71,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
         command: str = None,
         # This helps link results to a higher-level table.
         diffusion_analysis_id: int = None,
+        is_restart: bool = False,
     ):
 
         # command list expects three subcommands:
@@ -93,6 +94,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
             directory=directory,
             command=command,
             diffusion_analysis_id=diffusion_analysis_id,
+            is_restart=is_restart,
         ).result()
 
         # Relax the starting supercell structure
@@ -102,6 +104,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + f"{Relaxation__Vasp__NebEndpoint.name_full}.start",
+            is_restart=is_restart,
         )
 
         # Relax the ending supercell structure
@@ -111,6 +114,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
             directory=parameters_cleaned["directory"]
             + os.path.sep
             + f"{Relaxation__Vasp__NebEndpoint.name_full}.end",
+            is_restart=is_restart,
         )
 
         # wait for the endpoint relaxations to finish
@@ -138,4 +142,5 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
             source=parameters_cleaned["source"],
             directory=parameters_cleaned["directory"],
             diffusion_analysis_id=parameters_cleaned["diffusion_analysis_id"],
+            is_restart=is_restart,
         )

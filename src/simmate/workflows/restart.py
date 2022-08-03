@@ -27,9 +27,6 @@ class Restart__Simmate__Automatic(Workflow):
     @classmethod
     def run_config(cls, directory_old: str, directory_new: str = None):
 
-        directory_new = None
-        directory_old = "C:\\Users\\jacks\\Documents\\SpyderWD\\simmate-task-uoqnad3s"
-
         # First copy over the directory
         directory_new_cleaned = copy_directory(directory_old, directory_new)
 
@@ -58,11 +55,14 @@ class Restart__Simmate__Automatic(Workflow):
         input_parameters["source"] = {
             "database_table": workflow.database_table.__name__,
             "directory": directory_old,
+            # BUG: I should force directory_old to be an absolute path in order
+            # to store it here, but I'm unsure how to properly handle different
+            # file systems...
             "is_restart": True,
         }
 
         # now instead of calling the workflow's run method, we use its run_restart
-        state = workflow.run_restart(**input_parameters)
+        state = workflow.run_restart(directory=directory_new, **input_parameters)
         result = state.result()
 
         return result

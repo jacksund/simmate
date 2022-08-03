@@ -234,10 +234,16 @@ class VaspTask(S3Task):
         poscar_filename = os.path.join(directory, "POSCAR")
         poscar_orig_filename = os.path.join(directory, "POSCAR_original")
         contcar_filename = os.path.join(directory, "CONTCAR")
+        stopcar_filename = os.path.join(directory, "STOPCAR")
 
         # TODO:
         # make an archive of the directory before we start editting files
         # make_error_archive(directory)
+        # add these changes to the simmate_corrections.csv
+
+        # delete the stopcar if it exists
+        if os.path.exists(stopcar_filename):
+            os.remove(stopcar_filename)
 
         # copy poscar to a new file
         shutil.move(poscar_filename, poscar_orig_filename)

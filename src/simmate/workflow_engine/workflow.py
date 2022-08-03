@@ -440,7 +440,7 @@ class Workflow:
         properly.
 
         For complex workflows, you can override this method to one that properly
-        handles restarting your calculation depending on parameters passed gathered
+        handles restarting your calculation depending on parameters gathered
         from the simmate_metadata.yaml.
         """
         # by default, just run the normal run method and pass the extra kwarg
