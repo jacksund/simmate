@@ -35,9 +35,7 @@ body:
       placeholder: Copy complete stack trace and error message here, including log output if applicable.
       value: |
         ``` python
-        # Copy complete error message here.
-        # Note, the "python" above lets you render with python coloring. 
-        # You can also use coloring for "bash", "yaml", etc. depending on where your error came from.
+        Copy complete error message here.
         ```
 
   - type: textarea
