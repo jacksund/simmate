@@ -11,6 +11,9 @@ import pdoc
 
 import django
 
+# grab current directory of this file. This is also where we want to write the output.
+here = Path(__file__).parent
+
 if __name__ == "__main__":
 
     # We must load Django settings first -- otherwise model imports will raise errors
@@ -40,7 +43,7 @@ if __name__ == "__main__":
 
     # Now generate all documentation
     all_docs = pdoc.pdoc(
-        "../src/simmate",
-        output_directory=Path("."),
+        here.parent / "src" / "simmate",
+        output_directory=here,
         format="html",
     )

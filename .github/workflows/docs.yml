@@ -29,12 +29,12 @@ jobs:
       
       # install all dependencies (including pdoc)
       - run: pip install -e .
-      # TODO: switch to anaconda
+      # TODO: switch to anaconda to match rest of CI
       
       # build your documentation into docs/.
       # Note, we use a custom build script for pdoc itself, but ideally you 
       # just run `pdoc -o docs/ ...` here.
-      - run: docs/make_docs.py
+      - run: python docs/make_docs.py
       
       # upload the docs/ directory (which now has all the html files) as an artifact
       - run: tar --directory docs/ -hcf artifact.tar .
