@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Discussions page
+    url: https://github.com/jacksund/simmate/discussions
+    about: Ask for help and post about general questions & ideas.
+  - name: API documentation
+    url: https://jacksund.github.io/simmate/simmate.html
+    about: The complete documentation.
