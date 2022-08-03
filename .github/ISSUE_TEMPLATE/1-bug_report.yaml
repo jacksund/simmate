@@ -1,7 +1,7 @@
 # docs https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms
 # https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
 
-name: Bug report
+name: 🐞 Bug report
 description: Report any errors or problems with your example test case and/or full error messages.
 labels: 'bug'
 body:
