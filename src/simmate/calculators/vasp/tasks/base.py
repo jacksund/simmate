@@ -223,7 +223,7 @@ class VaspTask(S3Task):
         )
 
     @classmethod
-    def setup_restart(cls, directory: str, structure: Structure, **kwargs):
+    def setup_restart(cls, directory: str, **kwargs):
         """
         From a working directory of a past calculation, sets up for the calculation
         to be restarted. For relaxations/dynamics this involved just copying

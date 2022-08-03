@@ -197,6 +197,21 @@ class VaspNudgedElasticBandTask(VaspTask):
         path_vis.to("cif", os.path.join(directory, "path_relaxed_idpp.cif"))
 
     @classmethod
+    def setup_restart(cls, directory: str, **kwargs):
+        """
+        From a working directory of a past calculation, sets up for the calculation
+        to be restarted.
+        """
+        print("WARNING: CONTCARs are not yet copied to POSCARs for NEB restarts.")
+
+        # establish filenames
+        stopcar_filename = os.path.join(directory, "STOPCAR")
+
+        # delete the stopcar if it exists
+        if os.path.exists(stopcar_filename):
+            os.remove(stopcar_filename)
+
+    @classmethod
     def workup(cls, directory: str):
         """
         Works up data from a NEB run, including confirming convergence and
