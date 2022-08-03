@@ -119,7 +119,8 @@ class Walltime(ErrorHandler):
         return False
 
     def correct(self):
-        return "Added STOPCAR file to end job"  # ... and resubmitted
+        raise Exception("Stopped job due to Walltime limit.")
+        # return "Added STOPCAR file to end job"  # ... and resubmitted
 
     def _get_remaining_time(self, directory: str) -> float:
         """
