@@ -276,63 +276,57 @@
 </span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">create_work_queue</span><span class="p">(</span>
 </span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a>                <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span>
 </span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a>                <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;simmate&quot;</span><span class="p">],</span>
-</span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a>                <span class="n">flow_runner_types</span><span class="o">=</span><span class="p">[</span>
-</span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a>                    <span class="s2">&quot;universal&quot;</span><span class="p">,</span>
-</span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a>                    <span class="s2">&quot;kubernetes&quot;</span><span class="p">,</span>
-</span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a>                    <span class="s2">&quot;docker&quot;</span><span class="p">,</span>
-</span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a>                    <span class="s2">&quot;subprocess&quot;</span><span class="p">,</span>
-</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a>                <span class="p">],</span>
-</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a>            <span class="p">)</span>
-</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a>
-</span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a>            <span class="c1"># create_work_queue does not accept an input for concurrency, so</span>
-</span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a>            <span class="c1"># I need to update this in a 2nd call to the api</span>
-</span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a>            <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">update_work_queue</span><span class="p">(</span>
-</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a>                <span class="nb">id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">),</span>
-</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a>                <span class="n">concurrency_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">concurrency_limit</span><span class="p">,</span>
-</span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a>            <span class="p">)</span>
-</span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a>
-</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a>        <span class="n">queue_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a>
-</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a>        <span class="k">return</span> <span class="n">queue_id</span>
-</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a>
-</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a>    <span class="nd">@staticmethod</span>
-</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_remaining_runs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a><span class="sd">        Returns a count of the number of remaining workflow runs.</span>
-</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a>
-</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="sd">        This is used to determine when workers should shut down within the `run`</span>
-</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="sd">        method, and this method should not be called by users.</span>
-</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a>
-</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a>        <span class="c1"># get_runs_in_work_queue cant look past the concurrency limit</span>
-</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a>        <span class="c1"># so we have to query for the allowed flow runs directly</span>
-</span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a>
-</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">get_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">read_flow_runs</span><span class="p">(</span>
-</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a>                <span class="c1"># BUG: Why won&#39;t this work...?</span>
-</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a>                <span class="c1"># flow_filter=FlowFilter(</span>
-</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a>                <span class="c1">#     tags={&quot;all_&quot;: [&quot;simmate&quot;]},</span>
-</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a>                <span class="c1"># ),</span>
-</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a>                <span class="n">flow_run_filter</span><span class="o">=</span><span class="n">FlowRunFilter</span><span class="p">(</span>
-</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a>                    <span class="n">state</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;any_&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;SCHEDULED&quot;</span><span class="p">,</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">]}}</span>
-</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a>                <span class="p">),</span>
-</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a>            <span class="p">)</span>
-</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a>
-</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">_delete_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a><span class="sd">        Deletes the work queue associated with this worker.</span>
+</span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a>            <span class="p">)</span>
+</span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a>
+</span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a>            <span class="c1"># create_work_queue does not accept an input for concurrency, so</span>
+</span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a>            <span class="c1"># I need to update this in a 2nd call to the api</span>
+</span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a>            <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">update_work_queue</span><span class="p">(</span>
+</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a>                <span class="nb">id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">),</span>
+</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a>                <span class="n">concurrency_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">concurrency_limit</span><span class="p">,</span>
+</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a>            <span class="p">)</span>
+</span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a>
+</span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a>        <span class="n">queue_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a>
+</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a>        <span class="k">return</span> <span class="n">queue_id</span>
+</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a>
+</span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_remaining_runs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a><span class="sd">        Returns a count of the number of remaining workflow runs.</span>
+</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a>
+</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a><span class="sd">        This is used to determine when workers should shut down within the `run`</span>
+</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a><span class="sd">        method, and this method should not be called by users.</span>
+</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a>
+</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a>        <span class="c1"># get_runs_in_work_queue cant look past the concurrency limit</span>
+</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a>        <span class="c1"># so we have to query for the allowed flow runs directly</span>
+</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a>
+</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">get_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">read_flow_runs</span><span class="p">(</span>
+</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a>                <span class="c1"># BUG: Why won&#39;t this work...?</span>
+</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a>                <span class="c1"># flow_filter=FlowFilter(</span>
+</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a>                <span class="c1">#     tags={&quot;all_&quot;: [&quot;simmate&quot;]},</span>
+</span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a>                <span class="c1"># ),</span>
+</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a>                <span class="n">flow_run_filter</span><span class="o">=</span><span class="n">FlowRunFilter</span><span class="p">(</span>
+</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a>                    <span class="n">state</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;any_&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;SCHEDULED&quot;</span><span class="p">,</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">]}}</span>
+</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a>                <span class="p">),</span>
+</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a>            <span class="p">)</span>
+</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a>
+</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">_delete_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a><span class="sd">        Deletes the work queue associated with this worker.</span>
+</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a>
+</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a><span class="sd">        This method is called automatically at the end of `run` and</span>
+</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a><span class="sd">        should not be called by users.</span>
+</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a>
+</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a>        <span class="n">queue_id</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_queue_id</span><span class="p">()</span>
 </span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a>
-</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a><span class="sd">        This method is called automatically at the end of `run` and</span>
-</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a><span class="sd">        should not be called by users.</span>
-</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a>
-</span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a>        <span class="n">queue_id</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_queue_id</span><span class="p">()</span>
-</span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a>
-</span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">get_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">delete_work_queue_by_id</span><span class="p">(</span>
-</span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a>                <span class="nb">id</span><span class="o">=</span><span class="n">queue_id</span><span class="p">,</span>
-</span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a>            <span class="p">)</span>
+</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">get_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">delete_work_queue_by_id</span><span class="p">(</span>
+</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a>                <span class="nb">id</span><span class="o">=</span><span class="n">queue_id</span><span class="p">,</span>
+</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a>            <span class="p">)</span>
 </span></pre></div>
 
 
@@ -529,63 +523,57 @@
 </span><span id="Worker-207"><a href="#Worker-207"><span class="linenos">207</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">create_work_queue</span><span class="p">(</span>
 </span><span id="Worker-208"><a href="#Worker-208"><span class="linenos">208</span></a>                <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span>
 </span><span id="Worker-209"><a href="#Worker-209"><span class="linenos">209</span></a>                <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;simmate&quot;</span><span class="p">],</span>
-</span><span id="Worker-210"><a href="#Worker-210"><span class="linenos">210</span></a>                <span class="n">flow_runner_types</span><span class="o">=</span><span class="p">[</span>
-</span><span id="Worker-211"><a href="#Worker-211"><span class="linenos">211</span></a>                    <span class="s2">&quot;universal&quot;</span><span class="p">,</span>
-</span><span id="Worker-212"><a href="#Worker-212"><span class="linenos">212</span></a>                    <span class="s2">&quot;kubernetes&quot;</span><span class="p">,</span>
-</span><span id="Worker-213"><a href="#Worker-213"><span class="linenos">213</span></a>                    <span class="s2">&quot;docker&quot;</span><span class="p">,</span>
-</span><span id="Worker-214"><a href="#Worker-214"><span class="linenos">214</span></a>                    <span class="s2">&quot;subprocess&quot;</span><span class="p">,</span>
-</span><span id="Worker-215"><a href="#Worker-215"><span class="linenos">215</span></a>                <span class="p">],</span>
-</span><span id="Worker-216"><a href="#Worker-216"><span class="linenos">216</span></a>            <span class="p">)</span>
-</span><span id="Worker-217"><a href="#Worker-217"><span class="linenos">217</span></a>
-</span><span id="Worker-218"><a href="#Worker-218"><span class="linenos">218</span></a>            <span class="c1"># create_work_queue does not accept an input for concurrency, so</span>
-</span><span id="Worker-219"><a href="#Worker-219"><span class="linenos">219</span></a>            <span class="c1"># I need to update this in a 2nd call to the api</span>
-</span><span id="Worker-220"><a href="#Worker-220"><span class="linenos">220</span></a>            <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">update_work_queue</span><span class="p">(</span>
-</span><span id="Worker-221"><a href="#Worker-221"><span class="linenos">221</span></a>                <span class="nb">id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">),</span>
-</span><span id="Worker-222"><a href="#Worker-222"><span class="linenos">222</span></a>                <span class="n">concurrency_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">concurrency_limit</span><span class="p">,</span>
-</span><span id="Worker-223"><a href="#Worker-223"><span class="linenos">223</span></a>            <span class="p">)</span>
-</span><span id="Worker-224"><a href="#Worker-224"><span class="linenos">224</span></a>
-</span><span id="Worker-225"><a href="#Worker-225"><span class="linenos">225</span></a>        <span class="n">queue_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-</span><span id="Worker-226"><a href="#Worker-226"><span class="linenos">226</span></a>
-</span><span id="Worker-227"><a href="#Worker-227"><span class="linenos">227</span></a>        <span class="k">return</span> <span class="n">queue_id</span>
-</span><span id="Worker-228"><a href="#Worker-228"><span class="linenos">228</span></a>
-</span><span id="Worker-229"><a href="#Worker-229"><span class="linenos">229</span></a>    <span class="nd">@staticmethod</span>
-</span><span id="Worker-230"><a href="#Worker-230"><span class="linenos">230</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_remaining_runs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="Worker-231"><a href="#Worker-231"><span class="linenos">231</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="Worker-232"><a href="#Worker-232"><span class="linenos">232</span></a><span class="sd">        Returns a count of the number of remaining workflow runs.</span>
-</span><span id="Worker-233"><a href="#Worker-233"><span class="linenos">233</span></a>
-</span><span id="Worker-234"><a href="#Worker-234"><span class="linenos">234</span></a><span class="sd">        This is used to determine when workers should shut down within the `run`</span>
-</span><span id="Worker-235"><a href="#Worker-235"><span class="linenos">235</span></a><span class="sd">        method, and this method should not be called by users.</span>
-</span><span id="Worker-236"><a href="#Worker-236"><span class="linenos">236</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="Worker-237"><a href="#Worker-237"><span class="linenos">237</span></a>
-</span><span id="Worker-238"><a href="#Worker-238"><span class="linenos">238</span></a>        <span class="c1"># get_runs_in_work_queue cant look past the concurrency limit</span>
-</span><span id="Worker-239"><a href="#Worker-239"><span class="linenos">239</span></a>        <span class="c1"># so we have to query for the allowed flow runs directly</span>
-</span><span id="Worker-240"><a href="#Worker-240"><span class="linenos">240</span></a>
-</span><span id="Worker-241"><a href="#Worker-241"><span class="linenos">241</span></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">get_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-</span><span id="Worker-242"><a href="#Worker-242"><span class="linenos">242</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">read_flow_runs</span><span class="p">(</span>
-</span><span id="Worker-243"><a href="#Worker-243"><span class="linenos">243</span></a>                <span class="c1"># BUG: Why won&#39;t this work...?</span>
-</span><span id="Worker-244"><a href="#Worker-244"><span class="linenos">244</span></a>                <span class="c1"># flow_filter=FlowFilter(</span>
-</span><span id="Worker-245"><a href="#Worker-245"><span class="linenos">245</span></a>                <span class="c1">#     tags={&quot;all_&quot;: [&quot;simmate&quot;]},</span>
-</span><span id="Worker-246"><a href="#Worker-246"><span class="linenos">246</span></a>                <span class="c1"># ),</span>
-</span><span id="Worker-247"><a href="#Worker-247"><span class="linenos">247</span></a>                <span class="n">flow_run_filter</span><span class="o">=</span><span class="n">FlowRunFilter</span><span class="p">(</span>
-</span><span id="Worker-248"><a href="#Worker-248"><span class="linenos">248</span></a>                    <span class="n">state</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;any_&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;SCHEDULED&quot;</span><span class="p">,</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">]}}</span>
-</span><span id="Worker-249"><a href="#Worker-249"><span class="linenos">249</span></a>                <span class="p">),</span>
-</span><span id="Worker-250"><a href="#Worker-250"><span class="linenos">250</span></a>            <span class="p">)</span>
-</span><span id="Worker-251"><a href="#Worker-251"><span class="linenos">251</span></a>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-</span><span id="Worker-252"><a href="#Worker-252"><span class="linenos">252</span></a>
-</span><span id="Worker-253"><a href="#Worker-253"><span class="linenos">253</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">_delete_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="Worker-254"><a href="#Worker-254"><span class="linenos">254</span></a>        <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="Worker-255"><a href="#Worker-255"><span class="linenos">255</span></a><span class="sd">        Deletes the work queue associated with this worker.</span>
+</span><span id="Worker-210"><a href="#Worker-210"><span class="linenos">210</span></a>            <span class="p">)</span>
+</span><span id="Worker-211"><a href="#Worker-211"><span class="linenos">211</span></a>
+</span><span id="Worker-212"><a href="#Worker-212"><span class="linenos">212</span></a>            <span class="c1"># create_work_queue does not accept an input for concurrency, so</span>
+</span><span id="Worker-213"><a href="#Worker-213"><span class="linenos">213</span></a>            <span class="c1"># I need to update this in a 2nd call to the api</span>
+</span><span id="Worker-214"><a href="#Worker-214"><span class="linenos">214</span></a>            <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">update_work_queue</span><span class="p">(</span>
+</span><span id="Worker-215"><a href="#Worker-215"><span class="linenos">215</span></a>                <span class="nb">id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">),</span>
+</span><span id="Worker-216"><a href="#Worker-216"><span class="linenos">216</span></a>                <span class="n">concurrency_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">concurrency_limit</span><span class="p">,</span>
+</span><span id="Worker-217"><a href="#Worker-217"><span class="linenos">217</span></a>            <span class="p">)</span>
+</span><span id="Worker-218"><a href="#Worker-218"><span class="linenos">218</span></a>
+</span><span id="Worker-219"><a href="#Worker-219"><span class="linenos">219</span></a>        <span class="n">queue_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span><span id="Worker-220"><a href="#Worker-220"><span class="linenos">220</span></a>
+</span><span id="Worker-221"><a href="#Worker-221"><span class="linenos">221</span></a>        <span class="k">return</span> <span class="n">queue_id</span>
+</span><span id="Worker-222"><a href="#Worker-222"><span class="linenos">222</span></a>
+</span><span id="Worker-223"><a href="#Worker-223"><span class="linenos">223</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="Worker-224"><a href="#Worker-224"><span class="linenos">224</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_remaining_runs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="Worker-225"><a href="#Worker-225"><span class="linenos">225</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Worker-226"><a href="#Worker-226"><span class="linenos">226</span></a><span class="sd">        Returns a count of the number of remaining workflow runs.</span>
+</span><span id="Worker-227"><a href="#Worker-227"><span class="linenos">227</span></a>
+</span><span id="Worker-228"><a href="#Worker-228"><span class="linenos">228</span></a><span class="sd">        This is used to determine when workers should shut down within the `run`</span>
+</span><span id="Worker-229"><a href="#Worker-229"><span class="linenos">229</span></a><span class="sd">        method, and this method should not be called by users.</span>
+</span><span id="Worker-230"><a href="#Worker-230"><span class="linenos">230</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="Worker-231"><a href="#Worker-231"><span class="linenos">231</span></a>
+</span><span id="Worker-232"><a href="#Worker-232"><span class="linenos">232</span></a>        <span class="c1"># get_runs_in_work_queue cant look past the concurrency limit</span>
+</span><span id="Worker-233"><a href="#Worker-233"><span class="linenos">233</span></a>        <span class="c1"># so we have to query for the allowed flow runs directly</span>
+</span><span id="Worker-234"><a href="#Worker-234"><span class="linenos">234</span></a>
+</span><span id="Worker-235"><a href="#Worker-235"><span class="linenos">235</span></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">get_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="Worker-236"><a href="#Worker-236"><span class="linenos">236</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">read_flow_runs</span><span class="p">(</span>
+</span><span id="Worker-237"><a href="#Worker-237"><span class="linenos">237</span></a>                <span class="c1"># BUG: Why won&#39;t this work...?</span>
+</span><span id="Worker-238"><a href="#Worker-238"><span class="linenos">238</span></a>                <span class="c1"># flow_filter=FlowFilter(</span>
+</span><span id="Worker-239"><a href="#Worker-239"><span class="linenos">239</span></a>                <span class="c1">#     tags={&quot;all_&quot;: [&quot;simmate&quot;]},</span>
+</span><span id="Worker-240"><a href="#Worker-240"><span class="linenos">240</span></a>                <span class="c1"># ),</span>
+</span><span id="Worker-241"><a href="#Worker-241"><span class="linenos">241</span></a>                <span class="n">flow_run_filter</span><span class="o">=</span><span class="n">FlowRunFilter</span><span class="p">(</span>
+</span><span id="Worker-242"><a href="#Worker-242"><span class="linenos">242</span></a>                    <span class="n">state</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;any_&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;SCHEDULED&quot;</span><span class="p">,</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">]}}</span>
+</span><span id="Worker-243"><a href="#Worker-243"><span class="linenos">243</span></a>                <span class="p">),</span>
+</span><span id="Worker-244"><a href="#Worker-244"><span class="linenos">244</span></a>            <span class="p">)</span>
+</span><span id="Worker-245"><a href="#Worker-245"><span class="linenos">245</span></a>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span><span id="Worker-246"><a href="#Worker-246"><span class="linenos">246</span></a>
+</span><span id="Worker-247"><a href="#Worker-247"><span class="linenos">247</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">_delete_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="Worker-248"><a href="#Worker-248"><span class="linenos">248</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Worker-249"><a href="#Worker-249"><span class="linenos">249</span></a><span class="sd">        Deletes the work queue associated with this worker.</span>
+</span><span id="Worker-250"><a href="#Worker-250"><span class="linenos">250</span></a>
+</span><span id="Worker-251"><a href="#Worker-251"><span class="linenos">251</span></a><span class="sd">        This method is called automatically at the end of `run` and</span>
+</span><span id="Worker-252"><a href="#Worker-252"><span class="linenos">252</span></a><span class="sd">        should not be called by users.</span>
+</span><span id="Worker-253"><a href="#Worker-253"><span class="linenos">253</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="Worker-254"><a href="#Worker-254"><span class="linenos">254</span></a>
+</span><span id="Worker-255"><a href="#Worker-255"><span class="linenos">255</span></a>        <span class="n">queue_id</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_queue_id</span><span class="p">()</span>
 </span><span id="Worker-256"><a href="#Worker-256"><span class="linenos">256</span></a>
-</span><span id="Worker-257"><a href="#Worker-257"><span class="linenos">257</span></a><span class="sd">        This method is called automatically at the end of `run` and</span>
-</span><span id="Worker-258"><a href="#Worker-258"><span class="linenos">258</span></a><span class="sd">        should not be called by users.</span>
-</span><span id="Worker-259"><a href="#Worker-259"><span class="linenos">259</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="Worker-260"><a href="#Worker-260"><span class="linenos">260</span></a>
-</span><span id="Worker-261"><a href="#Worker-261"><span class="linenos">261</span></a>        <span class="n">queue_id</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_queue_id</span><span class="p">()</span>
-</span><span id="Worker-262"><a href="#Worker-262"><span class="linenos">262</span></a>
-</span><span id="Worker-263"><a href="#Worker-263"><span class="linenos">263</span></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">get_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-</span><span id="Worker-264"><a href="#Worker-264"><span class="linenos">264</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">delete_work_queue_by_id</span><span class="p">(</span>
-</span><span id="Worker-265"><a href="#Worker-265"><span class="linenos">265</span></a>                <span class="nb">id</span><span class="o">=</span><span class="n">queue_id</span><span class="p">,</span>
-</span><span id="Worker-266"><a href="#Worker-266"><span class="linenos">266</span></a>            <span class="p">)</span>
+</span><span id="Worker-257"><a href="#Worker-257"><span class="linenos">257</span></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">get_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="Worker-258"><a href="#Worker-258"><span class="linenos">258</span></a>            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">delete_work_queue_by_id</span><span class="p">(</span>
+</span><span id="Worker-259"><a href="#Worker-259"><span class="linenos">259</span></a>                <span class="nb">id</span><span class="o">=</span><span class="n">queue_id</span><span class="p">,</span>
+</span><span id="Worker-260"><a href="#Worker-260"><span class="linenos">260</span></a>            <span class="p">)</span>
 </span></pre></div>
 
 
