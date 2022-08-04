@@ -385,7 +385,7 @@ class Workflow:
             pre_sanitize_structure=pre_sanitize_structure,
             pre_standardize_structure=pre_standardize_structure,
             is_restart=is_restart,
-        ).result()
+        )
 
         result = cls.s3task.run(**parameters_cleaned).result()
 

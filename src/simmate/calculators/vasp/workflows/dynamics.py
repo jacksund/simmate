@@ -40,7 +40,7 @@ class Dynamics__Vasp__Mit(Workflow):
             temperature_end=temperature_end,
             time_step=time_step,
             nsteps=nsteps,
-        ).result()
+        )
 
         result = cls.s3task.run(**parameters_cleaned).result()
         calculation_id = save_result(result)

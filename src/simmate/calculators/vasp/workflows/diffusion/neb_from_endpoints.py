@@ -95,7 +95,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
             command=command,
             diffusion_analysis_id=diffusion_analysis_id,
             is_restart=is_restart,
-        ).result()
+        )
 
         # Relax the starting supercell structure
         endpoint_start_state = Relaxation__Vasp__NebEndpoint.run(

@@ -63,7 +63,7 @@ class Relaxation__Vasp__Staged(Workflow):
             source=source,
             directory=directory,
             copy_previous_directory=copy_previous_directory,
-        ).result()
+        )
 
         tasks_to_run = [
             Relaxation__Vasp__Quality00,

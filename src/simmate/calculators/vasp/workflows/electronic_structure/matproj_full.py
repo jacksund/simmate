@@ -54,7 +54,7 @@ class ElectronicStructure__Vasp__MatprojFull(Workflow):
             directory=directory,
             copy_previous_directory=copy_previous_directory,
             register_run=False,
-        ).result()
+        )
 
         static_result = static_workflow.run(
             structure=parameters_cleaned["structure"],
