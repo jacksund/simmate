@@ -19,7 +19,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 
 
-# v0.7.0 - v0.7.2 (2022.07.19 - 2022.07.31)
+# v0.7.0 - v0.7.3 (2022.07.19 - 2022.08.04)
 
 **Enhancements**
 - add guide for installing VASP v5 to Ubuntu v22.04 ([@scott-materials](https://github.com/scott-materials), [#183](https://github.com/jacksund/simmate/issues/183))
@@ -30,6 +30,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add full-run unittests that call workflows and vasp (without emulation)
 - add walltime error handler that properly shuts down calculations when a SLURM job is about to expire
 - add option to restart workflows from a checkpoint
+- automatically build api documentation using github actions
 
 **Refactors**
 - refactor `start-worker` command to use prefect instead of the experimental django executor
@@ -40,6 +41,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 - fix incorrect passing of `source` in NEB all-paths workflow causing it to fail
 - fix missing SVG files for web UI ([#196](https://github.com/jacksund/simmate/pull/196)).
+- fix incorrect handling of prefect v2 futures by workflows
 
 
 
