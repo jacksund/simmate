@@ -8,8 +8,11 @@ from simmate.toolkit import Structure, Composition
 
 from simmate.toolkit.symmetry.wyckoff import loadWyckoffData
 from simmate.toolkit.creators.vector import UniformlyDistributedVectors
-from simmate.toolkit.creators.sites.random_wyckoff import asymmetric_unit_boundries  #!!! this will move to simmate.toolkit.symmetry in the future
+from simmate.toolkit.creators.sites.random_wyckoff import (
+    asymmetric_unit_boundries,
+)  #!!! this will move to simmate.toolkit.symmetry in the future
 from simmate.toolkit.creators.lattice import RSLSmartVolume
+
 # from pymatdisc.core.estimate import distance_matrix # !!! TODO
 
 ##############################################################################
