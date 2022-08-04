@@ -154,36 +154,18 @@ git restore .
 
 To make a new release, you must follow these steps:
 
-1. Create the new documentation:
-``` bash
-# Before the new documentation can be produced, there are a number
-# of optional dependencies that need to be installed.
-conda install -n simmate_dev -c conda-forge jarvis-tools aflow -y
-pip install qmpy_rester
+1. Update the Simmate version number in `pyproject.toml` ([here](https://github.com/jacksund/simmate/blob/main/pyproject.toml))
 
-# You can the change into the docs directory and run the make_docs.py.
-# Note we also delete existing docs to ensure a clean setup.
-cd docs/
-rm -r simmate/ index.html search.js simmate.html
-python make_docs.py
-```
+2. Make a [release](https://github.com/jacksund/simmate/releases/new) on Github (which will automatically release to pypi)
 
-2. Update the Simmate version number in `pyproject.toml` ([here](https://github.com/jacksund/simmate/blob/main/pyproject.toml))
+3. Wait for the autotick bot to open a pull request for the [simmate feedstock](https://github.com/conda-forge/simmate-feedstock). This can take up to 24hrs, but you can check the status [here](https://conda-forge.org/status/#version_updates) (under "Queued").
 
-3. Make a [release](https://github.com/jacksund/simmate/releases/new) on Github (which will automatically release to pypi)
+4. Make sure the autotick bot made the proper changes before merging. If there were any major changes, you can use [grayskull](https://github.com/conda-incubator/grayskull) to help update the version number, sha256, and dependencies.
 
-4. Wait for the autotick bot to open a pull request for the [simmate feedstock](https://github.com/conda-forge/simmate-feedstock). This can take up to 24hrs, but you can check the status [here](https://conda-forge.org/status/#version_updates) (under "Queued").
-
-5. Make sure the autotick bot made the proper changes before merging. If there were any major changes, you can use [grayskull](https://www.marcelotrevisani.com/grayskull) to help update the version number, sha256, and dependencies.
-
-6. After merging, it takes the conda-forge channels 30min or so to update their indexes. Afterwards, you can test the conda install with:
+5. After merging, it takes the conda-forge channels 30min or so to update their indexes. Afterwards, you can test the conda install with:
 ``` bash
 # for a normal release
 conda create -n my_env -c conda-forge simmate -y
-
-# for a dev release
-conda create -n my_env -c conda-forge python=3.10 -y
-conda install -n my_env -c conda-forge -c conda-forge/label/simmate_dev simmate -y
 
 # as an extra, make sure spyder can also be installed in the same env
 conda install -n my_env -c conda-forge spyder -y

@@ -24,16 +24,6 @@ from simmate.toolkit import Structure
 from simmate.database.third_parties import JarvisStructure
 
 
-# Jarvis is not a dependency of simmate, so make sure you install it before using
-# this module
-try:
-    from jarvis.db.figshare import data as jarvis_helper
-except:
-    raise ModuleNotFoundError(
-        "You must install jarvis with `conda install -c conda-forge jarvis-tools`"
-    )
-
-
 @transaction.atomic
 def load_all_structures():
     """
@@ -42,6 +32,15 @@ def load_all_structures():
     Loads all structures directly for the JARVIS database into the local
     Simmate database.
     """
+
+    # Jarvis is not a dependency of simmate, so make sure you install it before using
+    # this module
+    try:
+        from jarvis.db.figshare import data as jarvis_helper
+    except:
+        raise ModuleNotFoundError(
+            "You must install jarvis with `conda install -c conda-forge jarvis-tools`"
+        )
 
     # Load all of the 3D data from JARVIS. This gives us a list of dictionaries
     # TODO: In the future, we can include other datasets like their 2D dataset.

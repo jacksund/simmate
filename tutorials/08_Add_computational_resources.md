@@ -1,3 +1,5 @@
+> :warning::warning::warning: This tutorial is for Prefect v1, but much of Simmate now depends on Prefect v2. As we adjust to the new backend, parts of this tutorial may be broken and recommended proceedures are subject to change.
+
 # Add computational resources
 
 In this tutorial, you will learn how to run workflows on distributed computational resources -- with full scheduling and monitoring.
@@ -275,7 +277,7 @@ Once you learned how to set up your Dask cluster, the next step is tell Prefect 
 1. Configure and then start your Dask Cluster.
 2. Configure and then start your Prefect Agent, which will start submitting workflows!
 
-We provide an example of this script in our [`example_configs`](https://github.com/jacksund/simmate/blob/main/src/simmate/configuration/example_configs/run_cluster_example.py) module. In the future, we hope to have more convenient methods through the command-line, but these features are not complete yet. 
+In the future, we hope to have more convenient methods through the command-line, but these features are not complete yet. 
 
 </br>
 

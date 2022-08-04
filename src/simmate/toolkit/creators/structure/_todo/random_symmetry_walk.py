@@ -6,15 +6,11 @@ import itertools
 
 from simmate.toolkit import Structure, Composition
 
-from pymatdisc.core.symmetry.wyckoff import loadWyckoffData
-from pymatdisc.core.creators.vector import UniformlyDistributedVectors
-from pymatdisc.core.creators.sites import (
-    asymmetric_unit_boundries,
-)  #!!! this will move to pymatdisc.symmetry in the future
-from pymatdisc.core.creators.lattice import (
-    RSLSmartVolume,
-)  #!!! naming likely to change on this class too
-from pymatdisc.core.estimate import distance_matrix
+from simmate.toolkit.symmetry.wyckoff import loadWyckoffData
+from simmate.toolkit.creators.vector import UniformlyDistributedVectors
+from simmate.toolkit.creators.sites.random_wyckoff import asymmetric_unit_boundries  #!!! this will move to simmate.toolkit.symmetry in the future
+from simmate.toolkit.creators.lattice import RSLSmartVolume
+# from pymatdisc.core.estimate import distance_matrix # !!! TODO
 
 ##############################################################################
 
