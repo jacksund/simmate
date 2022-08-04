@@ -109,7 +109,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
         subcommands = parse_multi_command(
             command,
             commands_out=["command_bulk", "command_supercell", "command_neb"],
-        ).result()
+        )
 
         # Load our input and make a base directory for all other workflows to run
         # within for us.
@@ -121,7 +121,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             migrating_specie=migrating_specie,
             is_restart=is_restart,
             register_run=False,
-        ).result()
+        )
 
         # Our step is to run a relaxation on the bulk structure and it uses our inputs
         # directly. The remaining one tasks pass on results.
@@ -160,7 +160,7 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             migrating_specie=migrating_specie,
             directory=parameters_cleaned["directory"],
             vacancy_mode=True,  # assumed for now
-        ).result()
+        )
 
         # Run NEB single_path workflow for all these.
         for i, hop_id in enumerate(migration_hop_ids):

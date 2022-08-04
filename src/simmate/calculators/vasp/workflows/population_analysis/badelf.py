@@ -43,7 +43,7 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
         structure_w_empties = get_structure_w_empties(
             structure=structure,
             empty_ion_template="F",
-        ).result()
+        )
 
         # Bader only adds files and doesn't overwrite any, so I just run it
         # in the original directory. I may switch to copying over to a new

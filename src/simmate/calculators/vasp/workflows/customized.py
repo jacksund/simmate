@@ -55,7 +55,7 @@ class Customized__Vasp__UserConfig(Workflow):
             workflow_base=workflow_base,
             input_parameters=input_parameters,
             updated_settings=updated_settings,
-        ).result()
+        )
 
         result = run_customized_s3task(**parameters_cleaned)
 

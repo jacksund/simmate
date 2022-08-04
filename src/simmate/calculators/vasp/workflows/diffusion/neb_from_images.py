@@ -58,7 +58,7 @@ class Diffusion__Vasp__NebFromImages(Workflow):
             command=command,
             is_restart=is_restart,
             register_run=False,  # temporary fix bc no calc table exists yet
-        ).result()
+        )
 
         result = cls.s3task.run(**parameters_cleaned).result()
 
