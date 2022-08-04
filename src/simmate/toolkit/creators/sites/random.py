@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pymatdisc.core.creators.vector import UniformlyDistributedVectors
+from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 
 
 #!! NOTE: I should make a copy of this that is RandomSymSites, where I limit the

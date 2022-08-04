@@ -198,35 +198,6 @@ class SearchResults(models.QuerySet):
         # we can now delete the csv file
         os.remove(csv_filename)
 
-    # EXPERIMENTAL
-    # from prefect import Client
-    # from prefect.utilities.graphql import with_args
-    # def get_prefect_fields(self, fields):
-    #     # This is only every used for Calculations! I have it here instead of making
-    #     # whole new Manager subclass for simplicity.
-    #     # Make sure we have a calculation by seeing if it has prefect_flow_run_id
-    #     # field attached to the model
-    #     if not hasattr(self.model, "prefect_flow_run_id"):
-    #         raise Exception("get_prefect_fields() should only be used on Calculations!")
-    #     # grab all the ids in the queryset
-    #     ids = list(self.values_list("prefect_flow_run_id", flat=True).all())
-    #     # now for all of the ids in this queryset, grab the corresponding info
-    #     query = {
-    #         "query": {
-    #             with_args(
-    #                 "flow_run",
-    #                 {
-    #                     "where": {
-    #                         "id": {"_in": ids},
-    #                     },
-    #                 },
-    #             ): fields,
-    #         }
-    #     }
-    #     client = Client()
-    #     result = client.graphql(query)
-    #     return result
-
 
 # Copied this line from...
 # https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py

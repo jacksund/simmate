@@ -21,16 +21,6 @@ from pymatgen.io.ase import AseAtomsAdaptor
 
 from simmate.database.third_parties.aflow import AflowStructure
 
-# AFLOW is not a dependency of simmate, so make sure you install it before using
-# this module
-try:
-    from aflow import K as AflowKeywords
-    from aflow.control import Query as AflowQuery
-except:
-    raise ModuleNotFoundError(
-        "You must install aflow client with `conda install -c conda-forge aflow`"
-    )
-
 
 def load_all_structures():
     """
@@ -39,6 +29,16 @@ def load_all_structures():
     Loads all structures directly for the AFLOW database into the local
     Simmate database.
     """
+
+    # AFLOW is not a dependency of simmate, so make sure you install it before using
+    # this module
+    try:
+        from aflow import K as AflowKeywords
+        from aflow.control import Query as AflowQuery
+    except:
+        raise ModuleNotFoundError(
+            "You must install aflow client with `conda install -c conda-forge aflow`"
+        )
 
     # The way we build a query looks similar to the Django API, where we start
     # with a Query object (similar to Table.objects manager) and build filters
