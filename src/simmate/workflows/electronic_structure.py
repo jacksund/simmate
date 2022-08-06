@@ -10,4 +10,5 @@ for a given crystal structure
 
 from simmate.calculators.vasp.workflows.electronic_structure.all import (
     ElectronicStructure__Vasp__MatprojFull,
+    ElectronicStructure__Vasp__MatprojHseFull,
 )

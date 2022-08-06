@@ -5,3 +5,7 @@ from simmate.database.base_data_types import DensityofStatesCalc
 
 class MatprojDensityOfStates(DensityofStatesCalc):
     pass
+
+
+class MatprojHSEDensityOfStates(DensityofStatesCalc):
+    pass
