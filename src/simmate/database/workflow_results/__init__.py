@@ -4,30 +4,6 @@ from simmate.utilities import get_doc_from_readme
 
 __doc__ = get_doc_from_readme(__file__)
 
-from simmate.calculators.vasp.database.relaxation import (
-    MatprojRelaxation,
-    MatprojIonicStep,
-    MatprojHSERelaxation,
-    MatprojHSEIonicStep,
-    MatprojSCANRelaxation,
-    MatprojSCANIonicStep,
-    MITRelaxation,
-    MITIonicStep,
-    Quality00Relaxation,
-    Quality00IonicStep,
-    Quality01Relaxation,
-    Quality01IonicStep,
-    Quality02Relaxation,
-    Quality02IonicStep,
-    Quality03Relaxation,
-    Quality03IonicStep,
-    Quality04Relaxation,
-    Quality04IonicStep,
-    StagedRelaxation,
-    MatVirtualLabCINEBEndpointRelaxation,
-    MatVirtualLabCINEBEndpointIonicStep,
-)
-
 from simmate.calculators.vasp.database.energy import (
     MatprojStaticEnergy,
     MatprojHSEStaticEnergy,

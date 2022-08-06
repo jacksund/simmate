@@ -70,8 +70,9 @@ def save_bader_results(bader_result, prefect_flow_run_id):
 
     # load the calculation entry for this workflow run. This should already
     # exist thanks to the load_input_and_register task of the prebader workflow
-    calculation = MPBaderResults.from_prefect_id(
+    calculation = MPBaderResults.from_prefect_context(
         prefect_flow_run_id,
+        PopulationAnalysis__Vasp__BaderMatproj.name_full,
     )
     # BUG: can't use context to grab the id because workflow tasks generate a
     # different id than the main workflow

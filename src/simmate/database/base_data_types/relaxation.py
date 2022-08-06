@@ -94,7 +94,6 @@ class Relaxation(Structure, Thermodynamics, Calculation):
     """
 
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     base_info = (
@@ -437,7 +436,6 @@ class IonicStep(Structure, Thermodynamics, Forces):
     """
 
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     base_info = (

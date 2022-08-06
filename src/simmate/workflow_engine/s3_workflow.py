@@ -118,15 +118,13 @@ import signal
 import subprocess
 import yaml
 from typing import List, Tuple
-from functools import cache
 
 import pandas
 
-from prefect.tasks import Task
 from prefect.context import get_run_context, MissingContextError
 
-from simmate.workflow_engine import ErrorHandler
-from simmate.utilities import get_directory, make_archive, make_error_archive
+from simmate.workflow_engine import Workflow, ErrorHandler
+from simmate.utilities import make_archive, make_error_archive
 
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
 # reset the working directory between task retries -- in some cases we may
@@ -138,9 +136,9 @@ from simmate.utilities import get_directory, make_archive, make_error_archive
 # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
 
 
-class S3Task:
+class S3Workflow(Workflow):
     """
-    The base Supervised-Staged-Shell that many tasks inherit from. This class
+    The base Supervised-Staged-Shell that many workflows inherit from. This class
     encapulates logic for running external programs (like VASP), fixing common
     errors during a calculation, and working up the results.
     """
@@ -211,6 +209,145 @@ class S3Task:
     task run. After compression, it will also delete the directory.
     The default is False.
     """
+
+    @classmethod
+    def run_config(
+        cls,
+        directory: str = None,
+        command: str = None,
+        is_restart: bool = False,
+        **kwargs,
+    ):
+        """
+         Runs the entire staged task (setup, execution, workup), which includes
+         supervising during execution.
+
+         Call this method once you have your task initialized. For each run you
+         can provide a new structure, directory, or command. For example:
+
+         ``` python
+         from simmate.calculator.example.tasks import ExampleTask
+
+         my_result = ExampleTask.run(command=my_command)
+         ```
+
+         #### Parameters
+
+         - `command`:
+             The command that will be called during execution.
+
+         - `directory`:
+             The directory to run everything in. This is passed to the ulitities
+             function simmate.ulitities.get_directory
+
+        - `is_restart`:
+            whether or not this calculation is a continuation of a previous run
+            (i.e. a restarted calculation). If so, the `setup_restart` will be
+            called instead of the setup method. Extra checks will be made to
+            see if the calculation completed already too.
+
+         - `**kwargs`:
+             Any extra keywords that should be passed to the setup() method.
+
+        #### Returns
+
+         - a dictionary of the result, corrections, and working directory used
+         for this task run
+        """
+
+        # because the command is something that is frequently changed at the
+        # workflow level, then we want to make it so the user can set it for
+        # each unique task.run() call. Otherwise we grab the default from the
+        # class attribute
+        if not command:
+            command = cls.command
+
+        # !!! DEV
+        # local import to prevent circular import error
+        from simmate.workflow_engine.common_tasks import (
+            load_input_and_register,
+            save_result,
+        )
+
+        # !!! DEV
+        parameters_cleaned = load_input_and_register(
+            directory=directory,
+            command=command,
+            is_restart=is_restart,
+            **kwargs,
+        )
+        directory_cleaned = parameters_cleaned["directory"]
+        command_cleaned = parameters_cleaned["command"]
+
+        # When handling restarted calculations, we check for the final summary
+        # file and if it exists, we know the calculation has already completed
+        # (and therefore doesn't require a restart). This helps handle nested
+        # workflows where we don't know which task to restart at.
+        summary_filename = os.path.join(directory_cleaned, "simmate_summary.yaml")
+        is_complete = os.path.exists(summary_filename)
+        is_dir_setup = cls._check_input_files(directory_cleaned, raise_if_missing=False)
+
+        # run the setup stage of the task, where there is a unique method
+        # if we are picking up from a previously paused run.
+        if (not is_restart and not is_complete) or not is_dir_setup:
+            cls.setup(**parameters_cleaned)
+        elif is_restart and not is_complete:
+            cls.setup_restart(**parameters_cleaned)
+        else:
+            print("Calculation is already completed. Skipping setup.")
+
+        # now if we have a restart OR have an incomplete calculation that is being
+        # restarted, we can check our files and run the external program
+        if not is_restart or not is_complete:
+
+            # make sure proper files are present
+            cls._check_input_files(directory_cleaned)
+
+            # run the shelltask and error supervision stages. This method returns
+            # a list of any corrections applied during the run.
+            corrections = cls.execute(directory_cleaned, command_cleaned)
+        else:
+            print("Calculation is already completed. Skipping execution.")
+
+            # load the corrections from file for reference
+            corrections_filename = os.path.join(
+                directory_cleaned, "simmate_corrections.csv"
+            )
+            if os.path.exists(corrections_filename):
+                data = pandas.read_csv(corrections_filename)
+                corrections = data.values.tolist()
+            else:
+                corrections = []
+            # OPTIMIZE: this same code is at the start of the execute method.
+            # Consider making it into a utility.
+
+        # run the workup stage of the task. This is where the data/info is pulled
+        # out from the calculation and is thus our "result".
+        result = cls.workup(directory=directory_cleaned)
+
+        # if requested, compresses the directory to a zip file and then removes
+        # the directory.
+        if cls.compress_output:
+            make_archive(directory_cleaned)
+
+        # Grab the prefect flow run id. Note, when not ran within a prefect
+        # flow, there won't be an id. We therefore need this try/except
+        try:
+            prefect_context = get_run_context()
+            flow_run_id = str(prefect_context.task_run.flow_run_id)
+        except MissingContextError:
+            flow_run_id = None
+
+        # !!! DEV
+        calculation_id = save_result(result)
+
+        # Return our final information as a dictionary
+        return {
+            "result": result,
+            "corrections": corrections,
+            "directory": directory,
+            "prefect_flow_run_id": flow_run_id,
+        }
 
     @staticmethod
     def setup(directory: str, **kwargs):
@@ -293,7 +430,7 @@ class S3Task:
         if not all(os.path.exists(filename) for filename in filenames):
             if raise_if_missing:
                 raise Exception(
-                    "Make sure your `setup` method directory source is set up correctly"
+                    "Make sure your `setup` method directory source is defined correctly"
                     "The following files must exist in the directory where "
                     f"this task is ran but some are missing: {cls.required_files}"
                 )
@@ -635,161 +772,6 @@ class S3Task:
             The directory to run everything in.
         """
         pass
-
-    @classmethod
-    def run_config(
-        cls,
-        directory: str = None,
-        command: str = None,
-        is_restart: bool = False,
-        **kwargs,
-    ):
-        """
-         Runs the entire staged task (setup, execution, workup), which includes
-         supervising during execution.
-
-         Call this method once you have your task initialized. For each run you
-         can provide a new structure, directory, or command. For example:
-
-         ``` python
-         from simmate.calculator.example.tasks import ExampleTask
-
-         my_result = ExampleTask.run(command=my_command)
-         ```
-
-         #### Parameters
-
-         - `command`:
-             The command that will be called during execution.
-
-         - `directory`:
-             The directory to run everything in. This is passed to the ulitities
-             function simmate.ulitities.get_directory
-
-        - `is_restart`:
-            whether or not this calculation is a continuation of a previous run
-            (i.e. a restarted calculation). If so, the `setup_restart` will be
-            called instead of the setup method. Extra checks will be made to
-            see if the calculation completed already too.
-
-         - `**kwargs`:
-             Any extra keywords that should be passed to the setup() method.
-
-        #### Returns
-
-         - a dictionary of the result, corrections, and working directory used
-         for this task run
-        """
-
-        # because the command is something that is frequently changed at the
-        # workflow level, then we want to make it so the user can set it for
-        # each unique task.run() call. Otherwise we grab the default from the
-        # class attribute
-        if not command:
-            command = cls.command
-
-        # establish the working directory
-        directory = get_directory(directory)
-
-        # When handling restarted calculations, we check for the final summary
-        # file and if it exists, we know the calculation has already completed
-        # (and therefore doesn't require a restart). This helps handle nested
-        # workflows where we don't know which task to restart at.
-        summary_filename = os.path.join(directory, "simmate_summary.yaml")
-        is_complete = os.path.exists(summary_filename)
-        is_dir_setup = cls._check_input_files(directory, raise_if_missing=False)
-
-        # run the setup stage of the task, where there is a unique method
-        # if we are picking up from a previously paused run.
-        if (not is_restart and not is_complete) or not is_dir_setup:
-            cls.setup(directory=directory, **kwargs)
-        elif is_restart and not is_complete:
-            cls.setup_restart(directory=directory, **kwargs)
-        else:
-            print("Calculation is already completed. Skipping setup.")
-
-        # now if we have a restart OR have an incomplete calculation that is being
-        # restarted, we can check our files and run the external program
-        if not is_restart or not is_complete:
-
-            # make sure proper files are present
-            cls._check_input_files(directory)
-
-            # run the shelltask and error supervision stages. This method returns
-            # a list of any corrections applied during the run.
-            corrections = cls.execute(directory, command)
-        else:
-            print("Calculation is already completed. Skipping execution.")
-
-            # load the corrections from file for reference
-            corrections_filename = os.path.join(directory, "simmate_corrections.csv")
-            if os.path.exists(corrections_filename):
-                data = pandas.read_csv(corrections_filename)
-                corrections = data.values.tolist()
-            else:
-                corrections = []
-            # OPTIMIZE: this same code is at the start of the execute method.
-            # Consider making it into a utility.
-
-        # run the workup stage of the task. This is where the data/info is pulled
-        # out from the calculation and is thus our "result".
-        result = cls.workup(directory=directory)
-
-        # if requested, compresses the directory to a zip file and then removes
-        # the directory.
-        if cls.compress_output:
-            make_archive(directory)
-
-        # Grab the prefect flow run id. Note, when not ran within a prefect
-        # flow, there won't be an id. We therefore need this try/except
-        try:
-            prefect_context = get_run_context()
-            flow_run_id = str(prefect_context.task_run.flow_run_id)
-        except MissingContextError:
-            flow_run_id = None
-
-        # Return our final information as a dictionary
-        return {
-            "result": result,
-            "corrections": corrections,
-            "directory": directory,
-            "prefect_flow_run_id": flow_run_id,
-        }
-
-    @classmethod
-    @cache
-    def to_prefect_task(cls) -> Task:
-        """
-        Converts this Simmate s3task into a Prefect task
-        """
-
-        # Build the Task object directly instead of using prefect's @task decorator
-        task = Task(
-            fn=cls.run_config,
-            name=cls.__name__,
-        )
-
-        # as an extra, we set this attribute to the prefect task instance, which
-        # allows us to access the source Simmate S3Task easily with Prefect's
-        # context managers.
-        task.simmate_s3task = cls
-
-        return task
-
-    @classmethod
-    def run(cls, **kwargs):
-        """
-        A convience method to run this task as a registered task in a prefect context.
-        """
-        task = cls.to_prefect_task()
-        state = task.submit(**kwargs)
-
-        # We don't want to block and wait because this might disable parallel
-        # features of subflows. We therefore return the state and let the
-        # user decide if/when to block.
-        # result = state.result()
-
-        return state
 
     @classmethod
     def get_config(cls):

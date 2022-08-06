@@ -145,7 +145,7 @@ my_workflow = Example__Python__MyFavoriteSettings
 
 # Now check that our naming convention works as expected
 assert my_workflow.name_full == "example.pure-python.my-favorite-settings"
-assert my_workflow.name_project == "example"
+assert my_workflow.name_type == "example"
 assert my_workflow.name_calculator == "python"
 assert my_workflow.name_preset == "my-favorite-settings"
 ```
@@ -283,7 +283,6 @@ from prefect.packaging.serializers import PickleSerializer
 import simmate
 from simmate.toolkit import Structure
 from simmate.database.base_data_types import Calculation
-from simmate.workflow_engine import S3Task
 from simmate.utilities import async_to_sync
 
 
@@ -295,32 +294,10 @@ class Workflow:
 
     # TODO: set storage attribute to module
 
-    # TODO: inherit doc from s3task
-    # by default we just copy the docstring of the S3task to the workflow
-    # workflow.__doc__ = s3task.__doc__
-
     version: str = simmate.__version__
     """
     Version number for this flow. Defaults to the Simmate version 
     (e.g. "0.7.0").
-    """
-
-    s3task: S3Task = None
-    """
-    The supervised-staged-shell task (or S3Task) that this workflow uses to run.
-    For understanding what the calculation does and the settings it uses, users
-    should start here. You can also use a workflows `s3task.run` to run the workflow
-    without storing results in the database.
-    """
-
-    database_table: Calculation = None
-    """
-    The database table where calculation information (such as the prefect_flow_run_id)
-    is stored. The table should use `simmate.database.base_data_types.Calculation`
-    
-    In many cases, this table will contain all of the results you need. However,
-    pay special attention to NestedWorkflows, where your results are often tied
-    to a final task.
     """
 
     description_doc_short: str = None
@@ -328,6 +305,24 @@ class Workflow:
     A quick description for this workflow. This will be shown in the website UI
     in the list-view of all different workflow presets.
     """
+    
+    @classmethod
+    @property
+    def database_table(cls) -> Calculation:
+        """
+        The database table where calculation information (such as the prefect_flow_run_id)
+        is stored. The table should use `simmate.database.base_data_types.Calculation`
+        
+        In many cases, this table will contain all of the results you need. However,
+        pay special attention to NestedWorkflows, where your results are often tied
+        to a final task.
+        """
+        if cls.name_type == "relaxation":
+            from simmate.database.base_data_types import Relaxation
+            return Relaxation
+        else:
+            print(cls.name_type)
+            raise NotImplementedError()
 
     @classmethod
     def run_config(
@@ -344,54 +339,10 @@ class Workflow:
         """
         The workflow method, which can be overwritten when inheriting from this
         class. This can be either a staticmethod or classmethod.
-
-        #### The default run method
-
-        There is a default run method implemented that is for S3Tasks.
-
-        Builds a workflow from a S3Task and it's corresponding database table.
-
-        Very often with Simmate's S3Tasks, the workflow for a single S3Task is
-        the same. The workflow is typically made of three tasks:
-
-        1. loading the input parameters and registering the calculation
-        2. running the calculation (what this S3Task does on its own)
-        3. saving the calculation results
-
-        Task 1 and 3 always use the same functions, where we just need to tell
-        it which database table we are registering/saving to.
-
-        Because of this common recipe for workflows, we use this method to make
-        the workflow for us.
         """
-        # local import to prevent circular import error
-        from simmate.workflow_engine.common_tasks import (
-            load_input_and_register,
-            save_result,
+        raise NotImplementedError(
+            "When creating a custom workflow, make sure you set a run_config method!"
         )
-
-        # make sure the workflow is configured properly first
-        if not cls.s3task:
-            raise NotImplementedError(
-                "Please either set the s3task attribute or write a custom run method!"
-            )
-
-        parameters_cleaned = load_input_and_register(
-            structure=structure,
-            command=command,
-            source=source,
-            directory=directory,
-            copy_previous_directory=copy_previous_directory,
-            pre_sanitize_structure=pre_sanitize_structure,
-            pre_standardize_structure=pre_standardize_structure,
-            is_restart=is_restart,
-        )
-
-        result = cls.s3task.run(**parameters_cleaned).result()
-
-        save_result(result)
-
-        return result
 
     @classmethod
     @cache
@@ -453,7 +404,7 @@ class Workflow:
 
     @classmethod
     @property
-    def name_project(cls) -> str:
+    def name_type(cls) -> str:
         """
         Name of the Project this workflow is associated with. This is the first
         portion of the flow name (e.g. "static-energy")
@@ -488,7 +439,7 @@ class Workflow:
         is the same as `__doc__`. This attribute is only defined for beginners
         to python and for use in django templates for the website interface.
         """
-        return cls.__doc__ or cls.s3task.__doc__  # NEEDS REFACTOR
+        return cls.__doc__
 
     @classmethod
     @property
@@ -607,7 +558,7 @@ class Workflow:
             )
         else:
             # load/create the calculation for this workflow run
-            calculation = database_table.from_prefect_id(**register_kwargs_cleaned)
+            calculation = database_table.from_prefect_context(**register_kwargs_cleaned)
 
         return calculation
 
@@ -829,7 +780,7 @@ class Workflow:
             # call a method.
             tags=[
                 "simmate",
-                cls.name_project,
+                cls.name_type,
                 cls.name_calculator,
             ],
         )

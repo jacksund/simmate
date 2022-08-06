@@ -49,7 +49,7 @@ def test_workflow():
 
     # testing naming conventions
     assert DummyFlow.name_full == "dummy-project.dummy-caclulator.dummy-preset"
-    assert DummyFlow.name_project == "dummy-project"
+    assert DummyFlow.name_type == "dummy-project"
     assert DummyFlow.name_calculator == "dummy-caclulator"
     assert DummyFlow.name_preset == "dummy-preset"
 

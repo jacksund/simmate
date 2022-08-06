@@ -12,7 +12,7 @@ from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.toolkit import Structure
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
-from simmate.workflow_engine import S3Task
+from simmate.workflow_engine import S3Workflow
 
 
 def get_default_parallel_settings():
@@ -30,7 +30,7 @@ def get_default_parallel_settings():
         return {}
 
 
-class VaspTask(S3Task):
+class VaspWorkflow(S3Workflow):
 
     required_files = ["INCAR", "POTCAR", "POSCAR"]
 

@@ -9,7 +9,6 @@ def save_result(result):
 
     # Grab the database_table that we want to save the results in
     run_context = FlowRunContext.get()
-    prefect_flow_run_id = str(run_context.flow_run.id)
     database_table = run_context.flow.simmate_workflow.database_table
 
     # split our results and corrections (which are given as a dict) into
@@ -20,7 +19,7 @@ def save_result(result):
 
     # load the calculation entry for this workflow run. This should already
     # exist thanks to the load_input_and_register task.
-    calculation = database_table.from_prefect_id(prefect_flow_run_id)
+    calculation = database_table.from_prefect_context()
 
     # now update the calculation entry with our results
     calculation.update_from_vasp_run(vasprun, corrections, directory)

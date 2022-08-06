@@ -4,7 +4,6 @@ import os
 import yaml
 from typing import Any
 
-from prefect import task
 from prefect.context import FlowRunContext
 
 from simmate.utilities import get_directory, copy_directory
@@ -17,7 +16,6 @@ from simmate.workflow_engine import Workflow
 # so it may be worth isolating these into a separate task.
 
 
-@task
 def load_input_and_register(
     register_run: bool = True,
     **parameters: Any,
