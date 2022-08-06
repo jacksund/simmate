@@ -327,6 +327,7 @@ class Workflow:
             from simmate.database.base_data_types import StaticEnergy
 
             return StaticEnergy
+        # from simmate.database.base_data_types import BandStructureCalc, DensityofStatesCalc
         else:
             print(cls.name_type)
             raise NotImplementedError()

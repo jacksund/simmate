@@ -7,12 +7,12 @@ from pymatgen.symmetry.bandstructure import HighSymmKpath
 from pymatgen.electronic_structure.plotter import BSPlotter
 
 from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
-from simmate.calculators.vasp.tasks.static_energy.materials_project import (
-    MatprojStaticEnergy,
+from simmate.calculators.vasp.workflows.static_energy.matproj import (
+    StaticEnergy__Vasp__Matproj,
 )
 
 
-class VaspBandStructure(MatprojStaticEnergy):
+class VaspBandStructure(StaticEnergy__Vasp__Matproj):
     """
     A base class for band structure calculations. This is not meant
     to be used directly but instead should be inherited from.
@@ -24,7 +24,7 @@ class VaspBandStructure(MatprojStaticEnergy):
     the a fixed charge density from a previous static energy calculation.
     """
 
-    required_files = MatprojStaticEnergy.required_files + ["CHGCAR"]
+    required_files = StaticEnergy__Vasp__Matproj.required_files + ["CHGCAR"]
 
     # set the KptGrid or KptPath object
     # TODO: in the future, all functionality of this class will be available
@@ -95,7 +95,7 @@ class VaspBandStructure(MatprojStaticEnergy):
         """
 
         # run the normal output
-        MatprojStaticEnergy._write_output_summary(directory, vasprun)
+        StaticEnergy__Vasp__Matproj._write_output_summary(directory, vasprun)
 
         bs_plotter = BSPlotter(vasprun.get_band_structure(line_mode=True))
         plot = bs_plotter.get_plot()

@@ -4,12 +4,12 @@ import os
 
 from pymatgen.electronic_structure.plotter import DosPlotter
 
-from simmate.calculators.vasp.tasks.static_energy.materials_project import (
-    MatprojStaticEnergy,
+from simmate.calculators.vasp.workflows.static_energy.matproj import (
+    StaticEnergy__Vasp__Matproj,
 )
 
 
-class VaspDensityOfStates(MatprojStaticEnergy):
+class VaspDensityOfStates(StaticEnergy__Vasp__Matproj):
     """
     A base class for density of states (DOS) calculations. This is not meant
     to be used directly but instead should be inherited from.
@@ -18,7 +18,7 @@ class VaspDensityOfStates(MatprojStaticEnergy):
     the a fixed charge density from a previous static energy calculation.
     """
 
-    required_files = MatprojStaticEnergy.required_files + ["CHGCAR"]
+    required_files = StaticEnergy__Vasp__Matproj.required_files + ["CHGCAR"]
 
     @staticmethod
     def _write_output_summary(directory, vasprun):
@@ -28,7 +28,7 @@ class VaspDensityOfStates(MatprojStaticEnergy):
         """
 
         # run the normal output
-        MatprojStaticEnergy._write_output_summary(directory, vasprun)
+        StaticEnergy__Vasp__Matproj._write_output_summary(directory, vasprun)
 
         # and then generate a DOS plot
         plotter = DosPlotter()

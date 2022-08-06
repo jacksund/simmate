@@ -9,6 +9,9 @@ class MatprojBaderAnalysis(StaticEnergy):
     bader analysis on the charge density.
     """
 
+    class Meta:
+        app_label = "workflows"
+
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """
     A list of calculated oxidation states based on Bader analysis. This is 
@@ -24,6 +27,9 @@ class MatprojBaderELFAnalysis(StaticEnergy):
     bader analysis on the charge density.
     """
 
+    class Meta:
+        app_label = "workflows"
+
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """
     A list of calculated oxidation states based on Bader analysis. This is 
@@ -33,4 +39,7 @@ class MatprojBaderELFAnalysis(StaticEnergy):
 
 
 class MatprojELF(StaticEnergy):
+    class Meta:
+        app_label = "workflows"
+
     pass
