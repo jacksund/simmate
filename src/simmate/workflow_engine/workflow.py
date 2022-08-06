@@ -305,21 +305,28 @@ class Workflow:
     A quick description for this workflow. This will be shown in the website UI
     in the list-view of all different workflow presets.
     """
-    
+
     @classmethod
     @property
     def database_table(cls) -> Calculation:
         """
         The database table where calculation information (such as the prefect_flow_run_id)
         is stored. The table should use `simmate.database.base_data_types.Calculation`
-        
+
         In many cases, this table will contain all of the results you need. However,
         pay special attention to NestedWorkflows, where your results are often tied
         to a final task.
         """
-        if cls.name_type == "relaxation":
+        database_type = cls.name_type
+
+        if database_type == "relaxation":
             from simmate.database.base_data_types import Relaxation
+
             return Relaxation
+        elif database_type == "static-energy":
+            from simmate.database.base_data_types import StaticEnergy
+
+            return StaticEnergy
         else:
             print(cls.name_type)
             raise NotImplementedError()

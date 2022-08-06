@@ -55,7 +55,7 @@ class Relaxation__Vasp__Matproj(VaspWorkflow):
     properties), you should still test for convergence using higher-quality
     settings.
     """
-    
+
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
     description_doc_short = "uses Materials Project settings"

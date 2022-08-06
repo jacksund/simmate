@@ -3,7 +3,7 @@
 from simmate.calculators.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
 
 
-class MatVirtualLabCINEBEndpointRelaxation(Relaxation__Vasp__Mit):
+class Relaxation__Vasp__MvlNebEndpoint(Relaxation__Vasp__Mit):
     """
     This task is a reimplementation of pymatgen's
     [MVLCINEBEndPointSet](http://guide.materialsvirtuallab.org/pymatgen-analysis-diffusion/pymatgen.analysis.diffusion.neb.io.html#pymatgen.analysis.diffusion.neb.io.MVLCINEBEndPointSet).

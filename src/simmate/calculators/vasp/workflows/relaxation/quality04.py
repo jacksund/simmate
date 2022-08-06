@@ -61,4 +61,3 @@ class Relaxation__Vasp__Quality04(VaspWorkflow):
             ),
         },
     )
-

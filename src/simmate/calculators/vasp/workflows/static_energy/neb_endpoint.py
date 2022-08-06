@@ -1,17 +1,28 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine import Workflow
-from simmate.calculators.vasp.tasks.static_energy import (
-    NEBEndpointStaticEnergy as NEBEndpointStaticEnergyTask,
-)
-from simmate.calculators.vasp.database.energy import (
-    NEBEndpointStaticEnergy as NEBEndpointStaticEnergyResults,
+from simmate.calculators.vasp.workflows.relaxation.neb_endpoint import (
+    Relaxation__Vasp__MvlNebEndpoint,
 )
 
 
-class StaticEnergy__Vasp__NebEndpoint(Workflow):
-    s3task = NEBEndpointStaticEnergyTask
-    database_table = NEBEndpointStaticEnergyResults
-    description_doc_short = (
-        "uses Materials Project settings meant for defect supercell structures"
+class StaticEnergy__Vasp__NebEndpoint(Relaxation__Vasp__MvlNebEndpoint):
+    """
+    Runs a VASP energy calculation using MIT Project settings, where some
+    settings are adjusted to accomodate large supercells with defects.
+
+    This is identical to relaxation/neb_endpoint, but just a single ionic step.
+
+    You typically shouldn't use this workflow directly, but instead use the
+    higher-level NEB workflows (e.g. diffusion/neb_all_paths or
+    diffusion/neb_from_endpoints), which call this workflow for you.
+    """
+
+    # The settings used for this calculation are based on the MITRelaxation, but
+    # we are updating/adding new settings here.
+    incar = Relaxation__Vasp__MvlNebEndpoint.incar.copy()
+    incar.update(
+        dict(
+            IBRION=-1,  # (optional) locks everything between ionic steps
+            NSW=0,  # this is the main static energy setting
+        )
     )

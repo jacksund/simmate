@@ -15,7 +15,6 @@ from pymatgen.io.vasp.outputs import Vasprun
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     base_info = (

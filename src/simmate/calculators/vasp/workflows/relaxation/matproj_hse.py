@@ -41,6 +41,7 @@ from simmate.calculators.vasp.error_handlers import (
     Walltime,
 )
 
+
 class Relaxation__Vasp__MatprojHse(VaspWorkflow):
     """
     This task is a reimplementation of pymatgen's
@@ -48,7 +49,7 @@ class Relaxation__Vasp__MatprojHse(VaspWorkflow):
 
     Runs a VASP relaxation calculation using Materials Project HSE settings.
     """
-    
+
     description_doc_short = "uses Materials Project HSE settings"
 
     functional = "PBE"

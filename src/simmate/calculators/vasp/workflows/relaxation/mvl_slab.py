@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.relaxation.mvl_grainboundary import Relaxation__Vasp__MvlGrainboundary
+from simmate.calculators.vasp.workflows.relaxation.mvl_grainboundary import (
+    Relaxation__Vasp__MvlGrainboundary,
+)
 
 
 class Relaxation__Vasp__MvlSlab(Relaxation__Vasp__MvlGrainboundary):
@@ -19,4 +21,3 @@ class Relaxation__Vasp__MvlSlab(Relaxation__Vasp__MvlGrainboundary):
             NELMIN=8,
         )
     )
-
