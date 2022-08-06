@@ -15,7 +15,21 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 # Upcoming Release
 > :bulb: For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
 
-- no new changes have been merged into the `main` branch yet
+<!-- 
+    - no new changes have been merged into the `main` branch yet
+-->
+
+**Enhancements**
+- NEB workflows now accept parameters for changing supercell size and number of images used
+- add HSE workflows for static energy, relaxation, and DOS/BS electronic states
+- add NPT and MatProj molecular dynamics workflows
+- add SCAN workflows for static energy and relaxation
+
+**Refactors**
+- None
+
+**Fixes**
+- None
 
 
 

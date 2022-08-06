@@ -27,6 +27,16 @@ MITRelaxation, MITIonicStep = Relaxation.create_subclasses("MIT", module=__name_
 ) = Relaxation.create_subclasses("Matproj", module=__name__)
 
 (
+    MatprojHSERelaxation,
+    MatprojHSEIonicStep,
+) = Relaxation.create_subclasses("MatprojHSE", module=__name__)
+
+(
+    MatprojSCANRelaxation,
+    MatprojSCANIonicStep,
+) = Relaxation.create_subclasses("MatprojSCAN", module=__name__)
+
+(
     MatVirtualLabCINEBEndpointRelaxation,
     MatVirtualLabCINEBEndpointIonicStep,
 ) = Relaxation.create_subclasses("MatVirtualLabCINEBEndpoint", module=__name__)

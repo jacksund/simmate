@@ -69,6 +69,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
         directory: str = None,
         source: dict = None,
         command: str = None,
+        nimages: int = 5,
         # This helps link results to a higher-level table.
         diffusion_analysis_id: int = None,
         is_restart: bool = False,
@@ -93,6 +94,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
             source=source,
             directory=directory,
             command=command,
+            nimages=nimages,
             diffusion_analysis_id=diffusion_analysis_id,
             is_restart=is_restart,
         )
@@ -133,6 +135,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
                 "directory": endpoint_end_result["directory"],
                 "structure_field": "structure_final",
             },
+            nimages=nimages,
         ).result()
 
         # Run NEB on this set of images

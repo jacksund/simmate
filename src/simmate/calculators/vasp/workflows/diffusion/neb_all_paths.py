@@ -98,6 +98,11 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
         source: dict = None,
         directory: str = None,
         is_restart: bool = False,
+        # parameters for supercell and image generation
+        nimages: int = 5,
+        min_atoms: int = 80,
+        max_atoms: int = 240,
+        min_length: float = 10,
     ):
         # command list expects three subcommands:
         #   command_bulk, command_supercell, and command_neb
@@ -121,6 +126,10 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
             migrating_specie=migrating_specie,
             is_restart=is_restart,
             register_run=False,
+            min_atoms=min_atoms,
+            max_atoms=max_atoms,
+            min_length=min_length,
+            nimages=nimages,
         )
 
         # Our step is to run a relaxation on the bulk structure and it uses our inputs
@@ -178,6 +187,10 @@ class Diffusion__Vasp__NebAllPaths(Workflow):
                 + ";"
                 + subcommands["command_neb"],
                 is_restart=is_restart,
+                min_atoms=min_atoms,
+                max_atoms=max_atoms,
+                min_length=min_length,
+                nimages=nimages,
             )  # we don't want to wait on results to in order to allow parallel runs
 
 
@@ -232,7 +245,7 @@ def build_diffusion_analysis(
         # the files names here will be like "migration_hop_02.cif"
         migration_hop.write_path(
             os.path.join(directory, f"migration_hop_{number}.cif"),
-            nimages=10,
+            nimages=10,  # this is just for visualization
         )
 
     ###### STEP 2: creating the database objects and saving them to the db

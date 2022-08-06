@@ -8,6 +8,8 @@ Workflows for relaxing a crystal structure
 # if "simmate.calculators.Vasp" in installed_apps:
 from simmate.calculators.vasp.workflows.relaxation.all import (
     Relaxation__Vasp__Matproj,
+    Relaxation__Vasp__MatprojHse,
+    Relaxation__Vasp__MatprojScan,
     Relaxation__Vasp__Mit,
     Relaxation__Vasp__NebEndpoint,
     Relaxation__Vasp__Quality00,
