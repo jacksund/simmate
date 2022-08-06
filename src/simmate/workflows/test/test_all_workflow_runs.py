@@ -66,32 +66,41 @@ def test_all_workflow_runs(tmpdir, sample_structures):
                 successful_flows.append(workflow_name)
 
         # TEST MD FLOW
-        workflow_name = "dynamics.vasp.mit"
+        dynamics_flows = [
+            "dynamics.vasp.mit",
+            "dynamics.vasp.matproj",
+            "dynamics.vasp.mvl-npt",
+        ]
+        for workflow_name in dynamics_flows:
+            workflow = get_workflow(workflow_name)
+            state = workflow.run(
+                structure=structure,
+                command="mpirun -n 12 vasp_std > vasp.out",
+                nsteps=100,
+                temperature_start=400,
+                temperature_end=400,
+            )
+            if state.is_completed():
+                successful_flows.append(workflow_name)
+
+        # TEST NEB FLOWS
+        # For testing, look at I- diffusion in Y2CI2
+        structure = sample_structures["Y2CI2_mp-1206803_primitive"]
+        workflow_name = "diffusion.vasp.neb-all-paths"
         workflow = get_workflow(workflow_name)
         state = workflow.run(
             structure=structure,
+            migrating_specie="I",
             command="mpirun -n 12 vasp_std > vasp.out",
-            nsteps=100,
-            temperature_start=400,
-            temperature_end=400,
+            directory=str(tmpdir),
+            nimages=3,
+            min_atoms=10,
+            max_atoms=75,
+            min_length=3,
         )
+        state.result()
         if state.is_completed():
             successful_flows.append(workflow_name)
-
-        # TEST NEB FLOWS
-        # For testing, look at I- diffusion in Y2CF2
-        # structure = sample_structures["Y2CI2_mp-1206803_primitive"]
-        # workflow_name = "diffusion.vasp.neb-all-paths"
-        # workflow = get_workflow(workflow_name)
-        # state = workflow.run(
-        #     structure=structure,
-        #     migrating_specie="I",
-        #     command="mpirun -n 15 vasp_std > vasp.out",
-        #     directory=str(tmpdir),
-        # )
-        # state.result()
-        # if state.is_completed():
-        #     successful_flows.append(workflow_name)
 
     # check which flows either (1) failed or (2) weren't tested
     all_flows = get_list_of_all_workflows()

@@ -53,6 +53,10 @@ from simmate.calculators.vasp.database.nudged_elastic_band import (
 from simmate.calculators.vasp.database.dynamics import (
     MITDynamicsRun,
     MITDynamicsIonicStep,
+    MatprojDynamicsRun,
+    MatprojDynamicsIonicStep,
+    MatVirtualLabNPTDynamicsRun,
+    MatVirtualLabNPTDynamicsIonicStep,
 )
 
 from simmate.calculators.vasp.database.population_analysis import (

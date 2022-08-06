@@ -6,15 +6,9 @@ from simmate.workflow_engine.common_tasks import (
     load_input_and_register,
     save_result,
 )
-from simmate.calculators.vasp.tasks.dynamics import MITDynamics
-from simmate.calculators.vasp.database.dynamics import MITDynamicsRun
 
 
-class Dynamics__Vasp__Mit(Workflow):
-    description_doc_short = "uses MIT Project settings"
-    database_table = MITDynamicsRun
-    s3task = MITDynamics
-
+class DynamicsWorkflow(Workflow):
     @classmethod
     def run_config(
         cls,
