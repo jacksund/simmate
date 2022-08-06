@@ -197,7 +197,7 @@ class MigrationImages(list):
         cls,
         structure_start: Structure,
         structure_end: Structure,
-        nimages: int,
+        nimages: int = 5,
         **kwargs,
     ):
         """

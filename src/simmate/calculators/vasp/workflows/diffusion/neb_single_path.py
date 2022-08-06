@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-from typing import Tuple
 
-from simmate.toolkit import Structure
 from simmate.toolkit.diffusion import MigrationHop
-
-# TODO: use MigrationImages use to generate images?
-
-from simmate.workflow_engine import Workflow, task
+from simmate.workflow_engine import Workflow
 from simmate.workflow_engine.common_tasks import (
     load_input_and_register,
     parse_multi_command,
 )
-
 from simmate.calculators.vasp.workflows.diffusion.utilities import (
     get_migration_images_from_endpoints,
 )
@@ -68,6 +62,11 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
         # else in this context? Maybe even load_input_and_register will use
         # prefect id once it's a Calculation?
         is_restart: bool = False,
+        # parameters for supercell and image generation
+        nimages: int = 5,
+        min_atoms: int = 80,
+        max_atoms: int = 240,
+        min_length: float = 10,
     ):
 
         # split the command if separate ones were given
@@ -87,11 +86,20 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
             migration_hop_id=migration_hop_id,
             is_restart=is_restart,
             register_run=False,
+            min_atoms=min_atoms,
+            max_atoms=max_atoms,
+            min_length=min_length,
+            nimages=nimages,
         )
 
         # get the supercell endpoint structures
-        supercell_start, supercell_end = get_endpoint_structures(
-            parameters_cleaned["migration_hop"]
+        supercell_start, supercell_end, _ = parameters_cleaned[
+            "migration_hop"
+        ].get_sc_structures(
+            min_atoms=min_atoms,
+            max_atoms=max_atoms,
+            min_length=min_length,
+            vac_mode=True,
         )
 
         # Relax the starting supercell structure
@@ -129,6 +137,7 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
                 "directory": endpoint_end_result["directory"],
                 "structure_field": "structure_final",
             },
+            nimages=nimages,
         )
 
         # Run NEB on this set of images
@@ -141,26 +150,3 @@ class Diffusion__Vasp__NebSinglePath(Workflow):
             migration_hop_id=migration_hop_id,
             is_restart=is_restart,
         )
-
-
-@task
-def get_endpoint_structures(migration_hop: MigrationHop) -> Tuple[Structure]:
-    """
-    Simple wrapper for get_sc_structures method that makes it a Prefect task.
-    I assume parameters for now
-    """
-    start_supercell, end_supercell, _ = migration_hop.get_sc_structures(
-        # min_atoms=10,
-        # max_atoms=50,
-        # min_length=5,
-        vac_mode=True,
-    )
-    try:
-        assert start_supercell != end_supercell
-    except:
-        raise Exception(
-            "This structure has a bug due to a rounding error. "
-            "Our team is aware of this bug and it has been fixed for the next "
-            "pymatgen-analysis-diffusion release."
-        )
-    return start_supercell, end_supercell

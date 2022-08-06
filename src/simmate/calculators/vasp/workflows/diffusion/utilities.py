@@ -6,7 +6,11 @@ from simmate.workflow_engine import task
 
 
 @task
-def get_migration_images_from_endpoints(supercell_start, supercell_end):
+def get_migration_images_from_endpoints(
+    supercell_start: Structure,
+    supercell_end: Structure,
+    nimages: int = 5,
+):
     """
     Simple wrapper for from_endpoints method that makes it a Prefect task.
     I assume parameters for now.
@@ -20,7 +24,7 @@ def get_migration_images_from_endpoints(supercell_start, supercell_end):
     images = MigrationImages.from_endpoints(
         structure_start=supercell_start_cleaned,
         structure_end=supercell_end_cleaned,
-        nimages=5,  # TODO: have from_endpoints figure out pathway length
+        nimages=nimages,
     )
 
     return images
