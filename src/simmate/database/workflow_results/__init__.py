@@ -9,6 +9,8 @@ from simmate.calculators.vasp.database.relaxation import (
     MatprojIonicStep,
     MatprojHSERelaxation,
     MatprojHSEIonicStep,
+    MatprojSCANRelaxation,
+    MatprojSCANIonicStep,
     MITRelaxation,
     MITIonicStep,
     Quality00Relaxation,
@@ -29,6 +31,7 @@ from simmate.calculators.vasp.database.relaxation import (
 from simmate.calculators.vasp.database.energy import (
     MatprojStaticEnergy,
     MatprojHSEStaticEnergy,
+    MatprojSCANStaticEnergy,
     MITStaticEnergy,
     Quality04StaticEnergy,
     NEBEndpointStaticEnergy,

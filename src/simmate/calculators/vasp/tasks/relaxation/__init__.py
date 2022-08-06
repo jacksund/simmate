@@ -11,6 +11,7 @@ from .mit import MITRelaxation
 from .materials_project import MatprojRelaxation
 from .materials_project_hse import MatprojHSERelaxation
 from .materials_project_metal import MatprojMetalRelaxation
+from .materials_project_scan import MatprojSCANRelaxation
 
 from .materials_virtual_lab_endpoint import MatVirtualLabCINEBEndpointRelaxation
 from .materials_virtual_lab_grain_boundary import MatVirtualLabGrainBoundaryRelaxation

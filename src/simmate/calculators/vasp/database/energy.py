@@ -15,6 +15,10 @@ class MatprojHSEStaticEnergy(StaticEnergy):
     pass
 
 
+class MatprojSCANStaticEnergy(StaticEnergy):
+    pass
+
+
 class NEBEndpointStaticEnergy(StaticEnergy):
     pass
 

@@ -23,6 +23,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - NEB workflows now accept parameters for changing supercell size and number of images used
 - add HSE workflows for static energy, relaxation, and DOS/BS electronic states
 - add NPT and MatProj molecular dynamics workflows
+- add SCAN workflows for static energy and relaxation
 
 **Refactors**
 - None

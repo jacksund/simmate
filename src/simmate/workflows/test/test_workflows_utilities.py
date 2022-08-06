@@ -44,6 +44,7 @@ def test_list_of_all_workflows():
         "population-analysis.vasp.elf-matproj",
         "relaxation.vasp.matproj",
         "relaxation.vasp.matproj-hse",
+        "relaxation.vasp.matproj-scan",
         "relaxation.vasp.mit",
         "relaxation.vasp.neb-endpoint",
         "relaxation.vasp.quality00",
@@ -55,6 +56,7 @@ def test_list_of_all_workflows():
         "restart.simmate.automatic",
         "static-energy.vasp.matproj",
         "static-energy.vasp.matproj-hse",
+        "static-energy.vasp.matproj-scan",
         "static-energy.vasp.mit",
         "static-energy.vasp.neb-endpoint",
         "static-energy.vasp.quality04",
@@ -66,6 +68,7 @@ def test_list_of_workflows_by_type():
     assert get_list_of_workflows_by_type("static-energy") == [
         "static-energy.vasp.matproj",
         "static-energy.vasp.matproj-hse",
+        "static-energy.vasp.matproj-scan",
         "static-energy.vasp.mit",
         "static-energy.vasp.neb-endpoint",
         "static-energy.vasp.quality04",

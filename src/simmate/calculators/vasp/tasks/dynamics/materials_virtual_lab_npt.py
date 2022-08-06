@@ -16,7 +16,7 @@ class MatVirtualLabNPTDynamics(MITDynamics):
     incar = MITDynamics.incar.copy()
     incar.update(
         dict(
-            IALGO=48,
+            ALGO="Fast",
             ISIF=3,
             LANGEVIN_GAMMA__smart_langevin=True,
             LANGEVIN_GAMMA_L=1,
