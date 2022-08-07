@@ -7,13 +7,11 @@ from pandas import DataFrame
 from pymatgen.io.vasp.outputs import Chgcar
 from pymatgen.io.vasp import Potcar
 
-from simmate.toolkit import Structure
-from simmate.workflow_engine import S3Task
+from simmate.workflow_engine import S3Workflow
 from simmate.calculators.bader.outputs import ACF
-from simmate.calculators.bader.tasks import CombineCHGCARs
 
 
-class BaderAnalysis(S3Task):
+class BaderAnalysis(S3Workflow):
 
     command = "bader CHGCAR -ref CHGCAR_sum -b weight > bader.out"
     """

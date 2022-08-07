@@ -23,7 +23,7 @@ from simmate.calculators.vasp.workflows.static_energy.quality04 import (
     StaticEnergy__Vasp__Quality04,
 )
 
-from simmate.calculators.vasp.database.relaxation import StagedRelaxation
+# from simmate.calculators.vasp.database.relaxation import StagedRelaxation
 
 
 class Relaxation__Vasp__Staged(Workflow):
@@ -46,7 +46,7 @@ class Relaxation__Vasp__Staged(Workflow):
     """
 
     description_doc_short = "runs a series of relaxations (00-04 quality)"
-    database_table = StagedRelaxation
+    # database_table = StagedRelaxation
 
     @staticmethod
     def run_config(

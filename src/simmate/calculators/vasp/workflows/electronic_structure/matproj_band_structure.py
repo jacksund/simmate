@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.band_structure import VaspBandStructure
+from simmate.calculators.vasp.workflows.electronic_structure.base_band_structure import (
+    VaspBandStructure,
+)
 from simmate.calculators.vasp.workflows.relaxation.matproj import (
     Relaxation__Vasp__Matproj,
 )

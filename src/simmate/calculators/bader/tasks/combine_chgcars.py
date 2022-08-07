@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine import S3Task
+from simmate.workflow_engine import S3Workflow
 
 
 # TODO: The chgsum.pl script will be replaced with a simple python function
 # that just sums the two files. It might not be as fast but it removes one
 # executable file from having to be in the user's path. So in the future, this
 # Task will be depreciated/removed into the BaderAnalysis.setup method.
-class CombineCHGCARs(S3Task):
+class CombineCHGCARs(S3Workflow):
     """
     This tasks simply sums two charge density files into a new file. It uses
     a script from the Henkleman group.

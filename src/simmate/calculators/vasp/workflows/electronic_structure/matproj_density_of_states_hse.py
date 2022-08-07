@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.density_of_states import VaspDensityOfStates
+from simmate.calculators.vasp.workflows.electronic_structure.base_density_of_states import (
+    VaspDensityOfStates,
+)
 from simmate.calculators.vasp.workflows.relaxation.matproj_hse import (
     Relaxation__Vasp__MatprojHse,
 )

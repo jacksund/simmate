@@ -4,6 +4,14 @@ from simmate.utilities import get_doc_from_readme
 
 __doc__ = get_doc_from_readme(__file__)
 
+from simmate.database.base_data_types import (
+    Relaxation,
+    StaticEnergy,
+    BandStructureCalc,
+    DensityofStatesCalc,
+    PopulationAnalysis,
+)
+
 from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
     MITMigrationHop,
@@ -17,11 +25,6 @@ from simmate.calculators.vasp.database.dynamics import (
     MatprojDynamicsIonicStep,
     MatVirtualLabNPTDynamicsRun,
     MatVirtualLabNPTDynamicsIonicStep,
-)
-
-from simmate.calculators.vasp.database.population_analysis import (
-    MatprojBaderAnalysis,
-    MatprojBaderELFAnalysis,
 )
 
 from simmate.calculators.vasp.database.customized import (

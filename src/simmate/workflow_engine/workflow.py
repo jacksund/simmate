@@ -317,17 +317,30 @@ class Workflow:
         pay special attention to NestedWorkflows, where your results are often tied
         to a final task.
         """
-        database_type = cls.name_type
+        flow_type = cls.name_type
+        flow_preset = cls.name_preset
 
-        if database_type == "relaxation":
+        if flow_type == "relaxation":
             from simmate.database.base_data_types import Relaxation
 
             return Relaxation
-        elif database_type == "static-energy":
+        elif flow_type == "static-energy":
             from simmate.database.base_data_types import StaticEnergy
 
             return StaticEnergy
-        # from simmate.database.base_data_types import BandStructureCalc, DensityofStatesCalc
+        elif flow_type == "electronic-structure":
+            if "band-structure" in flow_preset:
+                from simmate.database.base_data_types import BandStructureCalc
+
+                return BandStructureCalc
+            elif "density-of-states" in flow_preset:
+                from simmate.database.base_data_types import DensityofStatesCalc
+
+                return DensityofStatesCalc
+        elif flow_type == "population-analysis":
+            from simmate.database.base_data_types import PopulationAnalysis
+
+            return PopulationAnalysis
         else:
             print(cls.name_type)
             raise NotImplementedError()

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.relaxation.neb_endpoint import (
+from simmate.calculators.vasp.workflows.relaxation.mvl_neb_endpoint import (
     Relaxation__Vasp__MvlNebEndpoint,
 )
 
 
-class StaticEnergy__Vasp__NebEndpoint(Relaxation__Vasp__MvlNebEndpoint):
+class StaticEnergy__Vasp__MvlNebEndpoint(Relaxation__Vasp__MvlNebEndpoint):
     """
     Runs a VASP energy calculation using MIT Project settings, where some
     settings are adjusted to accomodate large supercells with defects.

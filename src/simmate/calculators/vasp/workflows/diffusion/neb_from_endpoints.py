@@ -12,8 +12,8 @@ from simmate.workflow_engine.common_tasks import (
 from simmate.calculators.vasp.workflows.diffusion.utilities import (
     get_migration_images_from_endpoints,
 )
-from simmate.calculators.vasp.workflows.relaxation.neb_endpoint import (
-    Relaxation__Vasp__NebEndpoint,
+from simmate.calculators.vasp.workflows.relaxation.mvl_neb_endpoint import (
+    Relaxation__Vasp__MvlNebEndpoint,
 )
 from simmate.calculators.vasp.workflows.diffusion.neb_from_images import (
     Diffusion__Vasp__NebFromImages,

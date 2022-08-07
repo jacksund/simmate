@@ -9,10 +9,10 @@ from pymatgen.analysis.transition_state import NEBAnalysis
 
 from simmate.toolkit.diffusion import MigrationImages
 from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
-from simmate.calculators.vasp.tasks.base import VaspTask
+from simmate.calculators.vasp.workflows.base import VaspWorkflow
 
 
-class VaspNudgedElasticBandTask(VaspTask):
+class VaspNudgedElasticBandTask(VaspWorkflow):
     """
     A base class for Nudged Elastic Band (NEB) calculations. This is not meant
     to be used directly but instead should be inherited from.

@@ -2,11 +2,8 @@
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import task, Workflow
-from simmate.calculators.vasp.tasks.population_analysis import (
-    MatprojPreBader as MPPreBaderTask,
-)
-from simmate.calculators.vasp.database.population_analysis import (
-    MatprojBaderAnalysis as MPBaderResults,
+from simmate.calculators.vasp.workflows.static_energy.matproj import (
+    StaticEnergy__Vasp__Matproj,
 )
 from simmate.calculators.bader.tasks import (
     BaderAnalysis as BaderAnalysisTask,
@@ -19,8 +16,6 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
     Runs a static energy calculation using an extra-fine FFT grid and then
     carries out Bader analysis on the resulting charge density.
     """
-
-    database_table = MPBaderResults
 
     @classmethod
     def run_config(
@@ -56,10 +51,27 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
 # Below are extra tasks and subflows for the workflow that is defined above
 
 
-class PopulationAnalysis__Vasp__PrebaderMatproj(Workflow):
-    s3task = MPPreBaderTask
-    database_table = MPBaderResults
-    description_doc_short = "uses Materials Project settings with denser FFT grid"
+class PopulationAnalysis__Vasp__PrebaderMatproj(StaticEnergy__Vasp__Matproj):
+    """
+    Runs a static energy calculation with a high-density FFT grid under settings
+    from the Materials Project. Results can be used for Bader analysis.
+
+    We do NOT recommend running this calculation on its own. Instead, you should
+    use the full workflow, which runs this calculation AND the following bader
+    analysis for you. This S3Task is only the first step of that workflow.
+
+    See `bader.workflows.materials_project`.
+    """
+
+    # The key thing for bader analysis is that we need a very fine FFT mesh. Other
+    # than that, it's the same as a static energy calculation.
+    incar = StaticEnergy__Vasp__Matproj.incar.copy()
+    incar.update(
+        NGXF__density_a=20,
+        NGYF__density_b=20,
+        NGZF__density_c=20,
+        LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
+    )
 
 
 @task

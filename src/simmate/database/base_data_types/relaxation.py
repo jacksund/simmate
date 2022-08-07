@@ -156,75 +156,22 @@ class Relaxation(Structure, Thermodynamics, Calculation):
     # structure_final --> points to final IonicStep
     # structures --> gives list of all IonicSteps
 
-    @classmethod
-    def create_subclasses(cls, name: str, module: str, **extra_columns):
-        """
-        Dynamically creates a subclass of Relaxation as well as a separate IonicStep
-        table for it. These tables are linked together.
-
-        Example use:
-
-        ``` python
-        from simmate.database.base_data_types import Relaxation
-
-        ExampleRelaxation, ExampleIonicStep = Relaxation.create_subclasses(
-            "Example",
-            module=__name__,
-        )
-        ```
-
-        #### Parameters
-
-        - `name` :
-            The prefix name of the subclasses that are output. "Relaxation" and
-            "IonicStep" will be attached to the end of this prefix.
-        - `module` :
-            name of the module this subclass should be associated with. Typically,
-            you should pass __name__ to this.
-        - `**extra_columns` :
-            Additional columns to add to the table. The keyword will be the
-            column name and the value should match django options
-            (e.g. table_column.FloatField())
-
-        #### Returns
-
-        - `NewRelaxationClass` :
-            A subclass of Relaxation.
-        - `NewIonicStepClass`:
-            A subclass of IonicStep.
-
-        """
-
-        # For convience, we add columns that point to the start and end structures
-        NewRelaxationClass = cls.create_subclass(
-            f"{name}Relaxation",
-            structure_start=table_column.OneToOneField(
-                f"{name}IonicStep",
-                on_delete=table_column.CASCADE,
-                related_name="relaxations_as_start",
-                blank=True,
-                null=True,
-            ),
-            structure_final=table_column.OneToOneField(
-                f"{name}IonicStep",
-                on_delete=table_column.CASCADE,
-                related_name="relaxations_as_final",
-                blank=True,
-                null=True,
-            ),
-            module=module,
-            **extra_columns,
-        )
-
-        NewIonicStepClass = IonicStep.create_subclass_from_relaxation(
-            name,
-            NewRelaxationClass,
-            module=module,
-            **extra_columns,
-        )
-
-        # we now have a new child class and avoided writing some boilerplate code!
-        return NewRelaxationClass, NewIonicStepClass
+    structure_start = (
+        table_column.OneToOneField(
+            "IonicStep",
+            on_delete=table_column.CASCADE,
+            related_name="relaxations_as_start",
+            blank=True,
+            null=True,
+        ),
+    )
+    structure_final = table_column.OneToOneField(
+        "IonicStep",
+        on_delete=table_column.CASCADE,
+        related_name="relaxations_as_final",
+        blank=True,
+        null=True,
+    )
 
     @classmethod
     def from_directory(cls, directory: str):
@@ -456,58 +403,14 @@ class IonicStep(Structure, Thermodynamics, Forces):
     #   relaxations_as_start
     #   relaxations_as_final
 
-    @classmethod
-    def create_subclass_from_relaxation(
-        cls,
-        name: str,
-        relaxation: Relaxation,
-        module: str,
-        **extra_columns,
-    ):
-        """
-        Dynamically creates a subclass of IonicStep and links it to the Relaxation
-        table.
-
-        This method should NOT be called directly because it is instead used by
-        `Relaxation.create_subclasses`.
-
-        #### Parameters
-
-        - `name` :
-            Name of the subclass that is output.
-        - `relaxation` :
-            Relaxation table that these ionic steps should be associated with.
-        - `module` :
-            name of the module this subclass should be associated with. Typically,
-            you should pass __name__ to this.
-        - `**extra_columns` :
-            Additional columns to add to the table. The keyword will be the
-            column name and the value should match django options
-            (e.g. table_column.FloatField())
-
-        Returns
-        -------
-        - `NewClass` :
-            A subclass of IonicStep.
-
-        """
-
-        # All structures in this table come from relaxation calculations, where
-        # there can be many structures (one for each ionic steps) linked to a
-        # single relaxation. This means the start structure, end structure, and
-        # those structure in-between are stored together here.
-        # Therefore, there's just a simple column stating which relaxation it
-        # belongs to.
-        NewClass = cls.create_subclass(
-            f"{name}IonicStep",
-            relaxation=table_column.ForeignKey(
-                relaxation,
-                on_delete=table_column.CASCADE,
-                related_name="structures",
-            ),
-            module=module,
-            **extra_columns,
-        )
-
-        # we now have a new child class and avoided writing some boilerplate code!
-        return NewClass
+    # All structures in this table come from relaxation calculations, where
+    # there can be many structures (one for each ionic steps) linked to a
+    # single relaxation. This means the start structure, end structure, and
+    # those structure in-between are stored together here.
+    # Therefore, there's just a simple column stating which relaxation it
+    # belongs to.
+    relaxation = table_column.ForeignKey(
+        "Relaxation",
+        on_delete=table_column.CASCADE,
+        related_name="structures",
+    )

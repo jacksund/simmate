@@ -38,22 +38,22 @@ def test_all_workflow_runs(tmpdir, sample_structures):
 
         # TEST S3Workflows
         s3_flows = [
-            "electronic-structure.vasp.matproj-full",
+            # "electronic-structure.vasp.matproj-full",
             "population-analysis.vasp.bader-matproj",
             "population-analysis.vasp.elf-matproj",
-            "relaxation.vasp.matproj",
-            "relaxation.vasp.mit",
-            "relaxation.vasp.neb-endpoint",
-            "relaxation.vasp.quality00",
-            "relaxation.vasp.quality01",
-            "relaxation.vasp.quality02",
-            "relaxation.vasp.quality03",
-            "relaxation.vasp.staged",
-            "relaxation.vasp.quality04",
-            "static-energy.vasp.matproj",
-            "static-energy.vasp.mit",
-            "static-energy.vasp.neb-endpoint",
-            "static-energy.vasp.quality04",
+            # "relaxation.vasp.matproj",
+            # "relaxation.vasp.mit",
+            # "relaxation.vasp.mvl-neb-endpoint",
+            # "relaxation.vasp.quality00",
+            # "relaxation.vasp.quality01",
+            # "relaxation.vasp.quality02",
+            # "relaxation.vasp.quality03",
+            # "relaxation.vasp.quality04",
+            # "relaxation.vasp.staged",
+            # "static-energy.vasp.matproj",
+            # "static-energy.vasp.mit",
+            # "static-energy.vasp.mvl-neb-endpoint",
+            # "static-energy.vasp.quality04",
         ]
         for workflow_name in s3_flows:
 

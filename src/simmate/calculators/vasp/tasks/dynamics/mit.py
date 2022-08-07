@@ -4,10 +4,10 @@ import os
 
 from simmate.toolkit import Structure
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
-from simmate.calculators.vasp.tasks.relaxation import MITRelaxation
+from simmate.calculators.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
 
 
-class MITDynamics(MITRelaxation):
+class MITDynamics(Relaxation__Vasp__Mit):
     """
     This task is a reimplementation of pymatgen's
     [MITMDSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITMDSet).
@@ -28,7 +28,7 @@ class MITDynamics(MITRelaxation):
 
     confirm_convergence = False
 
-    incar = MITRelaxation.incar.copy()
+    incar = Relaxation__Vasp__Mit.incar.copy()
     incar.update(
         dict(
             # Unique to this task, we want to allow users to set these temperatures

@@ -330,24 +330,17 @@ class S3Workflow(Workflow):
         if cls.compress_output:
             make_archive(directory_cleaned)
 
-        # Grab the prefect flow run id. Note, when not ran within a prefect
-        # flow, there won't be an id. We therefore need this try/except
-        try:
-            prefect_context = get_run_context()
-            flow_run_id = str(prefect_context.task_run.flow_run_id)
-        except MissingContextError:
-            flow_run_id = None
-
-        # !!! DEV
-        calculation_id = save_result(result)
-
         # Return our final information as a dictionary
-        return {
+        result = {
             "result": result,
             "corrections": corrections,
-            "directory": directory,
-            "prefect_flow_run_id": flow_run_id,
+            "directory": directory_cleaned,
         }
+
+        # !!! DEV
+        result["calculation_id"] = save_result(result)
+
+        return result
 
     @staticmethod
     def setup(directory: str, **kwargs):
