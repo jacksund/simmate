@@ -32,6 +32,8 @@ def get_default_parallel_settings():
 
 class VaspWorkflow(S3Workflow):
 
+    _parameter_methods = S3Workflow._parameter_methods + ["_get_clean_structure"]
+
     required_files = ["INCAR", "POTCAR", "POSCAR"]
 
     command: str = "vasp_std > vasp.out"

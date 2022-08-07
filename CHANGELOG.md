@@ -15,8 +15,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 # Upcoming Release
 > :bulb: For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
 
-<!-- 
-    - no new changes have been merged into the `main` branch yet
+<!-- (hidden message for maintainer to use between releases)
+- no new changes have been merged into the `main` branch yet
 -->
 
 **Enhancements**
@@ -26,7 +26,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add SCAN workflows for static energy and relaxation
 
 **Refactors**
-- None
+- to simplify the creation of new workflows, `S3Task` is now `S3Workflow` and database tables are dynamically determined using the workflow name
+- workflows of a given type (e.g. relaxation or static-energy) now share a database tables in order to simplify overall database architecture
 
 **Fixes**
 - None

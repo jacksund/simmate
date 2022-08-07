@@ -6,10 +6,10 @@ from pymatgen.io.vasp.outputs import Elfcar, Chgcar
 
 from simmate.toolkit import Structure
 
-from .bader import BaderAnalysis
+from .bader import PopulationAnalysis__Bader__Bader
 
 
-class BaderELFAnalysis(BaderAnalysis):
+class PopulationAnalysis__Bader__Badelf(PopulationAnalysis__Bader__Bader):
     """
     Runs Bader analysis where the ELFCAR is used as the partitioning reference
     instead of CHGCAR.

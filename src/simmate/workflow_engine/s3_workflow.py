@@ -121,10 +121,8 @@ from typing import List, Tuple
 
 import pandas
 
-from prefect.context import get_run_context, MissingContextError
-
 from simmate.workflow_engine import Workflow, ErrorHandler
-from simmate.utilities import make_archive, make_error_archive
+from simmate.utilities import get_directory, make_archive, make_error_archive
 
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
 # reset the working directory between task retries -- in some cases we may
@@ -143,9 +141,8 @@ class S3Workflow(Workflow):
     errors during a calculation, and working up the results.
     """
 
-    # I set this here so that I don't have to copy/paste the init method
-    # every time I inherit from this class and want to update the default
-    # command to use for the child class.
+    _parameter_methods = Workflow._parameter_methods + ["setup"]
+
     command: str = None
     """
     The defualt shell command to use.
@@ -198,32 +195,20 @@ class S3Workflow(Workflow):
     we run monitoring functions every 5 minutes (10x30=300s=5min).
     """
 
-    save_corrections_to_file: bool = True
-    """
-    Whether to write a log file of the corrections made. The default is True.
-    """
-
-    compress_output: bool = False
-    """
-    Whether to compress the directory to a zip file at the end of the
-    task run. After compression, it will also delete the directory.
-    The default is False.
-    """
-
     @classmethod
     def run_config(
         cls,
         directory: str = None,
         command: str = None,
         is_restart: bool = False,
+        compress_output: bool = False,
         **kwargs,
     ):
         """
          Runs the entire staged task (setup, execution, workup), which includes
          supervising during execution.
 
-         Call this method once you have your task initialized. For each run you
-         can provide a new structure, directory, or command. For example:
+         #### Example use
 
          ``` python
          from simmate.calculator.example.tasks import ExampleTask
@@ -246,6 +231,11 @@ class S3Workflow(Workflow):
             called instead of the setup method. Extra checks will be made to
             see if the calculation completed already too.
 
+        - `compress_output`:
+            Whether to compress the directory to a zip file at the end of the
+            task run. After compression, it will also delete the directory.
+            The default is False.
+
          - `**kwargs`:
              Any extra keywords that should be passed to the setup() method.
 
@@ -262,37 +252,23 @@ class S3Workflow(Workflow):
         if not command:
             command = cls.command
 
-        # !!! DEV
-        # local import to prevent circular import error
-        from simmate.workflow_engine.common_tasks import (
-            load_input_and_register,
-            save_result,
-        )
-
-        # !!! DEV
-        parameters_cleaned = load_input_and_register(
-            directory=directory,
-            command=command,
-            is_restart=is_restart,
-            **kwargs,
-        )
-        directory_cleaned = parameters_cleaned["directory"]
-        command_cleaned = parameters_cleaned["command"]
+        # establish the working directory
+        directory = get_directory(directory)
 
         # When handling restarted calculations, we check for the final summary
         # file and if it exists, we know the calculation has already completed
         # (and therefore doesn't require a restart). This helps handle nested
         # workflows where we don't know which task to restart at.
-        summary_filename = os.path.join(directory_cleaned, "simmate_summary.yaml")
+        summary_filename = os.path.join(directory, "simmate_summary.yaml")
         is_complete = os.path.exists(summary_filename)
-        is_dir_setup = cls._check_input_files(directory_cleaned, raise_if_missing=False)
+        is_dir_setup = cls._check_input_files(directory, raise_if_missing=False)
 
         # run the setup stage of the task, where there is a unique method
         # if we are picking up from a previously paused run.
         if (not is_restart and not is_complete) or not is_dir_setup:
-            cls.setup(**parameters_cleaned)
+            cls.setup(directory=directory, **kwargs)
         elif is_restart and not is_complete:
-            cls.setup_restart(**parameters_cleaned)
+            cls.setup_restart(directory=directory, **kwargs)
         else:
             print("Calculation is already completed. Skipping setup.")
 
@@ -301,18 +277,16 @@ class S3Workflow(Workflow):
         if not is_restart or not is_complete:
 
             # make sure proper files are present
-            cls._check_input_files(directory_cleaned)
+            cls._check_input_files(directory)
 
             # run the shelltask and error supervision stages. This method returns
             # a list of any corrections applied during the run.
-            corrections = cls.execute(directory_cleaned, command_cleaned)
+            corrections = cls.execute(directory, command)
         else:
             print("Calculation is already completed. Skipping execution.")
 
             # load the corrections from file for reference
-            corrections_filename = os.path.join(
-                directory_cleaned, "simmate_corrections.csv"
-            )
+            corrections_filename = os.path.join(directory, "simmate_corrections.csv")
             if os.path.exists(corrections_filename):
                 data = pandas.read_csv(corrections_filename)
                 corrections = data.values.tolist()
@@ -323,22 +297,19 @@ class S3Workflow(Workflow):
 
         # run the workup stage of the task. This is where the data/info is pulled
         # out from the calculation and is thus our "result".
-        result = cls.workup(directory=directory_cleaned)
+        result = cls.workup(directory=directory)
 
         # if requested, compresses the directory to a zip file and then removes
         # the directory.
-        if cls.compress_output:
-            make_archive(directory_cleaned)
+        if compress_output:
+            make_archive(directory)
 
         # Return our final information as a dictionary
         result = {
             "result": result,
             "corrections": corrections,
-            "directory": directory_cleaned,
+            "directory": directory,
         }
-
-        # !!! DEV
-        result["calculation_id"] = save_result(result)
 
         return result
 
@@ -627,11 +598,11 @@ class S3Workflow(Workflow):
                     # highest priority fix and nothing else.
                     break
 
-            # write the log of corrections to file if requested. This is written
+            # write the log of corrections to file if there are any. This is written
             # as a CSV file format and done every while-loop cycle because it
             # lets the user monitor the calculation and error handlers applied
             # as it goes. If no corrections were applied, we skip writing the file.
-            if cls.save_corrections_to_file and corrections:
+            if corrections:
                 # compile the corrections metadata into a dataframe
                 data = pandas.DataFrame(
                     corrections,

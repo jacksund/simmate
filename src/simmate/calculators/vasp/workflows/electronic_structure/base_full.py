@@ -3,7 +3,6 @@
 import os
 
 from simmate.workflow_engine import Workflow
-from simmate.workflow_engine.common_tasks import load_input_and_register
 
 
 class ElectronicStructureWorkflow(Workflow):
@@ -22,6 +21,8 @@ class ElectronicStructureWorkflow(Workflow):
     use HSE instead.
     """
 
+    _use_database = False
+
     static_energy_workflow: Workflow = None
     band_structure_workflow: Workflow = None
     density_of_states_workflow: Workflow = None
@@ -36,22 +37,11 @@ class ElectronicStructureWorkflow(Workflow):
         copy_previous_directory: str = False,
     ):
 
-        parameters_cleaned = load_input_and_register(
+        static_result = cls.static_energy_workflow.run(
             structure=structure,
             command=command,
+            directory=directory + os.path.sep + cls.static_energy_workflow.name_full,
             source=source,
-            directory=directory,
-            copy_previous_directory=copy_previous_directory,
-            register_run=False,
-        )
-
-        static_result = cls.static_energy_workflow.run(
-            structure=parameters_cleaned["structure"],
-            command=parameters_cleaned.get("command"),
-            directory=parameters_cleaned["directory"]
-            + os.path.sep
-            + cls.static_energy_workflow.name_full,
-            source=parameters_cleaned["source"],
             # For band-structures, unit cells should be in the standardized format
             pre_standardize_structure=True,
         ).result()  # block until complete
@@ -61,8 +51,8 @@ class ElectronicStructureWorkflow(Workflow):
                 "database_table": cls.static_energy_workflow.database_table.__name__,
                 "directory": static_result["directory"],
             },
-            command=parameters_cleaned.get("command"),
-            directory=parameters_cleaned["directory"]
+            command=command,
+            directory=directory
             + os.path.sep
             + cls.density_of_states_workflow.name_full,
             copy_previous_directory=True,
@@ -73,10 +63,8 @@ class ElectronicStructureWorkflow(Workflow):
                 "database_table": cls.static_energy_workflow.database_table.__name__,
                 "directory": static_result["directory"],
             },
-            command=parameters_cleaned.get("command"),
-            directory=parameters_cleaned["directory"]
-            + os.path.sep
-            + cls.band_structure_workflow.name_full,
+            command=command,
+            directory=directory + os.path.sep + cls.band_structure_workflow.name_full,
             copy_previous_directory=True,
         )
 

@@ -11,7 +11,7 @@ from simmate.workflow_engine import S3Workflow
 from simmate.calculators.bader.outputs import ACF
 
 
-class BaderAnalysis(S3Workflow):
+class PopulationAnalysis__Bader__Bader(S3Workflow):
 
     command = "bader CHGCAR -ref CHGCAR_sum -b weight > bader.out"
     """

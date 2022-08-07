@@ -5,9 +5,9 @@ from simmate.workflow_engine import task, Workflow
 from simmate.calculators.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
-from simmate.calculators.bader.tasks import (
-    BaderAnalysis as BaderAnalysisTask,
-    CombineCHGCARs,
+from simmate.calculators.bader.workflows import (
+    PopulationAnalysis__Bader__Bader,
+    PopulationAnalysis__Bader__CombineChgcars,
 )
 
 
@@ -26,6 +26,11 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
         directory: str = None,
     ):
 
+        structure = "NaCl.cif"
+        command = "mpirun -n 8 vasp_std > vasp.out"
+        source = None
+        directory = None
+
         prebader_result = PopulationAnalysis__Vasp__PrebaderMatproj.run(
             structure=structure,
             command=command,
@@ -34,12 +39,14 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
         ).result()
 
         # Setup chargecars for the bader analysis and wait until complete
-        CombineCHGCARs.run(directory=prebader_result["directory"]).result()
+        PopulationAnalysis__Bader__CombineChgcars.run(
+            directory=prebader_result["directory"],
+        ).result()
 
         # Bader only adds files and doesn't overwrite any, so I just run it
         # in the original directory. I may switch to copying over to a new
         # directory in the future though.
-        bader_result = BaderAnalysisTask.run(
+        bader_result = PopulationAnalysis__Bader__Bader.run(
             directory=prebader_result["directory"]
         ).result()
 
@@ -82,9 +89,11 @@ def save_bader_results(bader_result, prefect_flow_run_id):
 
     # load the calculation entry for this workflow run. This should already
     # exist thanks to the load_input_and_register task of the prebader workflow
-    calculation = MPBaderResults.from_prefect_context(
-        prefect_flow_run_id,
-        PopulationAnalysis__Vasp__BaderMatproj.name_full,
+    calculation = (
+        PopulationAnalysis__Vasp__PrebaderMatproj.database_table.from_prefect_context(
+            prefect_flow_run_id,
+            PopulationAnalysis__Vasp__BaderMatproj.name_full,
+        )
     )
     # BUG: can't use context to grab the id because workflow tasks generate a
     # different id than the main workflow

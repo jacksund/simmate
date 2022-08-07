@@ -8,7 +8,7 @@ from simmate.database.third_parties import MatprojStructure
 from simmate.calculators.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
-from simmate.calculators.bader.tasks import BaderELFAnalysis
+from simmate.calculators.bader.workflows import PopulationAnalysis__Bader__Badelf
 
 
 class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
@@ -43,7 +43,7 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
         # Bader only adds files and doesn't overwrite any, so I just run it
         # in the original directory. I may switch to copying over to a new
         # directory in the future though.
-        badelf_result = BaderELFAnalysis.run(
+        badelf_result = PopulationAnalysis__Bader__Badelf.run(
             structure=structure_w_empties,
             directory=prebadelf_result["directory"],
         ).result()
@@ -159,7 +159,7 @@ def save_badelf_results(bader_result, prefect_flow_run_id):
 
     # load the calculation entry for this workflow run. This should already
     # exist thanks to the load_input_and_register task of the prebader workflow
-    calculation = MPBadelfResults.from_prefect_context(
+    calculation = PopulationAnalysis__Bader__Badelf.database_table.from_prefect_context(
         prefect_flow_run_id,
         PopulationAnalysis__Vasp__PrebadelfMatproj.name_full,
     )
