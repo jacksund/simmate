@@ -76,7 +76,7 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             state = workflow.run(
                 structure=structure,
                 command="mpirun -n 12 vasp_std > vasp.out",
-                nsteps=100,
+                nsteps=50,
                 temperature_start=400,
                 temperature_end=400,
             )

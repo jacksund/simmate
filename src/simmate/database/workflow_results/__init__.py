@@ -6,25 +6,19 @@ __doc__ = get_doc_from_readme(__file__)
 
 from simmate.database.base_data_types import (
     Relaxation,
+    IonicStep,
     StaticEnergy,
     BandStructureCalc,
     DensityofStatesCalc,
     PopulationAnalysis,
+    DynamicsRun,
+    DynamicsIonicStep,
 )
 
 from simmate.calculators.vasp.database.nudged_elastic_band import (
     MITDiffusionAnalysis,
     MITMigrationHop,
     MITMigrationImage,
-)
-
-from simmate.calculators.vasp.database.dynamics import (
-    MITDynamicsRun,
-    MITDynamicsIonicStep,
-    MatprojDynamicsRun,
-    MatprojDynamicsIonicStep,
-    MatVirtualLabNPTDynamicsRun,
-    MatVirtualLabNPTDynamicsIonicStep,
 )
 
 from simmate.calculators.vasp.database.customized import (

@@ -362,6 +362,10 @@ class Workflow:
             from simmate.database.base_data_types import PopulationAnalysis
 
             return PopulationAnalysis
+        elif flow_type == "dynamics":
+            from simmate.database.base_data_types import DynamicsRun
+
+            return DynamicsRun
         else:
             print(cls.name_type)
             raise NotImplementedError()
