@@ -30,6 +30,7 @@ class PopulationAnalysis__Bader__Bader(S3Workflow):
     """
 
     required_files = ["CHGCAR_sum", "POTCAR"]
+    use_database = False
 
     @classmethod
     def workup(cls, directory: str):

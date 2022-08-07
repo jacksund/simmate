@@ -18,6 +18,8 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
     as a reference when partitioning.
     """
 
+    use_database = False
+
     @classmethod
     def run_config(
         cls,

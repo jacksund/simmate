@@ -16,8 +16,8 @@ class PopulationAnalysis__Bader__Badelf(PopulationAnalysis__Bader__Bader):
     """
 
     command = "bader CHGCAR_empty -ref ELFCAR_empty > bader.out"
-    requires_structure = True  # !!! This may change in the future
     required_files = ["CHGCAR", "ELFCAR"]
+    use_database = False
 
     @staticmethod
     def setup(structure: Structure, directory: str):

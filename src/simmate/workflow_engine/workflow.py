@@ -307,7 +307,7 @@ class Workflow:
     in the list-view of all different workflow presets.
     """
 
-    _use_database: bool = True
+    use_database: bool = True
     """
     Whether to use Simmate database features or not.
     
@@ -388,7 +388,7 @@ class Workflow:
         """
         kwargs_cleaned = cls._load_input_and_register(**kwargs)
         result = cls.run_config(**kwargs_cleaned)
-        if cls._use_database:
+        if cls.use_database:
             result["calculation_id"] = cls._save_to_database(result)
         return result
 
@@ -717,7 +717,7 @@ class Workflow:
         # STEP 4: Register the calculation so the user can follow along in the UI
         # and also see which structures/runs have been submitted aready.
 
-        if cls._use_database:
+        if cls.use_database:
             cls._register_calculation(**parameters_cleaned)
 
         # ---------------------------------------------------------------------

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.toolkit import Structure
-from simmate.workflow_engine import task, Workflow
+from simmate.workflow_engine import Workflow
 from simmate.calculators.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
@@ -26,11 +26,6 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
         directory: str = None,
     ):
 
-        structure = "NaCl.cif"
-        command = "mpirun -n 8 vasp_std > vasp.out"
-        source = None
-        directory = None
-
         prebader_result = PopulationAnalysis__Vasp__PrebaderMatproj.run(
             structure=structure,
             command=command,
@@ -50,12 +45,23 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
             directory=prebader_result["directory"]
         ).result()
 
-        save_bader_results(bader_result, prebader_result["prefect_flow_run_id"])
+        return bader_result
 
+    @classmethod
+    def _save_to_database(cls, bader_result):
+        # load the results. We are particullary after the first result with
+        # is a pandas dataframe of oxidation states.
+        oxidation_data, extra_data = bader_result["result"]
 
-# -----------------------------------------------------------------------------
+        # load the calculation entry for this workflow run. This should already
+        # exist thanks to the load_input_and_register task of the prebader workflow
+        calculation = cls.database_table.from_prefect_context()
+        # BUG: can't use context to grab the id because workflow tasks generate a
+        # different id than the main workflow
 
-# Below are extra tasks and subflows for the workflow that is defined above
+        # now update the calculation entry with our results
+        calculation.oxidation_states = list(oxidation_data.oxidation_state.values)
+        calculation.save()
 
 
 class PopulationAnalysis__Vasp__PrebaderMatproj(StaticEnergy__Vasp__Matproj):
@@ -79,25 +85,3 @@ class PopulationAnalysis__Vasp__PrebaderMatproj(StaticEnergy__Vasp__Matproj):
         NGZF__density_c=20,
         LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
     )
-
-
-@task
-def save_bader_results(bader_result, prefect_flow_run_id):
-    # load the results. We are particullary after the first result with
-    # is a pandas dataframe of oxidation states.
-    oxidation_data, extra_data = bader_result["result"]
-
-    # load the calculation entry for this workflow run. This should already
-    # exist thanks to the load_input_and_register task of the prebader workflow
-    calculation = (
-        PopulationAnalysis__Vasp__PrebaderMatproj.database_table.from_prefect_context(
-            prefect_flow_run_id,
-            PopulationAnalysis__Vasp__BaderMatproj.name_full,
-        )
-    )
-    # BUG: can't use context to grab the id because workflow tasks generate a
-    # different id than the main workflow
-
-    # now update the calculation entry with our results
-    calculation.oxidation_states = list(oxidation_data.oxidation_state.values)
-    calculation.save()
