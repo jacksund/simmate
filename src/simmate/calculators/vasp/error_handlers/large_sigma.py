@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import ErrorHandler
@@ -19,10 +19,10 @@ class LargeSigma(ErrorHandler):
     def __init__(self, entropy_per_atom_threshold=0.001):
         self.entropy_per_atom_threshold = entropy_per_atom_threshold
 
-    def check(self, directory: str) -> bool:
+    def check(self, directory: Path) -> bool:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # this error is only relevent if we have ISMEAR >= 0. So we return that
@@ -33,17 +33,17 @@ class LargeSigma(ErrorHandler):
         # We check for this error in the OUTCAR
         # TODO: I don't have an OUTCAR class written yet so I just read the
         # raw text and search for the entropy information directly
-        outcar_filename = os.path.join(directory, "OUTCAR")
+        outcar_filename = directory / "OUTCAR"
 
         # check to see that the file is there first
-        if os.path.exists(outcar_filename):
+        if outcar_filename.exists():
 
             # read the file content and then close it
-            with open(outcar_filename) as file:
+            with outcar_filename.open() as file:
                 outcar_lines = file.readlines()
 
             # also load the structure so we know how many sites there are
-            poscar_filename = os.path.join(directory, "POSCAR")
+            poscar_filename = directory / "POSCAR"
             structure = Structure.from_file(poscar_filename)
             nsites = structure.num_sites
 
@@ -66,7 +66,7 @@ class LargeSigma(ErrorHandler):
     def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # grab the sigma value being used where the default is 0.2

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 import pytest
 
 from simmate.conftest import copy_test_files, make_dummy_files
@@ -17,10 +15,10 @@ def test_frozen(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    out_filename = os.path.join(tmpdir, "vasp.out")
-    chgcar_filename = os.path.join(tmpdir, "CHGCAR")
-    wavecar_filename = os.path.join(tmpdir, "WAVECAR")
+    incar_filename = tmpdir / "INCAR"
+    out_filename = tmpdir / "vasp.out"
+    chgcar_filename = tmpdir / "CHGCAR"
+    wavecar_filename = tmpdir / "WAVECAR"
 
     # We use a negative timeout to ensure this class fails
     error_handler = Frozen(timeout_limit=-1)
@@ -33,8 +31,8 @@ def test_frozen(tmpdir):
     fix = error_handler.correct(tmpdir)
     assert fix == "Removed IMIX=1 and deleted CHGCAR and WAVECAR"
     assert not Incar.from_file(incar_filename).get("IMIX", None)
-    assert not os.path.exists(chgcar_filename)
-    assert not os.path.exists(wavecar_filename)
+    assert not chgcar_filename.exists()
+    assert not wavecar_filename.exists()
 
     # Make second attempt at fixing the error
     fix = error_handler.correct(tmpdir)
@@ -51,5 +49,5 @@ def test_frozen(tmpdir):
         fix = error_handler.correct(tmpdir)
 
     # Confirm an error IS NOT found when no file exists
-    os.remove(out_filename)
+    out_filename.unlink()
     assert error_handler.check(tmpdir) == False

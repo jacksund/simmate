@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
 import shutil
-from tempfile import TemporaryDirectory
 
 from simmate.conftest import copy_test_files
 from simmate.utilities.files import (
@@ -18,18 +16,17 @@ def test_get_directory(tmpdir):
 
     # create and delete a new directory
     new_directory = get_directory()
-    assert "simmate-task-" in new_directory
+    assert "simmate-task-" in new_directory.name
     shutil.rmtree(new_directory)
 
     # get directory by name
     new_directory = get_directory(tmpdir)
     assert tmpdir == new_directory
 
-    # Use a TemporaryDir instance
-    tempdir2 = TemporaryDirectory()
-    new_directory = get_directory(tempdir2)
-    assert new_directory == tempdir2.name
-    tempdir2.cleanup()
+    # test recursive creation
+    subfolder = tmpdir / "subfolder1" / "subfolder2"
+    new_directory = get_directory(subfolder)
+    assert new_directory == subfolder
 
 
 def test_make_archive(tmpdir):
@@ -41,8 +38,8 @@ def test_make_archive(tmpdir):
     )
 
     archive_old_runs(tmpdir, time_cutoff=0)
-    assert os.path.exists(os.path.join(tmpdir, "simmate-task-1.zip"))
-    assert os.path.exists(os.path.join(tmpdir, "simmate-task-2.zip"))
+    assert (tmpdir / "simmate-task-1.zip").exists()
+    assert (tmpdir / "simmate-task-2.zip").exists()
 
 
 def test_make_error_archive(tmpdir):
@@ -54,10 +51,10 @@ def test_make_error_archive(tmpdir):
     )
 
     make_error_archive(tmpdir)
-    assert os.path.exists(os.path.join(tmpdir, "simmate_attempt_01.zip"))
+    assert (tmpdir / "simmate_attempt_01.zip").exists()
 
     make_error_archive(tmpdir)
-    assert os.path.exists(os.path.join(tmpdir, "simmate_attempt_02.zip"))
+    assert (tmpdir / "simmate_attempt_02.zip").exists()
 
 
 def test_empty_directory(tmpdir):
@@ -69,5 +66,5 @@ def test_empty_directory(tmpdir):
     )
 
     empty_directory(tmpdir)
-    assert not os.path.exists(os.path.join(tmpdir, "simmate-task-1"))
-    assert not os.path.exists(os.path.join(tmpdir, "simmate-task-2"))
+    assert not (tmpdir / "simmate-task-1").exists()
+    assert not (tmpdir / "simmate-task-2").exists()

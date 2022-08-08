@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.conftest import copy_test_files, make_dummy_files
 from simmate.calculators.vasp.inputs import Potcar
 from simmate.calculators.vasp.workflows.electronic_structure.matproj_band_structure import (
@@ -13,9 +11,9 @@ from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
 def test_band_structure_setup(structure, tmpdir, mocker):
 
     # estabilish filenames that we make and commonly reference
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    poscar_filename = os.path.join(tmpdir, "POSCAR")
-    potcar_filename = os.path.join(tmpdir, "POTCAR")
+    incar_filename = tmpdir / "INCAR"
+    poscar_filename = tmpdir / "POSCAR"
+    potcar_filename = tmpdir / "POTCAR"
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
@@ -29,9 +27,9 @@ def test_band_structure_setup(structure, tmpdir, mocker):
     ElectronicStructure__Vasp__MatprojBandStructure.setup(
         directory=tmpdir, structure=structure
     )
-    assert os.path.exists(incar_filename)
-    assert os.path.exists(poscar_filename)
-    assert os.path.exists(potcar_filename)
+    assert incar_filename.exists()
+    assert poscar_filename.exists()
+    assert potcar_filename.exists()
     Potcar.to_file_from_type.assert_called_with(
         structure.composition.elements,
         "PBE",
@@ -48,10 +46,10 @@ def test_band_structure_workup(tmpdir):
     )
 
     # estabilish filenames that we make and commonly reference
-    summary_filename = os.path.join(tmpdir, "simmate_summary.yaml")
-    plot_filename = os.path.join(tmpdir, "band_structure.png")
+    summary_filename = tmpdir / "simmate_summary.yaml"
+    plot_filename = tmpdir / "band_structure.png"
 
     # run the full workup
     ElectronicStructure__Vasp__MatprojBandStructure.workup(tmpdir)
-    assert os.path.exists(summary_filename)
-    assert os.path.exists(plot_filename)
+    assert summary_filename.exists()
+    assert plot_filename.exists()

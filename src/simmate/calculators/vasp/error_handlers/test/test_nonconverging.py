@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 import pytest
 
 from simmate.conftest import copy_test_files
@@ -17,8 +15,8 @@ def test_nonconverging(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    oszicar_filename = os.path.join(tmpdir, "OSZICAR")
+    incar_filename = tmpdir / "INCAR"
+    oszicar_filename = tmpdir / "OSZICAR"
 
     # Confirm an error IS NOT found when there aren't enough ionic steps
     error_handler = NonConverging()  # default is 10
@@ -70,5 +68,5 @@ def test_nonconverging(tmpdir):
     assert error_handler.check(tmpdir) == False
 
     # Make sure an error is not raised when no OSZICAR is present
-    os.remove(oszicar_filename)
+    oszicar_filename.unlink()
     assert error_handler.check(tmpdir) == False

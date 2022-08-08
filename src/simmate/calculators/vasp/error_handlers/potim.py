@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import ErrorHandler
@@ -20,20 +20,20 @@ class Potim(ErrorHandler):
     def __init__(self, dE_per_atom_threshold: float = 1):
         self.dE_per_atom_threshold = dE_per_atom_threshold
 
-    def check(self, directory: str) -> bool:
+    def check(self, directory: Path) -> bool:
 
         # We check for this error in the OSZICAR because it's the smallest file
         # that will tell us energies -- and therefore the fastest to read.
-        oszicar_filename = os.path.join(directory, "OSZICAR")
+        oszicar_filename = directory / "OSZICAR"
 
         # check to see that the file is there first
-        if os.path.exists(oszicar_filename):
+        if oszicar_filename.exists():
 
             # then load the file's data
             oszicar = Oszicar(oszicar_filename)
 
             # also load the structure so we know how many sites there are
-            poscar_filename = os.path.join(directory, "POSCAR")
+            poscar_filename = directory / "POSCAR"
             structure = Structure.from_file(poscar_filename)
             nsites = structure.num_sites
 
@@ -50,10 +50,10 @@ class Potim(ErrorHandler):
         # not seeing any error.
         return False
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         current_potim = incar.get("POTIM", 0.5)

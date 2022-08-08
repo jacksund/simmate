@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
@@ -16,10 +16,10 @@ class InsufficientBands(ErrorHandler):
     filename_to_check = "vasp.out"
     possible_error_messages = ["TOO FEW BANDS"]
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # Grab the current number of bands. First check the INCAR and if
@@ -27,8 +27,8 @@ class InsufficientBands(ErrorHandler):
         if "NBANDS" in incar:
             nbands_current = incar["NBANDS"]
         else:
-            outcar_filename = os.path.join(directory, "OUTCAR")
-            with open(outcar_filename) as file:
+            outcar_filename = directory / "OUTCAR"
+            with outcar_filename.open() as file:
                 lines = file.readlines()
             # Go through the lines until we find the NBANDS. The value
             # should be at the very end of the line.

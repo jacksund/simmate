@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 import shutil
 
 from pymatgen.io.vasp.outputs import Vasprun
@@ -25,7 +25,7 @@ class Unconverged(ErrorHandler):
     def check(self, directory: str) -> bool:
 
         # Now check if the calculation converged. If not, we have the error!
-        xml_filename = os.path.join(directory, "vasprun.xml")
+        xml_filename = directory / "vasprun.xml"
         try:
             # load the xml file and only parse the bare minimum
             xmlReader = Vasprun(
@@ -48,12 +48,12 @@ class Unconverged(ErrorHandler):
     def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # Also load the vasp results to see if it's the electronic or ionic steps
         # that are failing to converge.
-        xml_filename = os.path.join(directory, "vasprun.xml")
+        xml_filename = directory / "vasprun.xml"
         xmlReader = Vasprun(
             filename=xml_filename,
             parse_dos=False,
@@ -127,8 +127,8 @@ class Unconverged(ErrorHandler):
             # We continue the optimization with RMM-DIIS type relaxation
 
             # Copy the CONTCAR into the POSCAR
-            poscar_filename = os.path.join(directory, "POSCAR")
-            contcar_filename = os.path.join(directory, "CONTCAR")
+            poscar_filename = directory / "POSCAR"
+            contcar_filename = directory / "CONTCAR"
             shutil.copy(contcar_filename, poscar_filename)
             correction = "copied the CONTCAR into the POSCAR"
 

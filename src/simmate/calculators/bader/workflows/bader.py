@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
 import yaml
+from pathlib import Path
 from pandas import DataFrame
 
 from pymatgen.io.vasp.outputs import Chgcar
@@ -33,7 +33,7 @@ class PopulationAnalysis__Bader__Bader(S3Workflow):
     use_database = False
 
     @classmethod
-    def workup(cls, directory: str):
+    def workup(cls, directory: Path):
         """
         A basic workup process that reads Bader analysis results from the ACF.dat
         file and calculates the corresponding oxidation states with the existing
@@ -41,12 +41,12 @@ class PopulationAnalysis__Bader__Bader(S3Workflow):
         """
 
         # load the ACF.dat file
-        acf_filename = os.path.join(directory, "ACF.dat")
+        acf_filename = directory / "ACF.dat"
         dataframe, extra_data = ACF(filename=acf_filename)
 
         # load the electron counts used by VASP from the POTCAR files
         # OPTIMIZE: this can be much faster if I have a reference file
-        potcar_filename = os.path.join(directory, "POTCAR")
+        potcar_filename = directory / "POTCAR"
         potcars = Potcar.from_file(potcar_filename)
         nelectron_data = {}
         # the result is a list because there can be multiple element potcars
@@ -56,11 +56,11 @@ class PopulationAnalysis__Bader__Bader(S3Workflow):
 
         # SPECIAL CASE: in scenarios where empty atoms are added to the structure,
         # we should grab that modified structure instead of the one from the POSCAR.
-        chgcar_filename = os.path.join(directory, "CHGCAR")
-        chgcar_empty_filename = os.path.join(directory, "CHGCAR_empty")
+        chgcar_filename = directory / "CHGCAR"
+        chgcar_empty_filename = directory / "CHGCAR_empty"
 
         # the empty file will always take preference
-        if os.path.exists(chgcar_empty_filename):
+        if chgcar_empty_filename.exists():
             chgcar = Chgcar.from_file(chgcar_empty_filename)
             structure = chgcar.structure
             # We typically use hydrogen ("H") as the empty atom, so we will
@@ -113,7 +113,7 @@ class PopulationAnalysis__Bader__Bader(S3Workflow):
         """
 
         # write output of the dataframe
-        summary_csv_filename = os.path.join(directory, "simmate_summary_bader.csv")
+        summary_csv_filename = directory / "simmate_summary_bader.csv"
         dataframe.to_csv(summary_csv_filename)
 
         summary = {
@@ -121,7 +121,7 @@ class PopulationAnalysis__Bader__Bader(S3Workflow):
             **extra_data,
         }
 
-        summary_filename = os.path.join(directory, "simmate_summary.yaml")
-        with open(summary_filename, "w") as file:
+        summary_filename = directory / "simmate_summary.yaml"
+        with summary_filename.open("w") as file:
             content = yaml.dump(summary)
             file.write(content)

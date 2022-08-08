@@ -27,12 +27,12 @@ from simmate.utilities import get_directory, get_conda_env
 # For windows, this would be something like...
 #   C:\Users\exampleuser\simmate\extra_applications
 # Note, we use get_directory in order to create that folder if it does not exist.
-SIMMATE_DIRECTORY = get_directory(os.path.join(Path.home(), "simmate"))
+SIMMATE_DIRECTORY = get_directory(Path.home() / "simmate")
 
 # This directory is where simmate.website is located and helps us indicate
 # where things like our templates or static files are located. We find this
 # by looking at the import path to see where python installed it.
-DJANGO_DIRECTORY = os.path.dirname(os.path.abspath(website.__file__))
+DJANGO_DIRECTORY = Path(website.__file__).absolute().parent
 
 # Some settings below also depend on the conda env name. This makes switching
 # between different databases and settings as easy as activating different
@@ -85,22 +85,20 @@ SECRET_KEY = os.getenv(
 #   2. my_env-database.yaml
 #   3. my_env-database.sqlite3 (if USE_LOCAL_DATABASE=True) <-- and create this if doesn't exist
 #   4. use a DATABASE_URL env variable
-DATABASE_YAML = os.path.join(SIMMATE_DIRECTORY, "database.yaml")
-CONDA_DATABASE_YAML = os.path.join(SIMMATE_DIRECTORY, f"{CONDA_ENV}-database.yaml")
-CONDA_DATABASE_SQLITE3 = os.path.join(
-    SIMMATE_DIRECTORY, f"{CONDA_ENV}-database.sqlite3"
-).strip("-")
+DATABASE_YAML = SIMMATE_DIRECTORY / "database.yaml"
+CONDA_DATABASE_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-database.yaml"
+CONDA_DATABASE_SQLITE3 = SIMMATE_DIRECTORY / f"{CONDA_ENV}-database.sqlite3".strip("-")
 # if the user is in the (base) env or not using conda, then we will have a
 # value of "-database.sqlite3". We remove the starting "-" here.
 
 
 # Our 1st priority is checking for a "simmate/database.yaml" file
-if os.path.exists(DATABASE_YAML):
+if DATABASE_YAML.exists():
     with open(DATABASE_YAML) as file:
         DATABASES = yaml.full_load(file)
 
 # Our 2nd priority is checking for a file like "/simmate/my_env-database.yaml
-elif os.path.exists(CONDA_DATABASE_YAML):
+elif CONDA_DATABASE_YAML.exists():
     with open(CONDA_DATABASE_YAML) as file:
         DATABASES = yaml.full_load(file)
 
@@ -207,8 +205,8 @@ INSTALLED_APPS = [
 # We also check if the user has a "applications.yaml" file. In this file, the
 # user can provide extra apps to install for Django. We simply append these
 # to our list above
-APPLICATIONS_YAML = os.path.join(SIMMATE_DIRECTORY, "applications.yaml")
-if os.path.exists(APPLICATIONS_YAML):
+APPLICATIONS_YAML = SIMMATE_DIRECTORY / "applications.yaml"
+if APPLICATIONS_YAML.exists():
     with open(APPLICATIONS_YAML) as file:
         # load the list of extra apps. Since this is really just one line for
         # each, it is loaded as a single string separated by a space.
@@ -239,7 +237,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         # I set DIRS below so I can have a single templates folder
-        "DIRS": [os.path.join(DJANGO_DIRECTORY, "templates")],
+        "DIRS": [DJANGO_DIRECTORY / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -312,16 +310,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 # collect by running 'python manage.py collectstatic'
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(DJANGO_DIRECTORY, "static")
+STATIC_ROOT = DJANGO_DIRECTORY / "static"
 
 # Extra places for collectstatic to find static files.
-STATICFILES_DIRS = [os.path.join(DJANGO_DIRECTORY, "static_files")]
+STATICFILES_DIRS = [DJANGO_DIRECTORY / "static_files"]
 
 # For the dynamically-created structure files, we need to include the static
 # directory this to work during local testing. This is NOT allowed in a
 # production server, so we don't include it when DEBUG is set to False.
 if DEBUG:
-    STATICFILES_DIRS += [os.path.join(DJANGO_DIRECTORY, "static")]
+    STATICFILES_DIRS += [STATIC_ROOT]
 
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"

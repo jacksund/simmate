@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 import pytest
 
 from pandas import DataFrame
@@ -49,7 +47,7 @@ def test_static_energy_table(structure, tmpdir):
     # TODO:
 
     # test writing and reloading these from and archive
-    archive_filename = os.path.join(tmpdir, "archive.zip")
+    archive_filename = tmpdir / "archive.zip"
     StaticEnergy.objects.to_archive(archive_filename)
     StaticEnergy.load_archive(
         archive_filename,

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.error_handlers import PositiveEnergy
@@ -15,8 +13,8 @@ def test_positive_energy(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    oszicar_filename = os.path.join(tmpdir, "OSZICAR")
+    incar_filename = tmpdir / "INCAR"
+    oszicar_filename = tmpdir / "OSZICAR"
 
     # init class with default settings
     error_handler = PositiveEnergy()
@@ -43,5 +41,5 @@ def test_positive_energy(tmpdir):
     assert error_handler.check(tmpdir) == False
 
     # Confirm an error IS NOT found when there is no OSZICAR
-    os.remove(oszicar_filename)
+    oszicar_filename.unlink()
     assert error_handler.check(tmpdir) == False

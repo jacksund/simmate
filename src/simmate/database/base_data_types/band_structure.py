@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.electronic_structure.bandstructure import (
     BandStructureSymmLine as ToolkitBandStructure,
@@ -187,7 +185,7 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
 
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
-        vasprun_filename = os.path.join(directory, "vasprun.xml")
+        vasprun_filename = directory / "vasprun.xml"
         vasprun = Vasprun(vasprun_filename)
         band_structure = vasprun.get_band_structure(line_mode=True)
         band_structure_db = cls.from_toolkit(

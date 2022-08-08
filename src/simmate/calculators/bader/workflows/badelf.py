@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Elfcar, Chgcar
 
@@ -20,7 +20,7 @@ class PopulationAnalysis__Bader__Badelf(PopulationAnalysis__Bader__Bader):
     use_database = False
 
     @staticmethod
-    def setup(structure: Structure, directory: str):
+    def setup(structure: Structure, directory: Path):
         """
         Bader analysis requires that a static-energy calculation be ran beforehand
         - typically using VASP. This setup involves ensuring that
@@ -34,8 +34,8 @@ class PopulationAnalysis__Bader__Badelf(PopulationAnalysis__Bader__Bader):
         """
 
         # establish file names
-        elfcar_filename = os.path.join(directory, "ELFCAR")
-        chgcar_filename = os.path.join(directory, "CHGCAR")
+        elfcar_filename = directory / "ELFCAR"
+        chgcar_filename = directory / "CHGCAR"
 
         # Load ELFCAR + CHGCAR and replace the structure with the one we created that includes
         # empty atoms.

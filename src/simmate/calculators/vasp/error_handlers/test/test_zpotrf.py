@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.conftest import copy_test_files, make_dummy_files
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.error_handlers import Zpotrf
@@ -15,10 +13,10 @@ def test_eddrmm(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    chgcar_filename = os.path.join(tmpdir, "CHGCAR")
-    wavecar_filename = os.path.join(tmpdir, "WAVECAR")
-    oszicar_filename = os.path.join(tmpdir, "OSZICAR")
+    incar_filename = tmpdir / "INCAR"
+    chgcar_filename = tmpdir / "CHGCAR"
+    wavecar_filename = tmpdir / "WAVECAR"
+    oszicar_filename = tmpdir / "OSZICAR"
 
     # init class with default settings
     error_handler = Zpotrf()
@@ -41,11 +39,11 @@ def test_eddrmm(tmpdir):
     incar = Incar.from_file(incar_filename)
     assert incar["ISYM"] == 0
     assert incar["POTIM"] == 0.25
-    assert not os.path.exists(chgcar_filename)
-    assert not os.path.exists(wavecar_filename)
+    assert not chgcar_filename.exists()
+    assert not wavecar_filename.exists()
 
     # remove OSZICAR to the remaining checks/fixes
-    os.remove(oszicar_filename)
+    oszicar_filename.unlink()
 
     # Make first attempt at fixing the error
     make_dummy_files(chgcar_filename, wavecar_filename)
@@ -53,11 +51,11 @@ def test_eddrmm(tmpdir):
     assert fix == "set ISYM to 0 and deleted CHGCAR and WAVECAR"
     incar = Incar.from_file(incar_filename)
     assert Incar.from_file(incar_filename)["ISYM"] == 0
-    assert not os.path.exists(chgcar_filename)
-    assert not os.path.exists(wavecar_filename)
+    assert not chgcar_filename.exists()
+    assert not wavecar_filename.exists()
 
     # Make second attempt at fixing the error
-    with open(incar_filename, "w") as file:
+    with incar_filename.open("w") as file:
         file.write("NSW = 1 \nISIF = 2")
     make_dummy_files(chgcar_filename, wavecar_filename)
     fix = error_handler.correct(tmpdir)

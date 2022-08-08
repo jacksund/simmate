@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 import shutil
 
 from simmate.workflow_engine import ErrorHandler
@@ -19,16 +19,16 @@ class Zbrent(ErrorHandler):
         "ZBRENT: fatal error in bracketing",
     ]
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # make the fix
         incar["IBRION"] = 1
-        poscar_filename = os.path.join(directory, "POSCAR")
-        contcar_filename = os.path.join(directory, "CONTCAR")
+        poscar_filename = directory / "POSCAR"
+        contcar_filename = directory / "CONTCAR"
         shutil.copyfile(contcar_filename, poscar_filename)
         correction = "switched IBRION to 1 and copied the CONTCAR over to the POSCAR"
 

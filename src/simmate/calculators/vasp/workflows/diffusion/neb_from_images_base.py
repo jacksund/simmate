@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
 import shutil
 import yaml
 import numpy
+from pathlib import Path
 
 from pymatgen.analysis.transition_state import NEBAnalysis
 
@@ -87,12 +87,12 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
 
             # first make establish the foldername
             # The zfill function converts numbers from "1" to "01" for us
-            foldername = os.path.join(directory, str(i).zfill(2))
+            foldername = directory / str(i).zfill(2)
             # see if the folder exists, and if not, make it
-            if not os.path.exists(foldername):
-                os.mkdir(foldername)
+            if not foldername.exists():
+                foldername.mkdir()
             # now write the poscar file inside the folder
-            Poscar.to_file(image, os.path.join(foldername, "POSCAR"))
+            Poscar.to_file(image, foldername / "POSCAR")
 
         # We also need to check if the user set IMAGES in the INCAR. If not,
         # we set that for them here. Note, we use the "pop" method which removes
@@ -109,7 +109,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # and then write the incar file
         incar = Incar(**incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
-            filename=os.path.join(directory, "INCAR"),
+            filename=directory / "INCAR",
             # we can use the start image for our structure -- as all structures
             # should give the same result.
             structure=migration_images_cleaned[0],
@@ -130,7 +130,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
             # should give the same result.
             migration_images_cleaned[0].composition.elements,
             cls.functional,
-            os.path.join(directory, "POTCAR"),
+            directory / "POTCAR",
             cls.potcar_mappings,
         )
 
@@ -138,7 +138,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # starting path to a cif file. This can be slow for large structures
         # (>1s), but it is very little time compared to a full NEB run.
         path_vis = migration_images_cleaned.get_sum_structure()
-        path_vis.to("cif", os.path.join(directory, "path_relaxed_idpp.cif"))
+        path_vis.to("cif", directory / "path_relaxed_idpp.cif")
 
     @classmethod
     def setup_restart(cls, directory: str, **kwargs):
@@ -149,11 +149,11 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         print("WARNING: CONTCARs are not yet copied to POSCARs for NEB restarts.")
 
         # establish filenames
-        stopcar_filename = os.path.join(directory, "STOPCAR")
+        stopcar_filename = directory / "STOPCAR"
 
         # delete the stopcar if it exists
-        if os.path.exists(stopcar_filename):
-            os.remove(stopcar_filename)
+        if stopcar_filename.exists():
+            stopcar_filename.unlink()
 
     @classmethod
     def _pre_checks(
@@ -231,14 +231,9 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # BUG: For now I assume there are start/end image directories are located
         # in the working directory. These relaxation are actually ran by a
         # separate workflow, which is thus a prerequisite for this workflow.
-        start_dirname = os.path.join(
-            directory, "relaxation.vasp.mvl-neb-endpoint.start"
-        )
-        end_dirname = os.path.join(directory, "relaxation.vasp.mvl-neb-endpoint.end")
-        try:
-            assert os.path.exists(start_dirname)
-            assert os.path.exists(end_dirname)
-        except:
+        start_dirname = directory / "relaxation.vasp.mvl-neb-endpoint.start"
+        end_dirname = directory / "relaxation.vasp.mvl-neb-endpoint.end"
+        if not start_dirname.exists() or not end_dirname.exists():
             raise Exception(
                 "Your NEB calculation completed successfully. However, in order "
                 "to run the workup, Simmate needs the start/end point relaxations. "
@@ -252,16 +247,16 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # need to copy the OUTCAR from the endpoint relaxations to these folders.
         # I don't want to mess with opening a pull request with them / waiting
         # on a new release, so I make this hacky fix here
-        new_start_filename = os.path.join(directory, "00", "OUTCAR")
+        new_start_filename = directory / "00" / "OUTCAR"
 
         # the end filename should be the highest number in the directory
-        numbered_dirs = [d for d in os.listdir(directory) if d.isdigit()]
+        numbered_dirs = [d for d in directory.iterdir() if d.name.isdigit()]
         numbered_dirs.sort()
-        new_end_filename = os.path.join(directory, numbered_dirs[-1], "OUTCAR")
+        new_end_filename = directory / numbered_dirs[-1] / "OUTCAR"
 
         # now copy the outcars over
-        shutil.copyfile(os.path.join(start_dirname, "OUTCAR"), new_start_filename)
-        shutil.copyfile(os.path.join(end_dirname, "OUTCAR"), new_end_filename)
+        shutil.copyfile(start_dirname / "OUTCAR", new_start_filename)
+        shutil.copyfile(end_dirname / "OUTCAR", new_end_filename)
         ################
 
         neb_results = NEBAnalysis.from_dir(
@@ -290,7 +285,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
 
         # plot the results
         # plot = neb_results.get_plot()
-        # plot.savefig(os.path.join(directory, "NEB_plot.jpeg"))
+        # plot.savefig(directory / "NEB_plot.jpeg")
         print(
             "NEB plot generation is temporarily disabled due to a bug in prefect "
             "where matplotlib.plot() leads to a segmentation fault. "
@@ -301,7 +296,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # the summed structure.
         migration_images = MigrationImages(neb_results.structures)
         structure_sum = migration_images.get_sum_structure()
-        structure_sum.to("cif", os.path.join(directory, "path_relaxed_neb.cif"))
+        structure_sum.to("cif", directory / "path_relaxed_neb.cif")
 
         results_dict = neb_results.as_dict()
         summary = {
@@ -314,7 +309,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
             ),
         }
 
-        summary_filename = os.path.join(directory, "simmate_summary.yaml")
+        summary_filename = directory / "simmate_summary.yaml"
         with open(summary_filename, "w") as file:
             content = yaml.dump(summary)
             file.write(content)

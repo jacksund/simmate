@@ -116,7 +116,6 @@ import platform
 import time
 import signal
 import subprocess
-import yaml
 from typing import List, Tuple
 
 import pandas
@@ -259,8 +258,8 @@ class S3Workflow(Workflow):
         # file and if it exists, we know the calculation has already completed
         # (and therefore doesn't require a restart). This helps handle nested
         # workflows where we don't know which task to restart at.
-        summary_filename = os.path.join(directory, "simmate_summary.yaml")
-        is_complete = os.path.exists(summary_filename)
+        summary_filename = directory / "simmate_summary.yaml"
+        is_complete = summary_filename.exists()
         is_dir_setup = cls._check_input_files(directory, raise_if_missing=False)
 
         # run the setup stage of the task, where there is a unique method
@@ -286,8 +285,8 @@ class S3Workflow(Workflow):
             print("Calculation is already completed. Skipping execution.")
 
             # load the corrections from file for reference
-            corrections_filename = os.path.join(directory, "simmate_corrections.csv")
-            if os.path.exists(corrections_filename):
+            corrections_filename = directory / "simmate_corrections.csv"
+            if corrections_filename.exists():
                 data = pandas.read_csv(corrections_filename)
                 corrections = data.values.tolist()
             else:
@@ -390,8 +389,8 @@ class S3Workflow(Workflow):
         Make sure that there are the proper input files to run this calc
         """
 
-        filenames = [os.path.join(directory, file) for file in cls.required_files]
-        if not all(os.path.exists(filename) for filename in filenames):
+        filenames = [directory / file for file in cls.required_files]
+        if not all(filename.exists() for filename in filenames):
             if raise_if_missing:
                 raise Exception(
                     "Make sure your `setup` method directory source is defined correctly"
@@ -435,8 +434,8 @@ class S3Workflow(Workflow):
 
         # in case this is a restarted calculation, check if there is a list
         # of corrections in the current directory and load those as the start point
-        corrections_filename = os.path.join(directory, "simmate_corrections.csv")
-        if os.path.exists(corrections_filename):
+        corrections_filename = directory / "simmate_corrections.csv"
+        if corrections_filename.exists():
             data = pandas.read_csv(corrections_filename)
             corrections = data.values.tolist()
         # Otherwise we start with zero corrections that we slowly add to. This

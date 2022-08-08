@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 import time
 
 from simmate.workflow_engine import ErrorHandler
@@ -19,7 +19,7 @@ class Frozen(ErrorHandler):
     def __init__(self, timeout_limit: float = 3600):
         self.timeout_limit = timeout_limit
 
-    def check(self, directory: str) -> bool:
+    def check(self, directory: Path) -> bool:
         """
         Check for error in the specified directory. Note, we assume that we are
         checking the vasp.out file. If that file is not present, we say that there
@@ -27,13 +27,13 @@ class Frozen(ErrorHandler):
         """
 
         # establish the full path to the output file
-        output_filename = os.path.join(directory, "vasp.out")
+        output_filename = directory / "vasp.out"
 
         # check to see that the file is there first
-        if os.path.exists(output_filename):
+        if output_filename.exists():
 
             # check when the file was last editted
-            time_last_edit = os.path.getmtime(output_filename)
+            time_last_edit = output_filename.lstat().st_mtime
 
             # see how long ago this was and if it was longer than our timeout
             if time.time() - time_last_edit > self.timeout_limit:
@@ -49,7 +49,7 @@ class Frozen(ErrorHandler):
     def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         #########
@@ -59,8 +59,8 @@ class Frozen(ErrorHandler):
         # See https://github.com/jacksund/simmate/issues/159
         if incar.get("IMIX", None) == 1:
             # delete the CHGCAR and WAVECAR to ensure the next run is a clean start.
-            os.remove(os.path.join(directory, "CHGCAR"))
-            os.remove(os.path.join(directory, "WAVECAR"))
+            (directory / "CHGCAR").unlink()
+            (directory / "WAVECAR").unlink()
             incar.pop("IMIX")
             incar.to_file(incar_filename)
             return "Removed IMIX=1 and deleted CHGCAR and WAVECAR"

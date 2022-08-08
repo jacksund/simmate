@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import ErrorHandler
@@ -19,10 +19,10 @@ class Zpotrf(ErrorHandler):
     filename_to_check = "vasp.out"
     possible_error_messages = ["LAPACK: Routine ZPOTRF failed"]
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # We can learn more about the cause of this error by looking at
@@ -30,7 +30,7 @@ class Zpotrf(ErrorHandler):
         # BUG: what if the OSCZICAR is improperly formatted but a number
         # of ionic steps completed successfully?
         try:
-            oszicar_filename = os.path.join(directory, "OSZICAR")
+            oszicar_filename = directory / "OSZICAR"
             oszicar = Oszicar(oszicar_filename)
             nionic_steps = len(oszicar.ionic_steps)
         except Exception:
@@ -59,7 +59,7 @@ class Zpotrf(ErrorHandler):
         # starting lattice. We also save the original structure to a file
         # name POSCAR_original in case it's needed elsewhere.
         else:
-            poscar_filename = os.path.join(directory, "POSCAR")
+            poscar_filename = directory / "POSCAR"
             structure = Structure.from_file(poscar_filename)
             structure.to("POSCAR", poscar_filename + "_original")
             structure.apply_strain(0.2)
@@ -71,8 +71,8 @@ class Zpotrf(ErrorHandler):
         # and WAVECAR to ensure the next run is a clean start.
         current_icharg = incar.get("ICHARG", 0)
         if current_icharg < 10:
-            os.remove(os.path.join(directory, "CHGCAR"))
-            os.remove(os.path.join(directory, "WAVECAR"))
+            (directory / "CHGCAR").unlink()
+            (directory / "WAVECAR").unlink()
             correction += " and deleted CHGCAR and WAVECAR"
 
         # rewrite the INCAR with new settings

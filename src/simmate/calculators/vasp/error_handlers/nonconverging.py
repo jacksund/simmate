@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.outputs import Oszicar
@@ -19,7 +19,7 @@ class NonConverging(ErrorHandler):
     def __init__(self, min_ionic_steps: int = 10):
         self.min_ionic_steps = min_ionic_steps
 
-    def check(self, directory: str) -> bool:
+    def check(self, directory: Path) -> bool:
         """
         Check for error in the specified directory. Note, we assume that we are
         checking the OSZICAR file. If that file is not present, we say that there
@@ -28,12 +28,12 @@ class NonConverging(ErrorHandler):
 
         # We check for this error in the OSZICAR because it's the smallest file
         # that will tell us energies -- and therefore the fastest to read.
-        oszicar_filename = os.path.join(directory, "OSZICAR")
+        oszicar_filename = directory / "OSZICAR"
         # we also need the INCAR for this error handler
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
 
         # check to see that the files are there first
-        if os.path.exists(oszicar_filename) and os.path.exists(incar_filename):
+        if oszicar_filename.exists() and incar_filename.exists():
 
             # then load each file's data
             oszicar = Oszicar(oszicar_filename)
@@ -77,7 +77,7 @@ class NonConverging(ErrorHandler):
         # This value isn't used in fixing the Error anyways.
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # check what the current ALGO is. If it's not set, that means it's using

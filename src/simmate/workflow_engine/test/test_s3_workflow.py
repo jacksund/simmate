@@ -17,7 +17,6 @@
 # catch error with a non-monitor
 # test max_errors limit
 
-import os
 import shutil
 
 import pytest
@@ -103,7 +102,7 @@ def test_s3task_methods():
     state = workflow.run()
     result = state.result()
     assert state.is_completed()
-    assert os.path.exists(result["directory"])
+    assert result["directory"].exists()
     shutil.rmtree(result["directory"])
 
     # Test as a subflow
@@ -116,7 +115,7 @@ def test_s3task_methods():
     result = state.result()
 
     assert state.is_completed()
-    assert os.path.exists(result["directory"])
+    assert result["directory"].exists()
     shutil.rmtree(result["directory"])
 
 
@@ -134,10 +133,10 @@ def test_s3task_1():
     assert output["corrections"] == []
 
     # make sure that a "simmate-task-*" directory was created
-    assert os.path.exists(output["directory"])
+    assert output["directory"].exists()
 
     # and delete that directory
-    os.rmdir(output["directory"])
+    output["directory"].rmdir()
 
 
 def test_s3task_2():
@@ -151,13 +150,13 @@ def test_s3task_2():
     output = Customized__Testing__DummyWorkflow.run_config(compress_output=True)
 
     # make sure that a "simmate-task-*.zip" archive was created
-    assert os.path.exists(output["directory"] + ".zip")
+    assert output["directory"].with_suffix(".zip").exists()
 
     # make sure that a "simmate-task-*" directory was removed
-    assert not os.path.exists(output["directory"])
+    assert not output["directory"].exists()
 
     # and delete the archive
-    os.remove(output["directory"] + ".zip")
+    output["directory"].with_suffix(".zip").unlink()
 
 
 def test_s3task_3(tmpdir):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 import pytest
 from simmate.workflow_engine.error_handler import ErrorHandler
 
@@ -29,7 +29,7 @@ class IncorrectHandler(ErrorHandler):
 
 def test_error_handler():
 
-    directory = os.path.dirname(__file__)
+    directory = Path(__file__).parent
 
     # test basic use
     handler = CheckREADME()

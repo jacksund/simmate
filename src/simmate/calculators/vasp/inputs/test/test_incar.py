@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.calculators.vasp.inputs import Incar
 
 
@@ -278,27 +276,29 @@ def test_incar(tmpdir, structure):
         ),
     )
 
+    incar_filename = tmpdir / "INCAR"
+
     incar1 = Incar(**settings1)
     incar1.to_file(
-        filename=os.path.join(tmpdir, "INCAR"),
+        filename=incar_filename,
         structure=structure,
     )
 
     incar2 = Incar(**settings2)
     incar2.to_file(
-        filename=os.path.join(tmpdir, "INCAR"),
+        filename=incar_filename,
         structure=structure,
     )
 
     incar3 = Incar(**settings3)
     incar3.to_file(
-        filename=os.path.join(tmpdir, "INCAR"),
+        filename=incar_filename,
         structure=structure,
     )
 
     # simply check that we can reload. Checking for values and logic should be
     # done with individual keyword modifiers
-    incar4 = Incar.from_file(os.path.join(tmpdir, "INCAR"))
+    incar4 = Incar.from_file(incar_filename)
 
     # TODO: assert equal to ....
     diff = incar1.compare_incars(incar2)
@@ -308,7 +308,7 @@ def test_custom_keyword_modifier(tmpdir, sample_structures):
 
     structure = sample_structures["C_mp-48_primitive"]
 
-    incar_filename = os.path.join(tmpdir, "INCAR")
+    incar_filename = tmpdir / "INCAR"
 
     # make a dummy modifier that just multiplies input by 2
     def keyword_modifier_dummy(structure, value):

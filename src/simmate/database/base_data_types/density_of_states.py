@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.electronic_structure.dos import CompleteDos
 from pymatgen.electronic_structure.plotter import DosPlotter
@@ -174,7 +172,7 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
 
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
-        vasprun_filename = os.path.join(directory, "vasprun.xml")
+        vasprun_filename = directory / "vasprun.xml"
         vasprun = Vasprun(vasprun_filename)
         density_of_states_db = cls.from_toolkit(
             structure=vasprun.structures[0],

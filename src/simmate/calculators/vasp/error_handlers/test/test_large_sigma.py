@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 import pytest
 
 from simmate.conftest import copy_test_files
@@ -17,8 +15,8 @@ def test_large_sigma(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    outcar_filename = os.path.join(tmpdir, "OUTCAR")
+    incar_filename = tmpdir / "INCAR"
+    outcar_filename = tmpdir / "OUTCAR"
 
     # init class with default settings
     error_handler = LargeSigma()
@@ -44,7 +42,7 @@ def test_large_sigma(tmpdir):
         fix = error_handler.correct(tmpdir)
 
     # Confirm an error IS NOT found when no outcar exists
-    os.remove(outcar_filename)
+    outcar_filename.unlink()
     assert error_handler.check(tmpdir) == False
 
     # Confirm an error IS NOT found when ISMEAR > 0

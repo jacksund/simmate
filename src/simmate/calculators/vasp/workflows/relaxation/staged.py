@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.workflow_engine import Workflow
 from simmate.calculators.vasp.workflows.relaxation.quality00 import (
     Relaxation__Vasp__Quality00,
@@ -70,7 +68,7 @@ class Relaxation__Vasp__Staged(Workflow):
         state = current_task.run(
             structure=structure,
             command=command,
-            directory=directory + os.path.sep + current_task.name_full,
+            directory=directory / current_task.name_full,
         )
         result = state.result()
 
@@ -84,7 +82,7 @@ class Relaxation__Vasp__Staged(Workflow):
                     "structure_field": "structure_final",
                 },
                 command=command,
-                directory=directory + os.path.sep + current_task.name_full,
+                directory=directory / current_task.name_full,
             )
             result = state.result()
 

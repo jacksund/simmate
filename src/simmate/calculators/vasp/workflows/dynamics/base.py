@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.toolkit import Structure
 from simmate.calculators.vasp.workflows.base import VaspWorkflow
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
@@ -24,7 +22,7 @@ class DynamicsWorkflow(VaspWorkflow):
         structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         # write the poscar file
-        Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
+        Poscar.to_file(structure_cleaned, directory / "POSCAR")
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file. Note, we update the values of this incar,
@@ -36,7 +34,7 @@ class DynamicsWorkflow(VaspWorkflow):
         incar["POTIM"] = time_step
         incar = Incar(**incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
-            filename=os.path.join(directory, "INCAR"),
+            filename=directory / "INCAR",
             structure=structure,
         )
 
@@ -46,13 +44,13 @@ class DynamicsWorkflow(VaspWorkflow):
             Kpoints.to_file(
                 structure,
                 cls.kpoints,
-                os.path.join(directory, "KPOINTS"),
+                directory / "KPOINTS",
             )
 
         # write the POTCAR file
         Potcar.to_file_from_type(
             structure.composition.elements,
             cls.functional,
-            os.path.join(directory, "POTCAR"),
+            directory / "POTCAR",
             cls.potcar_mappings,
         )

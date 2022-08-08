@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.conftest import copy_test_files, make_dummy_files
 
 from simmate.toolkit.diffusion import MigrationImages
@@ -23,12 +21,10 @@ def test_neb_setup(sample_structures, tmpdir, mocker):
     images = MigrationImages.from_structure(structure, "I")[0]
 
     # estabilish filenames that we make and commonly reference
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    potcar_filename = os.path.join(tmpdir, "POTCAR")
+    incar_filename = tmpdir / "INCAR"
+    potcar_filename = tmpdir / "POTCAR"
     # These files exist within a series of directories 00, 01,..., 05
-    poscar_filenames = [
-        os.path.join(tmpdir, str(n).zfill(2), "POSCAR") for n in range(5)
-    ]
+    poscar_filenames = [tmpdir / str(n).zfill(2) / "POSCAR" for n in range(5)]
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
@@ -43,9 +39,9 @@ def test_neb_setup(sample_structures, tmpdir, mocker):
         migration_images=images,
         directory=tmpdir,
     )
-    assert os.path.exists(incar_filename)
-    assert os.path.exists(potcar_filename)
-    assert all([os.path.exists(f) for f in poscar_filenames])
+    assert incar_filename.exists()
+    assert potcar_filename.exists()
+    assert all([f.exists() for f in poscar_filenames])
     Potcar.to_file_from_type.assert_called_with(
         structure.composition.elements,
         "PBE",
@@ -62,12 +58,12 @@ def test_neb_workup(tmpdir):
     )
 
     # estabilish filenames that we make and commonly reference
-    summary_filename = os.path.join(tmpdir, "simmate_summary.yaml")
-    plot_filename = os.path.join(tmpdir, "NEB_plot.jpeg")
-    cif_filename = os.path.join(tmpdir, "path_relaxed_neb.cif")
+    summary_filename = tmpdir / "simmate_summary.yaml"
+    plot_filename = tmpdir / "NEB_plot.jpeg"
+    cif_filename = tmpdir / "path_relaxed_neb.cif"
 
     # run the full workup
     Diffusion__Vasp__NebFromImagesMit.workup(tmpdir)
-    assert os.path.exists(summary_filename)
+    assert summary_filename.exists()
     # assert os.path.exists(plot_filename)  # temporarily removed
-    assert os.path.exists(cif_filename)
+    assert cif_filename.exists()

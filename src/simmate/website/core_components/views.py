@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os
 import tempfile
 import time
+from pathlib import Path
 
 from django.shortcuts import render
 
@@ -45,7 +45,7 @@ def structure_viewer(request):
         # of when the user recieves the file versus when it is deleted.
         delete=False,
     )
-    temp_filname_base = os.path.basename(temp_file.name)
+    temp_filname_base = Path(temp_file.name).name
 
     # BUG FIX: Because we can make these temporary files automatically delete,
     # we need to prevent 3D files from building up over time and taking up
@@ -70,12 +70,8 @@ def test_viewer(request):
     # grab cif filenames to test with
     from simmate.toolkit import base_data_types
 
-    structure_dir = os.path.join(
-        os.path.dirname(base_data_types.__file__),
-        "test",
-        "test_structures",
-    )
-    cif_filenames = [os.path.join(structure_dir, f) for f in os.listdir(structure_dir)]
+    structure_dir = Path(base_data_types.__file__) / "test" / "test_structures"
+    cif_filenames = [f.absolute() for f in structure_dir.iterdir()]
 
     structure = Structure.from_file(cif_filenames[0])
 
@@ -96,7 +92,7 @@ def detete_old_3d_files(time_cutoff: float = 60):
         The default is 60 seconds.
     """
     # load the full path to the desired directory
-    directory = os.path.join(settings.DJANGO_DIRECTORY, "static")
+    directory = settings.DJANGO_DIRECTORY / "static"
 
     # grab all files/folders in this directory and then limit this list to those
     # that are...
@@ -105,13 +101,13 @@ def detete_old_3d_files(time_cutoff: float = 60):
     #   3. end with ".glb"
     #   3. haven't been modified for at least time_cutoff
     filenames = []
-    for filename in os.listdir(directory):
-        filename_full = os.path.join(directory, filename)
+    for filename in directory.iterdir():
+        filename_full = filename.absolute()
         if (
-            not os.path.isdir(filename_full)
-            and filename.startswith("tmp")
-            and filename.endswith(".glb")
-            and time.time() - os.path.getmtime(filename_full) > time_cutoff
+            not filename_full.is_dir()
+            and filename.name.startswith("tmp")
+            and filename.suffix == ".glb"
+            and time.time() - filename_full.lstat().st_mtime > time_cutoff
         ):
             filenames.append(filename_full)
 
@@ -119,6 +115,6 @@ def detete_old_3d_files(time_cutoff: float = 60):
     # If the file fails to be deleted, we just ingore it and move on
     for filename in filenames:
         try:
-            os.remove(filename)
+            filename.unlink()
         except:
             continue

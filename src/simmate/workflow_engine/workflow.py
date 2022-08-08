@@ -264,7 +264,6 @@ have gone through all the Simmate
 including the advanced "Creating custom workflows" tutorial.
 """
 
-import os
 import json
 import cloudpickle
 import yaml
@@ -697,7 +696,7 @@ class Workflow:
             # the past directory should be stored on the input object
             previous_directory = primary_input_cleaned.database_object.directory
 
-            # Copy over all files except simmate one (we have no need for the
+            # Copy over all files except simmate ones (we have no need for the
             # summaries or error archives)
             copy_directory(
                 directory_old=previous_directory,
@@ -789,9 +788,7 @@ class Workflow:
         )
 
         # now write the summary to file in the same directory as the calc.
-        input_summary_filename = os.path.join(
-            directory_cleaned, "simmate_metadata.yaml"
-        )
+        input_summary_filename = directory_cleaned / "simmate_metadata.yaml"
         with open(input_summary_filename, "w") as file:
             content = yaml.dump(input_summary)
             file.write(content)

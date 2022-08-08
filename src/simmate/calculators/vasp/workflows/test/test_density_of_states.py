@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.workflows.electronic_structure.matproj_density_of_states import (
     ElectronicStructure__Vasp__MatprojDensityOfStates,
@@ -16,10 +14,10 @@ def test_density_of_states_workup(tmpdir):
     )
 
     # estabilish filenames that we make and commonly reference
-    summary_filename = os.path.join(tmpdir, "simmate_summary.yaml")
-    plot_filename = os.path.join(tmpdir, "density_of_states.png")
+    summary_filename = tmpdir / "simmate_summary.yaml"
+    plot_filename = tmpdir / "density_of_states.png"
 
     # run the full workup
     ElectronicStructure__Vasp__MatprojDensityOfStates.workup(tmpdir)
-    assert os.path.exists(summary_filename)
-    assert os.path.exists(plot_filename)
+    assert summary_filename.exists()
+    assert plot_filename.exists()

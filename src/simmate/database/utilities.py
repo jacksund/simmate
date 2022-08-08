@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import shutil
 
 from django.apps import apps
@@ -44,8 +43,8 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     db_filename = DATABASES["default"]["NAME"]
 
     # delete the sqlite3 database file if it exists
-    if os.path.exists(db_filename):
-        os.remove(db_filename)
+    if db_filename.exists():
+        db_filename.unlink()
 
     # go through each app directory and delete all folders named 'migrations'
     for app_name, app_config in apps.app_configs.items():
@@ -54,8 +53,8 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         if app_config.label not in apps_to_migrate:
             continue
 
-        migration_dir = os.path.join(app_config.path, "migrations")
-        if os.path.exists(migration_dir):
+        migration_dir = app_config.path / "migrations"
+        if migration_dir.exists():
             shutil.rmtree(migration_dir)
             continue
 

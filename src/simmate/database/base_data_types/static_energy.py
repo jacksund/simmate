@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.database.base_data_types import (
     table_column,
     Structure,
@@ -61,7 +59,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     def from_directory(cls, directory: str):
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
-        vasprun_filename = os.path.join(directory, "vasprun.xml")
+        vasprun_filename = directory / "vasprun.xml"
         vasprun = Vasprun(vasprun_filename)
         return cls.from_vasp_run(vasprun)
 

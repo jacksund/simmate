@@ -4,8 +4,6 @@
 WARNING: This module is experimental and subject to change.
 """
 
-import os
-
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.analysis.transition_state import NEBAnalysis
@@ -105,11 +103,7 @@ class DiffusionAnalysis(Structure):
         # messy for users)
         # For now, I only grab the structure from the static-energy and store
         # it in the DiffusionAnalysis table.
-        bulk_filename = os.path.join(
-            directory,
-            "static-energy.vasp.matproj",
-            "POSCAR",
-        )
+        bulk_filename = directory / "static-energy.vasp.matproj" / "POSCAR"
         bulk_structure = ToolkitStructure.from_file(bulk_filename)
 
         # Save a diffusion analysis object so we can connect all other data
@@ -125,10 +119,9 @@ class DiffusionAnalysis(Structure):
         # also cifs present that match this naming convention.
         # We ignore the number when saving to avoid overwriting data.
         migration_directories = [
-            os.path.join(directory, f)
-            for f in os.listdir(directory)
-            if os.path.isdir(os.path.join(directory, f))
-            and f.startswith("migration_hop_")
+            f.absolute()
+            for f in directory.iterdir()
+            if f.absolute().is_dir() and f.startswith("migration_hop_")
         ]
 
         # now save each migration hop present

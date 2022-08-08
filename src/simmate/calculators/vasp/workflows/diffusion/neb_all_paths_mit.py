@@ -22,7 +22,7 @@ simmate-task-12345/  # determined by simmate.utilities.get_directory
 ```
 """
 
-import os
+from pathlib import Path
 from typing import List
 
 from simmate.toolkit import Structure
@@ -93,7 +93,7 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
         migrating_specie: str,
         command: str = None,
         source: dict = None,
-        directory: str = None,
+        directory: Path = None,
         is_restart: bool = False,
         # parameters for supercell and image generation
         nimages: int = 5,
@@ -107,7 +107,7 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
         bulk_relax_result = Relaxation__Vasp__Mit.run(
             structure=structure,
             command=command,  # subcommands["command_bulk"]
-            directory=directory + os.path.sep + Relaxation__Vasp__Mit.name_full,
+            directory=directory / Relaxation__Vasp__Mit.name_full,
             is_restart=is_restart,
         ).result()
 
@@ -120,7 +120,7 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
                 "structure_field": "structure_final",
             },
             command=command,  # subcommands["command_bulk"]
-            directory=directory + os.path.sep + StaticEnergy__Vasp__Mit.name_full,
+            directory=directory / StaticEnergy__Vasp__Mit.name_full,
             is_restart=is_restart,
         ).result()
 
@@ -144,8 +144,7 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
                     "migration_hop_id": hop_id,
                 },
                 directory=directory
-                + os.path.sep
-                + f"{Diffusion__Vasp__NebSinglePathMit.name_full}.{str(i).zfill(2)}",
+                / f"{Diffusion__Vasp__NebSinglePathMit.name_full}.{str(i).zfill(2)}",
                 diffusion_analysis_id=None,
                 migration_hop_id=None,
                 command=command,
@@ -203,13 +202,13 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
         migration_hops = pathfinder.get_paths()
 
         # We write all the path files so users can visualized them if needed
-        filename = os.path.join(directory, "migration_hop_all.cif")
+        filename = directory / "migration_hop_all.cif"
         pathfinder.write_all_paths(filename, nimages=10)
         for i, migration_hop in enumerate(migration_hops):
             number = str(i).zfill(2)  # converts numbers like 2 to "02"
             # the files names here will be like "migration_hop_02.cif"
             migration_hop.write_path(
-                os.path.join(directory, f"migration_hop_{number}.cif"),
+                directory / f"migration_hop_{number}.cif",
                 nimages=10,  # this is just for visualization
             )
 

@@ -7,7 +7,7 @@ It is a very basic extension PyMatGen's core Structure class, as it only adds
 a few extra methods and does not change any other usage.
 """
 
-import os
+from pathlib import Path
 
 from pymatgen.core import Structure as PymatgenStructure
 
@@ -97,7 +97,7 @@ class Structure(PymatgenStructure):
 
         # if the value is a str and it relates to a filepath, then we load the
         # structure from a file.
-        elif isinstance(structure, str) and os.path.exists(structure):
+        elif isinstance(structure, str) and Path(structure).exists():
             structure_cleaned = cls.from_file(structure)
 
         # Otherwise an incorrect format was given

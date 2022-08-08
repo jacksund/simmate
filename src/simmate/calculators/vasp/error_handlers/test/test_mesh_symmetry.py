@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import pytest
 
 from simmate.conftest import copy_test_files
@@ -16,9 +15,9 @@ def test_mesh_symmetry(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    kpoints_filename = os.path.join(tmpdir, "KPOINTS")
-    vasprun_filename = os.path.join(tmpdir, "vasprun.xml")
+    incar_filename = tmpdir / "INCAR"
+    kpoints_filename = tmpdir / "KPOINTS"
+    vasprun_filename = tmpdir / "vasprun.xml"
 
     # init class with default settings
     error_handler = MeshSymmetry()
@@ -32,7 +31,7 @@ def test_mesh_symmetry(tmpdir):
     assert error_handler.check(tmpdir) == False
 
     # Confirm an error IS found when vasprun.xml is not converged
-    os.remove(vasprun_filename)
+    vasprun_filename.unlink()
     assert error_handler.check(tmpdir) == True
 
     # Make attempt at fixing the error
@@ -41,7 +40,7 @@ def test_mesh_symmetry(tmpdir):
 
     # Confirm an error IS NOT found when KPOINTS file doesn't exist and KSPACING
     # was set instead.
-    os.remove(kpoints_filename)
+    kpoints_filename.unlink()
     incar = Incar.from_file(incar_filename)
     incar["KSPACING"] = 0.3
     incar.to_file(incar_filename)

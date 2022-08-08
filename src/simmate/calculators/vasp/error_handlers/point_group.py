@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
@@ -21,10 +21,10 @@ class PointGroup(ErrorHandler):
     # These are the error messages that we are looking for in the file
     possible_error_messages = ["group operation missing"]
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # turn off symmetry

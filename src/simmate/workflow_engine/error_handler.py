@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 from abc import ABC, abstractmethod
 import subprocess
 
@@ -22,15 +22,16 @@ class ErrorHandler(ABC):
         # By default, the check method looks for error messages in a file. If you
         # want a different kind of check, you can override this method.
         #
-        # def check(self, directory):
+        # def check(self, directory: Path) -> bool:
         #     ... do some check and return true if there's an error
         #     return True
 
-        def correct(self, directory: str) -> str:
+        def correct(self, directory: Path) -> str:
 
-            output_filename = os.path.join(directory, "output.txt")
+            # note we have a pathlib.Path object, not a string!
+            output_filename = directory / "output.txt"
 
-            with open(output_filename, "w") as file:
+            with output_filename.open("w") as file:
                 file.write("We fixed the error!")
             return "we found the example error"
     ```
@@ -81,7 +82,7 @@ class ErrorHandler(ABC):
     found, the `check` will return True.
     """
 
-    def check(self, directory: str) -> bool:
+    def check(self, directory: Path) -> bool:
         """
         This method is called during the job (for monitors) or at the end of
         the job to check for errors. It searches for errors and returns the
@@ -113,11 +114,12 @@ class ErrorHandler(ABC):
                 "and possible_error_messages attributes to be set. Either set "
                 "these or provide an updated check() method."
             )
+
         # establish the full path to the output file
-        filename = os.path.join(directory, self.filename_to_check)
+        filename = directory / self.filename_to_check
 
         # check to see that the file is there first
-        if os.path.exists(filename):
+        if filename.exists():
 
             # read the file content and then close it
             with open(filename) as file:
@@ -129,12 +131,13 @@ class ErrorHandler(ABC):
                     # If one of the messages is found, we immediately return that
                     # the error has been found.
                     return True
+
         # If the file doesn't exist, then we are not seeing any error yet. This line
         # will also be reached if no error was found above.
         return False
 
     @abstractmethod
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
         """
         This method is called at the end of a job when an error is detected.
         It should perform any corrective measures relating to the detected
@@ -154,7 +157,7 @@ class ErrorHandler(ABC):
         """
         return self.__class__.__name__
 
-    def terminate_job(directory: str, process: subprocess.Popen, command: str):
+    def terminate_job(directory: Path, process: subprocess.Popen, command: str):
         """
         Signals for the end of a job or forces the end of the job. This method
         will only be used if `has_custom_termination` is set to True. Otherwise,

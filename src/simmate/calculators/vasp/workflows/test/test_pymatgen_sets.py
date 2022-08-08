@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import pytest
 
 from simmate.conftest import make_dummy_files
@@ -130,12 +129,12 @@ def test_pymatgen_input_sets(
     """
 
     # set filenames
-    incar_simmate_name = os.path.join(tmpdir, "INCAR")
-    incar_pymatgen_name = os.path.join(tmpdir, "INCAR_pmg")
+    incar_simmate_name = tmpdir / "INCAR"
+    incar_pymatgen_name = tmpdir / "INCAR_pmg"
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
-    potcar_filename = os.path.join(tmpdir, "POTCAR")
+    potcar_filename = tmpdir / "POTCAR"
     mocker.patch.object(
         Potcar,
         "to_file_from_type",
@@ -192,12 +191,12 @@ def test_pymatgen_input_sets_neb(
     """
 
     # set filenames
-    incar_simmate_name = os.path.join(tmpdir, "INCAR")
-    incar_pymatgen_name = os.path.join(tmpdir, "INCAR_pmg")
+    incar_simmate_name = tmpdir / "INCAR"
+    incar_pymatgen_name = tmpdir / "INCAR_pmg"
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
-    potcar_filename = os.path.join(tmpdir, "POTCAR")
+    potcar_filename = tmpdir / "POTCAR"
     mocker.patch.object(
         Potcar,
         "to_file_from_type",

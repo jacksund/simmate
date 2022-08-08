@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 import pytest
 
 from simmate.conftest import copy_test_files, make_dummy_files
@@ -35,9 +33,9 @@ DummyWorkflow = Testing__Vasp__Dummy
 def test_base_setup(structure, tmpdir, mocker):
 
     # estabilish filenames that we make and commonly reference
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    poscar_filename = os.path.join(tmpdir, "POSCAR")
-    potcar_filename = os.path.join(tmpdir, "POTCAR")
+    incar_filename = tmpdir / "INCAR"
+    poscar_filename = tmpdir / "POSCAR"
+    potcar_filename = tmpdir / "POTCAR"
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
@@ -49,9 +47,9 @@ def test_base_setup(structure, tmpdir, mocker):
 
     # try to make input files in the tmpdir
     DummyWorkflow.setup(directory=tmpdir, structure=structure)
-    assert os.path.exists(incar_filename)
-    assert os.path.exists(poscar_filename)
-    assert os.path.exists(potcar_filename)
+    assert incar_filename.exists()
+    assert poscar_filename.exists()
+    assert potcar_filename.exists()
     Potcar.to_file_from_type.assert_called_with(
         structure.composition.elements,
         "PBE",
@@ -68,12 +66,12 @@ def test_base_workup(tmpdir):
     )
 
     # estabilish filenames that we make and commonly reference
-    summary_filename = os.path.join(tmpdir, "simmate_summary.yaml")
-    vasprun_filename = os.path.join(tmpdir, "vasprun.xml")
+    summary_filename = tmpdir / "simmate_summary.yaml"
+    vasprun_filename = tmpdir / "vasprun.xml"
 
     # run the full workup
     DummyWorkflow.workup(tmpdir)
-    assert os.path.exists(summary_filename)
+    assert summary_filename.exists()
 
     # run the workup again with a malformed xml
     with open(vasprun_filename, "r") as file:

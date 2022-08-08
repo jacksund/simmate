@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.error_handlers import Unconverged
@@ -15,8 +13,8 @@ def test_unconverged_electronic(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    vasprun_filename = os.path.join(tmpdir, "vasprun.xml")
+    incar_filename = tmpdir / "INCAR"
+    vasprun_filename = tmpdir / "vasprun.xml"
 
     # Confirm an error IS found when we have an unconverging xml
     error_handler = Unconverged()
@@ -52,7 +50,7 @@ def test_unconverged_electronic(tmpdir):
     assert incar["BMIX_MAG"] == 0.001
 
     # make sure no error is raised when the xml doesn't exist
-    os.remove(vasprun_filename)
+    vasprun_filename.unlink()
     assert error_handler.check(tmpdir) == False
 
 
@@ -64,7 +62,7 @@ def test_unconverged_ionic(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
+    incar_filename = tmpdir / "INCAR"
     # Confirm an error IS found when we have an unconverging xml
     error_handler = Unconverged()
     assert error_handler.check(tmpdir) == True

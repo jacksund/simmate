@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
@@ -15,10 +15,10 @@ class Brions(ErrorHandler):
     filename_to_check = "vasp.out"
     possible_error_messages = ["BRIONS problems: POTIM should be increased"]
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # make the fix

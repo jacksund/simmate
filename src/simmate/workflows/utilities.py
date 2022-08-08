@@ -6,7 +6,6 @@ functions for grabbing all available workflows as well as dynamically loading
 a workflow using its name.
 """
 
-import os
 import yaml
 import shutil
 import pkgutil
@@ -215,9 +214,7 @@ def load_results_from_directories(
     #   2. start with "simmate-task-"
     #   3. haven't been modified for at least time_cutoff
     foldernames = [
-        os.path.join(directory, f)
-        for f in os.listdir(directory)
-        if "simmate-task-" in os.path.basename(f)
+        directory / f for f in directory.iterdir() if "simmate-task-" in f.name
     ]
 
     # Now go through this list and archive the folders that met the criteria
@@ -234,7 +231,7 @@ def load_results_from_directories(
         try:
 
             # If we have a zip file, we need to unpack it before we can read results
-            if not os.path.isdir(foldername):
+            if not foldername.is_dir():
                 shutil.unpack_archive(
                     filename=foldername,
                     extract_dir=directory,
@@ -243,8 +240,8 @@ def load_results_from_directories(
                 foldername = foldername.removesuffix(".zip")
 
             # Grab the metadata file which tells us key information
-            filename = os.path.join(foldername, "simmate_metadata.yaml")
-            with open(filename) as file:
+            filename = foldername / "simmate_metadata.yaml"
+            with filename.open() as file:
                 metadata = yaml.full_load(file)
 
             # see which workflow was used -- which also tells us the database table

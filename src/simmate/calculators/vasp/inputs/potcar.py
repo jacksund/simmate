@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 # These are dictionaries that tell us which POTCARs we should grab based on
 # the type of calculation as well as where to find them
 from simmate.calculators.vasp.inputs.potcar_mappings import (
@@ -58,7 +56,7 @@ class Potcar:
 
             # now let's combine this information for the full path to the POTCAR.
             # The file will be located at /folder_loc/element_symbol/POTCAR
-            potcar_loc = os.path.join(folder_loc, potcar_symbol, "POTCAR")
+            potcar_loc = folder_loc / potcar_symbol / "POTCAR"
 
             # add it to our list
             potcar_locations.append(potcar_loc)

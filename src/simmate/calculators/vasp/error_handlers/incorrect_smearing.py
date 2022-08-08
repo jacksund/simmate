@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Vasprun
 
@@ -20,10 +20,10 @@ class IncorrectSmearing(ErrorHandler):
     is_monitor = False
     filename_to_check = "vasprun.xml"
 
-    def check(self, directory: str) -> bool:
+    def check(self, directory: Path) -> bool:
 
         # establish the full path to the output file
-        filename = os.path.join(directory, self.filename_to_check)
+        filename = directory / self.filename_to_check
 
         # we need this inside of a try/except clause because if the xml is
         # poorly formatted, then there is another issue at play. We only
@@ -61,7 +61,7 @@ class IncorrectSmearing(ErrorHandler):
     def correct(self, directory: str) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # update the smearing method to one appropriate for metals

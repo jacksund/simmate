@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.conftest import copy_test_files, make_dummy_files
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.error_handlers import Brmix
@@ -15,11 +13,11 @@ def test_brmix(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
-    chgcar_filename = os.path.join(tmpdir, "CHGCAR")
-    wavecar_filename = os.path.join(tmpdir, "WAVECAR")
-    outcar_filename = os.path.join(tmpdir, "OUTCAR")
-    errorcount_filename = os.path.join(tmpdir, "simmate_error_counts.json")
+    incar_filename = tmpdir / "INCAR"
+    chgcar_filename = tmpdir / "CHGCAR"
+    wavecar_filename = tmpdir / "WAVECAR"
+    outcar_filename = tmpdir / "OUTCAR"
+    errorcount_filename = tmpdir / "simmate_error_counts.json"
 
     # init class with default settings
     error_handler = Brmix()
@@ -39,8 +37,8 @@ def test_brmix(tmpdir):
     assert incar["ISTART"] == 1
 
     # Remove the error counts and valid OUTCAR and restart
-    os.remove(errorcount_filename)
-    os.remove(outcar_filename)
+    errorcount_filename.unlink()
+    outcar_filename.unlink()
 
     # Make first attempt at fixing the error
     fix = error_handler.correct(tmpdir)
@@ -69,8 +67,8 @@ def test_brmix(tmpdir):
     incar = Incar.from_file(incar_filename)
     assert incar["ISYM"] == 0
     assert incar["KGAMMA"] == True
-    assert not os.path.exists(chgcar_filename)
-    assert not os.path.exists(wavecar_filename)
+    assert not chgcar_filename.exists()
+    assert not wavecar_filename.exists()
 
     # Confirm an error IS NOT found when NELECT is in the INCAR
     with open(incar_filename, "w") as file:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
 import json
+from pathlib import Path
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import ErrorHandler
@@ -32,15 +32,15 @@ class RealOptlay(ErrorHandler):
     # how we treat the error and correct it.
     natoms_large_cell = 100
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # load the error-count file if it exists
-        error_count_filename = os.path.join(directory, "simmate_error_counts.json")
-        if os.path.exists(error_count_filename):
+        error_count_filename = directory / "simmate_error_counts.json"
+        if error_count_filename.exists():
             with open(error_count_filename) as error_count_file:
                 error_counts = json.load(error_count_file)
         # otherwise we are starting with an empty dictionary
@@ -52,7 +52,7 @@ class RealOptlay(ErrorHandler):
         # If it isn't there yet, set the count to 0 and we'll update it below.
         error_counts["real_optlay"] = error_counts.get("real_optlay", 0)
 
-        poscar_filename = os.path.join(directory, "POSCAR")
+        poscar_filename = directory / "POSCAR"
         structure = Structure.from_file(poscar_filename)
 
         if structure.num_sites < self.natoms_large_cell:
@@ -76,7 +76,7 @@ class RealOptlay(ErrorHandler):
         incar.to_file(incar_filename)
 
         # rewrite the new error count file
-        with open(error_count_filename, "w") as file:
+        with error_count_filename.open("w") as file:
             json.dump(error_counts, file)
 
         # now return the correction made for logging

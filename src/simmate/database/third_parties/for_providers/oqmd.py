@@ -16,8 +16,6 @@ For other options such as the REST API, check out http://oqmd.org/static/docs/re
 
 """
 
-import os
-
 from tqdm import tqdm
 import pandas
 from django.db import transaction
@@ -142,14 +140,14 @@ def load_all_structures_from_files(
     """
 
     # load the csv that contains the list of filenames and their values
-    df = pandas.read_csv(os.path.join(base_directory, "all_oqmd_entry.csv"))
+    df = pandas.read_csv(base_directory / "all_oqmd_entry.csv")
 
     # iterate through the list and load the structures to our database!
     # Use tqdm to monitor progress.
     for _, row in tqdm(df.iterrows()):
 
         # load the structure from the poscar file
-        filename = os.path.join(base_directory, row.filename)
+        filename = base_directory / row.filename
         with open(filename) as file:
             contents = file.read()
         structure = Structure.from_str(contents, "poscar")

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import yaml
 
 from prefect.states import Completed
@@ -57,12 +56,12 @@ def test_workflows_explore(command_line_runner):
 def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
 
     # establish filenames
-    cif_filename = os.path.join(tmpdir, "test.cif")
-    new_dirname = os.path.join(tmpdir, "inputs")
+    cif_filename = tmpdir / "test.cif"
+    new_dirname = tmpdir / "inputs"
 
     # TODO: switch out the tested workflow for one that doesn't require
     # VASP. As-is, I need to pretend to add a POTCAR file
-    potcar_filename = os.path.join(new_dirname, "POTCAR")
+    potcar_filename = new_dirname / "POTCAR"
     mocker.patch.object(
         Potcar,
         "to_file_from_type",
@@ -85,7 +84,7 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
         ],
     )
     assert result.exit_code == 0
-    assert os.path.exists(new_dirname)
+    assert new_dirname.exists()
 
     # ensure failure when a nested workflow is given
     result = command_line_runner.invoke(
@@ -98,8 +97,8 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
 def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
 
     # establish filenames
-    cif_filename = os.path.join(tmpdir, "test.cif")
-    new_dirname = os.path.join(tmpdir, "inputs")
+    cif_filename = tmpdir / "test.cif"
+    new_dirname = tmpdir / "inputs"
 
     # write the structure to file to be used
     structure.to("cif", cif_filename)
@@ -140,8 +139,8 @@ def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
 def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
 
     # establish filenames
-    cif_filename = os.path.join(tmpdir, "test.cif")
-    new_dirname = os.path.join(tmpdir, "inputs")
+    cif_filename = tmpdir / "test.cif"
+    new_dirname = tmpdir / "inputs"
 
     # write the structure to file to be used
     structure.to("cif", cif_filename)
@@ -175,9 +174,9 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
 def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
 
     # establish filenames
-    cif_filename = os.path.join(tmpdir, "test.cif")
-    yaml_filename = os.path.join(tmpdir, "test.yaml")
-    new_dirname = os.path.join(tmpdir, "inputs")
+    cif_filename = tmpdir / "test.cif"
+    yaml_filename = tmpdir / "test.yaml"
+    new_dirname = tmpdir / "inputs"
 
     # write the structure to file to be used
     structure.to("cif", cif_filename)

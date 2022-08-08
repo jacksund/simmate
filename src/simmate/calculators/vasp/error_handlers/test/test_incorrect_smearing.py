@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.error_handlers import IncorrectSmearing
@@ -15,7 +13,7 @@ def test_incorrect_smearing(tmpdir):
     )
 
     # we reference the files several spots below so we grab its path up front
-    incar_filename = os.path.join(tmpdir, "INCAR")
+    incar_filename = tmpdir / "INCAR"
 
     # init class with default settings
     error_handler = IncorrectSmearing()

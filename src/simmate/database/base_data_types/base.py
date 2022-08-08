@@ -8,13 +8,13 @@ See the `simmate.database.base_data_types` (which is the parent module of
 this one) for example usage.
 """
 
-import os
 import inspect
 import shutil
 import urllib
 import warnings
 import yaml
 import json
+from pathlib import Path
 
 import pandas
 from django.db import models  # , transaction
@@ -157,11 +157,6 @@ class SearchResults(models.QuerySet):
             )
             filename = filename_base + ".zip"
 
-        # Turn the filename into the full path. We do this because we only
-        # want to
-        # filename = os.path.abspath(filename)
-        # os.path.dirname(filename)
-
         # grab the base_information, and if ID is not present, add it
         base_info = self.model.base_info
         if "id" not in base_info:
@@ -191,12 +186,12 @@ class SearchResults(models.QuerySet):
         shutil.make_archive(
             base_name=filename.removesuffix(".zip"),
             format="zip",
-            root_dir=os.path.dirname(os.path.abspath(csv_filename)),
-            base_dir=os.path.basename(csv_filename),
+            root_dir=csv_filename.absolute().parent,
+            base_dir=csv_filename.name,
         )
 
         # we can now delete the csv file
-        os.remove(csv_filename)
+        csv_filename.unlink()
 
 
 # Copied this line from...
@@ -592,7 +587,7 @@ class DatabaseTable(models.Model):
             # grab the most recent date.
             matching_files = [
                 file
-                for file in os.listdir()
+                for file in Path.cwd().iterdir()
                 if file.startswith(cls.__name__) and file.endswith(".zip")
             ]
             # make sure there is at least one file
@@ -606,12 +601,12 @@ class DatabaseTable(models.Model):
 
         # Turn the filename into the full path -- which makes a number of
         # manipulations easier below.
-        filename = os.path.abspath(filename)
+        filename = filename.absolute()
 
         # uncompress the zip file to the same directory that it is located in
         shutil.unpack_archive(
             filename,
-            extract_dir=os.path.dirname(filename),
+            extract_dir=filename.parent,
         )
 
         # We will now have a csv file of the same name, which we load into
@@ -677,9 +672,9 @@ class DatabaseTable(models.Model):
             )
 
         # We can now delete the files. The zip file is only deleted if requested.
-        os.remove(csv_filename)
+        csv_filename.unlink()
         if delete_on_completion:
-            os.remove(filename)  # the zip archive
+            filename.unlink()  # the zip archive
 
     @classmethod
     def load_remote_archive(

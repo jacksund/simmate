@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 import pytest
 
 from simmate.website.test_app.models import TestForces
@@ -45,7 +43,7 @@ def test_forces_table(structure, tmpdir):
     structure_db.save()
 
     # test writing and reloading these from and archive
-    archive_filename = os.path.join(tmpdir, "archive.zip")
+    archive_filename = tmpdir / "archive.zip"
     TestForces.objects.to_archive(archive_filename)
     TestForces.load_archive(
         archive_filename,

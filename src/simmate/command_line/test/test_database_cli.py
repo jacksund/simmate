@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 import pytest
 
@@ -45,4 +45,4 @@ def test_database_dump_and_load(command_line_runner):
     assert result.exit_code == 0
 
     # delete the dump file
-    os.remove("database_dump.json")
+    Path("database_dump.json").unlink()

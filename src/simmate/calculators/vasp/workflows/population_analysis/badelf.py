@@ -146,7 +146,7 @@ def get_structure_w_empties(
     # the hydrogen isn't too close to another atom.
 
     # write the new structure to file
-    # filename = os.path.join(directory, "simmate_structure_w_empties.cif")
+    # filename = directory / "simmate_structure_w_empties.cif"
     # structure_w_empties.to("cif", filename)
 
     return structure_w_empties

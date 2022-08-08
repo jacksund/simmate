@@ -28,8 +28,6 @@ to account for these problematic cif files though.
 
 """
 
-import os
-
 from pymatgen.io.cif import CifParser
 
 from simmate.configuration.dask import batch_submit
@@ -60,24 +58,24 @@ def load_all_structures(
     # files that we can pull structures from. Note the name of the cif file is also
     # the cod-id.
     all_cifs = []
-    for folder_name1 in os.listdir(base_directory):
+    for folder_name1 in base_directory.iterdir():
         # skip if the folder name isn't a number
         if not folder_name1.isnumeric():
             continue
         # otherwise go through the folders inside of this one
-        for folder_name2 in os.listdir(os.path.join(base_directory, folder_name1)):
+        for folder_name2 in (base_directory / folder_name1).iterdir():
             # and then one more level until we hit the cifs!
-            for folder_name3 in os.listdir(
-                os.path.join(base_directory, folder_name1, folder_name2)
-            ):
+            for folder_name3 in (
+                base_directory / folder_name1 / folder_name2
+            ).iterdir():
                 # we now have all the foldernames we need. Let's record the full path
-                folder_path = os.path.join(
-                    base_directory, folder_name1, folder_name2, folder_name3
+                folder_path = (
+                    base_directory / folder_name1 / folder_name2 / folder_name3
                 )
                 # now go through each cif file in this directory
-                for cif_filename in os.listdir(folder_path):
+                for cif_filename in folder_path.iterdir():
                     # construct the full path to the file we are after
-                    cif_filepath = os.path.join(folder_path, cif_filename)
+                    cif_filepath = folder_path / cif_filename
                     all_cifs.append(cif_filepath)
 
     # Sometimes we are retrying this function call from a previously failed
@@ -91,7 +89,7 @@ def load_all_structures(
         from tqdm import tqdm
 
         for cif_filepath in tqdm(all_cifs):
-            cif_id = "cod-" + os.path.basename(cif_filepath).split(".")[0]
+            cif_id = "cod-" + cif_filepath.stem
             if not CodStructure.objects.filter(id=cif_id).exists():
                 new_cifs.append(cif_filepath)
 
@@ -162,7 +160,7 @@ def load_single_cif(cif_filepath: str):
     entry_dict = {
         # the split removes ".cif" from each file name and
         # the remaining number is the id
-        "id": "cod-" + os.path.basename(cif_filepath).split(".")[0],
+        "id": "cod-" + cif_filepath.stem,
         "structure": structure,
         "is_ordered": structure.is_ordered,
         "has_implicit_hydrogens": has_implicit_hydrogens,

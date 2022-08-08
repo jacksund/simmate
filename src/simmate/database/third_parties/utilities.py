@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import urllib
 import shutil
 
@@ -54,12 +53,12 @@ def load_default_sqlite3_build():
     assert DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
 
     # check if the prebuild directory exists, and create it if not
-    archive_dir = get_directory(os.path.join(SIMMATE_DIRECTORY, "sqlite-prebuilds"))
+    archive_dir = get_directory(SIMMATE_DIRECTORY / "sqlite-prebuilds")
 
-    archive_filename_full = os.path.join(archive_dir, archive_filename)
+    archive_filename_full = archive_dir / archive_filename
 
     # check if the archive has been downloaded before. If not, download!
-    if not os.path.exists(archive_filename_full):
+    if not archive_filename_full.exists():
         remote_archive_link = f"https://archives.simmate.org/{archive_filename}"
         # Download the archive zip file from the URL to the current working dir
         print("Downloading database file...")
