@@ -199,6 +199,10 @@ def copy_test_files(
     over to a temporary directory. You'll often use this when you want to modify
     files within the test directory (which is often the case with ErrorHandlers).
 
+    If the test_folder given is a compressed file, the zip contents will be
+    unpacked and copied to the temporary directory. This is typically done when
+    test files are extremely large (e.g. VASP output files)
+
     Here is an example use-case:
     ``` python
     from somewhere import ExampleHandler
@@ -210,7 +214,7 @@ def copy_test_files(
         copy_test_files(
             tmpdir,
             test_directory=__file__,
-            test_folder="test_example",
+            test_folder="test_example",  # or "test_example.zip"
         )
 
         # then you can do things like...
@@ -225,12 +229,22 @@ def copy_test_files(
         test_folder,
     )
 
-    # recursively copy all files in the directory over to the temporary directory
-    shutil.copytree(
-        src=source_directory,
-        dst=tmpdir,
-        dirs_exist_ok=True,
-    )
+    # if the test files are stored in a zip file, uncompress the files to
+    # the temporary test directory
+    if source_directory.endswith(".zip"):
+        shutil.unpack_archive(
+            source_directory,
+            extract_dir=tmpdir,
+        )
+
+    # Otherwise, recursively copy all files in the directory over to
+    # the temporary test directory
+    else:
+        shutil.copytree(
+            src=source_directory,
+            dst=tmpdir,
+            dirs_exist_ok=True,
+        )
 
 
 def make_dummy_files(*filenames: str):

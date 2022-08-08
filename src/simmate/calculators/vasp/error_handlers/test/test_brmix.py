@@ -11,7 +11,7 @@ def test_brmix(tmpdir):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="brmix",
+        test_folder="brmix.zip",
     )
 
     # we reference the files several spots below so we grab its path up front

@@ -12,7 +12,7 @@ def test_mesh_symmetry(tmpdir):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="mesh_symmetry",
+        test_folder="mesh_symmetry.zip",
     )
 
     # we reference the files several spots below so we grab its path up front

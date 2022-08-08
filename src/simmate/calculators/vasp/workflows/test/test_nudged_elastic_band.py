@@ -58,7 +58,7 @@ def test_neb_workup(tmpdir):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="nudged_elastic_band",
+        test_folder="nudged_elastic_band.zip",
     )
 
     # estabilish filenames that we make and commonly reference

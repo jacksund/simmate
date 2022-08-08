@@ -18,7 +18,7 @@ def test_neb(sample_structures, tmpdir, mocker):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="all_paths",
+        test_folder="all_paths.zip",
     )
 
     # For testing, look at I- diffusion in Y2CF2

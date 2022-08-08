@@ -12,7 +12,7 @@ def test_density_of_states_workup(tmpdir):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="density_of_states",
+        test_folder="density_of_states.zip",
     )
 
     # estabilish filenames that we make and commonly reference
