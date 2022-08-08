@@ -27,45 +27,44 @@ from pymatgen.io.vasp.sets import (
 )
 from pymatgen.analysis.diffusion.neb.io import MVLCINEBSet, MVLCINEBEndPointSet
 
-from simmate.calculators.vasp.tasks.static_energy import (
-    MatprojStaticEnergy,
-    MatprojSCANStaticEnergy,
-)
-from simmate.calculators.vasp.tasks.relaxation import (
-    MatprojRelaxation,
-    MITRelaxation,
-    MatprojHSERelaxation,
-    MatprojMetalRelaxation,
-    MatprojSCANRelaxation,
-    MatVirtualLabCINEBEndpointRelaxation,
-)
-from simmate.calculators.vasp.tasks.dynamics import (
-    MITDynamics,
-    MatprojDynamics,
-    # MatVirtualLabNPTDynamics,
-)
-from simmate.calculators.vasp.tasks.band_structure import (
-    MatprojHSEBandStructure,
-    MatprojBandStructure,
-)
-from simmate.calculators.vasp.tasks.density_of_states import (
-    MatprojHSEDensityOfStates,
-    MatprojDensityOfStates,
-)
-from simmate.calculators.vasp.tasks.nuclear_magnetic_resonance import (
-    MatprojNMRChemicalShifts,
-    MatprojNMRElectricFieldGradiant,
-)
-from simmate.calculators.vasp.tasks.elastic import MatVirtualLabElastic
-from simmate.calculators.vasp.tasks.relaxation import (
-    MatVirtualLabGrainBoundaryRelaxation,
-    MatVirtualLabSlabRelaxation,
-)
-from simmate.calculators.vasp.tasks.nudged_elastic_band import (
-    MITNudgedElasticBand,
-    MatVirtualLabClimbingImageNudgedElasticBand,
+from simmate.calculators.vasp.workflows.all import (
+    Diffusion__Vasp__NebFromImagesMit,
+    Diffusion__Vasp__NebFromImagesMvlCi,
+    StaticEnergy__Vasp__Matproj,
+    StaticEnergy__Vasp__MatprojScan,
+    Relaxation__Vasp__Matproj,
+    Relaxation__Vasp__MatprojHse,
+    Relaxation__Vasp__MatprojScan,
+    Relaxation__Vasp__MatprojMetal,
+    Relaxation__Vasp__Mit,
+    Relaxation__Vasp__MvlGrainboundary,
+    Relaxation__Vasp__MvlSlab,
+    Relaxation__Vasp__MvlNebEndpoint,
+    Dynamics__Vasp__Mit,
+    Dynamics__Vasp__Matproj,
+    # Dynamics__Vasp__MvlNpt,
 )
 
+# extras that are hidden from the all endpoint
+# NOTE: these imports are long/ugly because we hide the imports from users --
+# and instead point them to higher-level workflows that call these.
+from simmate.calculators.vasp.workflows.electronic_structure.matproj_band_structure import (
+    ElectronicStructure__Vasp__MatprojBandStructure,
+)
+from simmate.calculators.vasp.workflows.electronic_structure.matproj_band_structure_hse import (
+    ElectronicStructure__Vasp__MatprojBandStructureHse,
+)
+from simmate.calculators.vasp.workflows.electronic_structure.matproj_density_of_states import (
+    ElectronicStructure__Vasp__MatprojDensityOfStates,
+)
+from simmate.calculators.vasp.workflows.electronic_structure.matproj_density_of_states_hse import (
+    ElectronicStructure__Vasp__MatprojDensityOfStatesHse,
+)
+from simmate.calculators.vasp.workflows.nuclear_magnetic_resonance.all import (
+    Nmr__Vasp__MatprojChemicalShifts,
+    Nmr__Vasp__MatprojFieldGradient,
+)
+from simmate.calculators.vasp.workflows.elastic.mvl import Elastic__Vasp__Mvl
 
 MD_KWARGS = {
     "start_temp": 300,
@@ -76,37 +75,52 @@ MD_KWARGS = {
 
 @pytest.mark.pymatgen
 @pytest.mark.parametrize(
-    "simmate_task, pymatgen_set, pymatgen_kwargs",
+    "simmate_workflow, pymatgen_set, pymatgen_kwargs",
     [
-        (MatprojRelaxation, MPRelaxSet, {}),
-        (MITRelaxation, MITRelaxSet, {}),
-        (MITRelaxation, MITRelaxSet, {}),
-        (MatprojStaticEnergy, MPStaticSet, {}),
-        (MatprojHSERelaxation, MPHSERelaxSet, {}),
-        (MatprojMetalRelaxation, MPMetalRelaxSet, {}),
-        (MatprojSCANRelaxation, MPScanRelaxSet, {}),
-        (MatprojSCANStaticEnergy, MPScanStaticSet, {}),
-        (MatVirtualLabCINEBEndpointRelaxation, MVLCINEBEndPointSet, {}),
-        (MITDynamics, MITMDSet, MD_KWARGS),
-        (MatprojDynamics, MPMDSet, MD_KWARGS),
+        (Relaxation__Vasp__Matproj, MPRelaxSet, {}),
+        (Relaxation__Vasp__Mit, MITRelaxSet, {}),
+        (Relaxation__Vasp__MatprojHse, MPHSERelaxSet, {}),
+        (Relaxation__Vasp__MatprojMetal, MPMetalRelaxSet, {}),
+        (Relaxation__Vasp__MatprojScan, MPScanRelaxSet, {}),
+        (Relaxation__Vasp__MvlNebEndpoint, MVLCINEBEndPointSet, {}),
+        (Relaxation__Vasp__MvlGrainboundary, MVLGBSet, {"slab_mode": False}),
+        (Relaxation__Vasp__MvlSlab, MVLGBSet, {"slab_mode": True}),
+        (StaticEnergy__Vasp__Matproj, MPStaticSet, {}),
+        (StaticEnergy__Vasp__MatprojScan, MPScanStaticSet, {}),
+        (Dynamics__Vasp__Mit, MITMDSet, MD_KWARGS),
+        (Dynamics__Vasp__Matproj, MPMDSet, MD_KWARGS),
         # MVL-NPT MD requires POTCARs to be configured for pymatgen. need a workaround.
-        # (MatVirtualLabNPTDynamics, MVLNPTMDSet, MD_KWARGS),
-        (MatprojHSEBandStructure, MPHSEBSSet, {"mode": "line"}),
-        (MatprojBandStructure, MPNonSCFSet, {"mode": "line"}),
-        (MatprojDensityOfStates, MPNonSCFSet, {"mode": "uniform"}),
-        (MatprojHSEDensityOfStates, MPHSEBSSet, {"mode": "uniform"}),
-        (MatprojNMRChemicalShifts, MPNMRSet, {"mode": "cs"}),
-        (MatprojNMRElectricFieldGradiant, MPNMRSet, {"mode": "efg"}),
-        (MatVirtualLabElastic, MVLElasticSet, {}),
-        (MatVirtualLabGrainBoundaryRelaxation, MVLGBSet, {"slab_mode": False}),
-        (MatVirtualLabSlabRelaxation, MVLGBSet, {"slab_mode": True}),
+        # (Dynamics__Vasp__MvlNpt, MVLNPTMDSet, MD_KWARGS),
+        (
+            ElectronicStructure__Vasp__MatprojBandStructureHse,
+            MPHSEBSSet,
+            {"mode": "line"},
+        ),
+        (
+            ElectronicStructure__Vasp__MatprojBandStructure,
+            MPNonSCFSet,
+            {"mode": "line"},
+        ),
+        (
+            ElectronicStructure__Vasp__MatprojDensityOfStates,
+            MPNonSCFSet,
+            {"mode": "uniform"},
+        ),
+        (
+            ElectronicStructure__Vasp__MatprojDensityOfStatesHse,
+            MPHSEBSSet,
+            {"mode": "uniform"},
+        ),
+        (Nmr__Vasp__MatprojChemicalShifts, MPNMRSet, {"mode": "cs"}),
+        (Nmr__Vasp__MatprojFieldGradient, MPNMRSet, {"mode": "efg"}),
+        (Elastic__Vasp__Mvl, MVLElasticSet, {}),
     ],
 )
 def test_pymatgen_input_sets(
     structure,
     tmpdir,
     mocker,
-    simmate_task,
+    simmate_workflow,
     pymatgen_set,
     pymatgen_kwargs,
 ):
@@ -129,7 +143,7 @@ def test_pymatgen_input_sets(
     )
 
     # write both inputs
-    simmate_task().setup(structure=structure, directory=tmpdir)
+    simmate_workflow.setup(structure=structure, directory=tmpdir)
     pymatgen_set(structure, **pymatgen_kwargs).incar.write_file(incar_pymatgen_name)
 
     # load incar
@@ -146,7 +160,7 @@ def test_pymatgen_input_sets(
     # seem like a large error, but it is meant to encompass differences like
     # {'EDIFF': (4e-06, 1e-05)} where pymatgen rounded significantly. There
     # really isn't an issue unless EDIFF is off by a factor of 10 (1000%)
-    if "EDIFF" in diff and "EDIFF__per_atom" in simmate_task.incar:
+    if "EDIFF" in diff and "EDIFF__per_atom" in simmate_workflow.incar:
         ediff_simmate, ediff_pymatgen = diff["EDIFF"]
         percent_diff = (ediff_pymatgen - ediff_simmate) / ediff_pymatgen
         if abs(percent_diff) < 1:
@@ -158,17 +172,17 @@ def test_pymatgen_input_sets(
 
 @pytest.mark.pymatgen
 @pytest.mark.parametrize(
-    "simmate_task, pymatgen_set, pymatgen_kwargs",
+    "simmate_workflow, pymatgen_set, pymatgen_kwargs",
     [
-        (MITNudgedElasticBand, MITNEBSet, {}),
-        (MatVirtualLabClimbingImageNudgedElasticBand, MVLCINEBSet, {}),
+        (Diffusion__Vasp__NebFromImagesMit, MITNEBSet, {}),
+        (Diffusion__Vasp__NebFromImagesMvlCi, MVLCINEBSet, {}),
     ],
 )
 def test_pymatgen_input_sets_neb(
     structure,
     tmpdir,
     mocker,
-    simmate_task,
+    simmate_workflow,
     pymatgen_set,
     pymatgen_kwargs,
 ):
@@ -192,7 +206,7 @@ def test_pymatgen_input_sets_neb(
 
     # write both inputs. We just copy the same structure 3 times because we
     # don't really care what the POSCARs look like -- just the INCARs
-    simmate_task().setup(
+    simmate_workflow.setup(
         migration_images=MigrationImages([structure] * 3),
         directory=tmpdir,
     )
@@ -214,7 +228,7 @@ def test_pymatgen_input_sets_neb(
     # seem like a large error, but it is meant to encompass differences like
     # {'EDIFF': (4e-06, 1e-05)} where pymatgen rounded significantly. There
     # really isn't an issue unless EDIFF is off by a factor of 10 (1000%)
-    if "EDIFF" in diff and "EDIFF__per_atom" in simmate_task.incar:
+    if "EDIFF" in diff and "EDIFF__per_atom" in simmate_workflow.incar:
         ediff_simmate, ediff_pymatgen = diff["EDIFF"]
         percent_diff = (ediff_pymatgen - ediff_simmate) / ediff_pymatgen
         if abs(percent_diff) < 1:

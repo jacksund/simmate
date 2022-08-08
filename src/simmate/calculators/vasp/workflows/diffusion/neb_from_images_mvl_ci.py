@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.nudged_elastic_band.mit import MITNudgedElasticBand
+from simmate.calculators.vasp.workflows.diffusion.neb_from_images_mit import (
+    Diffusion__Vasp__NebFromImagesMit,
+)
 
 
-class MatVirtualLabClimbingImageNudgedElasticBand(MITNudgedElasticBand):
+class Diffusion__Vasp__NebFromImagesMvlCi(Diffusion__Vasp__NebFromImagesMit):
     """
     This task is a reimplementation of pymatgen's
     [MVLCINEBSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITNEBSet).
@@ -20,7 +22,7 @@ class MatVirtualLabClimbingImageNudgedElasticBand(MITNudgedElasticBand):
     Henkelman group. See http://theory.cm.utexas.edu/vtsttools/
     """
 
-    incar = MITNudgedElasticBand.incar.copy()
+    incar = Diffusion__Vasp__NebFromImagesMit.incar.copy()
     incar.update(
         dict(
             EDIFF=5e-5,

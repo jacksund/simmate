@@ -3,6 +3,7 @@
 from .matproj import Relaxation__Vasp__Matproj
 from .matproj_hse import Relaxation__Vasp__MatprojHse
 from .matproj_scan import Relaxation__Vasp__MatprojScan
+from .matproj_metal import Relaxation__Vasp__MatprojMetal
 from .mit import Relaxation__Vasp__Mit
 from .mvl_grainboundary import Relaxation__Vasp__MvlGrainboundary
 from .mvl_slab import Relaxation__Vasp__MvlSlab

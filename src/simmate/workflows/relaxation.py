@@ -10,6 +10,7 @@ from simmate.calculators.vasp.workflows.relaxation.all import (
     Relaxation__Vasp__Matproj,
     Relaxation__Vasp__MatprojHse,
     Relaxation__Vasp__MatprojScan,
+    Relaxation__Vasp__MatprojMetal,
     Relaxation__Vasp__Mit,
     Relaxation__Vasp__MvlGrainboundary,
     Relaxation__Vasp__MvlSlab,
