@@ -13,7 +13,7 @@ def test_large_sigma(tmpdir):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="large_sigma",
+        test_folder="large_sigma.zip",
     )
 
     # we reference the files several spots below so we grab its path up front

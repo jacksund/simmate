@@ -44,7 +44,7 @@ def test_band_structure_workup(tmpdir):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="band_structure",
+        test_folder="band_structure.zip",
     )
 
     # estabilish filenames that we make and commonly reference

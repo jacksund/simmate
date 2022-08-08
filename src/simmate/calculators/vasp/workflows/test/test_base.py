@@ -64,7 +64,7 @@ def test_base_workup(tmpdir):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="base",
+        test_folder="base.zip",
     )
 
     # estabilish filenames that we make and commonly reference

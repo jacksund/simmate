@@ -11,7 +11,7 @@ def test_unconverged_electronic(tmpdir):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="unconverged_electronic",
+        test_folder="unconverged_electronic.zip",
     )
 
     # we reference the files several spots below so we grab its path up front
@@ -60,7 +60,7 @@ def test_unconverged_ionic(tmpdir):
     copy_test_files(
         tmpdir,
         test_directory=__file__,
-        test_folder="unconverged_ionic",
+        test_folder="unconverged_ionic.zip",
     )
 
     # we reference the files several spots below so we grab its path up front
