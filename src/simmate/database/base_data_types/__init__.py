@@ -21,4 +21,4 @@ from .band_structure import BandStructure, BandStructureCalc
 from .density_of_states import DensityofStates, DensityofStatesCalc
 from .population_analysis import PopulationAnalysis
 
-from .nudged_elastic_band import DiffusionAnalysis
+from .nudged_elastic_band import DiffusionAnalysis, MigrationHop, MigrationImage

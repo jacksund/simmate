@@ -2,10 +2,8 @@
 
 from simmate.toolkit import Structure
 from simmate.toolkit.diffusion import MigrationImages
-from simmate.workflow_engine import task
 
 
-@task
 def get_migration_images_from_endpoints(
     supercell_start: Structure,
     supercell_end: Structure,

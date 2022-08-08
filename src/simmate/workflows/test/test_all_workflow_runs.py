@@ -83,7 +83,7 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             if state.is_completed():
                 successful_flows.append(workflow_name)
 
-        # TEST NEB FLOWS
+        # TEST NEB FLOWS (takes roughly 1 hr)
         # For testing, look at I- diffusion in Y2CI2
         structure = sample_structures["Y2CI2_mp-1206803_primitive"]
         workflow_name = "diffusion.vasp.neb-all-paths"
@@ -93,10 +93,10 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             migrating_specie="I",
             command="mpirun -n 12 vasp_std > vasp.out",
             directory=str(tmpdir),
-            nimages=3,
+            nimages=1,
             min_atoms=10,
-            max_atoms=75,
-            min_length=3,
+            max_atoms=25,
+            min_length=3.5,
         )
         state.result()
         if state.is_completed():

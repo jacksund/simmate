@@ -21,7 +21,6 @@ from simmate.database.base_data_types import (
 # TODO: consider making a NestedCalculation
 class DiffusionAnalysis(Structure):
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     migrating_specie = table_column.CharField(max_length=4, blank=True, null=True)
@@ -141,85 +140,11 @@ class DiffusionAnalysis(Structure):
 
         return analysis_db
 
-    @classmethod
-    def create_subclasses(
-        cls,
-        name: str,
-        module: str,
-        **extra_columns,
-    ):
-        """
-        Dynamically creates a subclass of Relaxation as well as a separate IonicStep
-        table for it. These tables are linked together.
-
-        Example use:
-
-        ``` python
-        from simmate.database.base_data_types import Relaxation
-
-        # note the odd formatting here is just because we are parsing three
-        # outputs from this method to three variables.
-        (
-            ExampleDiffusionAnalysis,
-            ExampleMigrationHop,
-            ExampleMigrationImage,
-        ) = DiffusionAnalysis.create_subclasses(
-            "Example",
-            module=__name__,
-        )
-        ```
-
-        #### Parameters
-
-        - `name` :
-            The prefix name of the subclasses that are output. "Relaxation" and
-            "IonicStep" will be attached to the end of this prefix.
-
-        - `module` :
-            name of the module this subclass should be associated with. Typically,
-            you should pass __name__ to this.
-
-        - `**extra_columns` :
-            Additional columns to add to the table. The keyword will be the
-            column name and the value should match django options
-            (e.g. table_column.FloatField())
-
-        #### Returns
-
-        - `NewDiffusionAnalysisClass` :
-            A subclass of DiffusionAnalysis.
-        - `NewMigrationHopClass`:
-            A subclass of MigrationHop.
-        - `NewMigrationHopClass`:
-            A subclass of MigrationHop.
-        """
-
-        # For convience, we add columns that point to the start and end structures
-        NewDiffusionAnalysisClass = cls.create_subclass(
-            f"{name}DiffusionAnalysis",
-            module=module,
-            **extra_columns,
-        )
-
-        (
-            NewMigrationHopClass,
-            NewMigrationImageClass,
-        ) = MigrationHop.create_subclasses_from_diffusion_analysis(
-            name,
-            NewDiffusionAnalysisClass,
-            module=module,
-            **extra_columns,
-        )
-
-        # we now have a new child class and avoided writing some boilerplate code!
-        return NewDiffusionAnalysisClass, NewMigrationHopClass, NewMigrationImageClass
-
 
 # TODO: consider making a Calculation bc this is what the corrections/directory
 # information should be attached to.
 class MigrationHop(DatabaseTable):
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     base_info = [
@@ -299,11 +224,11 @@ class MigrationHop(DatabaseTable):
     """ Relationships """
     # Each MigrationHop corresponds to the full analysis of one Structure, which
     # can have many MigrationHop(s)
-    # diffusion_analysis = table_column.ForeignKey(
-    #     # DiffusionAnalysis,
-    #     on_delete=table_column.PROTECT,
-    #     related_name="migration_hops",
-    # )
+    diffusion_analysis = table_column.ForeignKey(
+        DiffusionAnalysis,
+        on_delete=table_column.CASCADE,
+        related_name="migration_hops",
+    )
 
     # TODO:
     # image_start --> OneToOneField for specific MigrationHop
@@ -467,63 +392,6 @@ class MigrationHop(DatabaseTable):
 
         return hop_db
 
-    @classmethod
-    def create_subclasses_from_diffusion_analysis(
-        cls,
-        name: str,
-        diffusion_analysis: DiffusionAnalysis,
-        module: str,
-        **extra_columns,
-    ):
-        """
-        Dynamically creates subclass of MigrationHop and MigrationImage, then
-        links them to the DiffusionAnalysis table.
-
-        This method should NOT be called directly because it is instead used by
-        `DiffusionAnalysis.create_subclasses`.
-
-        #### Parameters
-
-        - `name` :
-            Name of the subclass that is output.
-        - `diffusion_analysis` :
-            DiffusionAnalysis table that these subclasses should be associated with.
-        - `module` :
-            name of the module this subclass should be associated with. Typically,
-            you should pass __name__ to this.
-        - `**extra_columns` :
-            Additional columns to add to the table. The keyword will be the
-            column name and the value should match django options
-            (e.g. table_column.FloatField())
-
-        #### Returns
-
-        - `NewMigrationHopClass`:
-            A subclass of MigrationHop.
-        - `NewMigrationHopClass`:
-            A subclass of MigrationHop.
-        """
-
-        NewMigrationHopClass = cls.create_subclass(
-            f"{name}MigrationHop",
-            diffusion_analysis=table_column.ForeignKey(
-                diffusion_analysis,
-                on_delete=table_column.CASCADE,
-                related_name="migration_hops",
-            ),
-            module=module,
-            **extra_columns,
-        )
-
-        NewMigrationImageClass = MigrationImage.create_subclass_from_migration_hop(
-            name,
-            NewMigrationHopClass,
-            module=module,
-            **extra_columns,
-        )
-
-        return NewMigrationHopClass, NewMigrationImageClass
-
 
 class MigrationImage(Structure):
     class Meta:
@@ -570,51 +438,8 @@ class MigrationImage(Structure):
     # deletes the source column from our Structure mix-in.
     source = None
 
-    @classmethod
-    def create_subclass_from_migration_hop(
-        cls,
-        name: str,
-        migration_hop: MigrationHop,
-        module: str,
-        **extra_columns,
-    ):
-        """
-        Dynamically creates subclass of MigrationImage, then links it to the
-        MigrationHop table.
-
-        This method should NOT be called directly because it is instead used by
-        `DiffusionAnalysis.create_subclasses`.
-
-        #### Parameters
-
-        - `name` :
-            Name of the subclass that is output.
-        - `migration_hop` :
-            MigrationHop table that these images should be associated with.
-        - `module` :
-            name of the module this subclass should be associated with. Typically,
-            you should pass __name__ to this.
-        - `**extra_columns` :
-            Additional columns to add to the table. The keyword will be the
-            column name and the value should match django options
-            (e.g. table_column.FloatField())
-
-        #### Returns
-
-        - `NewClass` :
-            A subclass of MigrationImage.
-
-        """
-
-        NewClass = cls.create_subclass(
-            f"{name}MigrationImage",
-            migration_hop=table_column.ForeignKey(
-                migration_hop,
-                on_delete=table_column.CASCADE,
-                related_name="migration_images",
-            ),
-            module=module,
-            **extra_columns,
-        )
-
-        return NewClass
+    migration_hop = table_column.ForeignKey(
+        MigrationHop,
+        on_delete=table_column.CASCADE,
+        related_name="migration_images",
+    )

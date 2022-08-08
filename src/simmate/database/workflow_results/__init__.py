@@ -13,12 +13,9 @@ from simmate.database.base_data_types import (
     PopulationAnalysis,
     DynamicsRun,
     DynamicsIonicStep,
-)
-
-from simmate.calculators.vasp.database.nudged_elastic_band import (
-    MITDiffusionAnalysis,
-    MITMigrationHop,
-    MITMigrationImage,
+    DiffusionAnalysis,
+    MigrationHop,
+    MigrationImage,
 )
 
 from simmate.calculators.vasp.database.customized import (

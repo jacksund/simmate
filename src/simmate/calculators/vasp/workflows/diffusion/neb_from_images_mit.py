@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.tasks.nudged_elastic_band.base import (
-    VaspNudgedElasticBandTask,
-)
 from simmate.calculators.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
+from simmate.calculators.vasp.workflows.diffusion.neb_from_images_base import (
+    VaspNebFromImagesWorkflow,
+)
 
 
-class MITNudgedElasticBand(VaspNudgedElasticBandTask, Relaxation__Vasp__Mit):
+class Diffusion__Vasp__NebFromImagesMit(
+    VaspNebFromImagesWorkflow, Relaxation__Vasp__Mit
+):
     """
     This task is a reimplementation of pymatgen's
     [MITNEBSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITNEBSet).

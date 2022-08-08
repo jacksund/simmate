@@ -4,26 +4,18 @@ import os
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import Workflow
-from simmate.workflow_engine.common_tasks import (
-    load_input_and_register,
-    parse_multi_command,
-)
-
 from simmate.calculators.vasp.workflows.diffusion.utilities import (
     get_migration_images_from_endpoints,
 )
 from simmate.calculators.vasp.workflows.relaxation.mvl_neb_endpoint import (
     Relaxation__Vasp__MvlNebEndpoint,
 )
-from simmate.calculators.vasp.workflows.diffusion.neb_from_images import (
-    Diffusion__Vasp__NebFromImages,
-)
-from simmate.calculators.vasp.database.nudged_elastic_band import (
-    MITDiffusionAnalysis,
+from simmate.calculators.vasp.workflows.diffusion.neb_from_images_mit import (
+    Diffusion__Vasp__NebFromImagesMit,
 )
 
 
-class Diffusion__Vasp__NebFromEndpoints(Workflow):
+class Diffusion__Vasp__NebFromEndpointsMit(Workflow):
     """
     Runs a full diffusion analysis from a start and end supercell using NEB.
 
@@ -57,8 +49,6 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
     ```
     """
 
-    database_table = MITDiffusionAnalysis
-
     description_doc_short = "runs NEB using two endpoint structures as input"
 
     @classmethod
@@ -74,7 +64,7 @@ class Diffusion__Vasp__NebFromEndpoints(Workflow):
         diffusion_analysis_id: int = None,
         is_restart: bool = False,
     ):
-
+        raise NotImplementedError("TBD -jacksund")
         # command list expects three subcommands:
         #   command_bulk, command_supercell, and command_neb
         subcommands = parse_multi_command(

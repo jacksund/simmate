@@ -12,7 +12,7 @@ from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
 from simmate.calculators.vasp.workflows.base import VaspWorkflow
 
 
-class VaspNudgedElasticBandTask(VaspWorkflow):
+class VaspNebFromImagesWorkflow(VaspWorkflow):
     """
     A base class for Nudged Elastic Band (NEB) calculations. This is not meant
     to be used directly but instead should be inherited from.
@@ -31,6 +31,8 @@ class VaspNudgedElasticBandTask(VaspWorkflow):
     may be useful if you'd like to make your own variation of this class.
     """
 
+    _parameter_methods = ["run_config", "setup"]
+
     # NEB does not require a POSCAR file because input structures are organized
     # into folders.
     required_files = ["INCAR", "POTCAR"]
@@ -39,67 +41,9 @@ class VaspNudgedElasticBandTask(VaspWorkflow):
     # confirm convergence here. I'll have to write my own output class to do this.
     confirm_convergence = False
 
-    @classmethod
-    def _pre_checks(
-        cls,
-        migration_images: MigrationImages,
-        directory: str,
-    ):
-        """
-        Runs a series of checks to ensure the user configured the job correctly.
-
-        This is called automatically within the setup() method and shouldn't be
-        used directly.
-        """
-
-        # The next common mistake is to mislabel the number of images in the
-        # INCAR file.
-        # first, we check if the user set this.
-        nimages = cls.incar.get("IMAGES")
-        if nimages:
-            # if so, we check that it was set correctly. It should be equal to
-            # the number of structures minus 2 (because we don't count the
-            # start and end images here.)
-            if nimages != (len(migration_images) - 2):
-                raise Exception(
-                    "IMAGES looks to be improperly set! This value should not"
-                    " include the start/end images -- so make sure you counted"
-                    " properly. Alternatively, you also can remove this keyword"
-                    " from your INCAR and Simmate will provide it automatically"
-                    " for you."
-                )
-
-        # TODO: add a precheck that ensures the number of cores VASP is ran on
-        # is also divisible by the number of images. For example...
-        # "mpirun -n 16 vasp" will not work for IMAGES=3 because 16 is not
-        # divisible by 3. But this also may be better suited for an ErrorHandler.
-        # An example error message from from VASP is...
-        #       "M_divide: can not subdivide 16 nodes by 3"
-
-        # make sure all images are contained with the cell
-        migration_images_cleaned = cls._process_structures(migration_images)
-        return migration_images_cleaned
-
-    @staticmethod
-    def _process_structures(structures: MigrationImages):
-        """
-        Remove any atom jumps across the cell.
-
-        This method is copied directly from pymatgen's MITNEBset and has not
-        been refactored/reviewed yet.
-
-        TODO: This code would be better placed as a method of MigrationImages
-        """
-        input_structures = structures
-        structures = [input_structures[0]]
-        for s in input_structures[1:]:
-            prev = structures[-1]
-            for i, site in enumerate(s):
-                t = numpy.round(prev[i].frac_coords - site.frac_coords)
-                if numpy.any(numpy.abs(t) > 0.5):
-                    s.translate_sites([i], t, to_unit_cell=False)
-            structures.append(s)
-        return MigrationImages(structures)  # convert back to simmate object
+    use_database = False
+    description_doc_short = "runs NEB using a series of structures images as input"
+    # register_run=False,  # temporary fix bc no calc table exists yet
 
     @classmethod
     def setup(
@@ -212,6 +156,68 @@ class VaspNudgedElasticBandTask(VaspWorkflow):
             os.remove(stopcar_filename)
 
     @classmethod
+    def _pre_checks(
+        cls,
+        migration_images: MigrationImages,
+        directory: str,
+    ):
+        """
+        Runs a series of checks to ensure the user configured the job correctly.
+
+        This is called automatically within the setup() method and shouldn't be
+        used directly.
+        """
+
+        # The next common mistake is to mislabel the number of images in the
+        # INCAR file.
+        # first, we check if the user set this.
+        nimages = cls.incar.get("IMAGES")
+        if nimages:
+            # if so, we check that it was set correctly. It should be equal to
+            # the number of structures minus 2 (because we don't count the
+            # start and end images here.)
+            if nimages != (len(migration_images) - 2):
+                raise Exception(
+                    "IMAGES looks to be improperly set! This value should not"
+                    " include the start/end images -- so make sure you counted"
+                    " properly. Alternatively, you also can remove this keyword"
+                    " from your INCAR and Simmate will provide it automatically"
+                    " for you."
+                )
+
+        # TODO: add a precheck that ensures the number of cores VASP is ran on
+        # is also divisible by the number of images. For example...
+        # "mpirun -n 16 vasp" will not work for IMAGES=3 because 16 is not
+        # divisible by 3. But this also may be better suited for an ErrorHandler.
+        # An example error message from from VASP is...
+        #       "M_divide: can not subdivide 16 nodes by 3"
+
+        # make sure all images are contained with the cell
+        migration_images_cleaned = cls._process_structures(migration_images)
+        return migration_images_cleaned
+
+    @staticmethod
+    def _process_structures(structures: MigrationImages):
+        """
+        Remove any atom jumps across the cell.
+
+        This method is copied directly from pymatgen's MITNEBset and has not
+        been refactored/reviewed yet.
+        """
+        # TODO: This code would be better placed as a method of MigrationImages
+
+        input_structures = structures
+        structures = [input_structures[0]]
+        for s in input_structures[1:]:
+            prev = structures[-1]
+            for i, site in enumerate(s):
+                t = numpy.round(prev[i].frac_coords - site.frac_coords)
+                if numpy.any(numpy.abs(t) > 0.5):
+                    s.translate_sites([i], t, to_unit_cell=False)
+            structures.append(s)
+        return MigrationImages(structures)  # convert back to simmate object
+
+    @classmethod
     def workup(cls, directory: str):
         """
         Works up data from a NEB run, including confirming convergence and
@@ -310,3 +316,36 @@ class VaspNudgedElasticBandTask(VaspWorkflow):
         with open(summary_filename, "w") as file:
             content = yaml.dump(summary)
             file.write(content)
+
+    @classmethod
+    def _save_to_database(
+        cls,
+        output,
+        diffusion_analysis_id: int = None,
+        migration_hop_id: int = None,
+    ):
+
+        # split our results and corrections (which are given as a dict) into
+        # separate variables
+        # Our result here is not a VaspRun object, but instead a NEBAnalysis
+        # object. See NudgedElasticBandTask.workup()
+        result = output["result"]
+
+        # TODO: These aren't saved for now. Consider making MigrationHopTable
+        # a Calculation and attaching these there.
+        corrections = output["corrections"]
+        directory = output["directory"]
+
+        # First, we need a migration_hop database object.
+        # All of hops should link to a diffusion_analysis entry, so we check
+        # for that here too. The key thing of these statements is that we
+        # have a migration_hop_id at the end.
+
+        migration_hop_db = cls.database_table.from_pymatgen(
+            analysis=result,
+            diffusion_analysis_id=diffusion_analysis_id,
+            migration_hop_id=migration_hop_id,
+        )
+
+        # If the user wants to access results, they can do so through the hop id
+        return migration_hop_db.id

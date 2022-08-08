@@ -366,6 +366,15 @@ class Workflow:
             from simmate.database.base_data_types import DynamicsRun
 
             return DynamicsRun
+        elif flow_type == "diffusion":
+            if "from-images" in flow_preset:
+                from simmate.database.base_data_types import MigrationImage
+
+                return MigrationImage
+            else:
+                from simmate.database.base_data_types import DiffusionAnalysis
+
+                return DiffusionAnalysis
         else:
             print(cls.name_type)
             raise NotImplementedError()
