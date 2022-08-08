@@ -14,31 +14,31 @@ def test_forces_table(structure, tmpdir):
     TestForces.show_columns()
 
     # Make up random values for forces and stress. They don't need to be realistic
-    example_forces = None  # [[0.5, 0.5, 0.5]] * structure.num_sites
-    # example_stress = [
-    #     [0.1, 0.1, 0.1],
-    #     [0.1, 0.1, 0.1],
-    #     [0.1, 0.1, 0.1],
-    # ]
+    example_forces = [[0.5, 0.5, 0.5]] * structure.num_sites
+    example_stress = [
+        [0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.1],
+    ]
 
     # test writing to database. Note both forces and stress are optional, so
     # we test every iteration of this.
-    # structure_db = TestForces.from_toolkit(
-    #     structure=structure,
-    #     site_forces=example_forces,
-    #     lattice_stress=example_stress,
-    # )
-    # structure_db.save()
+    structure_db = TestForces.from_toolkit(
+        structure=structure,
+        site_forces=example_forces,
+        lattice_stress=example_stress,
+    )
+    structure_db.save()
     structure_db = TestForces.from_toolkit(
         structure=structure,
         site_forces=example_forces,
     )
     structure_db.save()
-    # structure_db = TestForces.from_toolkit(
-    #     structure=structure,
-    #     lattice_stress=example_stress,
-    # )
-    # structure_db.save()
+    structure_db = TestForces.from_toolkit(
+        structure=structure,
+        lattice_stress=example_stress,
+    )
+    structure_db.save()
     structure_db = TestForces.from_toolkit(
         structure=structure,
     )

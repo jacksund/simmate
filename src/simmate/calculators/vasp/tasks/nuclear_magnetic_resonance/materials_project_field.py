@@ -10,7 +10,7 @@ from simmate.calculators.vasp.tasks.static_energy import MatprojStaticEnergy
 class MatprojNMRElectricFieldGradiant(MatprojStaticEnergy):
     """
     This task is a reimplementation of pymatgen's
-    [MPNMRSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNonSCFSet)
+    [MPNMRSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPNMRSet)
     with mode="efg" (Electric Field Gradient).
     """
 

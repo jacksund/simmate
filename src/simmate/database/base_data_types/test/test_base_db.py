@@ -2,10 +2,7 @@
 
 import pytest
 
-from simmate.website.test_app.models import (
-    TestDatabaseTable,
-    TestDatabaseTable2,
-)
+from simmate.website.test_app.models import TestDatabaseTable
 
 
 @pytest.mark.django_db
@@ -17,13 +14,6 @@ def test_database_table():
 
     # check name
     assert x.get_table_name() == x.__class__.__name__
-
-
-@pytest.mark.django_db
-def test_create_subclass():
-    # same as before but this table was made by the create_subclass method
-    x = TestDatabaseTable2(column1=True, column2=3.14, new_column3=False)
-    x.save()
 
 
 @pytest.mark.django_db

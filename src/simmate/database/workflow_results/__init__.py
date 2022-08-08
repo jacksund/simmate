@@ -16,10 +16,7 @@ from simmate.database.base_data_types import (
     DiffusionAnalysis,
     MigrationHop,
     MigrationImage,
-)
-
-from simmate.calculators.vasp.database.customized import (
-    CustomizedVASPCalculation,
+    CustomizedCalculation,
 )
 
 from simmate.toolkit.structure_prediction.evolution.database import (

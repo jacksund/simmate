@@ -84,7 +84,7 @@ class MigrationHop(PymatgenMigrationHop):
         supercell_start, supercell_end, supercell_base = super().get_sc_structures(
             vac_mode, min_atoms, max_atoms, min_length, tol
         )
-        
+
         # The parent method doesn't work as itended... I don't want to fix it,
         # so I just warn users.
         if supercell_start.num_sites < min_atoms or supercell_end.num_sites > max_atoms:

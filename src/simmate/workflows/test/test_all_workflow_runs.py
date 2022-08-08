@@ -83,8 +83,8 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             if state.is_completed():
                 successful_flows.append(workflow_name)
 
-        # TEST NEB FLOWS (takes roughly 1 hr)
-        # For testing, look at I- diffusion in Y2CI2
+        # TEST NEB FLOWS
+        # For testing, look at I- diffusion in Y2CI2 (takes roughly 1 hr)
         structure = sample_structures["Y2CI2_mp-1206803_primitive"]
         workflow_name = "diffusion.vasp.neb-all-paths"
         workflow = get_workflow(workflow_name)
@@ -96,7 +96,7 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             nimages=1,
             min_atoms=10,
             max_atoms=25,
-            min_length=3.5,
+            min_length=4,
         )
         state.result()
         if state.is_completed():

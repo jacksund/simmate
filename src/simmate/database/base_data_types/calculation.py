@@ -152,9 +152,13 @@ class Calculation(DatabaseTable):
         if not prefect_flow_run_id or not workflow_name:
             # Grab the database_table that we want to save the results in
             run_context = FlowRunContext.get()
-            prefect_flow_run_id = str(run_context.flow_run.id)
-            workflow = run_context.flow.simmate_workflow
-            assert workflow.database_table == cls
+            if run_context:
+                prefect_flow_run_id = str(run_context.flow_run.id)
+                workflow = run_context.flow.simmate_workflow
+                workflow_name=workflow.name_full
+                assert workflow.database_table == cls
+            else:
+                raise Exception("Please provide a flow_id and workflow name.")
 
         # Depending on how a workflow was submitted, there may be a calculation
         # extry existing already -- which we need to grab and then update. If it's
@@ -171,7 +175,7 @@ class Calculation(DatabaseTable):
         calculation = cls.from_toolkit(
             prefect_flow_run_id=prefect_flow_run_id,
             location=platform.node(),
-            workflow_name=workflow.name_full,
+            workflow_name=workflow_name,
             **kwargs,
         )
         calculation.save()

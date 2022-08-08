@@ -375,9 +375,12 @@ class Workflow:
                 from simmate.database.base_data_types import DiffusionAnalysis
 
                 return DiffusionAnalysis
+        elif flow_type == "customized":
+            from simmate.database.base_data_types import CustomizedCalculation
+
+            return CustomizedCalculation
         else:
-            print(cls.name_type)
-            raise NotImplementedError()
+            raise NotImplementedError("Unable to detect proper database table")
 
     # -------------------------------------------------------------------------
     # Core methods that handle how and what a workflow run does. This include
@@ -859,7 +862,7 @@ class Workflow:
         if "workflow_base" in register_kwargs_cleaned:
             parameters_serialized = cls._serialize_parameters(**register_kwargs_cleaned)
             prefect_flow_run_id = parameters_serialized.pop("prefect_flow_run_id", None)
-            calculation = database_table.from_prefect_id(
+            calculation = database_table.from_prefect_context(
                 prefect_flow_run_id=prefect_flow_run_id,
                 **parameters_serialized,
             )
