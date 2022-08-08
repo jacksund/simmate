@@ -62,7 +62,7 @@ class RotationNonIntMatrix(ErrorHandler):
         incar.to_file(incar_filename)
 
         # rewrite the new error count file
-        with open(error_count_filename, "w") as file:
+        with error_count_filename.open("w") as file:
             json.dump(error_counts, file)
 
         # now return the correction made for logging

@@ -94,12 +94,12 @@ CONDA_DATABASE_SQLITE3 = SIMMATE_DIRECTORY / f"{CONDA_ENV}-database.sqlite3".str
 
 # Our 1st priority is checking for a "simmate/database.yaml" file
 if DATABASE_YAML.exists():
-    with open(DATABASE_YAML) as file:
+    with DATABASE_YAML.open() as file:
         DATABASES = yaml.full_load(file)
 
 # Our 2nd priority is checking for a file like "/simmate/my_env-database.yaml
 elif CONDA_DATABASE_YAML.exists():
-    with open(CONDA_DATABASE_YAML) as file:
+    with CONDA_DATABASE_YAML.open() as file:
         DATABASES = yaml.full_load(file)
 
 # This is the default behavior
@@ -207,7 +207,7 @@ INSTALLED_APPS = [
 # to our list above
 APPLICATIONS_YAML = SIMMATE_DIRECTORY / "applications.yaml"
 if APPLICATIONS_YAML.exists():
-    with open(APPLICATIONS_YAML) as file:
+    with APPLICATIONS_YAML.open() as file:
         # load the list of extra apps. Since this is really just one line for
         # each, it is loaded as a single string separated by a space.
         extra_apps = yaml.full_load(file).split()

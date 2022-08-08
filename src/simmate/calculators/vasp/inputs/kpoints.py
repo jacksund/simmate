@@ -89,7 +89,7 @@ class Kpoints:
 
         # Now write the file
         # If I want a separate to_string method, I should move only this code.
-        with open(filename, "w") as file:
+        with filename.open("w") as file:
             file.write(lines)
 
     # TODO -- I have no reason to read kpt files yet. I likely won't implement

@@ -60,7 +60,7 @@ class Aliasing(ErrorHandler):
 
             # read the file content and then close it
             outcar_filename = directory / "OUTCAR"
-            with open(outcar_filename) as file:
+            with outcar_filename.open() as file:
                 outcar_lines = file.readlines()
 
             # go through each line looking for the suggestions

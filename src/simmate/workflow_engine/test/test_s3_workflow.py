@@ -159,7 +159,7 @@ def test_s3task_2():
     output["directory"].with_suffix(".zip").unlink()
 
 
-def test_s3task_3(tmpdir):
+def test_s3task_3(tmp_path):
     # Make a task with error handlers, monitoring, and specific directory
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -174,14 +174,14 @@ def test_s3task_3(tmpdir):
         ]
 
     # use the temporary directory
-    assert Customized__Testing__DummyWorkflow.run_config(directory=tmpdir) == {
+    assert Customized__Testing__DummyWorkflow.run_config(directory=tmp_path) == {
         "result": None,
         "corrections": [],
-        "directory": tmpdir,
+        "directory": tmp_path,
     }
 
 
-def test_s3task_4(tmpdir):
+def test_s3task_4(tmp_path):
     # test nonzero returncode
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -194,11 +194,11 @@ def test_s3task_4(tmpdir):
     pytest.raises(
         NonZeroExitError,
         Customized__Testing__DummyWorkflow.run_config,
-        directory=tmpdir,
+        directory=tmp_path,
     )
 
 
-def test_s3task_5(tmpdir):
+def test_s3task_5(tmp_path):
     # testing handler-triggered failures
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -211,11 +211,11 @@ def test_s3task_5(tmpdir):
     pytest.raises(
         MaxCorrectionsError,
         Customized__Testing__DummyWorkflow.run_config,
-        directory=tmpdir,
+        directory=tmp_path,
     )
 
 
-def test_s3task_6(tmpdir):
+def test_s3task_6(tmp_path):
     # monitor failure
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -228,11 +228,11 @@ def test_s3task_6(tmpdir):
     pytest.raises(
         MaxCorrectionsError,
         Customized__Testing__DummyWorkflow.run_config,
-        directory=tmpdir,
+        directory=tmp_path,
     )
 
 
-def test_s3task_7(tmpdir):
+def test_s3task_7(tmp_path):
     # special-monitor failure (non-terminating monitor)
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -245,11 +245,11 @@ def test_s3task_7(tmpdir):
     pytest.raises(
         MaxCorrectionsError,
         Customized__Testing__DummyWorkflow.run_config,
-        directory=tmpdir,
+        directory=tmp_path,
     )
 
 
-def test_s3task_8(tmpdir):
+def test_s3task_8(tmp_path):
     # check that monitor exits cleanly when retries are not allowed and no
     # workup method raises an error
 
@@ -260,11 +260,11 @@ def test_s3task_8(tmpdir):
         monitor_freq = 2
         error_handlers = [AlwaysFailsSpecialMonitorNoRetry()]
 
-    result = Customized__Testing__DummyWorkflow.run_config(directory=tmpdir)
+    result = Customized__Testing__DummyWorkflow.run_config(directory=tmp_path)
     assert len(result["corrections"]) == 1
 
 
-def test_s3task_9(tmpdir):
+def test_s3task_9(tmp_path):
     # make sure an error is raised when a file is missing
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -275,5 +275,5 @@ def test_s3task_9(tmpdir):
     pytest.raises(
         Exception,
         Customized__Testing__DummyWorkflow.run_config,
-        directory=tmpdir,
+        directory=tmp_path,
     )

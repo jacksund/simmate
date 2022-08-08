@@ -211,7 +211,7 @@ class DeepmdDataset:
                     ("force.npy", forces),
                 ]:
                     filename_full = set_directory / filename
-                    with open(filename_full, "wb") as file:
+                    with filename_full.open("wb") as file:
                         numpy.lib.format.write_array(fp=file, array=filedata)
 
         # all of the folders have been created and we return a list of where

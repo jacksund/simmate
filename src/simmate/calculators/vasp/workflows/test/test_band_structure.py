@@ -8,12 +8,12 @@ from simmate.calculators.vasp.workflows.electronic_structure.matproj_band_struct
 from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
 
 
-def test_band_structure_setup(structure, tmpdir, mocker):
+def test_band_structure_setup(structure, tmp_path, mocker):
 
     # estabilish filenames that we make and commonly reference
-    incar_filename = tmpdir / "INCAR"
-    poscar_filename = tmpdir / "POSCAR"
-    potcar_filename = tmpdir / "POTCAR"
+    incar_filename = tmp_path / "INCAR"
+    poscar_filename = tmp_path / "POSCAR"
+    potcar_filename = tmp_path / "POTCAR"
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
@@ -23,9 +23,9 @@ def test_band_structure_setup(structure, tmpdir, mocker):
         return_value=make_dummy_files(potcar_filename),
     )
 
-    # try to make input files in the tmpdir
+    # try to make input files in the tmp_path
     ElectronicStructure__Vasp__MatprojBandStructure.setup(
-        directory=tmpdir, structure=structure
+        directory=tmp_path, structure=structure
     )
     assert incar_filename.exists()
     assert poscar_filename.exists()
@@ -38,18 +38,18 @@ def test_band_structure_setup(structure, tmpdir, mocker):
     )
 
 
-def test_band_structure_workup(tmpdir):
+def test_band_structure_workup(tmp_path):
     copy_test_files(
-        tmpdir,
+        tmp_path,
         test_directory=__file__,
         test_folder="band_structure.zip",
     )
 
     # estabilish filenames that we make and commonly reference
-    summary_filename = tmpdir / "simmate_summary.yaml"
-    plot_filename = tmpdir / "band_structure.png"
+    summary_filename = tmp_path / "simmate_summary.yaml"
+    plot_filename = tmp_path / "band_structure.png"
 
     # run the full workup
-    ElectronicStructure__Vasp__MatprojBandStructure.workup(tmpdir)
+    ElectronicStructure__Vasp__MatprojBandStructure.workup(tmp_path)
     assert summary_filename.exists()
     assert plot_filename.exists()

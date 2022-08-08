@@ -41,7 +41,7 @@ class RealOptlay(ErrorHandler):
         # load the error-count file if it exists
         error_count_filename = directory / "simmate_error_counts.json"
         if error_count_filename.exists():
-            with open(error_count_filename) as error_count_file:
+            with error_count_filename.open() as error_count_file:
                 error_counts = json.load(error_count_file)
         # otherwise we are starting with an empty dictionary
         else:

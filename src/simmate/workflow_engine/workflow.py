@@ -789,7 +789,7 @@ class Workflow:
 
         # now write the summary to file in the same directory as the calc.
         input_summary_filename = directory_cleaned / "simmate_metadata.yaml"
-        with open(input_summary_filename, "w") as file:
+        with input_summary_filename.open("w") as file:
             content = yaml.dump(input_summary)
             file.write(content)
 

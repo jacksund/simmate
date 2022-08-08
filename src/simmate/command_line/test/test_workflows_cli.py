@@ -53,11 +53,11 @@ def test_workflows_explore(command_line_runner):
     assert result.exit_code == 1
 
 
-def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
+def test_workflows_setup_only(command_line_runner, structure, mocker, tmp_path):
 
     # establish filenames
-    cif_filename = tmpdir / "test.cif"
-    new_dirname = tmpdir / "inputs"
+    cif_filename = tmp_path / "test.cif"
+    new_dirname = tmp_path / "inputs"
 
     # TODO: switch out the tested workflow for one that doesn't require
     # VASP. As-is, I need to pretend to add a POTCAR file
@@ -71,7 +71,7 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
     # write the structure to file to be used
     structure.to("cif", cif_filename)
 
-    # now try writing input files to the tmpdir
+    # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
         workflows,
         [
@@ -94,11 +94,11 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmpdir):
     assert result.exit_code == 1
 
 
-def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
+def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
 
     # establish filenames
-    cif_filename = tmpdir / "test.cif"
-    new_dirname = tmpdir / "inputs"
+    cif_filename = tmp_path / "test.cif"
+    new_dirname = tmp_path / "inputs"
 
     # write the structure to file to be used
     structure.to("cif", cif_filename)
@@ -110,7 +110,7 @@ def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
         return_value=Completed(),
     )
 
-    # now try writing input files to the tmpdir
+    # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
         workflows,
         [
@@ -136,11 +136,11 @@ def test_workflows_run(command_line_runner, structure, mocker, tmpdir):
     assert result.exit_code == 1
 
 
-def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
+def test_workflows_run_cloud(command_line_runner, structure, mocker, tmp_path):
 
     # establish filenames
-    cif_filename = tmpdir / "test.cif"
-    new_dirname = tmpdir / "inputs"
+    cif_filename = tmp_path / "test.cif"
+    new_dirname = tmp_path / "inputs"
 
     # write the structure to file to be used
     structure.to("cif", cif_filename)
@@ -152,7 +152,7 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
         return_value=Completed(),
     )
 
-    # now try writing input files to the tmpdir
+    # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
         workflows,
         [
@@ -171,12 +171,12 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmpdir):
     )
 
 
-def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
+def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
 
     # establish filenames
-    cif_filename = tmpdir / "test.cif"
-    yaml_filename = tmpdir / "test.yaml"
-    new_dirname = tmpdir / "inputs"
+    cif_filename = tmp_path / "test.cif"
+    yaml_filename = tmp_path / "test.yaml"
+    new_dirname = tmp_path / "inputs"
 
     # write the structure to file to be used
     structure.to("cif", cif_filename)
@@ -187,7 +187,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
         workflow_name="static-energy.vasp.mit",
         directory=new_dirname,
     )
-    with open(yaml_filename, "w") as file:
+    with yaml_filename.open("w") as file:
         yaml.dump(input_args, file)
 
     # I don't want to actually run the workflow, so I override the run method
@@ -197,7 +197,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmpdir):
         return_value=Completed(),
     )
 
-    # now try writing input files to the tmpdir
+    # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
         workflows,
         ["run-yaml", yaml_filename],

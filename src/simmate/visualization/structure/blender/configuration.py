@@ -28,7 +28,7 @@ def get_blender_command():
     #   [home_directory] ~/simmate/blender.yaml
     blender_filename = Path.home() / "simmate" / "blender.yaml"
     if blender_filename.exists():
-        with open(blender_filename) as file:
+        with blender_filename.open() as file:
             blender_command = yaml.full_load(file)["COMMAND"]
 
         # BUG: for windows, we need to add quotes around the command because
@@ -119,7 +119,7 @@ def find_blender_installation():
     # We store the command inside the config directory which is located at...
     #   [home_directory] ~/simmate/blender.yaml
     blender_filename = Path.home() / "simmate" / "blender.yaml"
-    with open(blender_filename, "w") as file:
+    with blender_filename.open("w") as file:
         file.write(f"COMMAND: {blender_command}")
 
     return blender_command

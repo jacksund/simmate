@@ -45,7 +45,7 @@ def start_project(project_name):
 
     # If the file exists, we append this line to the end of the file. Otherwise,
     # we create a new file and add the line!
-    with open(apps_yaml, "a+") as file:
+    with apps_yaml.open("a+") as file:
         file.write(new_line)
     # Let the user know what we did and how to continue.
     click.echo(

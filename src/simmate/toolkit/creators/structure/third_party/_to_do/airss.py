@@ -42,7 +42,7 @@ class AIRSSStructure:
         )  # .replace is to remove spaces
 
         # create the file
-        file = open(self.cell_filename, "w")
+        file = self.cell_filename.open("w")
 
         # first write the VARVOL line using predicted volume
         volume = composition.volume_estimate()

@@ -148,7 +148,7 @@ def load_all_structures_from_files(
 
         # load the structure from the poscar file
         filename = base_directory / row.filename
-        with open(filename) as file:
+        with filename.open() as file:
             contents = file.read()
         structure = Structure.from_str(contents, "poscar")
 

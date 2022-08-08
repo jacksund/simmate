@@ -183,7 +183,7 @@ def django_db_setup(
 
 
 def copy_test_files(
-    tmpdir,
+    tmp_path,
     test_directory: str,
     test_folder: str,
 ):
@@ -201,18 +201,18 @@ def copy_test_files(
     from somewhere import ExampleHandler
     from simmate.conftest import copy_test_files
 
-    def test_example(tmpdir):
+    def test_example(tmp_path):
 
         # Make our temporary directory with copied files
         copy_test_files(
-            tmpdir,
+            tmp_path,
             test_directory=__file__,
             test_folder="test_example",  # or "test_example.zip"
         )
 
         # then you can do things like...
         error_handler = ExampleHandler()
-        error_handler.check(tmpdir)
+        error_handler.check(tmp_path)
     ```
     """
     # convert to Path objects
@@ -224,10 +224,10 @@ def copy_test_files(
 
     # if the test files are stored in a zip file, uncompress the files to
     # the temporary test directory
-    if source_directory.endswith(".zip"):
+    if source_directory.suffix == ".zip":
         shutil.unpack_archive(
             source_directory,
-            extract_dir=tmpdir,
+            extract_dir=tmp_path,
         )
 
     # Otherwise, recursively copy all files in the directory over to
@@ -235,7 +235,7 @@ def copy_test_files(
     else:
         shutil.copytree(
             src=source_directory,
-            dst=tmpdir,
+            dst=tmp_path,
             dirs_exist_ok=True,
         )
 
@@ -254,7 +254,7 @@ def make_dummy_files(*filenames: str):
         get_directory(filename.parent)
 
         # now make the file
-        with open(filename, "w") as file:
+        with filename.open("w") as file:
             file.write("This is a dummy file for testing.")
 
 

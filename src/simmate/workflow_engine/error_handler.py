@@ -122,7 +122,7 @@ class ErrorHandler(ABC):
         if filename.exists():
 
             # read the file content and then close it
-            with open(filename) as file:
+            with filename.open() as file:
                 file_text = file.read()
             # Check if each error is present
             for message in self.possible_error_messages:

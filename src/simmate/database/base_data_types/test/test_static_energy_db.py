@@ -9,7 +9,7 @@ from simmate.database.base_data_types import StaticEnergy
 
 
 @pytest.mark.django_db
-def test_static_energy_table(structure, tmpdir):
+def test_static_energy_table(structure, tmp_path):
 
     # test writing columns
     StaticEnergy.show_columns()
@@ -47,7 +47,7 @@ def test_static_energy_table(structure, tmpdir):
     # TODO:
 
     # test writing and reloading these from and archive
-    archive_filename = tmpdir / "archive.zip"
+    archive_filename = tmp_path / "archive.zip"
     StaticEnergy.objects.to_archive(archive_filename)
     StaticEnergy.load_archive(
         archive_filename,

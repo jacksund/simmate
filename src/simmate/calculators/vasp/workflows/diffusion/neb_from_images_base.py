@@ -310,7 +310,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         }
 
         summary_filename = directory / "simmate_summary.yaml"
-        with open(summary_filename, "w") as file:
+        with summary_filename.open("w") as file:
             content = yaml.dump(summary)
             file.write(content)
 

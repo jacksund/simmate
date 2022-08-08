@@ -30,12 +30,12 @@ class Testing__Vasp__Dummy(VaspWorkflow):
 DummyWorkflow = Testing__Vasp__Dummy
 
 
-def test_base_setup(structure, tmpdir, mocker):
+def test_base_setup(structure, tmp_path, mocker):
 
     # estabilish filenames that we make and commonly reference
-    incar_filename = tmpdir / "INCAR"
-    poscar_filename = tmpdir / "POSCAR"
-    potcar_filename = tmpdir / "POTCAR"
+    incar_filename = tmp_path / "INCAR"
+    poscar_filename = tmp_path / "POSCAR"
+    potcar_filename = tmp_path / "POTCAR"
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
@@ -45,8 +45,8 @@ def test_base_setup(structure, tmpdir, mocker):
         return_value=make_dummy_files(potcar_filename),
     )
 
-    # try to make input files in the tmpdir
-    DummyWorkflow.setup(directory=tmpdir, structure=structure)
+    # try to make input files in the tmp_path
+    DummyWorkflow.setup(directory=tmp_path, structure=structure)
     assert incar_filename.exists()
     assert poscar_filename.exists()
     assert potcar_filename.exists()
@@ -58,25 +58,25 @@ def test_base_setup(structure, tmpdir, mocker):
     )
 
 
-def test_base_workup(tmpdir):
+def test_base_workup(tmp_path):
     copy_test_files(
-        tmpdir,
+        tmp_path,
         test_directory=__file__,
         test_folder="base.zip",
     )
 
     # estabilish filenames that we make and commonly reference
-    summary_filename = tmpdir / "simmate_summary.yaml"
-    vasprun_filename = tmpdir / "vasprun.xml"
+    summary_filename = tmp_path / "simmate_summary.yaml"
+    vasprun_filename = tmp_path / "vasprun.xml"
 
     # run the full workup
-    DummyWorkflow.workup(tmpdir)
+    DummyWorkflow.workup(tmp_path)
     assert summary_filename.exists()
 
     # run the workup again with a malformed xml
-    with open(vasprun_filename, "r") as file:
+    with vasprun_filename.open("r") as file:
         contents = file.readlines()
-    with open(vasprun_filename, "w") as file:
+    with vasprun_filename.open("w") as file:
         file.writelines(contents[50])
     with pytest.raises(Exception):
-        DummyWorkflow.workup(tmpdir)
+        DummyWorkflow.workup(tmp_path)

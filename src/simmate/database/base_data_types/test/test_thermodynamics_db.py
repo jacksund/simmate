@@ -6,7 +6,7 @@ from simmate.website.test_app.models import TestThermodynamics
 
 
 @pytest.mark.django_db
-def test_thermo_table(structure, tmpdir):
+def test_thermo_table(structure, tmp_path):
 
     # test writing columns
     TestThermodynamics.show_columns()
@@ -34,7 +34,7 @@ def test_thermo_table(structure, tmpdir):
     #     )
 
     # test writing and reloading these from and archive
-    archive_filename = tmpdir / "archive.zip"
+    archive_filename = tmp_path / "archive.zip"
     TestThermodynamics.objects.to_archive(archive_filename)
     TestThermodynamics.load_archive(
         archive_filename,

@@ -117,7 +117,7 @@ MD_KWARGS = {
 )
 def test_pymatgen_input_sets(
     structure,
-    tmpdir,
+    tmp_path,
     mocker,
     simmate_workflow,
     pymatgen_set,
@@ -129,12 +129,12 @@ def test_pymatgen_input_sets(
     """
 
     # set filenames
-    incar_simmate_name = tmpdir / "INCAR"
-    incar_pymatgen_name = tmpdir / "INCAR_pmg"
+    incar_simmate_name = tmp_path / "INCAR"
+    incar_pymatgen_name = tmp_path / "INCAR_pmg"
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
-    potcar_filename = tmpdir / "POTCAR"
+    potcar_filename = tmp_path / "POTCAR"
     mocker.patch.object(
         Potcar,
         "to_file_from_type",
@@ -142,7 +142,7 @@ def test_pymatgen_input_sets(
     )
 
     # write both inputs
-    simmate_workflow.setup(structure=structure, directory=tmpdir)
+    simmate_workflow.setup(structure=structure, directory=tmp_path)
     pymatgen_set(structure, **pymatgen_kwargs).incar.write_file(incar_pymatgen_name)
 
     # load incar
@@ -179,7 +179,7 @@ def test_pymatgen_input_sets(
 )
 def test_pymatgen_input_sets_neb(
     structure,
-    tmpdir,
+    tmp_path,
     mocker,
     simmate_workflow,
     pymatgen_set,
@@ -191,12 +191,12 @@ def test_pymatgen_input_sets_neb(
     """
 
     # set filenames
-    incar_simmate_name = tmpdir / "INCAR"
-    incar_pymatgen_name = tmpdir / "INCAR_pmg"
+    incar_simmate_name = tmp_path / "INCAR"
+    incar_pymatgen_name = tmp_path / "INCAR_pmg"
 
     # Because we won't have POTCARs accessible, we need to cover this function
     # call -- specifically have it pretend to make a file
-    potcar_filename = tmpdir / "POTCAR"
+    potcar_filename = tmp_path / "POTCAR"
     mocker.patch.object(
         Potcar,
         "to_file_from_type",
@@ -207,7 +207,7 @@ def test_pymatgen_input_sets_neb(
     # don't really care what the POSCARs look like -- just the INCARs
     simmate_workflow.setup(
         migration_images=MigrationImages([structure] * 3),
-        directory=tmpdir,
+        directory=tmp_path,
     )
     pymatgen_set([structure] * 3, **pymatgen_kwargs).incar.write_file(
         incar_pymatgen_name

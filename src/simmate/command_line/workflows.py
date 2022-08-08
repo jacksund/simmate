@@ -319,7 +319,7 @@ def run_yaml(filename):
 
     import yaml
 
-    with open(filename) as file:
+    with filename.open() as file:
         parameters = yaml.full_load(file)  # this is updated below
 
     from simmate.workflows.utilities import get_workflow

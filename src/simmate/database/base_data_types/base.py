@@ -588,7 +588,7 @@ class DatabaseTable(models.Model):
             matching_files = [
                 file
                 for file in Path.cwd().iterdir()
-                if file.startswith(cls.__name__) and file.endswith(".zip")
+                if file.startswith(cls.__name__) and file.suffix == ".zip"
             ]
             # make sure there is at least one file
             if not matching_files:

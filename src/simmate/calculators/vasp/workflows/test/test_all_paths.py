@@ -13,10 +13,10 @@ from simmate.calculators.vasp.workflows.diffusion.all import (
 @pytest.mark.slow
 @pytest.mark.prefect_db
 @pytest.mark.django_db
-def test_neb(sample_structures, tmpdir, mocker):
+def test_neb(sample_structures, tmp_path, mocker):
 
     copy_test_files(
-        tmpdir,
+        tmp_path,
         test_directory=__file__,
         test_folder="all_paths.zip",
     )
@@ -41,6 +41,6 @@ def test_neb(sample_structures, tmpdir, mocker):
         structure=structure,
         migrating_specie="I",
         command="dummycmd1; dummycmd2; dummycmd3",
-        directory=str(tmpdir),
+        directory=str(tmp_path),
     )
     assert state.is_completed()

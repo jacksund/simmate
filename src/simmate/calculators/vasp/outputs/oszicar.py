@@ -29,7 +29,7 @@ class Oszicar:
         self.ionic_steps = []
 
         # open the file, read it's contents, and close immediately
-        with open(filename) as file:
+        with open() as file:
             lines = file.readlines()
         # Empty lines cause trouble so we remove those before parsing any data.
         lines = [line for line in lines if line.strip()]

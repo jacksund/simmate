@@ -63,9 +63,9 @@ class Potcar:
 
         # VASP expect all POTCAR files to be combined into one and in the same
         # order as the POSCAR elements. Let's do that here.
-        with open(filename, "w") as combinedfile:
+        with filename.open("w") as combinedfile:
             for potcar in potcar_locations:
-                with open(potcar) as singlefile:
+                with potcar.open() as singlefile:
                     combinedfile.write(singlefile.read())
 
     # TODO

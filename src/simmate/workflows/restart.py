@@ -32,7 +32,7 @@ class Restart__Simmate__Automatic(Workflow):
 
         # grab the metadata file in the new dir
         metadata_filename = directory_new_cleaned / "simmate_metadata.yaml"
-        with open(metadata_filename) as file:
+        with metadata_filename.open() as file:
             metadata = yaml.full_load(file)
 
         # Update the parameters from the metadata below

@@ -12,7 +12,7 @@ from simmate.utilities.files import (
 )
 
 
-def test_get_directory(tmpdir):
+def test_get_directory(tmp_path):
 
     # create and delete a new directory
     new_directory = get_directory()
@@ -20,51 +20,51 @@ def test_get_directory(tmpdir):
     shutil.rmtree(new_directory)
 
     # get directory by name
-    new_directory = get_directory(tmpdir)
-    assert tmpdir == new_directory
+    new_directory = get_directory(tmp_path)
+    assert tmp_path == new_directory
 
     # test recursive creation
-    subfolder = tmpdir / "subfolder1" / "subfolder2"
+    subfolder = tmp_path / "subfolder1" / "subfolder2"
     new_directory = get_directory(subfolder)
     assert new_directory == subfolder
 
 
-def test_make_archive(tmpdir):
+def test_make_archive(tmp_path):
 
     copy_test_files(
-        tmpdir,
+        tmp_path,
         test_directory=__file__,
         test_folder="to_archive",
     )
 
-    archive_old_runs(tmpdir, time_cutoff=0)
-    assert (tmpdir / "simmate-task-1.zip").exists()
-    assert (tmpdir / "simmate-task-2.zip").exists()
+    archive_old_runs(tmp_path, time_cutoff=0)
+    assert (tmp_path / "simmate-task-1.zip").exists()
+    assert (tmp_path / "simmate-task-2.zip").exists()
 
 
-def test_make_error_archive(tmpdir):
+def test_make_error_archive(tmp_path):
 
     copy_test_files(
-        tmpdir,
+        tmp_path,
         test_directory=__file__,
         test_folder="to_archive",
     )
 
-    make_error_archive(tmpdir)
-    assert (tmpdir / "simmate_attempt_01.zip").exists()
+    make_error_archive(tmp_path)
+    assert (tmp_path / "simmate_attempt_01.zip").exists()
 
-    make_error_archive(tmpdir)
-    assert (tmpdir / "simmate_attempt_02.zip").exists()
+    make_error_archive(tmp_path)
+    assert (tmp_path / "simmate_attempt_02.zip").exists()
 
 
-def test_empty_directory(tmpdir):
+def test_empty_directory(tmp_path):
 
     copy_test_files(
-        tmpdir,
+        tmp_path,
         test_directory=__file__,
         test_folder="to_archive",
     )
 
-    empty_directory(tmpdir)
-    assert not (tmpdir / "simmate-task-1").exists()
-    assert not (tmpdir / "simmate-task-2").exists()
+    empty_directory(tmp_path)
+    assert not (tmp_path / "simmate-task-1").exists()
+    assert not (tmp_path / "simmate-task-2").exists()
