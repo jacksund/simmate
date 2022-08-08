@@ -31,7 +31,7 @@ def test_calculation_table():
         calc_db.prefect_cloud_link
         == "https://cloud.prefect.io/simmate/flow-run/example-id-123"
     )
-    
+
     # and test incorrect passing
     with pytest.raises(Exception):
         calc_db2 = TestCalculation.from_prefect_context(

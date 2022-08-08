@@ -3,7 +3,7 @@
 import pytest
 
 from simmate.workflow_engine import Workflow, task
-from simmate.website.test_app.models import TestStructureCalculation
+from simmate.website.test_app.models import TestCalculation
 
 
 @task
@@ -21,7 +21,13 @@ class DummyProject__DummyCaclulator__DummyPreset(Workflow):
     Minimal example of a workflow
     """
 
-    database_table = TestStructureCalculation
+    use_database = False
+
+    # TODO: test database registration and results
+    database_table = TestCalculation
+    # @classmethod
+    # def _save_to_database(cls, result):
+    #     pass  # Skip default which is meant for vasp calcs
 
     @staticmethod
     def run_config(source=None, structure=None, **kwargs):
@@ -35,15 +41,16 @@ DummyFlow = DummyProject__DummyCaclulator__DummyPreset
 
 
 @pytest.mark.prefect_db
-def test_workflow():
+@pytest.mark.django_db
+def test_workflow(tmpdir):
     # Run the workflow just like you would for the base Prefect class
-    flow = DummyFlow.to_prefect_flow()
-    state = flow(return_state=True)
+    flow = DummyFlow._to_prefect_flow()
+    state = flow(return_state=True, directory=tmpdir)
     assert state.is_completed()
     assert state.result() == 3
 
     # Same exact thing but using higher-level method
-    state = DummyFlow.run()
+    state = DummyFlow.run(directory=tmpdir)
     assert state.is_completed()
     assert state.result() == 3
 
@@ -56,11 +63,10 @@ def test_workflow():
     # testing class properties
     assert DummyFlow.description_doc == DummyFlow.__doc__
     assert DummyFlow.description_doc.strip() == "Minimal example of a workflow"
-    assert DummyFlow.parameter_names == ["kwargs", "source", "structure"]
-    assert DummyFlow.parameters_to_register == [
+    assert DummyFlow.parameter_names == ["source", "structure"]
+    assert DummyFlow._parameters_to_register == [
         "prefect_flow_run_id",
         "source",
-        "structure",
     ]
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 

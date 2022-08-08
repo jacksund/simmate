@@ -155,7 +155,7 @@ class Calculation(DatabaseTable):
             if run_context:
                 prefect_flow_run_id = str(run_context.flow_run.id)
                 workflow = run_context.flow.simmate_workflow
-                workflow_name=workflow.name_full
+                workflow_name = workflow.name_full
                 assert workflow.database_table == cls
             else:
                 raise Exception("Please provide a flow_id and workflow name.")

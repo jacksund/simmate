@@ -18,13 +18,14 @@
 # test max_errors limit
 
 import os
+import shutil
 
 import pytest
 
 from prefect import flow
 
-from simmate.workflow_engine import ErrorHandler, S3Task
-from simmate.workflow_engine.supervised_staged_shell_task import (
+from simmate.workflow_engine import ErrorHandler, S3Workflow
+from simmate.workflow_engine.s3_workflow import (
     NonZeroExitError,
     MaxCorrectionsError,
 )
@@ -85,40 +86,52 @@ class AlwaysFailsSpecialMonitorNoRetry(AlwaysFailsMonitor):
 
 @pytest.mark.prefect_db
 def test_s3task_methods():
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
+        use_database = False
 
-    assert isinstance(DummyTask.get_config(), dict)
+    # for shorthand reference below
+    workflow = Customized__Testing__DummyWorkflow
 
-    DummyTask.print_config()  # a print statment w. nothing else to check
+    assert isinstance(workflow.get_config(), dict)
 
-    DummyTask.to_prefect_task()  # unused for now
+    workflow.print_config()  # a print statment w. nothing else to check
 
+    workflow._to_prefect_flow()  # unused for now
+
+    # Test basic run
+    state = workflow.run()
+    result = state.result()
+    assert state.is_completed()
+    assert os.path.exists(result["directory"])
+    shutil.rmtree(result["directory"])
+
+    # Test as a subflow
     @flow
     def test():
-        task = DummyTask.run()
-        return task.result()
+        state = workflow.run()
+        return state.result()
 
     state = test(return_state=True)
     result = state.result()
 
     assert state.is_completed()
     assert os.path.exists(result["directory"])
-    os.rmdir(result["directory"])
+    shutil.rmtree(result["directory"])
 
 
 def test_s3task_1():
     # run a basic task w.o. any handlers or monitoring
 
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
+        use_database = False
         monitor = False
 
-    output = DummyTask.run_config()
+    output = Customized__Testing__DummyWorkflow.run_config()
 
     assert output["result"] == None
     assert output["corrections"] == []
-    assert output["prefect_flow_run_id"] == None
 
     # make sure that a "simmate-task-*" directory was created
     assert os.path.exists(output["directory"])
@@ -130,12 +143,12 @@ def test_s3task_1():
 def test_s3task_2():
     # test file compression
 
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
+        use_database = False
         monitor = False
-        compress_output = True
 
-    output = DummyTask.run_config()
+    output = Customized__Testing__DummyWorkflow.run_config(compress_output=True)
 
     # make sure that a "simmate-task-*.zip" archive was created
     assert os.path.exists(output["directory"] + ".zip")
@@ -150,8 +163,9 @@ def test_s3task_2():
 def test_s3task_3(tmpdir):
     # Make a task with error handlers, monitoring, and specific directory
 
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
+        use_database = False
         polling_timestep = 0
         monitor_freq = 2
         error_handlers = [
@@ -161,18 +175,18 @@ def test_s3task_3(tmpdir):
         ]
 
     # use the temporary directory
-    assert DummyTask.run_config(directory=tmpdir) == {
+    assert Customized__Testing__DummyWorkflow.run_config(directory=tmpdir) == {
         "result": None,
         "corrections": [],
         "directory": tmpdir,
-        "prefect_flow_run_id": None,
     }
 
 
 def test_s3task_4(tmpdir):
     # test nonzero returncode
 
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
+        use_database = False
         command = "NonexistantCommand 404"
         polling_timestep = 0
         monitor_freq = 2
@@ -180,7 +194,7 @@ def test_s3task_4(tmpdir):
 
     pytest.raises(
         NonZeroExitError,
-        DummyTask.run_config,
+        Customized__Testing__DummyWorkflow.run_config,
         directory=tmpdir,
     )
 
@@ -188,7 +202,8 @@ def test_s3task_4(tmpdir):
 def test_s3task_5(tmpdir):
     # testing handler-triggered failures
 
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
+        use_database = False
         command = "echo dummy"
         polling_timestep = 0
         monitor_freq = 2
@@ -196,7 +211,7 @@ def test_s3task_5(tmpdir):
 
     pytest.raises(
         MaxCorrectionsError,
-        DummyTask.run_config,
+        Customized__Testing__DummyWorkflow.run_config,
         directory=tmpdir,
     )
 
@@ -204,7 +219,8 @@ def test_s3task_5(tmpdir):
 def test_s3task_6(tmpdir):
     # monitor failure
 
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
+        use_database = False
         command = "echo dummy"
         polling_timestep = 0
         monitor_freq = 2
@@ -212,7 +228,7 @@ def test_s3task_6(tmpdir):
 
     pytest.raises(
         MaxCorrectionsError,
-        DummyTask.run_config,
+        Customized__Testing__DummyWorkflow.run_config,
         directory=tmpdir,
     )
 
@@ -220,7 +236,8 @@ def test_s3task_6(tmpdir):
 def test_s3task_7(tmpdir):
     # special-monitor failure (non-terminating monitor)
 
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
+        use_database = False
         command = "echo dummy"
         polling_timestep = 0
         monitor_freq = 2
@@ -228,7 +245,7 @@ def test_s3task_7(tmpdir):
 
     pytest.raises(
         MaxCorrectionsError,
-        DummyTask.run_config,
+        Customized__Testing__DummyWorkflow.run_config,
         directory=tmpdir,
     )
 
@@ -237,25 +254,27 @@ def test_s3task_8(tmpdir):
     # check that monitor exits cleanly when retries are not allowed and no
     # workup method raises an error
 
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
+        use_database = False
         command = "echo dummy"
         polling_timestep = 0
         monitor_freq = 2
-        error_handlers = [AlwaysFailsSpecialMonitorRetry()]
+        error_handlers = [AlwaysFailsSpecialMonitorNoRetry()]
 
-    result = DummyTask.run_config(directory=tmpdir)
+    result = Customized__Testing__DummyWorkflow.run_config(directory=tmpdir)
     assert len(result["corrections"]) == 1
 
 
-def test_s3task_8(tmpdir):
+def test_s3task_9(tmpdir):
     # make sure an error is raised when a file is missing
 
-    class DummyTask(S3Task):
+    class Customized__Testing__DummyWorkflow(S3Workflow):
+        use_database = False
         command = "echo dummy"
         required_files = ["FILE_THAT_DOESNT_EXIST"]
 
     pytest.raises(
         Exception,
-        DummyTask.run_config,
+        Customized__Testing__DummyWorkflow.run_config,
         directory=tmpdir,
     )
