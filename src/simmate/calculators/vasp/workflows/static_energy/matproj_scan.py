@@ -1,15 +1,23 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine import Workflow
-from simmate.calculators.vasp.tasks.static_energy import (
-    MatprojSCANStaticEnergy as MPStaticEnergyTask,
-)
-from simmate.calculators.vasp.database.energy import (
-    MatprojSCANStaticEnergy as MPStaticEnergyResults,
+from simmate.calculators.vasp.workflows.relaxation.matproj_scan import (
+    Relaxation__Vasp__MatprojScan,
 )
 
 
-class StaticEnergy__Vasp__MatprojScan(Workflow):
-    s3task = MPStaticEnergyTask
-    database_table = MPStaticEnergyResults
-    description_doc_short = "uses Materials Project SCAN settings"
+class StaticEnergy__Vasp__MatprojScan(Relaxation__Vasp__MatprojScan):
+    """
+    This task is a reimplementation of pymatgen's
+    [MPScanStaticSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPScanStaticSet).
+    """
+
+    incar = Relaxation__Vasp__MatprojScan.incar.copy()
+    incar.update(
+        dict(
+            NSW=0,  # this is the main static energy setting
+            LREAL=False,
+            LORBIT=11,
+            LVHAR=True,
+            ISMEAR=-5,
+        )
+    )

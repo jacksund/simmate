@@ -7,9 +7,6 @@ from simmate.database.base_data_types import (
     Calculation,
     Forces,
     Thermodynamics,
-    StaticEnergy,
-    Relaxation,
-    DynamicsRun,
 )
 
 
@@ -24,22 +21,11 @@ class TestDatabaseTable(DatabaseTable):
         app_label = "test_app"
 
 
-TestDatabaseTable2 = TestDatabaseTable.create_subclass(
-    name="TestDatabaseTable2",
-    module=__name__,  # required for serialization
-    new_column3=table_column.BooleanField(),
-)
-
-
 class TestStructure(Structure):
     pass
 
 
 class TestCalculation(Calculation):
-    pass
-
-
-class TestStructureCalculation(Structure, Calculation):
     pass
 
 
@@ -51,15 +37,3 @@ class TestForces(Structure, Forces):
 # We add the Structure mixin in order to test the "update stabilites" methods
 class TestThermodynamics(Structure, Thermodynamics):
     pass
-
-
-class TestStaticEnergy(StaticEnergy):
-    pass
-
-
-TestRelaxation, TestIonicStep = Relaxation.create_subclasses("Test", module=__name__)
-
-TestDynamicsRun, TestDynamicsIonicStep = DynamicsRun.create_subclasses(
-    "Test",
-    module=__name__,
-)

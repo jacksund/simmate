@@ -8,7 +8,6 @@ __doc__ = get_doc_from_readme(__file__)
 # django in the code below this. These two imports don't depend on the database
 # module, so it may be worth isolating them for faster imports.
 from .error_handler import ErrorHandler
-from .supervised_staged_shell_task import S3Task
 from .worker import Worker
 
 # All imports below this point depend on the simmate.database module and therefore
@@ -17,3 +16,4 @@ from .worker import Worker
 from simmate.database import connect
 
 from .workflow import Workflow, task
+from .s3_workflow import S3Workflow

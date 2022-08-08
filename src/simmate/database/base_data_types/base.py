@@ -13,8 +13,8 @@ import inspect
 import shutil
 import urllib
 import warnings
-
 import yaml
+import json
 
 import pandas
 from django.db import models  # , transaction
@@ -365,72 +365,6 @@ class DatabaseTable(models.Model):
         return cls.__name__
 
     @classmethod
-    def create_subclass(
-        cls,
-        name: str,
-        module: str,
-        app_label: str = None,
-        **new_columns,
-    ):
-        """
-        This method is useful for dynamically creating a subclass DatabaseTable
-        from some abstract class.
-
-        Let's take an example where we inherit from a Structure table. The two
-        ways we create a NewTable below are exactly the same:
-
-        ``` python
-        # Normal way to create a child class
-        NewTable(Structure):
-            new_field1 = table_column.FloatField()
-            new_field2 = table_column.FloatField()
-
-        # How this method makes the same child class
-        NewTable = Structure.create_subclass(
-            name="NewTable",
-            module=__name__, # required for serialization
-            new_field1 = table_column.FloatField()
-            new_field2 = table_column.FloatField()
-            # app_label --> typically not required bc the parent class sets this
-        )
-        ```
-
-        While this might seem silly, it helps us avoid a bunch of boilerplate
-        code when we need to redefine a bunch of relationships in every single
-        child class (and always in the same way). A great example of it's utility
-        is in `simmate.calculators.vasp.database.relaxation`.
-        """
-
-        # because we update values below, we make sure we are editting a
-        # copy of the dictionary
-        new_columns = new_columns.copy()
-
-        # BUG: I'm honestly not sure what this does, but it works...
-        # https://stackoverflow.com/questions/27112816/
-        # For a more robust way of setting the Meta class, see my code in
-        # simmate.website.workflows.utilities
-        new_columns.update(
-            {
-                "__module__": module,
-                "Meta": {"app_label": app_label} if app_label else {},
-            }
-        )
-        # TODO: make it so I don't have to specify the module, but it is automatically
-        # detected from where the class is created. This would remove boilerplate code.
-        # A good start to this is here:
-        #   https://stackoverflow.com/questions/59912684/
-        # sys._getframe(1).f_globals["__name__"]  <-- grabs where this function is called
-        # but doesn't work for multiple levels of inheritance. For example, this fails for
-        # the Relaxation subclasses because the create_subclasses method calls
-        # create_subclass -- therefore we'd need _getframe(3) instead of 1...
-
-        # Now we dynamically create a new class that inherits from this main
-        # one and also adds the new columns to it.
-        NewClass = type(name, (cls,), new_columns)
-
-        return NewClass
-
-    @classmethod
     def from_toolkit(cls, as_dict: bool = False, **kwargs):
         """
         Given fundamental "base_info" and toolkit objects, this method will populate
@@ -697,6 +631,11 @@ class DatabaseTable(models.Model):
         # to enable parallelization, we define a function to load a single
         # entry (or row) of data. This allows us to submit the function to Dask.
         def load_single_entry(entry):
+            """
+            Quick utility function that load a single entry to the database.
+            We have this as a internal function in order to allow submitting
+            this function to Dask (for parallelization).
+            """
 
             # For all entries, convert the structure_string to a toolkit structure
             if "structure_string" in entry:
@@ -706,6 +645,16 @@ class DatabaseTable(models.Model):
             # OPTIMIZE: is there a better way to do decide which entries need to be
             # converted to toolkit objects? This code may be better placed in
             # base_data_type methods (e.g. a `from_base_info` method for each)
+
+            # BUG: some columns don't properly convert to python objects, but
+            # it seems inconsistent when this is done... For now I just manually
+            # convert JSON columns
+            json_parsing_columns = ["site_forces", "lattice_stress"]
+            for column in json_parsing_columns:
+                if column in entry:
+                    if entry[column]:  # sometimes it has a value of None
+                        entry[column] = json.loads(entry[column])
+            # OPTIMIZE: consider applying this to the df column for faster loading
 
             entry_db = cls.from_toolkit(**entry)
             entry_db.save()

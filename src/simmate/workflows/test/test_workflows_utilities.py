@@ -30,10 +30,10 @@ def test_list_of_all_workflows():
 
     assert get_list_of_all_workflows() == [
         "customized.vasp.user-config",
-        "diffusion.vasp.neb-all-paths",
-        "diffusion.vasp.neb-from-endpoints",
-        "diffusion.vasp.neb-from-images",
-        "diffusion.vasp.neb-single-path",
+        "diffusion.vasp.neb-all-paths-mit",
+        "diffusion.vasp.neb-from-endpoints-mit",
+        "diffusion.vasp.neb-from-images-mit",
+        "diffusion.vasp.neb-single-path-mit",
         "dynamics.vasp.matproj",
         "dynamics.vasp.mit",
         "dynamics.vasp.mvl-npt",
@@ -44,9 +44,12 @@ def test_list_of_all_workflows():
         "population-analysis.vasp.elf-matproj",
         "relaxation.vasp.matproj",
         "relaxation.vasp.matproj-hse",
+        "relaxation.vasp.matproj-metal",
         "relaxation.vasp.matproj-scan",
         "relaxation.vasp.mit",
-        "relaxation.vasp.neb-endpoint",
+        "relaxation.vasp.mvl-grainboundary",
+        "relaxation.vasp.mvl-neb-endpoint",
+        "relaxation.vasp.mvl-slab",
         "relaxation.vasp.quality00",
         "relaxation.vasp.quality01",
         "relaxation.vasp.quality02",
@@ -58,7 +61,7 @@ def test_list_of_all_workflows():
         "static-energy.vasp.matproj-hse",
         "static-energy.vasp.matproj-scan",
         "static-energy.vasp.mit",
-        "static-energy.vasp.neb-endpoint",
+        "static-energy.vasp.mvl-neb-endpoint",
         "static-energy.vasp.quality04",
     ]
 
@@ -70,7 +73,7 @@ def test_list_of_workflows_by_type():
         "static-energy.vasp.matproj-hse",
         "static-energy.vasp.matproj-scan",
         "static-energy.vasp.mit",
-        "static-energy.vasp.neb-endpoint",
+        "static-energy.vasp.mvl-neb-endpoint",
         "static-energy.vasp.quality04",
     ]
 
@@ -90,6 +93,7 @@ def test_get_workflow():
 def test_get_unique_paramters():
     assert get_unique_parameters() == [
         "command",
+        "compress_output",
         "copy_previous_directory",
         "diffusion_analysis_id",
         "directory",

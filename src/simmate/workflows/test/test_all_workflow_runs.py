@@ -43,16 +43,16 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             "population-analysis.vasp.elf-matproj",
             "relaxation.vasp.matproj",
             "relaxation.vasp.mit",
-            "relaxation.vasp.neb-endpoint",
+            "relaxation.vasp.mvl-neb-endpoint",
             "relaxation.vasp.quality00",
             "relaxation.vasp.quality01",
             "relaxation.vasp.quality02",
             "relaxation.vasp.quality03",
-            "relaxation.vasp.staged",
             "relaxation.vasp.quality04",
+            "relaxation.vasp.staged",
             "static-energy.vasp.matproj",
             "static-energy.vasp.mit",
-            "static-energy.vasp.neb-endpoint",
+            "static-energy.vasp.mvl-neb-endpoint",
             "static-energy.vasp.quality04",
         ]
         for workflow_name in s3_flows:
@@ -76,7 +76,7 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             state = workflow.run(
                 structure=structure,
                 command="mpirun -n 12 vasp_std > vasp.out",
-                nsteps=100,
+                nsteps=50,
                 temperature_start=400,
                 temperature_end=400,
             )
@@ -84,7 +84,7 @@ def test_all_workflow_runs(tmpdir, sample_structures):
                 successful_flows.append(workflow_name)
 
         # TEST NEB FLOWS
-        # For testing, look at I- diffusion in Y2CI2
+        # For testing, look at I- diffusion in Y2CI2 (takes roughly 1 hr)
         structure = sample_structures["Y2CI2_mp-1206803_primitive"]
         workflow_name = "diffusion.vasp.neb-all-paths"
         workflow = get_workflow(workflow_name)
@@ -93,10 +93,10 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             migrating_specie="I",
             command="mpirun -n 12 vasp_std > vasp.out",
             directory=str(tmpdir),
-            nimages=3,
+            nimages=1,
             min_atoms=10,
-            max_atoms=75,
-            min_length=3,
+            max_atoms=25,
+            min_length=4,
         )
         state.result()
         if state.is_completed():

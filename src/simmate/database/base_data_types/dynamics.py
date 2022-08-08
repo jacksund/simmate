@@ -28,7 +28,6 @@ class DynamicsRun(Structure, Calculation):
     """
 
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     temperature_start = table_column.IntegerField(blank=True, null=True)
@@ -52,64 +51,6 @@ class DynamicsRun(Structure, Calculation):
     steps set. In some cases, there may be fewer steps when the simulation is 
     stopped early.
     """
-
-    @classmethod
-    def create_subclasses(cls, name: str, module: str, **extra_columns):
-        """
-        Dynamically creates a subclass of DynamicsRun as well as a separate
-        DynamicsIonicStep table for it. These tables are linked together.
-
-        Example use:
-
-        ``` python
-        from simmate.database.base_data_types import DynamicsRun
-
-        ExampleDynamicsRun, ExampleDynamicsIonicStep = DynamicsRun.create_subclasses(
-            "Example",
-            module=__name__,
-        )
-        ```
-
-        #### Parameters
-
-        - `name` :
-            The prefix name of the subclasses that are output. "DynamicsRun" and
-            "DynamicsIonicStep" will be attached to the end of this prefix.
-        - `module` :
-            name of the module this subclass should be associated with. Typically,
-            you should pass __name__ to this.
-        - `**extra_columns` :
-            Additional columns to add to the table. The keyword will be the
-            column name and the value should match django options
-            (e.g. table_column.FloatField())
-
-        Returns
-        -------
-        - `NewDynamicsRunClass` :
-            A subclass of DynamicsRun.
-        - `NewDynamicsIonicStepClass`:
-            A subclass of DynamicDynamicsIonicStep.
-
-        """
-
-        # For convience, we add columns that point to the start and end structures
-        NewDynamicsRunClass = cls.create_subclass(
-            f"{name}DynamicsRun",
-            module=module,
-            **extra_columns,
-        )
-
-        NewDynamicDynamicsIonicStepClass = (
-            DynamicsIonicStep.create_subclass_from_dynamics_run(
-                name,
-                NewDynamicsRunClass,
-                module=module,
-                **extra_columns,
-            )
-        )
-
-        # we now have a new child class and avoided writing some boilerplate code!
-        return NewDynamicsRunClass, NewDynamicDynamicsIonicStepClass
 
     def update_from_vasp_run(
         self,
@@ -182,7 +123,6 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     """
 
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     base_info = (
@@ -210,58 +150,14 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     # nosekinetic
     # nosepot
 
-    @classmethod
-    def create_subclass_from_dynamics_run(
-        cls,
-        name: str,
-        dynamics_run: DynamicsRun,
-        module: str,
-        **extra_columns,
-    ):
-        """
-        Dynamically creates a subclass of DynamicsIonicStep and links it to the
-        DynamicsRun table.
-
-        This method should NOT be called directly because it is instead used by
-        `DynamicsRun.create_subclasses`.
-
-        #### Parameters
-
-        - `name` :
-            Name of the subclass that is output.
-        - `dynamics_run` :
-            DynamicsRun table that these ionic steps should be associated with.
-        - `module` :
-            name of the module this subclass should be associated with. Typically,
-            you should pass __name__ to this.
-        - `**extra_columns` :
-            Additional columns to add to the table. The keyword will be the
-            column name and the value should match django options
-            (e.g. table_column.FloatField())
-
-        Returns
-        -------
-        - `NewClass` :
-            A subclass of DynamicsIonicStep.
-
-        """
-
-        # All structures in this table come from dynamics run calculations, where
-        # there can be many structures (one for each ionic step) linked to a
-        # single run. This means the start structure, end structure, and
-        # those structure in-between are stored together here.
-        # Therefore, there's just a simple column stating which relaxation it
-        # belongs to.
-        NewClass = cls.create_subclass(
-            f"{name}DynamicsIonicStep",
-            dynamics_run=table_column.ForeignKey(
-                dynamics_run,
-                on_delete=table_column.CASCADE,
-                related_name="structures",
-            ),
-            module=module,
-            **extra_columns,
-        )
-
-        # we now have a new child class and avoided writing some boilerplate code!
-        return NewClass
+    # All structures in this table come from dynamics run calculations, where
+    # there can be many structures (one for each ionic step) linked to a
+    # single run. This means the start structure, end structure, and
+    # those structure in-between are stored together here.
+    # Therefore, there's just a simple column stating which relaxation it
+    # belongs to.
+    dynamics_run = table_column.ForeignKey(
+        DynamicsRun,
+        on_delete=table_column.CASCADE,
+        related_name="structures",
+    )

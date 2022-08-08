@@ -71,3 +71,47 @@ class MigrationHop(PymatgenMigrationHop):
         migration_hop_cleaned.database_entry = migration_hop_db
 
         return migration_hop_cleaned
+
+    def get_sc_structures(
+        self,
+        vac_mode: bool = True,
+        min_atoms: int = 80,
+        max_atoms: int = 240,
+        min_length: float = 10.0,
+        tol: float = 1e-5,
+    ):
+
+        supercell_start, supercell_end, supercell_base = super().get_sc_structures(
+            vac_mode, min_atoms, max_atoms, min_length, tol
+        )
+
+        # The parent method doesn't work as itended... I don't want to fix it,
+        # so I just warn users.
+        if supercell_start.num_sites < min_atoms or supercell_end.num_sites > max_atoms:
+            print(
+                f"WARNING: Failed to meet min_atoms={min_atoms} and max_atoms={max_atoms} "
+                "requirements when making supercell. Resulted in"
+                f" {supercell_start.num_sites} atoms."
+            )
+        if min(supercell_start.lattice.lengths) < min_length:
+            print(
+                "WARNING: Failed to meet min_length={min_length} requirement when"
+                " making supercell. Resulted in lattice vectors lengths of "
+                f"{supercell_start.lattice.lengths}."
+            )
+
+        # BUG-CHECK: There's some rounding issue in the base code that I don't want
+        # to mess with, so I just hack fix here.
+        try:
+            assert supercell_start != supercell_end
+        except:
+            raise Exception(
+                "This structure has a bug due to a rounding error. "
+                "Our team is aware of this bug and it has been fixed for the next "
+                "pymatgen-analysis-diffusion release. In the meantime, we've found "
+                "that increasing your supercell tolerances (min_atoms, max_atoms, min_length)"
+                "can sometimes fix this error."
+            )
+        ####
+
+        return supercell_start, supercell_end, supercell_base

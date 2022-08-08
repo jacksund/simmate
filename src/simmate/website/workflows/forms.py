@@ -221,5 +221,6 @@ INPUT_MAPPINGS = {
         "pre_standardize_structure",
         "pre_sanitize_structure",
         "is_restart",
+        "compress_output",
     ],
 }

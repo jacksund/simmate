@@ -1,15 +1,30 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine import Workflow
-from simmate.calculators.vasp.tasks.density_of_states import (
-    MatprojHSEDensityOfStates as MatprojDensityOfStatesTask,
+from simmate.calculators.vasp.workflows.electronic_structure.base_density_of_states import (
+    VaspDensityOfStates,
 )
-from simmate.calculators.vasp.database.density_of_states import (
-    MatprojHSEDensityOfStates as MatprojDensityOfStatesResults,
+from simmate.calculators.vasp.workflows.relaxation.matproj_hse import (
+    Relaxation__Vasp__MatprojHse,
 )
 
 
-class ElectronicStructure__Vasp__MatprojDensityOfStatesHse(Workflow):
-    s3task = MatprojDensityOfStatesTask
-    database_table = MatprojDensityOfStatesResults
-    description_doc_short = "uses Materials Project settings (HSE)"
+class ElectronicStructure__Vasp__MatprojDensityOfStatesHse(
+    VaspDensityOfStates, Relaxation__Vasp__MatprojHse
+):
+    """
+    This task is a reimplementation of pymatgen's
+    [MPHSERelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPHSERelaxSet)
+    with mode="uniform".
+
+    Calculates the band structure using Materials Project HSE settings.
+    """
+
+    incar = Relaxation__Vasp__MatprojHse.incar.copy()
+    incar.update(
+        NSW=0,
+        ISMEAR=0,
+        SIGMA=0.05,
+        ISYM=3,
+        LCHARG=False,
+        NELMIN=5,
+    )

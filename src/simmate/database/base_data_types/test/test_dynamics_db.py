@@ -7,27 +7,29 @@ from pandas import DataFrame
 # from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.toolkit import Structure
-from simmate.website.test_app.models import TestDynamicsRun, TestIonicStep
+from simmate.database.base_data_types import DynamicsRun, DynamicsIonicStep
 
 
 @pytest.mark.django_db
 def test_static_energy_table(structure):
 
     # test writing columns
-    TestDynamicsRun.show_columns()
-    TestIonicStep.show_columns()
+    DynamicsRun.show_columns()
+    DynamicsIonicStep.show_columns()
 
     # test writing to database
-    structure_db = TestDynamicsRun.from_prefect_id(
+    structure_db = DynamicsRun.from_prefect_context(
         prefect_flow_run_id="example-id-123",
+        workflow_name="example.test.workflow",
         structure=structure,
     )
     structure_db.save()
 
     # try grabbing the calculation again and make sure it loaded from the
     # database rather than creating a new entry
-    structure_db2 = TestDynamicsRun.from_prefect_id(
+    structure_db2 = DynamicsRun.from_prefect_context(
         prefect_flow_run_id="example-id-123",
+        workflow_name="example.test.workflow",
     )
     assert structure_db.id == structure_db.id
 
@@ -37,8 +39,8 @@ def test_static_energy_table(structure):
     assert structure == structure_new
 
     # test converting search results to dataframe and to toolkit
-    df = TestDynamicsRun.objects.to_dataframe()
+    df = DynamicsRun.objects.to_dataframe()
     assert isinstance(df, DataFrame)
-    structures = TestDynamicsRun.objects.to_toolkit()
+    structures = DynamicsRun.objects.to_toolkit()
     assert isinstance(structures, list)
     assert isinstance(structures[0], Structure)

@@ -336,8 +336,11 @@ class MigrationImages(list):
 
         # assume any list is in the MigrationHop format if there are more than
         # two structures (i.e. there is at least one midpoint image)
-        if isinstance(migration_images, list) and len(migration_images) > 2:
+        if isinstance(migration_images, cls):
             migration_images_cleaned = migration_images
+
+        elif isinstance(migration_images, list) and len(migration_images) > 2:
+            migration_images_cleaned = cls(migration_images)
 
         else:
             raise Exception(

@@ -13,11 +13,12 @@ from .forces import Forces
 from .thermodynamics import Thermodynamics
 
 from .static_energy import StaticEnergy
-from .relaxation import Relaxation
-from .dynamics import DynamicsRun
+from .relaxation import Relaxation, IonicStep
+from .dynamics import DynamicsRun, DynamicsIonicStep
 from .calculation_nested import NestedCalculation
 from .calculation_customized import CustomizedCalculation
 from .band_structure import BandStructure, BandStructureCalc
 from .density_of_states import DensityofStates, DensityofStatesCalc
+from .population_analysis import PopulationAnalysis
 
-from .nudged_elastic_band import DiffusionAnalysis
+from .nudged_elastic_band import DiffusionAnalysis, MigrationHop, MigrationImage

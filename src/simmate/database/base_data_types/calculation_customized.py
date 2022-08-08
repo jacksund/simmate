@@ -15,7 +15,6 @@ class CustomizedCalculation(Calculation):
     """
 
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     workflow_base = table_column.CharField(blank=True, null=True, max_length=75)

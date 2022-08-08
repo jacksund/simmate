@@ -132,7 +132,6 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
     """
 
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     base_info = Structure.base_info + DensityofStates.base_info + Calculation.base_info

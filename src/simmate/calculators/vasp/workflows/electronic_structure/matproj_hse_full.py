@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.electronic_structure.base import (
+from simmate.calculators.vasp.workflows.electronic_structure.base_full import (
     ElectronicStructureWorkflow,
 )
 from simmate.calculators.vasp.workflows.static_energy.matproj_hse import (

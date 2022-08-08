@@ -5,13 +5,10 @@ from pymatgen.analysis.structure_matcher import StructureMatcher
 from simmate.toolkit import Structure
 from simmate.workflow_engine import task, Workflow
 from simmate.database.third_parties import MatprojStructure
-from simmate.calculators.vasp.tasks.population_analysis import (
-    MatprojPreBaderELF,
+from simmate.calculators.vasp.workflows.static_energy.matproj import (
+    StaticEnergy__Vasp__Matproj,
 )
-from simmate.calculators.bader.tasks import BaderELFAnalysis
-from simmate.calculators.vasp.database.population_analysis import (
-    MatprojBaderELFAnalysis as MPBadelfResults,
-)
+from simmate.calculators.bader.workflows import PopulationAnalysis__Bader__Badelf
 
 
 class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
@@ -21,7 +18,7 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
     as a reference when partitioning.
     """
 
-    database_table = MPBadelfResults
+    use_database = False
 
     @classmethod
     def run_config(
@@ -48,7 +45,7 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
         # Bader only adds files and doesn't overwrite any, so I just run it
         # in the original directory. I may switch to copying over to a new
         # directory in the future though.
-        badelf_result = BaderELFAnalysis.run(
+        badelf_result = PopulationAnalysis__Bader__Badelf.run(
             structure=structure_w_empties,
             directory=prebadelf_result["directory"],
         ).result()
@@ -61,10 +58,27 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
 # Below are extra tasks and subflows for the workflow that is defined above
 
 
-class PopulationAnalysis__Vasp__PrebadelfMatproj(Workflow):
-    s3task = MatprojPreBaderELF
-    database_table = MPBadelfResults
-    description_doc_short = "runs Bader analysis with ELFCAR as reference"
+class PopulationAnalysis__Vasp__PrebadelfMatproj(StaticEnergy__Vasp__Matproj):
+    """
+    Runs a static energy calculation with a high-density FFT grid under settings
+    from the Materials Project. Results can be used for Bader analysis where
+    the ELF is used as the reference instead of the CHGCAR.
+    """
+
+    # The key thing for bader analysis is that we need a very fine FFT mesh. Other
+    # than that, it's the same as a static energy calculation.
+    incar = StaticEnergy__Vasp__Matproj.incar.copy()
+    incar.update(
+        LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
+        LELF=True,  # writes ELFCAR
+        NPAR=1,  # must be set if LELF is set to True
+        PREC="Single",  # ensures CHGCAR grid matches ELFCAR grid
+        # Note that these set the FFT grid while the pre-Bader task sets the
+        # fine FFT grid (e.g. useds NGX instead of NGXF)
+        NGX__density_a=12,
+        NGY__density_b=12,
+        NGZ__density_c=12,
+    )
 
 
 @task
@@ -147,8 +161,9 @@ def save_badelf_results(bader_result, prefect_flow_run_id):
 
     # load the calculation entry for this workflow run. This should already
     # exist thanks to the load_input_and_register task of the prebader workflow
-    calculation = MPBadelfResults.from_prefect_id(
+    calculation = PopulationAnalysis__Bader__Badelf.database_table.from_prefect_context(
         prefect_flow_run_id,
+        PopulationAnalysis__Vasp__PrebadelfMatproj.name_full,
     )
     # BUG: can't use context to grab the id because workflow tasks generate a
     # different id than the main workflow

@@ -3,7 +3,6 @@
 import os
 
 from simmate.workflow_engine import Workflow
-from simmate.workflow_engine.common_tasks import load_input_and_register
 from simmate.calculators.vasp.workflows.relaxation.quality00 import (
     Relaxation__Vasp__Quality00,
 )
@@ -23,7 +22,7 @@ from simmate.calculators.vasp.workflows.static_energy.quality04 import (
     StaticEnergy__Vasp__Quality04,
 )
 
-from simmate.calculators.vasp.database.relaxation import StagedRelaxation
+# from simmate.calculators.vasp.database.relaxation import StagedRelaxation
 
 
 class Relaxation__Vasp__Staged(Workflow):
@@ -46,7 +45,7 @@ class Relaxation__Vasp__Staged(Workflow):
     """
 
     description_doc_short = "runs a series of relaxations (00-04 quality)"
-    database_table = StagedRelaxation
+    # database_table = StagedRelaxation
 
     @staticmethod
     def run_config(
@@ -56,14 +55,6 @@ class Relaxation__Vasp__Staged(Workflow):
         directory=None,
         copy_previous_directory=False,
     ):
-
-        parameters_cleaned = load_input_and_register(
-            structure=structure,
-            command=command,
-            source=source,
-            directory=directory,
-            copy_previous_directory=copy_previous_directory,
-        )
 
         tasks_to_run = [
             Relaxation__Vasp__Quality00,
@@ -77,11 +68,9 @@ class Relaxation__Vasp__Staged(Workflow):
         # Our first relaxation is directly from our inputs.
         current_task = tasks_to_run[0]
         state = current_task.run(
-            structure=parameters_cleaned["structure"],
-            command=parameters_cleaned.get("command"),
-            directory=parameters_cleaned["directory"]
-            + os.path.sep
-            + current_task.name_full,
+            structure=structure,
+            command=command,
+            directory=directory + os.path.sep + current_task.name_full,
         )
         result = state.result()
 
@@ -94,10 +83,8 @@ class Relaxation__Vasp__Staged(Workflow):
                     "directory": result["directory"],  # uses preceding result
                     "structure_field": "structure_final",
                 },
-                command=parameters_cleaned.get("command"),
-                directory=parameters_cleaned["directory"]
-                + os.path.sep
-                + current_task.name_full,
+                command=command,
+                directory=directory + os.path.sep + current_task.name_full,
             )
             result = state.result()
 
