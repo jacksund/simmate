@@ -6,14 +6,16 @@ import pytest
 
 from simmate.conftest import copy_test_files, make_dummy_files
 from simmate.calculators.vasp.inputs import Potcar
-from simmate.calculators.vasp.tasks.base import VaspTask
+from simmate.calculators.vasp.workflows.base import VaspWorkflow
 from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
 
 
-class DummyTask(VaspTask):
+class Testing__Vasp__Dummy(VaspWorkflow):
     """
     A minimal example VaspTask that is just for testing
     """
+
+    use_database = False
 
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
@@ -24,6 +26,10 @@ class DummyTask(VaspTask):
         EDIFF__per_atom=2e-3,  # to ensure structure-specific kwargs
         KSPACING=0.75,
     )
+
+
+# For shorthand reference below
+DummyWorkflow = Testing__Vasp__Dummy
 
 
 def test_base_setup(structure, tmpdir, mocker):
@@ -42,7 +48,7 @@ def test_base_setup(structure, tmpdir, mocker):
     )
 
     # try to make input files in the tmpdir
-    DummyTask.setup(directory=tmpdir, structure=structure)
+    DummyWorkflow.setup(directory=tmpdir, structure=structure)
     assert os.path.exists(incar_filename)
     assert os.path.exists(poscar_filename)
     assert os.path.exists(potcar_filename)
@@ -66,7 +72,7 @@ def test_base_workup(tmpdir):
     vasprun_filename = os.path.join(tmpdir, "vasprun.xml")
 
     # run the full workup
-    DummyTask.workup(tmpdir)
+    DummyWorkflow.workup(tmpdir)
     assert os.path.exists(summary_filename)
 
     # run the workup again with a malformed xml
@@ -75,4 +81,4 @@ def test_base_workup(tmpdir):
     with open(vasprun_filename, "w") as file:
         file.writelines(contents[50])
     with pytest.raises(Exception):
-        DummyTask.workup(tmpdir)
+        DummyWorkflow.workup(tmpdir)

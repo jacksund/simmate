@@ -20,15 +20,15 @@ Simmate
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'workflows' %}">workflows</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.name_project %}">{{ workflow.name_project }}</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.name_project workflow.name_preset %}">
+      <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.name_type %}">{{ workflow.name_type }}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.name_type workflow.name_preset %}">
           {{ workflow.name_preset }}</a></li>
       <li class="breadcrumb-item active">submit</li>
     </ol>
   </nav>
 
   <!-- Submission form -->
-  <form action="{% url 'workflow_submit' workflow.name_project workflow.name_preset %}" method="post"
+  <form action="{% url 'workflow_submit' workflow.name_type workflow.name_preset %}" method="post"
     enctype="multipart/form-data">
     {% csrf_token %}
     {% load crispy_forms_tags %}

@@ -395,7 +395,6 @@ class MigrationHop(DatabaseTable):
 
 class MigrationImage(Structure):
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     base_info = [

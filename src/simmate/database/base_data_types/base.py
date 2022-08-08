@@ -13,8 +13,8 @@ import inspect
 import shutil
 import urllib
 import warnings
-
 import yaml
+import json
 
 import pandas
 from django.db import models  # , transaction
@@ -631,6 +631,11 @@ class DatabaseTable(models.Model):
         # to enable parallelization, we define a function to load a single
         # entry (or row) of data. This allows us to submit the function to Dask.
         def load_single_entry(entry):
+            """
+            Quick utility function that load a single entry to the database.
+            We have this as a internal function in order to allow submitting
+            this function to Dask (for parallelization).
+            """
 
             # For all entries, convert the structure_string to a toolkit structure
             if "structure_string" in entry:
@@ -640,6 +645,16 @@ class DatabaseTable(models.Model):
             # OPTIMIZE: is there a better way to do decide which entries need to be
             # converted to toolkit objects? This code may be better placed in
             # base_data_type methods (e.g. a `from_base_info` method for each)
+
+            # BUG: some columns don't properly convert to python objects, but
+            # it seems inconsistent when this is done... For now I just manually
+            # convert JSON columns
+            json_parsing_columns = ["site_forces", "lattice_stress"]
+            for column in json_parsing_columns:
+                if column in entry:
+                    if entry[column]:  # sometimes it has a value of None
+                        entry[column] = json.loads(entry[column])
+            # OPTIMIZE: consider applying this to the df column for faster loading
 
             entry_db = cls.from_toolkit(**entry)
             entry_db.save()

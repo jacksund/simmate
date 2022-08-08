@@ -737,25 +737,6 @@ class S3Workflow(Workflow):
         """
         pass
 
-    @classmethod
-    def get_config(cls):
-        """
-        Grabs the overall settings from the class.
-
-        By default, this will just grab the class's __dict__ attribute but this
-        can be overwritten to show only relevent information.
-        """
-        return dict(cls.__dict__)
-
-    @classmethod
-    def print_config(cls):
-        """
-        Takes the result of get_config and prints it in a yaml format that is
-        easier to read.
-        """
-        config = cls.get_config()
-        print(yaml.dump(config))
-
 
 # Custom errors that indicate exactly what causes the S3Task to exit.
 

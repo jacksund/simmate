@@ -518,7 +518,7 @@ class Workflow:
 
     # -------------------------------------------------------------------------
     # Properties/method that set website UI documentation and help users
-    # explore input options
+    # explore input options and settings used.
     # -------------------------------------------------------------------------
 
     # BUG: naming this `description` causes issues.
@@ -576,6 +576,30 @@ class Workflow:
         """
         # use yaml to make the printout pretty (no quotes and separate lines)
         print(yaml.dump(cls.parameter_names))
+
+    @classmethod
+    def get_config(cls):
+        """
+        Grabs the overall settings from the class in order to let users briefly
+        look at key parameters.
+
+        Using this method is scripts is not recommended.
+        """
+        return dict(
+            use_database=cls.use_database,
+            name_full=cls.name_full,
+            parameter_names=cls.parameter_names,
+            parameter_names_required=cls.parameter_names_required,
+        )
+
+    @classmethod
+    def show_config(cls):
+        """
+        Takes the result of get_config and prints it in a yaml format that is
+        easier to read.
+        """
+        config = cls.get_config()
+        print(yaml.dump(config))
 
     # -------------------------------------------------------------------------
     # Properties/method that configure registration of workflow runs and the

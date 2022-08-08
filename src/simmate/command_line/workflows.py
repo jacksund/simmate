@@ -187,16 +187,7 @@ def show_config(workflow_name):
 
     click.echo("PRINTING WORKFLOW CONFIG...")
 
-    # Not all workflows have a single config because some are NestWorkflows,
-    # meaning they are made of multiple smaller workflows.
-    if workflow.s3task:
-        workflow.s3task.print_config()
-    else:
-        raise click.ClickException(
-            "This is not a S3Task-based workflow. It is likely a NestedWorkflow, "
-            "meaning it is made up of multiple smaller workflows. We have not "
-            "added a show-config feature for these yet. "
-        )
+    workflow.show_config()
 
 
 @workflows.command(
@@ -238,11 +229,13 @@ def setup_only(context, workflow_name):
 
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
-    if workflow.s3task:
-        workflow.s3task.setup(**kwargs_cleaned)
+    from simmate.workflow_engine import S3Workflow
+
+    if issubclass(workflow, S3Workflow):
+        workflow.setup(**kwargs_cleaned)
     else:
         raise click.ClickException(
-            "This is not a S3Task-based workflow. It is likely a NestedWorkflow, "
+            "This is not a S3-based workflow. It is likely a NestedWorkflow, "
             "meaning it is made up of multiple smaller workflows. We have not "
             "added a setup-only feature for these yet. "
         )

@@ -231,8 +231,10 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # BUG: For now I assume there are start/end image directories are located
         # in the working directory. These relaxation are actually ran by a
         # separate workflow, which is thus a prerequisite for this workflow.
-        start_dirname = os.path.join(directory, "relaxation.vasp.neb-endpoint.start")
-        end_dirname = os.path.join(directory, "relaxation.vasp.neb-endpoint.end")
+        start_dirname = os.path.join(
+            directory, "relaxation.vasp.mvl-neb-endpoint.start"
+        )
+        end_dirname = os.path.join(directory, "relaxation.vasp.mvl-neb-endpoint.end")
         try:
             assert os.path.exists(start_dirname)
             assert os.path.exists(end_dirname)

@@ -3,10 +3,10 @@
 import pytest
 
 from simmate.conftest import copy_test_files
-from simmate.workflow_engine import S3Task
+from simmate.workflow_engine import S3Workflow
 from simmate.calculators.vasp.inputs import Potcar
 from simmate.calculators.vasp.workflows.diffusion.all import (
-    Diffusion__Vasp__NebAllPaths,
+    Diffusion__Vasp__NebAllPathsMit,
 )
 
 
@@ -31,13 +31,13 @@ def test_neb(sample_structures, tmpdir, mocker):
     # We also don't want to run any commands -- for any task. We skip these
     # by having the base S3task.execute just return an empty list (meaning
     # no corrections were made).
-    mocker.patch.object(S3Task, "execute", return_value=[])
+    mocker.patch.object(S3Workflow, "execute", return_value=[])
 
     # Don't check for proper input files because POTCARs will be missing
-    mocker.patch.object(S3Task, "_check_input_files", return_value=None)
+    mocker.patch.object(S3Workflow, "_check_input_files", return_value=None)
 
     # run the workflow and make sure it handles data properly.
-    state = Diffusion__Vasp__NebAllPaths.run(
+    state = Diffusion__Vasp__NebAllPathsMit.run(
         structure=structure,
         migrating_specie="I",
         command="dummycmd1; dummycmd2; dummycmd3",

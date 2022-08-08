@@ -95,7 +95,7 @@ def test_s3task_methods():
 
     assert isinstance(workflow.get_config(), dict)
 
-    workflow.print_config()  # a print statment w. nothing else to check
+    workflow.show_config()  # a print statment w. nothing else to check
 
     workflow._to_prefect_flow()  # unused for now
 

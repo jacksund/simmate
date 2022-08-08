@@ -75,7 +75,6 @@ class Forces(DatabaseTable):
         """
         # TODO: in the future, this should accept an IonicStep toolkit object
         # or maybe Structure + Forces toolkit objects.
-
         site_data = (
             dict(
                 site_forces=site_forces,

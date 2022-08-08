@@ -70,6 +70,10 @@ def test_workflow(tmpdir):
     ]
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 
+    assert isinstance(DummyFlow.get_config(), dict)
+
+    DummyFlow.show_config()  # a print statment w. nothing else to check
+
 
 # @pytest.mark.prefect_db
 # @pytest.mark.django_db

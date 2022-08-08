@@ -27,13 +27,6 @@ def test_workflows_show_config(command_line_runner):
     )
     assert result.exit_code == 0
 
-    # ensure failure when a nested workflow is given
-    result = command_line_runner.invoke(
-        workflows,
-        ["show-config", "relaxation.vasp.staged"],
-    )
-    assert result.exit_code == 1
-
     # ensure the flow fails when a incorrect name is given
     result = command_line_runner.invoke(
         workflows,

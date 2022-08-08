@@ -44,6 +44,7 @@ def test_list_of_all_workflows():
         "population-analysis.vasp.elf-matproj",
         "relaxation.vasp.matproj",
         "relaxation.vasp.matproj-hse",
+        "relaxation.vasp.matproj-metal",
         "relaxation.vasp.matproj-scan",
         "relaxation.vasp.mit",
         "relaxation.vasp.mvl-grainboundary",

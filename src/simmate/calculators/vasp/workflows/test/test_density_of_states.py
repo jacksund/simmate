@@ -3,7 +3,9 @@
 import os
 
 from simmate.conftest import copy_test_files
-from simmate.calculators.vasp.tasks.density_of_states import MatprojDensityOfStates
+from simmate.calculators.vasp.workflows.electronic_structure.matproj_density_of_states import (
+    ElectronicStructure__Vasp__MatprojDensityOfStates,
+)
 
 
 def test_density_of_states_workup(tmpdir):
@@ -13,14 +15,11 @@ def test_density_of_states_workup(tmpdir):
         test_folder="density_of_states",
     )
 
-    # init main task
-    task = MatprojDensityOfStates()
-
     # estabilish filenames that we make and commonly reference
     summary_filename = os.path.join(tmpdir, "simmate_summary.yaml")
     plot_filename = os.path.join(tmpdir, "density_of_states.png")
 
     # run the full workup
-    task.workup(tmpdir)
+    ElectronicStructure__Vasp__MatprojDensityOfStates.workup(tmpdir)
     assert os.path.exists(summary_filename)
     assert os.path.exists(plot_filename)
