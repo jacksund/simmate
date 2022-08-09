@@ -124,7 +124,7 @@ command: mpirun -n 8 vasp_std > vasp.out
 from simmate.workflows.relaxation import Relaxation__Vasp__Matproj as workflow
 
 state = workflow.run(structure="NaCl.cif")
-result = workflow.result()
+result = state.result()
 ```
 
 
