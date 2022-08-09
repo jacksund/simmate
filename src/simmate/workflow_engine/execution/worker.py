@@ -40,8 +40,11 @@ class SimmateWorker:
         # settings on what to do when the queue is empty
         close_on_empty_queue: bool = False,
         waittime_on_empty_queue: float = 60,
-        labels: list[str] = [],
+        tags: list[str] = ["simmate"],  # should default be empty...?
     ):
+        # the tags to query tasks for. If no tags were given, the worker will
+        # query for tasks that have NO tags
+        self.tags = tags
 
         # the maximum number of workitems to run before closing down
         # if no limit was set, we can go to infinity!
@@ -81,13 +84,13 @@ class SimmateWorker:
             # if we've hit the limit.
             if (time.time() - time_start) > self.timeout:
                 # TODO - check wait_on_timeout if running in parallel.
-                print("The time-limit for this worker has been hit.")
+                print("The time-limit for this worker has been hit. Shutting down.")
                 return
 
             # check the number of jobs completed so far, and exit if we hit
             # the limit
             if ntasks_finished >= self.nitems_max:
-                print("Maxium number of WorkItems hit for this worker.")
+                print("Maxium number of WorkItems hit for this worker. Shutting down.")
                 return
 
             # check the length of the queue and while it is empty, we want to
@@ -103,14 +106,22 @@ class SimmateWorker:
                     # after we just waited, let's check the queue size again
                     if self.queue_size() == 0:
                         # if it's still empty, we should close the worker
-                        print("The queue is empty so the worker has been closed.")
+                        print("The task queue is empty. Shutting down.")
                         return
 
             # If we've made it this far, we're ready to grab a new WorkItem
             # and run it!
             # Query for PENDING WorkItems, lock it for editting, and update
             # the status to RUNNING
-            workitem = WorkItem.objects.select_for_update().filter(status="P").first()
+            query_results = WorkItem.objects.select_for_update().filter(status="P")
+            # filter down by tags
+            if self.tags:
+                for tag in self.tags:
+                    query_results = query_results.filter(tags__icontains=tag)
+            else:
+                query_results = query_results.filter(tags=self.tags)
+            # and grab the first result
+            workitem = query_results.first()
 
             # our lock exists only within this transation
             with transaction.atomic():
@@ -121,7 +132,7 @@ class SimmateWorker:
                 workitem.save()
 
             # Print out the job ID that is being ran for the user to see
-            print(f"Running WorkItem with id {workitem.id}.")
+            print(f"Running WorkItem with id {workitem.id}")
 
             # now let's unpickle the WorkItem components
             fxn = cloudpickle.loads(workitem.fxn)

@@ -31,10 +31,10 @@ class WorkItem(DatabaseTable):
     class Meta:
         app_label = "workflow_engine"
 
-    labels = table_column.JSONField(default=[])
+    tags = table_column.JSONField(default=[])
     """
-    List of labels to submit the task with, which helps with submitting workers
-    for a specific type of task/workflow.
+    List of tags to submit the task with, which helps with submitting workers
+    for a specific type of task/workflow. (e.g. ["simmate", "custom"])
     """
 
     fxn = table_column.BinaryField()
@@ -55,6 +55,11 @@ class WorkItem(DatabaseTable):
     result = table_column.BinaryField(blank=True, null=True)
     """
     the output of fxn(*args, **kwargs)
+    """
+
+    source = None
+    """
+    Source column is not needed so setting this to None disables the column
     """
 
     # These states are based on the python queue module

@@ -36,7 +36,7 @@ class SimmateExecutor:
         self,
         fxn,
         *args,
-        labels=[],
+        tags=[],
         **kwargs,
     ):
 
@@ -54,7 +54,7 @@ class SimmateExecutor:
             fxn=cloudpickle.dumps(fxn),
             args=cloudpickle.dumps(args),
             kwargs=cloudpickle.dumps(kwargs),
-            # TODO: labels
+            tags=tags,  # should be json serializable already
         )
 
         # create the future object

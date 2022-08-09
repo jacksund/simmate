@@ -272,6 +272,7 @@ import inspect
 from typing import List, Any
 import uuid
 from functools import cache  # cached_property doesnt work with classmethod
+from pathlib import Path
 
 from prefect.tasks import task  # present only for convience imports elsewhere
 from prefect.flows import Flow
@@ -439,11 +440,12 @@ class Workflow:
         return state
 
     @classmethod
-    def run_cloud(cls, **kwargs) -> str:
+    def run_cloud(cls, return_future: bool = True, **kwargs) -> str:
         # Because we often want to save some info to our database even before
         # the calculation starts/finishes, we do that with. An example is
         # storing the structure and run id that we just submitted.
         if USE_PREFECT:
+
             run_id = cls._run_prefect_cloud(**kwargs)
             cls._register_calculation(run_id=run_id, **kwargs)
             # BUG: Will there be a race condition here? What if the workflow finishes
@@ -451,15 +453,27 @@ class Workflow:
             # BUG: if parameters are improperly set, this line will fail, while the
             # job submission (above) will suceed. Should I cancel the flow run if
             # this occurs?
+
+            if return_future:
+                raise Exception("Prefect cannot return futures from submisson.")
+
             return run_id
         else:
             print(f"Submitting new run of {cls.name_full}")
+
             run_id = cls._get_run_id()
             cls._register_calculation(run_id=run_id, **kwargs)
+
             executor = SimmateExecutor()
-            future = executor.submit(cls._run_full, run_id=run_id, **kwargs)
+            future = executor.submit(
+                cls._run_full,
+                run_id=run_id,
+                tags=cls.tags,
+                **kwargs,
+            )
             # Would it be better to return the future...?
-            return future
+            if return_future:
+                return future
 
         return run_id
 
@@ -538,6 +552,23 @@ class Workflow:
         portion of the flow name (e.g. "matproj" or "matproj-prebader")
         """
         return cls.name_full.split(".")[2]
+
+    @classmethod
+    @property
+    def tags(cls) -> list[str]:
+        """
+        Lists of tags to submit a the workflow with when using run_cloud.
+        """
+        tags = [
+            "simmate",
+            cls.name_type,
+            cls.name_calculator,
+        ]
+
+        if USE_PREFECT:
+            return tags
+        else:
+            return tags + [cls.name_full]
 
     # -------------------------------------------------------------------------
     # Properties/method that set website UI documentation and help users
@@ -949,6 +980,8 @@ class Workflow:
                     parameter_value = parameter_value.as_dict()
                 elif hasattr(parameter_value, "to_dict"):
                     parameter_value = parameter_value.to_dict()
+                elif parameter_key == "directory":
+                    parameter_value = str(parameter_value)  # convert Path to str
 
                 # workflow_base and input_parameters are special cases that
                 # may require a refactor (for customized workflows)
@@ -1041,6 +1074,9 @@ class Workflow:
             parameters_cleaned["supercell_end"] = Structure.from_dynamic(
                 parameters["supercell_end"]
             )
+
+        if "directory" in parameters.keys():
+            parameters_cleaned["directory"] = Path(parameters_cleaned["directory"])
 
         return parameters_cleaned
 
@@ -1214,11 +1250,7 @@ class Workflow:
                 # OPTIMIZE: it would be better if I could figure out the ImportSerializer
                 # here. Only issue is that prefect would need to know to import AND
                 # call a method.
-                tags=[
-                    "simmate",
-                    cls.name_type,
-                    cls.name_calculator,
-                ],
+                tags=cls.tags,
             )
 
             deployment_id = await deployment.create()
