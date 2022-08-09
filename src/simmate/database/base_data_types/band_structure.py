@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.electronic_structure.bandstructure import (
@@ -151,7 +151,7 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
         self,
         vasprun: Vasprun,
         corrections: list,
-        directory: str,
+        directory: Path,
     ):
         """
         Given a pymatgen VaspRun object, which is what's typically returned
@@ -179,7 +179,7 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
         self.save()
 
     @classmethod
-    def from_directory(cls, directory: str):
+    def from_directory(cls, directory: Path):
         """
         Creates a new database entry from a directory that holds band-structure
         results. For now, this assumes the directory holds vasp output files.
@@ -187,7 +187,7 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
 
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
-        vasprun_filename = os.path.join(directory, "vasprun.xml")
+        vasprun_filename = directory / "vasprun.xml"
         vasprun = Vasprun(vasprun_filename)
         band_structure = vasprun.get_band_structure(line_mode=True)
         band_structure_db = cls.from_toolkit(

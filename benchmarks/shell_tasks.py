@@ -15,7 +15,7 @@ a bug, which I detail in the execute method of the S3Task. This bug is actually
 present in Custodian for commands that spawn multiple processes/threads.
 """
 
-import os
+from pathlib import Path
 from timeit import default_timer as time
 from subprocess import Popen
 
@@ -143,7 +143,7 @@ for x in range(ntrials):
     # add time to db
     custodian_times.append(stop - start)
     # I need to remove the log file, otherwise it builds and affects speed
-    os.remove("custodian.json")
+    Path("custodian.json").unlink()
 
 # ----------------------------------------------------------------------------
 

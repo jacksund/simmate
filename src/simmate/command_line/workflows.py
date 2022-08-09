@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import List
+import pathlib
 
 import click
 from click import Context
@@ -205,7 +206,7 @@ def setup_only(context, workflow_name):
     """
 
     click.echo("LOADING STRUCTURE AND WORKFLOW...")
-    from simmate.toolkit import Structure
+
     from simmate.workflows.utilities import get_workflow
 
     workflow = get_workflow(
@@ -224,14 +225,17 @@ def setup_only(context, workflow_name):
 
     directory = kwargs_cleaned.get("directory", None)
     if not directory:
-        directory = get_directory(f"{workflow.name_full}.SETUP-ONLY")
-        kwargs_cleaned["directory"] = directory
+        directory = f"{workflow.name_full}.SETUP-ONLY"
+
+    # ensure a path obj and that directory is created
+    kwargs_cleaned["directory"] = get_directory(directory)
 
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
     from simmate.workflow_engine import S3Workflow
 
     if issubclass(workflow, S3Workflow):
+
         workflow.setup(**kwargs_cleaned)
     else:
         raise click.ClickException(
@@ -311,7 +315,7 @@ def run_cloud(context, workflow_name):
         allow_extra_args=True,
     )
 )
-@click.argument("filename", type=click.Path(exists=True))
+@click.argument("filename", type=click.Path(exists=True, path_type=pathlib.Path))
 def run_yaml(filename):
     """Runs a workflow where parameters are loaded from a yaml file."""
 
@@ -319,7 +323,7 @@ def run_yaml(filename):
 
     import yaml
 
-    with open(filename) as file:
+    with filename.open() as file:
         parameters = yaml.full_load(file)  # this is updated below
 
     from simmate.workflows.utilities import get_workflow

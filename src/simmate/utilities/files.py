@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import os
-from tempfile import TemporaryDirectory, mkdtemp
+from pathlib import Path
+from tempfile import mkdtemp
 import shutil
 import time
 from typing import List, Union
 
 
-def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
+def get_directory(directory: Union[str, Path] = None) -> Path:
     """
     Initializes a directory.
 
@@ -18,10 +18,8 @@ def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
       - `None`:
           returns the full path to a new folder inside python's
           current working directory named "simmate-task-<randomID>"
-      - `TemporaryDirectory`:
-          returns the full path to the given temp directory
-      - `str`:
-          makes the directory if it doesnt exist and then returns the path
+      - `str` or `pathlib.Path`:
+          makes the directory if it doesnt exist and then returns the full path
 
     #### Parameters
 
@@ -31,7 +29,7 @@ def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
     #### Returns
 
     - `directory`:
-        The path to the initialized directory as a string
+        The full path to the initialized directory as a `pathlib.Path` object
     """
 
     # if no directory was provided, we create a new folder within the current
@@ -41,29 +39,28 @@ def get_directory(directory: Union[str, TemporaryDirectory] = None) -> str:
     if not directory:
         # create a directory in the current working directory. Note, even though
         # we are creating a "TemporaryDirectory" here, this directory is never
-        # actually deleted.
-        directory = mkdtemp(prefix="simmate-task-", dir=os.getcwd())
-
-    # if the user provided a tempdir, we want it's name
-    elif isinstance(directory, TemporaryDirectory):
-        directory = directory.name
+        # actually deleted. Note, Path() gives the working directory
+        directory_new = mkdtemp(prefix="simmate-task-", dir=Path.cwd())
+        directory_cleaned = Path(directory_new)
 
     # otherwise make sure the directory the user provided exists and if it does
     # not, then make it!
     else:
-        # We use mkdirs instead of mkdir because we want to make these directory
-        # recursively. That is, we can do "path/to/newfolder1/newfolder2" where
-        # multiple folders can be made with one call.
-        # Also if the folder already exists, we don't want to raise an error.
-        os.makedirs(directory, exist_ok=True)
+        directory_cleaned = Path(directory)
+        if not directory_cleaned.exists():
+            # We use parents=True because we want to make these directories
+            # recursively. That is, we can do "path/to/newfolder1/newfolder2" where
+            # multiple folders can be made with one call.
+            # Also if the folder already exists, we don't want to raise an error.
+            directory_cleaned.mkdir(parents=True, exist_ok=True)
 
     # and return the full path to the directory
-    return os.path.abspath(directory)
+    return directory_cleaned.absolute()
 
 
 def copy_directory(
-    directory_old: str,
-    directory_new: str = None,
+    directory_old: Path,
+    directory_new: Path = None,
     ignore_simmate_files: bool = False,
 ) -> str:
     """
@@ -101,7 +98,7 @@ def copy_directory(
     #   4. directory was deleted and unavailable
     # When copying over the directory, we ignore any `simmate_` files
     # that correspond to metadata/results/corrections/etc.
-    if os.path.exists(directory_old):
+    if directory_old.exists():
         # copy the old directory to the new one
         shutil.copytree(
             src=directory_old,
@@ -111,11 +108,11 @@ def copy_directory(
             else None,
             dirs_exist_ok=True,
         )
-    elif os.path.exists(f"{directory_old}.zip"):
+    elif directory_old.with_suffix(".zip").exists():
         # unpack the old archive
         shutil.unpack_archive(
-            filename=f"{directory_old}.zip",
-            extract_dir=os.path.dirname(directory_old),
+            filename=directory_old.with_suffix(".zip"),
+            extract_dir=directory_old.parent,
         )
         # copy the old directory to the new one
         shutil.copytree(
@@ -142,7 +139,7 @@ def copy_directory(
     return directory_new_cleaned
 
 
-def make_archive(directory: str):
+def make_archive(directory: Path):
     """
     Compresses the directory to a zip file of the same name. After compressing,
     it then deletes the original directory.
@@ -152,6 +149,9 @@ def make_archive(directory: str):
     - `directory`:
         Path to the folder that should be archived
     """
+
+    directory_full = directory.absolute()
+
     # This wraps shutil.make_archive to change the default parameters. Normally,
     # it writes the archive in the working directory, but we update it to use the
     # the same directory as the folder being archived. The format is also set
@@ -159,19 +159,19 @@ def make_archive(directory: str):
     shutil.make_archive(
         # By default I choose within the current directory and save
         # it as the same name of the directory (+ zip ending)
-        base_name=os.path.abspath(directory),
+        base_name=directory_full,
         # format to use switch to gztar after testing
         format="zip",
         # full path to up tp directory that will be archived
-        root_dir=os.path.dirname(directory),
+        root_dir=directory_full.parent,
         # directory within root_directory to archive
-        base_dir=os.path.basename(directory),
+        base_dir=directory_full.name,
     )
     # now remove the directory we just archived
     shutil.rmtree(directory)
 
 
-def make_error_archive(directory: str):
+def make_error_archive(directory: Path):
     """
     Compresses the directory to a zip file and stores the new archive within the
     original. This utility is meant for creating archives within the directory
@@ -186,15 +186,16 @@ def make_error_archive(directory: str):
         Path to the folder that should be archived
     """
 
-    full_path = os.path.abspath(directory)
+    full_path = directory.absolute()
 
     # check the directory and see how many other "simmate_attempt_*.zip" files
     # already exist. Our archive number will be based off of this.
     count = (
-        len([f for f in os.listdir(full_path) if f.startswith("simmate_attempt_")]) + 1
+        len([f for f in full_path.iterdir() if f.name.startswith("simmate_attempt_")])
+        + 1
     )
     count_str = str(count).zfill(2)
-    base_name = os.path.join(full_path, f"simmate_attempt_{count_str}")
+    base_name = full_path / f"simmate_attempt_{count_str}"
 
     # Before we make the archive, we want to avoid also storing other simmate
     # archives and files within this new archive. We therefore copy all files
@@ -210,7 +211,7 @@ def make_error_archive(directory: str):
 
 
 def archive_old_runs(
-    directory: str = ".",
+    directory: Path = None,
     time_cutoff: float = 3 * 7 * 24 * 60 * 60,  # equal to 3 weeks
 ):
     """
@@ -229,6 +230,9 @@ def archive_old_runs(
         The default is 3 weeks.
 
     """
+    if not directory:
+        directory = Path.cwd()
+
     # load the full path to the desired directory
     directory = get_directory(directory)
 
@@ -238,12 +242,12 @@ def archive_old_runs(
     #   2. start with "simmate-task-"
     #   3. haven't been modified for at least time_cutoff
     foldernames = []
-    for foldername in os.listdir(directory):
-        foldername_full = os.path.join(directory, foldername)
+    for foldername in directory.iterdir():
+        foldername_full = directory / foldername
         if (
-            os.path.isdir(foldername_full)
-            and "simmate-task-" in foldername
-            and time.time() - os.path.getmtime(foldername_full) > time_cutoff
+            foldername_full.is_dir()
+            and "simmate-task-" in foldername.name
+            and time.time() - foldername_full.lstat().st_mtime > time_cutoff
         ):
             foldernames.append(foldername_full)
 
@@ -251,7 +255,7 @@ def archive_old_runs(
     [make_archive(f) for f in foldernames]
 
 
-def empty_directory(directory: str, files_to_keep: List[str] = []):
+def empty_directory(directory: Path, files_to_keep: List[Path] = []):
     """
     Deletes all files and folders within a directory, except for those provided
     to the files_to_keep parameter.
@@ -265,12 +269,13 @@ def empty_directory(directory: str, files_to_keep: List[str] = []):
         not be deleted. The default is [].
     """
     # grab all of the files and folders inside the listed directory
-    for filename in os.listdir(directory):
-        full_path = os.path.join(directory, filename)
+    print(directory)
+    for filename in directory.iterdir():
+        full_path = filename.absolute()
         if filename not in files_to_keep:
             # check if we have a folder or a file.
             # Folders we delete with shutil and files with the os module
-            if os.path.isdir(full_path):
+            if full_path.is_dir():
                 shutil.rmtree(full_path)  # ignore_errors=False
             else:
-                os.remove(full_path)
+                full_path.unlink()

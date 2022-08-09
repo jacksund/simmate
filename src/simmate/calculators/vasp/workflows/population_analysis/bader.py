@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 from simmate.toolkit import Structure
 from simmate.workflow_engine import Workflow
 from simmate.calculators.vasp.workflows.static_energy.matproj import (
@@ -23,7 +25,7 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
         structure: Structure,
         command: str = None,
         source: dict = None,
-        directory: str = None,
+        directory: Path = None,
     ):
 
         prebader_result = PopulationAnalysis__Vasp__PrebaderMatproj.run(

@@ -199,7 +199,7 @@ class Incar(dict):
             filename (str): filename to write to.
         """
         # we just take the string format and put it in a file
-        with open(filename, "w") as file:
+        with filename.open("w") as file:
             file.write(self.to_evaluated_str(structure=structure))
 
     @staticmethod
@@ -212,7 +212,7 @@ class Incar(dict):
             Incar object
         """
         # open the file, grab the lines, and then close it
-        with open(filename) as file:
+        with filename.open() as file:
             lines = file.readlines()
 
         # store parameters in this dictionary

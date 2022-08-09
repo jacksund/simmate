@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 import numpy
 
@@ -135,25 +135,23 @@ class DeepmdDataset:
                 composition = Composition(composition_str)
 
                 # Let's establish where this folder will be and also store it
-                composition_directory = os.path.join(
-                    directory, composition_str + "_" + folder_suffix
-                )
+                composition_directory = directory / f"{composition_str}_{folder_suffix}"
                 folder_list.append(composition_directory)
                 # this creates the directory or grabs the full path
                 composition_directory = get_directory(composition_directory)
 
                 # first let's write the type_map file, which is just a list of elements
-                mapping_filename = os.path.join(composition_directory, "type_map.raw")
-                with open(mapping_filename, "w") as file:
+                mapping_filename = composition_directory / "type_map.raw"
+                with mapping_filename.open("w") as file:
                     for element in composition:
                         file.write(str(element) + "\n")
 
                 # Now we can write the type file while also establish the mapping.
                 # Note the mapping is just the index (0, 1, 2, ...) of each element.
-                type_filename = os.path.join(
-                    directory, composition_str + "_" + folder_suffix, "type.raw"
+                type_filename = (
+                    directory / f"{composition_str}_{folder_suffix}" / "type.raw"
                 )
-                with open(type_filename, "w") as file:
+                with type_filename.open("w") as file:
                     for mapping_value, element in enumerate(composition):
                         for i in range(int(composition[element])):
                             file.write(str(mapping_value) + "\n")
@@ -203,7 +201,7 @@ class DeepmdDataset:
 
                 # for now we assume the dataset is written to set.000, so we
                 # make that folder first.
-                set_directory = os.path.join(composition_directory, "set.000")
+                set_directory = composition_directory / "set.000"
                 set_directory = get_directory(set_directory)
                 # now write our numpy files to the folder specified
                 for filename, filedata in [
@@ -212,8 +210,8 @@ class DeepmdDataset:
                     ("energy.npy", energies),
                     ("force.npy", forces),
                 ]:
-                    filename_full = os.path.join(set_directory, filename)
-                    with open(filename_full, "wb") as file:
+                    filename_full = set_directory / filename
+                    with filename_full.open("wb") as file:
                         numpy.lib.format.write_array(fp=file, array=filedata)
 
         # all of the folders have been created and we return a list of where

@@ -63,7 +63,7 @@ other connects all ionic steps to a specific calculation and result.
 
 """
 
-import os
+from pathlib import Path
 
 from simmate.database.base_data_types import (
     table_column,
@@ -174,10 +174,10 @@ class Relaxation(Structure, Thermodynamics, Calculation):
     )
 
     @classmethod
-    def from_directory(cls, directory: str):
+    def from_directory(cls, directory: Path):
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
-        vasprun_filename = os.path.join(directory, "vasprun.xml")
+        vasprun_filename = directory / "vasprun.xml"
         vasprun = Vasprun(vasprun_filename)
         return cls.from_vasp_run(vasprun)
 
@@ -209,7 +209,7 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         self,
         vasprun: Vasprun,
         corrections: List,
-        directory: str,
+        directory: Path,
     ):
         """
         Given a Vasprun object from a finished relaxation, this will update the

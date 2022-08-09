@@ -14,8 +14,8 @@ This file helps share fixtures accross files as described
 """
 
 
-import os
 import shutil
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -45,14 +45,8 @@ def get_structure_files():
     Lists the full filename paths all of the files in the following directory:
        - toolkit/base_data_types/test/test_structures
     """
-    # We want the full path of these filenames, so we that's why there are
-    # extra os joins here.
-    structure_dir = os.path.join(
-        os.path.dirname(base_data_types.__file__),
-        "test",
-        "test_structures",
-    )
-    cif_filenames = [os.path.join(structure_dir, f) for f in os.listdir(structure_dir)]
+    structure_dir = Path(base_data_types.__file__).parent / "test" / "test_structures"
+    cif_filenames = [structure_dir / f for f in structure_dir.iterdir()]
     return cif_filenames
 
 
@@ -153,8 +147,7 @@ def sample_structures():
     # Now load all of the structures. This is a dictionary that where you
     # can access structures with keys like "SiO2_mp-7029_primitive"
     structures = {
-        filename.split(os.path.sep)[-1].strip(".cif"): Structure.from_file(filename)
-        for filename in STRUCTURE_FILES
+        filename.stem: Structure.from_file(filename) for filename in STRUCTURE_FILES
     }
 
     return structures
@@ -189,11 +182,7 @@ def django_db_setup(
             structure_db.save()
 
 
-def copy_test_files(
-    tmpdir,
-    test_directory: str,
-    test_folder: str,
-):
+def copy_test_files(tmp_path, test_directory, test_folder):
     """
     This is a test utility that takes a given directory and copies it's content
     over to a temporary directory. You'll often use this when you want to modify
@@ -208,33 +197,33 @@ def copy_test_files(
     from somewhere import ExampleHandler
     from simmate.conftest import copy_test_files
 
-    def test_example(tmpdir):
+    def test_example(tmp_path):
 
         # Make our temporary directory with copied files
         copy_test_files(
-            tmpdir,
+            tmp_path,
             test_directory=__file__,
             test_folder="test_example",  # or "test_example.zip"
         )
 
         # then you can do things like...
         error_handler = ExampleHandler()
-        error_handler.check(tmpdir)
+        error_handler.check(tmp_path)
     ```
     """
+    # convert to Path objects
+    test_directory = Path(test_directory)
+    test_folder = Path(test_folder)
 
     # grab the path to the directory with all the test files
-    source_directory = os.path.join(
-        os.path.dirname(os.path.abspath(test_directory)),
-        test_folder,
-    )
+    source_directory = test_directory.absolute().parent / test_folder
 
     # if the test files are stored in a zip file, uncompress the files to
     # the temporary test directory
-    if source_directory.endswith(".zip"):
+    if source_directory.suffix == ".zip":
         shutil.unpack_archive(
             source_directory,
-            extract_dir=tmpdir,
+            extract_dir=tmp_path,
         )
 
     # Otherwise, recursively copy all files in the directory over to
@@ -242,7 +231,7 @@ def copy_test_files(
     else:
         shutil.copytree(
             src=source_directory,
-            dst=tmpdir,
+            dst=tmp_path,
             dirs_exist_ok=True,
         )
 
@@ -255,11 +244,13 @@ def make_dummy_files(*filenames: str):
     """
 
     for filename in filenames:
+        filename = Path(filename)
+
         # make sure the parent dir of the filename exists
-        get_directory(os.path.dirname(filename))
+        get_directory(filename.parent)
 
         # now make the file
-        with open(filename, "w") as file:
+        with filename.open("w") as file:
             file.write("This is a dummy file for testing.")
 
 

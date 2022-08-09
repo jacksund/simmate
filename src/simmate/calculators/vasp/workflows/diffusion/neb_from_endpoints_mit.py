@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from pathlib import Path
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import Workflow
@@ -56,7 +57,7 @@ class Diffusion__Vasp__NebFromEndpointsMit(Workflow):
         cls,
         supercell_start: Structure,
         supercell_end: Structure,
-        directory: str = None,
+        directory: Path = None,
         source: dict = None,
         command: str = None,
         nimages: int = 5,

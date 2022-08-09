@@ -42,15 +42,15 @@ DummyFlow = DummyProject__DummyCaclulator__DummyPreset
 
 @pytest.mark.prefect_db
 @pytest.mark.django_db
-def test_workflow(tmpdir):
+def test_workflow(tmp_path):
     # Run the workflow just like you would for the base Prefect class
     flow = DummyFlow._to_prefect_flow()
-    state = flow(return_state=True, directory=tmpdir)
+    state = flow(return_state=True, directory=tmp_path)
     assert state.is_completed()
     assert state.result() == 3
 
     # Same exact thing but using higher-level method
-    state = DummyFlow.run(directory=tmpdir)
+    state = DummyFlow.run(directory=tmp_path)
     assert state.is_completed()
     assert state.result() == 3
 

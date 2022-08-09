@@ -39,7 +39,7 @@ class Poscar:
             Structure object.
         """
         # open the file, grab the lines, and then close it
-        with open(filename) as file:
+        with filename.open() as file:
             lines = file.readlines()
 
         # Rather than iterate with "for line in lines", POSCAR has a common
@@ -327,5 +327,5 @@ class Poscar:
 
         # Now write the file
         # If I want a separate to_string method, I should move only this code.
-        with open(filename, "w") as file:
+        with filename.open("w") as file:
             file.write(lines)

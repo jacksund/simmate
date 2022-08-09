@@ -6,12 +6,12 @@ functions for grabbing all available workflows as well as dynamically loading
 a workflow using its name.
 """
 
-import os
 import yaml
 import shutil
 import pkgutil
-from typing import List
+from typing import List, Union
 from importlib import import_module
+from pathlib import Path
 
 from simmate import workflows
 from simmate.utilities import get_directory, make_archive
@@ -191,9 +191,7 @@ def get_workflow(
     return workflow
 
 
-def load_results_from_directories(
-    base_directory: str = ".",
-):
+def load_results_from_directories(base_directory: Union[str, Path] = "."):
     """
     Goes through a given directory and finds all "simmate-task-" folders and zip
     archives present. The simmate_metadata.yaml file is used in each of these
@@ -215,9 +213,7 @@ def load_results_from_directories(
     #   2. start with "simmate-task-"
     #   3. haven't been modified for at least time_cutoff
     foldernames = [
-        os.path.join(directory, f)
-        for f in os.listdir(directory)
-        if "simmate-task-" in os.path.basename(f)
+        directory / f for f in directory.iterdir() if "simmate-task-" in f.name
     ]
 
     # Now go through this list and archive the folders that met the criteria
@@ -234,7 +230,7 @@ def load_results_from_directories(
         try:
 
             # If we have a zip file, we need to unpack it before we can read results
-            if not os.path.isdir(foldername):
+            if not foldername.is_dir():
                 shutil.unpack_archive(
                     filename=foldername,
                     extract_dir=directory,
@@ -243,8 +239,8 @@ def load_results_from_directories(
                 foldername = foldername.removesuffix(".zip")
 
             # Grab the metadata file which tells us key information
-            filename = os.path.join(foldername, "simmate_metadata.yaml")
-            with open(filename) as file:
+            filename = foldername / "simmate_metadata.yaml"
+            with filename.open() as file:
                 metadata = yaml.full_load(file)
 
             # see which workflow was used -- which also tells us the database table

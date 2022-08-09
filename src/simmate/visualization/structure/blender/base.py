@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
 import json
 import itertools
 import subprocess
+from pathlib import Path
 
 import numpy
 
@@ -26,13 +26,13 @@ def make_blender_structure(structure, filename="simmate_structure.blend"):
     lattice = json.dumps(structure.lattice.matrix.tolist())
 
     # The location of the make_structure.py
-    executable_directory = os.path.dirname(__file__)
-    path_to_script = os.path.join(executable_directory, "scripts", "make_structure.py")
+    executable_directory = Path(__file__).absolute().parent
+    path_to_script = executable_directory / "scripts" / "make_structure.py"
 
     # Now build all of the our serialized structure data and settings together
     # into the blender command that we will call via the command line
     command = (
-        f"{BLENDER_COMMAND} --background --factory-startup --python {path_to_script} "
+        f"{BLENDER_COMMAND} --background --factory-startup --python {str(path_to_script)} "
         f'-- --sites="{sites}" --lattice="{lattice}" --save="{filename}"'
     )
 

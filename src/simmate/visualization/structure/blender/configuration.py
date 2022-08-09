@@ -7,7 +7,6 @@
 # This is different for each operating system, and each is outlined here:
 #   https://docs.blender.org/manual/en/latest/advanced/command_line/launch/index.html
 
-import os
 import platform
 import subprocess
 from pathlib import Path
@@ -27,9 +26,9 @@ def get_blender_command():
     # First we look in the simmate configuration directory and check if it
     # has been set there.
     #   [home_directory] ~/simmate/blender.yaml
-    blender_filename = os.path.join(Path.home(), "simmate", "blender.yaml")
-    if os.path.exists(blender_filename):
-        with open(blender_filename) as file:
+    blender_filename = Path.home() / "simmate" / "blender.yaml"
+    if blender_filename.exists():
+        with blender_filename.open() as file:
             blender_command = yaml.full_load(file)["COMMAND"]
 
         # BUG: for windows, we need to add quotes around the command because
@@ -77,23 +76,21 @@ def find_blender_installation():
 
         # On Windows, Blender is typically installed in the following directory:
         #   C:\Program Files\Blender Foundation\Blender 2.93
-        expected_folder = "C:\\Program Files\\Blender Foundation\\"
+        expected_folder = Path("C:\\Program Files\\Blender Foundation\\")
         # in the future, I could have a list of directories to check here and
         # then iterate through them below.
 
         # We check the folder, and if it exists we grab the highest Blender version listed.
-        if os.path.exists(expected_folder):
+        if expected_folder.exists():
 
             # grab all the folders and find the highest blender version, which
             # be the last one when sorted alphabetically
-            blender_version = sorted(os.listdir(expected_folder))[-1]
+            blender_version = sorted(expected_folder.iterdir())[-1]
 
             # To call blender in python, we write the full path to the blender
             # executable. For example, the command looks like this:
             #   "C:\\Program Files\\Blender Foundation\\Blender 2.93\\blender.exe" --help
-            full_path_to_blender = os.path.join(
-                expected_folder, blender_version, "blender.exe"
-            )
+            full_path_to_blender = expected_folder / blender_version / "blender.exe"
             # Because there are spaces in the file path, it is important we
             # wrap this command in quotes. Note we also replace the backslashes
             # in the file path with forward slashes.
@@ -121,8 +118,8 @@ def find_blender_installation():
 
     # We store the command inside the config directory which is located at...
     #   [home_directory] ~/simmate/blender.yaml
-    blender_filename = os.path.join(Path.home(), "simmate", "blender.yaml")
-    with open(blender_filename, "w") as file:
+    blender_filename = Path.home() / "simmate" / "blender.yaml"
+    with blender_filename.open("w") as file:
         file.write(f"COMMAND: {blender_command}")
 
     return blender_command

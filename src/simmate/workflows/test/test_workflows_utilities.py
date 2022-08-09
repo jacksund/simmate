@@ -125,12 +125,12 @@ def test_get_unique_paramters():
 
 
 @pytest.mark.django_db
-def test_load_results_from_directories(tmpdir):
+def test_load_results_from_directories(tmp_path):
 
     copy_test_files(
-        tmpdir,
+        tmp_path,
         test_directory=__file__,
         test_folder="",  # copy over the entire folder
     )
 
-    load_results_from_directories(base_directory=tmpdir)
+    load_results_from_directories(base_directory=tmp_path)

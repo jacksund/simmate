@@ -48,7 +48,7 @@ class LrfCommutatorHandler(ErrorHandler):
         vi = VaspInput.from_directory(".")
 
         if "lrf_comm" in self.errors:
-            if Outcar(zpath(os.path.join(os.getcwd(), "OUTCAR"))).is_stopped is False:
+            if Outcar(Path.cwd() / "OUTCAR").is_stopped is False:
                 if not vi["INCAR"].get("LPEAD"):
                     actions.append(
                         {"dict": "INCAR", "action": {"_set": {"LPEAD": True}}}

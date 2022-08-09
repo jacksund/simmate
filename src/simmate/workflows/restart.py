@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
 import yaml
+from pathlib import Path
 
 from simmate.workflow_engine import Workflow
 from simmate.utilities import copy_directory
@@ -25,17 +25,14 @@ class Restart__Simmate__Automatic(Workflow):
     """
 
     @classmethod
-    def run_config(cls, directory_old: str, directory_new: str = None):
+    def run_config(cls, directory_old: Path, directory_new: Path = None):
 
         # First copy over the directory
         directory_new_cleaned = copy_directory(directory_old, directory_new)
 
         # grab the metadata file in the new dir
-        metadata_filename = os.path.join(
-            directory_new_cleaned,
-            "simmate_metadata.yaml",
-        )
-        with open(metadata_filename) as file:
+        metadata_filename = directory_new_cleaned / "simmate_metadata.yaml"
+        with metadata_filename.open() as file:
             metadata = yaml.full_load(file)
 
         # Update the parameters from the metadata below

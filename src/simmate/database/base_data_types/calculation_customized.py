@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 from pymatgen.io.vasp.outputs import Vasprun
 from simmate.database.base_data_types import table_column, Calculation
 
@@ -42,7 +44,7 @@ class CustomizedCalculation(Calculation):
         self,
         vasprun: Vasprun,
         corrections: list,
-        directory: str,
+        directory: Path,
     ):
         # Takes a pymatgen VaspRun object, which is what's typically returned
         # from a simmate VaspTask.run() call.

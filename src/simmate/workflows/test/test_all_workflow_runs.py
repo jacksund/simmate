@@ -11,12 +11,12 @@ from simmate.workflows.utilities import (
 @pytest.mark.vasp
 @pytest.mark.prefect_db
 @pytest.mark.django_db
-def test_all_workflow_runs(tmpdir, sample_structures):
+def test_all_workflow_runs(tmp_path, sample_structures):
 
     # For testing, look at the NaCl rocksalt primitive structure
     structure = sample_structures["NaCl_mp-22862_primitive"]
 
-    with tmpdir.as_cwd():
+    with tmp_path.as_cwd():
 
         successful_flows = []
 
@@ -92,7 +92,7 @@ def test_all_workflow_runs(tmpdir, sample_structures):
             structure=structure,
             migrating_specie="I",
             command="mpirun -n 12 vasp_std > vasp.out",
-            directory=str(tmpdir),
+            directory=str(tmp_path),
             nimages=1,
             min_atoms=10,
             max_atoms=25,

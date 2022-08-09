@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from pymatgen.io.vasp.inputs import Kpoints
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 from pymatgen.electronic_structure.plotter import BSPlotter
@@ -47,13 +45,13 @@ class VaspBandStructure(StaticEnergy__Vasp__Matproj):
         structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         # write the poscar file
-        Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
+        Poscar.to_file(structure_cleaned, directory / "POSCAR")
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file
         incar = Incar(**cls.incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
-            filename=os.path.join(directory, "INCAR"),
+            filename=directory / "INCAR",
             structure=structure_cleaned,
         )
 
@@ -76,14 +74,14 @@ class VaspBandStructure(StaticEnergy__Vasp__Matproj):
             labels=k_points_labels,
             kpts_weights=[1] * len(frac_k_points),
         )
-        kpoints.write_file(os.path.join(directory, "KPOINTS"))
+        kpoints.write_file(directory / "KPOINTS")
         ##############
 
         # write the POTCAR file
         Potcar.to_file_from_type(
             structure_cleaned.composition.elements,
             cls.functional,
-            os.path.join(directory, "POTCAR"),
+            directory / "POTCAR",
             cls.potcar_mappings,
         )
 
@@ -99,5 +97,5 @@ class VaspBandStructure(StaticEnergy__Vasp__Matproj):
 
         bs_plotter = BSPlotter(vasprun.get_band_structure(line_mode=True))
         plot = bs_plotter.get_plot()
-        plot_filename = os.path.join(directory, "band_structure.png")
+        plot_filename = directory / "band_structure.png"
         plot.savefig(plot_filename)

@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 import pandas
 
 
 def ACF(filename="ACF.dat"):
 
+    # convert to path obj
+    filename = Path(filename)
+
     # open the file, grab the lines, and then close it
-    with open(filename) as file:
+    with filename.open() as file:
         lines = file.readlines()
 
     # establish the headers. Note that I ignore the '#' column as this is

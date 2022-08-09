@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.workflow_engine import Workflow
 
@@ -33,14 +33,14 @@ class ElectronicStructureWorkflow(Workflow):
         structure,
         command: str = None,
         source: str = None,
-        directory: str = None,
+        directory: Path = None,
         copy_previous_directory: str = False,
     ):
 
         static_result = cls.static_energy_workflow.run(
             structure=structure,
             command=command,
-            directory=directory + os.path.sep + cls.static_energy_workflow.name_full,
+            directory=directory / cls.static_energy_workflow.name_full,
             source=source,
             # For band-structures, unit cells should be in the standardized format
             pre_standardize_structure=True,
@@ -52,9 +52,7 @@ class ElectronicStructureWorkflow(Workflow):
                 "directory": static_result["directory"],
             },
             command=command,
-            directory=directory
-            + os.path.sep
-            + cls.density_of_states_workflow.name_full,
+            directory=directory / cls.density_of_states_workflow.name_full,
             copy_previous_directory=True,
         )
 
@@ -64,7 +62,7 @@ class ElectronicStructureWorkflow(Workflow):
                 "directory": static_result["directory"],
             },
             command=command,
-            directory=directory + os.path.sep + cls.band_structure_workflow.name_full,
+            directory=directory / cls.band_structure_workflow.name_full,
             copy_previous_directory=True,
         )
 

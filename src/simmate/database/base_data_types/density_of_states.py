@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.electronic_structure.dos import CompleteDos
@@ -136,7 +136,9 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
 
     base_info = Structure.base_info + DensityofStates.base_info + Calculation.base_info
 
-    def update_from_vasp_run(self, vasprun: Vasprun, corrections: list, directory: str):
+    def update_from_vasp_run(
+        self, vasprun: Vasprun, corrections: list, directory: Path
+    ):
         """
         Given a pymatgen VaspRun object, which is what's typically returned
         from a simmate VaspTask.run() call, this will update the database entry
@@ -166,7 +168,7 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
         self.save()
 
     @classmethod
-    def from_directory(cls, directory: str):
+    def from_directory(cls, directory: Path):
         """
         Creates a new database entry from a directory that holds band-structure
         results. For now, this assumes the directory holds vasp output files.
@@ -174,7 +176,7 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
 
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
-        vasprun_filename = os.path.join(directory, "vasprun.xml")
+        vasprun_filename = directory / "vasprun.xml"
         vasprun = Vasprun(vasprun_filename)
         density_of_states_db = cls.from_toolkit(
             structure=vasprun.structures[0],

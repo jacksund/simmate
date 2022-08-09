@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 import json
 
 from simmate.workflow_engine import ErrorHandler
@@ -18,16 +18,16 @@ class SubspaceMatrix(ErrorHandler):
     filename_to_check = "vasp.out"
     possible_error_messages = ["WARNING: Sub-Space-Matrix is not hermitian in DAV"]
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # load the error-count file if it exists
-        error_count_filename = os.path.join(directory, "simmate_error_counts.json")
-        if os.path.exists(error_count_filename):
-            with open(error_count_filename) as error_count_file:
+        error_count_filename = directory / "simmate_error_counts.json"
+        if error_count_filename.exists():
+            with error_count_filename.open() as error_count_file:
                 error_counts = json.load(error_count_file)
         # otherwise we are starting with an empty dictionary
         else:
@@ -53,7 +53,7 @@ class SubspaceMatrix(ErrorHandler):
         incar.to_file(incar_filename)
 
         # rewrite the new error count file
-        with open(error_count_filename, "w") as file:
+        with error_count_filename.open("w") as file:
             json.dump(error_counts, file)
 
         # now return the correction made for logging

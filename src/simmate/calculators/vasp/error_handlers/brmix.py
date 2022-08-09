@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 import json
 
 from pymatgen.io.vasp.outputs import Outcar
@@ -20,10 +20,10 @@ class Brmix(ErrorHandler):
     filename_to_check = "vasp.out"
     possible_error_messages = ["BRMIX: very serious problems"]
 
-    def check(self, directory: str) -> bool:
+    def check(self, directory: Path) -> bool:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # if NELECT is in the INCAR, that means we are running
@@ -36,16 +36,16 @@ class Brmix(ErrorHandler):
         # otherwise check the file as usual for the error
         return super().check(directory)
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # load the error-count file if it exists
-        error_count_filename = os.path.join(directory, "simmate_error_counts.json")
-        if os.path.exists(error_count_filename):
-            with open(error_count_filename) as error_count_file:
+        error_count_filename = directory / "simmate_error_counts.json"
+        if error_count_filename.exists():
+            with error_count_filename.open() as error_count_file:
                 error_counts = json.load(error_count_file)
         # otherwise we are starting with an empty dictionary
         else:
@@ -62,7 +62,7 @@ class Brmix(ErrorHandler):
 
         # check if there is a valid OUTCAR
         if error_counts["brmix"] == 0:
-            outcar_filename = os.path.join(directory, "OUTCAR")
+            outcar_filename = directory / "OUTCAR"
             try:
                 assert Outcar(outcar_filename).is_stopped is False
             except Exception:
@@ -126,8 +126,8 @@ class Brmix(ErrorHandler):
             # and WAVECAR to ensure the next run is a clean start.
             current_icharg = incar.get("ICHARG", 0)
             if current_icharg < 10:
-                os.remove(os.path.join(directory, "CHGCAR"))
-                os.remove(os.path.join(directory, "WAVECAR"))
+                (directory / "CHGCAR").unlink()
+                (directory / "WAVECAR").unlink()
                 correction += " and deleted CHGCAR and WAVECAR"
             # BUG: why doesn't custodian add an attempt here?
             # error_counts["brmix"] += 1
@@ -136,7 +136,7 @@ class Brmix(ErrorHandler):
         incar.to_file(incar_filename)
 
         # rewrite the new error count file
-        with open(error_count_filename, "w") as file:
+        with error_count_filename.open("w") as file:
             json.dump(error_counts, file)
 
         # now return the correction made for logging

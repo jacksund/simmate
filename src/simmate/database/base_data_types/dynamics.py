@@ -4,6 +4,7 @@
 This module is experimental and subject to change.
 """
 
+from pathlib import Path
 
 from simmate.database.base_data_types import (
     table_column,
@@ -56,7 +57,7 @@ class DynamicsRun(Structure, Calculation):
         self,
         vasprun: Vasprun,
         corrections: List,
-        directory: str,
+        directory: Path,
     ):
         """
         Given a Vasprun object from a finished dynamics run, this will update the

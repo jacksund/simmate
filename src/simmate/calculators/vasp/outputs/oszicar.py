@@ -5,6 +5,8 @@
 # storing electronic and ionic steps across different calculators. I think it
 # would be useful to have a ElectronicStep and IonicStep classes.
 
+from pathlib import Path
+
 import numpy
 
 
@@ -23,13 +25,16 @@ class Oszicar:
 
     def __init__(self, filename="OSZICAR"):
 
+        # convert to path obj
+        filename = Path(filename)
+
         # Make an empty list to store all of the ionic steps. While relaxations
         # have many ionic steps, note that a static energy calculation will only
         # ever have one step. Either way, we still store the steps in a list.
         self.ionic_steps = []
 
         # open the file, read it's contents, and close immediately
-        with open(filename) as file:
+        with filename.open() as file:
             lines = file.readlines()
         # Empty lines cause trouble so we remove those before parsing any data.
         lines = [line for line in lines if line.strip()]

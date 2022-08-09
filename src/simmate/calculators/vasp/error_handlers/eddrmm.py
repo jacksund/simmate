@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
@@ -22,10 +22,10 @@ class Eddrmm(ErrorHandler):
     filename_to_check = "vasp.out"
     possible_error_messages = ["WARNING in EDDRMM: call to ZHEGV failed"]
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # RMM algorithm is not stable for this calculation
@@ -50,20 +50,22 @@ class Eddrmm(ErrorHandler):
             if "IMAGES" in incar.keys():
                 # here, folders will be 00, 01, 02, etc. with CHGCARs/WAVECARs
                 # in each. We iterate through and delete all of them.
-                subdirectories = [d for d in os.listdir(directory) if d.isnumeric()]
+                subdirectories = [
+                    d.absolute() for d in directory.iterdir() if d.name.isnumeric()
+                ]
                 for subdir in subdirectories:
-                    chgcar_filename = os.path.join(directory, subdir, "CHGCAR")
-                    wavecar_filename = os.path.join(directory, subdir, "WAVECAR")
-                    if os.path.exists(chgcar_filename):
-                        os.remove(chgcar_filename)
-                    if os.path.exists(wavecar_filename):
-                        os.remove(wavecar_filename)
+                    chgcar_filename = subdir / "CHGCAR"
+                    wavecar_filename = subdir / "WAVECAR"
+                    if chgcar_filename.exists():
+                        chgcar_filename.unlink()
+                    if wavecar_filename.exists():
+                        wavecar_filename.unlink()
                 correction += " and deleted CHGCARs + WAVECARs for all images"
 
             # Otherwise, we have a normal VASP calculation
             else:
-                os.remove(os.path.join(directory, "CHGCAR"))
-                os.remove(os.path.join(directory, "WAVECAR"))
+                (directory / "CHGCAR").unlink()
+                (directory / "WAVECAR").unlink()
                 correction += " and deleted CHGCAR + WAVECAR"
         # rewrite the INCAR with new settings
         incar.to_file(incar_filename)

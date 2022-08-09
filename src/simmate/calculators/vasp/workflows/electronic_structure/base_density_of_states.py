@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from pymatgen.electronic_structure.plotter import DosPlotter
 
 from simmate.calculators.vasp.workflows.static_energy.matproj import (
@@ -47,5 +45,5 @@ class VaspDensityOfStates(StaticEnergy__Vasp__Matproj):
         # NOTE: get_dos_dict may be useful in the future
 
         plot = plotter.get_plot()
-        plot_filename = os.path.join(directory, "density_of_states.png")
+        plot_filename = directory / "density_of_states.png"
         plot.savefig(plot_filename)

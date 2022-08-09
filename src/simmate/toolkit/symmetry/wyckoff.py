@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
-##############################################################################
-
-import os
+from pathlib import Path
 import pandas as pd
 import itertools
-
-##############################################################################
 
 
 def loadWyckoffData():
@@ -20,10 +16,10 @@ def loadWyckoffData():
     """
 
     # Grab the directory of this current python file
-    current_directory = os.path.dirname(__file__)
+    current_directory = Path(__file__).parent
 
     # Set the full path to the data csv file
-    datafile = current_directory + "/wyckoffdata.csv"
+    datafile = current_directory / "wyckoffdata.csv"
 
     # Load the csv file into a pandas dataframe
     data = pd.read_csv(datafile)
@@ -49,9 +45,6 @@ def loadWyckoffData():
 
     # return the data
     return data
-
-
-##############################################################################
 
 
 def findValidWyckoffCombos(stoich, spacegroup, wy_data=loadWyckoffData()):
@@ -197,9 +190,6 @@ def findValidWyckoffCombos(stoich, spacegroup, wy_data=loadWyckoffData()):
     return {"WyckoffGroups": wy_groups, "ValidCombinations": valid_combos}
 
 
-##############################################################################
-
-
 def findValidWyckoffCombosForListofSpacegroups(
     stoich, sg_include=range(1, 231), sg_exclude=[]
 ):
@@ -230,9 +220,6 @@ def findValidWyckoffCombosForListofSpacegroups(
     return combos_by_sg
 
 
-##############################################################################
-
-
 def loadAsymmetricUnitData():
 
     """
@@ -243,10 +230,10 @@ def loadAsymmetricUnitData():
     """
 
     # grab the directory of this current python file
-    current_directory = os.path.dirname(__file__)
+    current_directory = Path(__file__).parent
 
     # set the full path to the data csv file
-    datafile = current_directory + "/asymdata.csv"
+    datafile = current_directory / "asymdata.csv"
 
     # load the csv file into a pandas dataframe
     data = pd.read_csv(datafile)
@@ -258,9 +245,6 @@ def loadAsymmetricUnitData():
     return data
 
 
-##############################################################################
-
-
 def loadSpecifiedUnitData():
 
     """
@@ -268,11 +252,8 @@ def loadSpecifiedUnitData():
     COLUMN GRAB I NEED TO UPDATE THESE CSV FILES OR COMBINE THESE FUNCTIONS.
     """
 
-    current_directory = os.path.dirname(__file__)
-    datafile = current_directory + "/asymdata.csv"
+    current_directory = Path(__file__).parent
+    datafile = current_directory / "asymdata.csv"
     data = pd.read_csv(datafile)
     data = data["cellspec"].values
     return data
-
-
-##############################################################################

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
@@ -27,41 +27,12 @@ class Aliasing(ErrorHandler):
     # All instances of this ErrorHandler will work exactly the same, so there
     # are no keywords available -- and also there's no need for a __init__()
 
-    def check(self, directory):
-        """
-        Check for errors in the specified directory. Note, we assume that we are
-        checking the vasp.out file. If that file is not present, we say that there
-        is no error because another handler will address this.
-        """
-
-        # We want to return a list of errors that were found, so we keep a
-        # master list.
-        errors_found = []
-
-        # establish the full path to the output file
-        filename = os.path.join(directory, "vasp.out")
-
-        # check to see that the file is there first
-        if os.path.exists(filename):
-
-            # read the file content and then close it
-            with open(filename) as file:
-                file_text = file.read()
-
-            # Check if each error is present
-            for error, message in self.possible_error_messages.items():
-                # if the error is NOT present, find() returns a -1
-                if file_text.find(message) != -1:
-                    errors_found.append(error)
-
-        # If the file doesn't exist, we are not seeing any error yetm which is
-        # also an empty list. Otherwise return the list of errors we found
-        return errors_found
-
-    def correct(self, directory):
+    def correct(self, directory: Path) -> str:
         """
         Perform corrections based on the INCAR.
         """
+
+        raise NotImplementedError("This handler has not been ported from custodian yet")
 
         # Note "error" here is a list of the errors found. For example, error
         # could be ["alaising_error", "insufficient_fft_grid"]. If there
@@ -71,7 +42,7 @@ class Aliasing(ErrorHandler):
         corrections = []
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         if "aliasing" in error:
@@ -88,8 +59,8 @@ class Aliasing(ErrorHandler):
             # so we open the OUTCAR and find these lines and the suggested fix.
 
             # read the file content and then close it
-            outcar_filename = os.path.join(directory, "OUTCAR")
-            with open(outcar_filename) as file:
+            outcar_filename = directory / "OUTCAR"
+            with outcar_filename.open() as file:
                 outcar_lines = file.readlines()
 
             # go through each line looking for the suggestions
@@ -130,8 +101,8 @@ class Aliasing(ErrorHandler):
             # If the ICHARG is less than 10, then we want to delete the CHGCAR
             # and WAVECAR to ensure the next run is a clean start.
             if current_icharg < 10:
-                os.remove(os.path.join(directory, "CHGCAR"))
-                os.remove(os.path.join(directory, "WAVECAR"))
+                (directory / "CHGCAR").unlink()
+                (directory / "WAVECAR").unlink()
 
             # return the description of what we did
             corrections.append("deleted CHGCAR and WAVECAR")

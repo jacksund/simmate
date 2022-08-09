@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from simmate.toolkit.diffusion import MigrationHop
 from simmate.workflow_engine import Workflow
@@ -48,7 +48,7 @@ class Diffusion__Vasp__NebSinglePathMit(Workflow):
     def run_config(
         cls,
         migration_hop: MigrationHop,
-        directory: str = None,
+        directory: Path = None,
         source: dict = None,
         command: str = None,
         # These help link results to a higher-level table.
@@ -77,9 +77,7 @@ class Diffusion__Vasp__NebSinglePathMit(Workflow):
         endpoint_start_state = Relaxation__Vasp__MvlNebEndpoint.run(
             structure=supercell_start,
             command=command,  # subcommands["command_supercell"]
-            directory=directory
-            + os.path.sep
-            + f"{Relaxation__Vasp__MvlNebEndpoint.name_full}.start",
+            directory=directory / f"{Relaxation__Vasp__MvlNebEndpoint.name_full}.start",
             is_restart=is_restart,
         )
 
@@ -87,9 +85,7 @@ class Diffusion__Vasp__NebSinglePathMit(Workflow):
         endpoint_end_state = Relaxation__Vasp__MvlNebEndpoint.run(
             structure=supercell_end,
             command=command,  # subcommands["command_supercell"]
-            directory=directory
-            + os.path.sep
-            + f"{Relaxation__Vasp__MvlNebEndpoint.name_full}.end",
+            directory=directory / f"{Relaxation__Vasp__MvlNebEndpoint.name_full}.end",
             is_restart=is_restart,
         )
 

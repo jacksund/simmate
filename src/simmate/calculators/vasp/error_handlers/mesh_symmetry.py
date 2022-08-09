@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.io.vasp.inputs import Kpoints
@@ -24,16 +24,16 @@ class MeshSymmetry(ErrorHandler):
         "Reciprocal lattice and k-lattice belong to different class of"
     ]
 
-    def check(self, directory: str) -> bool:
+    def check(self, directory: Path) -> bool:
 
         # load the INCAR file to view the current settings
-        incar_filename = os.path.join(directory, "INCAR")
+        incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
 
         # check if there is a KPOINTS file and if so, read it and check the
         # kpoint style being using.
-        kpoints_filename = os.path.join(directory, "KPOINTS")
-        if os.path.exists(kpoints_filename):
+        kpoints_filename = directory / "KPOINTS"
+        if kpoints_filename.exists():
             kpoints = Kpoints.from_file(kpoints_filename)
             kpoints_style = kpoints.style
         else:
@@ -51,7 +51,7 @@ class MeshSymmetry(ErrorHandler):
             return False
 
         # Now check if the calculation converged. If it did, we ignore the error.
-        xml_filename = os.path.join(directory, "vasprun.xml")
+        xml_filename = directory / "vasprun.xml"
         try:
             # load the xml file and only parse the bare minimum
             xmlReader = Vasprun(
@@ -71,7 +71,7 @@ class MeshSymmetry(ErrorHandler):
         # class's default function to do this.
         return super().check(directory)
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         raise NotImplementedError(
             "The fix for MeshSymmetryError hasn't been converted from Custodian "
@@ -80,7 +80,7 @@ class MeshSymmetry(ErrorHandler):
         )
 
         # load the INCAR file to view the current settings
-        kpoints_filename = os.path.join(directory, "KPOINTS")
+        kpoints_filename = directory / "KPOINTS"
         kpoints = Kpoints.from_file(kpoints_filename)
 
         # !!! I'm not sure what Custodian is doing here exactly, so I need to

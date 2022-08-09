@@ -98,7 +98,6 @@ result = state.result()
 3. Because material science frequently involves calling external programs, we've created a powerful `S3Task` class to inherit from. A `S3Task` class can implement it's own `setup`, `execute`, and `workup` methods, and even add functions for error handling. Here's how you would build a custom `S3Task` from scratch:
 
 ``` python
-import os
 
 from simmate.toolkit import Structure
 from simmate.workflow_engine import S3Task
@@ -110,14 +109,14 @@ class ExampleTask(S3Task):
     
     @staticmethod
     def setup(directory, structure, **kwargs):
-        filename = os.path.join(directory, "my_input_structure.cif")
+        filename = directory / "my_input_structure.cif"
         structure.to("cif", filename)
 
     @staticmethod
     def workup(directory):
         # do some workup or analysis on the output files. Here we just return
         # the original structure back as the "results"
-        filename = os.path.join(directory, "my_input_structure.cif")
+        filename = directory / "my_input_structure.cif"
         my_results = Structure.from_file(filename)
         return my_results
 

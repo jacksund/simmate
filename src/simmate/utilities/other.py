@@ -3,6 +3,7 @@
 import os
 import sys
 import requests
+from pathlib import Path
 
 import simmate
 
@@ -50,12 +51,12 @@ def get_doc_from_readme(file: str) -> str:
     it's slower in production (bc of opening/closing files).
     """
 
-    # We assume the file is in the same directory and named "README.rst"
-    file_directory = os.path.dirname(os.path.abspath(file))
-    with open(
-        os.path.join(file_directory, "README.md"),
-        encoding="utf-8",
-    ) as doc_file:
+    # convert to path obj
+    file = Path(file)
+
+    # We assume the file is in the same directory and named "README.md"
+    readme = file.absolute().parent / "README.md"
+    with readme.open(encoding="utf-8") as doc_file:
         doc = doc_file.read()
     return doc
 

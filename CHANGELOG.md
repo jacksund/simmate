@@ -29,6 +29,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Refactors**
 - to simplify the creation of new workflows, `S3Task` is now `S3Workflow` and database tables are dynamically determined using the workflow name
 - workflows of a given type (e.g. relaxation or static-energy) now share a database tables in order to simplify overall database architecture
+- migrate from `os.path` to `pathlib.Path` throughout package
 
 **Fixes**
 - None

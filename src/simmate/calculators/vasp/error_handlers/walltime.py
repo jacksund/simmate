@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from pathlib import Path
 import time
 import datetime
 import subprocess
@@ -69,7 +70,7 @@ class Walltime(ErrorHandler):
         self.buffer_time = buffer_time
         self.electronic_step_stop = electronic_step_stop
 
-    def check(self, directory: str) -> bool:
+    def check(self, directory: Path) -> bool:
         """
         Check for error.
         """
@@ -101,19 +102,19 @@ class Walltime(ErrorHandler):
         # Otherwise we don't have this error.
         return False
 
-    def terminate_job(self, directory: str, **kwargs) -> bool:
+    def terminate_job(self, directory: Path, **kwargs) -> bool:
         """
         When a walltime is about to be hit, we want to tell VASP to end
         naturally by creating a STOPCAR file. We do not want to allow and
         new VASP attempts, so we return a value of False for allow_retry
         """
 
-        stopcar_filename = os.path.join(directory, "STOPCAR")
+        stopcar_filename = directory / "STOPCAR"
         stopcar_content = (
             "LSTOP = .TRUE." if not self.electronic_step_stop else "LABORT = .TRUE."
         )
 
-        with open(stopcar_filename, "w") as stopcar:
+        with stopcar_filename.open("w") as stopcar:
             stopcar.write(stopcar_content)
 
         return False
@@ -122,7 +123,7 @@ class Walltime(ErrorHandler):
         raise Exception("Stopped job due to Walltime limit.")
         # return "Added STOPCAR file to end job"  # ... and resubmitted
 
-    def _get_remaining_time(self, directory: str) -> float:
+    def _get_remaining_time(self, directory: Path) -> float:
         """
         Detects the amount of time remaining for a job by looking for class
         settings (e.g. wall_time), environment variables, or looking at file
@@ -139,13 +140,13 @@ class Walltime(ErrorHandler):
             # was ran outside of a Workflow), then we say that wall_time cannot
             # be determined. (checking files like INCAR won't work bc of other
             # handlers updating them)
-            filename = os.path.join(directory, "simmate_metadata.yaml")
-            if not os.path.exists(filename):
+            filename = directory / "simmate_metadata.yaml"
+            if not filename.exists():
                 print("Unable to detect the time remaining. Ignoring Timeout.")
                 return
                 # !!! What if I looked at the creation time of the current directory?
 
-            time_since_creation = time.time() - os.path.getmtime(filename)
+            time_since_creation = time.time() - filename.lstat().st_mtime
 
             remaining_time = self.wall_time - time_since_creation
 
@@ -204,14 +205,14 @@ class Walltime(ErrorHandler):
         else:
             return None
 
-    def _get_max_step_time(self, directory: str) -> float:
+    def _get_max_step_time(self, directory: Path) -> float:
         """
         Looks at completed ionic/electronic steps to see the maximum time
         for each new step. Whether ion or electronic step time is returned
         depends on the electronic_step_stop setting.
         """
 
-        outcar_filename = os.path.join(directory, "OUTCAR")
+        outcar_filename = directory / "OUTCAR"
         outcar = Outcar(outcar_filename)
 
         # NOTE: this code is copied from the custodian error handler and
@@ -242,7 +243,7 @@ class Walltime(ErrorHandler):
 
         return time_per_step
 
-    def _check_if_finished(self, directory: str):
+    def _check_if_finished(self, directory: Path):
         # We can invert the unconverged check in order to see if the calc is done.
         return not Unconverged().check(directory)
         # BUG: Will this work properly for MD simulations? Should I check the

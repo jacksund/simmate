@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 from pathlib import Path
 import shutil
 
@@ -21,10 +20,8 @@ def get_default_parallel_settings():
         ~/simmate/vasp/INCAR_parallel_settings
     If this file doesn't exist, then we just use an empty dictionary.
     """
-    settings_filename = os.path.join(
-        Path.home(), "simmate", "vasp", "INCAR_parallel_settings"
-    )
-    if os.path.exists(settings_filename):
+    settings_filename = Path.home() / "simmate" / "vasp" / "INCAR_parallel_settings"
+    if settings_filename.exists():
         return Incar.from_file(settings_filename)
     else:
         return {}
@@ -191,19 +188,19 @@ class VaspWorkflow(S3Workflow):
         return structure
 
     @classmethod
-    def setup(cls, directory: str, structure: Structure, **kwargs):
+    def setup(cls, directory: Path, structure: Structure, **kwargs):
 
         # run cleaning and standardizing on structure (based on class attributes)
         structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         # write the poscar file
-        Poscar.to_file(structure_cleaned, os.path.join(directory, "POSCAR"))
+        Poscar.to_file(structure_cleaned, directory / "POSCAR")
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file
         incar = Incar(**cls.incar) + Incar(**cls.incar_parallel_settings)
         incar.to_file(
-            filename=os.path.join(directory, "INCAR"),
+            filename=directory / "INCAR",
             structure=structure_cleaned,
         )
 
@@ -213,19 +210,19 @@ class VaspWorkflow(S3Workflow):
             Kpoints.to_file(
                 structure_cleaned,
                 cls.kpoints,
-                os.path.join(directory, "KPOINTS"),
+                directory / "KPOINTS",
             )
 
         # write the POTCAR file
         Potcar.to_file_from_type(
             structure_cleaned.composition.elements,
             cls.functional,
-            os.path.join(directory, "POTCAR"),
+            directory / "POTCAR",
             cls.potcar_mappings,
         )
 
     @classmethod
-    def setup_restart(cls, directory: str, **kwargs):
+    def setup_restart(cls, directory: Path, **kwargs):
         """
         From a working directory of a past calculation, sets up for the calculation
         to be restarted. For relaxations/dynamics this involved just copying
@@ -233,10 +230,10 @@ class VaspWorkflow(S3Workflow):
         """
 
         # establish filenames
-        poscar_filename = os.path.join(directory, "POSCAR")
-        poscar_orig_filename = os.path.join(directory, "POSCAR_original")
-        contcar_filename = os.path.join(directory, "CONTCAR")
-        stopcar_filename = os.path.join(directory, "STOPCAR")
+        poscar_filename = directory / "POSCAR"
+        poscar_orig_filename = directory / "POSCAR_original"
+        contcar_filename = directory / "CONTCAR"
+        stopcar_filename = directory / "STOPCAR"
 
         # TODO:
         # make an archive of the directory before we start editting files
@@ -244,8 +241,8 @@ class VaspWorkflow(S3Workflow):
         # add these changes to the simmate_corrections.csv
 
         # delete the stopcar if it exists
-        if os.path.exists(stopcar_filename):
-            os.remove(stopcar_filename)
+        if stopcar_filename.exists():
+            stopcar_filename.unlink()
 
         # copy poscar to a new file
         shutil.move(poscar_filename, poscar_orig_filename)
@@ -254,7 +251,7 @@ class VaspWorkflow(S3Workflow):
         shutil.move(contcar_filename, poscar_filename)
 
     @classmethod
-    def workup(cls, directory: str):
+    def workup(cls, directory: Path):
         """
         This is the most basic VASP workup where I simply load the final structure,
         final energy, and (if requested) confirm convergence. I will likely make
@@ -264,7 +261,7 @@ class VaspWorkflow(S3Workflow):
         # load the xml file and all of the vasprun data
         try:
             vasprun = Vasprun(
-                filename=os.path.join(directory, "vasprun.xml"),
+                filename=directory / "vasprun.xml",
                 exception_on_bad_xml=True,
             )
         except:
@@ -274,7 +271,7 @@ class VaspWorkflow(S3Workflow):
                 " salvaging data here though."
             )
             vasprun = Vasprun(
-                filename=os.path.join(directory, "vasprun.xml"),
+                filename=directory / "vasprun.xml",
                 exception_on_bad_xml=False,
             )
             vasprun.final_structure = vasprun.structures[-1]
@@ -294,7 +291,7 @@ class VaspWorkflow(S3Workflow):
         return vasprun
 
     @staticmethod
-    def _write_output_summary(directory: str, vasprun: Vasprun):
+    def _write_output_summary(directory: Path, vasprun: Vasprun):
         """
         This prints a "simmate_summary.yaml" file with key output information.
 
@@ -316,8 +313,8 @@ class VaspWorkflow(S3Workflow):
             "conduction_band_minimum": results.get("vbm", None),
         }
 
-        summary_filename = os.path.join(directory, "simmate_summary.yaml")
-        with open(summary_filename, "w") as file:
+        summary_filename = directory / "simmate_summary.yaml"
+        with summary_filename.open("w") as file:
             content = yaml.dump(summary)
             file.write(content)
 

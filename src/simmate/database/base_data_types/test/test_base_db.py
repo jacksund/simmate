@@ -47,7 +47,7 @@ def test_from_toolkit():
 @pytest.mark.django_db
 def test_archive():
 
-    # BUG: This test does not save archives within a tmpdir -- but instead the
+    # BUG: This test does not save archives within a tmp_path -- but instead the
     # working directory. Therefore, these tests cannot be split up and ran
     # in parallel (with pytest-xdist).
 

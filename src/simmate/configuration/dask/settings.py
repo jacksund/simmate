@@ -12,12 +12,12 @@ def load_cluster_settings() -> dict:
     Note, module must be imported BEFORE we import any dask modules.
     """
 
-    SIMMATE_DIRECTORY = os.path.join(Path.home(), "simmate")
-    CLUSTER_YAML = os.path.join(SIMMATE_DIRECTORY, "dask_cluster.yaml")
-    if os.path.exists(CLUSTER_YAML):
+    SIMMATE_DIRECTORY = Path.home() / "simmate"
+    CLUSTER_YAML = SIMMATE_DIRECTORY / "dask_cluster.yaml"
+    if CLUSTER_YAML.exists():
         os.environ.setdefault(
             "DASK_CONFIG",
-            os.path.join(os.path.expanduser("~"), "simmate", "dask_cluster.yaml"),
+            SIMMATE_DIRECTORY / "dask_cluster.yaml",
         )
 
 
