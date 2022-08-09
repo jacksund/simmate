@@ -1,14 +1,27 @@
 # -*- coding: utf-8 -*-
 
-from prefect import task
+from prefect.context import FlowRunContext
 
-from typing import List
 
-# OPTIMIZE: I need to return a dictionary because Prefect struggles to handle
+def get_prefect_id(raise_if_no_context: bool = True):
+    """
+    grabs the prefect flow run id from context (if there is one)
+    """
+    # Grab the flow run id for reference.
+    run_context = FlowRunContext.get()
+    if run_context:
+        run_id = str(run_context.flow_run.id)
+        return run_id
+    elif not run_context and not raise_if_no_context:
+        return None  # no error is raised
+    else:
+        raise Exception("Cannot detetect a Prefect FlowRunContext")
+
+
+# OPTIMIZE: I needed to return a dictionary because Prefect struggles to handle
 # a list or tuple return in their workflow context. Maybe this will change in
 # Prefect Orion though.
-@task
-def parse_multi_command(command: str, commands_out: List[int]) -> dict:
+def parse_multi_command(command: str, commands_out: list[int]) -> dict:
     """
     Given a list of commands separated by semicolons (;), this simply separates
     the commands into individual ones.
