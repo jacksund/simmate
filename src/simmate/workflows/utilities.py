@@ -252,7 +252,7 @@ def load_results_from_directories(base_directory: Union[str, Path] = "."):
 
             # use the metadata to update the other fields
             results_db.source = metadata["source"]
-            results_db.prefect_flow_run_id = metadata["prefect_flow_run_id"]
+            results_db.run_id = metadata["run_id"]
 
             # note the directory might have been moved from when this was originally
             # ran vs where it is now. Therefore, we update the folder location here.

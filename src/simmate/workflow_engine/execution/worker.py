@@ -39,7 +39,7 @@ class SimmateWorker:
         # wait_on_timeout=False, # TODO
         # settings on what to do when the queue is empty
         close_on_empty_queue: bool = False,
-        waittime_on_empty_queue: float = 60,
+        waittime_on_empty_queue: float = 1,
         tags: list[str] = ["simmate"],  # should default be empty...?
     ):
         # the tags to query tasks for. If no tags were given, the worker will
@@ -112,16 +112,13 @@ class SimmateWorker:
             # If we've made it this far, we're ready to grab a new WorkItem
             # and run it!
             # Query for PENDING WorkItems, lock it for editting, and update
-            # the status to RUNNING
-            query_results = WorkItem.objects.select_for_update().filter(status="P")
-            # filter down by tags
-            if self.tags:
-                for tag in self.tags:
-                    query_results = query_results.filter(tags__icontains=tag)
-            else:
-                query_results = query_results.filter(tags=self.tags)
-            # and grab the first result
-            workitem = query_results.first()
+            # the status to RUNNING. And grab the first result
+            workitem = (
+                WorkItem.objects.select_for_update()
+                .filter(status="P")
+                .filter_by_tags(self.tags)
+                .first()
+            )
 
             # our lock exists only within this transation
             with transaction.atomic():
@@ -179,5 +176,16 @@ class SimmateWorker:
         # !!! Should I include RUNNING in the count? If so I do that with...
         #   from django.db.models import Q
         #   ...filter(Q(status="P") | Q(status="R"))
-        queue_size = WorkItem.objects.filter(status="P").count()
+        queue_size = (
+            WorkItem.objects.filter(status="P").filter_by_tags(self.tags).count()
+        )
         return queue_size
+
+    @classmethod
+    def run_singleflow_worker(cls):
+        worker = cls(
+            nitems_max=1,
+            close_on_empty_queue=True,
+            tags=["simmate"],
+        )
+        worker.start()

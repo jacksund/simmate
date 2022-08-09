@@ -2,18 +2,8 @@
 
 import pytest
 
-from simmate.workflow_engine import Workflow, task
+from simmate.workflow_engine import Workflow
 from simmate.website.test_app.models import TestCalculation
-
-
-@task
-def dummy_task_1(a):
-    return 1
-
-
-@task
-def dummy_task_2(a):
-    return 2
 
 
 class DummyProject__DummyCaclulator__DummyPreset(Workflow):
@@ -31,23 +21,15 @@ class DummyProject__DummyCaclulator__DummyPreset(Workflow):
 
     @staticmethod
     def run_config(source=None, structure=None, **kwargs):
-        x = dummy_task_1(source)
-        y = dummy_task_2(structure)
-        return x + y
+        return 1 + 2
 
 
 # copy to variable for shorthand use
 DummyFlow = DummyProject__DummyCaclulator__DummyPreset
 
 
-@pytest.mark.prefect_db
 @pytest.mark.django_db
 def test_workflow(tmp_path):
-    # Run the workflow just like you would for the base Prefect class
-    flow = DummyFlow._to_prefect_flow()
-    state = flow(return_state=True, directory=tmp_path)
-    assert state.is_completed()
-    assert state.result() == 3
 
     # Same exact thing but using higher-level method
     state = DummyFlow.run(directory=tmp_path)
@@ -64,35 +46,12 @@ def test_workflow(tmp_path):
     assert DummyFlow.description_doc == DummyFlow.__doc__
     assert DummyFlow.description_doc.strip() == "Minimal example of a workflow"
     assert DummyFlow.parameter_names == ["source", "structure"]
-    assert DummyFlow._parameters_to_register == [
-        "prefect_flow_run_id",
-        "source",
-    ]
+    assert DummyFlow._parameters_to_register == ["source"]
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 
     assert isinstance(DummyFlow.get_config(), dict)
 
     DummyFlow.show_config()  # a print statment w. nothing else to check
-
-
-# @pytest.mark.prefect_db
-# @pytest.mark.django_db
-# def test_workflow_cloud(mocker, sample_structures):
-
-#     # test cloud properties
-#     deployment_id = DummyFlow.deployment_id
-#     assert isinstance(deployment_id, str)
-#     # we dont check the actual value bc its randomly generated
-
-#     n = DummyFlow.nflows_submitted
-#     assert isinstance(n, int)
-
-#     # to test serialization of input parameters we grab a toolkit object
-#     structure = sample_structures["C_mp-48_primitive"]
-
-#     # Run the workflow through prefect cloud
-#     flow_id = DummyFlow.run_cloud(structure=structure)
-#     assert isinstance(flow_id, str)
 
 
 def test_serialize_parameters():
@@ -138,3 +97,39 @@ def test_deserialize_parameters(mocker):
     }
 
     Workflow._deserialize_parameters(**example_parameters)
+
+
+# !!! These tests below are for the Prefect Executor, which is disabled at the moment
+
+# @task
+# def dummy_task_1(a):
+#     return 1
+# @task
+# def dummy_task_2(a):
+#     return 2
+# @staticmethod
+# def run_config(source=None, structure=None, **kwargs):
+#     x = dummy_task_1(source)
+#     y = dummy_task_2(structure)
+#     return x + y
+
+# # Run the workflow just like you would for the base Prefect class
+# flow = DummyFlow._to_prefect_flow()
+# state = flow(return_state=True, directory=tmp_path)
+# assert state.is_completed()
+# assert state.result() == 3
+
+# @pytest.mark.prefect_db
+# @pytest.mark.django_db
+# def test_workflow_cloud(mocker, sample_structures):
+#     # test cloud properties
+#     deployment_id = DummyFlow.deployment_id
+#     assert isinstance(deployment_id, str)
+#     # we dont check the actual value bc its randomly generated
+#     n = DummyFlow.nflows_submitted
+#     assert isinstance(n, int)
+#     # to test serialization of input parameters we grab a toolkit object
+#     structure = sample_structures["C_mp-48_primitive"]
+#     # Run the workflow through prefect cloud
+#     flow_id = DummyFlow.run_cloud(structure=structure)
+#     assert isinstance(flow_id, str)

@@ -8,15 +8,33 @@ from simmate.workflows.utilities import (
 )
 
 
+# @pytest.mark.prefect_db
 @pytest.mark.vasp
-@pytest.mark.prefect_db
 @pytest.mark.django_db
 def test_all_workflow_runs(tmp_path, sample_structures):
 
     # For testing, look at the NaCl rocksalt primitive structure
     structure = sample_structures["NaCl_mp-22862_primitive"]
 
-    with tmp_path.as_cwd():
+    # -------------
+    # https://stackoverflow.com/questions/41742317/
+    import os
+    import contextlib
+    from pathlib import Path
+
+    @contextlib.contextmanager
+    def working_directory(path):
+        """Changes working directory and returns to previous on exit."""
+        prev_cwd = Path.cwd()
+        os.chdir(path)
+        try:
+            yield
+        finally:
+            os.chdir(prev_cwd)
+
+    # -----------------
+
+    with working_directory(tmp_path):
 
         successful_flows = []
 
@@ -86,7 +104,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         # TEST NEB FLOWS
         # For testing, look at I- diffusion in Y2CI2 (takes roughly 1 hr)
         structure = sample_structures["Y2CI2_mp-1206803_primitive"]
-        workflow_name = "diffusion.vasp.neb-all-paths"
+        workflow_name = "diffusion.vasp.neb-all-paths-mit"
         workflow = get_workflow(workflow_name)
         state = workflow.run(
             structure=structure,

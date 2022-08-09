@@ -81,7 +81,7 @@ class AlwaysFailsSpecialMonitorNoRetry(AlwaysFailsMonitor):
 # ----------------------------------------------------------------------------
 
 
-@pytest.mark.prefect_db
+# @pytest.mark.prefect_db
 def test_s3workflow_methods():
     class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
@@ -97,10 +97,6 @@ def test_s3workflow_methods():
     # Test basic run
     state = workflow.run()
     result = state.result()
-    assert state.is_completed()
-    assert result["directory"].exists()
-    shutil.rmtree(result["directory"])
-
     assert state.is_completed()
     assert result["directory"].exists()
     shutil.rmtree(result["directory"])
@@ -275,3 +271,6 @@ def test_s3workflow_9(tmp_path):
 #     return state.result()
 # state = test(return_state=True)
 # result = state.result()
+# assert state.is_completed()
+# assert result["directory"].exists()
+# shutil.rmtree(result["directory"])

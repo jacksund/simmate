@@ -27,7 +27,7 @@ test()
 
 from simmate.workflow_engine.execution.worker import SimmateWorker
 
-worker = SimmateWorker(waittime_on_empty_queue=1)  # nitems_max=1
+worker = SimmateWorker(waittime_on_empty_queue=1, tags=[])  # nitems_max=1
 worker.start()
 
 # ----------------------------------------------------------------------------

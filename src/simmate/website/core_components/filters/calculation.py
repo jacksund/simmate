@@ -10,7 +10,7 @@ class Calculation(filters.FilterSet):
         model = CalculationTable
         fields = dict(
             directory=["exact"],
-            prefect_flow_run_id=["exact"],
+            run_id=["exact"],
             created_at=["range"],
             updated_at=["range"],
         )

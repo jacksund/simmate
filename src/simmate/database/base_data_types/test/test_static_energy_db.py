@@ -15,8 +15,8 @@ def test_static_energy_table(structure, tmp_path):
     StaticEnergy.show_columns()
 
     # test writing to database
-    structure_db = StaticEnergy.from_prefect_context(
-        prefect_flow_run_id="example-id-123",
+    structure_db = StaticEnergy.from_run_context(
+        run_id="example-id-123",
         workflow_name="example.test.workflow",
         structure=structure,
     )
@@ -24,8 +24,8 @@ def test_static_energy_table(structure, tmp_path):
 
     # try grabbing the calculation again and make sure it loaded from the
     # database rather than creating a new entry
-    structure_db2 = StaticEnergy.from_prefect_context(
-        prefect_flow_run_id="example-id-123",
+    structure_db2 = StaticEnergy.from_run_context(
+        run_id="example-id-123",
         workflow_name="example.test.workflow",
     )
     assert structure_db.id == structure_db2.id

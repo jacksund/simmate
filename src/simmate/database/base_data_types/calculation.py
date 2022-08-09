@@ -20,7 +20,7 @@ class Calculation(DatabaseTable):
 
     base_info = [
         "directory",
-        "prefect_flow_run_id",
+        "run_id",
         "created_at",
         "updated_at",
         "corrections",
@@ -86,12 +86,12 @@ class Calculation(DatabaseTable):
         doesn't check to confirm it's been registered. To actually confirm that,
         use the `flow_run_view` attribute instead.
         """
-        return f"https://cloud.prefect.io/simmate/flow-run/{self.prefect_flow_run_id}"
+        return f"https://cloud.prefect.io/simmate/flow-run/{self.run_id}"
 
     @property
     def flow_run_view(self):  # -> FlowRunView
         """
-        Checks if the prefect_flow_run_id was registered with Prefect Cloud, and
+        Checks if the run_id was registered with Prefect Cloud, and
         if so, returns a
         [FlowRunView](https://docs.prefect.io/orchestration/flow-runs/inspection.html)
         that hold metadata such as the status. This metadata includes...
@@ -119,7 +119,7 @@ class Calculation(DatabaseTable):
     @property
     def prefect_flow_run_name(self) -> str:
         """
-        Gives the user-friendly name of this run if the prefect_flow_run_id
+        Gives the user-friendly name of this run if the run_id
         was registered with Prefect Cloud. (an example name is "friendly-bumblebee").
         """
         flowrunview = self.flow_run_view
@@ -128,7 +128,7 @@ class Calculation(DatabaseTable):
     @property
     def prefect_state(self) -> str:
         """
-        Gives the current state of this run if the prefect_flow_run_id
+        Gives the current state of this run if the run_id
         was registered with Prefect Cloud. (ex: "Scheduled" or "Successful")
         """
         flowrunview = self.flow_run_view

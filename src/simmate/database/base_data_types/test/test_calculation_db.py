@@ -12,16 +12,16 @@ def test_calculation_table():
     TestCalculation.show_columns()
 
     # test writing to database
-    calc_db = TestCalculation.from_prefect_context(
-        prefect_flow_run_id="example-id-123",
+    calc_db = TestCalculation.from_run_context(
+        run_id="example-id-123",
         workflow_name="example.test.workflow",
     )
     calc_db.save()
 
     # try grabbing the calculation again and make sure it loaded from the
     # database rather than creating a new entry
-    calc_db2 = TestCalculation.from_prefect_context(
-        prefect_flow_run_id="example-id-123",
+    calc_db2 = TestCalculation.from_run_context(
+        run_id="example-id-123",
         workflow_name="example.test.workflow",
     )
     assert calc_db.id == calc_db2.id
@@ -34,8 +34,8 @@ def test_calculation_table():
 
     # and test incorrect passing
     with pytest.raises(Exception):
-        calc_db2 = TestCalculation.from_prefect_context(
-            prefect_flow_run_id="example-id-123",
+        calc_db2 = TestCalculation.from_run_context(
+            run_id="example-id-123",
             # workflow_name --> missing but required
         )
 
@@ -43,13 +43,13 @@ def test_calculation_table():
 @pytest.mark.django_db
 def test_calculation_archives():
 
-    calc_db = TestCalculation.from_prefect_context(
-        prefect_flow_run_id="example-id-123",
+    calc_db = TestCalculation.from_run_context(
+        run_id="example-id-123",
         workflow_name="example.test.workflow",
     )
     calc_db.save()
-    calc_db2 = TestCalculation.from_prefect_context(
-        prefect_flow_run_id="example-id-123",
+    calc_db2 = TestCalculation.from_run_context(
+        run_id="example-id-123",
         workflow_name="example.test.workflow",
     )
     calc_db2.save()

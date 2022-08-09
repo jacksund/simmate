@@ -63,7 +63,7 @@ you have your computational resources configured. You can then run workflows
 using the `run_cloud` method, which returns a Prefect flow run id.
 
 ``` python
-prefect_flow_run_id = workflow.run_cloud(
+run_id = workflow.run_cloud(
     structure="NaCl.cif", 
     command="mpirun -n 4 vasp_std > vasp.out",
 )
@@ -84,7 +84,7 @@ table = workflow.database_table
 df = table.obects.to_dataframe()
 
 # or grab a specific run result and convert to a toolkit object
-entry = table.objects.get(prefect_flow_run_id="example-123456")
+entry = table.objects.get(run_id="example-123456")
 structure = entry.to_toolkit()
 ```
 
@@ -295,6 +295,10 @@ class DummyState:
     def result(self):
         return self._result
 
+    @staticmethod
+    def is_completed():
+        return True
+
 
 class Workflow:
     """
@@ -382,9 +386,9 @@ class Workflow:
         """
         # Note: this is a separate method and wrapper around run_full because
         # we want to allow Prefect executor to overwrite this method.
-        print(f"Starting new run of {cls.name_full}")
+        print(f"Starting {cls.name_full}")
         result = cls._run_full(**kwargs)  # no run_id as a new one will be made
-        print(f"Completed run of {cls.name_full}")
+        print(f"Completed {cls.name_full}")
         state = DummyState(result)
         return state
 
@@ -395,6 +399,14 @@ class Workflow:
         """
 
         print(f"Submitting new run of {cls.name_full}")
+
+        # If we are submitting using a filename, we don't want to
+        # submit to a cluster and have the job fail because it doesn't have
+        # access to the file. We therefore deserialize right before
+        # serializing in the next line in order to ensure parameters that
+        # accept file names are submitted with all necessary data.
+        parameters_deserialized = cls._deserialize_parameters(**kwargs)
+        parameters_serialized = cls._serialize_parameters(**parameters_deserialized)
 
         # Because we often want to save some info to our database even before
         # the calculation starts/finishes, we do that by calling _register_calc
@@ -407,7 +419,7 @@ class Workflow:
             cls._run_full,  # should this be the run method...?
             run_id=run_id,
             tags=cls.tags,
-            **kwargs,
+            **parameters_serialized,
         )
 
         # If the user wants the future, return that instead of the run_id
@@ -438,7 +450,7 @@ class Workflow:
     @property
     def database_table(cls) -> Calculation:
         """
-        The database table where calculation information (such as the prefect_flow_run_id)
+        The database table where calculation information (such as the run_id)
         is stored. The table should use `simmate.database.base_data_types.Calculation`
 
         In many cases, this table will contain all of the results you need. However,
@@ -462,7 +474,9 @@ class Workflow:
 
                 return BandStructureCalc
             elif "density-of-states" in flow_preset:
-                from simmate.database.base_data_types import DensityofStatesCalc
+                from simmate.database.base_data_types import (
+                    DensityofStatesCalc,
+                )
 
                 return DensityofStatesCalc
         elif flow_type == "population-analysis":
@@ -716,7 +730,11 @@ class Workflow:
         # the primary input. I go through each one at a time until I find one
         # that was provided -- then I exit with that parameter's value.
         primary_input = None
-        for primary_input_key in ["structure", "migration_hop", "supercell_start"]:
+        for primary_input_key in [
+            "structure",
+            "migration_hop",
+            "supercell_start",
+        ]:
             primary_input = parameters.get(primary_input_key, None)
             primary_input_cleaned = parameters_cleaned.get(primary_input_key, None)
             if primary_input:
@@ -752,7 +770,7 @@ class Workflow:
                 )
 
             # the past directory should be stored on the input object
-            previous_directory = primary_input_cleaned.database_object.directory
+            previous_directory = Path(primary_input_cleaned.database_object.directory)
 
             # Copy over all files except simmate ones (we have no need for the
             # summaries or error archives)
@@ -1004,7 +1022,9 @@ class Workflow:
 
     @classmethod
     def _deserialize_parameters(
-        cls, add_defaults_from_attr: bool = True, **parameters
+        cls,
+        add_defaults_from_attr: bool = True,
+        **parameters,
     ) -> dict:
         """
         converts all parameters to appropriate python objects
@@ -1081,7 +1101,7 @@ class Workflow:
                 parameters["supercell_end"]
             )
 
-        if "directory" in parameters.keys():
+        if parameters.get("directory", None):
             parameters_cleaned["directory"] = Path(parameters_cleaned["directory"])
 
         return parameters_cleaned

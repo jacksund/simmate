@@ -25,11 +25,13 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add NPT and MatProj molecular dynamics workflows
 - add SCAN workflows for static energy and relaxation
 - test files can be provided within zip files, fixing excessive line counts on git commits
+- add simmate worker that can run "out-of-box" and requires no set up
 
 **Refactors**
 - to simplify the creation of new workflows, `S3Task` is now `S3Workflow` and database tables are dynamically determined using the workflow name
 - workflows of a given type (e.g. relaxation or static-energy) now share a database tables in order to simplify overall database architecture
 - migrate from `os.path` to `pathlib.Path` throughout package
+- isolate prefect use to separate executors
 
 **Fixes**
 - None
