@@ -470,14 +470,12 @@ class SearchEngine:
 
                 # Attached the flow_run_id to our source so we know how many
                 # associated jobs are running.
-                source_db.prefect_flow_run_ids.append(flow_run_id)
+                source_db.run_ids.append(flow_run_id)
                 source_db.save()
 
                 # update the source on the calculation
                 # TODO: use the flow run id from above to grab the calc
-                calculation = self.calculation_datatable.objects.get(
-                    prefect_flow_run_id=flow_run_id
-                )
+                calculation = self.calculation_datatable.objects.get(run_id=flow_run_id)
                 calculation.source = f"{source.__class__.__name__}"
                 calculation.source_id = parent_ids
                 calculation.save()

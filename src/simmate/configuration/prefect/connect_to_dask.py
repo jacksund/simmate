@@ -20,6 +20,7 @@ def set_default_executor(dask_scheduler_address):
         agent = LocalAgent(name="ExampleAgent")
         agent.start()
     """
+    raise NotImplementedError("This method has not been ported to prefect 2.0")
 
     # All workflows should be pointed to the Dask cluster as the default Executor.
     # We can grab the Dask scheduler's address using the cluster object from above.

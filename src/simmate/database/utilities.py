@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import shutil
+from pathlib import Path
 
 from django.apps import apps
 from django.core.management import call_command
@@ -53,7 +54,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         if app_config.label not in apps_to_migrate:
             continue
 
-        migration_dir = app_config.path / "migrations"
+        migration_dir = Path(app_config.path) / "migrations"
         if migration_dir.exists():
             shutil.rmtree(migration_dir)
             continue

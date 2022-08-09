@@ -50,14 +50,17 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
         return bader_result
 
     @classmethod
-    def _save_to_database(cls, bader_result):
+    def _save_to_database(cls, bader_result, run_id):
         # load the results. We are particullary after the first result with
         # is a pandas dataframe of oxidation states.
         oxidation_data, extra_data = bader_result["result"]
 
         # load the calculation entry for this workflow run. This should already
         # exist thanks to the load_input_and_register task of the prebader workflow
-        calculation = cls.database_table.from_prefect_context()
+        calculation = cls.database_table.from_run_context(
+            run_id=run_id,
+            workflow_name=cls.name_full,
+        )
         # BUG: can't use context to grab the id because workflow tasks generate a
         # different id than the main workflow
 

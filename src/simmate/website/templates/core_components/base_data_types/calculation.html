@@ -7,7 +7,7 @@
 
         if calculation.flow_run_view:
             name = calculation.prefect_flow_run_name # and link to calculation.prefect_cloud_link
-            id = calculation.prefect_flow_run_id
+            id = calculation.run_id
             state = calculation.prefect_state
             # and then a button that links to calculation.prefect_cloud_link
         else:

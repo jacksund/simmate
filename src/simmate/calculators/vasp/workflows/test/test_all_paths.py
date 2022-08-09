@@ -9,9 +9,8 @@ from simmate.calculators.vasp.workflows.diffusion.all import (
     Diffusion__Vasp__NebAllPathsMit,
 )
 
-
+# @pytest.mark.prefect_db
 @pytest.mark.slow
-@pytest.mark.prefect_db
 @pytest.mark.django_db
 def test_neb(sample_structures, tmp_path, mocker):
 

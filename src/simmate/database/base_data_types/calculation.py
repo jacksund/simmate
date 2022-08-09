@@ -2,8 +2,6 @@
 
 import platform
 
-from prefect.context import FlowRunContext
-
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 
@@ -22,7 +20,7 @@ class Calculation(DatabaseTable):
 
     base_info = [
         "directory",
-        "prefect_flow_run_id",
+        "run_id",
         "created_at",
         "updated_at",
         "corrections",
@@ -58,7 +56,7 @@ class Calculation(DatabaseTable):
     like... "/path/to/simmate-task-abc123"
     """
 
-    prefect_flow_run_id = table_column.CharField(
+    run_id = table_column.CharField(
         max_length=50,
         blank=True,
         null=True,
@@ -88,12 +86,12 @@ class Calculation(DatabaseTable):
         doesn't check to confirm it's been registered. To actually confirm that,
         use the `flow_run_view` attribute instead.
         """
-        return f"https://cloud.prefect.io/simmate/flow-run/{self.prefect_flow_run_id}"
+        return f"https://cloud.prefect.io/simmate/flow-run/{self.run_id}"
 
     @property
     def flow_run_view(self):  # -> FlowRunView
         """
-        Checks if the prefect_flow_run_id was registered with Prefect Cloud, and
+        Checks if the run_id was registered with Prefect Cloud, and
         if so, returns a
         [FlowRunView](https://docs.prefect.io/orchestration/flow-runs/inspection.html)
         that hold metadata such as the status. This metadata includes...
@@ -121,7 +119,7 @@ class Calculation(DatabaseTable):
     @property
     def prefect_flow_run_name(self) -> str:
         """
-        Gives the user-friendly name of this run if the prefect_flow_run_id
+        Gives the user-friendly name of this run if the run_id
         was registered with Prefect Cloud. (an example name is "friendly-bumblebee").
         """
         flowrunview = self.flow_run_view
@@ -130,15 +128,18 @@ class Calculation(DatabaseTable):
     @property
     def prefect_state(self) -> str:
         """
-        Gives the current state of this run if the prefect_flow_run_id
+        Gives the current state of this run if the run_id
         was registered with Prefect Cloud. (ex: "Scheduled" or "Successful")
         """
         flowrunview = self.flow_run_view
         return flowrunview.state.__class__.__name__ if flowrunview else None
 
     @classmethod
-    def from_prefect_context(
-        cls, prefect_flow_run_id: str = None, workflow_name: str = None, **kwargs
+    def from_run_context(
+        cls,
+        run_id: str = None,
+        workflow_name: str = None,
+        **kwargs,
     ):
         """
         Given a prefect id, this method will do one of the following...
@@ -149,16 +150,21 @@ class Calculation(DatabaseTable):
         It will then return the corresponding Calculation instance.
         """
 
-        if not prefect_flow_run_id or not workflow_name:
+        if not run_id or not workflow_name:
             # Grab the database_table that we want to save the results in
+            from prefect.context import FlowRunContext
+
             run_context = FlowRunContext.get()
             if run_context:
-                prefect_flow_run_id = str(run_context.flow_run.id)
                 workflow = run_context.flow.simmate_workflow
                 workflow_name = workflow.name_full
+                run_id = str(run_context.flow_run.id)
                 assert workflow.database_table == cls
             else:
-                raise Exception("Please provide a flow_id and workflow name.")
+                raise Exception(
+                    "No Prefect FlowRunContext was detected, so you must provide "
+                    "flow_id and workflow_name to the from_run_context method."
+                )
 
         # Depending on how a workflow was submitted, there may be a calculation
         # extry existing already -- which we need to grab and then update. If it's
@@ -166,14 +172,14 @@ class Calculation(DatabaseTable):
 
         # check if the calculation already exists in our database, and if so,
         # grab it and return it.
-        if cls.objects.filter(prefect_flow_run_id=prefect_flow_run_id).exists():
-            return cls.objects.get(prefect_flow_run_id=prefect_flow_run_id)
+        if cls.objects.filter(run_id=run_id).exists():
+            return cls.objects.get(run_id=run_id)
         # Otherwise we need to create a new one and return that.
 
         # To handle the initialization of other Simmate mix-ins, we pass all
         # information to the from_toolkit method rather than directly to cls.
         calculation = cls.from_toolkit(
-            prefect_flow_run_id=prefect_flow_run_id,
+            run_id=run_id,
             location=platform.node(),
             workflow_name=workflow_name,
             **kwargs,

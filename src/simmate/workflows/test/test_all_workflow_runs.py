@@ -8,15 +8,33 @@ from simmate.workflows.utilities import (
 )
 
 
+# @pytest.mark.prefect_db
 @pytest.mark.vasp
-@pytest.mark.prefect_db
 @pytest.mark.django_db
 def test_all_workflow_runs(tmp_path, sample_structures):
 
     # For testing, look at the NaCl rocksalt primitive structure
     structure = sample_structures["NaCl_mp-22862_primitive"]
 
-    with tmp_path.as_cwd():
+    # -------------
+    # https://stackoverflow.com/questions/41742317/
+    import os
+    import contextlib
+    from pathlib import Path
+
+    @contextlib.contextmanager
+    def working_directory(path):
+        """Changes working directory and returns to previous on exit."""
+        prev_cwd = Path.cwd()
+        os.chdir(path)
+        try:
+            yield
+        finally:
+            os.chdir(prev_cwd)
+
+    # -----------------
+
+    with working_directory(tmp_path):
 
         successful_flows = []
 
@@ -85,22 +103,22 @@ def test_all_workflow_runs(tmp_path, sample_structures):
 
         # TEST NEB FLOWS
         # For testing, look at I- diffusion in Y2CI2 (takes roughly 1 hr)
-        structure = sample_structures["Y2CI2_mp-1206803_primitive"]
-        workflow_name = "diffusion.vasp.neb-all-paths"
-        workflow = get_workflow(workflow_name)
-        state = workflow.run(
-            structure=structure,
-            migrating_specie="I",
-            command="mpirun -n 12 vasp_std > vasp.out",
-            directory=str(tmp_path),
-            nimages=1,
-            min_atoms=10,
-            max_atoms=25,
-            min_length=4,
-        )
-        state.result()
-        if state.is_completed():
-            successful_flows.append(workflow_name)
+        # structure = sample_structures["Y2CI2_mp-1206803_primitive"]
+        # workflow_name = "diffusion.vasp.neb-all-paths-mit"
+        # workflow = get_workflow(workflow_name)
+        # state = workflow.run(
+        #     structure=structure,
+        #     migrating_specie="I",
+        #     command="mpirun -n 12 vasp_std > vasp.out",
+        #     directory=str(tmp_path),
+        #     nimages=1,
+        #     min_atoms=10,
+        #     max_atoms=25,
+        #     min_length=4,
+        # )
+        # state.result()
+        # if state.is_completed():
+        #     successful_flows.append(workflow_name)
 
     # check which flows either (1) failed or (2) weren't tested
     all_flows = get_list_of_all_workflows()
@@ -108,9 +126,18 @@ def test_all_workflow_runs(tmp_path, sample_structures):
     missing_failed_flows.sort()
 
     assert missing_failed_flows == [
-        "diffusion.vasp.neb-all-paths",
-        "diffusion.vasp.neb-from-endpoints",
-        "diffusion.vasp.neb-from-images",
-        "diffusion.vasp.neb-single-path",
+        "diffusion.vasp.neb-all-paths-mit",
+        "diffusion.vasp.neb-from-endpoints-mit",
+        "diffusion.vasp.neb-from-images-mit",
+        "diffusion.vasp.neb-single-path-mit",
+        "electronic-structure.vasp.matproj-hse-full"
         "population-analysis.vasp.badelf-matproj",
+        "relaxation.vasp.matproj-hse",
+        "relaxation.vasp.matproj-metal",
+        "relaxation.vasp.matproj-scan",
+        "relaxation.vasp.mvl-grainboundary",
+        "relaxation.vasp.mvl-slab",
+        "restart.simmate.automatic",
+        "static-energy.vasp.matproj-hse",
+        "static-energy.vasp.matproj-scan",
     ]

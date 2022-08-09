@@ -97,14 +97,14 @@ class DatabaseAdapter:
         # These attributes tells us which structure to grab from our datatable.
         # The user should have only provided one -- if they gave more, we just
         # use whichever one comes first.
-        prefect_flow_run_id = structure_dict.get("prefect_flow_run_id")
+        run_id = structure_dict.get("run_id")
         database_id = structure_dict.get("database_id")
         directory = structure_dict.get("directory")
 
-        # we must have either a prefect_flow_run_id or database_id
-        if not prefect_flow_run_id and not database_id and not directory:
+        # we must have either a run_id or database_id
+        if not run_id and not database_id and not directory:
             raise Exception(
-                "You must have either a prefect_flow_run_id, database_id, "
+                "You must have either a run_id, database_id, "
                 "or directory provided if you want to load a structure from "
                 "a previous calculation."
             )
@@ -113,9 +113,9 @@ class DatabaseAdapter:
         # are unique so all three should return a single calculation.
         if database_id:
             database_object = datatable.objects.get(id=database_id)
-        elif prefect_flow_run_id:
+        elif run_id:
             database_object = datatable.objects.get(
-                prefect_flow_run_id=prefect_flow_run_id,
+                run_id=run_id,
             )
         elif directory:
             database_object = datatable.objects.get(directory=directory)

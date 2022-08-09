@@ -9,7 +9,7 @@
     </h2>
     <div id="collapseCalcFilters" class="accordion-collapse collapse" aria-labelledby="headingCalcFilters">
         <div class="accordion-body">
-            {{ form.prefect_flow_run_id | as_crispy_field }}
+            {{ form.run_id | as_crispy_field }}
             {{ form.directory | as_crispy_field }}
             {{ form.created_at__range | as_crispy_field }}
             {{ form.updated_at__range | as_crispy_field }}

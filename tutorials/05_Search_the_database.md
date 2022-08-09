@@ -164,7 +164,7 @@ table.show_columns()
 - formula_anonymous
 - spacegroup (relation to Spacegroup)
 - directory
-- prefect_flow_run_id
+- run_id
 - created_at
 - updated_at
 - corrections

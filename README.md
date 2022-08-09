@@ -124,7 +124,7 @@ command: mpirun -n 8 vasp_std > vasp.out
 from simmate.workflows.relaxation import Relaxation__Vasp__Matproj as workflow
 
 state = workflow.run(structure="NaCl.cif")
-result = workflow.result()
+result = state.result()
 ```
 
 
@@ -180,21 +180,28 @@ structure.add_oxidation_state_by_guess()
 ```
 
 
-4. _**Ease of Scalability.**_ At the beginning of a project, you may want to write and run code on a single computer and single core. But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations. At the extreme, some projects require thousands of computers across numerous locations, including university clusters (using SLURM or PBS) and cloud computing (using Kubernetes and Docker). Simmate can meet all of these needs thanks to integration with [Dask](https://github.com/dask/dask) and [Prefect](https://github.com/PrefectHQ/prefect):
+4. _**Ease of Scalability.**_ At the beginning of a project, you may want to write and run code on a single computer and single core. But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations. At the extreme, some projects require thousands of computers across numerous locations, including university clusters (using SLURM or PBS) and cloud computing (using Kubernetes and Docker). Simmate can meet all of these needs thanks to integration with a custom `SimmateExecutor` (the default), [Dask](https://github.com/dask/dask), and/or [Prefect](https://github.com/PrefectHQ/prefect):
 ```python
-# To run the tasks of a single workflow in parallel, use Dask.
-from prefect.task_runners import DaskTaskRunner
-workflow.task_runner = DaskTaskRunner()
-state = workflow.run(...)
+# on your local computer, schedule your workflow run
+state = workflow.run_cloud(...)
 
-# To run many workflows in parallel, use Prefect.
-# Once you configure Prefect, you simply switch
-# from using "run" to "run_cloud"
-prefect_flow_run_id = workflow.run_cloud(...)
+# Note, your workflow won't run locally.
+# While you wait for it run, you can check it's status
+state.is_done()
+state.is_running()
 
-# You can use different combinations of these two parallelization strategies as well!
-# Using Prefect and Dask, we can scale out accross various computer resources 
-# with a few lines of code.
+# or cancel the job before it runs
+state.cancel()
+
+# or wait until the job completes and grab the result!
+# The job won't run until you start a worker (see command below)
+result = state.result()
+```
+
+``` bash
+# In a separate terminal or even on a remote HPC cluster, you
+# can start a worker that will start running any scheduled jobs
+simmate workflow-engine start-worker
 ```
 
 

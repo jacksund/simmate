@@ -196,6 +196,19 @@ class SearchResults(models.QuerySet):
         # we can now delete the csv file
         csv_filename.unlink()
 
+    def filter_by_tags(self, tags: list[str]):
+        """
+        A utility filter() method that
+        """
+
+        if tags:
+            new_query = self
+            for tag in tags:
+                new_query = new_query.filter(tags__icontains=tag)
+        else:
+            new_query = self.filter(tags=[])
+        return new_query
+
 
 # Copied this line from...
 # https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py

@@ -2,8 +2,6 @@
 
 import plotly.graph_objects as plotly_go
 from django.apps import apps as django_apps
-from prefect.client import get_client
-from prefect.orion.schemas.filters import FlowRunFilter
 
 from simmate.database.base_data_types import table_column, DatabaseTable
 from simmate.utilities import async_to_sync
@@ -261,7 +259,7 @@ class StructureSource(DatabaseTable):
     settings = table_column.JSONField(default=dict)
 
     # This list limits to ids that are submitted or running
-    prefect_flow_run_ids = table_column.JSONField(default=list)
+    run_ids = table_column.JSONField(default=list)
 
     search = table_column.ForeignKey(
         EvolutionarySearch,
@@ -271,7 +269,7 @@ class StructureSource(DatabaseTable):
 
     @staticmethod
     @async_to_sync
-    async def _check_still_running_ids(prefect_flow_run_ids):
+    async def _check_still_running_ids(run_ids):
         """
         Queries Prefect to see check on a list of flow run ids and determines
         which ones are still in a scheduled, running, or pending state.
@@ -281,6 +279,10 @@ class StructureSource(DatabaseTable):
         This is normally used within `update_flow_run_ids` and shouldn't
         be called directly.
         """
+        raise NotImplementedError("porting to general executor")
+
+        from prefect.client import get_client
+        from prefect.orion.schemas.filters import FlowRunFilter
 
         # The reason we have this code as a separate method is because we want
         # to isolate Prefect's async calls from Django's sync-restricted calls
@@ -289,7 +291,7 @@ class StructureSource(DatabaseTable):
         async with get_client() as client:
             response = await client.read_flow_runs(
                 flow_run_filter=FlowRunFilter(
-                    id={"any_": prefect_flow_run_ids},
+                    id={"any_": run_ids},
                     state={"type": {"any_": ["SCHEDULED", "PENDING", "RUNNING"]}},
                 ),
             )
@@ -306,10 +308,10 @@ class StructureSource(DatabaseTable):
         """
 
         # make the async call to Prefect client
-        still_running_ids = self._check_still_running_ids(self.prefect_flow_run_ids)
+        still_running_ids = self._check_still_running_ids(self.run_ids)
 
         # we now have our new list of IDs! Let's update it to the database
-        self.prefect_flow_run_ids = still_running_ids
+        self.run_ids = still_running_ids
         self.save()
 
         return still_running_ids

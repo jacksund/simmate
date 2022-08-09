@@ -190,7 +190,7 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         # Note, the information does not matter at this point because it will be
         # populated below
         relaxation = cls.from_toolkit(structure=vasprun.structures[-1])
-        # TODO: need to pull prefect_flow_run_id from metadata file.
+        # TODO: need to pull run_id from metadata file.
 
         # Now we have the relaxation data all loaded and can save it to the database
         relaxation.save()

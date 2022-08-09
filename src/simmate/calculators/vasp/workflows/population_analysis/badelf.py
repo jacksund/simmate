@@ -5,7 +5,7 @@ from pathlib import Path
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
 from simmate.toolkit import Structure
-from simmate.workflow_engine import task, Workflow
+from simmate.workflow_engine import Workflow
 from simmate.database.third_parties import MatprojStructure
 from simmate.calculators.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
@@ -52,7 +52,7 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
             directory=prebadelf_result["directory"],
         ).result()
 
-        save_badelf_results(badelf_result, prebadelf_result["prefect_flow_run_id"])
+        save_badelf_results(badelf_result, prebadelf_result["run_id"])
 
 
 # -----------------------------------------------------------------------------
@@ -83,7 +83,6 @@ class PopulationAnalysis__Vasp__PrebadelfMatproj(StaticEnergy__Vasp__Matproj):
     )
 
 
-@task
 def get_structure_w_empties(
     structure,
     empty_ion_template,
@@ -155,16 +154,15 @@ def get_structure_w_empties(
 
 
 # THIS IS A COPY/PASTE FROM THE BADER WORKFLOW -- I need to condense these
-@task
-def save_badelf_results(bader_result, prefect_flow_run_id):
+def save_badelf_results(bader_result, run_id):
     # load the results. We are particullary after the first result with
     # is a pandas dataframe of oxidation states.
     oxidation_data, extra_data = bader_result["result"]
 
     # load the calculation entry for this workflow run. This should already
     # exist thanks to the load_input_and_register task of the prebader workflow
-    calculation = PopulationAnalysis__Bader__Badelf.database_table.from_prefect_context(
-        prefect_flow_run_id,
+    calculation = PopulationAnalysis__Bader__Badelf.database_table.from_run_context(
+        run_id,
         PopulationAnalysis__Vasp__PrebadelfMatproj.name_full,
     )
     # BUG: can't use context to grab the id because workflow tasks generate a

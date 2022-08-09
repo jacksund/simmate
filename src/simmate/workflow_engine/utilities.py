@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from prefect import task
-
-from typing import List
-
-# OPTIMIZE: I need to return a dictionary because Prefect struggles to handle
+# OPTIMIZE: I needed to return a dictionary because Prefect struggles to handle
 # a list or tuple return in their workflow context. Maybe this will change in
 # Prefect Orion though.
-@task
-def parse_multi_command(command: str, commands_out: List[int]) -> dict:
+def parse_multi_command(command: str, commands_out: list[int]) -> dict:
     """
     Given a list of commands separated by semicolons (;), this simply separates
     the commands into individual ones.
