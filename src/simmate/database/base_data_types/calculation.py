@@ -2,8 +2,6 @@
 
 import platform
 
-from prefect.context import FlowRunContext
-
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 
@@ -154,6 +152,8 @@ class Calculation(DatabaseTable):
 
         if not run_id or not workflow_name:
             # Grab the database_table that we want to save the results in
+            from prefect.context import FlowRunContext
+
             run_context = FlowRunContext.get()
             if run_context:
                 workflow = run_context.flow.simmate_workflow

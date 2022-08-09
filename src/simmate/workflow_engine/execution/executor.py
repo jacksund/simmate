@@ -32,13 +32,8 @@ class SimmateExecutor:
     # https://docs.python.org/3/library/concurrent.futures.html
     # from concurrent.futures import Executor # No need to inherit at the moment
 
-    def submit(
-        self,
-        fxn,
-        *args,
-        tags=[],
-        **kwargs,
-    ):
+    @staticmethod
+    def submit(fxn, *args, tags=[], **kwargs):
 
         # The *args and **kwargs input separates args into a tuple and kwargs into
         # a dictionary for me, which makes their storage very easy!
@@ -63,23 +58,7 @@ class SimmateExecutor:
         # and return the future for use
         return future
 
-    def map(self, fxn, iterables, timeout=None, chunksize=100):  # TODO
-        # chunksize indicates how many to add at one
-        # iterables is a list of (*args, **kwargs)
-        # add many fn(*args, **kwargs) to queue
-
-        # TODO -- This is not supported at the moment. I should use the
-        # .bulk_create method to do this in the future:
-        # https://docs.djangoproject.com/en/3.1/ref/models/querysets/#bulk-create
-
-        # raise an error to ensure user sees this isn't supported yet.
-        raise Exception("This method is not supported yet")
-
-    def shutdown(self, wait=True, cancel_futures=False):  # TODO
-        # whether to wait until the queue is empty
-        # whether to cancel futures and clear database
-        pass
-
+    @staticmethod
     def wait(self, futures):
         """
         Waits for all futures to complete before returning a list of their results
@@ -100,16 +79,14 @@ class SimmateExecutor:
         else:
             return [future.result() for future in futures]
 
-    # ------------------------------------------------------------------------
-    # ------------------------------------------------------------------------
-    # ------------------------------------------------------------------------
-
+    # -------------------------------------------------------------------------
     # These methods are for managing and monitoring the queue
     # I attach these directly to the Executor rather than having a separate
     # DjangoQueue class that inherits from python's Queue module.
     # If there is a good reason to make a separate class in the future,
     # I can start from these methods here and the following link:
     # https://docs.python.org/3/library/queue.html
+    # -------------------------------------------------------------------------
 
     def queue_size(self):
         """
@@ -146,3 +123,26 @@ class SimmateExecutor:
             raise Exception
         else:
             WorkItem.objects.filter(status="F").delete()
+
+    # -------------------------------------------------------------------------
+    # Extra methods to add if I want to be consistent with other Executor classes
+    # -------------------------------------------------------------------------
+
+    # @staticmethod
+    # def map(fxn, iterables, timeout=None, chunksize=100):  # TODO
+    #     # chunksize indicates how many to add at one
+    #     # iterables is a list of (*args, **kwargs)
+    #     # add many fn(*args, **kwargs) to queue
+
+    #     # TODO -- This is not supported at the moment. I should use the
+    #     # .bulk_create method to do this in the future:
+    #     # https://docs.djangoproject.com/en/3.1/ref/models/querysets/#bulk-create
+
+    #     # raise an error to ensure user sees this isn't supported yet.
+    #     raise Exception("This method is not supported yet")
+
+    # @staticmethod
+    # def shutdown(wait=True, cancel_futures=False):  # TODO
+    #     # whether to wait until the queue is empty
+    #     # whether to cancel futures and clear database
+    #     pass

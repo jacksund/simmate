@@ -8,10 +8,8 @@ Example usage:
 ```python
 from simmate.workflow_engine.execution.executor import SimmateExecutor
 
-executor = SimmateExecutor()
-
 # EXAMPLE 1
-future = executor.submit(sum, [4, 3, 2, 1])
+future = SimmateExecutor.submit(sum, [4, 3, 2, 1])
 assert future.result() == 10
 
 # EXAMPLE 2

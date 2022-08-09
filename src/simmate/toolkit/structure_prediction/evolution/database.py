@@ -2,8 +2,6 @@
 
 import plotly.graph_objects as plotly_go
 from django.apps import apps as django_apps
-from prefect.client import get_client
-from prefect.orion.schemas.filters import FlowRunFilter
 
 from simmate.database.base_data_types import table_column, DatabaseTable
 from simmate.utilities import async_to_sync
@@ -281,6 +279,10 @@ class StructureSource(DatabaseTable):
         This is normally used within `update_flow_run_ids` and shouldn't
         be called directly.
         """
+        raise NotImplementedError("porting to general executor")
+
+        from prefect.client import get_client
+        from prefect.orion.schemas.filters import FlowRunFilter
 
         # The reason we have this code as a separate method is because we want
         # to isolate Prefect's async calls from Django's sync-restricted calls

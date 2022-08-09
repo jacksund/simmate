@@ -46,7 +46,7 @@ class SimmateFuture:
             workitem.save()
             return True
 
-    def cancelled(self):
+    def is_cancelled(self):
         """
         Return True if the call was successfully cancelled.
         """
@@ -59,7 +59,7 @@ class SimmateFuture:
         else:
             return False
 
-    def running(self):
+    def is_running(self):
         """
         Return True if the call is currently being executed and cannot be cancelled.
         """
@@ -72,7 +72,7 @@ class SimmateFuture:
         else:
             return False
 
-    def done(self):
+    def is_done(self):
         """
         Return True if the call was successfully cancelled or finished running.
         """

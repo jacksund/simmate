@@ -2,8 +2,6 @@
 
 import yaml
 
-from prefect.states import Completed
-
 from simmate.calculators.vasp.inputs import Potcar
 from simmate.workflow_engine import Workflow
 
@@ -109,6 +107,9 @@ def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
         "run",
         return_value=Completed(),
     )
+    # the code above can be modified for a prefect executor
+    # from prefect.states import Completed
+    # return_value=Completed(),
 
     # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
@@ -151,6 +152,9 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmp_path):
         "run_cloud",
         return_value=Completed(),
     )
+    # the code above can be modified for a prefect executor
+    # from prefect.states import Completed
+    # return_value=Completed(),
 
     # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
@@ -196,6 +200,9 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
         "run",
         return_value=Completed(),
     )
+    # the code above can be modified for a prefect executor
+    # from prefect.states import Completed
+    # return_value=Completed(),
 
     # now try writing input files to the tmp_path
     result = command_line_runner.invoke(

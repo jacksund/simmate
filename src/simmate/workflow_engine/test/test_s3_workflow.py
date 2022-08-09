@@ -21,8 +21,6 @@ import shutil
 
 import pytest
 
-from prefect import flow
-
 from simmate.workflow_engine import ErrorHandler, S3Workflow
 from simmate.workflow_engine.s3_workflow import (
     NonZeroExitError,
@@ -84,7 +82,7 @@ class AlwaysFailsSpecialMonitorNoRetry(AlwaysFailsMonitor):
 
 
 @pytest.mark.prefect_db
-def test_s3task_methods():
+def test_s3workflow_methods():
     class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
         use_database = False
@@ -96,8 +94,6 @@ def test_s3task_methods():
 
     workflow.show_config()  # a print statment w. nothing else to check
 
-    workflow._to_prefect_flow()  # unused for now
-
     # Test basic run
     state = workflow.run()
     result = state.result()
@@ -105,21 +101,12 @@ def test_s3task_methods():
     assert result["directory"].exists()
     shutil.rmtree(result["directory"])
 
-    # Test as a subflow
-    @flow
-    def test():
-        state = workflow.run()
-        return state.result()
-
-    state = test(return_state=True)
-    result = state.result()
-
     assert state.is_completed()
     assert result["directory"].exists()
     shutil.rmtree(result["directory"])
 
 
-def test_s3task_1():
+def test_s3workflow_1():
     # run a basic task w.o. any handlers or monitoring
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -139,7 +126,7 @@ def test_s3task_1():
     output["directory"].rmdir()
 
 
-def test_s3task_2():
+def test_s3workflow_2():
     # test file compression
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -159,7 +146,7 @@ def test_s3task_2():
     output["directory"].with_suffix(".zip").unlink()
 
 
-def test_s3task_3(tmp_path):
+def test_s3workflow_3(tmp_path):
     # Make a task with error handlers, monitoring, and specific directory
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -181,7 +168,7 @@ def test_s3task_3(tmp_path):
     }
 
 
-def test_s3task_4(tmp_path):
+def test_s3workflow_4(tmp_path):
     # test nonzero returncode
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -198,7 +185,7 @@ def test_s3task_4(tmp_path):
     )
 
 
-def test_s3task_5(tmp_path):
+def test_s3workflow_5(tmp_path):
     # testing handler-triggered failures
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -215,7 +202,7 @@ def test_s3task_5(tmp_path):
     )
 
 
-def test_s3task_6(tmp_path):
+def test_s3workflow_6(tmp_path):
     # monitor failure
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -232,7 +219,7 @@ def test_s3task_6(tmp_path):
     )
 
 
-def test_s3task_7(tmp_path):
+def test_s3workflow_7(tmp_path):
     # special-monitor failure (non-terminating monitor)
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -249,7 +236,7 @@ def test_s3task_7(tmp_path):
     )
 
 
-def test_s3task_8(tmp_path):
+def test_s3workflow_8(tmp_path):
     # check that monitor exits cleanly when retries are not allowed and no
     # workup method raises an error
 
@@ -264,7 +251,7 @@ def test_s3task_8(tmp_path):
     assert len(result["corrections"]) == 1
 
 
-def test_s3task_9(tmp_path):
+def test_s3workflow_9(tmp_path):
     # make sure an error is raised when a file is missing
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -277,3 +264,14 @@ def test_s3task_9(tmp_path):
         Customized__Testing__DummyWorkflow.run_config,
         directory=tmp_path,
     )
+
+
+# !!! Unitests to use with Prefect Executor
+# Test as a subflow
+# from prefect import flow
+# @flow
+# def test():
+#     state = workflow.run()
+#     return state.result()
+# state = test(return_state=True)
+# result = state.result()

@@ -25,7 +25,7 @@ HEADER_ART = r"""
 """
 
 
-class Worker:
+class PrefectWorker:
     """
     A worker is a process that checks the Prefect database for scheduled workflow
     runs and then submits them.
