@@ -56,7 +56,7 @@ class PositiveEnergy(ErrorHandler):
         # we can say there is no error.
         return False
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
         """
         Perform corrections based on the INCAR.
         """

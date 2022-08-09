@@ -70,7 +70,7 @@ def test_viewer(request):
     # grab cif filenames to test with
     from simmate.toolkit import base_data_types
 
-    structure_dir = Path(base_data_types.__file__) / "test" / "test_structures"
+    structure_dir = Path(base_data_types.__file__).parent / "test" / "test_structures"
     cif_filenames = [f.absolute() for f in structure_dir.iterdir()]
 
     structure = Structure.from_file(cif_filenames[0])

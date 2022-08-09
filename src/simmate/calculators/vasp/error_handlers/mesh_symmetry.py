@@ -71,7 +71,7 @@ class MeshSymmetry(ErrorHandler):
         # class's default function to do this.
         return super().check(directory)
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         raise NotImplementedError(
             "The fix for MeshSymmetryError hasn't been converted from Custodian "

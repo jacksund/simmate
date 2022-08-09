@@ -117,6 +117,7 @@ import time
 import signal
 import subprocess
 from typing import List, Tuple
+from pathlib import Path
 
 import pandas
 
@@ -197,7 +198,7 @@ class S3Workflow(Workflow):
     @classmethod
     def run_config(
         cls,
-        directory: str = None,
+        directory: Path = None,
         command: str = None,
         is_restart: bool = False,
         compress_output: bool = False,
@@ -313,7 +314,7 @@ class S3Workflow(Workflow):
         return result
 
     @staticmethod
-    def setup(directory: str, **kwargs):
+    def setup(directory: Path, **kwargs):
         """
         This abstract method is ran before the command is actually executed. This
         allows for some pre-processing, such as writing input files or any other
@@ -347,7 +348,7 @@ class S3Workflow(Workflow):
         pass
 
     @classmethod
-    def setup_restart(directory: str, **kwargs):
+    def setup_restart(directory: Path, **kwargs):
         """
         This method is used instead of `setup` when is_restart=True is passed
         to the run/run_config methods.
@@ -384,7 +385,7 @@ class S3Workflow(Workflow):
         pass
 
     @classmethod
-    def _check_input_files(cls, directory: str, raise_if_missing: bool = True):
+    def _check_input_files(cls, directory: Path, raise_if_missing: bool = True):
         """
         Make sure that there are the proper input files to run this calc
         """
@@ -401,7 +402,7 @@ class S3Workflow(Workflow):
         return True  # indicates all files are present
 
     @classmethod
-    def execute(cls, directory: str, command: str) -> List[Tuple[str]]:
+    def execute(cls, directory: Path, command: str) -> List[Tuple[str]]:
         """
         This calls the command within the target directory and handles all error
         handling as well as monitoring of the job.
@@ -633,7 +634,7 @@ class S3Workflow(Workflow):
         return corrections
 
     @staticmethod
-    def _terminate_job(directory: str, process: subprocess.Popen, command: str):
+    def _terminate_job(directory: Path, process: subprocess.Popen, command: str):
         """
         Stopping the command we submitted can be a tricky business if we are running
         scripts in parallel (such as using mpirun). Different computers and OSs
@@ -708,7 +709,7 @@ class S3Workflow(Workflow):
         return True
 
     @staticmethod
-    def workup(directory: str):
+    def workup(directory: Path):
         """
         This method is called at the end of a job, *after* error detection.
         This allows post-processing, such as cleanup, analysis of results,

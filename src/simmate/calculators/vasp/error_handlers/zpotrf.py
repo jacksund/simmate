@@ -61,7 +61,7 @@ class Zpotrf(ErrorHandler):
         else:
             poscar_filename = directory / "POSCAR"
             structure = Structure.from_file(poscar_filename)
-            structure.to("POSCAR", poscar_filename + "_original")
+            structure.to("POSCAR", poscar_filename.with_stem("POSCAR_original"))
             structure.apply_strain(0.2)
             structure.to("POSCAR", poscar_filename)
             correction = "scaled the structure lattice by +20%"

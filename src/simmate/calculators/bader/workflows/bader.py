@@ -102,7 +102,7 @@ class PopulationAnalysis__Bader__Bader(S3Workflow):
 
     @staticmethod
     def _write_output_summary(
-        directory: str,
+        directory: Path,
         dataframe: DataFrame,
         extra_data: dict,
     ):

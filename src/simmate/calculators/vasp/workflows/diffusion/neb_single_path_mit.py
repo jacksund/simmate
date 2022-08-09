@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 from simmate.toolkit.diffusion import MigrationHop
 from simmate.workflow_engine import Workflow
 from simmate.calculators.vasp.workflows.diffusion.utilities import (
@@ -46,7 +48,7 @@ class Diffusion__Vasp__NebSinglePathMit(Workflow):
     def run_config(
         cls,
         migration_hop: MigrationHop,
-        directory: str = None,
+        directory: Path = None,
         source: dict = None,
         command: str = None,
         # These help link results to a higher-level table.

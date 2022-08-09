@@ -69,7 +69,7 @@ class NonConverging(ErrorHandler):
         # if the files don't exist, we are not seeing any error yet
         return False
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
         """
         Perform corrections based on the INCAR.
         """

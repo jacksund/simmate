@@ -74,6 +74,6 @@ def load_default_sqlite3_build():
     )
 
     # rename and move the sqlite file to be the new database
-    db_filename_orig = archive_filename_full.replace(".zip", ".sqlite3")
+    db_filename_orig = archive_filename_full.with_suffix(".sqlite3")  # was .zip
     db_filename_new = DATABASES["default"]["NAME"]
     shutil.move(db_filename_orig, db_filename_new)

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 from simmate.toolkit import Structure
 from simmate.calculators.vasp.workflows.base import VaspWorkflow
 from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
@@ -10,7 +12,7 @@ class DynamicsWorkflow(VaspWorkflow):
     def setup(
         cls,
         structure: Structure,
-        directory: str,
+        directory: Path,
         temperature_start: int = 300,
         temperature_end: int = 1200,
         time_step: float = 2,

@@ -164,7 +164,7 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
         structure: Structure,
         migrating_specie: str,
         vacancy_mode: bool,
-        directory: str = "",
+        directory: Path = None,
         **kwargs,
     ) -> List[str]:
         """
@@ -189,6 +189,8 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
         - `**kwargs`:
             Any parameter normally accepted by DistinctPathFinder
         """
+        if not directory:
+            directory = Path("")
 
         ###### STEP 1: creating the toolkit objects and writing them to file
 

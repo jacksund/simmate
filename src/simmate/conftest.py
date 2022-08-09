@@ -182,11 +182,7 @@ def django_db_setup(
             structure_db.save()
 
 
-def copy_test_files(
-    tmp_path,
-    test_directory: str,
-    test_folder: str,
-):
+def copy_test_files(tmp_path, test_directory, test_folder):
     """
     This is a test utility that takes a given directory and copies it's content
     over to a temporary directory. You'll often use this when you want to modify

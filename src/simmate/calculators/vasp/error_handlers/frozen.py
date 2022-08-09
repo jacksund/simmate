@@ -46,7 +46,7 @@ class Frozen(ErrorHandler):
         # our timeout specified -- where the job is still running and looks good.
         return False
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"

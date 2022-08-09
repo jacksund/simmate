@@ -63,7 +63,7 @@ class LargeSigma(ErrorHandler):
         # not seeing any error.
         return False
 
-    def correct(self, directory: str) -> str:
+    def correct(self, directory: Path) -> str:
 
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"

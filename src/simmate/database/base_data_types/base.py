@@ -15,13 +15,13 @@ import warnings
 import yaml
 import json
 from pathlib import Path
+from typing import List, Union
 
 import pandas
 from django.db import models  # , transaction
 from django_pandas.io import read_frame
 from django.utils.timezone import datetime
 
-from typing import List
 
 # This line does NOTHING but rename a module. I have this because I want to use
 # "table_column.CharField(...)" instead of "models.CharField(...)" in my Models.
@@ -119,7 +119,7 @@ class SearchResults(models.QuerySet):
         # pymatgen objects as a list
         return [obj.to_toolkit() for obj in self]
 
-    def to_archive(self, filename: str = None):
+    def to_archive(self, filename: Union[str, Path] = None):
         """
         Writes a compressed zip file using the table's base_info attribute.
         Underneath, the file is written in a csv format.
@@ -157,6 +157,9 @@ class SearchResults(models.QuerySet):
             )
             filename = filename_base + ".zip"
 
+        # convert to path obj
+        filename = Path(filename)
+
         # grab the base_information, and if ID is not present, add it
         base_info = self.model.base_info
         if "id" not in base_info:
@@ -176,7 +179,7 @@ class SearchResults(models.QuerySet):
 
         # Write the data to a csv file
         # OPTIMIZE: is there a better format that pandas can write to?
-        csv_filename = filename.replace(".zip", ".csv")
+        csv_filename = filename.with_suffix(".csv")
         df.to_csv(csv_filename, index=False)
 
         # now convert the dump file to a compressed zip. In the complex, os
@@ -184,7 +187,7 @@ class SearchResults(models.QuerySet):
         # zip ending. We are also grabbing the directory that the csv is
         # located in
         shutil.make_archive(
-            base_name=filename.removesuffix(".zip"),
+            base_name=filename.with_suffix(""),  # removes .zip ending
             format="zip",
             root_dir=csv_filename.absolute().parent,
             base_dir=csv_filename.name,
@@ -523,7 +526,7 @@ class DatabaseTable(models.Model):
     @classmethod
     def load_archive(
         cls,
-        filename: str = None,
+        filename: Union[str, Path] = None,
         delete_on_completion: bool = False,
         confirm_override: bool = False,
         parallel: bool = False,
@@ -588,7 +591,7 @@ class DatabaseTable(models.Model):
             matching_files = [
                 file
                 for file in Path.cwd().iterdir()
-                if file.startswith(cls.__name__) and file.suffix == ".zip"
+                if file.name.startswith(cls.__name__) and file.suffix == ".zip"
             ]
             # make sure there is at least one file
             if not matching_files:
@@ -601,7 +604,7 @@ class DatabaseTable(models.Model):
 
         # Turn the filename into the full path -- which makes a number of
         # manipulations easier below.
-        filename = filename.absolute()
+        filename = Path(filename).absolute()
 
         # uncompress the zip file to the same directory that it is located in
         shutil.unpack_archive(
@@ -611,7 +614,7 @@ class DatabaseTable(models.Model):
 
         # We will now have a csv file of the same name, which we load into
         # a pandas dataframe
-        csv_filename = filename.replace(".zip", ".csv")
+        csv_filename = filename.with_suffix(".csv")  # was ".zip"
         df = pandas.read_csv(csv_filename)
 
         # BUG: NaN values throw errors when read into SQL databases, so we

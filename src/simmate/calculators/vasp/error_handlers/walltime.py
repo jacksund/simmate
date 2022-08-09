@@ -243,7 +243,7 @@ class Walltime(ErrorHandler):
 
         return time_per_step
 
-    def _check_if_finished(self, directory: str):
+    def _check_if_finished(self, directory: Path):
         # We can invert the unconverged check in order to see if the calc is done.
         return not Unconverged().check(directory)
         # BUG: Will this work properly for MD simulations? Should I check the

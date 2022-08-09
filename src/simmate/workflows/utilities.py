@@ -9,8 +9,9 @@ a workflow using its name.
 import yaml
 import shutil
 import pkgutil
-from typing import List
+from typing import List, Union
 from importlib import import_module
+from pathlib import Path
 
 from simmate import workflows
 from simmate.utilities import get_directory, make_archive
@@ -190,9 +191,7 @@ def get_workflow(
     return workflow
 
 
-def load_results_from_directories(
-    base_directory: str = ".",
-):
+def load_results_from_directories(base_directory: Union[str, Path] = "."):
     """
     Goes through a given directory and finds all "simmate-task-" folders and zip
     archives present. The simmate_metadata.yaml file is used in each of these

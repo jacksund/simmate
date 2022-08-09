@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
 from simmate.toolkit import Structure
@@ -26,7 +28,7 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
         structure: Structure,
         command: str = None,
         source: dict = None,
-        directory: str = None,
+        directory: Path = None,
     ):
 
         prebadelf_result = PopulationAnalysis__Vasp__PrebadelfMatproj.run(

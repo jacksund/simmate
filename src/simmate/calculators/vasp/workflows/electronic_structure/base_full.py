@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 from simmate.workflow_engine import Workflow
 
 
@@ -31,7 +33,7 @@ class ElectronicStructureWorkflow(Workflow):
         structure,
         command: str = None,
         source: str = None,
-        directory: str = None,
+        directory: Path = None,
         copy_previous_directory: str = False,
     ):
 

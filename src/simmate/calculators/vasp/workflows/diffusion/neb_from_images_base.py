@@ -48,7 +48,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
     @classmethod
     def setup(
         cls,
-        directory: str,
+        directory: Path,
         migration_images: MigrationImages,
         **kwargs,
     ):
@@ -141,7 +141,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         path_vis.to("cif", directory / "path_relaxed_idpp.cif")
 
     @classmethod
-    def setup_restart(cls, directory: str, **kwargs):
+    def setup_restart(cls, directory: Path, **kwargs):
         """
         From a working directory of a past calculation, sets up for the calculation
         to be restarted.
@@ -159,7 +159,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
     def _pre_checks(
         cls,
         migration_images: MigrationImages,
-        directory: str,
+        directory: Path,
     ):
         """
         Runs a series of checks to ensure the user configured the job correctly.
@@ -218,7 +218,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         return MigrationImages(structures)  # convert back to simmate object
 
     @classmethod
-    def workup(cls, directory: str):
+    def workup(cls, directory: Path):
         """
         Works up data from a NEB run, including confirming convergence and
         writing summary output files (structures, data, and plots).
@@ -274,7 +274,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         return neb_results
 
     @staticmethod
-    def _write_output_summary(directory: str, neb_results: NEBAnalysis):
+    def _write_output_summary(directory: Path, neb_results: NEBAnalysis):
         """
         This is an EXPERIMENTAL feature.
 

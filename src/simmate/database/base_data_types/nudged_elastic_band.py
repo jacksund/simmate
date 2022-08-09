@@ -4,6 +4,8 @@
 WARNING: This module is experimental and subject to change.
 """
 
+from pathlib import Path
+
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.analysis.transition_state import NEBAnalysis
@@ -85,7 +87,7 @@ class DiffusionAnalysis(Structure):
         return structure_dict if as_dict else cls(**structure_dict)
 
     @classmethod
-    def from_directory(cls, directory: str, **kwargs):
+    def from_directory(cls, directory: Path, **kwargs):
         """
         Creates a new database entry from a directory that holds diffusion analysis
         results. For now, this assumes the directory holds vasp output files.
@@ -298,7 +300,7 @@ class MigrationHop(DatabaseTable):
     #######
 
     @classmethod
-    def from_directory(cls, directory: str, **kwargs):
+    def from_directory(cls, directory: Path, **kwargs):
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
 

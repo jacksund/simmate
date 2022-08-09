@@ -26,7 +26,7 @@ class TripleProduct(ErrorHandler):
         # load the structure and save it as a backup file
         poscar_filename = directory / "POSCAR"
         structure = Structure.from_file(poscar_filename)
-        structure.to("POSCAR", poscar_filename + "_original")
+        structure.to("POSCAR", poscar_filename.with_stem("POSCAR_original"))
 
         # switch the b and c lattice vector of the structure
         structure.make_supercell([[1, 0, 0], [0, 0, 1], [0, 1, 0]])

@@ -291,7 +291,7 @@ class VaspWorkflow(S3Workflow):
         return vasprun
 
     @staticmethod
-    def _write_output_summary(directory: str, vasprun: Vasprun):
+    def _write_output_summary(directory: Path, vasprun: Vasprun):
         """
         This prints a "simmate_summary.yaml" file with key output information.
 

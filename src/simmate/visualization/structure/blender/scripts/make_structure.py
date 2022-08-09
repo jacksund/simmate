@@ -315,7 +315,7 @@ def make_structure_blend(lattice, sites_to_draw, filename):
     if filename.suffix == ".blend":
         # save this to a blender file
         bpy.ops.wm.save_as_mainfile(filepath=filename)
-    elif filename.suffix ==".glb":
+    elif filename.suffix == ".glb":
         # export in the gltf 2.0 format (.glb file)
         bpy.ops.export_scene.gltf(filepath=filename)
     else:
