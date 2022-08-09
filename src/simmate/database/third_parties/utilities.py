@@ -2,6 +2,7 @@
 
 import urllib
 import shutil
+import logging
 
 from simmate.utilities import get_directory
 from simmate.configuration.django.settings import DATABASES, SIMMATE_DIRECTORY
@@ -61,11 +62,11 @@ def load_default_sqlite3_build():
     if not archive_filename_full.exists():
         remote_archive_link = f"https://archives.simmate.org/{archive_filename}"
         # Download the archive zip file from the URL to the current working dir
-        print("Downloading database file...")
+        logging.info("Downloading database file...")
         urllib.request.urlretrieve(remote_archive_link, archive_filename_full)
-        print("Done.\n")
+        logging.info("Done.")
     else:
-        print(f"Found past download at {archive_filename_full}. Using archive as base.")
+        logging.info(f"Found past download at {archive_filename_full}. Using archive as base.")
 
     # uncompress the zip file to archive directory
     shutil.unpack_archive(

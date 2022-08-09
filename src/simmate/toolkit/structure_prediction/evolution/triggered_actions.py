@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from inspect import signature
-
+import logging
 
 class TriggeredAction:
     def __init__(
@@ -80,7 +80,7 @@ class InitStructures:
 
     def action(self, search):
 
-        print("Making new structures...")
+        logging.info("Making new structures...")
 
         # we want n total structures so we are going to loop this number of times
         for n in range(self.n_initial_structures):
@@ -113,7 +113,7 @@ class AddStructures:
 
     def action(self, search):
 
-        print("Making new structures...")
+        logging.info("Making new structures...")
 
         # we want n total structures so we are going to loop this number of times
         for n in range(self.n_add_structures):

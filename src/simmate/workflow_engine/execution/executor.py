@@ -2,6 +2,7 @@
 
 # import pickle
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
+import logging
 
 from simmate.workflow_engine.execution.database import WorkItem
 from simmate.workflow_engine.execution.future import SimmateFuture
@@ -67,7 +68,7 @@ class SimmateExecutor:
         # then we return a dictionary of which futures replaced by results.
         # NOTE: this is really for compatibility with Prefect's FlowRunner.
         if isinstance(futures, dict):
-            print("\n\nWAIT")
+            logging.info("waiting for workflows to finish")
             import time
 
             time.sleep(10)

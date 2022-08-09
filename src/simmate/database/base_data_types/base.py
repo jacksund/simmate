@@ -16,6 +16,7 @@ import yaml
 import json
 from pathlib import Path
 from typing import List, Union
+import logging
 
 import pandas
 from django.db import models  # , transaction
@@ -750,23 +751,23 @@ class DatabaseTable(models.Model):
 
         # tell the user where the data comes from
         if cls._meta.app_label == "third_parties":
-            print(
-                "\nWARNING: this data is NOT from the Simmate team, so be sure "
+            logging.warn(
+                "this data is NOT from the Simmate team, so be sure "
                 "to visit the provider's website and to cite their work."
                 f" This data is from {cls.source} and the following paper "
-                f"should be cited: {cls.source_doi}\n"
+                f"should be cited: {cls.source_doi}"
             )
 
         # Predetermine the file name, which is just the ending of the URL
         archive_filename = remote_archive_link.split("/")[-1]
 
         # Download the archive zip file from the URL to the current working dir
-        print("Downloading archive file...")
+        logging.info("Downloading archive file...")
         urllib.request.urlretrieve(remote_archive_link, archive_filename)
-        print("Done.\n")
+        logging.info("Done.")
 
         # now that the archive is downloaded, we can load it into our db
-        print("Loading data into Simmate database...")
+        logging.info("Loading data into Simmate database...")
         cls.load_archive(
             archive_filename,
             delete_on_completion=True,
@@ -774,7 +775,7 @@ class DatabaseTable(models.Model):
             parallel=parallel,
             confirm_sqlite_parallel=True,  # we already confirmed this above
         )
-        print("Done.\n")
+        logging.info("Done.")
 
     @classmethod
     def get_column_names(cls) -> List[str]:

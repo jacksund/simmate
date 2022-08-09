@@ -118,6 +118,7 @@ import signal
 import subprocess
 from typing import List, Tuple
 from pathlib import Path
+import logging
 
 import pandas
 
@@ -270,7 +271,7 @@ class S3Workflow(Workflow):
         elif is_restart and not is_complete:
             cls.setup_restart(directory=directory, **kwargs)
         else:
-            print("Calculation is already completed. Skipping setup.")
+            logging.info("Calculation is already completed. Skipping setup.")
 
         # now if we have a restart OR have an incomplete calculation that is being
         # restarted, we can check our files and run the external program
@@ -283,7 +284,7 @@ class S3Workflow(Workflow):
             # a list of any corrections applied during the run.
             corrections = cls.execute(directory, command)
         else:
-            print("Calculation is already completed. Skipping execution.")
+            logging.info("Calculation is already completed. Skipping execution.")
 
             # load the corrections from file for reference
             corrections_filename = directory / "simmate_corrections.csv"
@@ -470,6 +471,7 @@ class S3Workflow(Workflow):
             # a bug if another is another parallel command used besides mpirun.
             # An example of this might be deepmd which automatically submits
             # things in parallel without calling mpirun up-front.
+            logging.info(f"Running '{command}' inside {directory}")
             process = subprocess.Popen(
                 command,
                 cwd=directory,
@@ -594,6 +596,7 @@ class S3Workflow(Workflow):
                     correction = error_handler.correct(directory)
                     # record what's been changed
                     corrections.append((error_handler.name, correction))
+                    logging.info(f"Found error {error_handler.name}. Fixed with {correction}")
                     # break from the error_handler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break

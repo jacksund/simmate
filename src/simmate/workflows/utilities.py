@@ -12,6 +12,7 @@ import pkgutil
 from typing import List, Union
 from importlib import import_module
 from pathlib import Path
+import logging
 
 from simmate import workflows
 from simmate.utilities import get_directory, make_archive
@@ -222,7 +223,7 @@ def load_results_from_directories(base_directory: Union[str, Path] = "."):
 
         # Print message for monitoring progress.
         # TODO: consider switching to tqdm
-        print(f"Loading data from... \n\t{foldername}")
+        logging.info(f"Loading data from {foldername}")
 
         # There may be many folders that contain failed or incomplete data.
         # We don't want those to prevent others from being loaded so we put
@@ -262,10 +263,10 @@ def load_results_from_directories(base_directory: Union[str, Path] = "."):
             results_db.save()
             make_archive(foldername)
 
-            print("\tSuccessful.")
+            logging.info("Successfully loaded into database.")
 
         except:
-            print("\tFailed.")
+            logging.warn("Failed to load into database")
 
 
 def get_unique_parameters() -> List[str]:

@@ -269,7 +269,6 @@ def empty_directory(directory: Path, files_to_keep: List[Path] = []):
         not be deleted. The default is [].
     """
     # grab all of the files and folders inside the listed directory
-    print(directory)
     for filename in directory.iterdir():
         full_path = filename.absolute()
         if filename not in files_to_keep:

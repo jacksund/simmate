@@ -36,6 +36,8 @@ command: mpirun -n 5 vasp_std > vasp.out
 ```
 """
 
+import logging
+
 from simmate.workflow_engine import Workflow, S3Workflow
 
 
@@ -50,7 +52,7 @@ class Customized__Vasp__UserConfig(Workflow):
         updated_settings: dict,
         input_parameters: dict,
     ):
-        print(
+        logging.warn(
             "WARNING: customized workflows are meant only for quick testing. "
             "If you are using custom settings regularly, we highly recommend "
             "making a new workflow inside a Simmate project instead. "

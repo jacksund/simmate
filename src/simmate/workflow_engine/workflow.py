@@ -264,6 +264,7 @@ have gone through all the Simmate
 including the advanced "Creating custom workflows" tutorial.
 """
 
+import logging
 import json
 import cloudpickle
 import yaml
@@ -386,9 +387,9 @@ class Workflow:
         """
         # Note: this is a separate method and wrapper around run_full because
         # we want to allow Prefect executor to overwrite this method.
-        print(f"Starting {cls.name_full}")
+        logging.info(f"Starting {cls.name_full}")
         result = cls._run_full(**kwargs)  # no run_id as a new one will be made
-        print(f"Completed {cls.name_full}")
+        logging.info(f"Completed {cls.name_full}")
         state = DummyState(result)
         return state
 
@@ -398,7 +399,7 @@ class Workflow:
         submits the workflow run to cloud database to be ran by a worker
         """
 
-        print(f"Submitting new run of {cls.name_full}")
+        logging.info(f"Submitting new run of {cls.name_full} to cloud")
 
         # If we are submitting using a filename, we don't want to
         # submit to a cluster and have the job fail because it doesn't have
@@ -421,7 +422,9 @@ class Workflow:
             tags=cls.tags,
             **parameters_serialized,
         )
-
+        
+        logging.info(f"Successfully submitted (run_id={run_id})")
+        
         # If the user wants the future, return that instead of the run_id
         if return_future:
             return future
@@ -802,8 +805,8 @@ class Workflow:
             # assert
             if not source == primary_input:
                 # only warning for now because this is experimental
-                print(
-                    "\nWARNING: Your source does not match the source of your "
+                logging.warn(
+                    "Your source does not match the source of your "
                     "primary input. Sources are an experimental feature, so "
                     "this will not affect your results. Still, please report "
                     "this to our team to help with development. \n\n"
@@ -938,7 +941,7 @@ class Workflow:
         # special-case workflows don't store calculation information bc the flow
         # is just a quick python analysis.
         if not database_table:
-            print("No database table found. Skipping registration.")
+            logging.warn("No database table found. Skipping registration.")
             return
 
         # grab the registration kwargs from the parameters provided and then
