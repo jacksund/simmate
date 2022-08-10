@@ -414,7 +414,8 @@ class Workflow:
         # at this higher level. An example is storing the structure and run id.
         # Thus, we create and register the run_id up front
         run_id = cls._get_run_id()
-        cls._register_calculation(run_id=run_id, **kwargs)
+        if cls.use_database:
+            cls._register_calculation(run_id=run_id, **kwargs)
 
         future = SimmateExecutor.submit(
             cls._run_full,  # should this be the run method...?
