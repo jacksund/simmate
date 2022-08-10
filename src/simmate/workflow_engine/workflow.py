@@ -394,7 +394,9 @@ class Workflow:
         return state
 
     @classmethod
-    def run_cloud(cls, return_state: bool = True, **kwargs) -> str:
+    def run_cloud(
+        cls, return_state: bool = True, tags: list[str] = None, **kwargs
+    ) -> str:
         """
         submits the workflow run to cloud database to be ran by a worker
         """
@@ -420,7 +422,7 @@ class Workflow:
         state = SimmateExecutor.submit(
             cls._run_full,  # should this be the run method...?
             run_id=run_id,
-            tags=cls.tags,
+            tags=tags or cls.tags,
             **parameters_serialized,
         )
 

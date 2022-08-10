@@ -94,6 +94,7 @@ class SearchEngine:
             (0.05, "from_ase.CoordinatePerturbation"),
         ],
         selector: str = "TruncatedSelection",
+        tags: list[str] = None,
         # TODO: maybe use **workflow_run_kwargs...?
     ):
         """
@@ -153,6 +154,7 @@ class SearchEngine:
 
         self.composition = composition
         self.workflow_command = workflow_command
+        self.tags = tags
 
         # TODO: consider grabbing these from the database so that we can update
         # them at any point.
@@ -452,6 +454,7 @@ class SearchEngine:
                 )
                 state = self.workflow.run_cloud(
                     structure=structure,
+                    tags=self.tags,
                     **extra_kwargs,
                 )
 
@@ -466,8 +469,10 @@ class SearchEngine:
                 calculation = self.calculation_datatable.objects.get(
                     run_id=state.run_id
                 )
-                calculation.source = f"{source.__class__.__name__}"
-                calculation.source_id = parent_ids
+                calculation.source = {
+                    "creator": f"{source.__class__.__name__}",
+                    "parent_ids": parent_ids,
+                }
                 calculation.save()
 
     def _make_new_structure(self, source, max_attempts=100):
