@@ -165,8 +165,7 @@ class Walltime(ErrorHandler):
             # parse the output into a time
             if output == "INVALID":
                 logging.warn(
-                    "SLURM node improperly configured. "
-                    "Cannot detect TimeLeft"
+                    "SLURM node improperly configured. " "Cannot detect TimeLeft"
                 )
                 return
             elif output == "UNLIMITED":

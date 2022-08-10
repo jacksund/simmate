@@ -66,7 +66,9 @@ def load_default_sqlite3_build():
         urllib.request.urlretrieve(remote_archive_link, archive_filename_full)
         logging.info("Done.")
     else:
-        logging.info(f"Found past download at {archive_filename_full}. Using archive as base.")
+        logging.info(
+            f"Found past download at {archive_filename_full}. Using archive as base."
+        )
 
     # uncompress the zip file to archive directory
     shutil.unpack_archive(

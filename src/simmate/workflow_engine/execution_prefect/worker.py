@@ -92,7 +92,9 @@ class PrefectWorker:
 
         async with OrionAgent(work_queue_name=self.queue_name) as agent:
 
-            logging.info(f"Worker started! Looking for work from queue '{self.queue_name}'...")
+            logging.info(
+                f"Worker started! Looking for work from queue '{self.queue_name}'..."
+            )
 
             # Loop endlessly until one of the following happens...
             #   the timeout limit is hit
@@ -110,7 +112,9 @@ class PrefectWorker:
                 # check the number of jobs completed so far, and exit if we hit
                 # the limit
                 if nflows_submitted >= self.nflows_max:
-                    logging.info("Maxium number of workflow runs hit. Shutting down worker.")
+                    logging.info(
+                        "Maximum number of workflow runs hit. Shutting down worker."
+                    )
                     break
 
                 # Run and submit flows

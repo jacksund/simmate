@@ -361,6 +361,7 @@ class Workflow:
         """
         This method should not be called directly. Use the `run` method instead.
         """
+        logging.info(f"Starting {cls.name_full}")
         # This method is isolated only because we want to wrap it as a prefect
         # workflow in some cases.
         run_id = run_id or cls._get_run_id()
@@ -368,6 +369,7 @@ class Workflow:
         result = cls.run_config(**kwargs_cleaned)
         if cls.use_database:
             result["calculation_id"] = cls._save_to_database(result, run_id=run_id)
+        logging.info(f"Completed {cls.name_full}")
         return result
 
     @staticmethod
@@ -387,9 +389,7 @@ class Workflow:
         """
         # Note: this is a separate method and wrapper around run_full because
         # we want to allow Prefect executor to overwrite this method.
-        logging.info(f"Starting {cls.name_full}")
-        result = cls._run_full(**kwargs)  # no run_id as a new one will be made
-        logging.info(f"Completed {cls.name_full}")
+        result = cls._run_full(**kwargs)
         state = DummyState(result)
         return state
 
@@ -422,9 +422,9 @@ class Workflow:
             tags=cls.tags,
             **parameters_serialized,
         )
-        
+
         logging.info(f"Successfully submitted (run_id={run_id})")
-        
+
         # If the user wants the future, return that instead of the run_id
         if return_future:
             return future

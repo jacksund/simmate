@@ -2,6 +2,7 @@
 
 import logging
 
+
 class StopCondition:
     def __init__(
         self,
@@ -17,6 +18,7 @@ class StopCondition:
         # stopping condition(s) has been met and False if the calculation should
         # continue.
         pass
+
 
 class BasicStopConditions:
     def __init__(self, max_structures=300, energy_limit=-999, same_min_structures=50):

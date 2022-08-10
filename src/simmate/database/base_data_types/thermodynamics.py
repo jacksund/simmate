@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tqdm import tqdm
+import logging
 
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.database.base_data_types import DatabaseTable, table_column

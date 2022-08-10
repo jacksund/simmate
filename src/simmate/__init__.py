@@ -8,6 +8,7 @@ __version__ = importlib.metadata.version("simmate")
 
 # Some of these utilities use the __version__ above, so this import must come after
 from simmate.utilities import get_doc_from_readme, check_if_using_latest_version
+
 __doc__ = get_doc_from_readme(__file__)
 
 
@@ -26,4 +27,3 @@ try:
     check_if_using_latest_version()
 except:
     logging.warn("Unable to check if using the latest Simmate version.")
-

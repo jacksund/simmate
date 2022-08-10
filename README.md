@@ -118,8 +118,8 @@ command: mpirun -n 8 vasp_std > vasp.out
 ```
 
 ``` python
-# Python let's you run workflows within scripts and
-# it also enables advanced setting configurations.
+# Python let's you run workflows within scripts
+# which enables advanced setting configurations.
 
 from simmate.workflows.relaxation import Relaxation__Vasp__Matproj as workflow
 
@@ -133,8 +133,6 @@ result = state.result()
 ```python
 # Be sure to follow the database tutorial where we build our 
 # initial database with the command `simmate database reset`
-# and load data with `ExampleTable.load_remote_archive()`
-# before running any of the code below.
 
 from simmate.database import connect
 from simmate.database.third_parties import MatprojStructure
@@ -151,8 +149,7 @@ structures = MatprojStructure.objects.filter(
     spacegroup__number=167,  # the spacegroup number is 167
 ).all()
 
-# Quickly convert to a pandas dataframe or toolkit structures.
-# (note: the toolkit is built off of pymatgen, so it uses the same methods)
+# Quickly convert to excel, a pandas dataframe, or toolkit structures.
 df = structures.to_dataframe()
 structures = structures.to_toolkit()
 ```
@@ -182,19 +179,15 @@ structure.add_oxidation_state_by_guess()
 
 4. _**Ease of Scalability.**_ At the beginning of a project, you may want to write and run code on a single computer and single core. But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations. At the extreme, some projects require thousands of computers across numerous locations, including university clusters (using SLURM or PBS) and cloud computing (using Kubernetes and Docker). Simmate can meet all of these needs thanks to integration with a custom `SimmateExecutor` (the default), [Dask](https://github.com/dask/dask), and/or [Prefect](https://github.com/PrefectHQ/prefect):
 ```python
-# on your local computer, schedule your workflow run
+# On your local computer, schedule your workflow run.
+# This is as easy as replacing "run" with "run_cloud".
+# This returns a "future-like" object.
 state = workflow.run_cloud(...)
 
-# Note, your workflow won't run locally.
-# While you wait for it run, you can check it's status
-state.is_done()
-state.is_running()
-
-# or cancel the job before it runs
-state.cancel()
-
-# or wait until the job completes and grab the result!
-# The job won't run until you start a worker (see command below)
+# Calling result will wait until the job completes 
+# and grab the result! Note, the job won't run 
+# until you start a worker that is connected to the
+# same database (see command below)
 result = state.result()
 ```
 

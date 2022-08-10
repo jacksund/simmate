@@ -69,6 +69,9 @@ class SimmateWorker:
         # print the header in the console to let the user know the worker started
         print(HEADER_ART)
 
+        # loggin helpful info
+        logging.info(f"Starting worker with tags {list(self.tags)}")
+
         # establish starting point for the worker
         time_start = time.time()
         ntasks_finished = 0
@@ -83,13 +86,18 @@ class SimmateWorker:
             # if we've hit the limit.
             if (time.time() - time_start) > self.timeout:
                 # TODO - check wait_on_timeout if running in parallel.
-                logging.info("The time-limit for this worker has been hit. Shutting down.")
+                logging.info(
+                    "The time-limit for this worker has been hit. Shutting down."
+                )
                 return
 
             # check the number of jobs completed so far, and exit if we hit
             # the limit
             if ntasks_finished >= self.nitems_max:
-                logging.info("Maxium number of WorkItems hit for this worker. Shutting down.")
+                logging.info(
+                    f"Maximum number of WorkItems reached ({self.nitems_max}). "
+                    "Shutting down."
+                )
                 return
 
             # check the length of the queue and while it is empty, we want to
@@ -165,7 +173,7 @@ class SimmateWorker:
             ntasks_finished += 1
 
             # Print out the job ID that was just finished for the user to see.
-            logging.info("Completed WorkItem.")
+            logging.info("Completed WorkItem")
 
     def queue_size(self):
         """

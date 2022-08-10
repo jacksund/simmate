@@ -3,6 +3,7 @@
 from inspect import signature
 import logging
 
+
 class TriggeredAction:
     def __init__(
         self,

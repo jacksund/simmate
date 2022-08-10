@@ -471,7 +471,8 @@ class S3Workflow(Workflow):
             # a bug if another is another parallel command used besides mpirun.
             # An example of this might be deepmd which automatically submits
             # things in parallel without calling mpirun up-front.
-            logging.info(f"Running '{command}' inside {directory}")
+            logging.info(f"Using {directory}")
+            logging.info(f"Running '{command}'")
             process = subprocess.Popen(
                 command,
                 cwd=directory,
@@ -596,7 +597,9 @@ class S3Workflow(Workflow):
                     correction = error_handler.correct(directory)
                     # record what's been changed
                     corrections.append((error_handler.name, correction))
-                    logging.info(f"Found error {error_handler.name}. Fixed with {correction}")
+                    logging.info(
+                        f"Found error '{error_handler.name}'. Fixed with '{correction}'"
+                    )
                     # break from the error_handler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break
