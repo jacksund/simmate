@@ -270,7 +270,7 @@ result = state.result()
 
 You can use python inheritance to borrow utilities and settings from workflows.
 However, make sure you are making copies of the original workflow settings!
-If you modify them without making a copy, you'll be 
+If you modify them without making a copy, you'll be in a world of trouble.
 
 ``` python
 from simmate.workflows.utilities import get_workflow
@@ -292,7 +292,7 @@ class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
 
 # make sure we have new settings updated
 # and that we didn't change the original
-assert original_workflow.incat != StaticEnergy__Vasp__MyCustomPreset
+assert original_workflow.incar != StaticEnergy__Vasp__MyCustomPreset
 ```
 
 

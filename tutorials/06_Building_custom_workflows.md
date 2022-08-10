@@ -1,14 +1,15 @@
 
 # Building custom workflows
 
-> :warning: This tutorial isn't required for beginners to use Simmate. There is currently no "quick tutorial" for this topic as this is only for advanced users with complex use-cases.
+> :warning: There is no "quick tutorial" for this topic. Even advanced users should read everything!
 
-In this tutorial, you will learn how to build customized workflows. This involves an introduction to underlying calculators and workflow engine features.
+In this tutorial, you will learn how to build customized workflows.
 
 1. [Why isn't there a `custom_settings` option?](#why-isnt-there-a-custom_settings-option)
 2. [Update settings for an existing workflow](#update-settings-for-an-existing-workflow)
-2. [Create new & advanced workflows](#create-new-&-advanced-workflows)
-3. [Creating a Project for our workflow](#creating-a-project-for-our-workflow)
+3. [Determine a name for your new custom workflow](#determine-a-name-for-your-new-custom-workflow)
+4. [Create new & advanced workflows](#create-new-&-advanced-workflows)
+5. [Taking things to the next level](#taking-things-to-next-level)
 
 </br>
 
@@ -24,7 +25,9 @@ Instead, Simmate encourages the creation of new workflows and result tables when
 
 For very quick testing, it is still useful to customize a workflow's settings without having to create a new workflow altogether. There are two approaches you can take to edit your settings:
 
-**OPTION 1:** Writing input files and manually submitting a separate program
+**OPTION 1:** 
+
+Writing input files and manually submitting a separate program
 
 ``` bash
 # This simply writes input files
@@ -77,169 +80,123 @@ Both of these approaches are only suitable for customizing settings for a few ca
 
 </br>
 
+## Naming workflows
+
+> :warning: Naming is very import! If you skip this step, your workflows will fail and cause errors elsewhere.
+
+Naming your new workflow is an important step in Simmate. Higher level features such as the website interface require that workflow names follow a certain format because this let's us do things such as determine where in the website interface we can find your new workflow. Followings a set of rules is how we arrive at workflows like `relaxation.vasp.mit`
+
+First, we need to update the workflow name to match Simmate's naming
+conventions, which includes:
+    1.  The type of analysis the workflow is doing
+    2.  The "calculator" (or program) that the workflow uses to run
+    3.  A unique name to identify the settings used
+
+Examples for each part would be:
+    1. relaxation, static-energy, dynamics, ...
+    2. vasp, abinit, qe, deepmd, ...
+    3. jacks-test, matproj, quality00, ...
+
+Together, an example workflow names would be:
+    - `relaxation.vasp.jacks-test`
+    - `static-energy.abinit.matproj`
+    - `dynamics.qe.quality00`
+
+When converting this to our workflow name in python, we need to replace
+periods with 2 underscores each and convert our words to
+[pascal case](https://khalilstemmler.com/blogs/camel-case-snake-case-pascal-case/).
+For example, our workflow names become:
+    - `Relaxation__Vasp__JacksTest`
+    - `StaticEnergy__Abinit__Matproj`
+    - `Dynamics__Qe__Quality00`
+
+> :bulb: Capitalization is very important here so make sure you double check your workflow names.
+
+Now let's test this out in python using a similar workflow name:
+``` python
+from simmate.workflow_engine import Workflow
+
+class Example__Python__MyFavoriteSettings(Workflow):
+    pass  # we will build the rest of workflow later
+
+# These names can be long and unfriendly, so it can be nice to
+# link them to a variable name for easier access.
+my_workflow = Example__Python__MyFavoriteSettings
+
+# Now check that our naming convention works as expected
+assert my_workflow.name_full == "example.pure-python.my-favorite-settings"
+assert my_workflow.name_type == "example"
+assert my_workflow.name_calculator == "python"
+assert my_workflow.name_preset == "my-favorite-settings"
+```
+
+You now have a ready-to-use workflow name!
+
+</br>
+
 ## Create new & advanced workflows
 
-1. Simmate defines a base `Workflow` class to help with common material science analyses, but at its core, it uses Prefect Flows. Therefore, if you don't care for advanced Simmate features, you can build custom workflows directly with Prefect. Take advantage of all of [Prefect's guides](https://orion-docs.prefect.io/tutorials/first-steps/) when building new workflows. The simplest possible workflow can look something like...
-
-``` python
-from prefect import flow
-
-@flow
-def my_favorite_function():
-    print("This function doesn't do much")
-    return 42
-
-state = my_favorite_function()
-result = state.result()
-```
-
-2. However, we've built many helpful features on top of Simmate to make your workflows more powerful and easier to write. In building a material science workflow, we may want two common steps: (i) running a calculation through a program like VASP and (ii) saving the results to our database. We must therefore define individual `Task`s as well as a `DatabaseTable` to store results in. The next steps will address both of these.
-
-3. Because material science frequently involves calling external programs, we've created a powerful `S3Task` class to inherit from. A `S3Task` class can implement it's own `setup`, `execute`, and `workup` methods, and even add functions for error handling. Here's how you would build a custom `S3Task` from scratch:
-
-``` python
-
-from simmate.toolkit import Structure
-from simmate.workflow_engine import S3Task
-
-
-class ExampleTask(S3Task):
-
-    command = "echo 'I am calling some program here!' > output.txt"
-    
-    @staticmethod
-    def setup(directory, structure, **kwargs):
-        filename = directory / "my_input_structure.cif"
-        structure.to("cif", filename)
-
-    @staticmethod
-    def workup(directory):
-        # do some workup or analysis on the output files. Here we just return
-        # the original structure back as the "results"
-        filename = directory / "my_input_structure.cif"
-        my_results = Structure.from_file(filename)
-        return my_results
-
-
-# Now try running this task using a test NaCl structure
-nacl_example = Structure(
-    lattice=[
-        [3.485437, 0.0, 2.012318],
-        [1.161812, 3.286101, 2.012318],
-        [0.0, 0.0, 4.024635],
-    ],
-    species=["Na", "Cl"],
-    coords=[[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]],
-)
-
-# Tasks classes don't need to be initialized. You can call them directly.
-state = ExampleTask.run(structure=nacl_example)
-result = state.result()
-
-# The output is a dictionary containing the return value from the workup 
-# method along with other information about the task run.
-print(result)  
-```
-
-
-4. Building a task `S3Task` from scratch can be a lot of work. Instead, you may want to inherit from tasks we built already. To see what programs are available, take a look at the `simmate.calculators` module ([here](https://github.com/jacksund/simmate/tree/main/src/simmate/calculators)). For example, VASP users can use the `VaspTask`:
-
-```python
-from simmate.calculators.vasp.tasks.base import VaspTask
-from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
-
-class ExampleRelaxation(VaspTask):
-    functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
-    incar = dict(
-        PREC="Low",
-        EDIFF__per_atom=2e-4,  # flags like "__per_atom" help set structure-dependant settings
-        EDIFFG=-2e-1,
-        NSW=75,
-        IBRION=2,
-        POTIM=0.02,
-        KSPACING=0.75,
-    )
-
-state = ExampleRelaxation.run(structure=...)
-```
-
-> :bulb: If you don't care to store results in a database, then the S3Task is all you need! Thus, all steps below can be considered optional (but they are highly recommended!).
-
-5. Now let's create a database table to save our results. For this, we can either create a table from scratch or make one using the classes from `simmate.database.base_data_types`. Below is an example of how to build a table from structure and energy information.
-``` python
-from simmate.database import connect
-from simmate.database.base_data_types import (
-    table_column,
-    Structure,
-    Thermodynamics,
-    Calculation,
-)
-
-class MyCustomTable(Structure, Thermodynamics, Calculation):
-    class Meta:
-        app_label = "workflow_results"
-
-    custom_column_01 = table_column.IntegerField()
-    custom_column_02 = table_column.FloatField(null=True, blank=True)
-
-# Check out all the columns that are automatically built for us!
-MyCustomTable.show_columns()
-
-# IMPORTANT: This line will raise an error because, even though we 
-# defined our table, we have not yet added it to our actual database.
-# We will fix this in a later step.
-MyCustomTable.objects.count()
-```
-
-6. Thus far, the process of creating a `S3Task` and a `DatabaseTable` are very common steps. It is also very common to piece these together into a single-calculation workflow (like we mentioned in step 2). Therefore, the default settings on the `Workflow` class does this for us automatically:
+Simmate defines a base `Workflow` class to help with common material science analyses. The simplest possible workflow can look something like...
 
 ``` python
 from simmate.workflow_engine import Workflow
 
-# IMPORTANT: Note the complex name we used here! All workflows should follow
-# our standardized naming conventions in order for the workflow to work 
-# properly with cloud and website features.
+class Example__Python__MyFavoriteSettings(Workflow):
+    # Note, the long name of this workflow class is important!
+    
+    use_database = False  # we don't have a database table yet
 
-class Relaxation__Vasp__MyCustomSettings(Workflow):
-    s3task = ExampleRelaxationTable
-    database_table = MyCustomTable
-
-
-# Running the workflow acts exactly like how we ran the task, except now 
-# we include saving results to a database table.
-# IMPORTANT: This workflow will fail because we still have not registered
-# our database table above! We'll get the same exact error as seen in the
-# last step.
-result = workflow.run(structure=structure) 
+    @staticmethod
+    def run_config():
+        print("This workflow doesn't do much")
+        return 42
 ```
 
-7. Thus far, we have built all of the code we need for a custom workflow, but we still have that pesky problem of our database table throwing a `does not exist` error. In the next section, we are going to take all of this code and organize it into an "app". This is important because it let's Simmate know where to find your defined database tables, tasks, and workflows.
+Building a workflow from scratch can be a lot of work. Most often, we don't want to create a new workflow. We just want to take an existing one and update a few settings. In python, we can do that with...
 
+``` python
+from simmate.workflows.utilities import get_workflow
+
+original_workflow = get_workflow("static-energy.vasp.matproj")
+
+
+class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
+    # NOTE: the name we gave is important! 
+    # Don't skip reading the guide above
+    
+    # give a version to help you and you team keep track of what changes
+    version = "2022.07.04"
+
+    incar = original_workflow.incar.copy()  # Make sure you copy!
+    incar.update(
+        dict(
+            NPAR=1,
+            ENCUT=-1,
+        )
+    )
+
+# make sure we have new settings updated and that we didn't change the original
+assert original_workflow.incat != StaticEnergy__Vasp__MyCustomPreset
+```
+
+You can now run and interact with your workflow like any other one!
+
+``` python
+state = StaticEnergy__Vasp__MyCustomPreset.run(structure="NaCl.cif")
+result = state.result()
+```
 
 </br>
 
-## Creating a Project for our workflow
+# Taking things to next level 
 
-1. Let's create a project named `my_new_project`. To do this, navigate to a folder where you'd like to store your code and run...
+There are still a lot of things we would want to do with our new workflow. For example, what if we want to...
+- modify a complex workflow (such as `diffusion.vasp.neb-all-paths-mit`)
+- create a custom workflow using a new program like USPEX or ABINIT
+- use a custom database to save our workflow results
+- access the workflow in the website interface
+- access our workflow from other scripts (and the `get_workflow` function)
 
-``` bash
-simmate start-project my_new_project
-```
+For creating complex workflows and databases, you'll need to read through our API documentation, where we cover advanced cases. Also, don't be hesitate to [post a question on our forum](https://github.com/jacksund/simmate/discussions/categories/q-a). We can also tell you the best place to start.
 
-2. You will see a new folder named "my_new_project" which you can switch into.
-
-``` bash
-cd my_new_project
-```
-
-3. Open up the `README.md` file in this folder and read through our directions. If you want a web-form of this guide, use [this link](https://github.com/jacksund/simmate/tree/main/src/simmate/configuration/example_project)
-
-4. After completing the steps in that readme, you've now registered your workflow and database tables to simmate!
-
-
-For expert python users, you may notice that you are building the start of a new python package here. In fact our "start-project" command is really just a cookie-cutter template! This can have huge implications for sharing research and code. With a fully-functional and published Simmate app, you can upload your project for other labs to use via github and PyPi! Then the entire Simmate community can install and use your custom workflows with Simmate. For them, it'd be as easy as doing (i) `pip install my_new_project` and (ii) adding `example_app.apps.ExampleAppConfig` to their `~/simmate/applications.yaml`. Alternatively, you can request that your app be merged into our Simmate repository, so that it is installed by default for all users. Whichever route you choose, your hard work should be much more accessible to the community and new users!
-
-> :warning: In the future, we hope to have a page that lists off apps available for download, but because Simmate is brand new, there currently aren't any existing apps outside of Simmate itself. Reach out to our team if you're interesting in kickstarting a downloads page!
-
-Up next, we will start sharing results with others! Continue to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/07_Use_a_cloud_database.md) when you're ready.
+Accessing our workflow on the website or in scripts is much easier, and we will cover it in the next tutorial -- while we tackle custom database tables as the same time. Continue to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/07_Building_custom_datatables.md) when you're ready.
