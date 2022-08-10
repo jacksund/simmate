@@ -4,7 +4,7 @@ import plotly.graph_objects as plotly_go
 from django.apps import apps as django_apps
 
 from simmate.database.base_data_types import table_column, DatabaseTable
-from simmate.utilities import async_to_sync
+from simmate.workflow_engine.execution import WorkItem
 
 
 class EvolutionarySearch(DatabaseTable):
@@ -122,7 +122,10 @@ class EvolutionarySearch(DatabaseTable):
     def individuals(self):
         # note we don't call "all()" on this queryset yet becuase this property
         # it often used as a "base" queryset (and additional filters are added)
-        return self.individuals_datatable.objects.filter(formula_full=self.composition)
+        return self.individuals_datatable.objects.filter(
+            formula_full=self.composition,
+            workflow_name=self.workflows[-1],  # use most recent workflow
+        )
 
     @property
     def individuals_completed(self):
@@ -267,39 +270,6 @@ class StructureSource(DatabaseTable):
         related_name="sources",
     )
 
-    @staticmethod
-    @async_to_sync
-    async def _check_still_running_ids(run_ids):
-        """
-        Queries Prefect to see check on a list of flow run ids and determines
-        which ones are still in a scheduled, running, or pending state.
-        From the list of ids given, it will return a list of the ones that
-        haven't finished yet.
-
-        This is normally used within `update_flow_run_ids` and shouldn't
-        be called directly.
-        """
-        raise NotImplementedError("porting to general executor")
-
-        from prefect.client import get_client
-        from prefect.orion.schemas.filters import FlowRunFilter
-
-        # The reason we have this code as a separate method is because we want
-        # to isolate Prefect's async calls from Django's sync-restricted calls
-        # (i.e. django raises errors if called within an async context).
-
-        async with get_client() as client:
-            response = await client.read_flow_runs(
-                flow_run_filter=FlowRunFilter(
-                    id={"any_": run_ids},
-                    state={"type": {"any_": ["SCHEDULED", "PENDING", "RUNNING"]}},
-                ),
-            )
-
-        still_running_ids = [str(entry.id) for entry in response]
-
-        return still_running_ids
-
     def update_flow_run_ids(self):
         """
         Queries Prefect to see how many workflows are in a scheduled, running,
@@ -307,7 +277,8 @@ class StructureSource(DatabaseTable):
         structure source.
         """
 
-        # make the async call to Prefect client
+        # check which ids are still running. Note, this is a separate
+        # method in case it's an async call to Prefect client
         still_running_ids = self._check_still_running_ids(self.run_ids)
 
         # we now have our new list of IDs! Let's update it to the database
@@ -322,3 +293,52 @@ class StructureSource(DatabaseTable):
         runs = self.update_flow_run_ids()
         # now the currently running ones is just the length of ids!
         return len(runs)
+
+    @staticmethod
+    def _check_still_running_ids(run_ids):
+        """
+        Queries Prefect to see check on a list of flow run ids and determines
+        which ones are still in a scheduled, running, or pending state.
+        From the list of ids given, it will return a list of the ones that
+        haven't finished yet.
+        This is normally used within `update_flow_run_ids` and shouldn't
+        be called directly.
+        """
+        # The reason we have this code as a separate method is because we want
+        # to allow isolation of Prefect's async calls from Django's
+        # sync-restricted calls (i.e. django raises errors if called
+        # within an async context).
+        still_running_ids = WorkItem.objects.filter(
+            id__in=run_ids,
+            status__in=["P", "R"],
+        ).values_list("id", flat=True)
+        return list(still_running_ids)
+
+    # This method is for Prefect 2.0
+    # from simmate.utilities import async_to_sync
+    # @staticmethod
+    # @async_to_sync
+    # async def _check_still_running_ids(run_ids):
+    #     """
+    #     Queries Prefect to see check on a list of flow run ids and determines
+    #     which ones are still in a scheduled, running, or pending state.
+    #     From the list of ids given, it will return a list of the ones that
+    #     haven't finished yet.
+    #     This is normally used within `update_flow_run_ids` and shouldn't
+    #     be called directly.
+    #     """
+    #     raise NotImplementedError("porting to general executor")
+    #     from prefect.client import get_client
+    #     from prefect.orion.schemas.filters import FlowRunFilter
+    #     # The reason we have this code as a separate method is because we want
+    #     # to isolate Prefect's async calls from Django's sync-restricted calls
+    #     # (i.e. django raises errors if called within an async context).
+    #     async with get_client() as client:
+    #         response = await client.read_flow_runs(
+    #             flow_run_filter=FlowRunFilter(
+    #                 id={"any_": run_ids},
+    #                 state={"type": {"any_": ["SCHEDULED", "PENDING", "RUNNING"]}},
+    #             ),
+    #         )
+    #     still_running_ids = [str(entry.id) for entry in response]
+    #     return still_running_ids
