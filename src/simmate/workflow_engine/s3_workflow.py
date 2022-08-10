@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-# The Supervised-Staged-Shell Task (aka "S3Task")
+# The Supervised-Staged-Shell Workflow (aka "S3Workflow")
 
-This class contains the core functionality to **supervise** a **staged** task
+This class contains the core functionality to **supervise** a **staged** workflow
 involving some **shell** command.
 
 Let's breakdown what this means...
@@ -19,9 +19,9 @@ up of three steps:
 
 And for *supervising* the task, this means we monitor the program while the
 execution stage is running. So once a program is started, Simmate can check
-output files for common errors/issues. If an error is found, we stop the
-program, fix the issue, and then restart it. Any fixes that were made are
-written to "simmate_corrections.csv".
+output files for common errors/issues -- even while the other program is still
+running. If an error is found, we stop the program, fix the issue, and then 
+restart it.
 
 
 <!--
@@ -38,63 +38,99 @@ The steps are...
 - postprocess/analysis
 -->
 
-This entire process (the different stages and monitoring) is carried out
-using the `run` method. You rarely use this class directly. Instead,
-you typically use a subclass of it. As a user, you really just need to do
-something like this:
+Running S3Workflows is the same as normal workflows (e.g. using the `run` method),
+and this entire process of supervising, staging, and shell execution is done for you!
 
+
+# S3Workflows for common Calculators
+
+For programs that are commonly used in material science, you should check the
+`simmate.calculators` module and then a given calculator's `workflow` module.
+Many have a subclass of `S3Workflow` already built for you. For example, VASP
+user can take advantage of the following class:
+`simmate.calculators.vasp.workflows.base.VaspWorkflow`
+
+
+
+# Building a custom S3Workflow
+
+Before starting a custom `S3Workflow`, make sure you have read the section 
+above this (on S3Workflows for common Calculators like VASP). You should also 
+have gone through the guides on building a custom `Workflow`.
+
+NOTE: Custom `S3Workflows` must also follow the naming conventions required
+of `Workflow`s
+
+
+## Simple command call
+
+The most basic example of a S3Workflow is just calling some command -- without
+doing anything else (no input files, no error handling, etc.). 
+
+Unlike custom `Workflows` were we defined a `run_config` method, `S3Workflows`
+have a pre-built `run_config` method that carries out the different stages and 
+monitoring of a workflow for us. So all the work is already done for us!
+
+As an example, let's just use the command `echo` to print something:
+    
 ``` python
-from simmate.calculator.example.tasks import ExampleTask
 
-my_task = ExampleTask()
-my_result = my_task.run()
+from simmate.workflow_engine import S3Workflow
+
+class Example__Echo__SayHello(S3Workflow):
+    use_database = False  # we aren't using a custom table for now
+    monitor = False  # there is no error handling yet
+    command = "echo Hello"
+
+# behaves like a normal workflow
+state = Example__Echo__SayHello.run()
+result = state.result()
 ```
 
-And that's it!
-
-For experts, this class can be viewed as a combination of prefect's ShellTask,
-a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
-functionality of `pymatgen.io.vasp.sets` too. By merging all of these together
-into one class, we make things much easier for users and creating new Tasks.
+IMPORTANT: Note that  we used "Echo" in our workflow name. This helps the user 
+see what commands or programs will be called when a workflow is ran.
 
 
-# Building a custom S3task
+## Custom setup and workup
 
-This class is commonly used to make tasks for our calculator modules, so you
-will likely want to subclass this. Here is a basic example of inheriting
-and then running a task:
+Now what if we'd like to write input files or read output files that are created?
+Here, we need to update our `setup` and `workup` methods:
 
 ``` python
 
-from simmate.workflow_engine import S3Task
-from example.error_handlers import PossibleError1, PossibleError2
+from simmate.workflow_engine import S3Workflow
 
-
-class ExampleTask(SSSTask):
-
-    command = "echo example"  # just prints out "example"
+class Example__Echo__SayHello(S3Workflow):
     
-    # settings for error handling
-    max_corrections = 7
-    error_handlers = [PossibleError1, PossibleError2]
-    polling_timestep = 0.1
-    monitor_freq = 10
-    
-    # custom attributes
-    some_new_setting = 123
+    use_database = False  # we aren't using a custom table for now
+    monitor = False  # there is no error handling yet
+
+    command = "echo Hello > output.txt"  # adds "Hello" into a new file
 
     @classmethod
-    def setup(cls, directory, custom_parmeter, **kwargs):
+    def setup(cls, directory, custom_parameter, **kwargs):
+        # The directory given is a pathlib.Path object for the directory
+        # that the command will be called in
+        
         print("I'm setting things up!")
         print(f"My new setting value is {cls.some_new_setting}")
         print(f"My new parameter value is {custom_parmeter}")
+        
+        return  # no need to return anything. Nothing will be done with it.
 
     @staticmethod
     def workup(directory):
+        # The directory given is a pathlib.Path object for the directory
+        # that the command will be called in
+        
+        # Simply check that we have a new file
+        output_file = directory / "output.txt"
+        assert output_file.exists()
+        
         print("I'm working things up!")
+        return "Done!"
 
-
-task = ExampleTask()
+task = Example__Echo__SayHello()
 result = task.run()
 ```
 
@@ -106,9 +142,33 @@ There are a two important things to note here:
     - Custom `workup` methods require the `directory` input paramter
 2. It's optional to set/overwrite attributes. You can also add new ones too.
 
-For a full (and advanced) example, of a subclass take a look at
-`simmate.calculators.vasp.tasks.base.VaspTask` and the tasks that use it like
-`simmate.calculators.vasp.tasks.relaxation.matproj`.
+Note: S3Workflows for a custom calculator (such `VaspWorkflow` for VASP)
+will often have custom `setup` and `workup` methods already defined for you.
+You can update/override these as you see fit.
+
+For a full (and advanced) example of a subclass take a look at
+`simmate.calculators.vasp.workflows.base.VaspTask` and the tasks that use it like
+`simmate.calculators.vasp.workflows.relaxation.matproj`.
+
+
+# Custom error handling
+
+See the documentation located at `simmate.workflow_engine.error_handler` for
+more information.
+
+
+# Continuation of workflows
+
+This is an experimental feature and for advanced users only. (TODO)
+
+
+# Alternatives
+
+For experts, this class can be viewed as a combination of prefect's ShellTask,
+a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
+functionality of `pymatgen.io.vasp.sets` too. By merging all of these together
+into one class, we make things much easier for users and creating new Tasks.
+
 """
 
 import os
