@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import time
-
-# import pickle
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
+import logging
 
 from django.db import transaction
 
@@ -70,6 +69,9 @@ class SimmateWorker:
         # print the header in the console to let the user know the worker started
         print(HEADER_ART)
 
+        # loggin helpful info
+        logging.info(f"Starting worker with tags {list(self.tags)}")
+
         # establish starting point for the worker
         time_start = time.time()
         ntasks_finished = 0
@@ -84,13 +86,18 @@ class SimmateWorker:
             # if we've hit the limit.
             if (time.time() - time_start) > self.timeout:
                 # TODO - check wait_on_timeout if running in parallel.
-                print("The time-limit for this worker has been hit. Shutting down.")
+                logging.info(
+                    "The time-limit for this worker has been hit. Shutting down."
+                )
                 return
 
             # check the number of jobs completed so far, and exit if we hit
             # the limit
             if ntasks_finished >= self.nitems_max:
-                print("Maxium number of WorkItems hit for this worker. Shutting down.")
+                logging.info(
+                    f"Maximum number of WorkItems reached ({self.nitems_max}). "
+                    "Shutting down."
+                )
                 return
 
             # check the length of the queue and while it is empty, we want to
@@ -106,7 +113,7 @@ class SimmateWorker:
                     # after we just waited, let's check the queue size again
                     if self.queue_size() == 0:
                         # if it's still empty, we should close the worker
-                        print("The task queue is empty. Shutting down.")
+                        logging.info("The task queue is empty. Shutting down.")
                         return
 
             # If we've made it this far, we're ready to grab a new WorkItem
@@ -129,7 +136,7 @@ class SimmateWorker:
                 workitem.save()
 
             # Print out the job ID that is being ran for the user to see
-            print(f"Running WorkItem with id {workitem.id}")
+            logging.info(f"Running WorkItem with id {workitem.id}")
 
             # now let's unpickle the WorkItem components
             fxn = cloudpickle.loads(workitem.fxn)
@@ -166,7 +173,7 @@ class SimmateWorker:
             ntasks_finished += 1
 
             # Print out the job ID that was just finished for the user to see.
-            print("Completed WorkItem.")
+            logging.info("Completed WorkItem")
 
     def queue_size(self):
         """

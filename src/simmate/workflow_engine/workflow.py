@@ -264,6 +264,7 @@ have gone through all the Simmate
 including the advanced "Creating custom workflows" tutorial.
 """
 
+import logging
 import json
 import cloudpickle
 import yaml
@@ -360,6 +361,7 @@ class Workflow:
         """
         This method should not be called directly. Use the `run` method instead.
         """
+        logging.info(f"Starting {cls.name_full}")
         # This method is isolated only because we want to wrap it as a prefect
         # workflow in some cases.
         run_id = run_id or cls._get_run_id()
@@ -367,6 +369,7 @@ class Workflow:
         result = cls.run_config(**kwargs_cleaned)
         if cls.use_database:
             result["calculation_id"] = cls._save_to_database(result, run_id=run_id)
+        logging.info(f"Completed {cls.name_full}")
         return result
 
     @staticmethod
@@ -386,9 +389,7 @@ class Workflow:
         """
         # Note: this is a separate method and wrapper around run_full because
         # we want to allow Prefect executor to overwrite this method.
-        print(f"Starting {cls.name_full}")
-        result = cls._run_full(**kwargs)  # no run_id as a new one will be made
-        print(f"Completed {cls.name_full}")
+        result = cls._run_full(**kwargs)
         state = DummyState(result)
         return state
 
@@ -398,7 +399,7 @@ class Workflow:
         submits the workflow run to cloud database to be ran by a worker
         """
 
-        print(f"Submitting new run of {cls.name_full}")
+        logging.info(f"Submitting new run of {cls.name_full} to cloud")
 
         # If we are submitting using a filename, we don't want to
         # submit to a cluster and have the job fail because it doesn't have
@@ -413,7 +414,8 @@ class Workflow:
         # at this higher level. An example is storing the structure and run id.
         # Thus, we create and register the run_id up front
         run_id = cls._get_run_id()
-        cls._register_calculation(run_id=run_id, **kwargs)
+        if cls.use_database:
+            cls._register_calculation(run_id=run_id, **kwargs)
 
         future = SimmateExecutor.submit(
             cls._run_full,  # should this be the run method...?
@@ -421,6 +423,8 @@ class Workflow:
             tags=cls.tags,
             **parameters_serialized,
         )
+
+        logging.info(f"Successfully submitted (run_id={run_id})")
 
         # If the user wants the future, return that instead of the run_id
         if return_future:
@@ -802,8 +806,8 @@ class Workflow:
             # assert
             if not source == primary_input:
                 # only warning for now because this is experimental
-                print(
-                    "\nWARNING: Your source does not match the source of your "
+                logging.warn(
+                    "Your source does not match the source of your "
                     "primary input. Sources are an experimental feature, so "
                     "this will not affect your results. Still, please report "
                     "this to our team to help with development. \n\n"
@@ -938,7 +942,7 @@ class Workflow:
         # special-case workflows don't store calculation information bc the flow
         # is just a quick python analysis.
         if not database_table:
-            print("No database table found. Skipping registration.")
+            logging.warn("No database table found. Skipping registration.")
             return
 
         # grab the registration kwargs from the parameters provided and then

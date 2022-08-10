@@ -4,6 +4,7 @@ import shutil
 import yaml
 import numpy
 from pathlib import Path
+import logging
 
 from pymatgen.analysis.transition_state import NEBAnalysis
 
@@ -146,7 +147,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         From a working directory of a past calculation, sets up for the calculation
         to be restarted.
         """
-        print("WARNING: CONTCARs are not yet copied to POSCARs for NEB restarts.")
+        logging.warn("CONTCARs are not yet copied to POSCARs for NEB restarts.")
 
         # establish filenames
         stopcar_filename = directory / "STOPCAR"
@@ -284,13 +285,8 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         """
 
         # plot the results
-        # plot = neb_results.get_plot()
-        # plot.savefig(directory / "NEB_plot.jpeg")
-        print(
-            "NEB plot generation is temporarily disabled due to a bug in prefect "
-            "where matplotlib.plot() leads to a segmentation fault. "
-            "See https://github.com/PrefectHQ/prefect/issues/5991"
-        )
+        plot = neb_results.get_plot()
+        plot.savefig(directory / "NEB_plot.jpeg")
 
         # convert all the structures to a MigrationImages object so we can write
         # the summed structure.

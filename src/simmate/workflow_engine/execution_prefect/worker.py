@@ -4,6 +4,7 @@ import anyio
 import time
 import uuid
 from functools import cached_property
+import logging
 
 from prefect.client import get_client
 from prefect.exceptions import PrefectHTTPStatusError
@@ -91,7 +92,9 @@ class PrefectWorker:
 
         async with OrionAgent(work_queue_name=self.queue_name) as agent:
 
-            print(f"Worker started! Looking for work from queue '{self.queue_name}'...")
+            logging.info(
+                f"Worker started! Looking for work from queue '{self.queue_name}'..."
+            )
 
             # Loop endlessly until one of the following happens...
             #   the timeout limit is hit
@@ -103,13 +106,15 @@ class PrefectWorker:
                 # check for timeout before starting a new workitem and exit
                 # if we've hit the limit.
                 if (time.time() - time_start) > self.timeout:
-                    print("The time-limit reached. Shutting down worker.")
+                    logging.info("The time-limit reached. Shutting down worker.")
                     break
 
                 # check the number of jobs completed so far, and exit if we hit
                 # the limit
                 if nflows_submitted >= self.nflows_max:
-                    print("Maxium number of workflow runs hit. Shutting down worker.")
+                    logging.info(
+                        "Maximum number of workflow runs hit. Shutting down worker."
+                    )
                     break
 
                 # Run and submit flows
@@ -119,7 +124,7 @@ class PrefectWorker:
                 # Keep track of the new runs we submit
                 if nflows_new:
                     nflows_submitted += nflows_new
-                    print(f"Found and submitted {nflows_new} new workflow runs.")
+                    logging.info(f"Found and submitted {nflows_new} new workflow runs.")
 
                 # If our last query gave zero workflows submitted, then there's
                 # a chance our queue is empty and we should shut down.
@@ -131,7 +136,7 @@ class PrefectWorker:
                 if nflows_new == 0 and self.close_on_empty_queue:
                     remaining = await self._get_remaining_runs()
                     if remaining == 0:
-                        print("The queue is empty. Shutting down worker.")
+                        logging.info("The queue is empty. Shutting down worker.")
                         break
 
                 # Sleep until the next check
@@ -144,15 +149,15 @@ class PrefectWorker:
                 # try:
                 #   << all code in the while loop >>
                 # except KeyboardInterrupt:
-                #     print(
+                #     logging.info(
                 #         "Recieved keyboard signal to stop. Shutting down worker."
                 #     )
                 #     break
 
         # Delete the queue now that we are done with it
-        print("Deleting queue and cleaning up...")
+        logging.info("Deleting queue and cleaning up...")
         await self._delete_queue()
-        print("Successfully closed worker.")
+        logging.info("Successfully closed worker.")
 
     @cached_property
     @async_to_sync

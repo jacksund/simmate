@@ -102,13 +102,17 @@ class Structure(PymatgenStructure):
 
         # Otherwise an incorrect format was given
         else:
-            raise Exception(
-                "Unknown format provided for structure input. "
-                f"{type(structure)} was provided. If you are trying "
-                "to provide a filepath (str), make sure you don't have "
-                "any typos and that the path is relative to the working "
-                "directory."
-            )
+            if isinstance(structure, str):
+                raise FileNotFoundError(
+                    "Are you trying to provide a filename as your input structure? "
+                    "If so, make sure you have the proper working directory set. "
+                    f"We were unable to find '{structure}' in '{Path.cwd()}'"
+                )
+            else:
+                raise Exception(
+                    "Unknown format provided for structure input. "
+                    f"{type(structure)} was provided."
+                )
 
         # add this attribute to help with error checking in other methods
         structure_cleaned.is_from_past_calc = is_from_past_calc

@@ -5,6 +5,7 @@ from pathlib import Path
 import time
 import datetime
 import subprocess
+import logging
 
 import numpy
 from pymatgen.io.vasp.outputs import Outcar
@@ -89,7 +90,7 @@ class Walltime(ErrorHandler):
             # make sure the calculation didn't "finish at the buzzer"
             is_finished = self._check_if_finished(directory)
             if is_finished:
-                print(
+                logging.info(
                     "BUZZER BEATER!!! This job finished right when it was "
                     "about to hit the walltime!"
                 )
@@ -142,7 +143,7 @@ class Walltime(ErrorHandler):
             # handlers updating them)
             filename = directory / "simmate_metadata.yaml"
             if not filename.exists():
-                print("Unable to detect the time remaining. Ignoring Timeout.")
+                logging.warn("Unable to detect the time remaining. Ignoring Timeout.")
                 return
                 # !!! What if I looked at the creation time of the current directory?
 
@@ -163,9 +164,8 @@ class Walltime(ErrorHandler):
             ).stdout.strip()
             # parse the output into a time
             if output == "INVALID":
-                print(
-                    "WARNING: SLURM node improperly configured. "
-                    "Cannot detect TimeLeft"
+                logging.warn(
+                    "SLURM node improperly configured. " "Cannot detect TimeLeft"
                 )
                 return
             elif output == "UNLIMITED":
@@ -177,7 +177,7 @@ class Walltime(ErrorHandler):
                 try:
                     output = [int(i) for i in output.replace("-", ":").split(":")]
                 except:
-                    print(
+                    logging.warn(
                         "Failed to parse SLURM output. Please report this to the"
                         f"Simmate team. Output was {output}"
                     )

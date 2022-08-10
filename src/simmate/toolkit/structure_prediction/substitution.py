@@ -2,6 +2,7 @@
 
 import itertools
 from typing import List
+import logging
 
 from pymatgen.core import Species
 from pymatgen.analysis.structure_prediction.substitutor import Substitutor
@@ -108,7 +109,7 @@ def get_structures_from_substitution_of_known(
         composition_source = oxi_composition.replace(substituition_cleaned.copy())
         # BUG: this method is destructive to the input dictionary so we must
         # pass a copy instead
-        print([oxi_composition, composition_source, substituition_cleaned])
+        logging.info([oxi_composition, composition_source, substituition_cleaned])
 
         # Now grab all known structures with this composition
         source_structures = get_known_structures(composition_source, **kwargs)

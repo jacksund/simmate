@@ -2,6 +2,7 @@
 
 import numpy
 from tqdm import tqdm
+import logging
 
 from django.utils import timezone
 
@@ -141,7 +142,7 @@ class PartialCrystalNNFingerprint:
         if not new_structures:
             return
 
-        print(
+        logging.info(
             f"Found {len(new_structures)} new structures for the fingerprint database."
         )
 

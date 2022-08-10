@@ -4,6 +4,7 @@ import os
 import sys
 import requests
 from pathlib import Path
+import logging
 
 import simmate
 
@@ -84,14 +85,10 @@ def check_if_using_latest_version(current_version=simmate.__version__):
     latest_version = get_latest_version()
 
     if current_version != latest_version:
-        print(
-            "WARNING: There is a new version of Simmate available. \n"
+        logging.warn(
+            "There is a new version of Simmate available. "
             f"You are currently using v{current_version} while v{latest_version} "
-            "is the latest. To update, you should first check what has been "
-            "changed at https://github.com/jacksund/simmate/blob/main/CHANGELOG.md. "
-            "If you would like to use these changes, you can run the follwing "
-            "command in the terminal (with your desired conda environment "
-            "active): `conda update --all`"
+            "is the latest."
         )
 
 

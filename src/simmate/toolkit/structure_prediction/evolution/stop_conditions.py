@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# -----------------------------------------------------------------------------
-
-"""
-Feel free to write your own StopCondition! It should follow the format shown here.
-
--Jack
-"""
+import logging
 
 
 class StopCondition:
@@ -26,9 +20,6 @@ class StopCondition:
         pass
 
 
-# -----------------------------------------------------------------------------
-
-
 class BasicStopConditions:
     def __init__(self, max_structures=300, energy_limit=-999, same_min_structures=50):
         self.max_structures = max_structures
@@ -41,7 +32,7 @@ class BasicStopConditions:
 
         # start by looking at the total number of structures that completed their analysis
         if search.njobs_completed >= self.max_structures:
-            print("\nMax structures hit. Stopping Search")
+            logging.info("\nMax structures hit. Stopping Search")
             return True
 
         # grab the completed energies and the lowest energy for reference
@@ -52,7 +43,7 @@ class BasicStopConditions:
 
         # look at the structure energies and see what the lowest is
         if min_energy <= self.energy_limit:
-            print("\nEnergy limit hit. Stopping Search")
+            logging.info("\nEnergy limit hit. Stopping Search")
             return True
 
         # look how long the minimum structure has been there #!!! ERROR IN LOGIC

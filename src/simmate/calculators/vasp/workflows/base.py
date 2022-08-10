@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import shutil
+import logging
 
 import yaml
 
@@ -265,7 +266,7 @@ class VaspWorkflow(S3Workflow):
                 exception_on_bad_xml=True,
             )
         except:
-            print(
+            logging.warn(
                 "XML is malformed. This typically means there's an error with your"
                 " calculation that wasn't caught by your ErrorHandlers. We try"
                 " salvaging data here though."
