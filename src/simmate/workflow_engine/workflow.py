@@ -394,7 +394,7 @@ class Workflow:
         return state
 
     @classmethod
-    def run_cloud(cls, return_future: bool = True, **kwargs) -> str:
+    def run_cloud(cls, return_state: bool = True, **kwargs) -> str:
         """
         submits the workflow run to cloud database to be ran by a worker
         """
@@ -417,7 +417,7 @@ class Workflow:
         if cls.use_database:
             cls._register_calculation(run_id=run_id, **kwargs)
 
-        future = SimmateExecutor.submit(
+        state = SimmateExecutor.submit(
             cls._run_full,  # should this be the run method...?
             run_id=run_id,
             tags=cls.tags,
@@ -427,8 +427,9 @@ class Workflow:
         logging.info(f"Successfully submitted (run_id={run_id})")
 
         # If the user wants the future, return that instead of the run_id
-        if return_future:
-            return future
+        if return_state:
+            state.run_id = run_id  # attach the run id as an extra
+            return state
 
         return run_id
 
@@ -973,8 +974,8 @@ class Workflow:
 
         return calculation
 
-    @staticmethod
-    def _serialize_parameters(**parameters) -> dict:
+    @classmethod
+    def _serialize_parameters(cls, **parameters) -> dict:
         """
         Converts input parameters to json-sealiziable objects that Prefect can
         use.
@@ -1010,6 +1011,9 @@ class Workflow:
                     parameter_value = parameter_value.to_dict()
                 elif parameter_key == "directory":
                     parameter_value = str(parameter_value)  # convert Path to str
+                elif parameter_key == "source":
+                    # recursive call to this function
+                    parameter_value = cls._serialize_parameters(**parameter_value)
 
                 # workflow_base and input_parameters are special cases that
                 # may require a refactor (for customized workflows)
@@ -1017,7 +1021,7 @@ class Workflow:
                     parameter_value = parameter_value.name_full
                 elif parameter_key == "input_parameters":
                     # recursive call to this function
-                    parameter_value = Workflow._serialize_parameters(**parameter_value)
+                    parameter_value = cls._serialize_parameters(**parameter_value)
 
                 else:
                     parameter_value = cloudpickle.dumps(parameter_value)
@@ -1107,5 +1111,12 @@ class Workflow:
 
         if parameters.get("directory", None):
             parameters_cleaned["directory"] = Path(parameters_cleaned["directory"])
+
+        if parameters.get("source", None):
+            # !!! are there other types I should account for? Maybe I should just
+            # make this a recursive call to catch everything?
+            parameters_cleaned["source"]["directory"] = Path(
+                parameters_cleaned["directory"]
+            )
 
         return parameters_cleaned

@@ -1,31 +1,24 @@
 # -*- coding: utf-8 -*-
 
 import time
+from typing import List, Union, Tuple
+import logging
 
 from simmate.toolkit import Composition
-
-from simmate.database import connect
+from simmate.workflow_engine import Workflow
 from simmate.database.workflow_results import (
     EvolutionarySearch as SearchDatatable,
     StructureSource as SourceDatatable,
 )
-
 import simmate.toolkit.creators as creation_module
 import simmate.toolkit.transformations.from_ase as transform_module
 from simmate.toolkit.validators.fingerprint.pcrystalnn import (
     PartialCrystalNNFingerprint,
 )
 
-from typing import List, Union, Tuple
-from simmate.workflow_engine import Workflow
-
 
 class SearchEngine:
     """
-    **WARNING** This search engine assumes you have properly configured
-    Prefect Cloud and a cloud database backend (e.g. Postgres). In the future,
-    we will accommodate local runs and other backends.
-
     This class is the entry point for predicting crystal structures with an
     evolutionary search algorithm.
 
@@ -39,7 +32,6 @@ class SearchEngine:
 
         search_engine = SearchEngine(
             composition="C4",
-            labels=["WarWulf"],  # optional
             workflow_command="mpirun -n 8 vasp_std > vasp.out",  # optional
         )
 
@@ -157,6 +149,7 @@ class SearchEngine:
         # a string that should be converted to one.
         if not isinstance(composition, Composition):
             composition = Composition(composition)
+        logging.info(f"Setting up evolutionary search for {composition}")
 
         self.composition = composition
         self.workflow_command = workflow_command
@@ -178,8 +171,8 @@ class SearchEngine:
         else:  # BUG
             raise Exception("We only support TruncatedSelection right now")
         self.selector = selector
-        print(
-            "The default parent selection for mutations will use "
+        logging.info(
+            "Parent selection for mutations will use "
             f"{self.selector.__class__.__name__}."
         )
 
@@ -192,19 +185,14 @@ class SearchEngine:
 
             # Point to the structure datatable that we'll pull from
             # BUG: For now, I assume its the results table of the workflow
-            self.individuals_datatable = self.workflow.database_table._meta.get_field(
-                "quality04relaxation"
-            ).related_model  # gives quality04relaxation table
+            self.individuals_datatable = self.workflow.database_table
             self.calculation_datatable = self.workflow.database_table
             # BUG: these need to be merged and moved outside this if statement
         else:
             raise Exception(
                 "Only `relaxation.vasp.staged` is supported in early testing"
             )
-        print(
-            f"All individuals will be evaulated through the "
-            f"{self.workflow.name_full} workflow."
-        )
+        logging.info(f"Individuals will be evaulated using '{self.workflow.name_full}'")
         # BUG: I'll need to rewrite this in the future bc I don't really account
         # for other workflows yet. It would make sense that our workflow changes
         # as the search progresses (e.g. we incorporate DeePMD relaxation once ready)
@@ -228,13 +216,11 @@ class SearchEngine:
                 limit_best_survival=limit_best_survival,
             )
             self.search_datatable.save()
-        print(
+        logging.info(
             "To track the progress while this search runs, you can use the following"
             " in a separate python terminal:\n\n"
-            "\tfrom simmate.shortcuts import SearchResults\n"
-            f"\tsearch = SearchResults.objects.get(id={self.search_datatable.id})\n\n"
-            f"So your search ID is {self.search_datatable.id}.\n"
-            "View the documentation on the EvolutionarySearch datatable for more info."
+            "\tfrom simmate.database.workflow_results import EvolutionarySearch\n"
+            f"\tsearch = EvolutionarySearch.objects.get(id={self.search_datatable.id})\n\n"
         )
 
         # Grab the list of singleshot sources that have been ran before
@@ -276,7 +262,7 @@ class SearchEngine:
             if len(composition.elements) == 1 and source in [
                 "from_ase.AtomicPermutation"
             ]:
-                print(
+                logging.warn(
                     f"{source} is not possible with single-element structures."
                     " This is being removed from your steadystate_sources."
                 )
@@ -296,8 +282,8 @@ class SearchEngine:
         # these to steady-state integers (and round to the nearest integer)
         sum_proportions = sum(self.steadystate_source_proportions)
         if sum_proportions != 1:
-            print(
-                "Warning: fractions for steady-state sources do not add to 1."
+            logging.warn(
+                "fractions for steady-state sources do not add to 1."
                 "We have scaled all sources to equal one to fix this."
             )
             self.steadystate_source_proportions = [
@@ -338,7 +324,7 @@ class SearchEngine:
         # Initialize the fingerprint database
         # For this we need to grab all previously calculated structures of this
         # compositon too pass in too.
-        print("Generating fingerprints for past structures...")
+        logging.info("Generating fingerprints for past structures...")
         self.fingerprint_validator = PartialCrystalNNFingerprint(
             composition=composition,
             structure_pool=self.search_datatable.individuals,
@@ -348,9 +334,9 @@ class SearchEngine:
         # crashed slurm job, but it's never submitted again...
         # OPTIMIZE: should we only do final structures? Or should I include input
         # structures and even all ionic steps as well...?
-        print("Done.")
+        logging.info("Finished setup")
 
-    def run(self, sleep_step=10):
+    def run(self, sleep_step=60):
 
         # See if the singleshot sources have been ran yet. For restarted calculations
         # this will likely not be needed (unless a new source was added)
@@ -383,9 +369,11 @@ class SearchEngine:
             # OPTIMIZE: ask Prefect if their is an equivalent to Dask's gather/wait
             # functions, so we know exactly when a workflow completes
             # https://docs.dask.org/en/stable/futures.html#waiting-on-futures
-            print(f"Sleeping for {sleep_step} seconds before running checks again.")
+            logging.info(
+                f"Sleeping for {sleep_step} seconds before running checks again."
+            )
             time.sleep(sleep_step)
-        print("Stopping the search (remaining calcs will be left to finish).")
+        logging.info("Stopping the search (remaining calcs will be left to finish).")
 
     def _check_stop_condition(self):
 
@@ -396,7 +384,7 @@ class SearchEngine:
         # structures that failed to be calculated
         # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
         if self.search_datatable.individuals_completed.count() > self.max_structures:
-            print(
+            logging.info(
                 f"Maximum number of completed calculations hit (n={self.max_structures}."
             )
             return True
@@ -420,7 +408,7 @@ class SearchEngine:
             created_at__gte=best.created_at,
         ).count()
         if num_new_structures_since_best > self.limit_best_survival:
-            print(
+            logging.info(
                 f"Best individual has not changed after {self.limit_best_survival}"
                 " new individuals added."
             )
@@ -429,7 +417,7 @@ class SearchEngine:
         return False
 
     def _check_singleshot_sources(self):
-        print("Singleshot sources not implemented yet. Skipping this step.")
+        logging.warn("Singleshot sources not implemented yet. Skipping this step.")
 
     def _check_steadystate_workflows(self):
 
@@ -462,20 +450,22 @@ class SearchEngine:
                 extra_kwargs = (
                     {"command": self.workflow_command} if self.workflow_command else {}
                 )
-                flow_run_id = self.workflow.run_cloud(
+                state = self.workflow.run_cloud(
                     structure=structure,
                     **extra_kwargs,
                 )
-                print("Submitted workflow run to prefect cloud.")
 
-                # Attached the flow_run_id to our source so we know how many
+                # Attached the id to our source so we know how many
                 # associated jobs are running.
-                source_db.run_ids.append(flow_run_id)
+                # NOTE: this is the WorkItem id and NOT the run_id!!!
+                source_db.run_ids.append(state.pk)
                 source_db.save()
 
                 # update the source on the calculation
                 # TODO: use the flow run id from above to grab the calc
-                calculation = self.calculation_datatable.objects.get(run_id=flow_run_id)
+                calculation = self.calculation_datatable.objects.get(
+                    run_id=state.run_id
+                )
                 calculation.source = f"{source.__class__.__name__}"
                 calculation.source_id = parent_ids
                 calculation.save()
@@ -500,7 +490,7 @@ class SearchEngine:
         if is_transformation and (
             self.search_datatable.individuals_completed.count() < self.nfirst_generation
         ):
-            print(
+            logging.info(
                 "Search isn't ready for transformations yet."
                 f" Skipping {source.__class__.__name__}."
             )
@@ -509,7 +499,7 @@ class SearchEngine:
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
         # proven otherwise
-        print(f"Attempting to create a structure with {source.__class__.__name__}")
+        logging.info(f"Create new structure with {source.__class__.__name__}")
         new_structure = False
         attempt = 0
         while not new_structure and attempt <= max_attempts:
@@ -534,20 +524,20 @@ class SearchEngine:
                 if not self.fingerprint_validator.check_structure(new_structure):
                     # if it is not unique, we can throw away the structure and
                     # try the loop again.
-                    print("Generated structure is not unique. Trying again.")
+                    logging.info("Generated structure is not unique. Trying again.")
                     new_structure = None
 
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure:
-            print(
+            logging.warn(
                 "Failed to create a structure! Consider changing your settings or"
                 " contact our team for help."
             )
             return False, False
 
         # Otherwise we were successful
-        print("Creation Successful.")
+        logging.info("Creation Successful.")
 
         # return the structure and its parents
         return parent_ids, new_structure
