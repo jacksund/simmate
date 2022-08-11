@@ -1,0 +1,25 @@
+
+# This file establishes the info needed for installing your project via pip. This
+# then let's you import your code! For example, you can do...
+#   from example_app.apps import ExampleAppConfig
+
+# As your project grows, you may want to update the requirements for it or even
+# upload it to PyPI, which let's other people download and install your code. 
+# To see how this setup.py file can grow, you can take a look at other example files:
+#     Simmate's pyproject.toml is at... 
+#       https://github.com/jacksund/simmate/blob/main/pyproject.toml
+#     Another example one is at...
+#       https://github.com/pypa/sampleproject
+#     Full documentation on setuptools:
+#       https://setuptools.pypa.io/en/latest/userguide/index.html
+
+
+[build-system]
+requires = ["setuptools>=64.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{ project_name }}"
+version = "0.0.0"
+dependencies = ["simmate"]
+requires-python=">=3.10"
