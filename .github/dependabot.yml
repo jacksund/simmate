@@ -5,7 +5,12 @@
 
 version: 2
 updates:
-  - package-ecosystem: "pip" # See documentation for possible values
+  - package-ecosystem: "pip"
     directory: "/" # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"
+
+# The following issues are relevant if I want Dependabot to also
+# check for updatess to our environment.yaml
+# https://github.com/dependabot/dependabot-core/issues/2227
+# https://github.com/dependabot/dependabot-core/issues/2824
