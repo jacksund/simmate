@@ -1,5 +1,3 @@
-> :warning::warning::warning: This tutorial is for Prefect v1, but much of Simmate now depends on Prefect v2. As we adjust to the new backend, parts of this tutorial may be broken and recommended proceedures are subject to change.
-
 # Add computational resources
 
 In this tutorial, you will learn how to run workflows on distributed computational resources -- with full scheduling and monitoring.
@@ -12,36 +10,59 @@ In this tutorial, you will learn how to run workflows on distributed computation
     - [Setting up your cluster with Dask](#setting-up-your-cluster-with-dask)
     - [Connecting others to your scheduler](#connecting-others-to-your-scheduler)
 
-> :warning: For beginners, this will be the most difficult part of setting up Simmate -- but it is entirely optional. Be sure to read the section on [Should I set up my own cluster?](#should-i-set-up-my-own-cluster). There are many ways to set up your resources and caviats to each (especially if you are using university or federal supercomputers). While python experts should be able to learn Prefect and Dask quickly, we strongly urge beginners to get advice from our team. If you struggle to follow along with this tutorial, [post a question](https://github.com/jacksund/simmate/discussions/categories/q-a) or email us directly (simmate.team@gmail.com).
-
-
 <br/><br/>
 
 # The quick tutorial
 
-> :bulb: [prefect](https://github.com/PrefectHQ/prefect), [dask](https://github.com/dask/distributed), and [dask_jobqueue](https://github.com/dask/dask-jobqueue) will be already installed for you because they are dependencies of Simmate
+> :bulb: This tutorial will use the default scheduler/executor, "SimmateExecutor". However, you can also use Prefect and/or Dask to build out your cluster. This is cover in the next tutorial, but it is not recommended at the moment.
 
 1. Be aware that you can share a cloud database *without* sharing computational resources. This flexibility is very important for many collaborations. 
-2. Just like with your cloud database, designate a point-person to manage your private computational resources. Everyone else can skip to step 9.
-3. Either sign in to [Prefect Cloud](https://universal.prefect.io/) (recommended) or setup a [Prefect Server](https://docs.prefect.io/orchestration/server/overview.html).
-4. Connect to your server with the following steps (this is from [Prefect's tutorial](https://docs.prefect.io/orchestration/getting-started/set-up.html)):
-    - On Prefect Cloud's homepage, go to `User` -> `Account Settings` -> `API Keys` -> `Create An API Key`
-    - Copy the created key
-    - set your Prefect backend with the command `prefect backend cloud`
-    - tell Prefect your key with the command `prefect auth login --key example_key_h123j2jfk`
-5. Register all Simmate workflows with Prefect using the command `simmate workflow-engine setup-cloud`
-6. Test that Prefect is configured properly with the following steps (this will run the workflow locally):
-    - run the command `prefect agent local start` (note that this will run endlessly and submit all workflows in parallel. use `crtl+C` to stop)
-    - in a separate terminal, rerun our workflow from tutorial 2 with `run-cloud` instead of `run` (so `simmate workflows run-cloud relaxation_mit POSCAR`)
-7. Set up your computational resources using Dask (and if needed, Dask JobQueue). There are MANY options for this, which are covered in the [`simmate.workflow_engine`](https://github.com/jacksund/simmate/tree/main/src/simmate/workflow_engine) module. Take the time to read the documentation here. But as an example, we'll set up a SLURM cluster and then link it to a Prefect agent. Note, if you want to run workflows with commands like `mpirun -n 18 vasp_std > vasp.out`, then limit the Dask worker to one core while having the SLURM job request more cores. The resulting python script will look something like this:
-```python
 
+2. Just like with your cloud database, designate a point-person to manage your private computational resources. Everyone else only needs to switch from `run` to `run_cloud`.
+
+3. If your computational resources are distributed on different computers, make sure you have set up a cloud database (see the previous tutorial on how to do this). If you want to schedule AND run things entirely on your local computer (or file system), then you can skip this step.
+
+4. If you have remote resources, make sure you have ALL simmate installations connected to the same database (i.e. you database connection file should be on all resources).
+
+5. If you have custom workflows, make sure you are using a simmate project and all resources have this app installed
+
+> :bulb: If you don't have custom database tables, you can try continuing without this step, but there's no guarantee that the workflow will run properly.
+
+6. Schedule your simmate workflows by switching from the `run` method to the `run_cloud` method. For example, if you are using the command line:
+``` bash
+simmate workflows run-cloud relaxation.vasp.mit --structure POSCAR
 ```
-8. Test out your cluster by running `simmate workflows run-cloud relaxation_mit POSCAR` in a separate terminal (submit this a bunch if you'd like to). If you'd like to limit how many workflows of a given tag (e.g. "WarWulf" above) run in parallel, set the concurrency limit in Prefect cloud [here](https://cloud.prefect.io/team/flow-concurrency).
-9. To let others use your cluster, simply add them to your Prefect Cloud and give them an API key. They just need to do the following:
-    - set your Prefect backend with the command `prefect backend cloud`
-    - tell Prefect your key with the command `prefect auth login --key example_key_h123j2jfk`
-    - try submitting a workflow with `simmate workflows run-cloud relaxation_mit POSCAR`
+
+> :bulb: This workflow is now scheduled but it won't run until we start a worker.
+
+8. Whereever you'd like to run the workflow, start a worker with:
+``` bash
+simmate workflow-engine start-singleflow-worker
+```
+
+> :warning::warning::warning: If you are on a cluster, start-worker should be called within your submit script (e.g. inside `submit.sh` for SLURM). Don't run workers on the head node! :warning::warning::warning:
+
+9. Note this "singleflow" worker will start, run 1 workflow, then shutdown. If you would like more control over how many workflows are ran or even run a worker endlessly, you can use the command:
+``` bash
+simmate workflow-engine start-worker
+```
+
+10. Scale out your cluster! Start workers anywhere you'd like, and start as many as you'd like. Just make sure you follow steps  4 and 5 for every worker.
+
+11. To control which workers run which workflows, use tags. Workers will only pick up submissions that have matching tags.
+``` bash
+# when submitting
+simmate workflows run-cloud ... -t my_tag -t small-job
+```
+
+``` bash
+# for the worker
+simmate workflow-engine start-worker -t small-job
+```
+
+12. To let others use your cluster, simply connect them to the same database.
+
+
 
 <br/><br/>
 
@@ -61,9 +82,9 @@ This tuturial will give an overview of how to modify the `schedule` and determin
 - `schedule`: submits the workflow to a scheduler queue of many other workflows
 - `execute`: run the calculation on a remote cluster
 
-A scheduler is something we submit workflows to and controls when to run them. As a bunch of workflows are submitted, our scheduler forms a queue and keeps track of which ones to run next. We will use [Prefect](https://www.prefect.io/) as our scheduler. 
+A **scheduler** is something we submit workflows to and controls when to run them. The terms "scheduler" and "executor" are sometimes used interchangeably. As a bunch of workflows are submitted, our scheduler forms a queue and keeps track of which ones to run next. To do this, we can use the built-in `SimmateExecutor`, [Dask](https://docs.dask.org/en/stable/futures.html), or [Prefect](https://www.prefect.io/) as our scheduler. For this tutorial, we will use the `SimmateExecutor` because it is the default one and it's already set up for us.
 
-A cluster is a group of computational resources that actually run the workflows. So our scheduler will find whichever workflow should be ran next, and send it to our cluster to run. Clusters are often made up of "workers" -- where a worker is just a single resource and it works through one job at a time. For example, if we had a cluster made up of 10 desktop computers, each computer would run a workflow and once finished ask the scheduler for the next workflow to run. At any given time, 10 workflows will be running. We'll use Dask to set up our cluster, whether your resources are on the cloud, a supercomputer, or just simple desktops.
+A **cluster** is a group of computational resources that actually run the workflows. So our scheduler will find whichever workflow should be ran next, and send it to our cluster to run. Clusters are often made up of **workers** -- where a worker is just a single resource and it works through one job at a time. For example, say we have 10 computers (or slurm jobs) that each run one workflow at a time. All computers together are our cluster. Each computer is a worker. At any given time, 10 workflows will be running because each worker will have one it is in charge of. Because we are using the `SimmateExectuor`, we will be using `SimmateWorker`s to set up each worker and therefore our cluster. Set for each worker is the same -- whether your resources are on a cloud service, a supercomputer, or just simple desktops.
 
 <br/>
 
@@ -77,9 +98,8 @@ With that said, each team will likely need to handle their own computational res
 - a series of desktop computers that your lab shares
 - any combination of these resources
 
-The easiest way to use these resources is to sign on and run simmate directly on it. When this is done, the workflow runs directly on your resource and it will run there immediately. We've already see this with Tutorial 2 when we called `simmate workflows run ...`. Just use that on your new resource to start! (for help signing on to remote supercomputers and installing anaconda, be sure to ask the cluster's IT team).
+The easiest way to use these resources is to sign on and run a simmate workflow using the `run` method. When this is done, the workflow runs directly on your resource and it will run there immediately. This with Tutorial 2 when we called `simmate workflows run ...`. When on a HPC SLURM cluster, we would run simmate using a `submit.sh` file like this:
 
-As another example, you can submit a workflow to a SLURM cluster with a submit.sh file like this:
 ```
 #!/bin/bash
 
@@ -88,21 +108,102 @@ As another example, you can submit a workflow to a SLURM cluster with a submit.s
 #SBATCH --ntasks=2
 
 # make sure you have you activated your conda enviornment 
-# and required modules before submitting
+# and required modules (like vasp) before submitting
 
-simmate workflows run-cloud relaxation_mit POSCAR > simmate.out
+simmate workflows run-yaml my_settings.yaml > simmate.out
 ```
 
 :fire::fire::fire:
-If you are only running a few workflows per day (<10), we recommend you stick to running workflows in this way. That is, just calling `simmate workflows run`. Don't overcomplicate things.
+If you are only running a few workflows per day (<10), we recommend you stick to running workflows in this way. That is, just calling `simmate workflows run`. Don't overcomplicate things. Go back to tutorial 02 to review these concepts.
 :fire::fire::fire:
 
-Alternatively, if your team is submitting hundreds or thousands of workflows at a time, then it would be extremely useful to monitor and orchestrate these workflows. To do this, we will use Prefect and Dask. Just like with our cloud database in the previous tutorial, you only need ONE person to manage ALL of your computational resources. Once the resources have been set up, the other users can connect using API key (which is essentially a username+password).
+Alternatively, if your team is submitting hundreds or thousands of workflows at a time, then it would be extremely useful to monitor and orchestrate these workflows using a **scheduler** and **cluster**. Just like with our cloud database in the previous tutorial, you only need ONE person to manage ALL of your computational resources. Once the resources have been set up, the other users can connect using the database connection file (or an API key if you are using Prefect).
+
+If you are that one person for your team, then continue with this tutorial. If not, then you should instead talk with your point person! Using your teams resources should be as easy as switching from the `run` to `run_cloud` method.
+
+</br>
+
+# A check-list for your workers
+
+Now that we know the terms **scheduler**, **cluster**, and **worker** (and also know whether we need these), we can start going through a check list to set everything up:
+
+1. configure your scheduler
+2. connect a cloud database
+3. connect to the scheduler
+4. register all custom projects/apps
+
+
+**1. The Scheduler**:
+If you stick to the "SimmateExecutor", then you're already all good to go! Nothing needs to be done. This is because the queue of job submissions is really just a database table inside the simmate database. Workers will queue this table and grab the first result.
+
+**2. Connecting to a Cloud Database**:
+We learned from previous tutorials that simmate (by default) writes results to a local file named `~/simmate/my_env-database.sqlite3`. We also learned that cloud databases let many different computers share data and access the database through an internet connection. Because SQLite3 (the default database engine) is not build for hundreds of connections and we often use separate computers to run workflows, you should build a cloud database. Therefore, don't skip tutorial 08 where we set up a cloud database!
+
+**3. Connecting to the Scheduler**
+Because we are using the "SimmateExecutor" all we need is a connection to the cloud database. All you need to do make sure ALL of your computational resources are connected to the cloud database you configured. If your workers aren't picking up any of your workflow submissions, it's probably because you didn't connect them properly.
+
+**4. Connecting custom projects**
+
+> :warning: Because SimmateExecutor uses cloudpickle when submitting tasks, many custom workflows will work just fine without this step. Our team is still working how to guide users and make this as easy as possible. For now, we suggest just trying out your workflow when you skip this step -- as most times it will work. If not, then the text below explains why.
+
+If you have custom database tables or code, it's important that (a) the cloud database knows about these tables and (b) your remote resources can access your custom code. Therefore, your custom project/app should be installed and accessible by all of your computation resources. Be sure to `pip install your-cool-project` for all computers.
+
+
+</br>
+
+# Setting up your cluster and workers
+
+After you go through the check-list above, you're ready to start a worker!
+
+Scheduling a workflow is straight-forward. Simply change all your scripts and commands from the `run` method to the `run_cloud` method. For example, if you are using the command line:
+``` bash
+simmate workflows run-cloud relaxation.vasp.mit --structure POSCAR
+```
+
+This schedules your workflow, but it won't run yet. It is simply sitting in the queue and waiting for a worker to pick it up. Once we start a worker, then it will actually run.
+
+Whereever you'd like to run the workflow, start a worker with:
+``` bash
+simmate workflow-engine start-singleflow-worker
+```
+> :warning::warning::warning: If you are on a cluster, start-worker should be called within your submit script (e.g. inside `submit.sh` for SLURM). Don't run workers on the head node! :warning::warning::warning:
+
+When you run this "singleflow" worker, you'll notice that the Worker will start, run 1 workflow, then shutdown. This is the recommend approach for HPC clusters because it follow best practices for sharing resources. You don't want a worker hogging computational resources if there aren't any workflows scheduled to run! 
+
+However, if you would like more control over how many workflows are ran or even run a worker endlessly, you can use the command:
+``` bash
+simmate workflow-engine start-worker
+```
+
+For example, if your team runs many mini workflows that are under 5 minutes, starting/stopping workers could be a pain (sometimes it can take simmate up to 10 seconds to set everything up). That's a significant overhead and wasted computation time. To overcome this, we would run a worker that shuts down after 10 workflows or if the queue is empty:
+``` bash
+simmate workflow-engine start-worker --nitems_max 10 --close_on_empty_queue true
+```
+
+</br>
+
+# Controlling what workflows are ran by each worker
+
+> :warning: The full guide for custom workers is still being written. See workflow "tags" for more information.
 
 </br>
 
 # Connecting others to your scheduler
 
-Once you've set up your scheduler with Prefect and cluster with Dask, your team members simply need to connect to Prefect Cloud to submit their workflows. Generate an API key for them. Then they can complete step 9 of [the quick tutorial](#the-quick-tutorial) (above).
+If they are connected to your database, then they're good to go! Other schedulers like Prefect or Dask require extra setup.
 
-Just remember... `workflow.run()` in python and `simmate workflows run` in the command-line will still run the workflow locally and right away. `workflow.run_cloud()` in python and `simmate workflows run-cloud` in the command-line will submit your workflow to Prefect Cloud.
+</br>
+
+# You did it!
+
+:fire::fire::fire::fire::fire::fire:
+
+If you made it to this point, you're pretty much a Simmate expert! 
+
+Any other guides and tutorials will be in the API documentation. We hope you see the potential Simmate has to offer the larger materials community! With a powerful framework like Simmate in hand, anything is possible. In other words...
+
+**"The ceiling is the roof" -Michael Jordan**
+
+Have fun coding and always be sure to ask for help/feedback when you need it.
+
+:fire::fire::fire::fire::fire::fire:

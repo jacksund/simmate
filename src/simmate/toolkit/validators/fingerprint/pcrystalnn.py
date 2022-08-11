@@ -18,6 +18,11 @@ from matminer.featurizers.structure.sites import (
     SiteStatsFingerprint,
 )  # PartialsSiteStatsFingerprint
 
+logging.warn(
+    "PartialsSiteStatsFingerprint current acts as a SiteStatsFingerprint. "
+    "We are waiting on a new MatMiner release to fix this issue."
+)
+
 
 class PartialCrystalNNFingerprint:
     def __init__(

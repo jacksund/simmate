@@ -3,7 +3,7 @@
 
 WarWulf is the Warren Lab's Beowulf cluster.
 
-> :bulb: This guide should be used alongside tutorial 02 ([here](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md#switching-to-a-remote-cluster)).
+> :bulb: This guide should be used alongside tutorial 02 ([here](https://github.com/jacksund/simmate/blob/main/tutorials/02_Run_a_workflow.md#switching-to-a-remote-cluster)).
 
 <br/>
 
