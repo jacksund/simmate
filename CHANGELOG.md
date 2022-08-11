@@ -17,7 +17,16 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 <!-- (hidden message for maintainer to use between releases)
 - no new changes have been merged into the `main` branch yet
+**Enhancements**
+**Refactors**
+**Fixes**
 -->
+
+- no new changes have been merged into the `main` branch yet
+
+
+
+# v0.8.0 (2022.08.11)
 
 **Enhancements**
 - NEB workflows now accept parameters for changing supercell size and number of images used
@@ -27,15 +36,15 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - test files can be provided within zip files, fixing excessive line counts on git commits
 - add simmate worker that can run "out-of-box" and requires no set up
 - add logging for useful debugging and monitoring of workflows
+- pinned dependencies to maximum versions and manage with dependabot
 
 **Refactors**
 - to simplify the creation of new workflows, `S3Task` is now `S3Workflow` and database tables are dynamically determined using the workflow name
-- workflows of a given type (e.g. relaxation or static-energy) now share a database tables in order to simplify overall database architecture
+- workflows of a given type (e.g. relaxation or static-energy) now share database tables in order to simplify overall database architecture
 - migrate from `os.path` to `pathlib.Path` throughout package
 - isolate prefect use to separate executors
-
-**Fixes**
-- None
+- updated tutorials for new workflow engine and workers
+- remove use of `setup.py` in favor of `pyproject.toml`
 
 
 

@@ -34,11 +34,20 @@ def load_remote_archives(**kwargs):
     this method.
     """
 
+    logging.info("Loading AFLOW Prototypes")
     AflowPrototype.load_remote_archive(**kwargs)
-    CodStructure.load_remote_archive(**kwargs)
+
+    logging.info("Loading JARVIS data")
     JarvisStructure.load_remote_archive(**kwargs)
+
+    logging.info("Loading MatProj data")
     MatprojStructure.load_remote_archive(**kwargs)
+
+    logging.info("Loading OQMD data")
     OqmdStructure.load_remote_archive(**kwargs)
+
+    logging.info("Loading COD data")
+    CodStructure.load_remote_archive(**kwargs)  # BUG: this crashes the IDE.
 
 
 def load_default_sqlite3_build():
@@ -48,7 +57,7 @@ def load_default_sqlite3_build():
     """
     # DEV NOTE: the prebuild filename is updated when new versions call for it.
     # Therefore, this value hardcoded specifically for each simmate version
-    archive_filename = "prebuild-2022-07-05.zip"
+    archive_filename = "prebuild-2022-08-11.zip"
 
     # Make sure the backend is using SQLite3 as this is the only allowed format
     assert DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
