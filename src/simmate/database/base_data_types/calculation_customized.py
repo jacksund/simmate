@@ -47,7 +47,7 @@ class CustomizedCalculation(Calculation):
         directory: Path,
     ):
         # Takes a pymatgen VaspRun object, which is what's typically returned
-        # from a simmate VaspTask.run() call.
+        # from a simmate VaspWorkflow.run() call.
 
         # rather than cherry-pick data, we just save everything as a dictionary
         self.data = vasprun.as_dict()

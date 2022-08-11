@@ -32,7 +32,7 @@ def start_project(project_name):
     # we now make the project folder using our template directory.
     # Note, we are using Django's "startproject" command even though we are just
     # copying files over. This might be overkill but it gets the job done.
-    call_command("startproject", project_name, template=template_directory)
+    call_command("startproject", project_name, template=str(template_directory))
 
     # grab the full path to the new project for the user to see
     new_project_directory = Path.cwd() / project_name

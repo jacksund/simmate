@@ -14,31 +14,32 @@ In this tutorial, you will learn how to explore your database as well as load da
 
 1. Make sure you've initialized your database. This was done in tutorial 2 with the command `simmate database reset`. Do NOT rerun this command as it will empty your database and delete your results.
 2. Go to the `simmate.database` module to view all available tables.
-3. The table for Tutorial 2's results are located in the `MITStaticEnergy` datatable class, which can be loaded via either of these options:
+3. The table for Tutorial 2's results are located in the `StaticEnergy` datatable class, which can be loaded via either of these options:
 ```python
 # OPTION 1
 from simmate.database import connect # this connects to our database
-from simmate.database.workflow_results import MITStaticEnergy
+from simmate.database.workflow_results import StaticEnergy
 
 # OPTION 2 (slower but recommended for convenience)
-from simmate.workflows.static_energy import mit_workflow
-results = mit_workflow.database_table  # results here is the same thing as MITStaticEnergy above
+from simmate.workflows.utilities import get_workflow
+workflow = get_workflow("static-energy.vasp.mit")
+table = workflow.database_table  # results here is the same thing as StaticEnergy above
 ```
-4. View all the possible table columns with `MITStaticEnergy.show_columns()`
-5. View the full table as pandas dataframe with `MITStaticEnergy.objects.to_dataframe()`
+4. View all the possible table columns with `StaticEnergy.show_columns()`
+5. View the full table as pandas dataframe with `StaticEnergy.objects.to_dataframe()`
 6. Filter results using [django-based queries](https://docs.djangoproject.com/en/4.0/topics/db/queries/). For example:
 ```python
-filtered_results = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites__lte=2).all()
+filtered_results = StaticEnergy.objects.filter(formula_reduced="NaCl", nsites__lte=2).all()
 ```
 7. Convert the final structure from a database object (aka `DatabaseStructure`) to a structure object (aka `ToolkitStructure`).
 ```python
-single_relaxation = MITStaticEnergy.objects.filter(formula_reduced="NaCl", nsites__lte=2).first()
+single_relaxation = StaticEnergy.objects.filter(formula_reduced="NaCl", nsites__lte=2).first()
 nacl_structure = single_relaxation.to_toolkit()
 ```
 8. For third-party data (like [Material Project](https://materialsproject.org/), [AFLOW](http://aflowlib.org/), [COD](http://www.crystallography.net/cod/), etc.) load the database table and (if you are NOT using a prebuilt database) then request to download all the available data:
 ```python
 from simmate.database import connect  # this connects to our database
-from simmate.database.third_parties.jarvis import JarvisStructure
+from simmate.database.third_parties import JarvisStructure
 
 # NOTE: This line is only needed if you did NOT accept the download
 # when running `simmate database reset`.
@@ -135,8 +136,9 @@ In Tutorial 2, we ran a calculation and then added results to our database table
 We know our workflow's name was `energy-mit`, so let's start by grabbing that workflow again. The database table for results is always attached to the workflow as the `database_table` attribute. You can load it like this:
 
 ```python
-from simmate.workflows import energy_mit
-table = energy_mit.database_table
+from simmate.workflows.utilities import get_workflow
+workflow = get_workflow("static-energy.vasp.mit")
+table = workflow.database_table
 ```
 
 To see all of the data this table stores, we can use it's `show_columns()` method. Here, we'll see a bunch of columns printed for us...
@@ -149,8 +151,10 @@ table.show_columns()
 
 ```
 - id
-- structure_string
+- created_at
+- updated_at
 - source
+- structure_string
 - nsites
 - nelements
 - elements
@@ -163,10 +167,10 @@ table.show_columns()
 - formula_reduced
 - formula_anonymous
 - spacegroup (relation to Spacegroup)
+- workflow_name
+- location
 - directory
 - run_id
-- created_at
-- updated_at
 - corrections
 - site_forces
 - lattice_stress
@@ -194,7 +198,7 @@ These are a lot of columns... and you may not need all of them. But Simmate stil
 Next we'd want to see the table with all of its data. To access the table rows, we use the `objects` attribute, and then to get this into a table, we convert to a "dataframe". A dataframe is a filtered portion of a database table -- and because we didn't filter any of our results yet, our dataframe is just the whole table. 
 
 ```python
-data = database_table.objects.to_dataframe()
+data = table.objects.to_dataframe()
 ```
 Open up this variable by double-clicking `data` in Spyder's variable explorer (top right window) and you can view the table. Here's what a typical dataframe looks like in Spyder:
 
@@ -240,7 +244,7 @@ In the previous section, we loaded our `DatabaseTable` from the workflow. But no
 from simmate.database import connect  # this connects to our database
 
 # This gives the database_table we were using in the previous section
-from simmate.database.workflow_results import MITRelaxation
+from simmate.database.workflow_results import StaticEnergy
 
 # This loads the table where we store all of the JARVIS data.
 from simmate.database.third_parties import JarvisStructure
@@ -278,7 +282,7 @@ data = JarvisStructure.objects.to_dataframe()[:150]
 Now let's really test out our filtering ability with this new data:
 ```python
 from simmate.database import connect  # this connects to our database
-from simmate.database.third_parties.jarvis import JarvisStructure
+from simmate.database.third_parties import JarvisStructure
 
 # EXAMPLE 1: all structures that have less than 6 sites in their unitcell
 structures_1 = JarvisStructure.objects.filter(nsites__lt=6).all()
@@ -299,4 +303,4 @@ df_2 = structures_2.to_dataframe()
 
 There are many ways to search through your tables, and we only covered the basics here. Advanced users will benefit from knowing that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a long time to master, so we only recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) if you plan on joining our team or are a fully computational student. Beginners can just ask for help. Figuring out the correct filter can take new users hours while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/categories/q-a).
 
-When you're ready, you can advance to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/06_Building_custom_workflows), which can be completed on your local computer.
+When you're ready, you can advance to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/06_Build_custom_workflows), which can be completed on your local computer.

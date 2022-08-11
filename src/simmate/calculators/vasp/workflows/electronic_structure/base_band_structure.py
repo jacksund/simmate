@@ -37,7 +37,7 @@ class VaspBandStructure(StaticEnergy__Vasp__Matproj):
     def setup(cls, directory, structure, **kwargs):
         """
         Writes input files for this calculation. This differs from the normal
-        VaspTask setup because it converts the structure to the standard primative
+        VaspWorkflow setup because it converts the structure to the standard primative
         first and then writes a KPOINT file with using a highsym path.
         """
 

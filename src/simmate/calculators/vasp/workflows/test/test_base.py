@@ -10,7 +10,7 @@ from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
 
 class Testing__Vasp__Dummy(VaspWorkflow):
     """
-    A minimal example VaspTask that is just for testing
+    A minimal example VaspWorkflow that is just for testing
     """
 
     use_database = False

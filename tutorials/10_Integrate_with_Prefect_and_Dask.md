@@ -1,6 +1,6 @@
-> :warning::warning::warning: This tutorial is for Prefect v1, but much of Simmate now depends on Prefect v2. As we adjust to the new backend, parts of this tutorial may be broken and recommended proceedures are subject to change.
+# Integrate with Prefect and Dask
 
-# Add computational resources
+> :warning::warning::warning: We do not recommend this tutorial for users at the moment. This tutorial is for Prefect v1, but much of Simmate now depends on Prefect v2. As we adjust to the new backend, parts of this tutorial may be broken and recommended proceedures are subject to change. :warning::warning::warning: 
 
 In this tutorial, you will learn how to run workflows on distributed computational resources -- with full scheduling and monitoring.
 
@@ -14,7 +14,6 @@ In this tutorial, you will learn how to run workflows on distributed computation
 
 > :warning: For beginners, this will be the most difficult part of setting up Simmate -- but it is entirely optional. Be sure to read the section on [Should I set up my own cluster?](#should-i-set-up-my-own-cluster). There are many ways to set up your resources and caviats to each (especially if you are using university or federal supercomputers). While python experts should be able to learn Prefect and Dask quickly, we strongly urge beginners to get advice from our team. If you struggle to follow along with this tutorial, [post a question](https://github.com/jacksund/simmate/discussions/categories/q-a) or email us directly (simmate.team@gmail.com).
 
-> :warning: Functions that submit thousands of smaller calculations/workflows may benefit from isolated computational clusters. For these methods, be sure to read the relevent documentation. By example, our module for evolutionary structure prediction will walk you through using a local cluster (read more at [`simmate.toolkit.structure_prediction.evolution`](https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit/structure_prediction/evolution)).
 
 <br/><br/>
 

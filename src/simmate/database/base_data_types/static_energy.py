@@ -68,7 +68,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun):
         # Takes a pymatgen VaspRun object, which is what's typically returned
-        # from a simmate VaspTask.run() call.
+        # from a simmate VaspWorkflow.run() call.
 
         # The data is actually easier to access as a dictionary and everything
         # we need is stored under the "output" key.
@@ -100,7 +100,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         directory: Path,
     ):
         # Takes a pymatgen VaspRun object, which is what's typically returned
-        # from a simmate VaspTask.run() call.
+        # from a simmate VaspWorkflow.run() call.
 
         # The data is actually easier to access as a dictionary and everything
         # we need is stored under the "output" key.

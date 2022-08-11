@@ -449,7 +449,7 @@ For workflows to run correctly, the following requirements need to be met:
 5. Simmate installed on the remote cluster
 6. VASP Potentials in `~/simmate/vasp/Potentials` on the remote cluster
 
-The remainder of this tutorial gives example commands to use. Replace these commands and scripts with the ones in your cluster's guide. (For example, the next command titled "Sign in with...", you should use the "Sign in with..." section of your guide.)
+The remainder of this tutorial gives example commands to use. Replace these commands and scripts with the ones in your cluster's guide. (For example, the next command titled "Sign in with...", you should use the "Sign in with..." section of your cluster's guide.)
 
 If you've never signed into a remote cluster before, we will do this by using SSH (Secure Shell). For example, to sign in to University of North Carolina's LongLeaf cluster, you would run the following command in your local terminal (on windows, use your Command-prompt -- not the Anaconda Powershell Prompt):
 
@@ -473,10 +473,13 @@ To load VASP into your environment, you typically need to run the command:
 # Load VASP with...
 
 module load vasp
+
+# then check the command is found
+
 vasp_std
 ```
 
-If the vasp_std command worked correctly, you will see (their command doesn't print help information like `simmate` or `conda`):
+If the vasp_std command worked correctly, you will see the following output (bc their command doesn't print help information like `simmate` or `conda`):
 
 ``` shell
 # Error output may vary between different VASP versions
