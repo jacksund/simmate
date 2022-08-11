@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
-# For adding new selection methods, DEAP is a good reference:
-#   https://github.com/DEAP/deap/blob/master/deap/tools/selection.py
-#   https://deap.readthedocs.io/en/master/api/tools.html
-#
-# Their selection methods take a list of individuals that each have a .fitness
-# attribute. Instead, I pass individuals here as a pandas dataframe and have
-# them specify a "fitness_column"
-#
-# Another good reference is Wikipedia
-#   https://en.wikipedia.org/wiki/Selection_(genetic_algorithm)
+"""
+For adding new selection methods, DEAP is a good reference:
+  https://github.com/DEAP/deap/blob/master/deap/tools/selection.py
+  https://deap.readthedocs.io/en/master/api/tools.html
 
-# NOTE: I assume lower fitness is better! This may change in the future because
-# other selection methods throw issues with lower=better and even more issues
-# when we have negative values
+Their selection methods take a list of individuals that each have a .fitness
+attribute. Instead, I pass individuals here as a pandas dataframe and have
+them specify a "fitness_column"
+
+Another good reference is Wikipedia
+  https://en.wikipedia.org/wiki/Selection_(genetic_algorithm)
+
+NOTE: I assume lower fitness is better! This may change in the future because
+other selection methods throw issues with lower=better and even more issues
+when we have negative values
+"""
 
 
 class Selector:

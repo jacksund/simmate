@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+This module is experimental and not used at the moment.
+"""
+
 from inspect import signature
 import logging
 

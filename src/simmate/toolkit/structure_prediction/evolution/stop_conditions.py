@@ -54,6 +54,3 @@ class BasicStopConditions:
 
         # If no conditions above are met, return False to continue the search
         return False
-
-
-# -----------------------------------------------------------------------------
