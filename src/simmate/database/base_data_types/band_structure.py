@@ -155,7 +155,7 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
     ):
         """
         Given a pymatgen VaspRun object, which is what's typically returned
-        from a simmate VaspTask.run() call, this will update the database entry
+        from a simmate VaspWorkflow.run() call, this will update the database entry
         with the results.
         """
 

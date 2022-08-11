@@ -141,12 +141,12 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
     ):
         """
         Given a pymatgen VaspRun object, which is what's typically returned
-        from a simmate VaspTask.run() call, this will update the database entry
+        from a simmate VaspWorkflow.run() call, this will update the database entry
         with the results.
         """
 
         # Takes a pymatgen VaspRun object, which is what's typically returned
-        # from a simmate VaspTask.run() call.
+        # from a simmate VaspWorkflow.run() call.
 
         # All data analysis is done via a CompleteDOS object, so we convert
         # the vasprun object to that first.

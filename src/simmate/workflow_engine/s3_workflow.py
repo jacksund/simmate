@@ -147,7 +147,7 @@ will often have custom `setup` and `workup` methods already defined for you.
 You can update/override these as you see fit.
 
 For a full (and advanced) example of a subclass take a look at
-`simmate.calculators.vasp.workflows.base.VaspTask` and the tasks that use it like
+`simmate.calculators.vasp.workflows.base.VaspWorkflow` and the tasks that use it like
 `simmate.calculators.vasp.workflows.relaxation.matproj`.
 
 

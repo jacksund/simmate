@@ -45,7 +45,7 @@ class VaspWorkflow(S3Workflow):
     incar: dict = None
     """
     This sets the default vasp settings from a dictionary. This is the one thing
-    you *must* set when subclassing VaspTask. An example is:
+    you *must* set when subclassing VaspWorkflow. An example is:
         
     ``` python
       incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
@@ -161,7 +161,7 @@ class VaspWorkflow(S3Workflow):
         # we raise an error. I may want to change this in the future though
         if pre_sanitize_structure and pre_standardize_structure:
             raise Exception(
-                "For this VaspTask, only one of `pre_sanitize_structure` or "
+                "For this VaspWorkflow, only one of `pre_sanitize_structure` or "
                 " `pre_standardize_structure` can be set to True, not both."
             )
 

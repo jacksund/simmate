@@ -1,5 +1,5 @@
 
-# Building custom workflows
+# Build custom workflows
 
 > :warning: There is no "quick tutorial" for this topic. Even advanced users should read everything!
 
@@ -11,7 +11,7 @@ In this tutorial, you will learn how to build customized workflows.
 4. [Create new & advanced workflows](#create-new-&-advanced-workflows)
 5. [Taking things to the next level](#taking-things-to-next-level)
 
-</br>
+</br></br>
 
 ## Why isn't there a `custom_settings` option?
 
@@ -186,6 +186,8 @@ state = StaticEnergy__Vasp__MyCustomPreset.run(structure="NaCl.cif")
 result = state.result()
 ```
 
+There's much more that's possible. We'll look at a slightly more complex example in the next tutorial too. Be sure to keep going!
+
 </br>
 
 # Taking things to next level 
@@ -193,10 +195,10 @@ result = state.result()
 There are still a lot of things we would want to do with our new workflow. For example, what if we want to...
 - modify a complex workflow (such as `diffusion.vasp.neb-all-paths-mit`)
 - create a custom workflow using a new program like USPEX or ABINIT
-- use a custom database to save our workflow results
+- use a custom database table to save our workflow results
 - access the workflow in the website interface
 - access our workflow from other scripts (and the `get_workflow` function)
 
 For creating complex workflows and databases, you'll need to read through our API documentation, where we cover advanced cases. Also, don't be hesitate to [post a question on our forum](https://github.com/jacksund/simmate/discussions/categories/q-a). We can also tell you the best place to start.
 
-Accessing our workflow on the website or in scripts is much easier, and we will cover it in the next tutorial -- while we tackle custom database tables as the same time. Continue to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/07_Building_custom_datatables.md) when you're ready.
+Accessing our workflow on the website or in scripts is much easier, and we will cover it in the next tutorial -- while we tackle custom database tables as the same time. Continue to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/07_Build_custom_datatables_and_apps.md) when you're ready.
