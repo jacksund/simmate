@@ -56,9 +56,6 @@ def test_all_workflow_runs(tmp_path, sample_structures):
 
         # TEST S3Workflows
         s3_flows = [
-            "electronic-structure.vasp.matproj-full",
-            "population-analysis.vasp.bader-matproj",
-            "population-analysis.vasp.elf-matproj",
             "relaxation.vasp.matproj",
             "relaxation.vasp.mit",
             "relaxation.vasp.mvl-neb-endpoint",
@@ -68,10 +65,21 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             "relaxation.vasp.quality03",
             "relaxation.vasp.quality04",
             "relaxation.vasp.staged",
+            "relaxation.vasp.matproj-metal",
+            "relaxation.vasp.matproj-scan",  # slow
+            "relaxation.vasp.matproj-hse",  # slow
+            "relaxation.vasp.mvl-grainboundary",
+            "relaxation.vasp.mvl-slab",
             "static-energy.vasp.matproj",
             "static-energy.vasp.mit",
             "static-energy.vasp.mvl-neb-endpoint",
             "static-energy.vasp.quality04",
+            "static-energy.vasp.matproj-hse",  # slow
+            "static-energy.vasp.matproj-scan",  # slow
+            "population-analysis.vasp.bader-matproj",
+            "population-analysis.vasp.elf-matproj",
+            "electronic-structure.vasp.matproj-full",
+            "electronic-structure.vasp.matproj-hse-full",  # slow
         ]
         for workflow_name in s3_flows:
 
@@ -103,22 +111,21 @@ def test_all_workflow_runs(tmp_path, sample_structures):
 
         # TEST NEB FLOWS
         # For testing, look at I- diffusion in Y2CI2 (takes roughly 1 hr)
-        # structure = sample_structures["Y2CI2_mp-1206803_primitive"]
-        # workflow_name = "diffusion.vasp.neb-all-paths-mit"
-        # workflow = get_workflow(workflow_name)
-        # state = workflow.run(
-        #     structure=structure,
-        #     migrating_specie="I",
-        #     command="mpirun -n 12 vasp_std > vasp.out",
-        #     directory=str(tmp_path),
-        #     nimages=1,
-        #     min_atoms=10,
-        #     max_atoms=25,
-        #     min_length=4,
-        # )
-        # state.result()
-        # if state.is_completed():
-        #     successful_flows.append(workflow_name)
+        structure = sample_structures["Y2CI2_mp-1206803_primitive"]
+        workflow_name = "diffusion.vasp.neb-all-paths-mit"
+        workflow = get_workflow(workflow_name)
+        state = workflow.run(
+            structure=structure,
+            migrating_specie="I",
+            command="mpirun -n 12 vasp_std > vasp.out",
+            nimages=1,
+            min_atoms=10,
+            max_atoms=25,
+            min_length=4,
+        )
+        state.result()
+        if state.is_completed():
+            successful_flows.append(workflow_name)
 
     # check which flows either (1) failed or (2) weren't tested
     all_flows = get_list_of_all_workflows()
@@ -126,18 +133,9 @@ def test_all_workflow_runs(tmp_path, sample_structures):
     missing_failed_flows.sort()
 
     assert missing_failed_flows == [
-        "diffusion.vasp.neb-all-paths-mit",
-        "diffusion.vasp.neb-from-endpoints-mit",
-        "diffusion.vasp.neb-from-images-mit",
-        "diffusion.vasp.neb-single-path-mit",
-        "electronic-structure.vasp.matproj-hse-full"
-        "population-analysis.vasp.badelf-matproj",
-        "relaxation.vasp.matproj-hse",
-        "relaxation.vasp.matproj-metal",
-        "relaxation.vasp.matproj-scan",
-        "relaxation.vasp.mvl-grainboundary",
-        "relaxation.vasp.mvl-slab",
+        "diffusion.vasp.neb-from-endpoints-mit",  # used within all-paths
+        "diffusion.vasp.neb-from-images-mit",  # used within all-paths
+        "diffusion.vasp.neb-single-path-mit",  # used within all-paths
+        "population-analysis.vasp.badelf-matproj",  # requires db
         "restart.simmate.automatic",
-        "static-energy.vasp.matproj-hse",
-        "static-energy.vasp.matproj-scan",
     ]
