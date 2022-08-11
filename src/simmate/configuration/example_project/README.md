@@ -23,7 +23,7 @@ pip install -e .
 
 2. Make sure this install worked by running these lines in python:
 
-``` bash
+``` python
 # You may need to restart your terminal/Spyder for this to work
 import example_app
 from example_app.apps import ExampleAppConfig
@@ -38,16 +38,20 @@ example_app.apps.ExampleAppConfig
 4. Reset your database, which will now build-in the new tables from `example_app`:
 
 ``` bash
+# remember, this deletes everything!
 simmate database reset
+
+# alternatively if you don't want to delete the current database
+simmate database update
 ```
 
 5. Make sure you can view the new tables in your database
 
 ``` python
 from simmate.database import connect
-from example_app.models import ExampleRelaxation
+from example_app.models import MyCustomTable1
 
-ExampleRelaxation.objects.count()  # should output 0 bc we haven't added data yet
+MyCustomTable1.objects.count()  # should output 0 bc we haven't added data yet
 ```
 
 
