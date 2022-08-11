@@ -249,7 +249,7 @@ If you reaaally wanted to, you could stop going through our tutorials and just i
 
 Additionally, an important thing to keep in mind is that Simmate is MUCH more powerful when you start interacting with our code -- rather than just using the web interface. By learning to interact with Simmate's code using the command-line and Python, you can quickly submit 1000s of calculations and access advanced functionality that isn't yet available in the interface (and there's a lot of it). Keep this in mind as you continue through our other tutorials! We'll teach you how to interact with our code so that you can take full advantage of Simmate.
 
-As a final note, spend some time with the extra resources (below) and then continue on to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/02_%20Run_a_workflow.md) where we'll learn how to run workflows.
+As a final note, spend some time with the extra resources (below) and then continue on to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/02_Run_a_workflow.md) where we'll learn how to run workflows.
 
 <br/>
 
