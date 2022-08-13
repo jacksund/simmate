@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from numpy.random import randint, choice
+import logging
 
+from numpy.random import randint, choice
 from tqdm import tqdm
 
+from simmate.toolkit import Composition
 from simmate.toolkit.symmetry.wyckoff import (
     loadAsymmetricUnitData,
     loadWyckoffData,
@@ -15,11 +17,14 @@ from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 class RandomWySites:
     def __init__(
         self,
-        composition,  # must be a pymatgen Composition object
-        spacegroup_include=range(1, 231),
-        spacegroup_exclude=[],
+        composition: Composition,
+        spacegroup_include: list[int] = range(1, 231),
+        spacegroup_exclude: list[int] = [],
         coords_generation_method=UniformlyDistributedVectors,
-        coords_gen_options=dict(),  # asymmetric_unit_boundries is include in extra_conditions automatically
+        # note, asymmetric_unit_boundries is included in coords_gen_options
+        # automatically so this input is anything extra.
+        coords_gen_options: dict = dict(),
+        lazily_generate_combinations: bool = True,
     ):
 
         # make a list of spacegroups that we are allowed to choose from
@@ -38,87 +43,68 @@ class RandomWySites:
         self.stoichiometry = stoichiometry
 
         # Find valid wyckoff combinatons for all spacegroups and stoichiometry
-        # I want the combinations and info to be stored as a dictionary of {spacegroup:combos/info} entries
+        # I want the combinations and info to be stored as a dictionary of
+        # {spacegroup:combos/info} entries.
+        # We split this into 2 dictionaries becuase we reference each a lot and
+        # it makes the code below easier.
         self.wy_groupinfo = {}
         self.wy_groupcombos = {}
-        # some spacegroups will be incompatible with the given composition -- keep a list of these
+        # some spacegroups will be incompatible with the given composition, so
+        # we keep a list of these
         self.spacegroups_invalid = []
-        #!!! NOTE: This code takes a long time to run in some cases, so I want to do it up front
-        # because this takes time, I print a warning and then use tqdm to track progress
-        message = "Generating Wyckoff combinations for every spacegroup: "
-        for spacegroup in tqdm(self.spacegroup_options, desc=message):
-            sg_combo_data = findValidWyckoffCombos(stoichiometry, spacegroup)
-            # If the spacegroup + stoich combination has no valid combinations, the generator will not work
-            if not sg_combo_data["ValidCombinations"]:
-                self.spacegroups_invalid.append(spacegroup)
-                # no need to save these results so skip to the next spacegroup
-                continue
-            # splitting up this dictionary becuase we reference each a lot
-            # and append the results to respective dictionaries
-            self.wy_groupinfo.update({spacegroup: sg_combo_data["WyckoffGroups"]})
-            self.wy_groupcombos.update({spacegroup: sg_combo_data["ValidCombinations"]})
-        # we need to take the spacegroups that are invalid and update the spacegroup_options with it.
-        # we still save the self.spacegroups_invalid for the user to see #!!! consider removing self.spacegroups_invalid though
-        self.spacegroup_options = [
-            sg for sg in self.spacegroup_options if sg not in self.spacegroups_invalid
-        ]
 
-        # make all generators for each spacegroup
-        # the generators are different for each spacegroup because each has a different asym unit
-        #!!! NOTE: options set in coords_gen_options will apply to all spacegroups
-        # I want the generators to be stored as a dictionary of {spacegroup:generator} entries
+        # Each spacegroup will have a "generator" that manages possible wyckoff
+        # combinations and the asymmetric unit associated with the spacegroup.
+        # These will be stored as a dictionary of  {spacegroup: generator}
         self.coords_generators = {}
-        for spacegroup in self.spacegroup_options:
-            # grab a copy of the user inputs for reference
-            # we will manipulate final_options for each spacegroup for use in the generator
-            final_options = coords_gen_options.copy()
-            # If the spacegroup was found to have no valid wyckoff combinations, there is no need for a generator
-            if spacegroup in self.spacegroups_invalid:
-                # skip to next spacegroup
-                continue
-            # establish the coords generator with asymmetric_unit_boundries
-            # this process is a little more complicated because we require that the asymmetric_unit_boundries be included in extra_conditions
-            asym_bounds = asymmetric_unit_boundries(spacegroup)
-            # if any extra_conditions were provided by the user, we want to combine them with the asym conditions
-            if "extra_conditions" in coords_gen_options.keys():
-                all_bounds = coords_gen_options["extra_conditions"] + asym_bounds
-                final_options.update({"extra_conditions": all_bounds})
-            # otherwise, the asym_bounds are the only boundry conditions for the coordinates
-            else:
-                final_options.update({"extra_conditions": asym_bounds})
-            # now that we have the coords_gen_options updated, we can make the generator
-            coords_generator = coords_generation_method(**final_options)
-            # add this generator to the results
-            self.coords_generators.update({spacegroup: coords_generator})
+        # Options set in coords_gen_options will apply to all spacegroups, so
+        # we store these up front. This because these generators are
+        # sometimes accessed lazily
+        self.coords_generation_method = coords_generation_method
+        self.coords_gen_options = coords_gen_options
+
+        # Generating all wyckoff combinations can take a long time to run in
+        # some cases (e.g. high atom counts), so we may want to do it up front.
+        # There are also scenarios where we don't want to generate the possible
+        # spacegroup combinations until the spacegroup is actually requested.
+        # This saves us time when we want just one structure and then are
+        # done with this system.
+        self.lazily_generate_combinations = lazily_generate_combinations
+        if not lazily_generate_combinations:
+            logging.info("Generating Wyckoff combinations for every spacegroup")
+            # use tqdm to track progress
+            for spacegroup in tqdm(self.spacegroup_options):
+                self._setup_spacegroup_wyckoff_generator(
+                    spacegroup,
+                    show_logging=False,
+                )
+            logging.info("Done.")
 
         # below, I'll need to repeatedly reference wy_data
-        #!!! I want to find a better way of loading wy_data - maybe load only data for spacegroup_options?
+        #!!! I want to find a better way of loading wy_data - maybe load
+        # only data for spacegroup_options?
         self.wy_data = loadWyckoffData().values
 
     def new_sites(self, spacegroup=None):
 
-        # This section of code is checking the spacegroup input
-        # if a spacegroup is not specified, grab a random one from our options
+        # parse spacegroup or grab a random one (with necessary lazy-setup)
+        spacegroup = self._init_spacegroup(spacegroup)
+        # exit if we have an invalid spacegroup
         if not spacegroup:
-            # randomly select a symmetry system
-            spacegroup = choice(self.spacegroup_options)
-        #!!! do I need to check this? This may slow the algorithm, but ensures a user doesn't break the function
-        # if a spacegroup is specified, we still need to make sure it's valid
-        else:
-            check = spacegroup not in self.spacegroups_invalid
-            # if it is invalid, print a message and quit the function
-            if not check:
-                # print('This spacegroup is invalid for the given composition') #!!! consider adding a warning
-                return False
+            return False
 
-        # we need to grab the generators, wyckoff combinations, wyckoff group information for selected spacegroup
+        # we need to grab the generators, wyckoff combinations, wyckoff group
+        # information for selected spacegroup
         coords_generator = self.coords_generators[spacegroup]
         wy_groupcombos = self.wy_groupcombos[spacegroup]
         wy_groupinfo = self.wy_groupinfo[spacegroup]
 
         # randomly grab a wy_group combination
-        # NOTE: this does not have equal probability of grabbing all wyckoff site combinations because some wy_groups have more wy_site posibilities than others
-        # choice(sg_combos['ValidCombinations']) doesn't work here, so we grab a random index instead
+        # NOTE: this does not have equal probability of grabbing all wyckoff
+        # site combinations because some wy_groups have more wy_site p
+        # osibilities than others.
+        # choice(sg_combos['ValidCombinations']) doesn't work here, so we grab
+        # a random index instead
         random_index = randint(0, len(wy_groupcombos))
         wy_group_combo = wy_groupcombos[random_index]
 
@@ -127,10 +113,12 @@ class RandomWySites:
         # as well as an empty list for the species
         species_list = []
 
-        # now we need to iterate through each element in stoich, see which wy_group(s) it was assigned to
+        # now we need to iterate through each element in stoich, see which
+        # wy_group(s) it was assigned to
         for i, wy_groups in enumerate(wy_group_combo):
             # wy_groups represents the combination of wy_group's for a single element
-            # len(stoich) == len(wy_group_combo) because indexes are matched up (i.e. stoich[1] was assigned wy_group_combo[1])
+            # len(stoich) == len(wy_group_combo) because indexes are matched
+            # up (i.e. stoich[1] was assigned wy_group_combo[1])
             # so we can use the index of wy_groups to grab the element
             element = self.composition.elements[i]
             # wy_groups can be a list of wy_group entries
@@ -138,25 +126,33 @@ class RandomWySites:
                 # now we need to generate the coordinates for this wy_site
                 # for that, we need three things:
                 # (1) a random wy_site from the assigned wy_group
-                # (2) the base wy_site coords corresponding to that wy_site (i.e. (x,y,z) or (0,y,0))
-                # (3) random coords that exist inside the asymmetric unit, used to eval() the coords with
+                # (2) the base wy_site coords corresponding to that wy_site
+                #     (i.e. (x,y,z) or (0,y,0))
+                # (3) random coords that exist inside the asymmetric unit,
+                #     used to eval() the coords with
                 # (4) ensure that the result coordinates have not been used already
                 # wy_group label is a key to the wy_groupinfo dictionary
-                # the wy_sites output is a list of indexes (as numpy array) that correspond to indicies in the loadWyckoffData() output
+                # the wy_sites output is a list of indexes (as numpy array)
+                # that correspond to indicies in the loadWyckoffData() output
                 wy_sites = wy_groupinfo[wy_group]
                 check = False
                 while not check:
                     # randomly choose one of these wy_site indexes
-                    # I have this inside the while-loop because if a special wy_site (i.e. (0,0,0)) is picked when it's already in coords_used, we will get stuck in the while loop
+                    # I have this inside the while-loop because if a special
+                    # wy_site (i.e. (0,0,0)) is picked when it's already in
+                    # coords_used, we will get stuck in the while loop
                     wy_site_i = choice(wy_sites)
                     # use the choice to grab the wy_site
                     wy_site = self.wy_data[wy_site_i]
-                    # grab the first entry (as all others are symmetrically equivalent) for coord template
+                    # grab the first entry (as all others are symmetrically
+                    # equivalent) for coord template
                     wy_coords = wy_site[5]  # index 5 is 'Coordinates'
-                    # generate random x,y,z values that are inside the asymmetric unit
+                    # generate random x,y,z values that are inside the
+                    # asymmetric unit
                     x, y, z = coords_generator.new_vector()
                     # place these x,y,z values into the coords where necessary
-                    # not sure why I need to use None,dict(x=x,y=y,z=z) inside eval. Eval() can't use the locals for some reason.
+                    # not sure why I need to use None,dict(x=x,y=y,z=z)
+                    # inside eval. Eval() can't use the locals for some reason.
                     final_coords = eval(wy_coords, None, dict(x=x, y=y, z=z))
                     # see if the result is already a coordinate used
                     check = final_coords not in coords_list
@@ -164,12 +160,122 @@ class RandomWySites:
                 coords_list.append(final_coords)
                 species_list.append(element)
 
-        # maybe make these into pymatgen Site objects? I don't see any advantage to Site object,
-        # because we will later need PeriodicSite objects and there's no direct conversion method
+        # maybe make these into pymatgen Site objects? I don't see any
+        # advantage to Site object, because we will later need PeriodicSite
+        # objects and there's no direct conversion method
         return species_list, coords_list
 
+    def _init_spacegroup(self, spacegroup):
+        # This checks the spacegroup input from a user or grabs a random one.
+        # We isolate this into a separate class because of the complex logic
+        # required to handle lazy
 
-##############################################################################
+        # if a spacegroup is not specified, grab a random one from our options
+        if not spacegroup:
+            # If we generated the combinatons up front, we can just grab a spacegroup
+            # from all the valid options.
+            if not self.lazily_generate_combinations:
+                spacegroup = choice(self.spacegroup_options)
+
+            # Otherwise, we need to randomly select a symmetry system until we
+            # find a valid one
+            else:
+                spacegroup = -1  # gives non-existing spacegroup to start the loop
+
+                # check if the spacegroup is valid & analyzed before
+                while not spacegroup in self.coords_generators:
+
+                    # bug-note: this loop should not go on endlessly, because
+                    # spacegroup=1 should **always** be valid and it will be
+                    # selected eventually in extreme cases.
+
+                    # grab a new spacegroup
+                    spacegroup = choice(self.spacegroup_options)
+
+                    # generate the possible combinations.
+                    self._setup_spacegroup_wyckoff_generator(spacegroup)
+
+        # if the user provided a spacegroup, we still need to check if its been
+        # analyzed and is valid.
+        else:
+
+            # make sure wyckoff combos have been analyzed before
+            if (
+                self.lazily_generate_combinations
+                and spacegroup not in self.coords_generators
+                and spacegroup not in self.spacegroups_invalid
+            ):
+                # generate the possible combinations.
+                self._setup_spacegroup_wyckoff_generator(spacegroup)
+
+            # Make sure the spacegroup is valid for the given composition
+            if spacegroup in self.spacegroups_invalid:
+                logging.warn(
+                    f"Spacegroup {spacegroup} is invalid for {self.composition}"
+                )
+                return False
+
+        return spacegroup
+
+    def _setup_spacegroup_wyckoff_generator(
+        self, spacegroup: int, show_logging: bool = True
+    ):
+        if show_logging:
+            logging.info(
+                f"Generating possible wyckoff combinations for spacegroup {spacegroup}"
+            )
+        sg_combo_data = findValidWyckoffCombos(self.stoichiometry, spacegroup)
+        if show_logging:
+            logging.info("Done generating combinations.")
+        # If the spacegroup + stoich combination has no valid combinations,
+        # the generator will not work
+        if not sg_combo_data["ValidCombinations"]:
+            self.spacegroups_invalid.append(spacegroup)
+            # we also need to update all the spacegroup_options now that we have
+            # a new invalid one.
+            self.spacegroup_options = [
+                sg
+                for sg in self.spacegroup_options
+                if sg not in self.spacegroups_invalid
+            ]
+            # exit the function -- false indicates we have an invalid spacegroup
+            return False
+        # Otherwise we have valid combos that we want to store -- so that
+        # we don't need to calculate them again.
+        self.wy_groupinfo.update({spacegroup: sg_combo_data["WyckoffGroups"]})
+        self.wy_groupcombos.update({spacegroup: sg_combo_data["ValidCombinations"]})
+
+        # Next we need to setup the asymmetric unit boundry conditions.
+
+        # grab a copy of the user inputs for reference
+        # we will manipulate final_options for each spacegroup for use
+        # in the generator
+        final_options = self.coords_gen_options.copy()
+
+        # establish the coords generator with asymmetric_unit_boundries
+        # this process is a little more complicated because we require
+        # that the asymmetric_unit_boundries be included in extra_conditions
+        asym_bounds = asymmetric_unit_boundries(spacegroup)
+
+        # if any extra_conditions were provided by the user, we want to
+        # combine them with the asym conditions
+        if "extra_conditions" in self.coords_gen_options.keys():
+            all_bounds = self.coords_gen_options["extra_conditions"] + asym_bounds
+            final_options.update({"extra_conditions": all_bounds})
+        # otherwise, the asym_bounds are the only boundry conditions for
+        # the coordinates
+        else:
+            final_options.update({"extra_conditions": asym_bounds})
+
+        # now that we have the coords_gen_options updated, we can make the generator
+        coords_generator = self.coords_generation_method(**final_options)
+
+        # add store this generator
+        self.coords_generators.update({spacegroup: coords_generator})
+
+        # exit the function -- true indicates we have a valid spacegroup
+        return True
+
 
 # Grab the boundry conditions for the asymmetric unit of a spacegroup's unitcell
 def asymmetric_unit_boundries(spacegroup, asym_data=loadAsymmetricUnitData()):
