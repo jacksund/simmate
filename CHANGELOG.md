@@ -22,7 +22,10 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
-- no new changes have been merged into the `main` branch yet
+**Enhancements**
+- improve the warning associated with workflow failure because of "command not found" issues
+- workers not ignore and reset tasks that fail with "command not found"
+- `RandomWySites` can now generate wyckoff combinations lazily (or up front) depending on use case
 
 
 
@@ -37,6 +40,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add simmate worker that can run "out-of-box" and requires no set up
 - add logging for useful debugging and monitoring of workflows
 - pinned dependencies to maximum versions and manage with dependabot
+
 
 **Refactors**
 - to simplify the creation of new workflows, `S3Task` is now `S3Workflow` and database tables are dynamically determined using the workflow name

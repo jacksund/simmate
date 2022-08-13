@@ -629,12 +629,22 @@ class S3Workflow(Workflow):
             # exception here but instead let the monitor handle that
             # error in the code below.
             if process.returncode != 0 and not has_error:
+
                 # convert the error from bytes to a string
                 errors = errors.decode("utf-8")
                 # and report the error to the user
-                raise NonZeroExitError(
-                    f"The command ({command}) failed. The error output was...\n {errors}"
-                )
+                if process.returncode == 127:
+                    raise CommandNotFoundError(
+                        f"The command ({command}) failed becauase it could not be found. "
+                        "This typically means that either (a) you have not installed "
+                        "the program required for this command or (b) you forgot to "
+                        "call 'module load ...' before trying to start the program. "
+                        f"The full error output was:\n\n {errors}"
+                    )
+                else:
+                    raise NonZeroExitError(
+                        f"The command ({command}) failed. The error output was...\n {errors}"
+                    )
 
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered above (if there was one).
@@ -812,4 +822,8 @@ class MaxCorrectionsError(Exception):
 
 
 class NonZeroExitError(Exception):
+    pass
+
+
+class CommandNotFoundError(NonZeroExitError):
     pass

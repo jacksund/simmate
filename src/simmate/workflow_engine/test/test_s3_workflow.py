@@ -23,6 +23,7 @@ import pytest
 
 from simmate.workflow_engine import ErrorHandler, S3Workflow
 from simmate.workflow_engine.s3_workflow import (
+    CommandNotFoundError,
     NonZeroExitError,
     MaxCorrectionsError,
 )
@@ -165,11 +166,24 @@ def test_s3workflow_3(tmp_path):
 
 
 def test_s3workflow_4(tmp_path):
-    # test nonzero returncode
+    # test nonzero returncodes
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
         use_database = False
         command = "NonexistantCommand 404"
+        polling_timestep = 0
+        monitor_freq = 2
+        error_handlers = [AlwaysPassesHandler()]
+
+    pytest.raises(
+        CommandNotFoundError,
+        Customized__Testing__DummyWorkflow.run_config,
+        directory=tmp_path,
+    )
+
+    class Customized__Testing__DummyWorkflow(S3Workflow):
+        use_database = False
+        command = "cd xyz123"  # will fail with "directory does not exist"
         polling_timestep = 0
         monitor_freq = 2
         error_handlers = [AlwaysPassesHandler()]
