@@ -632,8 +632,13 @@ class S3Workflow(Workflow):
 
                 # convert the error from bytes to a string
                 errors = errors.decode("utf-8")
-                # and report the error to the user
-                if process.returncode == 127:
+                # and report the error to the user. Mac/Linux label this as exit
+                # code 127, whereas windows doesn't so the message needs to be
+                # read.
+                if process.returncode == 127 or (
+                    platform.system() == "Windows"
+                    and "is not recognized as an internal or external command"
+                ):
                     raise CommandNotFoundError(
                         f"The command ({command}) failed becauase it could not be found. "
                         "This typically means that either (a) you have not installed "

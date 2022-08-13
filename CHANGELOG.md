@@ -24,7 +24,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Enhancements**
 - improve the warning associated with workflow failure because of "command not found" issues
-- workers not ignore and reset tasks that fail with "command not found"
+- workers not ignore and reset tasks that fail with "command not found". 2 workers failing with this error will result in the WorkItem being canceled
 - `RandomWySites` can now generate wyckoff combinations lazily (or up front) depending on use case
 
 

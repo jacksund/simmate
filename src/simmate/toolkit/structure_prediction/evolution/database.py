@@ -288,7 +288,7 @@ class StructureSource(DatabaseTable):
         return still_running_ids
 
     @property
-    def nprefect_flow_runs(self):
+    def nflow_runs(self):
         # update our ids before we report how many there are.
         runs = self.update_flow_run_ids()
         # now the currently running ones is just the length of ids!
