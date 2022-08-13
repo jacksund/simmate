@@ -10,102 +10,43 @@ from simmate.workflow_engine.execution import WorkItem
 class EvolutionarySearch(DatabaseTable):
     """
     This database table holds all of the information related to an evolutionary
-    search and also has convient methods to analyze the data.
-
-    Loading Results
-    ---------------
-
-    Typically, you'll load your search through a search id or a composition:
-
-    .. code-block:: python
-
-        from simmate.shortcuts import SearchResults
-
-        # if you know the id
-        search_results = SearchResults.objects.get(id=123)
-
-        # if you know the composition
-        search_results = SearchResults.objects.get(id="Ca2 N1")
-
-    Alternatively, you can find these out by looking at a table of all the
-    evolutionary searches that have been ran:
-
-    .. code-block:: python
-
-        all_searches = SearchResults.objects.to_dataframe()
-
-    Viewing Results
-    ---------------
-
-    The first thing you may want to check is the best structure found. To access
-    this and write it to a file:
-
-    .. code-block:: python
-
-        # loads the best structure and converts it to a pymatgen structure object
-        structure = search_results.best_individual.to_toolkit()
-
-        # writes it to a cif file
-        structure.to("cif", "best_structure.cif")
-
-    To view convergence of the search, you can use the convenient plotting methods.
-
-    Note: this will open up the plot in your default browser, so this command
-    won't work properly through an ssh terminal.
-
-    .. code-block:: python
-
-        search_results.view_convergence_plot()
-
-    If you are benchmarking Simmate to see if it found a particular structure,
-    you can use:
-
-    .. code-block:: python
-
-        from simmate.toolkit import Structure
-
-        structure = Structure.from_file("example123.cif")
-
-        search_results.view_correctness_plot(structure)
-
-    Beyond plots, you can also access a table of all calculated structures:
-
-    .. code-block:: python
-
-        dataframe = search_results.individuals_completed.to_dataframe()
-
-
+    search and also has convient methods to analyze the data + write output files.
     """
 
     class Meta:
         app_label = "workflows"
 
-    # consider formula_full or chemical_system by making a composition-based mixin
-    composition = table_column.CharField(max_length=50)  # !!! change to formula_full?
+    # !!! consider making a composition-based mixin
+    composition = table_column.CharField(max_length=50)
 
-    # Import path for the workflow(s)
-    individuals_datatable_str = table_column.CharField(max_length=200)
+    # Import path for the workflow and the database table of results
+    subworkflow_name = table_column.CharField(max_length=200)
+    subworkflow_kwargs = table_column.CharField(max_length=200)
 
     # List of import paths for workflows used at any point. While all workflows
     # populate the individuals_datatable, they might do this in different ways.
     # For example, one may start with a ML prediction, another runs a series
     # of VASP relaxations, and another simply copies a structure from AFLOW.
-    workflows = table_column.JSONField()
+    individuals_datatable_name = table_column.CharField(max_length=200)
+    fitness_field = table_column.CharField(max_length=200)
 
-    # Import path that grabs the fitness value
-    # I assume energy for now
-    # fitness_function = table_column.CharField(max_length=200)
-
+    # Other settings for the search
     max_structures = table_column.IntegerField()
     limit_best_survival = table_column.IntegerField()
+    nfirst_generation = table_column.IntegerField()
+    nsteadystate = table_column.IntegerField()
 
-    # relationships
-    # sources / individuals
-    # stop_conditions
+    # Key classes to use during the search
+    selector_name = table_column.CharField(max_length=200)
+    # stop_condition_name ---> assumed for now
+    # information about the singleshot_sources and steadystate_sources
+    # are stored within the IndividualSources datatable
 
-    # get_stats:
-    #   Total structure counts
-    #   makeup of random, heredity, mutation, seeds, COPEX
+    # Tags to submit the NewIndividual workflow with. Should be a list of strings
+    tags = table_column.JSONField()
+
+    # disable the source column
+    source = None
 
     @property
     def individuals_datatable(self):
@@ -250,7 +191,7 @@ class EvolutionarySearch(DatabaseTable):
         figure.show(renderer="browser")
 
 
-class StructureSource(DatabaseTable):
+class IndividualSources(DatabaseTable):
     class Meta:
         app_label = "workflows"
 
@@ -269,6 +210,18 @@ class StructureSource(DatabaseTable):
         on_delete=table_column.CASCADE,
         related_name="sources",
     )
+
+    # singleshot_sources
+    # steadystate_sources: list[tuple[float, str]] = [
+    #     (0.30, "RandomSymStructure"),
+    #     (0.30, "from_ase.Heredity"),
+    #     (0.10, "from_ase.SoftMutation"),
+    #     (0.10, "from_ase.MirrorMutation"),
+    #     (0.05, "from_ase.LatticeStrain"),
+    #     (0.05, "from_ase.RotationalMutation"),
+    #     (0.05, "from_ase.AtomicPermutation"),
+    #     (0.05, "from_ase.CoordinatePerturbation"),
+    # ]
 
     def update_flow_run_ids(self):
         """

@@ -19,22 +19,60 @@ when we have negative values
 
 
 class Selector:
-    def __init__(
-        self,
-    ):
-        # add any unchanging variables or settings here
-        pass
-
     def select(self, nselect, individuals, fitness_column):
         # The select method should take in two arguments:
         # individuals = a pandas dataframe with columns "id" and "fitness"
         # n = the number of individuals that we want to choose from those fitnesses
         # The select method should then return a list/tuple of the indicies
         # of the fitnesses that were selected
-        pass
+        raise NotImplementedError()
+
+    def select_from_datatable(
+        self,
+        nselect,
+        datatable,  # search_datatable.individuals_completed
+        ranking_column: str = None,  # "energy_per_atom"
+        query_limit: str = None,  # 200
+    ):
+
+        # our selectors just require a dataframe where we specify the fitness
+        # column. So we query our individuals database to give this as an input.
+        if ranking_column:
+            datatable = datatable.order_by(ranking_column)
+        if query_limit:
+            datatable = datatable[:query_limit]
+        individuals_df = datatable.to_dataframe()
+        # NOTE: I assume we'll never need more than the best 200 structures, which
+        # may not be true in special cases.
+
+        # From these individuals, select our parent structures
+        parents_df = self.select(nselect, individuals_df, ranking_column)
+
+        # grab the id column of the parents and convert it to a list
+        parent_ids = parents_df.id.values.tolist()
+
+        # Now lets grab these structures from our database and convert them
+        # to a list of pymatgen structures.
+        # We have to make separate queries for this instead of doing "id__in=parent_ids".
+        # This is because (1) order may be important and (2) we may have duplicate
+        # entries. For example, a hereditary mutation can request parent ids of [123,123]
+        # in which case we want to give the same input structure twice!
+        parent_structures = [
+            datatable.only("structure_string").get(id=parent_id).to_toolkit()
+            for parent_id in parent_ids
+        ]
+
+        # When there's only one structure selected we return the structure and
+        # id independently -- not within a list
+        if nselect == 1:
+            parent_ids = parent_ids[0]
+            parent_structures = parent_structures[0]
+
+        # for record keeping, we also want to return the ids for each structure
+        return parent_ids, parent_structures
 
 
-class TruncatedSelection:
+class TruncatedSelection(Selector):
     """
     Truncated selection limits the parent selection to the top X% of individuals,
     and then within this top section, every individual has an equal chance of

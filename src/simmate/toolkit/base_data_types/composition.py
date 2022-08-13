@@ -223,3 +223,20 @@ class Composition(PymatgenComposition):
                 subsystem = "-".join(sorted(combo))
                 subsystems.append(subsystem)
         return subsystems
+
+    @classmethod
+    def from_dynamic(cls, composition):
+
+        # if the input is already a pymatgen structure, just return it back
+        if isinstance(composition, PymatgenComposition):
+            return composition
+
+        # if the "@module" key is in the dictionary, then we have a pymatgen
+        # structure dict which we convert to a pymatgen object and return
+        elif isinstance(composition, dict) and "@module" in composition.keys():
+            return cls.from_dict(composition)
+
+        # Otherwise attempt to initialize the input, where we expect it to
+        # be one of types accepted (e.g. a string or dictionary)
+        else:
+            return cls(composition)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
+import logging
 
 from dask.distributed import get_client
 
@@ -96,3 +97,56 @@ class StructureCreator(ABC):
         I can run machine learning code here before updating too.
         """
         pass
+
+    def create_structure_with_validation(self, validators=[], max_attempts=100):
+
+        # While some structure creators go through validation while they are being
+        # created (e.g. a site-distances check), there may be higher-level
+        # validations that need to be done. I may need to rethink and refactor
+        # the distinction between the two though.
+
+        # Until we get a new valid structure (or run out of attempts), keep trying
+        # with our given source. Assume we don't have a valid structure until
+        # proven otherwise
+        logging.info(f"Creating new structure with {self.__class__.__name__}")
+        new_structure = False
+        attempt = 0
+        while not new_structure and attempt <= max_attempts:
+            # add an attempt
+            attempt += 1
+            # make a new structure
+            new_structure = self.create_structure()
+
+            # check to see if the structure passes all validation checks.
+            if new_structure:
+
+                for validator in validators:
+                    is_valid = validator.check(new_structure)
+
+                    if not is_valid:
+                        # if it is not unique, we can throw away the structure and
+                        # try the loop again.
+                        logging.info(
+                            "Generated structure is failed validation by "
+                            f"{validator.__name__}. Trying again."
+                        )
+                        new_structure = None
+
+                        # one failed validation is enough to stop. There is no
+                        # need to test the other validation methods.
+                        break
+
+        # see if we got a structure or if we hit the max attempts and there's
+        # a serious problem!
+        if not new_structure:
+            logging.warn(
+                "Failed to create a structure! Consider changing your settings or"
+                " contact our team for help."
+            )
+            return False, False
+
+        # Otherwise we were successful
+        logging.info("Creation Successful.")
+
+        # return the structure and its parents
+        return new_structure

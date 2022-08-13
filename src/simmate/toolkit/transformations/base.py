@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
+import logging
 
 
 class Transformation(ABC):
@@ -80,3 +81,99 @@ class Transformation(ABC):
         The code that carries out the
         """
         raise NotImplementedError
+
+    def apply_from_database_and_selector(
+        self,
+        selector,
+        datatable,
+        selector_kwargs: dict = {},
+        max_attempts: int = 100,
+        **kwargs,  # for apply_transformation_with_validation
+    ):
+
+        logging.info(f"Creating a transformed structure with {self.__class__.__name__}")
+        logging.info(f"Parent(s) will be selected using {selector.__class__.__name__}")
+
+        # grab parent structures using the selection method
+        parent_ids, parent_structures = selector.select_from_datatable(
+            nselect=self.ninput,
+            datatable=datatable,
+            **selector_kwargs,
+        )
+
+        # Until we get a new valid structure (or run out of attempts), keep trying
+        # with our given source. Assume we don't have a valid structure until
+        # proven otherwise
+        new_structure = False
+        attempt = 0
+        while not new_structure and attempt <= max_attempts:
+            # add an attempt
+            attempt += 1
+
+            # make a new structure
+            new_structure = self.apply_transformation_with_validation(
+                parent_structures,
+                **kwargs,
+            )
+
+        # see if we got a structure or if we hit the max attempts and there's
+        # a serious problem!
+        if not new_structure:
+            logging.warn("Failed to create a structure. Giving up.")
+            return False
+
+        # Otherwise we were successful
+        logging.info("Creation Successful.")
+
+    def apply_transformation_with_validation(
+        self,
+        structures,  # either a structure or list of structures. Depends on ninput.
+        validators=[],
+        max_attempts=100,
+    ):
+
+        # Until we get a new valid structure (or run out of attempts), keep trying
+        # with our given source. Assume we don't have a valid structure until
+        # proven otherwise
+        new_structure = False
+        attempt = 0
+        while not new_structure and attempt <= max_attempts:
+            # add an attempt
+            attempt += 1
+
+            # make a new structure
+            new_structure = self.apply_transformation(structures)
+
+            # check to see if the structure passes all validation checks.
+            if new_structure:
+
+                for validator in validators:
+                    is_valid = validator.check(new_structure)
+
+                    if not is_valid:
+                        # if it is not unique, we can throw away the structure and
+                        # try the loop again.
+                        logging.info(
+                            "Generated structure is failed validation by "
+                            f"{validator.__name__}. Trying again."
+                        )
+                        new_structure = None
+
+                        # one failed validation is enough to stop. There is no
+                        # need to test the other validation methods.
+                        break
+
+        # see if we got a structure or if we hit the max attempts and there's
+        # a serious problem!
+        if not new_structure:
+            logging.warn(
+                "Failed to create a structure! Consider changing your settings or"
+                " contact our team for help."
+            )
+            return False
+
+        # Otherwise we were successful
+        logging.info("Creation Successful.")
+
+        # return the structure and its parents
+        return new_structure

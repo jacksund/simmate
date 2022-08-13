@@ -1143,15 +1143,23 @@ class Workflow:
             try:
                 json.dumps(parameter_value)
             except TypeError:
-                if hasattr(parameter_value, "as_dict"):
-                    parameter_value = parameter_value.as_dict()
-                elif hasattr(parameter_value, "to_dict"):
-                    parameter_value = parameter_value.to_dict()
-                elif parameter_key == "directory":
-                    parameter_value = str(parameter_value)  # convert Path to str
+
+                # Special cases
+                if parameter_key == "directory":
+                    # convert Path to str
+                    parameter_value = str(parameter_value)
                 elif parameter_key == "source":
                     # recursive call to this function
                     parameter_value = cls._serialize_parameters(**parameter_value)
+                elif parameter_key == "composition":
+                    # convert Composition to str
+                    parameter_value = str(parameter_value)
+
+                # preferred serializiation
+                elif hasattr(parameter_value, "as_dict"):
+                    parameter_value = parameter_value.as_dict()
+                elif hasattr(parameter_value, "to_dict"):
+                    parameter_value = parameter_value.to_dict()
 
                 # workflow_base and input_parameters are special cases that
                 # may require a refactor (for customized workflows)
@@ -1176,7 +1184,7 @@ class Workflow:
         converts all parameters to appropriate python objects
         """
 
-        from simmate.toolkit import Structure
+        from simmate.toolkit import Structure, Composition
         from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 
         parameters_cleaned = parameters.copy()
@@ -1213,13 +1221,21 @@ class Workflow:
                 if parameters.get(parameter, None) == None and hasattr(cls, parameter):
                     parameters_cleaned[parameter] = getattr(cls, parameter)
 
-        # The remaining checks look to intialize input to toolkit objects
+        # The remaining checks look to intialize input to toolkit objects using
+        # the from_dynamic methods.
+        # OPTIMIZE: if I have proper typing and parameter itrospection, I could
+        # potentially grab the from_dynamic method on the fly -- rather than
+        # doing these repeated steps here.
 
         structure = parameters.get("structure", None)
         if structure:
             parameters_cleaned["structure"] = Structure.from_dynamic(structure)
         else:
             parameters_cleaned.pop("structure", None)
+
+        if "composition" in parameters.keys():
+            migration_hop = Composition.from_dynamic(parameters["composition"])
+            parameters_cleaned["composition"] = migration_hop
 
         if "structures" in parameters.keys():
             structure_filenames = parameters["structures"].split(";")
