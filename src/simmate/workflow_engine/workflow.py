@@ -668,6 +668,10 @@ class Workflow:
             raise NotImplementedError("Unable to detect proper database table")
 
     @classmethod
+    def all_results(cls):
+        return cls.database_table.objects.filter(workflow_name=cls.name_full)
+
+    @classmethod
     def _save_to_database(cls, result, run_id):
 
         # split our results and corrections (which are given as a dict) into

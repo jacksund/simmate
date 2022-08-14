@@ -160,7 +160,7 @@ class Transformation(ABC):
                         # try the loop again.
                         logging.debug(
                             "Generated structure failed validation by "
-                            f"{validator.__name__}. Trying again."
+                            f"{validator.__class__.__name__}. Trying again."
                         )
                         new_structure = None
 

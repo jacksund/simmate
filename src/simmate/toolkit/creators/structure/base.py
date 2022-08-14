@@ -128,7 +128,7 @@ class StructureCreator(ABC):
                         # try the loop again.
                         logging.info(
                             "Generated structure is failed validation by "
-                            f"{validator.__name__}. Trying again."
+                            f"{validator.__class__.__name__}. Trying again."
                         )
                         new_structure = None
 

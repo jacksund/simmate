@@ -5,6 +5,7 @@ from pathlib import Path
 import plotly.graph_objects as plotly_go
 
 from simmate.database.base_data_types import table_column, DatabaseTable
+from simmate.utilities import get_directory
 
 
 class EvolutionarySearch(DatabaseTable):
@@ -143,6 +144,16 @@ class EvolutionarySearch(DatabaseTable):
 
         return best_history
 
+    def write_summary(self, directory: Path):
+        # calls all the key methods defined below
+        best_cifs_directory = get_directory(directory / "best_structures_cifs")
+        self.write_best_structures(100, best_cifs_directory)
+        self.write_individuals_completed(directory)
+        self.write_individuals_completed_full(directory)
+        self.write_best_individuals_history(directory)
+        self.write_individuals_incomplete(directory)
+        self.write_convergence_plot(directory)
+
     # -------------------------------------------------------------------------
     # Methods for deserializing objects. Consider moving to the toolkit methods
     # -------------------------------------------------------------------------
@@ -188,20 +199,16 @@ class EvolutionarySearch(DatabaseTable):
         # structures and even all ionic steps as well...?
         return fingerprint_validator
 
-    def write_summary(self, directory: Path):
-        # calls all the key methods defined below
-        self.write_best_structures(100, directory / "best_structures_cifs")
-        self.write_individuals_completed(directory)
-        self.write_individuals_completed_full(directory)
-        self.write_best_individuals_history(directory)
-        self.write_individuals_incomplete(directory)
-        self.write_convergence_plot(directory)
-
     # -------------------------------------------------------------------------
     # Writing CSVs summaries and CIFs of best structures
     # -------------------------------------------------------------------------
 
     def write_best_structures(self, nbest: int, directory: Path):
+        # if the directory is filled, we need to delete all the files 
+        # before writing the new ones.
+        for file in directory.iterdir():
+            file.unlink()
+        
         best = self.get_nbest_indiviudals(nbest)
         structures = best.only("structure_string", "id").to_toolkit()
         for rank, structure in enumerate(structures):
@@ -400,3 +407,47 @@ class EvolutionarySearch(DatabaseTable):
             directory / "convergence__time_vs_fingerprint_distance.html",
             include_plotlyjs="cdn",
         )
+
+    # -------------------------------------------------------------------------
+    # This plot is specifically for "relaxation.vasp.staged" and should be moved
+    # to that class when this search allows new workflows
+    # -------------------------------------------------------------------------
+
+    # def get_relaxation_staged_convergence(self):
+
+    #     staged_workflow_names = [
+    #         "relaxation.vasp.quality00",
+    #         "relaxation.vasp.quality01",
+    #         "relaxation.vasp.quality02",
+    #         "relaxation.vasp.quality03",
+    #         "relaxation.vasp.quality04",
+    #         "static-energy.vasp.quality04",
+    #     ]
+
+    #     # Go through all the workflows and compare it to the previous. Note,
+    #     # we skip the first workflow because no runs came before it.
+    #     for i, current_task in enumerate(tasks_to_run[1:]):
+
+    #         # Our first relaxation is directly from our inputs.
+    #         current_workflow_name = tasks_to_run[i]
+    #         previous_workflow_name = tasks_to_run[i-1]
+
+    #         current_workflow = get_workflow(current_workflow_name)
+    #         previous_workflow = get_workflow(previous_workflow_name)
+
+    #         all_results
+
+    #         preceding_task = tasks_to_run[i]  # will be one before because of [:1]
+    #         state = current_task.run(
+    #             structure={
+    #                 "database_table": preceding_task.database_table.__name__,
+    #                 "directory": result["directory"],  # uses preceding result
+    #                 "structure_field": "structure_final",
+    #             },
+    #             command=command,
+    #             directory=directory / current_task.name_full,
+    #         )
+    #         result = state.result()
+
+    #     # return the result of the final static energy if the user wants it
+    #     return result

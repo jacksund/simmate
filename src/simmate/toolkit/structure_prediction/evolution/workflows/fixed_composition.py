@@ -185,8 +185,11 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         # this loop will go until I hit 'break' below
         while True:
 
-            # Write the output summary.
-            search_datatable.write_summary(directory)
+            # Write the output summary if there is at least one structure completed
+            if search_datatable.individuals_completed.count() >= 1:
+                search_datatable.write_summary(directory)
+            else:
+                search.write_individuals_incomplete(directory)
 
             # TODO: maybe write summary files to csv...? This may be a mute
             # point because I expect we can follow along in the web UI in the future
