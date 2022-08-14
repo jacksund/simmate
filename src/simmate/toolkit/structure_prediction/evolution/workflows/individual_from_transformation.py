@@ -61,5 +61,12 @@ class StructurePrediction__Python__IndividualFromTransformation(Workflow):
         # if structure creation was successful, run the workflow for it
         if new_structure:
             workflow = get_workflow(subworkflow_name)
-            state = workflow.run(structure=new_structure, **subworkflow_kwargs)
+            state = workflow.run(
+                structure=new_structure,
+                source={
+                    "transformation": transformation_class_str,
+                    "parent_ids": parent_ids,
+                },
+                **subworkflow_kwargs,
+            )
             result = state.result()

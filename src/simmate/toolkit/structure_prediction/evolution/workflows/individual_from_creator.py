@@ -18,8 +18,6 @@ class StructurePrediction__Python__IndividualFromCreator(Workflow):
         composition: Composition,
         subworkflow_name: str,
         subworkflow_kwargs: dict = {},
-        validators=[],
-        max_attempts=100,
         **kwargs,
     ):
         # Consider moving to _deserialize_parameters. Only issue is that
@@ -40,5 +38,11 @@ class StructurePrediction__Python__IndividualFromCreator(Workflow):
         # if structure creation was successful, run the workflow for it
         if new_structure:
             subworkflow = get_workflow(subworkflow_name)
-            state = subworkflow.run(structure=new_structure, **subworkflow_kwargs)
+            state = subworkflow.run(
+                structure=new_structure,
+                source={
+                    "creator": creator_class_str,
+                },
+                **subworkflow_kwargs,
+            )
             result = state.result()
