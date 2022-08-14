@@ -3,6 +3,7 @@
 import time
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 import logging
+import traceback
 
 from django.db import transaction
 
@@ -67,7 +68,7 @@ class SimmateWorker:
     def start(self):
 
         # print the header in the console to let the user know the worker started
-        print(HEADER_ART)
+        logging.info("\n" + HEADER_ART)
 
         # loggin helpful info
         logging.info(f"Starting worker with tags {list(self.tags)}")
@@ -149,6 +150,61 @@ class SimmateWorker:
             # if it fails, we want to "capture" the error and return it
             # rather than have the Worker fail itself.
             except Exception as exception:
+
+                traceback.print_exc()
+
+                logging.warning(
+                    "Task failed with the error shown above. \n\n"
+                    "If you are unfamilar with error tracebacks and find this error "
+                    "difficult to read, you can learn more about these errors "
+                    "here:\n https://realpython.com/python-traceback/\n\n"
+                    "Please open a new issue on our github page if you believe "
+                    "this is a bug:\n https://github.com/jacksund/simmate/issues/\n\n"
+                )
+
+                # local import to prevent circular import issues
+                from simmate.workflow_engine.s3_workflow import CommandNotFoundError
+
+                # The most common error (by far) is a command-not-found issue.
+                # We want to handle this separately -- whereas other exceptions
+                # we just pass on to the results.
+                if isinstance(exception, CommandNotFoundError):
+                    logging.warning(
+                        "This WorkItem failed with a 'command not found' error. "
+                        "This worker is likely improperly configured or "
+                        "you have a typo in your command."
+                    )
+
+                    with transaction.atomic():
+
+                        nfailures = workitem.command_not_found_failures + 1
+
+                        # Check if this task is problematic. If this error happened
+                        # with another worker, we likely have a problematic task
+                        if nfailures == 2:
+                            logging.warning(
+                                "This is the 2nd occurance with this task causing "
+                                "a 'command not found' problem. In case this a typo "
+                                "in your command, we are marking the task as CANCELLED "
+                                "to prevent it from shutting down other workers."
+                            )
+                            workitem.status = "C"
+                            workitem.save()
+                            # the result will be set below
+
+                        # Otherwise the user likely just forgot to use module load
+                        else:
+                            logging.info(
+                                f"Resetting WorkItem {workitem.id} to 'Pending' so "
+                                "another worker can retry."
+                            )
+
+                            workitem.command_not_found_failures = nfailures
+                            workitem.status = "P"
+                            workitem.save()
+                    logging.info("Shutting down to prevent repeated issues.")
+                    return
+
                 result = exception
 
             # whatever the result, we need to try to pickle it now
@@ -156,6 +212,7 @@ class SimmateWorker:
                 result_pickled = cloudpickle.dumps(result)
             # if this fails, we even want to pickle the error and return it
             except Exception as exception:
+                # otherwise package the full error
                 result_pickled = cloudpickle.dumps(exception)
 
             # requery the WorkItem to restart our lock

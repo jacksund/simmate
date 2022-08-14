@@ -266,7 +266,7 @@ class VaspWorkflow(S3Workflow):
                 exception_on_bad_xml=True,
             )
         except:
-            logging.warn(
+            logging.warning(
                 "XML is malformed. This typically means there's an error with your"
                 " calculation that wasn't caught by your ErrorHandlers. We try"
                 " salvaging data here though."

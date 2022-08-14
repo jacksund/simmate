@@ -29,6 +29,7 @@ class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):
         command: str = None,
         source: dict = None,
         directory: Path = None,
+        **kwargs,
     ):
 
         prebadelf_result = PopulationAnalysis__Vasp__PrebadelfMatproj.run(

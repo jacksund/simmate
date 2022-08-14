@@ -208,7 +208,7 @@ class Example__Python__MyFavoriteSettings(Workflow):
     use_database = False  # we don't have a database table yet
 
     @staticmethod
-    def run_config():
+    def run_config(**kwargs):
         print("This workflow doesn't do much")
         return 42
 
@@ -386,7 +386,7 @@ from simmate.workflow_engine import Workflow
 class Example__Python__MyFavoriteSettings(Workflow):
 
     @staticmethod
-    def run_config():
+    def run_config(**kwargs):
         print("This workflow doesn't do much")
         return 42
 
@@ -413,7 +413,7 @@ from pathlib import Path
 
 import simmate
 from simmate.database.base_data_types import Calculation
-from simmate.utilities import get_directory, copy_directory
+from simmate.utilities import get_directory, copy_directory, make_archive
 from simmate.workflow_engine.execution import SimmateExecutor, WorkItem
 
 
@@ -471,7 +471,7 @@ class Workflow:
     `_save_to_database` saves the output of the `workup` method to the database.
     """
 
-    _parameter_methods = ["run_config"]
+    _parameter_methods = ["run_config", "_run_full"]
     """
     List of methods that allow unique input parameters. This helps track where
     `**kwargs` are passed and let's us gather the inputs in one place.
@@ -483,7 +483,7 @@ class Workflow:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def run_config(cls):
+    def run_config(cls, **kwargs):
         """
         The workflow method, which can be overwritten when inheriting from this
         class. This can be either a staticmethod or classmethod.
@@ -493,18 +493,39 @@ class Workflow:
         )
 
     @classmethod
-    def _run_full(cls, run_id=None, **kwargs):
+    def _run_full(cls, run_id=None, directory=None, compress_output=False, **kwargs):
         """
         This method should not be called directly. Use the `run` method instead.
+
+        #### Parameters
+
+        - `compress_output`:
+            Whether to compress the directory to a zip file at the end of the
+            task run. After compression, it will also delete the directory.
+            The default is False.
         """
-        logging.info(f"Starting {cls.name_full}")
         # This method is isolated only because we want to wrap it as a prefect
         # workflow in some cases.
-        run_id = run_id or cls._get_run_id()
-        kwargs_cleaned = cls._load_input_and_register(run_id=run_id, **kwargs)
+        logging.info(f"Starting {cls.name_full}")
+        kwargs_cleaned = cls._load_input_and_register(
+            run_id=run_id,
+            directory=directory,
+            compress_output=compress_output,
+            **kwargs,
+        )
         result = cls.run_config(**kwargs_cleaned)
         if cls.use_database:
-            result["calculation_id"] = cls._save_to_database(result, run_id=run_id)
+            result["calculation_id"] = cls._save_to_database(
+                result,
+                run_id=kwargs_cleaned["run_id"],
+            )
+
+        # if requested, compresses the directory to a zip file and then removes
+        # the directory.
+        if compress_output:
+            logging.info("Compressing result to a ZIP file.")
+            make_archive(kwargs_cleaned["directory"])
+
         logging.info(f"Completed {cls.name_full}")
         return result
 
@@ -539,6 +560,10 @@ class Workflow:
 
         logging.info(f"Submitting new run of {cls.name_full} to cloud")
 
+        # To help with tracking the flow in cloud, we create the flow_id up front.
+        kwargs["run_id"] = kwargs.get("run_id", None) or cls._get_run_id()
+        run_id = kwargs["run_id"]  # just for easy reference below
+
         # If we are submitting using a filename, we don't want to
         # submit to a cluster and have the job fail because it doesn't have
         # access to the file. We therefore deserialize right before
@@ -551,13 +576,11 @@ class Workflow:
         # the calculation starts/finishes, we do that by calling _register_calc
         # at this higher level. An example is storing the structure and run id.
         # Thus, we create and register the run_id up front
-        run_id = cls._get_run_id()
         if cls.use_database:
-            cls._register_calculation(run_id=run_id, **kwargs)
+            cls._register_calculation(**kwargs)
 
         state = SimmateExecutor.submit(
             cls._run_full,  # should this be the run method...?
-            run_id=run_id,
             tags=tags or cls.tags,
             **parameters_serialized,
         )
@@ -617,9 +640,7 @@ class Workflow:
 
                 return BandStructureCalc
             elif "density-of-states" in flow_preset:
-                from simmate.database.base_data_types import (
-                    DensityofStatesCalc,
-                )
+                from simmate.database.base_data_types import DensityofStatesCalc
 
                 return DensityofStatesCalc
         elif flow_type == "population-analysis":
@@ -821,7 +842,7 @@ class Workflow:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_input_and_register(cls, run_id: str, **parameters: Any) -> dict:
+    def _load_input_and_register(cls, **parameters: Any) -> dict:
         """
         How the input was submitted as a parameter depends on if we are submitting
         to Prefect Cloud, running the flow locally, or even continuing from a
@@ -945,7 +966,7 @@ class Workflow:
             # assert
             if not source == primary_input:
                 # only warning for now because this is experimental
-                logging.warn(
+                logging.warning(
                     "Your source does not match the source of your "
                     "primary input. Sources are an experimental feature, so "
                     "this will not affect your results. Still, please report "
@@ -975,8 +996,12 @@ class Workflow:
         # STEP 4: Register the calculation so the user can follow along in the UI
         # and also see which structures/runs have been submitted aready.
 
+        parameters_cleaned["run_id"] = (
+            parameters_cleaned.get("run_id", None) or cls._get_run_id()
+        )
+
         if cls.use_database:
-            cls._register_calculation(run_id=run_id, **parameters_cleaned)
+            cls._register_calculation(**parameters_cleaned)
 
         # ---------------------------------------------------------------------
 
@@ -997,8 +1022,6 @@ class Workflow:
         # desired -- and it also allows us to load old results into a database.
         input_summary = dict(
             workflow_name=cls.name_full,
-            # this ID is ingored as an input but needed for loading past data
-            run_id=run_id,
             **parameters_serialized,
         )
 
@@ -1042,7 +1065,7 @@ class Workflow:
         return parameters_to_register
 
     @classmethod
-    def _register_calculation(cls, run_id=None, **kwargs) -> Calculation:
+    def _register_calculation(cls, **kwargs) -> Calculation:
         """
         If the workflow is linked to a calculation table in the Simmate database,
         this adds the flow run to the database.
@@ -1081,7 +1104,7 @@ class Workflow:
         # special-case workflows don't store calculation information bc the flow
         # is just a quick python analysis.
         if not database_table:
-            logging.warn("No database table found. Skipping registration.")
+            logging.warning("No database table found. Skipping registration.")
             return
 
         # grab the registration kwargs from the parameters provided and then
@@ -1098,14 +1121,12 @@ class Workflow:
         if "workflow_base" in register_kwargs_cleaned:
             parameters_serialized = cls._serialize_parameters(**register_kwargs_cleaned)
             calculation = database_table.from_run_context(
-                run_id=run_id,
                 workflow_name=cls.name_full,
                 **parameters_serialized,
             )
         else:
             # load/create the calculation for this workflow run
             calculation = database_table.from_run_context(
-                run_id=run_id,
                 workflow_name=cls.name_full,
                 **register_kwargs_cleaned,
             )
@@ -1143,15 +1164,23 @@ class Workflow:
             try:
                 json.dumps(parameter_value)
             except TypeError:
-                if hasattr(parameter_value, "as_dict"):
-                    parameter_value = parameter_value.as_dict()
-                elif hasattr(parameter_value, "to_dict"):
-                    parameter_value = parameter_value.to_dict()
-                elif parameter_key == "directory":
-                    parameter_value = str(parameter_value)  # convert Path to str
+
+                # Special cases
+                if parameter_key == "directory":
+                    # convert Path to str
+                    parameter_value = str(parameter_value)
                 elif parameter_key == "source":
                     # recursive call to this function
                     parameter_value = cls._serialize_parameters(**parameter_value)
+                elif parameter_key == "composition":
+                    # convert Composition to str
+                    parameter_value = str(parameter_value)
+
+                # preferred serializiation
+                elif hasattr(parameter_value, "as_dict"):
+                    parameter_value = parameter_value.as_dict()
+                elif hasattr(parameter_value, "to_dict"):
+                    parameter_value = parameter_value.to_dict()
 
                 # workflow_base and input_parameters are special cases that
                 # may require a refactor (for customized workflows)
@@ -1176,7 +1205,7 @@ class Workflow:
         converts all parameters to appropriate python objects
         """
 
-        from simmate.toolkit import Structure
+        from simmate.toolkit import Structure, Composition
         from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 
         parameters_cleaned = parameters.copy()
@@ -1213,13 +1242,21 @@ class Workflow:
                 if parameters.get(parameter, None) == None and hasattr(cls, parameter):
                     parameters_cleaned[parameter] = getattr(cls, parameter)
 
-        # The remaining checks look to intialize input to toolkit objects
+        # The remaining checks look to intialize input to toolkit objects using
+        # the from_dynamic methods.
+        # OPTIMIZE: if I have proper typing and parameter itrospection, I could
+        # potentially grab the from_dynamic method on the fly -- rather than
+        # doing these repeated steps here.
 
         structure = parameters.get("structure", None)
         if structure:
             parameters_cleaned["structure"] = Structure.from_dynamic(structure)
         else:
             parameters_cleaned.pop("structure", None)
+
+        if "composition" in parameters.keys():
+            migration_hop = Composition.from_dynamic(parameters["composition"])
+            parameters_cleaned["composition"] = migration_hop
 
         if "structures" in parameters.keys():
             structure_filenames = parameters["structures"].split(";")
@@ -1253,8 +1290,9 @@ class Workflow:
         if parameters.get("source", None):
             # !!! are there other types I should account for? Maybe I should just
             # make this a recursive call to catch everything?
-            parameters_cleaned["source"]["directory"] = Path(
-                parameters_cleaned["directory"]
-            )
+            if parameters_cleaned["source"].get("directory", None):
+                parameters_cleaned["source"]["directory"] = Path(
+                    parameters_cleaned["directory"]
+                )
 
         return parameters_cleaned

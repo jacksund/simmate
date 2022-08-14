@@ -51,8 +51,9 @@ class Customized__Vasp__UserConfig(Workflow):
         workflow_base: Workflow,
         updated_settings: dict,
         input_parameters: dict,
+        **kwargs,
     ):
-        logging.warn(
+        logging.warning(
             "WARNING: customized workflows are meant only for quick testing. "
             "If you are using custom settings regularly, we highly recommend "
             "making a new workflow inside a Simmate project instead. "

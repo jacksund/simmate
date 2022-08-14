@@ -183,7 +183,7 @@ import logging
 import pandas
 
 from simmate.workflow_engine import Workflow, ErrorHandler
-from simmate.utilities import get_directory, make_archive, make_error_archive
+from simmate.utilities import get_directory, make_error_archive
 
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
 # reset the working directory between task retries -- in some cases we may
@@ -262,7 +262,6 @@ class S3Workflow(Workflow):
         directory: Path = None,
         command: str = None,
         is_restart: bool = False,
-        compress_output: bool = False,
         **kwargs,
     ):
         """
@@ -291,11 +290,6 @@ class S3Workflow(Workflow):
             (i.e. a restarted calculation). If so, the `setup_restart` will be
             called instead of the setup method. Extra checks will be made to
             see if the calculation completed already too.
-
-        - `compress_output`:
-            Whether to compress the directory to a zip file at the end of the
-            task run. After compression, it will also delete the directory.
-            The default is False.
 
          - `**kwargs`:
              Any extra keywords that should be passed to the setup() method.
@@ -359,11 +353,6 @@ class S3Workflow(Workflow):
         # run the workup stage of the task. This is where the data/info is pulled
         # out from the calculation and is thus our "result".
         result = cls.workup(directory=directory)
-
-        # if requested, compresses the directory to a zip file and then removes
-        # the directory.
-        if compress_output:
-            make_archive(directory)
 
         # Return our final information as a dictionary
         result = {
@@ -629,12 +618,27 @@ class S3Workflow(Workflow):
             # exception here but instead let the monitor handle that
             # error in the code below.
             if process.returncode != 0 and not has_error:
+
                 # convert the error from bytes to a string
                 errors = errors.decode("utf-8")
-                # and report the error to the user
-                raise NonZeroExitError(
-                    f"The command ({command}) failed. The error output was...\n {errors}"
-                )
+                # and report the error to the user. Mac/Linux label this as exit
+                # code 127, whereas windows doesn't so the message needs to be
+                # read.
+                if process.returncode == 127 or (
+                    platform.system() == "Windows"
+                    and "is not recognized as an internal or external command"
+                ):
+                    raise CommandNotFoundError(
+                        f"The command ({command}) failed becauase it could not be found. "
+                        "This typically means that either (a) you have not installed "
+                        "the program required for this command or (b) you forgot to "
+                        "call 'module load ...' before trying to start the program. "
+                        f"The full error output was:\n\n {errors}"
+                    )
+                else:
+                    raise NonZeroExitError(
+                        f"The command ({command}) failed. The error output was...\n {errors}"
+                    )
 
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered above (if there was one).
@@ -812,4 +816,8 @@ class MaxCorrectionsError(Exception):
 
 
 class NonZeroExitError(Exception):
+    pass
+
+
+class CommandNotFoundError(NonZeroExitError):
     pass

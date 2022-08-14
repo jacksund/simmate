@@ -57,6 +57,15 @@ class WorkItem(DatabaseTable):
     the output of fxn(*args, **kwargs)
     """
 
+    command_not_found_failures = table_column.IntegerField(default=0)
+    """
+    Keeps track of the special-case "CommandNotFound" error that is hidden by
+    workers. This keeps a tally of how many Workers that this task is triggering
+    to shut down. This is important because it helps prevent total cluster
+    shutdown from a single typo in a command. By default, workers will label
+    a task as problematic if 2 workers give CommandNotFound errors.
+    """
+
     source = None
     """
     Source column is not needed so setting this to None disables the column

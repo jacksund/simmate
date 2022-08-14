@@ -22,7 +22,18 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
-- no new changes have been merged into the `main` branch yet
+**Enhancements**
+- improve the warning associated with workflow failure because of "command not found" issues
+- workers now ignore and reset tasks that fail with "command not found". 2 workers failing with this error will result in the WorkItem being canceled
+- `RandomWySites` can now generate wyckoff combinations lazily (or up front) depending on use case
+- add `simmate utilities` command group with `archive-old-runs`
+- add `start-cluster` command for starting many local workers
+- add `structure-prediction` workflows
+
+
+**Refactors**
+- evolutionary search now delay creations, transformations, and validation until runtime (used to be at time of structure submission)
+- `directory`, `compress_ouput`, and `run_id` are now default input parameters for subclasses of `Workflow`. If these are unused, the `run_config` must include `**kwargs`
 
 
 
@@ -37,6 +48,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add simmate worker that can run "out-of-box" and requires no set up
 - add logging for useful debugging and monitoring of workflows
 - pinned dependencies to maximum versions and manage with dependabot
+
 
 **Refactors**
 - to simplify the creation of new workflows, `S3Task` is now `S3Workflow` and database tables are dynamically determined using the workflow name

@@ -26,4 +26,4 @@ logging.basicConfig(
 try:
     check_if_using_latest_version()
 except:
-    logging.warn("Unable to check if using the latest Simmate version.")
+    logging.warning("Unable to check if using the latest Simmate version.")

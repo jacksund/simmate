@@ -90,13 +90,13 @@ class MigrationHop(PymatgenMigrationHop):
         # The parent method doesn't work as itended... I don't want to fix it,
         # so I just warn users.
         if supercell_start.num_sites < min_atoms or supercell_end.num_sites > max_atoms:
-            logging.warn(
+            logging.warning(
                 f"Failed to meet min_atoms={min_atoms} and max_atoms={max_atoms} "
                 "requirements when making supercell. Resulted in"
                 f" {supercell_start.num_sites} atoms."
             )
         if min(supercell_start.lattice.lengths) < min_length:
-            logging.warn(
+            logging.warning(
                 "Failed to meet min_length={min_length} requirement when"
                 " making supercell. Resulted in lattice vectors lengths of "
                 f"{supercell_start.lattice.lengths}."

@@ -97,9 +97,35 @@ def start_singleflow_worker():
     Worker.run_singleflow_worker()
 
 
+@workflow_engine.command()
+@click.argument(
+    "nworkers",
+    type=int,
+)
+@click.option(
+    "--worker_command",
+    "-c",
+    default="simmate workflow-engine start-worker",
+    type=str,
+    help="the command to start each worker with. See start-worker for options",
+)
+def start_cluster(nworkers, worker_command):
+    """
+    This starts many Simmate Workers that each run in a local subprocess.
+    """
+
+    from simmate.workflow_engine.execution.utilities import start_cluster
+
+    start_cluster(
+        nworkers=nworkers,
+        worker_command=worker_command,
+    )
+
+
 # explicitly list functions so that pdoc doesn't skip them
 __all__ = [
     "workflow_engine",
     "start_worker",
     "start_singleflow_worker",
+    "start_cluster",
 ]

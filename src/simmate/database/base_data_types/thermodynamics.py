@@ -180,7 +180,7 @@ class Thermodynamics(DatabaseTable):
             try:
                 cls.update_chemical_system_stabilities(chemical_system)
             except ValueError as exception:
-                logging.warn(f"Failed for {chemical_system} with error: {exception}")
+                logging.warning(f"Failed for {chemical_system} with error: {exception}")
 
         # BUG: can't use parallel=True as an input
         # Because different systems may need to update a single one at the same

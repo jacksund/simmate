@@ -26,6 +26,7 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
         command: str = None,
         source: dict = None,
         directory: Path = None,
+        **kwargs,
     ):
 
         prebader_result = PopulationAnalysis__Vasp__PrebaderMatproj.run(

@@ -25,7 +25,7 @@ class Restart__Simmate__Automatic(Workflow):
     """
 
     @classmethod
-    def run_config(cls, directory_old: Path, directory_new: Path = None):
+    def run_config(cls, directory_old: Path, directory_new: Path = None, **kwargs):
 
         # First copy over the directory
         directory_new_cleaned = copy_directory(directory_old, directory_new)

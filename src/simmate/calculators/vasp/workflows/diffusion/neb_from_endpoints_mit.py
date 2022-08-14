@@ -64,6 +64,7 @@ class Diffusion__Vasp__NebFromEndpointsMit(Workflow):
         # This helps link results to a higher-level table.
         diffusion_analysis_id: int = None,
         is_restart: bool = False,
+        **kwargs,
     ):
         raise NotImplementedError("TBD -jacksund")
         # command list expects three subcommands:

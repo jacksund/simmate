@@ -52,6 +52,7 @@ class Relaxation__Vasp__Staged(Workflow):
         source=None,
         directory=None,
         copy_previous_directory=False,
+        **kwargs,
     ):
 
         tasks_to_run = [

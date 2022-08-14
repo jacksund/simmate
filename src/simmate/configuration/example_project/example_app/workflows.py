@@ -44,7 +44,7 @@ class Example__Python__MyExample1(Workflow):
     database_table = MyCustomTable1
 
     @staticmethod
-    def run_config(x, y):
+    def run_config(x, y, **kwargs):
         # This is a boring workflow because it just saves the input values
         # to our table. You can get much more creative with workflows though
         new_entry = MyCustomTable2(

@@ -35,7 +35,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     # Make sure the backend is using SQLite3 as this is the only allowed format
     using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
     if not using_sqlite:
-        logging.warn(
+        logging.warning(
             "reseting your database does not clear your database tables "
             "for non-sqlite3 backends. Make sure you only use this function when "
             "initially building your database and not after."
