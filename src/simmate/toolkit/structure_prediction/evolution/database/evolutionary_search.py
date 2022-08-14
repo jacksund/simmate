@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 import plotly.graph_objects as plotly_go
 
 from simmate.database.base_data_types import table_column, DatabaseTable
@@ -52,6 +54,10 @@ class EvolutionarySearch(DatabaseTable):
     # hope to see.
     # expected_structure = table_column.JSONField()
 
+    # -------------------------------------------------------------------------
+    # Core methods that help grab key information about the search
+    # -------------------------------------------------------------------------
+
     @property
     def subworkflow(self):
 
@@ -100,9 +106,46 @@ class EvolutionarySearch(DatabaseTable):
         # would require a large amount of work to implement.
 
     @property
-    def individual_best(self):
-        best = self.individuals_completed.order_by("energy_per_atom").first()
-        return best
+    def individuals_incomplete(self):
+        # If there is an energy_per_atom, we can treat the calculation as completed
+        return self.individuals.filter(energy_per_atom__isnull=True)
+
+    @property
+    def best_individual(self):
+        return self.individuals_completed.order_by(self.fitness_field).first()
+
+    def get_nbest_indiviudals(self, nbest: int):
+        return self.individuals_completed.order_by(self.fitness_field)[:nbest]
+
+    def get_best_individual_history(self):
+        """
+        Goes through all structures in order that they were created and creates
+        a history of which structure was best at any given time.
+        """
+
+        individuals = (
+            self.individuals_completed.order_by("updated_at")
+            .only("id", self.fitness_field)
+            .all()
+        )
+
+        # Keep a log of the best structures. The first structure to finish is
+        # by default the best at that time.
+        best_history = [individuals[0].id]
+        best_value = getattr(individuals[0], self.fitness_field)
+        for individual in individuals:
+            potential_new_value = getattr(individual, self.fitness_field)
+
+            # BUG: I assume lower is better, but this may change
+            if potential_new_value < best_value:
+                best_history.append(individual.id)
+                best_value = potential_new_value
+
+        return best_history
+
+    # -------------------------------------------------------------------------
+    # Methods for deserializing objects. Consider moving to the toolkit methods
+    # -------------------------------------------------------------------------
 
     @property
     def selector(self):
@@ -145,6 +188,94 @@ class EvolutionarySearch(DatabaseTable):
         # structures and even all ionic steps as well...?
         return fingerprint_validator
 
+    def write_summary(self, directory: Path):
+        # calls all the key methods defined below
+        self.write_best_structures(100, directory / "best_structures_cifs")
+        self.write_individuals_completed(directory)
+        self.write_individuals_completed_full(directory)
+        self.write_best_individuals_history(directory)
+        self.write_individuals_incomplete(directory)
+        self.write_convergence_plot(directory)
+
+    # -------------------------------------------------------------------------
+    # Writing CSVs summaries and CIFs of best structures
+    # -------------------------------------------------------------------------
+
+    def write_best_structures(self, nbest: int, directory: Path):
+        best = self.get_nbest_indiviudals(nbest)
+        structures = best.only("structure_string", "id").to_toolkit()
+        for rank, structure in enumerate(structures):
+            structure_filename = (
+                directory / f"rank-{rank}__id-{structure.database_object.id}.cif"
+            )
+            structure.to("cif", structure_filename)
+
+    def write_individuals_completed_full(self, directory: Path):
+        columns = self.individuals_datatable.get_column_names()
+        columns.remove("structure_string")
+        df = self.individuals_completed.defer("structure_string").to_dataframe(columns)
+        csv_filename = directory / "individuals_completed__ALLDATA.csv"
+        df.to_csv(csv_filename)
+
+    def write_individuals_completed(self, directory: Path):
+        columns = ["id", "energy_per_atom", "updated_at"]
+        df = (
+            self.individuals_completed.order_by(self.fitness_field)
+            .only(*columns)
+            .to_dataframe(columns)
+        )
+        # label the index column
+        df.index.name = "rank"
+
+        # make the timestamps easier to read
+        def format_date(date):
+            return date.strftime("%Y-%m-%d %H:%M:%S")
+
+        df["updated_at"] = df.updated_at.apply(format_date)
+        md_filename = directory / "individuals_completed.md"
+        df.to_markdown(md_filename)
+
+    def write_best_individuals_history(self, directory: Path):
+        columns = ["id", "energy_per_atom", "updated_at"]
+        best_history = self.get_best_individual_history()
+        df = (
+            self.individuals.filter(id__in=best_history)
+            .order_by("-updated_at")
+            .only(*columns)
+            .to_dataframe(columns)
+        )
+
+        # make the timestamps easier to read
+        def format_date(date):
+            return date.strftime("%Y-%m-%d %H:%M:%S")
+
+        df["updated_at"] = df.updated_at.apply(format_date)
+        md_filename = directory / "history_of_the_best_individuals.md"
+        df.to_markdown(md_filename)
+
+    def write_individuals_incomplete(self, directory: Path):
+        columns = ["id", "energy_per_atom", "updated_at"]
+        df = (
+            self.individuals_incomplete.order_by(self.fitness_field)
+            .only(*columns)
+            .order_by("created_at")
+            .to_dataframe(columns)
+        )
+        # label the index column
+        df.index.name = "rank"
+
+        # make the timestamps easier to read
+        def format_date(date):
+            return date.strftime("%Y-%m-%d %H:%M:%S")
+
+        df["updated_at"] = df.updated_at.apply(format_date)
+        md_filename = directory / "individuals_still_running_or_failed.md"
+        df.to_markdown(md_filename)
+
+    # -------------------------------------------------------------------------
+    # Generating plots
+    # -------------------------------------------------------------------------
+
     def get_convergence_plot(self):
 
         # Grab the calculation's structure and convert it to a dataframe
@@ -154,14 +285,16 @@ class EvolutionarySearch(DatabaseTable):
         # object and just pass it directly to a Figure object
         scatter = plotly_go.Scatter(
             x=structures_dataframe["updated_at"],
-            y=structures_dataframe["energy_per_atom"],
+            y=structures_dataframe[self.fitness_field],
             mode="markers",
         )
         figure = plotly_go.Figure(data=scatter)
 
         figure.update_layout(
             xaxis_title="Date Completed",
-            yaxis_title="Energy (eV/atom)",
+            yaxis_title="Energy (eV/atom)"
+            if self.fitness_field == "energy_per_atom"
+            else self.fitness_field,
         )
 
         # we return the figure object for the user
@@ -170,6 +303,13 @@ class EvolutionarySearch(DatabaseTable):
     def view_convergence_plot(self):
         figure = self.get_convergence_plot()
         figure.show(renderer="browser")
+
+    def write_convergence_plot(self, directory: Path):
+        figure = self.get_convergence_plot()
+        figure.write_html(
+            directory / f"convergence__time_vs_{self.fitness_field}.html",
+            include_plotlyjs="cdn",
+        )
 
     def get_correctness_plot(self, structure_known):
 
@@ -253,3 +393,10 @@ class EvolutionarySearch(DatabaseTable):
     def view_correctness_plot(self, structure_known):
         figure = self.get_correctness_plot(structure_known)
         figure.show(renderer="browser")
+
+    def write_correctness_plot(self, structure_known, directory: Path):
+        figure = self.get_convergence_plot()
+        figure.write_html(
+            directory / "convergence__time_vs_fingerprint_distance.html",
+            include_plotlyjs="cdn",
+        )

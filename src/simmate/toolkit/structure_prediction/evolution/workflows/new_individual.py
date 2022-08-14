@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
 
 from simmate.workflow_engine import Workflow
 from simmate.database.workflow_results import EvolutionarySearch
@@ -13,6 +14,7 @@ class StructurePrediction__Python__NewIndividual(Workflow):
     def run_config(
         search_id: int,
         structure_source_id: int,
+        directory: Path,
         **kwargs,
     ):
 
@@ -52,6 +54,10 @@ class StructurePrediction__Python__NewIndividual(Workflow):
             state = search_db.subworkflow.run(
                 structure=new_structure,
                 source=source,
+                directory=directory,
                 **search_db.subworkflow_kwargs,
             )
             result = state.result()
+            # NOTE: we tell the workflow to use the same directory. There is
+            # good chance the user indicates that they want to compress the
+            # folder to.

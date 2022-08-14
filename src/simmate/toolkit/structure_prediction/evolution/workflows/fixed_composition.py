@@ -185,6 +185,9 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         # this loop will go until I hit 'break' below
         while True:
 
+            # Write the output summary.
+            search_datatable.write_summary(directory)
+
             # TODO: maybe write summary files to csv...? This may be a mute
             # point because I expect we can follow along in the web UI in the future
             # To that end, I can add a "URL" property
@@ -192,6 +195,8 @@ class StructurePrediction__Python__FixedComposition(Workflow):
             # Check the stop condition
             # If it is True, we can stop the calc.
             if cls._check_stop_condition(search_datatable):
+                # TODO: should I sleep / wait for other calculations and
+                # check again? Then write summary one last time..?
                 break  # break out of the while loop
             # Otherwise, keep going!
 
@@ -238,7 +243,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         # we can stop the search.
 
         # grab the best individual for reference
-        best = search_datatable.individual_best
+        best = search_datatable.best_individual
 
         # We need this if-statement in case no structures have completed yet.
         if not best:
