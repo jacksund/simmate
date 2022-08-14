@@ -266,7 +266,7 @@ def load_results_from_directories(base_directory: Union[str, Path] = "."):
             logging.info("Successfully loaded into database.")
 
         except:
-            logging.warn("Failed to load into database")
+            logging.warning("Failed to load into database")
 
 
 def get_unique_parameters() -> List[str]:

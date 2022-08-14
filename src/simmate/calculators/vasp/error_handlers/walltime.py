@@ -143,7 +143,9 @@ class Walltime(ErrorHandler):
             # handlers updating them)
             filename = directory / "simmate_metadata.yaml"
             if not filename.exists():
-                logging.warn("Unable to detect the time remaining. Ignoring Timeout.")
+                logging.warning(
+                    "Unable to detect the time remaining. Ignoring Timeout."
+                )
                 return
                 # !!! What if I looked at the creation time of the current directory?
 
@@ -164,7 +166,7 @@ class Walltime(ErrorHandler):
             ).stdout.strip()
             # parse the output into a time
             if output == "INVALID":
-                logging.warn(
+                logging.warning(
                     "SLURM node improperly configured. " "Cannot detect TimeLeft"
                 )
                 return
@@ -177,7 +179,7 @@ class Walltime(ErrorHandler):
                 try:
                     output = [int(i) for i in output.replace("-", ":").split(":")]
                 except:
-                    logging.warn(
+                    logging.warning(
                         "Failed to parse SLURM output. Please report this to the"
                         f"Simmate team. Output was {output}"
                     )

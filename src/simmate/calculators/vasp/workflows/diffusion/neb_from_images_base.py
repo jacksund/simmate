@@ -147,7 +147,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         From a working directory of a past calculation, sets up for the calculation
         to be restarted.
         """
-        logging.warn("CONTCARs are not yet copied to POSCARs for NEB restarts.")
+        logging.warning("CONTCARs are not yet copied to POSCARs for NEB restarts.")
 
         # establish filenames
         stopcar_filename = directory / "STOPCAR"

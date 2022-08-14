@@ -210,7 +210,7 @@ class RandomWySites:
 
             # Make sure the spacegroup is valid for the given composition
             if spacegroup in self.spacegroups_invalid:
-                logging.warn(
+                logging.warning(
                     f"Spacegroup {spacegroup} is invalid for {self.composition}"
                 )
                 return False

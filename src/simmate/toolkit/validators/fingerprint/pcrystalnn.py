@@ -18,7 +18,7 @@ from matminer.featurizers.structure.sites import (
     SiteStatsFingerprint,
 )  # PartialsSiteStatsFingerprint
 
-logging.warn(
+logging.warning(
     "PartialsSiteStatsFingerprint current acts as a SiteStatsFingerprint. "
     "We are waiting on a new MatMiner release to fix this issue."
 )

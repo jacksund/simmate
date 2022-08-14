@@ -153,7 +153,7 @@ class SimmateWorker:
 
                 traceback.print_exc()
 
-                logging.warn(
+                logging.warning(
                     "Task failed with the error shown above. \n\n"
                     "If you are unfamilar with error tracebacks and find this error "
                     "difficult to read, you can learn more about these errors "
@@ -169,7 +169,7 @@ class SimmateWorker:
                 # We want to handle this separately -- whereas other exceptions
                 # we just pass on to the results.
                 if isinstance(exception, CommandNotFoundError):
-                    logging.warn(
+                    logging.warning(
                         "This WorkItem failed with a 'command not found' error. "
                         "This worker is likely improperly configured or "
                         "you have a typo in your command."
@@ -182,7 +182,7 @@ class SimmateWorker:
                         # Check if this task is problematic. If this error happened
                         # with another worker, we likely have a problematic task
                         if nfailures == 2:
-                            logging.warn(
+                            logging.warning(
                                 "This is the 2nd occurance with this task causing "
                                 "a 'command not found' problem. In case this a typo "
                                 "in your command, we are marking the task as CANCELLED "

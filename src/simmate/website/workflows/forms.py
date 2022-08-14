@@ -205,6 +205,7 @@ INPUT_MAPPINGS = {
         "directory_new",
         "command",
         "migrating_specie",
+        "run_id",
     ],
     "integer": [
         "nsteps",

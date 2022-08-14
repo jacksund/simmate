@@ -139,7 +139,7 @@ class StructureCreator(ABC):
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure:
-            logging.warn(
+            logging.warning(
                 "Failed to create a structure! Consider changing your settings or"
                 " contact our team for help."
             )

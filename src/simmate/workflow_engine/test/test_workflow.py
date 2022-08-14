@@ -45,13 +45,37 @@ def test_workflow(tmp_path):
     # testing class properties
     assert DummyFlow.description_doc == DummyFlow.__doc__
     assert DummyFlow.description_doc.strip() == "Minimal example of a workflow"
-    assert DummyFlow.parameter_names == ["source", "structure"]
-    assert DummyFlow._parameters_to_register == ["source"]
+    assert DummyFlow.parameter_names == [
+        "compress_output",
+        "directory",
+        "run_id",
+        "source",
+        "structure",
+    ]
+    assert DummyFlow._parameters_to_register == [
+        "directory",
+        "run_id",
+        "source",
+    ]
     DummyFlow.show_parameters()  # a print statment w. nothing else to check
 
     assert isinstance(DummyFlow.get_config(), dict)
 
     DummyFlow.show_config()  # a print statment w. nothing else to check
+
+    # test file compression
+    new_dir = tmp_path / "new_folder"
+    state = DummyFlow.run(directory=new_dir, compress_output=True)
+    result = state.result()
+
+    # make sure that a "simmate-task-*.zip" archive was created
+    assert new_dir.with_suffix(".zip").exists()
+
+    # make sure that a "simmate-task-*" directory was removed
+    assert not new_dir.exists()
+
+    # and delete the archive
+    new_dir.with_suffix(".zip").unlink()
 
 
 def test_serialize_parameters():

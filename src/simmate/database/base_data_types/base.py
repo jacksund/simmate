@@ -751,7 +751,7 @@ class DatabaseTable(models.Model):
 
         # tell the user where the data comes from
         if cls._meta.app_label == "third_parties":
-            logging.warn(
+            logging.warning(
                 "this data is NOT from the Simmate team, so be sure "
                 "to visit the provider's website and to cite their work."
                 f" This data is from {cls.source} and the following paper "

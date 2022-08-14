@@ -119,7 +119,7 @@ class Transformation(ABC):
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure:
-            logging.warn(
+            logging.warning(
                 f"Failed to create a structure after {max_attempts} different"
                 "parent combinations. Giving up."
             )
@@ -171,7 +171,7 @@ class Transformation(ABC):
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure:
-            logging.warn(
+            logging.warning(
                 "Failed to create a structure from input after "
                 f"{max_attempts} attempts"
             )

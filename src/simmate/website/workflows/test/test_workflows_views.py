@@ -42,6 +42,8 @@ def test_workflow_detail_view(client, workflow_name):
     if workflow_name in [
         "restart.simmate.automatic",
         "electronic-structure.vasp.matproj-full",
+        "structure-prediction.python.fixed-composition",
+        "structure-prediction.python.new-individual",
     ]:
         return
 
@@ -133,5 +135,6 @@ def test_workflow_submit_view(client, sample_structures, mocker):
         # parameters not deserialized yet so these will still be present
         command="",
         directory="",
+        run_id="",
         is_restart=False,
     )

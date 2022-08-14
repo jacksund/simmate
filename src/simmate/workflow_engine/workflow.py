@@ -966,7 +966,7 @@ class Workflow:
             # assert
             if not source == primary_input:
                 # only warning for now because this is experimental
-                logging.warn(
+                logging.warning(
                     "Your source does not match the source of your "
                     "primary input. Sources are an experimental feature, so "
                     "this will not affect your results. Still, please report "
@@ -1104,7 +1104,7 @@ class Workflow:
         # special-case workflows don't store calculation information bc the flow
         # is just a quick python analysis.
         if not database_table:
-            logging.warn("No database table found. Skipping registration.")
+            logging.warning("No database table found. Skipping registration.")
             return
 
         # grab the registration kwargs from the parameters provided and then

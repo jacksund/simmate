@@ -123,27 +123,7 @@ def test_s3workflow_1():
     output["directory"].rmdir()
 
 
-def test_s3workflow_2():
-    # test file compression
-
-    class Customized__Testing__DummyWorkflow(S3Workflow):
-        command = "echo dummy"
-        use_database = False
-        monitor = False
-
-    output = Customized__Testing__DummyWorkflow.run_config(compress_output=True)
-
-    # make sure that a "simmate-task-*.zip" archive was created
-    assert output["directory"].with_suffix(".zip").exists()
-
-    # make sure that a "simmate-task-*" directory was removed
-    assert not output["directory"].exists()
-
-    # and delete the archive
-    output["directory"].with_suffix(".zip").unlink()
-
-
-def test_s3workflow_3(tmp_path):
+def test_s3workflow_2(tmp_path):
     # Make a task with error handlers, monitoring, and specific directory
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -165,7 +145,7 @@ def test_s3workflow_3(tmp_path):
     }
 
 
-def test_s3workflow_4(tmp_path):
+def test_s3workflow_3(tmp_path):
     # test nonzero returncodes
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -195,7 +175,7 @@ def test_s3workflow_4(tmp_path):
     )
 
 
-def test_s3workflow_5(tmp_path):
+def test_s3workflow_4(tmp_path):
     # testing handler-triggered failures
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -212,7 +192,7 @@ def test_s3workflow_5(tmp_path):
     )
 
 
-def test_s3workflow_6(tmp_path):
+def test_s3workflow_5(tmp_path):
     # monitor failure
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -229,7 +209,7 @@ def test_s3workflow_6(tmp_path):
     )
 
 
-def test_s3workflow_7(tmp_path):
+def test_s3workflow_6(tmp_path):
     # special-monitor failure (non-terminating monitor)
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -246,7 +226,7 @@ def test_s3workflow_7(tmp_path):
     )
 
 
-def test_s3workflow_8(tmp_path):
+def test_s3workflow_7(tmp_path):
     # check that monitor exits cleanly when retries are not allowed and no
     # workup method raises an error
 
@@ -261,7 +241,7 @@ def test_s3workflow_8(tmp_path):
     assert len(result["corrections"]) == 1
 
 
-def test_s3workflow_9(tmp_path):
+def test_s3workflow_8(tmp_path):
     # make sure an error is raised when a file is missing
 
     class Customized__Testing__DummyWorkflow(S3Workflow):

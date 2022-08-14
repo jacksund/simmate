@@ -262,7 +262,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
 
     @staticmethod
     def _check_singleshot_sources(search_datatable, singleshot_sources):
-        logging.warn("Singleshot sources not implemented yet. Skipping this step.")
+        logging.warning("Singleshot sources not implemented yet. Skipping this step.")
         return
         # Initialize the single-shot sources
         # singleshot_sources = []
@@ -304,7 +304,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
             if len(composition.elements) == 1 and source_name in [
                 "from_ase.AtomicPermutation"
             ]:
-                logging.warn(
+                logging.warning(
                     f"{source_name} is not possible with single-element structures."
                     " This is being removed from your steadystate_sources."
                 )
@@ -321,7 +321,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         # these to steady-state integers (and round to the nearest integer)
         sum_proportions = sum(steadystate_source_proportions)
         if sum_proportions != 1:
-            logging.warn(
+            logging.warning(
                 "fractions for steady-state sources do not add to 1."
                 "We have scaled all sources to equal one to fix this."
             )

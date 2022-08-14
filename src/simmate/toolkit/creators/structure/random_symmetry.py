@@ -199,7 +199,7 @@ class RandomSymStructure(StructureCreator):
                     # if the generator returns None - then the spacegroup is
                     # incompatible with the composition
                     if not sites:
-                        logging.warn(
+                        logging.warning(
                             f"Failed to create a structure using spacegroup {spacegroup}."
                         )
                         return False
@@ -217,7 +217,7 @@ class RandomSymStructure(StructureCreator):
                     # if the generator returns None - then the spacegroup is
                     # incompatible with the composition
                     if not sites:
-                        logging.warn(
+                        logging.warning(
                             f"Failed to create a structure using spacegroup {spacegroup}."
                         )
                         return False
@@ -265,7 +265,9 @@ class RandomSymStructure(StructureCreator):
         # If the structure creation failed (structure = False), then see if the
         # failed spacegroup should be removed from future choices.
         if not structure:
-            logging.warn(f"Failed to create a structure using spacegroup {spacegroup}.")
+            logging.warning(
+                f"Failed to create a structure using spacegroup {spacegroup}."
+            )
             if self.remove_failed_spacegroups:
                 logging.info(
                     f"Removed spacegroup {spacegroup} from options. "

@@ -85,7 +85,7 @@ def check_if_using_latest_version(current_version=simmate.__version__):
     latest_version = get_latest_version()
 
     if current_version != latest_version:
-        logging.warn(
+        logging.warning(
             "There is a new version of Simmate available. "
             f"You are currently using v{current_version} while v{latest_version} "
             "is the latest."
