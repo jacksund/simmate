@@ -10,10 +10,7 @@ from simmate.database.workflow_results import (
     EvolutionarySearch as SearchDatatable,
     StructureSource as SourceDatatable,
 )
-from .individual_from_creator import StructurePrediction__Python__IndividualFromCreator
-from .individual_from_transformation import (
-    StructurePrediction__Python__IndividualFromTransformation,
-)
+from .new_individual import StructurePrediction__Python__NewIndividual
 
 # TODO
 # StructurePrediction__Python__VariableTernaryComposition
@@ -410,30 +407,22 @@ class StructurePrediction__Python__FixedComposition(Workflow):
             # create that many new individuals! max(x,0) ensure we don't get a
             # negative value. A value of 0 means we are at steady-state and can
             # just skip this loop.
-            for n in range(
-                max(int(source_db.nsteadystate_target - source_db.nflow_runs), 0)
-            ):
+            nflows_to_submit = max(
+                int(source_db.nsteadystate_target - source_db.nflow_runs), 0
+            )
+            for n in range(nflows_to_submit):
 
                 # submit the workflow for the new individual. Note, the structure
                 # won't be evuluated until the job actually starts. This allows
                 # our validator to have the most current information available
                 # when starting the structure creation
-
-                if source_db.is_transformation:
-                    workflow = StructurePrediction__Python__IndividualFromCreator
-                    state = workflow.run_cloud()
-
-                elif source_db.is_transformation:
-                    workflow = StructurePrediction__Python__IndividualFromTransformation
-                    state = workflow.run_cloud()
-                else:
-                    raise Exception(
-                        "A structure source can't be both a creator and a transformation. "
-                        "Something is configured incorrectly."
-                    )
+                state = StructurePrediction__Python__NewIndividual.run_cloud(
+                    search_id=search_datatable.id,
+                    source_id=source_db.id,
+                )
 
                 # Attached the id to our source so we know how many
                 # associated jobs are running.
                 # NOTE: this is the WorkItem id and NOT the run_id!!!
-                source_db.run_ids.append(state.pk)
+                source_db.workitem_ids.append(state.pk)
                 source_db.save()

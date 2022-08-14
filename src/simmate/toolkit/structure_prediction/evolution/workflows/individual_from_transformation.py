@@ -18,8 +18,6 @@ class StructurePrediction__Python__IndividualFromTransformation(Workflow):
         composition: Composition,
         subworkflow_name: str,
         subworkflow_kwargs: dict = {},
-        validators=[],
-        max_attempts=100,
         **kwargs,
     ):
         # Consider moving to _deserialize_parameters. Only issue is that
