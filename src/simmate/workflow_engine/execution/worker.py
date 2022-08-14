@@ -68,7 +68,7 @@ class SimmateWorker:
     def start(self):
 
         # print the header in the console to let the user know the worker started
-        print(HEADER_ART)
+        logging.info("\n" + HEADER_ART)
 
         # loggin helpful info
         logging.info(f"Starting worker with tags {list(self.tags)}")

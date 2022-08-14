@@ -24,8 +24,16 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Enhancements**
 - improve the warning associated with workflow failure because of "command not found" issues
-- workers not ignore and reset tasks that fail with "command not found". 2 workers failing with this error will result in the WorkItem being canceled
+- workers now ignore and reset tasks that fail with "command not found". 2 workers failing with this error will result in the WorkItem being canceled
 - `RandomWySites` can now generate wyckoff combinations lazily (or up front) depending on use case
+- add `simmate utilities` command group with `archive-old-runs`
+- add `start-cluster` command for starting many local workers
+- add `structure-prediction` workflows
+
+
+**Refactors**
+- evolutionary search now delay creations, transformations, and validation until runtime (used to be at time of structure submission)
+- `directory`, `compress_ouput`, and `run_id` are now default input parameters for subclasses of `Workflow`. If these are unused, the `run_config` must include `**kwargs`
 
 
 
