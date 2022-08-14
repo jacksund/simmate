@@ -183,7 +183,7 @@ import logging
 import pandas
 
 from simmate.workflow_engine import Workflow, ErrorHandler
-from simmate.utilities import get_directory, make_archive, make_error_archive
+from simmate.utilities import get_directory, make_error_archive
 
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
 # reset the working directory between task retries -- in some cases we may
@@ -262,7 +262,6 @@ class S3Workflow(Workflow):
         directory: Path = None,
         command: str = None,
         is_restart: bool = False,
-        compress_output: bool = False,
         **kwargs,
     ):
         """
@@ -291,11 +290,6 @@ class S3Workflow(Workflow):
             (i.e. a restarted calculation). If so, the `setup_restart` will be
             called instead of the setup method. Extra checks will be made to
             see if the calculation completed already too.
-
-        - `compress_output`:
-            Whether to compress the directory to a zip file at the end of the
-            task run. After compression, it will also delete the directory.
-            The default is False.
 
          - `**kwargs`:
              Any extra keywords that should be passed to the setup() method.
@@ -359,11 +353,6 @@ class S3Workflow(Workflow):
         # run the workup stage of the task. This is where the data/info is pulled
         # out from the calculation and is thus our "result".
         result = cls.workup(directory=directory)
-
-        # if requested, compresses the directory to a zip file and then removes
-        # the directory.
-        if compress_output:
-            make_archive(directory)
 
         # Return our final information as a dictionary
         result = {

@@ -121,7 +121,7 @@ class StructureCreator(ABC):
             if new_structure:
 
                 for validator in validators:
-                    is_valid = validator.check(new_structure)
+                    is_valid = validator.check_structure(new_structure)
 
                     if not is_valid:
                         # if it is not unique, we can throw away the structure and

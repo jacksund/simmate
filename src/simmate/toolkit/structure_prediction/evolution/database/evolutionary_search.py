@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import plotly.graph_objects as plotly_go
-from django.apps import apps as django_apps
 
 from simmate.database.base_data_types import table_column, DatabaseTable
-from simmate.workflow_engine.execution import WorkItem
-from simmate.workflows.utilities import get_workflow
 
 
 class EvolutionarySearch(DatabaseTable):
@@ -56,15 +53,34 @@ class EvolutionarySearch(DatabaseTable):
     # expected_structure = table_column.JSONField()
 
     @property
+    def subworkflow(self):
+
+        # local import to prevent circular import issues
+        from simmate.workflows.utilities import get_workflow
+
+        # Initialize the workflow if a string was given.
+        # Otherwise we should already have a workflow class.
+        if self.subworkflow_name == "relaxation.vasp.staged":
+            workflow = get_workflow(self.subworkflow_name)
+        else:
+            raise Exception(
+                "Only `relaxation.vasp.staged` is supported in early testing"
+            )
+
+        # BUG: I'll need to rewrite this in the future bc I don't really account
+        # for other workflows yet. It would make sense that our workflow changes
+        # as the search progresses (e.g. we incorporate DeePMD relaxation once
+        # ready)
+
+        return workflow
+
+    @property
     def individuals_datatable(self):
         # NOTE: this table just gives the class back and doesn't filter down
-        # to the relevent individuals for this search. For that, use the "individuals"
-        # property
+        # to the relevent individuals for this search. For that, use the
+        # "individuals" property
         # we assume the table is registered in the local_calcs app
-        return django_apps.get_model(
-            app_label="workflows",
-            model_name=self.individuals_datatable_str,
-        )
+        return self.subworkflow.database_table
 
     @property
     def individuals(self):
@@ -72,7 +88,7 @@ class EvolutionarySearch(DatabaseTable):
         # it often used as a "base" queryset (and additional filters are added)
         return self.individuals_datatable.objects.filter(
             formula_full=self.composition,
-            workflow_name=self.workflows[-1],  # use most recent workflow
+            workflow_name="relaxation.vasp.quality04",  # BUG: self.subworkflow_name,
         )
 
     @property
@@ -84,9 +100,50 @@ class EvolutionarySearch(DatabaseTable):
         # would require a large amount of work to implement.
 
     @property
-    def best_individual(self):
+    def individual_best(self):
         best = self.individuals_completed.order_by("energy_per_atom").first()
         return best
+
+    @property
+    def selector(self):
+
+        # Initialize the selector
+        if self.selector_name == "TruncatedSelection":
+            from simmate.toolkit.structure_prediction.evolution.selectors import (
+                TruncatedSelection,
+            )
+
+            selector = TruncatedSelection()
+        else:  # BUG
+            raise Exception("We only support TruncatedSelection right now")
+
+        return selector
+
+    @property
+    def validator(self):
+        # Initialize the fingerprint database
+        # For this we need to grab all previously calculated structures of this
+        # compositon too pass in too.
+        import logging
+
+        from simmate.toolkit import Composition
+        from simmate.toolkit.validators.fingerprint.pcrystalnn import (
+            PartialCrystalNNFingerprint,
+        )
+
+        logging.info("Generating fingerprints for past structures...")
+        fingerprint_validator = PartialCrystalNNFingerprint(
+            composition=Composition(self.composition),
+            structure_pool=self.individuals,
+        )
+        logging.info("Done generating fingerprints.")
+
+        # BUG: should we only do structures that were successfully calculated?
+        # If not, there's a chance a structure fails because of something like a
+        # crashed slurm job, but it's never submitted again...
+        # OPTIMIZE: should we only do final structures? Or should I include input
+        # structures and even all ionic steps as well...?
+        return fingerprint_validator
 
     def get_convergence_plot(self):
 
@@ -196,154 +253,3 @@ class EvolutionarySearch(DatabaseTable):
     def view_correctness_plot(self, structure_known):
         figure = self.get_correctness_plot(structure_known)
         figure.show(renderer="browser")
-
-    def get_selector(self):
-
-        # Initialize the selector
-        if self.selector_name == "TruncatedSelection":
-            from simmate.toolkit.structure_prediction.evolution.selectors import (
-                TruncatedSelection,
-            )
-
-            selector = TruncatedSelection()
-        else:  # BUG
-            raise Exception("We only support TruncatedSelection right now")
-
-        return selector
-
-    @property
-    def subworkflow(self):
-        # Initialize the workflow if a string was given.
-        # Otherwise we should already have a workflow class.
-        if self.subworkflow_name == "relaxation.vasp.staged":
-            workflow = get_workflow(self.subworkflow_name)
-        else:
-            raise Exception(
-                "Only `relaxation.vasp.staged` is supported in early testing"
-            )
-
-        # BUG: I'll need to rewrite this in the future bc I don't really account
-        # for other workflows yet. It would make sense that our workflow changes
-        # as the search progresses (e.g. we incorporate DeePMD relaxation once ready)
-
-        return workflow
-
-    def get_validator(self):
-        # Initialize the fingerprint database
-        # For this we need to grab all previously calculated structures of this
-        # compositon too pass in too.
-        import logging
-
-        from simmate.toolkit import Composition
-        from simmate.toolkit.validators.fingerprint.pcrystalnn import (
-            PartialCrystalNNFingerprint,
-        )
-
-        logging.info("Generating fingerprints for past structures...")
-        fingerprint_validator = PartialCrystalNNFingerprint(
-            composition=Composition(self.composition),
-            structure_pool=self.search_datatable.individuals,
-        )
-        # BUG: should we only do structures that were successfully calculated?
-        # If not, there's a chance a structure fails because of something like a
-        # crashed slurm job, but it's never submitted again...
-        # OPTIMIZE: should we only do final structures? Or should I include input
-        # structures and even all ionic steps as well...?
-        return fingerprint_validator
-
-
-class StructureSources(DatabaseTable):
-    class Meta:
-        app_label = "workflows"
-
-    name = table_column.CharField(max_length=50)
-    kwargs = table_column.JSONField(default=dict)
-
-    is_steadystate = table_column.BooleanField()
-    is_singleshot = table_column.BooleanField()
-    nsteadystate_target = table_column.FloatField(null=True, blank=True)
-
-    is_creator = table_column.BooleanField()
-    is_transformation = table_column.BooleanField()
-
-    # This list limits to ids that are submitted or running
-    workitem_ids = table_column.JSONField(default=list)
-
-    search = table_column.ForeignKey(
-        EvolutionarySearch,
-        on_delete=table_column.CASCADE,
-        related_name="sources",
-    )
-
-    def update_flow_workitem_ids(self):
-        """
-        Queries Prefect to see how many workflows are in a scheduled, running,
-        or pending state from the list of run ids that are associate with this
-        structure source.
-        """
-
-        # check which ids are still running. Note, this is a separate
-        # method in case it's an async call to Prefect client
-        still_running_ids = self._check_still_running_ids(self.workitem_ids)
-
-        # we now have our new list of IDs! Let's update it to the database
-        self.workitem_ids = still_running_ids
-        self.save()
-
-        return still_running_ids
-
-    @property
-    def nflow_runs(self):
-        # update our ids before we report how many there are.
-        runs = self.update_flow_workitem_ids()
-        # now the currently running ones is just the length of ids!
-        return len(runs)
-
-    @staticmethod
-    def _check_still_running_ids(workitem_ids):
-        """
-        Queries Prefect to see check on a list of flow run ids and determines
-        which ones are still in a scheduled, running, or pending state.
-        From the list of ids given, it will return a list of the ones that
-        haven't finished yet.
-        This is normally used within `update_flow_workitem_ids` and shouldn't
-        be called directly.
-        """
-        # The reason we have this code as a separate method is because we want
-        # to allow isolation of Prefect's async calls from Django's
-        # sync-restricted calls (i.e. django raises errors if called
-        # within an async context).
-        still_running_ids = WorkItem.objects.filter(
-            id__in=workitem_ids,
-            status__in=["P", "R"],
-        ).values_list("id", flat=True)
-        return list(still_running_ids)
-
-    # This method is for Prefect 2.0
-    # from simmate.utilities import async_to_sync
-    # @staticmethod
-    # @async_to_sync
-    # async def _check_still_running_ids(workitem_ids):
-    #     """
-    #     Queries Prefect to see check on a list of flow run ids and determines
-    #     which ones are still in a scheduled, running, or pending state.
-    #     From the list of ids given, it will return a list of the ones that
-    #     haven't finished yet.
-    #     This is normally used within `update_flow_workitem_ids` and shouldn't
-    #     be called directly.
-    #     """
-    #     raise NotImplementedError("porting to general executor")
-    #     from prefect.client import get_client
-    #     from prefect.orion.schemas.filters import FlowRunFilter
-    #     # The reason we have this code as a separate method is because we want
-    #     # to isolate Prefect's async calls from Django's sync-restricted calls
-    #     # (i.e. django raises errors if called within an async context).
-    #     async with get_client() as client:
-    #         response = await client.read_flow_runs(
-    #             flow_run_filter=FlowRunFilter(
-    #                 id={"any_": workitem_ids},
-    #                 state={"type": {"any_": ["SCHEDULED", "PENDING", "RUNNING"]}},
-    #             ),
-    #         )
-    #     still_running_ids = [str(entry.id) for entry in response]
-    #     return still_running_ids

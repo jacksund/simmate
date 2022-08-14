@@ -100,6 +100,7 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
         min_atoms: int = 80,
         max_atoms: int = 240,
         min_length: float = 10,
+        **kwargs,
     ):
 
         # Our step is to run a relaxation on the bulk structure and it uses our inputs

@@ -51,6 +51,7 @@ class Customized__Vasp__UserConfig(Workflow):
         workflow_base: Workflow,
         updated_settings: dict,
         input_parameters: dict,
+        **kwargs,
     ):
         logging.warn(
             "WARNING: customized workflows are meant only for quick testing. "

@@ -147,7 +147,7 @@ class Example__Python__MyFavoriteSettings(Workflow):
     use_database = False  # we don't have a database table yet
 
     @staticmethod
-    def run_config():
+    def run_config(**kwargs):
         print("This workflow doesn't do much")
         return 42
 ```

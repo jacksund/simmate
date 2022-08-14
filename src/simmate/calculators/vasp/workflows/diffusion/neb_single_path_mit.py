@@ -63,6 +63,7 @@ class Diffusion__Vasp__NebSinglePathMit(Workflow):
         min_atoms: int = 80,
         max_atoms: int = 240,
         min_length: float = 10,
+        **kwargs,
     ):
 
         # get the supercell endpoint structures

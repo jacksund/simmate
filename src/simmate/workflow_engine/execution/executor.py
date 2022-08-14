@@ -60,7 +60,7 @@ class SimmateExecutor:
         return future
 
     @staticmethod
-    def wait(self, futures):
+    def wait(futures):
         """
         Waits for all futures to complete before returning a list of their results
         """
@@ -89,7 +89,8 @@ class SimmateExecutor:
     # https://docs.python.org/3/library/queue.html
     # -------------------------------------------------------------------------
 
-    def queue_size(self):
+    @staticmethod
+    def queue_size():
         """
         Return the approximate size of the queue.
         """
@@ -100,7 +101,8 @@ class SimmateExecutor:
         queue_size = WorkItem.objects.filter(status="P").count()
         return queue_size
 
-    def clear_queue(self, are_you_sure=False):
+    @staticmethod
+    def clear_queue(are_you_sure=False):
         """
         Empties the WorkItem database table and delete everything. This will
         not stop the workers if they are in the middle of a job though.
@@ -114,6 +116,7 @@ class SimmateExecutor:
         else:
             WorkItem.objects.all().delete()
 
+    @staticmethod
     def clear_finished(self, are_you_sure=False):
         """
         Empties the WorkItem database table and delete everything. This will

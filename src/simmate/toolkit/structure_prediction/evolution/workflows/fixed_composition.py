@@ -10,7 +10,9 @@ from simmate.database.workflow_results import (
     EvolutionarySearch as SearchDatatable,
     StructureSource as SourceDatatable,
 )
-from .new_individual import StructurePrediction__Python__NewIndividual
+from simmate.toolkit.structure_prediction.evolution.workflows.new_individual import (
+    StructurePrediction__Python__NewIndividual,
+)
 
 # TODO
 # StructurePrediction__Python__VariableTernaryComposition
@@ -57,6 +59,8 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         validator_kwargs: dict = {},
         tags: list[str] = None,
         sleep_step: int = 60,
+        directory: str = None,
+        **kwargs,
     ):
         """
         Sets up the search engine and its settings.
@@ -157,7 +161,9 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         )
         search_datatable.save()
 
-        cls._check_stop_condition(search_datatable)
+        if cls._check_stop_condition(search_datatable):
+            logging.info("Looks like this search was already ran by someone else!")
+            return
 
         # See if the singleshot sources have been ran yet. For restarted calculations
         # this will likely not be needed (unless a new source was added). But for
@@ -174,7 +180,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         )
 
         logging.info("Finished setup")
-        logging.info("Assigned this to EvolutionarySearch id={search_datatable.id}.")
+        logging.info(f"Assigned this to EvolutionarySearch id={search_datatable.id}.")
 
         # this loop will go until I hit 'break' below
         while True:
@@ -232,7 +238,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         # we can stop the search.
 
         # grab the best individual for reference
-        best = search_datatable.best_individual
+        best = search_datatable.individual_best
 
         # We need this if-statement in case no structures have completed yet.
         if not best:
@@ -286,14 +292,15 @@ class StructurePrediction__Python__FixedComposition(Workflow):
     ):
 
         # Initialize the steady-state sources, which are given as a list of
-        # (proportion, class/class_str, kwargs) for each. As we go through these,
-        # we also collect the proportion list for them.
+        # (proportion, class/class_str, kwargs) for each. As we go through
+        # these, we also collect the proportion list for them.
         steadystate_sources_cleaned = []
         steadystate_source_proportions = []
         for proportion, source_name in steadystate_sources:
 
-            # There are certain transformation sources that don't work for single-element
-            # structures, so we check for this here and remove them.
+            # There are certain transformation sources that don't work for
+            # single-element structures, so we check for this here and
+            # remove them.
             if len(composition.elements) == 1 and source_name in [
                 "from_ase.AtomicPermutation"
             ]:
@@ -387,8 +394,9 @@ class StructurePrediction__Python__FixedComposition(Workflow):
             < search_datatable.nfirst_generation
         ):
             logging.info(
-                "Search hasn't finish 'generation 1' one yet. "
-                "Skipping all steady-state sources that are transformations."
+                "Search hasn't finished nfirst_generation yet "
+                f"({search_datatable.nfirst_generation} individuals). "
+                "Skipping transformations."
             )
             ready_for_transformations = False
         else:
@@ -410,6 +418,10 @@ class StructurePrediction__Python__FixedComposition(Workflow):
             nflows_to_submit = max(
                 int(source_db.nsteadystate_target - source_db.nflow_runs), 0
             )
+
+            if nflows_to_submit > 0:
+                logging.info(f"Submitting new individuals from {source_db.name}")
+
             for n in range(nflows_to_submit):
 
                 # submit the workflow for the new individual. Note, the structure
@@ -418,7 +430,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
                 # when starting the structure creation
                 state = StructurePrediction__Python__NewIndividual.run_cloud(
                     search_id=search_datatable.id,
-                    source_id=source_db.id,
+                    structure_source_id=source_db.id,
                 )
 
                 # Attached the id to our source so we know how many

@@ -119,11 +119,16 @@ class Transformation(ABC):
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure:
-            logging.warn("Failed to create a structure. Giving up.")
+            logging.warn(
+                f"Failed to create a structure after {max_attempts} different"
+                "parent combinations. Giving up."
+            )
             return False
 
         # Otherwise we were successful
         logging.info("Creation Successful.")
+
+        return parent_ids, new_structure
 
     def apply_transformation_with_validation(
         self,
@@ -153,8 +158,8 @@ class Transformation(ABC):
                     if not is_valid:
                         # if it is not unique, we can throw away the structure and
                         # try the loop again.
-                        logging.info(
-                            "Generated structure is failed validation by "
+                        logging.debug(
+                            "Generated structure failed validation by "
                             f"{validator.__name__}. Trying again."
                         )
                         new_structure = None
@@ -167,13 +172,10 @@ class Transformation(ABC):
         # a serious problem!
         if not new_structure:
             logging.warn(
-                "Failed to create a structure! Consider changing your settings or"
-                " contact our team for help."
+                "Failed to create a structure from input after "
+                f"{max_attempts} attempts"
             )
             return False
-
-        # Otherwise we were successful
-        logging.info("Creation Successful.")
 
         # return the structure and its parents
         return new_structure

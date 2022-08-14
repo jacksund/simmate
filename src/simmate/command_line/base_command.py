@@ -11,6 +11,7 @@ from simmate.command_line.workflows import workflows
 from simmate.command_line.workflow_engine import workflow_engine
 from simmate.command_line.run_server import run_server
 from simmate.command_line.start_project import start_project
+from simmate.command_line.utilities import utilities
 
 
 @click.group()
@@ -37,6 +38,7 @@ simmate.add_command(workflows)
 simmate.add_command(workflow_engine)
 simmate.add_command(run_server)
 simmate.add_command(start_project)
+simmate.add_command(utilities)
 
 # explicitly list functions so that pdoc doesn't skip them
 __all__ = ["simmate"]

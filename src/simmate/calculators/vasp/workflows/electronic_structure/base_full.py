@@ -35,6 +35,7 @@ class ElectronicStructureWorkflow(Workflow):
         source: str = None,
         directory: Path = None,
         copy_previous_directory: str = False,
+        **kwargs,
     ):
 
         static_result = cls.static_energy_workflow.run(
