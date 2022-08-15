@@ -187,7 +187,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
 
             # Check the stop condition
             # If it is True, we can stop the calc.
-            if search_datatable._check_stop_condition():
+            if search_datatable.check_stop_condition():
                 # TODO: should I sleep / wait for other calculations and
                 # check again? Then write summary one last time..?
                 break  # break out of the while loop

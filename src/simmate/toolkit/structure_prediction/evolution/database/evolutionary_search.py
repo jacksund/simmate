@@ -323,7 +323,7 @@ class EvolutionarySearch(DatabaseTable):
         # it often used as a "base" queryset (and additional filters are added)
         return self.individuals_datatable.objects.filter(
             formula_full=self.composition,
-            workflow_name="relaxation.vasp.quality04",  # BUG: self.subworkflow_name,
+            workflow_name=self.subworkflow_name,
         )
 
     @property
@@ -374,6 +374,7 @@ class EvolutionarySearch(DatabaseTable):
 
     def write_summary(self, directory: Path):
         logging.info(f"Writing search summary to {directory}")
+
         # calls all the key methods defined below
         best_cifs_directory = get_directory(directory / "best_structures_cifs")
         self.write_best_structures(100, best_cifs_directory)
@@ -384,6 +385,15 @@ class EvolutionarySearch(DatabaseTable):
         self.write_convergence_plot(directory)
         self.write_final_fitness_plot(directory)
         self.write_subworkflow_times_plot(directory)
+
+        # BUG: This is only for "relaxation.vasp.staged", which the assumed
+        # workflow for now.
+        self.subworkflow.write_series_convergence_plot(
+            directory=directory,
+            formula_full=self.composition,
+            energy_per_atom__isnull=False,
+        )
+
         logging.info("Done writing summary.")
 
     # -------------------------------------------------------------------------
@@ -457,7 +467,7 @@ class EvolutionarySearch(DatabaseTable):
         df.to_csv(csv_filename)
 
     def write_individuals_completed(self, directory: Path):
-        columns = ["id", "energy_per_atom", "updated_at"]
+        columns = ["id", "energy_per_atom", "updated_at", "source"]
         df = (
             self.individuals_completed.order_by(self.fitness_field)
             .only(*columns)
@@ -471,6 +481,17 @@ class EvolutionarySearch(DatabaseTable):
             return date.strftime("%Y-%m-%d %H:%M:%S")
 
         df["updated_at"] = df.updated_at.apply(format_date)
+
+        def format_parents(source):
+            return source.get("parent_ids", None)
+
+        df["parent_ids"] = df.source.apply(format_parents)
+
+        def format_source(source):
+            return source.get("creator", None) or source.get("transformation", None)
+
+        df["source"] = df.source.apply(format_source)
+
         md_filename = directory / "individuals_completed.md"
         df.to_markdown(md_filename)
 
@@ -698,9 +719,11 @@ class EvolutionarySearch(DatabaseTable):
         columns = ["created_at", "updated_at"]
         df = self.individuals_completed.only(*columns).to_dataframe(columns)
         df["total_time"] = df.updated_at - df.created_at
+
         def convert_to_min(time):
             # time is stored in nanoseconds and we convert to minutes
             return time.value * (10**-9) / 60
+
         df["total_time_min"] = df.total_time.apply(convert_to_min)
         histogram = plotly_go.Histogram(x=df.total_time_min)
         figure = plotly_go.Figure(data=histogram)
@@ -720,42 +743,3 @@ class EvolutionarySearch(DatabaseTable):
             directory / "distribution_of_subworkflow_times.html",
             include_plotlyjs="cdn",
         )
-
-    # def get_relaxation_staged_convergence(self):
-
-    #     staged_workflow_names = [
-    #         "relaxation.vasp.quality00",
-    #         "relaxation.vasp.quality01",
-    #         "relaxation.vasp.quality02",
-    #         "relaxation.vasp.quality03",
-    #         "relaxation.vasp.quality04",
-    #         "static-energy.vasp.quality04",
-    #     ]
-
-    #     # Go through all the workflows and compare it to the previous. Note,
-    #     # we skip the first workflow because no runs came before it.
-    #     for i, current_task in enumerate(tasks_to_run[1:]):
-
-    #         # Our first relaxation is directly from our inputs.
-    #         current_workflow_name = tasks_to_run[i]
-    #         previous_workflow_name = tasks_to_run[i-1]
-
-    #         current_workflow = get_workflow(current_workflow_name)
-    #         previous_workflow = get_workflow(previous_workflow_name)
-
-    #         all_results
-
-    #         preceding_task = tasks_to_run[i]  # will be one before because of [:1]
-    #         state = current_task.run(
-    #             structure={
-    #                 "database_table": preceding_task.database_table.__name__,
-    #                 "directory": result["directory"],  # uses preceding result
-    #                 "structure_field": "structure_final",
-    #             },
-    #             command=command,
-    #             directory=directory / current_task.name_full,
-    #         )
-    #         result = state.result()
-
-    #     # return the result of the final static energy if the user wants it
-    #     return result
