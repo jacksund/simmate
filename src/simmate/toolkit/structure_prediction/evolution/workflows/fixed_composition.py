@@ -6,13 +6,7 @@ import logging
 
 from simmate.toolkit import Composition
 from simmate.workflow_engine import Workflow
-from simmate.database.workflow_results import (
-    EvolutionarySearch as SearchDatatable,
-    StructureSource as SourceDatatable,
-)
-from simmate.toolkit.structure_prediction.evolution.workflows.new_individual import (
-    StructurePrediction__Python__NewIndividual,
-)
+from simmate.database.workflow_results import EvolutionarySearch as SearchDatatable
 
 # TODO
 # StructurePrediction__Python__VariableTernaryComposition
@@ -161,7 +155,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         )
         search_datatable.save()
 
-        if cls._check_stop_condition(search_datatable):
+        if search_datatable.check_stop_condition():
             logging.info("Looks like this search was already ran by someone else!")
             return
 
@@ -169,15 +163,11 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         # this will likely not be needed (unless a new source was added). But for
         # new searches/compositions, this will submit all individuals from the
         # single shot sources before we even start the steady-state runs
-        cls._check_singleshot_sources(search_datatable, singleshot_sources)
+        search_datatable._check_singleshot_sources()
 
         # Initialize the steady state sources by saving their config information
         # to the database.
-        steadystate_sources_db = cls._init_steadystate_sources_to_db(
-            composition,
-            search_datatable,
-            steadystate_sources,
-        )
+        search_datatable._init_steadystate_sources_to_db(steadystate_sources)
 
         logging.info("Finished setup")
         logging.info(f"Assigned this to EvolutionarySearch id={search_datatable.id}.")
@@ -189,7 +179,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
             if search_datatable.individuals_completed.count() >= 1:
                 search_datatable.write_summary(directory)
             else:
-                search.write_individuals_incomplete(directory)
+                search_datatable.write_individuals_incomplete(directory)
 
             # TODO: maybe write summary files to csv...? This may be a mute
             # point because I expect we can follow along in the web UI in the future
@@ -197,7 +187,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
 
             # Check the stop condition
             # If it is True, we can stop the calc.
-            if cls._check_stop_condition(search_datatable):
+            if search_datatable._check_stop_condition():
                 # TODO: should I sleep / wait for other calculations and
                 # check again? Then write summary one last time..?
                 break  # break out of the while loop
@@ -209,10 +199,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
 
             # Go through the running workflows and see if we need to submit
             # new ones to meet our steadystate target(s)
-            cls._check_steadystate_workflows(
-                search_datatable,
-                steadystate_sources_db,
-            )
+            search_datatable._check_steadystate_workflows()
 
             # To save our database load, sleep until we run checks again.
             logging.info(
@@ -220,229 +207,4 @@ class StructurePrediction__Python__FixedComposition(Workflow):
             )
             time.sleep(sleep_step)
 
-        logging.info("Stopping the search (remaining calcs will be left to finish).")
-
-    @staticmethod
-    def _check_stop_condition(search_datatable):
-
-        # first see if we've hit our maximum limit for structures.
-        # Note: because we are only looking at the results table, this is really
-        # only counting the number of successfully calculated individuals.
-        # Nothing is done to stop those that are still running or to count
-        # structures that failed to be calculated
-        # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-        if (
-            search_datatable.individuals_completed.count()
-            > search_datatable.max_structures
-        ):
-            logging.info(
-                "Maximum number of completed calculations hit "
-                f"(n={search_datatable.max_structures}."
-            )
-            return True
-        # The 2nd stop condition is based on how long we've have the same
-        # "best" individual. If the number of new individuals calculated (without
-        # any becoming the new "best") is greater than limit_best_survival, then
-        # we can stop the search.
-
-        # grab the best individual for reference
-        best = search_datatable.best_individual
-
-        # We need this if-statement in case no structures have completed yet.
-        if not best:
-            return False
-
-        # count the number of new individuals added AFTER the best one. If it is
-        # more than limit_best_survival, we stop the search.
-        num_new_structures_since_best = search_datatable.individuals.filter(
-            # check energies to ensure we only count completed calculations
-            energy_per_atom__gt=best.energy_per_atom,
-            created_at__gte=best.created_at,
-        ).count()
-        if num_new_structures_since_best > search_datatable.limit_best_survival:
-            logging.info(
-                "Best individual has not changed after "
-                f"{search_datatable.limit_best_survival} new individuals added."
-            )
-            return True
-        # If we reached this point, then we haven't hit a stop condition yet!
-        return False
-
-    @staticmethod
-    def _check_singleshot_sources(search_datatable, singleshot_sources):
-        logging.warning("Singleshot sources not implemented yet. Skipping this step.")
-        return
-        # Initialize the single-shot sources
-        # singleshot_sources = []
-        # for source in singleshot_sources:
-        #     # if we are given a string, we want initialize the class
-        #     # otherwise it should be a class alreadys
-        #     if type(source) == str:
-        #         source = self._init_common_class(source)
-        #     # and add it to our final list
-        #     self.singleshot_sources.append(source)
-        # singleshot_sources_db = []
-        # for source in self.singleshot_sources:
-        #     source_db = SourceDatatable(
-        #         name=source.__class__.__name__,
-        #         is_steadystate=False,
-        #         is_singleshot=True,
-        #         search=self.search_datatable,
-        #     )
-        #     source_db.save()
-        #     self.singleshot_sources_db.append(source_db)
-
-    @staticmethod
-    def _init_steadystate_sources_to_db(
-        composition,
-        search_datatable,
-        steadystate_sources,
-    ):
-
-        # Initialize the steady-state sources, which are given as a list of
-        # (proportion, class/class_str, kwargs) for each. As we go through
-        # these, we also collect the proportion list for them.
-        steadystate_sources_cleaned = []
-        steadystate_source_proportions = []
-        for proportion, source_name in steadystate_sources:
-
-            # There are certain transformation sources that don't work for
-            # single-element structures, so we check for this here and
-            # remove them.
-            if len(composition.elements) == 1 and source_name in [
-                "from_ase.AtomicPermutation"
-            ]:
-                logging.warning(
-                    f"{source_name} is not possible with single-element structures."
-                    " This is being removed from your steadystate_sources."
-                )
-                steadystate_sources.pop()
-                continue  # skips to next source
-
-            # Store proportion value and name of source. We do NOT initialize
-            # the source because it will be called elsewhere (within the submitted
-            # workflow and therefore a separate thread.
-            steadystate_sources_cleaned.append(source_name)
-            steadystate_source_proportions.append(proportion)
-
-        # Make sure the proportions sum to 1, otherwise scale them. We then convert
-        # these to steady-state integers (and round to the nearest integer)
-        sum_proportions = sum(steadystate_source_proportions)
-        if sum_proportions != 1:
-            logging.warning(
-                "fractions for steady-state sources do not add to 1."
-                "We have scaled all sources to equal one to fix this."
-            )
-            steadystate_source_proportions = [
-                p / sum_proportions for p in steadystate_source_proportions
-            ]
-        # While these are percent values, we want specific counts. We convert to
-        # those here.
-        steadystate_source_counts = [
-            int(p * search_datatable.nsteadystate)
-            for p in steadystate_source_proportions
-        ]
-
-        # Throughout our search, we want to keep track of which workflows we've
-        # submitted for each source as well as how long we were holding a
-        # steady-state of submissions. We therefore keep a log of Sources in
-        # our database.
-        steadystate_sources_db = []
-        for source_name, ntarget_jobs in zip(
-            steadystate_sources_cleaned, steadystate_source_counts
-        ):
-            # before saving, we want to record whether we have a creator or transformation
-            # !!! Is there a way to dynamically determine this from a string?
-            # Or maybe initialize them to provide they work before we register?
-            # Third option is to specify with the input.
-            known_creators = [
-                "RandomSymStructure",
-                "PyXtalStructure",
-            ]
-            is_creator = True if source_name in known_creators else False
-            known_transformations = [
-                "from_ase.Heredity",
-                "from_ase.SoftMutation",
-                "from_ase.MirrorMutation",
-                "from_ase.LatticeStrain",
-                "from_ase.RotationalMutation",
-                "from_ase.AtomicPermutation",
-                "from_ase.CoordinatePerturbation",
-            ]
-            is_transformation = True if source_name in known_transformations else False
-            if not is_creator and not is_transformation:
-                raise Exception("Unknown source being used.")
-                # BUG: I should really allow any subclass of Creator/Transformation
-
-            source_db = SourceDatatable(
-                name=source_name,
-                # kwargs --> default for now,
-                is_steadystate=True,
-                is_singleshot=False,
-                is_creator=is_creator,
-                is_transformation=is_transformation,
-                nsteadystate_target=ntarget_jobs,
-                search=search_datatable,
-            )
-            source_db.save()
-            steadystate_sources_db.append(source_db)
-        # !!! What if this search has been ran before or a matching search is
-        # being ran elsewhere? Do we still want new entries for each?
-
-        return steadystate_sources_db
-
-    @staticmethod
-    def _check_steadystate_workflows(search_datatable, steadystate_sources_db):
-
-        # transformations from a database table require that we have
-        # completed structures in the database. We want to wait until there's
-        # a set amount before we start mutating the best. We check that here.
-        if (
-            search_datatable.individuals_completed.count()
-            < search_datatable.nfirst_generation
-        ):
-            logging.info(
-                "Search hasn't finished nfirst_generation yet "
-                f"({search_datatable.nfirst_generation} individuals). "
-                "Skipping transformations."
-            )
-            ready_for_transformations = False
-        else:
-            ready_for_transformations = True
-
-        # we iterate through each steady-state source and check to see how many
-        # jobs are still running for it. If it's less than the target steady-state,
-        # then we need to submit more!
-        for source_db in steadystate_sources_db:
-
-            # skip if we have a transformation but aren't ready for it yet
-            if source_db.is_transformation and not ready_for_transformations:
-                continue
-
-            # This loop says for the number of steady state runs we are short,
-            # create that many new individuals! max(x,0) ensure we don't get a
-            # negative value. A value of 0 means we are at steady-state and can
-            # just skip this loop.
-            nflows_to_submit = max(
-                int(source_db.nsteadystate_target - source_db.nflow_runs), 0
-            )
-
-            if nflows_to_submit > 0:
-                logging.info(f"Submitting new individuals from {source_db.name}")
-
-            for n in range(nflows_to_submit):
-
-                # submit the workflow for the new individual. Note, the structure
-                # won't be evuluated until the job actually starts. This allows
-                # our validator to have the most current information available
-                # when starting the structure creation
-                state = StructurePrediction__Python__NewIndividual.run_cloud(
-                    search_id=search_datatable.id,
-                    structure_source_id=source_db.id,
-                )
-
-                # Attached the id to our source so we know how many
-                # associated jobs are running.
-                # NOTE: this is the WorkItem id and NOT the run_id!!!
-                source_db.workitem_ids.append(state.pk)
-                source_db.save()
+        logging.info("Stopping the search (running calcs will be left to finish).")

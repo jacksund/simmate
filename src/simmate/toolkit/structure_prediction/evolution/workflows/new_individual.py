@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pathlib import Path
+import logging
 
 from simmate.workflow_engine import Workflow
 from simmate.database.workflow_results import EvolutionarySearch
@@ -20,6 +21,16 @@ class StructurePrediction__Python__NewIndividual(Workflow):
 
         search_db = EvolutionarySearch.objects.get(id=search_id)
         source_db = search_db.structure_sources.get(id=structure_source_id)
+
+        # Check the stop condition of the search and see if this new individual
+        # is even needed. This will catch when a search ends while a new
+        # individual was waiting in the queue
+        if search_db.check_stop_condition():
+            logging.info(
+                "The search ended while this individual was in the queue. "
+                "Canceling new individual."
+            )
+            return
 
         if source_db.is_transformation:
 

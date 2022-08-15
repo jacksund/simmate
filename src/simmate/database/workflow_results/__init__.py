@@ -20,6 +20,6 @@ from simmate.database.base_data_types import (
 )
 
 from simmate.toolkit.structure_prediction.evolution.database import (
-    EvolutionarySearch,
     StructureSource,
+    EvolutionarySearch,
 )

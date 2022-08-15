@@ -30,18 +30,19 @@ class Selector:
     def select_from_datatable(
         self,
         nselect,
-        datatable,  # search_datatable.individuals_completed
-        ranking_column: str = None,  # "energy_per_atom"
-        query_limit: str = None,  # 200
+        datatable,
+        ranking_column: str = None,
+        query_limit: str = None,
     ):
 
         # our selectors just require a dataframe where we specify the fitness
         # column. So we query our individuals database to give this as an input.
+        datatable_cleaned = datatable
         if ranking_column:
-            datatable = datatable.order_by(ranking_column)
+            datatable_cleaned = datatable_cleaned.order_by(ranking_column)
         if query_limit:
-            datatable = datatable[:query_limit]
-        individuals_df = datatable.to_dataframe()
+            datatable_cleaned = datatable_cleaned[:query_limit]
+        individuals_df = datatable_cleaned.to_dataframe()
         # NOTE: I assume we'll never need more than the best 200 structures, which
         # may not be true in special cases.
 

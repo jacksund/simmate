@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import logging
 
 import django
 from django.conf import settings
@@ -25,6 +26,7 @@ def setup_django():
     # BUG: originally I used the code below, but it didn't work with Prefect+Dask:
     #   if "DJANGO_SETTINGS_MODULE" in os.environ:
 
+    logging.info("Configuring database and workflows...")
     # The code below is the equiv of running 'python manage.py shell'
     # This sets up all of django for its full use. You can being importing
     # models after this is setup.
@@ -32,6 +34,7 @@ def setup_django():
         "DJANGO_SETTINGS_MODULE", "simmate.configuration.django.settings"
     )
     django.setup()
+    logging.info("Configuration complete.")
 
 
 # When I import this module, it automatically configures django for us, including

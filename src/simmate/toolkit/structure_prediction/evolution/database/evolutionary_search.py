@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from pathlib import Path
+import logging
 
+import pandas
 import plotly.graph_objects as plotly_go
 
+from simmate.toolkit import Composition
 from simmate.database.base_data_types import table_column, DatabaseTable
 from simmate.utilities import get_directory
+from simmate.toolkit.structure_prediction.evolution.database import StructureSource
+from simmate.workflow_engine.execution import WorkItem
 
 
 class EvolutionarySearch(DatabaseTable):
@@ -54,6 +59,229 @@ class EvolutionarySearch(DatabaseTable):
     # useful benchmarking and when the user has a target structure that they
     # hope to see.
     # expected_structure = table_column.JSONField()
+
+    # -------------------------------------------------------------------------
+    # Highest-level methods that run the overall search
+    # -------------------------------------------------------------------------
+
+    def check_stop_condition(self):
+
+        # first see if we've hit our maximum limit for structures.
+        # Note: because we are only looking at the results table, this is really
+        # only counting the number of successfully calculated individuals.
+        # Nothing is done to stop those that are still running or to count
+        # structures that failed to be calculated
+        # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
+        if self.individuals_completed.count() > self.max_structures:
+            logging.info(
+                "Maximum number of completed calculations hit "
+                f"(n={self.max_structures})."
+            )
+            return True
+        # The 2nd stop condition is based on how long we've have the same
+        # "best" individual. If the number of new individuals calculated (without
+        # any becoming the new "best") is greater than limit_best_survival, then
+        # we can stop the search.
+
+        # grab the best individual for reference
+        best = self.best_individual
+
+        # We need this if-statement in case no structures have completed yet.
+        if not best:
+            return False
+
+        # count the number of new individuals added AFTER the best one. If it is
+        # more than limit_best_survival, we stop the search.
+        num_new_structures_since_best = self.individuals.filter(
+            # check energies to ensure we only count completed calculations
+            energy_per_atom__gt=best.energy_per_atom,
+            created_at__gte=best.created_at,
+        ).count()
+        if num_new_structures_since_best > self.limit_best_survival:
+            logging.info(
+                "Best individual has not changed after "
+                f"{self.limit_best_survival} new individuals added."
+            )
+            return True
+        # If we reached this point, then we haven't hit a stop condition yet!
+        return False
+
+    def _check_singleshot_sources(self):
+        logging.warning("Singleshot sources not implemented yet. Skipping this step.")
+        return
+        # Initialize the single-shot sources
+        # singleshot_sources = []
+        # for source in singleshot_sources:
+        #     # if we are given a string, we want initialize the class
+        #     # otherwise it should be a class alreadys
+        #     if type(source) == str:
+        #         source = self._init_common_class(source)
+        #     # and add it to our final list
+        #     self.singleshot_sources.append(source)
+        # singleshot_sources_db = []
+        # for source in self.singleshot_sources:
+        #     source_db = SourceDatatable(
+        #         name=source.__class__.__name__,
+        #         is_steadystate=False,
+        #         is_singleshot=True,
+        #         search=self.search_datatable,
+        #     )
+        #     source_db.save()
+        #     self.singleshot_sources_db.append(source_db)
+
+    def _init_steadystate_sources_to_db(self, steadystate_sources):
+        composition = Composition(self.composition)
+
+        # Initialize the steady-state sources, which are given as a list of
+        # (proportion, class/class_str, kwargs) for each. As we go through
+        # these, we also collect the proportion list for them.
+        steadystate_sources_cleaned = []
+        steadystate_source_proportions = []
+        for proportion, source_name in steadystate_sources:
+
+            # There are certain transformation sources that don't work for
+            # single-element structures, so we check for this here and
+            # remove them.
+            if len(composition.elements) == 1 and source_name in [
+                "from_ase.AtomicPermutation"
+            ]:
+                logging.warning(
+                    f"{source_name} is not possible with single-element structures."
+                    " This is being removed from your steadystate_sources."
+                )
+                steadystate_sources.pop()
+                continue  # skips to next source
+
+            # Store proportion value and name of source. We do NOT initialize
+            # the source because it will be called elsewhere (within the submitted
+            # workflow and therefore a separate thread.
+            steadystate_sources_cleaned.append(source_name)
+            steadystate_source_proportions.append(proportion)
+
+        # Make sure the proportions sum to 1, otherwise scale them. We then convert
+        # these to steady-state integers (and round to the nearest integer)
+        sum_proportions = sum(steadystate_source_proportions)
+        if sum_proportions != 1:
+            logging.warning(
+                "fractions for steady-state sources do not add to 1."
+                "We have scaled all sources to equal one to fix this."
+            )
+            steadystate_source_proportions = [
+                p / sum_proportions for p in steadystate_source_proportions
+            ]
+        # While these are percent values, we want specific counts. We convert to
+        # those here.
+        steadystate_source_counts = [
+            int(p * self.nsteadystate) for p in steadystate_source_proportions
+        ]
+
+        # Throughout our search, we want to keep track of which workflows we've
+        # submitted for each source as well as how long we were holding a
+        # steady-state of submissions. We therefore keep a log of Sources in
+        # our database.
+        steadystate_sources_db = []
+        for source_name, ntarget_jobs in zip(
+            steadystate_sources_cleaned, steadystate_source_counts
+        ):
+            # before saving, we want to record whether we have a creator or transformation
+            # !!! Is there a way to dynamically determine this from a string?
+            # Or maybe initialize them to provide they work before we register?
+            # Third option is to specify with the input.
+            known_creators = [
+                "RandomSymStructure",
+                "PyXtalStructure",
+            ]
+            is_creator = True if source_name in known_creators else False
+            known_transformations = [
+                "from_ase.Heredity",
+                "from_ase.SoftMutation",
+                "from_ase.MirrorMutation",
+                "from_ase.LatticeStrain",
+                "from_ase.RotationalMutation",
+                "from_ase.AtomicPermutation",
+                "from_ase.CoordinatePerturbation",
+            ]
+            is_transformation = True if source_name in known_transformations else False
+            if not is_creator and not is_transformation:
+                raise Exception("Unknown source being used.")
+                # BUG: I should really allow any subclass of Creator/Transformation
+
+            source_db = StructureSource(
+                name=source_name,
+                # kwargs --> default for now,
+                is_steadystate=True,
+                is_singleshot=False,
+                is_creator=is_creator,
+                is_transformation=is_transformation,
+                nsteadystate_target=ntarget_jobs,
+                search=self,
+            )
+            source_db.save()
+            steadystate_sources_db.append(source_db)
+        # !!! What if this search has been ran before or a matching search is
+        # being ran elsewhere? Do we still want new entries for each?
+
+        return steadystate_sources_db
+
+    def _check_steadystate_workflows(self):
+
+        # local import to prevent circular import issues
+        from simmate.toolkit.structure_prediction.evolution.workflows.new_individual import (
+            StructurePrediction__Python__NewIndividual,
+        )
+
+        # transformations from a database table require that we have
+        # completed structures in the database. We want to wait until there's
+        # a set amount before we start mutating the best. We check that here.
+        if self.individuals_completed.count() < self.nfirst_generation:
+            logging.info(
+                "Search hasn't finished nfirst_generation yet "
+                f"({self.nfirst_generation} individuals). "
+                "Skipping transformations."
+            )
+            ready_for_transformations = False
+        else:
+            ready_for_transformations = True
+
+        # we iterate through each steady-state source and check to see how many
+        # jobs are still running for it. If it's less than the target steady-state,
+        # then we need to submit more!
+        steadystate_sources_db = self.structure_sources.filter(
+            is_steadystate=True
+        ).all()
+        for source_db in steadystate_sources_db:
+
+            # skip if we have a transformation but aren't ready for it yet
+            if source_db.is_transformation and not ready_for_transformations:
+                continue
+
+            # This loop says for the number of steady state runs we are short,
+            # create that many new individuals! max(x,0) ensure we don't get a
+            # negative value. A value of 0 means we are at steady-state and can
+            # just skip this loop.
+            nflows_to_submit = max(
+                int(source_db.nsteadystate_target - source_db.nflow_runs), 0
+            )
+
+            if nflows_to_submit > 0:
+                logging.info(f"Submitting new individuals from {source_db.name}")
+
+            for n in range(nflows_to_submit):
+
+                # submit the workflow for the new individual. Note, the structure
+                # won't be evuluated until the job actually starts. This allows
+                # our validator to have the most current information available
+                # when starting the structure creation
+                state = StructurePrediction__Python__NewIndividual.run_cloud(
+                    search_id=self.id,
+                    structure_source_id=source_db.id,
+                )
+
+                # Attached the id to our source so we know how many
+                # associated jobs are running.
+                # NOTE: this is the WorkItem id and NOT the run_id!!!
+                source_db.workitem_ids.append(state.pk)
+                source_db.save()
 
     # -------------------------------------------------------------------------
     # Core methods that help grab key information about the search
@@ -145,6 +373,7 @@ class EvolutionarySearch(DatabaseTable):
         return best_history
 
     def write_summary(self, directory: Path):
+        logging.info(f"Writing search summary to {directory}")
         # calls all the key methods defined below
         best_cifs_directory = get_directory(directory / "best_structures_cifs")
         self.write_best_structures(100, best_cifs_directory)
@@ -153,6 +382,9 @@ class EvolutionarySearch(DatabaseTable):
         self.write_best_individuals_history(directory)
         self.write_individuals_incomplete(directory)
         self.write_convergence_plot(directory)
+        self.write_final_fitness_plot(directory)
+        self.write_subworkflow_times_plot(directory)
+        logging.info("Done writing summary.")
 
     # -------------------------------------------------------------------------
     # Methods for deserializing objects. Consider moving to the toolkit methods
@@ -204,11 +436,11 @@ class EvolutionarySearch(DatabaseTable):
     # -------------------------------------------------------------------------
 
     def write_best_structures(self, nbest: int, directory: Path):
-        # if the directory is filled, we need to delete all the files 
+        # if the directory is filled, we need to delete all the files
         # before writing the new ones.
         for file in directory.iterdir():
             file.unlink()
-        
+
         best = self.get_nbest_indiviudals(nbest)
         structures = best.only("structure_string", "id").to_toolkit()
         for rank, structure in enumerate(structures):
@@ -261,22 +493,31 @@ class EvolutionarySearch(DatabaseTable):
         df.to_markdown(md_filename)
 
     def write_individuals_incomplete(self, directory: Path):
-        columns = ["id", "energy_per_atom", "updated_at"]
-        df = (
-            self.individuals_incomplete.order_by(self.fitness_field)
-            .only(*columns)
-            .order_by("created_at")
-            .to_dataframe(columns)
+        structure_sources = self.structure_sources.all()
+        sources = []
+        workitem_ids = []
+        statuses = []
+        created_at = []
+        for source in structure_sources:
+            workitem_ids += source.workitem_ids
+            # as an extra, keep a list of the source names
+            sources += [source.name] * len(source.workitem_ids)
+
+            for workitem_id in source.workitem_ids:
+                work_item = WorkItem.objects.get(id=workitem_id)
+                statuses.append(work_item.get_status_display())
+                created_at.append(work_item.created_at.strftime("%Y-%m-%d %H:%M:%S"))
+
+        df = pandas.DataFrame(
+            {
+                "workitem_id": workitem_ids,
+                "source": sources,
+                "status": statuses,
+                "created_at": created_at,
+            }
         )
-        # label the index column
-        df.index.name = "rank"
 
-        # make the timestamps easier to read
-        def format_date(date):
-            return date.strftime("%Y-%m-%d %H:%M:%S")
-
-        df["updated_at"] = df.updated_at.apply(format_date)
-        md_filename = directory / "individuals_still_running_or_failed.md"
+        md_filename = directory / "individuals_still_running.md"
         df.to_markdown(md_filename)
 
     # -------------------------------------------------------------------------
@@ -286,7 +527,10 @@ class EvolutionarySearch(DatabaseTable):
     def get_convergence_plot(self):
 
         # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = self.individuals_completed.to_dataframe()
+        columns = ["updated_at", self.fitness_field]
+        structures_dataframe = self.individuals_completed.only(*columns).to_dataframe(
+            columns
+        )
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
@@ -412,6 +656,70 @@ class EvolutionarySearch(DatabaseTable):
     # This plot is specifically for "relaxation.vasp.staged" and should be moved
     # to that class when this search allows new workflows
     # -------------------------------------------------------------------------
+
+    def get_final_fitness_plot(self):
+
+        # Grab the calculation's structure and convert it to a dataframe
+        structures_dataframe = self.individuals_completed.only(
+            self.fitness_field
+        ).to_dataframe(self.fitness_field)
+
+        # There's only one plot here, no subplot. So we make the scatter
+        # object and just pass it directly to a Figure object
+        histogram = plotly_go.Histogram(
+            x=structures_dataframe[self.fitness_field],
+        )
+        figure = plotly_go.Figure(data=histogram)
+
+        figure.update_layout(
+            xaxis_title="Energy (eV/atom)"
+            if self.fitness_field == "energy_per_atom"
+            else self.fitness_field,
+            yaxis_title="Individuals (#)",
+        )
+
+        # we return the figure object for the user
+        return figure
+
+    def view_final_fitness_plot(self):
+        figure = self.get_final_fitness_plot()
+        figure.show(renderer="browser")
+
+    def write_final_fitness_plot(self, directory: Path):
+        figure = self.get_final_fitness_plot()
+        figure.write_html(
+            directory / f"distribution_of_{self.fitness_field}.html",
+            include_plotlyjs="cdn",
+        )
+
+    def get_subworkflow_times_plot(self):
+
+        # Grab the calculation's structure and convert it to a dataframe
+        columns = ["created_at", "updated_at"]
+        df = self.individuals_completed.only(*columns).to_dataframe(columns)
+        df["total_time"] = df.updated_at - df.created_at
+        def convert_to_min(time):
+            # time is stored in nanoseconds and we convert to minutes
+            return time.value * (10**-9) / 60
+        df["total_time_min"] = df.total_time.apply(convert_to_min)
+        histogram = plotly_go.Histogram(x=df.total_time_min)
+        figure = plotly_go.Figure(data=histogram)
+        figure.update_layout(
+            xaxis_title="Total time (min)",
+            yaxis_title="Individuals (#)",
+        )
+        return figure
+
+    def view_subworkflow_times_plot(self):
+        figure = self.get_subworkflow_times_plot()
+        figure.show(renderer="browser")
+
+    def write_subworkflow_times_plot(self, directory: Path):
+        figure = self.get_subworkflow_times_plot()
+        figure.write_html(
+            directory / "distribution_of_subworkflow_times.html",
+            include_plotlyjs="cdn",
+        )
 
     # def get_relaxation_staged_convergence(self):
 
