@@ -86,7 +86,7 @@ class Transformation(ABC):
         self,
         selector,
         datatable,
-        selector_kwargs: dict = {},
+        select_kwargs: dict = {},
         max_attempts: int = 100,
         **kwargs,  # for apply_transformation_with_validation
     ):
@@ -98,7 +98,7 @@ class Transformation(ABC):
         parent_ids, parent_structures = selector.select_from_datatable(
             nselect=self.ninput,
             datatable=datatable,
-            **selector_kwargs,
+            **select_kwargs,
         )
 
         # Until we get a new valid structure (or run out of attempts), keep trying
@@ -153,14 +153,14 @@ class Transformation(ABC):
             if new_structure:
 
                 for validator in validators:
-                    is_valid = validator.check(new_structure)
+                    is_valid = validator.check_structure(new_structure)
 
                     if not is_valid:
                         # if it is not unique, we can throw away the structure and
                         # try the loop again.
                         logging.debug(
                             "Generated structure failed validation by "
-                            f"{validator.__name__}. Trying again."
+                            f"{validator.__class__.__name__}. Trying again."
                         )
                         new_structure = None
 

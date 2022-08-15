@@ -135,6 +135,7 @@ def test_workflow_submit_view(client, sample_structures, mocker):
         # parameters not deserialized yet so these will still be present
         command="",
         directory="",
+        source=None,
         run_id="",
         is_restart=False,
     )

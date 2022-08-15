@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import math
+from pathlib import Path
+
+from plotly.subplots import make_subplots
+import plotly.graph_objects as plotly_go
+
 from simmate.workflow_engine import Workflow
 from simmate.calculators.vasp.workflows.relaxation.quality00 import (
     Relaxation__Vasp__Quality00,
@@ -45,8 +51,18 @@ class Relaxation__Vasp__Staged(Workflow):
     description_doc_short = "runs a series of relaxations (00-04 quality)"
     # database_table = StagedRelaxation
 
-    @staticmethod
+    subworkflows = [
+        Relaxation__Vasp__Quality00,
+        Relaxation__Vasp__Quality01,
+        Relaxation__Vasp__Quality02,
+        Relaxation__Vasp__Quality03,
+        Relaxation__Vasp__Quality04,
+        StaticEnergy__Vasp__Quality04,
+    ]
+
+    @classmethod
     def run_config(
+        cls,
         structure,
         command=None,
         source=None,
@@ -55,17 +71,8 @@ class Relaxation__Vasp__Staged(Workflow):
         **kwargs,
     ):
 
-        tasks_to_run = [
-            Relaxation__Vasp__Quality00,
-            Relaxation__Vasp__Quality01,
-            Relaxation__Vasp__Quality02,
-            Relaxation__Vasp__Quality03,
-            Relaxation__Vasp__Quality04,
-            StaticEnergy__Vasp__Quality04,
-        ]
-
         # Our first relaxation is directly from our inputs.
-        current_task = tasks_to_run[0]
+        current_task = cls.subworkflows[0]
         state = current_task.run(
             structure=structure,
             command=command,
@@ -74,8 +81,8 @@ class Relaxation__Vasp__Staged(Workflow):
         result = state.result()
 
         # The remaining tasks continue and use the past results as an input
-        for i, current_task in enumerate(tasks_to_run[1:]):
-            preceding_task = tasks_to_run[i]  # will be one before because of [:1]
+        for i, current_task in enumerate(cls.subworkflows[1:]):
+            preceding_task = cls.subworkflows[i]  # will be one before because of [:1]
             state = current_task.run(
                 structure={
                     "database_table": preceding_task.database_table.__name__,
@@ -87,5 +94,99 @@ class Relaxation__Vasp__Staged(Workflow):
             )
             result = state.result()
 
-        # return the result of the final static energy if the user wants it
+        # we return the final step but update the directory to the parent one
+        result["directory"] = directory
         return result
+
+    @classmethod
+    def _get_final_energy_series(cls, df, directory: str):
+        """
+        A utility that grabs the final energies from each stage. Useful for
+        grabbing convergence information.
+        """
+        for subflow in cls.subworkflows:
+            pass
+
+    @classmethod
+    def get_series_convergence_plot(cls, **filter_kwargs):
+
+        directories = (
+            cls.database_table.objects.filter(
+                workflow_name=cls.name_full,
+                **filter_kwargs,
+            )
+            .values_list("directory", flat=True)
+            .all()
+        )
+
+        all_energy_series = []
+        for directory in directories:
+            energy_series = []
+            for subflow in cls.subworkflows:
+                query = subflow.database_table.objects.filter(
+                    workflow_name=subflow.name_full,
+                    directory__startswith=directory,
+                    energy_per_atom__isnull=False,
+                ).only("energy_per_atom")
+                if query.exists():
+                    result = query.get()
+                    energy_series.append(result.energy_per_atom)
+                else:
+                    energy_series.append(None)
+            all_energy_series.append(energy_series)
+
+        # -------
+
+        figure = make_subplots(
+            rows=math.ceil((len(cls.subworkflows) - 1) / 3),
+            cols=3,
+        )
+
+        for i in range(len(cls.subworkflows) - 1):
+
+            xs = []
+            ys = []
+            for energy_series in all_energy_series:
+
+                xs.append(energy_series[i + 1])
+                ys.append(energy_series[i])
+
+            scatter = plotly_go.Scatter(
+                x=xs,
+                y=ys,
+                mode="markers",
+            )
+            row = math.ceil((i + 1) / 3)
+            col = (i % 3) + 1
+            figure.add_trace(
+                trace=scatter,
+                row=row,
+                col=col,
+            )
+
+            # Update xaxis properties
+            figure.update_xaxes(
+                title_text=cls.subworkflows[i + 1].name_full,
+                row=row,
+                col=col,
+            )
+            figure.update_yaxes(
+                title_text=cls.subworkflows[i].name_full,
+                row=row,
+                col=col,
+            )
+
+        return figure
+
+    @classmethod
+    def view_series_convergence_plot(cls, **kwargs):
+        figure = cls.get_series_convergence_plot(**kwargs)
+        figure.show(renderer="browser")
+
+    @classmethod
+    def write_series_convergence_plot(cls, directory: Path, **kwargs):
+        figure = cls.get_series_convergence_plot(**kwargs)
+        figure.write_html(
+            directory / "convergence__staged_relaxations.html",
+            include_plotlyjs="cdn",
+        )

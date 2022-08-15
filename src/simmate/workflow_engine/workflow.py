@@ -493,7 +493,14 @@ class Workflow:
         )
 
     @classmethod
-    def _run_full(cls, run_id=None, directory=None, compress_output=False, **kwargs):
+    def _run_full(
+        cls,
+        run_id: str = None,
+        directory: Path = None,
+        compress_output: bool = False,
+        source: dict = None,
+        **kwargs,
+    ):
         """
         This method should not be called directly. Use the `run` method instead.
 
@@ -511,6 +518,7 @@ class Workflow:
             run_id=run_id,
             directory=directory,
             compress_output=compress_output,
+            source=source,
             **kwargs,
         )
         result = cls.run_config(**kwargs_cleaned)
@@ -666,6 +674,10 @@ class Workflow:
             return CustomizedCalculation
         else:
             raise NotImplementedError("Unable to detect proper database table")
+
+    @classmethod
+    def all_results(cls):
+        return cls.database_table.objects.filter(workflow_name=cls.name_full)
 
     @classmethod
     def _save_to_database(cls, result, run_id):
@@ -1046,8 +1058,8 @@ class Workflow:
 
         # run is always used to register but is never an input parameter
         parameters_to_register = []
-        # run_id and workflow_name are used to register but these are
-        # implemented with the _register_calculation elsewhere
+        # workflow_name is also used to register but this implemented within
+        # the _register_calculation method
 
         table_columns = cls.database_table.get_column_names()
 
@@ -1115,6 +1127,14 @@ class Workflow:
         register_kwargs_cleaned = cls._deserialize_parameters(
             add_defaults_from_attr=False, **register_kwargs
         )
+
+        # SPECIAL CASE: The exception to the above is with SOURCE, which needs
+        # to be in a JSON-serialized form for the database
+        if "source" in register_kwargs_cleaned:
+            register_kwargs_cleaned["source"] = cls._serialize_parameters(
+                source=kwargs["source"]
+            )["source"]
+            # !!! This is a hacky bug fix that needs refactored
 
         # SPECIAL CASE: for customized workflows we need to convert the inputs
         # back to json before saving to the database.
