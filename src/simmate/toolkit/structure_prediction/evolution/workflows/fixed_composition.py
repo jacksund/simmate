@@ -2,6 +2,7 @@
 
 import logging
 import time
+from pathlib import Path
 
 from simmate.database.workflow_results import EvolutionarySearch as SearchDatatable
 from simmate.toolkit import Composition
@@ -52,7 +53,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         validator_kwargs: dict = {},
         tags: list[str] = None,
         sleep_step: int = 60,
-        directory: str = None,
+        directory: Path = None,
         **kwargs,
     ):
         """
@@ -162,7 +163,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         # this will likely not be needed (unless a new source was added). But for
         # new searches/compositions, this will submit all individuals from the
         # single shot sources before we even start the steady-state runs
-        search_datatable._check_singleshot_sources()
+        search_datatable._check_singleshot_sources(directory)
 
         # Initialize the steady state sources by saving their config information
         # to the database.

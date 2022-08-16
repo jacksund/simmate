@@ -2,6 +2,7 @@
 
 import itertools
 import logging
+import warnings
 
 from pymatgen.analysis.structure_prediction.substitutor import Substitutor
 from pymatgen.core import Species
@@ -45,11 +46,14 @@ def get_structures_from_substitution_of_known(
     # BUG: This code should be a single line:
     #   expected_substituitions = substitutor.pred_from_comp(oxi_composition)
     # Howevever, pymatgen's function fails when even a single element is not
-    # allowed with their dataset (e.g. any carbides will fail). To get around
+    # allowed with their dataset (e.g. any carbide will fail). To get around
     # this, I use pred_from_list instead of pred_from_comp, and I keep trying
     # until I get one that works. The while loop here is try every combination
     # of elements (starting with all of them and then try smaller combos) and
-    # exits as soon as I find one that works.
+    # exits as soon as I find one that works. Pymatgen also randomly logs
+    # within this function call, so we disable the logger while running this.
+    logger = logging.getLogger()
+    logger.disabled = True
     nelements = len(oxi_composition.elements)
     has_subs = False
     while (not has_subs) and (nelements > 0):
@@ -60,15 +64,13 @@ def get_structures_from_substitution_of_known(
                 expected_substituitions = substitutor.pred_from_list(elements_to_sub)
                 break  # exit immediately once successful
             except:
-                expected_substituitions = None
+                expected_substituitions = []
         if expected_substituitions:
             has_subs = True
         else:
             # try the cycle again but with one less element in the combinations
             nelements -= 1
-
-    if not expected_substituitions:
-        raise Exception("Failed to find viable substituitions for this composition")
+    logger.disabled = False
 
     # Confirm charge balance for most-likely structures
     # This loop is copy/pasted from...
@@ -78,11 +80,20 @@ def get_structures_from_substitution_of_known(
         subs = p["substitutions"]
         charge = 0
         for i_el in oxi_composition.elements:
+            # BUG: not caught in pymatgen -- ex: Composition("C4")
+            if i_el not in subs.keys():
+                continue
             f_el = subs[i_el]
             charge += f_el.oxi_state * oxi_composition[i_el]
         if charge == 0:
             output.append(p)
     expected_substituitions = output
+
+    if not expected_substituitions:
+        # logging.warning(f"Failed to find viable substituitions for {composition}")
+        return []
+
+    # logging.info(f"{len(expected_substituitions)} subsitutions charge balance")
 
     # ----------
 
@@ -106,10 +117,14 @@ def get_structures_from_substitution_of_known(
         }
 
         # Generate the composition that we will use for source structures
-        composition_source = oxi_composition.replace(substituition_cleaned.copy())
+        # Pymatgen prints a warning that we are aware of and okay with
+        with warnings.catch_warnings(record=True):
+            composition_source = oxi_composition.replace(substituition_cleaned.copy())
         # BUG: this method is destructive to the input dictionary so we must
         # pass a copy instead
-        logging.info([oxi_composition, composition_source, substituition_cleaned])
+
+        # log the substituition for debugging
+        logging.debug([oxi_composition, composition_source, substituition_cleaned])
 
         # Now grab all known structures with this composition
         source_structures = get_known_structures(composition_source, **kwargs)
@@ -157,8 +172,12 @@ def get_structures_from_substitution_of_known(
 
         for structure in source_structures:
             new_structure = structure.copy()
+
             new_structure.replace_species(substituition_cleaned_2)
+
             # TODO: scale structures to reasonable volume..?
             structures_final.append(new_structure)
+
+    # logging.info(f"{len(structures_final)} final subsitutions using known structures")
 
     return structures_final
