@@ -2,11 +2,11 @@
 
 from pathlib import Path
 
-from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.io.vasp.inputs import Kpoints
+from pymatgen.io.vasp.outputs import Vasprun
 
-from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
+from simmate.workflow_engine import ErrorHandler
 
 
 class MeshSymmetry(ErrorHandler):

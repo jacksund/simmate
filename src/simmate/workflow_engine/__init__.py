@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+# The order that we import these different modules is important to prevent
+# circular imports errors, so we prevent isort from changing this file.
+# isort: skip_file
+
 from simmate.utilities import get_doc_from_readme
 
 __doc__ = get_doc_from_readme(__file__)
@@ -13,6 +17,7 @@ from .error_handler import ErrorHandler
 # need a database connection. This line sets up the database connection so
 # that models can be imported.
 from simmate.database import connect
+
 
 from .workflow import Workflow
 from .s3_workflow import S3Workflow

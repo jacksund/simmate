@@ -6,17 +6,14 @@ WARNING: This module is experimental and subject to change.
 
 from pathlib import Path
 
+from pymatgen.analysis.transition_state import NEBAnalysis
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from pymatgen.analysis.transition_state import NEBAnalysis
 
+from simmate.database.base_data_types import DatabaseTable, Structure, table_column
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
-from simmate.database.base_data_types import (
-    table_column,
-    DatabaseTable,
-    Structure,
-)
+
 
 # TODO: consider making a NestedCalculation
 class DiffusionAnalysis(Structure):

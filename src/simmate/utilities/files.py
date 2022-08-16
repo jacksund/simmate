@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-from tempfile import mkdtemp
 import shutil
 import time
-from typing import List, Union
+from pathlib import Path
+from tempfile import mkdtemp
 
 
-def get_directory(directory: Union[str, Path] = None) -> Path:
+def get_directory(directory: Path | str = None) -> Path:
     """
     Initializes a directory.
 
@@ -255,7 +254,7 @@ def archive_old_runs(
     [make_archive(f) for f in foldernames]
 
 
-def empty_directory(directory: Path, files_to_keep: List[Path] = []):
+def empty_directory(directory: Path, files_to_keep: list[Path] = []):
     """
     Deletes all files and folders within a directory, except for those provided
     to the files_to_keep parameter.

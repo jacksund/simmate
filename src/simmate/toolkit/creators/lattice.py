@@ -3,12 +3,11 @@
 ##############################################################################
 
 from numpy.random import choice
-
 from pymatgen.core.lattice import Lattice
 
 from simmate.toolkit.creators.vector import (
-    UniformlyDistributedVectors,
     NormallyDistributedVectors,
+    UniformlyDistributedVectors,
 )
 
 ##############################################################################
@@ -164,6 +163,7 @@ class RSLFixedVolume(RandomSymLattice):
 ##############################################################################
 
 from simmate.toolkit.symmetry.wyckoff import loadWyckoffData
+
 
 #!!! EASY SPEED/MEMORY IMPROVEMENTS CAN BE MADE HERE (ON INIT)
 class RSLSmartVolume:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
 
 from dask.distributed import get_client
 

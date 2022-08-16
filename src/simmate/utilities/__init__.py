@@ -2,19 +2,19 @@
 
 from .async_wrapper import async_to_sync
 from .files import (
+    archive_old_runs,
+    copy_directory,
+    empty_directory,
     get_directory,
     make_archive,
     make_error_archive,
-    archive_old_runs,
-    empty_directory,
-    copy_directory,
 )
 from .other import (
+    check_if_using_latest_version,
+    get_chemical_subsystems,
     get_conda_env,
     get_doc_from_readme,
-    get_chemical_subsystems,
     get_latest_version,
-    check_if_using_latest_version,
 )
 
 # must be last to prevent circular import

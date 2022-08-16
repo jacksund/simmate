@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-
 from pandas import DataFrame
 
 from simmate.toolkit import Structure

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from pytest_django.asserts import assertTemplateUsed
 from django.urls import reverse
+from pytest_django.asserts import assertTemplateUsed
 
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import (
-    get_workflow_types,
     get_list_of_all_workflows,
     get_workflow,
+    get_workflow_types,
 )
 
 ALL_WORKFLOWS = get_list_of_all_workflows()

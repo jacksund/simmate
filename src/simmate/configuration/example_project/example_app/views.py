@@ -16,6 +16,7 @@ from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 
 from .models import ExampleRelaxationTable
 
+
 # Simple views (like a homepage) are made following django's normal format
 def example_view(request):
     context = {}

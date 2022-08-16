@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import numpy
-
-from simmate.toolkit import Structure
-
+from pymatgen.analysis.diffusion.neb.pathfinder import DistinctPathFinder, IDPPSolver
 from pymatgen.analysis.diffusion.neb.pathfinder import (
-    DistinctPathFinder,
     MigrationHop as PymatgenMigrationHop,
-    IDPPSolver,
 )
 
-from typing import List
+from simmate.toolkit import Structure
 
 
 class MigrationImages(list):
@@ -30,7 +26,7 @@ class MigrationImages(list):
     to MigrationHops.
     """
 
-    def __init__(self, structures: List[Structure]):
+    def __init__(self, structures: list[Structure]):
         # This init function does nothing except apply typing -- specifically,
         # it says that it expects a list of structures.
         super().__init__(structures)

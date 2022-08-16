@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.base import VaspWorkflow
 from simmate.calculators.vasp.inputs.potcar_mappings import (
     PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
 )
+from simmate.calculators.vasp.workflows.base import VaspWorkflow
 
 
 class Relaxation__Vasp__Quality02(VaspWorkflow):

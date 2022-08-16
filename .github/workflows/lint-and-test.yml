@@ -36,10 +36,16 @@ jobs:
     steps:
 
     - name: Initial setup
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Check code format with Black
       uses: psf/black@stable
+
+    # This action seems poorly-maintained -- as it fails on MacOS and also
+    # directly installs isort (unlike the action used for Black). I therefore
+    # disable this for now.
+    # - name: Check import format with iSort
+    #   uses: isort/isort-action@master
 
     - name: Create conda env and install deps
       uses: conda-incubator/setup-miniconda@v2
@@ -67,7 +73,8 @@ jobs:
       run: |
         pytest -vv --durations=15
     # "-vv" makes the pytest output verbose so errors are more useful
-    # and "duration=0" has pytest print how long every test took.
+    # and "duration=0" has pytest print how long every test took. We ask for
+    # the 15 slowest ones.
 
     # Marked tests can be dropped for now. I'll re-add this test when needed.
     # - name: Run no_django_setup tests

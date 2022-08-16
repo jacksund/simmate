@@ -18,8 +18,9 @@ new_toolkit_object = PyMatGenAdapter.get_toolkit(new_pmg_object)
 ```
 """
 
-from simmate.toolkit import Structure as ToolkitStructure
 from pymatgen.core.structure import Structure as PyMatGenStructure
+
+from simmate.toolkit import Structure as ToolkitStructure
 
 
 class PyMatGenAdapter:

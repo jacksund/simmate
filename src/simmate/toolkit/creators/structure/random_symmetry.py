@@ -4,10 +4,10 @@ import logging
 
 from numpy.random import choice
 
-from simmate.toolkit import Structure, Composition
-from simmate.toolkit.creators.structure.base import StructureCreator
+from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.lattice import RSLSmartVolume
 from simmate.toolkit.creators.sites.random_wyckoff import RandomWySites
+from simmate.toolkit.creators.structure.base import StructureCreator
 from simmate.toolkit.creators.utils import NestedFixes
 from simmate.toolkit.validators.structure import SiteDistanceMatrix
 

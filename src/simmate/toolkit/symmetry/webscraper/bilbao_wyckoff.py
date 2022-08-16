@@ -20,8 +20,8 @@ misleading because we know that Ca2N has the spacegroup 166
 ##############################################################################
 
 
-from selenium import webdriver
 import pandas as pd
+from selenium import webdriver
 from tqdm import tqdm
 
 # launch the webbrowser

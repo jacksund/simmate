@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import time
-import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 import logging
+import time
 import traceback
 
+import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from django.db import transaction
 
 from simmate.workflow_engine.execution.database import WorkItem
@@ -22,6 +22,10 @@ HEADER_ART = r"""
 
 
 class SimmateWorker:
+    """
+    The default worker that connect to Simmate database for workflows submitted
+    via the `run_cloud` method.
+    """
 
     # Ideally, this worker would involve multiple threads threads going. One
     # thread would update the queue database with a "heartbeat" to let it know
@@ -30,6 +34,9 @@ class SimmateWorker:
     # worker can run multiple workitems at once and in parallel.
     # However, if this level of implementation is needed, we should instead
     # switch to using Prefect, which has it built in.
+
+    # Consider making this a database object so that we can track workers in
+    # the UI and know how many are running.
 
     def __init__(
         self,
@@ -42,30 +49,46 @@ class SimmateWorker:
         waittime_on_empty_queue: float = 1,
         tags: list[str] = ["simmate"],  # should default be empty...?
     ):
-        # the tags to query tasks for. If no tags were given, the worker will
-        # query for tasks that have NO tags
+        """
+        Configures a worker that connects to the default executor backend.
+        By default the worker will run endlessly.
+
+        #### Parameters:
+
+        - `nitems_max`:
+            The maximum number of workitems to run before closing down
+            if no limit was set, we can go to infinity.
+
+        - `timeout`:
+            Don't start a new workitem after this time. The worker will be shut down.
+            if no timeout was set, use infinity so we wait forever.
+
+        - `close_on_empty_queue`:
+            whether to close if the queue is empty
+
+        - `waittime_on_empty_queue`:
+            if the queue is found to be empty, check the queue again after
+            this time sleeping.
+
+        - `tags`:
+            the tags to query tasks for. If no tags were given, the worker will
+            query for tasks that have NO tags
+
+        """
         self.tags = tags
-
-        # the maximum number of workitems to run before closing down
-        # if no limit was set, we can go to infinity!
         self.nitems_max = nitems_max or float("inf")
-
-        # Don't start a new workitem after this time. The worker will be shut down.
-        # if no timeout was set, use infinity so we wait forever.
         self.timeout = timeout or float("inf")
+        self.close_on_empty_queue = close_on_empty_queue
+        self.waittime_on_empty_queue = waittime_on_empty_queue
 
         # whether to wait on the running workitems to finish before shutting down
         # the timedout worker.
         # self.wait_on_timeout = wait_on_timeout # # TODO
 
-        # whether to close if the queue is empty
-        self.close_on_empty_queue = close_on_empty_queue
-        # if the queue is found to be empty, we will give it one last chance
-        # to fill. Check the queue again after this time sleeping and if it is
-        # still empty, close the worker.
-        self.waittime_on_empty_queue = waittime_on_empty_queue
-
     def start(self):
+        """
+        Starts the worker process to begin working through WorkItems
+        """
 
         # print the header in the console to let the user know the worker started
         logging.info("\n" + HEADER_ART)
@@ -232,7 +255,7 @@ class SimmateWorker:
             # Print out the job ID that was just finished for the user to see.
             logging.info("Completed WorkItem")
 
-    def queue_size(self):
+    def queue_size(self) -> int:
         """
         Return the approximate size of the queue.
         """
@@ -247,6 +270,14 @@ class SimmateWorker:
 
     @classmethod
     def run_singleflow_worker(cls):
+        """
+        A convenience method for running a worker that...
+        1. shuts down immediately if the queue is empty
+        2. shuts down after a single workflow run
+
+        Because this type of worker is frequently used for HPC clusters, we
+        make a convenience method for it.
+        """
         worker = cls(
             nitems_max=1,
             close_on_empty_queue=True,

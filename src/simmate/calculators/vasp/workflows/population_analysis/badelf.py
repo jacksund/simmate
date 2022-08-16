@@ -4,13 +4,13 @@ from pathlib import Path
 
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
-from simmate.toolkit import Structure
-from simmate.workflow_engine import Workflow
-from simmate.database.third_parties import MatprojStructure
+from simmate.calculators.bader.workflows import PopulationAnalysis__Bader__Badelf
 from simmate.calculators.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
-from simmate.calculators.bader.workflows import PopulationAnalysis__Bader__Badelf
+from simmate.database.third_parties import MatprojStructure
+from simmate.toolkit import Structure
+from simmate.workflow_engine import Workflow
 
 
 class PopulationAnalysis__Vasp__BadelfMatproj(Workflow):

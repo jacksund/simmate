@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.conftest import copy_test_files
-from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.error_handlers import Unconverged
+from simmate.calculators.vasp.inputs import Incar
+from simmate.conftest import copy_test_files
 
 
 def test_unconverged_electronic(tmp_path):

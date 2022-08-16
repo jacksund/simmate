@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
 from simmate.calculators.vasp.workflows.diffusion.neb_from_images_base import (
     VaspNebFromImagesWorkflow,
 )
+from simmate.calculators.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
 
 
 class Diffusion__Vasp__NebFromImagesMit(

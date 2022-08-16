@@ -2,10 +2,10 @@
 
 import pytest
 
-from simmate.conftest import copy_test_files, make_dummy_files
 from simmate.calculators.vasp.inputs import Potcar
-from simmate.calculators.vasp.workflows.base import VaspWorkflow
 from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
+from simmate.calculators.vasp.workflows.base import VaspWorkflow
+from simmate.conftest import copy_test_files, make_dummy_files
 
 
 class Testing__Vasp__Dummy(VaspWorkflow):

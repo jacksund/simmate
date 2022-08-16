@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from tqdm import tqdm
 import logging
-
-from simmate.toolkit import Structure as ToolkitStructure
-from simmate.database.base_data_types import DatabaseTable, table_column
-from simmate.utilities import get_chemical_subsystems
 
 # BUG: This prints a tqdm error so we silence it here.
 import warnings
 
+from tqdm import tqdm
+
+from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.toolkit import Structure as ToolkitStructure
+from simmate.utilities import get_chemical_subsystems
+
 with warnings.catch_warnings(record=True):
-    from pymatgen.analysis.phase_diagram import PDEntry
-    from pymatgen.analysis.phase_diagram import PhaseDiagram
+    from pymatgen.analysis.phase_diagram import PDEntry, PhaseDiagram
 
 
 class Thermodynamics(DatabaseTable):

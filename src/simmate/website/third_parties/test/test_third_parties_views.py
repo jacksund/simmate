@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from pytest_django.asserts import assertTemplateUsed
 from django.urls import reverse
+from pytest_django.asserts import assertTemplateUsed
 
 
 def test_providers_view(client):

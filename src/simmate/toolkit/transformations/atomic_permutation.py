@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from numpy.random import randint, choice
-
+from numpy.random import choice, randint
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
 from simmate.toolkit.transformations.base import Transformation

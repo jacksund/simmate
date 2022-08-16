@@ -5,7 +5,6 @@ from django.urls import include, path
 
 from simmate.website.core import views
 
-
 urlpatterns = [
     #
     # This is the path to the homepage (just simmate.org)

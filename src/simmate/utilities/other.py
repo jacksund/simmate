@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import sys
-import requests
 from pathlib import Path
-import logging
+
+import requests
 
 import simmate
 

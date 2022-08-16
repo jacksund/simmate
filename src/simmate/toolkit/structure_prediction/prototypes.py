@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
-
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.prototypes import FromAflowPrototypes
 
 
 def get_structures_from_prototypes(
     composition: Composition,
-) -> List[Structure]:
+) -> list[Structure]:
     """
     Generates a list of structures by using prototypes as template. This function
     is a simple wrapper around the functionality in

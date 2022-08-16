@@ -2,12 +2,16 @@
 
 from django_filters import rest_framework as filters
 
-from simmate.website.core_components.filters import Structure
 from simmate.database.base_data_types.nudged_elastic_band import (
     DiffusionAnalysis as DiffusionAnalysisTable,
+)
+from simmate.database.base_data_types.nudged_elastic_band import (
     MigrationHop as MigrationHopTable,
+)
+from simmate.database.base_data_types.nudged_elastic_band import (
     MigrationImage as MigrationImageTable,
 )
+from simmate.website.core_components.filters import Structure
 
 
 class DiffusionAnalysis(Structure):

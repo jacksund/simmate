@@ -16,8 +16,8 @@ convert to pymatgen.
 
 """
 
-from tqdm import tqdm
 from pymatgen.io.ase import AseAtomsAdaptor
+from tqdm import tqdm
 
 from simmate.database.third_parties.aflow import AflowStructure
 

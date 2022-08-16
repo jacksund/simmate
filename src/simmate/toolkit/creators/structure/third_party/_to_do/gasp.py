@@ -21,8 +21,8 @@ class GASPStructure:
 
         #!!! this is inside the init because not all users will have this installed!
         try:
-            from gasp.general import CompositionSpace, IDGenerator
             from gasp.development import Constraints
+            from gasp.general import CompositionSpace, IDGenerator
             from gasp.organism_creators import RandomOrganismCreator
         except ModuleNotFoundError:
             #!!! I should raise an error in the future

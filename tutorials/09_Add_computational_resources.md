@@ -47,7 +47,11 @@ simmate workflow-engine start-singleflow-worker
 simmate workflow-engine start-worker
 ```
 
-10. Scale out your cluster! Start workers anywhere you'd like, and start as many as you'd like. Just make sure you follow steps  4 and 5 for every worker.
+10. Scale out your cluster! Start workers anywhere you'd like, and start as many as you'd like. Just make sure you follow steps  4 and 5 for every worker. If you need to start many workers at once, you can use the `start-cluster` command as well.
+``` bash
+# starts 5 local workers
+simmate workflow-engine start-cluster 5
+```
 
 11. To control which workers run which workflows, use tags. Workers will only pick up submissions that have matching tags.
 ``` bash
@@ -178,6 +182,12 @@ simmate workflow-engine start-worker
 For example, if your team runs many mini workflows that are under 5 minutes, starting/stopping workers could be a pain (sometimes it can take simmate up to 10 seconds to set everything up). That's a significant overhead and wasted computation time. To overcome this, we would run a worker that shuts down after 10 workflows or if the queue is empty:
 ``` bash
 simmate workflow-engine start-worker --nitems_max 10 --close_on_empty_queue true
+```
+
+If you need to start many workers at once, you can use the `start-cluster` command as well.
+``` bash
+# starts 5 local workers
+simmate workflow-engine start-cluster 5
 ```
 
 </br>

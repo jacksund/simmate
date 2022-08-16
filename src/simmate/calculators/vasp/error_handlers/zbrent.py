@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
 import shutil
+from pathlib import Path
 
-from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
+from simmate.workflow_engine import ErrorHandler
 
 
 class Zbrent(ErrorHandler):

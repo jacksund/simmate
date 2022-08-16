@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.conftest import copy_test_files
 from simmate.calculators.vasp.workflows.electronic_structure.matproj_density_of_states import (
     ElectronicStructure__Vasp__MatprojDensityOfStates,
 )
+from simmate.conftest import copy_test_files
 
 
 def test_density_of_states_workup(tmp_path):

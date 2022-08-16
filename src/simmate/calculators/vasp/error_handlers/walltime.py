@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import os
-from pathlib import Path
-import time
 import datetime
-import subprocess
 import logging
+import os
+import subprocess
+import time
+from pathlib import Path
 
 import numpy
 from pymatgen.io.vasp.outputs import Outcar
 
-from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.error_handlers import Unconverged
+from simmate.workflow_engine import ErrorHandler
 
 
 class Walltime(ErrorHandler):

@@ -32,7 +32,7 @@ workflow = get_workflow("static-energy.vasp.matproj")
 
 ## Viewing input parameters
 
-A workflow's nput parameters can be analyzed in the following ways:
+A workflow's input parameters can be analyzed in the following ways:
 
 ``` python
 workflow.show_parameters()  # prints out info
@@ -44,11 +44,7 @@ workflow.parameter_names_required
 ## Running a workflow (local)
 
 To run a workflow locally (i.e. directly on your current computer), you can
-use the `run` method. This is returns a `State` object, which allows
-you to check if the run completed successfully or not. Then final output of your
-workflow run can be accessed using `state.result()`. You can read more about
-`State` objects [here](https://orion-docs.prefect.io/concepts/states/), but as
-a quick example:
+use the `run` method. As a quick example:
 
 ``` python
 state = workflow.run(
@@ -59,6 +55,15 @@ state = workflow.run(
 if state.is_completed():  # optional check
     result = state.result()
 ```
+
+Note that `run` returned a `State` object, not our result. States allows you to
+check if the run completed successfully or not. Then final output of your
+workflow run can be accessed using `state.result()`. The `State` is based off
+of Prefect's state object, which you can read more about 
+[here](https://orion-docs.prefect.io/concepts/states/). We use `State`s because 
+the status of a run becomes important when we start scheduling runs to run
+remotely, and more importantly, it allows use to building in compatibility with
+other workflow engines like Prefect.
 
 Outside of python, you can also run workflows from the command line, using YAML 
 files, or the website interface. These approaches are covered in the intro
@@ -121,13 +126,22 @@ entry = table.objects.get(run_id="example-123456")
 structure = entry.to_toolkit()
 ```
 
+You'll notice the table gives results for all runs of this type (e.g. all
+static-energies). To limit your results to just this specific workflow, you
+can use the `all_results` property:
+
+``` python
+results = workflow.all_results
+
+# the line above is a shortcut for...
+table = workflow.database_table
+results = workflow.database_table.objects.filter(workflow_name=workflow.name_full)
+```
+
 Filtering of results is covered in the `simmate.database` documentation.
 
 <!--
 TODO:
-    - viewing parameter names
-    - accessing results (database_table)
-    - run_cloud and other cloud methods
     - different documentation levels (parameters, mini docstring, etc.)
     - finding the same workflow in the website UI (place this )
 -->
@@ -154,7 +168,7 @@ Examples for each part would be:
     2. vasp, abinit, qe, deepmd, ...
     3. jacks-test, matproj, quality00, ...
 
-Together, an example workflow names would be:
+Together, example workflow names would be:
     - `relaxation.vasp.jacks-test`
     - `static-energy.abinit.matproj`
     - `dynamics.qe.quality00`
@@ -168,7 +182,7 @@ For example, our workflow names become:
     - `Dynamics__Qe__Quality00`
 
 NOTE: Capitalization is very important here so make sure you double check
-your workflow names.
+your workflow names. Hyphens are placed based on capital letters.
 
 Now let's test this out in python using a similar workflow name:
 ``` python
@@ -193,14 +207,11 @@ You now have a ready-to-use workflow name!
 
 ## Example workflow
 
-To convert this to a Simmate workflow, we just need to change the format
-a little. Instead of a `@flow` decorator, we use the `run_config` method
-of a new subclass:
+To build a Simmate workflow, you can have ANY python code you'd like. The only
+requirement is that you place that code inside a `run_config` method of a 
+new subclass for `Workflow`:
 
 ``` python
-# NOTE: this example does not follow Simmate's naming convention, so
-# some higher level features will be broken. We will fix in a later step.
-
 from simmate.workflow_engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
@@ -218,7 +229,7 @@ result = state.result()
 ```
 
 Behind the scenes, the `run` method is converting our `run_config` to a 
-workflow for us.
+workflow and doing extra setup tasks for us.
 
 Now let's look at a realistic example where we build a Workflow that has
 input parameters and accesses class attributes/methods:
@@ -263,6 +274,48 @@ Once you have your new workflow, you can run it as you would any other worfklow:
 ``` python
 state = Example__Python__MyFavoriteSettings.run("Jack")
 result = state.result()
+```
+
+## Default parameters and using kwargs
+
+You'll notice in the workflow above that we used `**kwargs` in each of our
+`run_config` methods -- and if you remove these, the workflow will fail. This
+is because simmate adds default parameters to the `run_config` that can be used
+by all workflows. These parameters are:
+
+- `run_id`: a unique id to help with tracking a calculation
+- `directory`: a unique foldername that the calculation will take place in
+- `compress_output`: whether to compress the directory to a zip file when we're done
+- `source`: where the input of this calculation came from (EXPERIMENTAL FEATURE)
+
+You can use any of these inputs to help with your workflow. Most commonly, you
+just use the `directory` input and just ignore the others by adding `**kwargs`.
+It is important to note that `directory` is given as a 
+[`pathlib.Path`](https://docs.python.org/3/library/pathlib.html) object.
+
+``` python
+from simmate.workflow_engine import Workflow
+
+class Example__Python__MyFavoriteSettings(Workflow):
+    
+    use_database = False  # we don't have a database table yet
+
+    @staticmethod
+    def run_config(directory, **kwargs):
+        
+        # We use the unique directory to write outputs!
+        # Recall that we have a pathlib.Path object.
+        output_file = directory / "my_output.txt"
+        
+        with output_file.open("w") as file:
+            file.write("Writing my output!")
+        
+        # If you don't like/know pathlib.Path, you can
+        # convert the directory name back to a string
+        output_filename = str(output_file)
+        
+        return "Done!"
+
 ```
 
 
@@ -401,19 +454,19 @@ Prefect now too.
 
 """
 
-import logging
-import json
-import cloudpickle
-import yaml
-import re
 import inspect
-from typing import List, Any
+import json
+import logging
+import re
 import uuid
 from pathlib import Path
 
+import cloudpickle
+import yaml
+
 import simmate
 from simmate.database.base_data_types import Calculation
-from simmate.utilities import get_directory, copy_directory, make_archive
+from simmate.utilities import copy_directory, get_directory, make_archive
 from simmate.workflow_engine.execution import SimmateExecutor, WorkItem
 
 
@@ -442,8 +495,6 @@ class Workflow:
     """
     An abstract base class for all Simmate workflows.
     """
-
-    # TODO: set storage attribute to module
 
     version: str = simmate.__version__
     """
@@ -483,33 +534,65 @@ class Workflow:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def run_config(cls, **kwargs):
+    def run(cls, **kwargs) -> DummyState:
         """
-        The workflow method, which can be overwritten when inheriting from this
-        class. This can be either a staticmethod or classmethod.
+        The highest-level method to run a workflow. This includes calling
+        `run_config` and all of the extra steps involved (such as registering
+        a calculation to the database and creating the working directory).
+
+        For advanced users, we recommend reading through the `_run_full` method
+        to see the full workflow logic.
         """
-        raise NotImplementedError(
-            "When creating a custom workflow, make sure you set a run_config method!"
-        )
+        # Note: this is a separate method and wrapper around run_full because
+        # we want to allow Prefect executor to overwrite this method.
+        result = cls._run_full(**kwargs)
+        state = DummyState(result)
+        return state
 
     @classmethod
     def _run_full(
         cls,
         run_id: str = None,
-        directory: Path = None,
+        directory: Path | str = None,
         compress_output: bool = False,
         source: dict = None,
         **kwargs,
     ):
         """
-        This method should not be called directly. Use the `run` method instead.
+
+        The full logic for a workflow run. This deserialize input parameters,
+        register the calculation to the database, call the defined
+        `run_config` command, and save results to the database.
+
+        This method should not be called directly. Use the `run` method instead,
+        which will properly convert to a `Prefect` workflow (if necessary) and
+        return a State-like object.
 
         #### Parameters
+
+        - `run_id`:
+            A unique id that is assigned to the workflow run. If an ID was not
+            provided, a randomly-generated id from
+            [UUID4](https://docs.python.org/3/library/uuid.html#uuid.uuid4)
+            is used. We recommend leaving this at default.
+
+         - `directory`:
+             The directory to run everything in. This is passed to the ulitities
+             function simmate.ulitities.get_directory, which generates a
+             unique foldername if not provided. This will be converted into
+             a `pathlib.Path` object.
 
         - `compress_output`:
             Whether to compress the directory to a zip file at the end of the
             task run. After compression, it will also delete the directory.
             The default is False.
+
+        - `source`: (EXPERIMENTAL FEATURE)
+            The source is JSON-like information that indicates where the
+            input for this calculation came from, which could be a number
+            of things including (another calculation, a simple comment, etc.).
+            This is useful if you want to label results in your database.
+
         """
         # This method is isolated only because we want to wrap it as a prefect
         # workflow in some cases.
@@ -537,33 +620,27 @@ class Workflow:
         logging.info(f"Completed {cls.name_full}")
         return result
 
-    @staticmethod
-    def _get_run_id():
-        """
-        generates a random id to use as a workflow run id
-        """
-        # This is a separate method in order to allow the prefect executor to
-        # overwrite this method.
-        unique_id = str(uuid.uuid4())
-        return unique_id
-
-    @classmethod
-    def run(cls, **kwargs) -> DummyState:
-        """
-        runs the workflow locally
-        """
-        # Note: this is a separate method and wrapper around run_full because
-        # we want to allow Prefect executor to overwrite this method.
-        result = cls._run_full(**kwargs)
-        state = DummyState(result)
-        return state
-
     @classmethod
     def run_cloud(
-        cls, return_state: bool = True, tags: list[str] = None, **kwargs
-    ) -> str:
+        cls,
+        return_state: bool = True,
+        tags: list[str] = None,
+        **kwargs,
+    ):
         """
-        submits the workflow run to cloud database to be ran by a worker
+        Submits the workflow run to cloud database to be ran by a worker.
+
+        #### Parameters
+
+        - `return_state`:
+            Whether to return a State-like object or just the run_id. Defaults
+            to true, which returns a State.
+
+        - `tags`:
+            A list of flags/labels/tags that the workflow run should be scheduled
+            with. This helps with limiting which workers are allow to pickup
+            and run the workflow. Defaults to the `tags` property of the
+            workflow.
         """
 
         logging.info(f"Submitting new run of {cls.name_full} to cloud")
@@ -602,6 +679,16 @@ class Workflow:
 
         return run_id
 
+    @classmethod
+    def run_config(cls, **kwargs) -> any:
+        """
+        The workflow method, which can be overwritten when inheriting from this
+        class. This can be either a `staticmethod` or `classmethod`.
+        """
+        raise NotImplementedError(
+            "When creating a custom workflow, make sure you set a run_config method!"
+        )
+
     # -------------------------------------------------------------------------
     # Methods that interact with the Executor class in order to see what
     # has been submitted to cloud.
@@ -614,7 +701,10 @@ class Workflow:
         Queries the Simmate database to see how many workflows are in a
         running or pending state.
         """
-        return WorkItem.objects.filter(status__in=["P", "R"], tags=cls.tags).count()
+        return WorkItem.objects.filter(
+            status__in=["P", "R"],
+            tags=cls.tags,
+        ).count()
 
     # -------------------------------------------------------------------------
     # Methods that help with accessing the database and saving results
@@ -676,11 +766,11 @@ class Workflow:
             raise NotImplementedError("Unable to detect proper database table")
 
     @classmethod
-    def all_results(cls):
+    def all_results(cls):  # -> SearchResults
         return cls.database_table.objects.filter(workflow_name=cls.name_full)
 
     @classmethod
-    def _save_to_database(cls, result, run_id):
+    def _save_to_database(cls, result: any, run_id: str):
 
         # split our results and corrections (which are given as a dict) into
         # separate variables
@@ -782,7 +872,7 @@ class Workflow:
 
     @classmethod
     @property
-    def parameter_names(cls) -> List[str]:
+    def parameter_names(cls) -> list[str]:
         """
         Gives a list of all the parameter names for this workflow.
         """
@@ -799,7 +889,7 @@ class Workflow:
 
     @classmethod
     @property
-    def parameter_names_required(cls) -> List[str]:
+    def parameter_names_required(cls) -> list[str]:
         """
         Gives a list of all the required parameter names for this workflow.
         """
@@ -854,7 +944,7 @@ class Workflow:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_input_and_register(cls, **parameters: Any) -> dict:
+    def _load_input_and_register(cls, **parameters: any) -> dict:
         """
         How the input was submitted as a parameter depends on if we are submitting
         to Prefect Cloud, running the flow locally, or even continuing from a
@@ -1049,9 +1139,21 @@ class Workflow:
         # to be used by the workflow
         return parameters_cleaned
 
+    @staticmethod
+    def _get_run_id():
+        """
+        Generates a random id to use as a workflow run id.
+
+        This is called automatically within `_load_input_and_register`
+        """
+        # This is a separate method in order to allow the prefect executor to
+        # overwrite this method.
+        unique_id = str(uuid.uuid4())
+        return unique_id
+
     @classmethod
     @property
-    def _parameters_to_register(cls) -> List[str]:
+    def _parameters_to_register(cls) -> list[str]:
         """
         A list of input parameters that should be used to register the calculation.
         """
@@ -1153,6 +1255,10 @@ class Workflow:
 
         return calculation
 
+    # -------------------------------------------------------------------------
+    # Methods that hanlde serialization and deserialization of input parameters.
+    # -------------------------------------------------------------------------
+
     @classmethod
     def _serialize_parameters(cls, **parameters) -> dict:
         """
@@ -1225,7 +1331,7 @@ class Workflow:
         converts all parameters to appropriate python objects
         """
 
-        from simmate.toolkit import Structure, Composition
+        from simmate.toolkit import Composition, Structure
         from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 
         parameters_cleaned = parameters.copy()

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import yaml
 from pathlib import Path
 
-from simmate.workflow_engine import Workflow
+import yaml
+
 from simmate.utilities import copy_directory
+from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 

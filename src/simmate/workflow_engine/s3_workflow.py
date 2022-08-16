@@ -171,28 +171,18 @@ into one class, we make things much easier for users and creating new Tasks.
 
 """
 
+import logging
 import os
 import platform
-import time
 import signal
 import subprocess
-from typing import List, Tuple
+import time
 from pathlib import Path
-import logging
 
 import pandas
 
-from simmate.workflow_engine import Workflow, ErrorHandler
 from simmate.utilities import get_directory, make_error_archive
-
-# cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
-# reset the working directory between task retries -- in some cases we may
-# want to delete the entire directory.
-
-# OPTIMIZE: I think this class would greatly benefit from asyncio so that we
-# know exactly when a shelltask completes, rather than looping and checking every
-# set timestep.
-# https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
+from simmate.workflow_engine import ErrorHandler, Workflow
 
 
 class S3Workflow(Workflow):
@@ -216,7 +206,7 @@ class S3Workflow(Workflow):
     and before `execute` is called. By default, no input files are required.
     """
 
-    error_handlers: List[ErrorHandler] = []
+    error_handlers: list[ErrorHandler] = []
     """
     A list of ErrorHandler objects to use in order of priority (that is, highest
     priority is first). If one handler is triggered, the correction will be 
@@ -255,6 +245,15 @@ class S3Workflow(Workflow):
     default values of polling_timestep=10 and monitor_freq=30 indicate that
     we run monitoring functions every 5 minutes (10x30=300s=5min).
     """
+
+    # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
+    # reset the working directory between task retries -- in some cases we may
+    # want to delete the entire directory.
+
+    # OPTIMIZE: I think this class would greatly benefit from asyncio so that we
+    # know exactly when a shelltask completes, rather than looping and checking every
+    # set timestep.
+    # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
 
     @classmethod
     def run_config(
@@ -452,7 +451,7 @@ class S3Workflow(Workflow):
         return True  # indicates all files are present
 
     @classmethod
-    def execute(cls, directory: Path, command: str) -> List[Tuple[str]]:
+    def execute(cls, directory: Path, command: str) -> list[tuple[str]]:
         """
         This calls the command within the target directory and handles all error
         handling as well as monitoring of the job.

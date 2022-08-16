@@ -12,8 +12,9 @@ These benchmarks have not been added yet due to extra setup required:
     - a workflow written in FireWorks and ran through a MongoDB Cloud + local Worker
 """
 
-import pandas
 from timeit import default_timer as time
+
+import pandas
 
 # the number of dummy tasks to run in serial and number of total trials
 ntasks_range = range(1, 16, 2)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# import pickle
-import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 import logging
+
+import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 
 from simmate.workflow_engine.execution.database import WorkItem
 from simmate.workflow_engine.execution.future import SimmateFuture
@@ -34,7 +34,12 @@ class SimmateExecutor:
     # from concurrent.futures import Executor # No need to inherit at the moment
 
     @staticmethod
-    def submit(fxn, *args, tags=[], **kwargs):
+    def submit(
+        fxn: callable,
+        *args,
+        tags: list[str] = [],
+        **kwargs,
+    ) -> SimmateFuture:
 
         # The *args and **kwargs input separates args into a tuple and kwargs into
         # a dictionary for me, which makes their storage very easy!
@@ -60,7 +65,7 @@ class SimmateExecutor:
         return future
 
     @staticmethod
-    def wait(futures):
+    def wait(futures: SimmateFuture):
         """
         Waits for all futures to complete before returning a list of their results
         """
@@ -90,7 +95,7 @@ class SimmateExecutor:
     # -------------------------------------------------------------------------
 
     @staticmethod
-    def queue_size():
+    def queue_size() -> int:
         """
         Return the approximate size of the queue.
         """
@@ -102,7 +107,7 @@ class SimmateExecutor:
         return queue_size
 
     @staticmethod
-    def clear_queue(are_you_sure=False):
+    def clear_queue(are_you_sure: bool = False):
         """
         Empties the WorkItem database table and delete everything. This will
         not stop the workers if they are in the middle of a job though.
@@ -117,7 +122,7 @@ class SimmateExecutor:
             WorkItem.objects.all().delete()
 
     @staticmethod
-    def clear_finished(self, are_you_sure=False):
+    def clear_finished(self, are_you_sure: bool = False):
         """
         Empties the WorkItem database table and delete everything. This will
         not stop the workers if they are in the middle of a job though.

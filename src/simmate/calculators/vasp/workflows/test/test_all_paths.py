@@ -2,12 +2,13 @@
 
 import pytest
 
-from simmate.conftest import copy_test_files
-from simmate.workflow_engine import S3Workflow
 from simmate.calculators.vasp.inputs import Potcar
 from simmate.calculators.vasp.workflows.diffusion.all import (
     Diffusion__Vasp__NebAllPathsMit,
 )
+from simmate.conftest import copy_test_files
+from simmate.workflow_engine import S3Workflow
+
 
 # @pytest.mark.prefect_db
 @pytest.mark.slow

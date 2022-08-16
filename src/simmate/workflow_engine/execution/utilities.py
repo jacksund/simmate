@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import subprocess
 from pathlib import Path
 from tempfile import mkdtemp
-import logging
 
 
 def start_cluster(
     nworkers: int,
-    worker_command="simmate workflow-engine start-worker",
+    worker_command: str = "simmate workflow-engine start-worker",
 ):
 
     cluster_directory = mkdtemp(prefix="simmate-cluster-", dir=Path.cwd())

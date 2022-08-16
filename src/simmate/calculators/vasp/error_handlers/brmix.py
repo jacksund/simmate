@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
 import json
+from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Outcar
 
-from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
+from simmate.workflow_engine import ErrorHandler
 
 
 class Brmix(ErrorHandler):

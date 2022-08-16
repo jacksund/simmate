@@ -177,9 +177,7 @@ def run_cluster(
         elif key == "walltime_per_job":
             agent_kwargs["walltime"] = agent_kwargs.pop(key)
 
-    from simmate.configuration.prefect.setup_resources import (
-        run_cluster_and_agent,
-    )
+    from simmate.configuration.prefect.setup_resources import run_cluster_and_agent
 
     run_cluster_and_agent(**agent_kwargs)
 

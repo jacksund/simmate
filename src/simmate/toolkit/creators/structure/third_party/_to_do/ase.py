@@ -14,12 +14,11 @@ class ASEStructure:
 
         # we can assume the user has ASE installed because it is a dependency of PyMatgen
         #!!! it looks like the ase.ga module is actively changing so version may introduce errors
-        from ase.ga.startgenerator import StartGenerator
-        from ase.ga.utilities import closest_distances_generator
-
         # the slab variable is there to specify dimensionality. The code really just uses the pbc setting
         #!!! I need to doublecheck this
         from ase import Atoms
+        from ase.ga.startgenerator import StartGenerator
+        from ase.ga.utilities import closest_distances_generator
 
         slab = Atoms(
             pbc=True

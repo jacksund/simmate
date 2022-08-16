@@ -18,8 +18,9 @@ def run_server():
     django runserver --settings=simmate.configuration.django.settings
     """
 
-    from simmate.database import connect
     from django.core.management import call_command
+
+    from simmate.database import connect
 
     call_command("runserver")
 

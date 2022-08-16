@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from pymatgen.electronic_structure.plotter import BSPlotter
 from pymatgen.io.vasp.inputs import Kpoints
 from pymatgen.symmetry.bandstructure import HighSymmKpath
-from pymatgen.electronic_structure.plotter import BSPlotter
 
 from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
 from simmate.calculators.vasp.workflows.static_energy.matproj import (

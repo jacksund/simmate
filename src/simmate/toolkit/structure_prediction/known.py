@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
-
-from simmate.toolkit import Composition, Structure
 from simmate.database import connect
 from simmate.database.third_parties import (
     AflowStructure,
@@ -11,12 +8,13 @@ from simmate.database.third_parties import (
     MatprojStructure,
     OqmdStructure,
 )
+from simmate.toolkit import Composition, Structure
 
 
 def get_known_structures(
     composition: Composition,
     strict_nsites: bool = False,
-) -> List[Structure]:
+) -> list[Structure]:
     """
     Goes through all database tables in the `simmate.database.third_parties`
     module and grabs all structures with a matching composition.

@@ -3,10 +3,9 @@
 import math
 from pathlib import Path
 
-from plotly.subplots import make_subplots
 import plotly.graph_objects as plotly_go
+from plotly.subplots import make_subplots
 
-from simmate.workflow_engine import Workflow
 from simmate.calculators.vasp.workflows.relaxation.quality00 import (
     Relaxation__Vasp__Quality00,
 )
@@ -25,6 +24,7 @@ from simmate.calculators.vasp.workflows.relaxation.quality04 import (
 from simmate.calculators.vasp.workflows.static_energy.quality04 import (
     StaticEnergy__Vasp__Quality04,
 )
+from simmate.workflow_engine import Workflow
 
 # from simmate.calculators.vasp.database.relaxation import StagedRelaxation
 

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 import pathlib
 
 import click
@@ -13,7 +12,7 @@ def workflows():
     pass
 
 
-def list_options(options: List) -> int:
+def list_options(options: list) -> int:
     """
     This is a utility for click (cli) that prints of list of items as a numbered
     list. It prompts users to select an option from the list.
@@ -111,9 +110,9 @@ def explore():
 
     click.echo("\nGathering all available workflows...")
     from simmate.workflows.utilities import (
-        get_workflow_types,
         get_list_of_workflows_by_type,
         get_workflow,
+        get_workflow_types,
     )
 
     click.echo("\n\nWhat type of analysis are you interested in?")

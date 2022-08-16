@@ -16,8 +16,8 @@ present in Custodian for commands that spawn multiple processes/threads.
 """
 
 from pathlib import Path
-from timeit import default_timer as time
 from subprocess import Popen
+from timeit import default_timer as time
 
 import pandas
 
@@ -51,7 +51,7 @@ base_times = run_trials(run_popen, ntrials)
 
 # a task written with Simmate and 3 dummy error handlers
 
-from simmate.workflow_engine import S3Task, ErrorHandler
+from simmate.workflow_engine import ErrorHandler, S3Task
 
 
 class AlwaysPassesHandler(ErrorHandler):
@@ -88,7 +88,7 @@ simmate_times = run_trials(task.run, ntrials, kwargs={"directory": "."})
 
 # a task written with Custodian and 3 dummy error handlers
 
-from custodian.custodian import Custodian, Job, ErrorHandler
+from custodian.custodian import Custodian, ErrorHandler, Job
 
 
 class AlwaysPassesHandler(ErrorHandler):

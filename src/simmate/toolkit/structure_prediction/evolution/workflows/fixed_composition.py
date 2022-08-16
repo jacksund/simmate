@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import time
-from typing import Union
 import logging
+import time
 
+from simmate.database.workflow_results import EvolutionarySearch as SearchDatatable
 from simmate.toolkit import Composition
 from simmate.workflow_engine import Workflow
-from simmate.database.workflow_results import EvolutionarySearch as SearchDatatable
 
 # TODO
 # StructurePrediction__Python__VariableTernaryComposition
@@ -28,8 +27,8 @@ class StructurePrediction__Python__FixedComposition(Workflow):
     @classmethod
     def run_config(
         cls,
-        composition: Union[str, Composition],
-        subworkflow_name: Union[str, Workflow] = "relaxation.vasp.staged",
+        composition: str | Composition,
+        subworkflow_name: str | Workflow = "relaxation.vasp.staged",
         subworkflow_kwargs: dict = {},
         fitness_field: str = "energy_per_atom",
         max_structures: int = 3000,

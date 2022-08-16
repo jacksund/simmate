@@ -2,17 +2,17 @@
 
 from pathlib import Path
 
-from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.electronic_structure.bandstructure import (
     BandStructureSymmLine as ToolkitBandStructure,
 )
 from pymatgen.electronic_structure.plotter import BSPlotter
+from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.database.base_data_types import (
-    table_column,
-    DatabaseTable,
     Calculation,
+    DatabaseTable,
     Structure,
+    table_column,
 )
 
 

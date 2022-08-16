@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+# The order that we import these different modules is important to prevent
+# circular imports errors, so we prevent isort from changing this file.
+# isort: skip_file
+
 from simmate.utilities import get_doc_from_readme
 
 __doc__ = get_doc_from_readme(__file__)

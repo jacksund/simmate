@@ -14,10 +14,10 @@ For more information and advanced guides, be sure to read through our
 """
 
 from simmate.database.base_data_types import (
-    DatabaseTable,
-    table_column,
-    Structure,
     Calculation,
+    DatabaseTable,
+    Structure,
+    table_column,
 )
 
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import DatabaseTable, table_column
-
 from pymatgen.symmetry.groups import SpaceGroup as PymatgenSpacegroup
+
+from simmate.database.base_data_types import DatabaseTable, table_column
 
 # NOTE: This class is *not* meant to store data about each spacegroup, but instead
 # is just to help with querying Structures. If you want all spacegroup data

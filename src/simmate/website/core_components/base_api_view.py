@@ -2,14 +2,13 @@
 
 from django.http import HttpRequest
 
-from rest_framework.viewsets import GenericViewSet
-
 # from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
+from rest_framework.viewsets import GenericViewSet
 
-from simmate.website.core_components.filters import DatabaseTableFilter
 from simmate.database.base_data_types import DatabaseTable
+from simmate.website.core_components.filters import DatabaseTableFilter
 
 
 class SimmateAPIViewSet(GenericViewSet):

@@ -4,9 +4,9 @@ import itertools
 
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.toolkit import Composition, Structure
 from simmate.database import connect
 from simmate.database.third_parties import AflowPrototype
+from simmate.toolkit import Composition, Structure
 
 
 class FromAflowPrototypes:

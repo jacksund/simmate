@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import numpy
+from pymatgen.core.lattice import Lattice  # BUG -- this is only for a bug-fix
 
 from simmate.toolkit import Structure
-
-from pymatgen.core.lattice import Lattice  # BUG -- this is only for a bug-fix
 
 
 class Poscar:

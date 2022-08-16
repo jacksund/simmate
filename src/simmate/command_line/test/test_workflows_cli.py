@@ -3,11 +3,10 @@
 import yaml
 
 from simmate.calculators.vasp.inputs import Potcar
-from simmate.workflow_engine import Workflow
-from simmate.workflow_engine.workflow import DummyState
-
 from simmate.command_line.workflows import workflows
 from simmate.conftest import make_dummy_files
+from simmate.workflow_engine import Workflow
+from simmate.workflow_engine.workflow import DummyState
 
 
 def test_workflows_list_all(command_line_runner):

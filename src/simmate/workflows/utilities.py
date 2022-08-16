@@ -6,13 +6,13 @@ functions for grabbing all available workflows as well as dynamically loading
 a workflow using its name.
 """
 
-import yaml
-import shutil
+import logging
 import pkgutil
-from typing import List, Union
+import shutil
 from importlib import import_module
 from pathlib import Path
-import logging
+
+import yaml
 
 from simmate import workflows
 from simmate.utilities import get_directory, make_archive
@@ -42,7 +42,7 @@ def get_workflow_types():
 def get_list_of_workflows_by_type(
     flow_type: str,
     full_name: bool = True,
-) -> List[str]:
+) -> list[str]:
     """
     Returns a list of all the workflows located in the given module.
     """
@@ -82,7 +82,7 @@ def get_list_of_workflows_by_type(
     return workflow_names
 
 
-def get_list_of_all_workflows() -> List[str]:
+def get_list_of_all_workflows() -> list[str]:
     """
     Returns a list of all the workflows of all types.
 
@@ -192,7 +192,7 @@ def get_workflow(
     return workflow
 
 
-def load_results_from_directories(base_directory: Union[str, Path] = "."):
+def load_results_from_directories(base_directory: Path | str = "."):
     """
     Goes through a given directory and finds all "simmate-task-" folders and zip
     archives present. The simmate_metadata.yaml file is used in each of these
@@ -269,7 +269,7 @@ def load_results_from_directories(base_directory: Union[str, Path] = "."):
             logging.warning("Failed to load into database")
 
 
-def get_unique_parameters() -> List[str]:
+def get_unique_parameters() -> list[str]:
     """
     Returns a list of all unique parameter names accross all workflows.
 

@@ -74,8 +74,9 @@ pytest
 
 5. Make sure you saved all file changes in Spyder.
 
-6. Simmate requires code to be nicely formatted and readable. To do this, we use the [`black`](https://github.com/psf/black) formatter. Make sure you are in the `~/Documents/github/simmate` directory when you run this command:
+6. Simmate requires code to be nicely formatted and readable. To do this, we use the [`black`](https://github.com/psf/black) formatter and [isort](https://pycqa.github.io/isort/docs/configuration/github_action.html) for organzing imports. Make sure you are in the `~/Documents/github/simmate` directory when you run these two commands:
 ``` shell
+isort .
 black .
 ```
 

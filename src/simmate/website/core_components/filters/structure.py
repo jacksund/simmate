@@ -2,8 +2,8 @@
 
 from django_filters import rest_framework as filters
 
-from simmate.utilities import get_chemical_subsystems
 from simmate.database.base_data_types import Structure as StructureTable
+from simmate.utilities import get_chemical_subsystems
 
 
 class Structure(filters.FilterSet):

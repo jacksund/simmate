@@ -57,9 +57,10 @@ class MigrationHop(PymatgenMigrationHop):
         """
 
         # Imports are done locally to keep this class modular.
+        from django.utils.module_loading import import_string
+
         from simmate.database import connect
         from simmate.website.workflows import models as all_datatables
-        from django.utils.module_loading import import_string
 
         datatable_str = migration_hop["migration_hop_table"]
 

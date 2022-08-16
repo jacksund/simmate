@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
 import logging
+from pathlib import Path
 
 import pandas
 import plotly.graph_objects as plotly_go
 
+from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.toolkit import Composition
-from simmate.database.base_data_types import table_column, DatabaseTable
-from simmate.utilities import get_directory
 from simmate.toolkit.structure_prediction.evolution.database import StructureSource
+from simmate.utilities import get_directory
 from simmate.workflow_engine.execution import WorkItem
 
 
@@ -590,11 +590,12 @@ class EvolutionarySearch(DatabaseTable):
         # OPTIMIZE: There should be a convience method to make this featurizer
         # since I use it so much
         import numpy
-        from simmate.toolkit import Composition
         from matminer.featurizers.site import CrystalNNFingerprint
-        from matminer.featurizers.structure.sites import (
-            SiteStatsFingerprint,  # PartialsSiteStatsFingerprint,
+        from matminer.featurizers.structure.sites import (  # PartialsSiteStatsFingerprint,
+            SiteStatsFingerprint,
         )
+
+        from simmate.toolkit import Composition
 
         sitefingerprint_method = CrystalNNFingerprint.from_preset(
             "ops", distance_cutoffs=None, x_diff_weight=3

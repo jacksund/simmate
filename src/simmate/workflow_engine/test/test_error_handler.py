@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from pathlib import Path
+
 import pytest
+
 from simmate.workflow_engine.error_handler import ErrorHandler
 
 

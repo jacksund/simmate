@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import urllib
-import shutil
 import logging
+import shutil
+import urllib
 
-from simmate.utilities import get_directory
 from simmate.configuration.django.settings import DATABASES, SIMMATE_DIRECTORY
+from simmate.database.third_parties import AflowPrototype  # AflowStructure,
 from simmate.database.third_parties import (
-    # AflowStructure,
-    AflowPrototype,
     CodStructure,
     JarvisStructure,
     MatprojStructure,
     OqmdStructure,
 )
+from simmate.utilities import get_directory
 
 
 def load_remote_archives(**kwargs):

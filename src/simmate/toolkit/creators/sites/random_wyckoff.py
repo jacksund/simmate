@@ -2,16 +2,16 @@
 
 import logging
 
-from numpy.random import randint, choice
+from numpy.random import choice, randint
 from tqdm import tqdm
 
 from simmate.toolkit import Composition
+from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 from simmate.toolkit.symmetry.wyckoff import (
+    findValidWyckoffCombos,
     loadAsymmetricUnitData,
     loadWyckoffData,
-    findValidWyckoffCombos,
 )
-from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 
 
 class RandomWySites:

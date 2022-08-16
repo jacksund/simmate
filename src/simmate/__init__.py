@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import importlib.metadata
-
+import logging
 
 __version__ = importlib.metadata.version("simmate")
 
 # Some of these utilities use the __version__ above, so this import must come after
-from simmate.utilities import get_doc_from_readme, check_if_using_latest_version
+from simmate.utilities import check_if_using_latest_version, get_doc_from_readme
 
 __doc__ = get_doc_from_readme(__file__)
 

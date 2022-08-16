@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-
 from pandas import DataFrame
 
-from simmate.toolkit import Structure
 from simmate.database.base_data_types import StaticEnergy
+from simmate.toolkit import Structure
 
 
 @pytest.mark.django_db

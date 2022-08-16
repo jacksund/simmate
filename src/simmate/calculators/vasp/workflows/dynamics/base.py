@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-from simmate.toolkit import Structure
+from simmate.calculators.vasp.inputs import Incar, Kpoints, Poscar, Potcar
 from simmate.calculators.vasp.workflows.base import VaspWorkflow
-from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
+from simmate.toolkit import Structure
 
 
 class DynamicsWorkflow(VaspWorkflow):

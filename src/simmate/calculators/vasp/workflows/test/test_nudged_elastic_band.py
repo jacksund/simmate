@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from simmate.conftest import copy_test_files, make_dummy_files
-
-from simmate.toolkit.diffusion import MigrationImages
-
 from simmate.calculators.vasp.inputs import Potcar
-from simmate.calculators.vasp.workflows.diffusion.neb_from_images_mit import (
-    Diffusion__Vasp__NebFromImagesMit,
-)
 from simmate.calculators.vasp.inputs.potcar_mappings import (
     PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
 )
+from simmate.calculators.vasp.workflows.diffusion.neb_from_images_mit import (
+    Diffusion__Vasp__NebFromImagesMit,
+)
+from simmate.conftest import copy_test_files, make_dummy_files
+from simmate.toolkit.diffusion import MigrationImages
 
 
 def test_neb_setup(sample_structures, tmp_path, mocker):

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import table_column, Calculation
-
-from typing import List
+from simmate.database.base_data_types import Calculation, table_column
 
 
 class NestedCalculation(Calculation):
@@ -36,7 +34,7 @@ class NestedCalculation(Calculation):
     def create_subclass_from_calcs(
         cls,
         name: str,
-        child_database_tables: List[Calculation],
+        child_database_tables: list[Calculation],
         module: str,
         **extra_columns,
     ):

@@ -1,48 +1,43 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-
-from simmate.conftest import make_dummy_files
-from simmate.calculators.vasp.inputs import Incar, Potcar
-from simmate.toolkit.diffusion import MigrationImages
-
+from pymatgen.analysis.diffusion.neb.io import MVLCINEBEndPointSet, MVLCINEBSet
+from pymatgen.io.vasp.sets import MITNEBSet  # MVLNPTMDSet,
 from pymatgen.io.vasp.sets import (
-    MPRelaxSet,
-    MITRelaxSet,
-    MPStaticSet,
     MITMDSet,
-    MPMDSet,
-    MPHSERelaxSet,
+    MITRelaxSet,
     MPHSEBSSet,
-    MPNonSCFSet,
+    MPHSERelaxSet,
+    MPMDSet,
     MPMetalRelaxSet,
+    MPNMRSet,
+    MPNonSCFSet,
+    MPRelaxSet,
     MPScanRelaxSet,
     MPScanStaticSet,
-    MPNMRSet,
+    MPStaticSet,
     MVLElasticSet,
     MVLGBSet,
-    MITNEBSet,
-    # MVLNPTMDSet,
 )
-from pymatgen.analysis.diffusion.neb.io import MVLCINEBSet, MVLCINEBEndPointSet
 
-from simmate.calculators.vasp.workflows.all import (
+from simmate.calculators.vasp.inputs import Incar, Potcar
+from simmate.calculators.vasp.workflows.all import (  # Dynamics__Vasp__MvlNpt,
     Diffusion__Vasp__NebFromImagesMit,
     Diffusion__Vasp__NebFromImagesMvlCi,
-    StaticEnergy__Vasp__Matproj,
-    StaticEnergy__Vasp__MatprojScan,
+    Dynamics__Vasp__Matproj,
+    Dynamics__Vasp__Mit,
     Relaxation__Vasp__Matproj,
     Relaxation__Vasp__MatprojHse,
-    Relaxation__Vasp__MatprojScan,
     Relaxation__Vasp__MatprojMetal,
+    Relaxation__Vasp__MatprojScan,
     Relaxation__Vasp__Mit,
     Relaxation__Vasp__MvlGrainboundary,
-    Relaxation__Vasp__MvlSlab,
     Relaxation__Vasp__MvlNebEndpoint,
-    Dynamics__Vasp__Mit,
-    Dynamics__Vasp__Matproj,
-    # Dynamics__Vasp__MvlNpt,
+    Relaxation__Vasp__MvlSlab,
+    StaticEnergy__Vasp__Matproj,
+    StaticEnergy__Vasp__MatprojScan,
 )
+from simmate.calculators.vasp.workflows.elastic.mvl import Elastic__Vasp__Mvl
 
 # extras that are hidden from the all endpoint
 # NOTE: these imports are long/ugly because we hide the imports from users --
@@ -63,7 +58,8 @@ from simmate.calculators.vasp.workflows.nuclear_magnetic_resonance.all import (
     Nmr__Vasp__MatprojChemicalShifts,
     Nmr__Vasp__MatprojFieldGradient,
 )
-from simmate.calculators.vasp.workflows.elastic.mvl import Elastic__Vasp__Mvl
+from simmate.conftest import make_dummy_files
+from simmate.toolkit.diffusion import MigrationImages
 
 MD_KWARGS = {
     "start_temp": 300,

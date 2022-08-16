@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.conftest import copy_test_files, make_dummy_files
-from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.error_handlers import Brmix
+from simmate.calculators.vasp.inputs import Incar
+from simmate.conftest import copy_test_files, make_dummy_files
 
 
 def test_brmix(tmp_path):

@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-from typing import List
 import logging
 
-from pymatgen.core import Species
 from pymatgen.analysis.structure_prediction.substitutor import Substitutor
+from pymatgen.core import Species
 
 from simmate.toolkit import Composition, Structure
+
 from .known import get_known_structures
 
 
 def get_structures_from_substitution_of_known(
     composition: Composition,
     **kwargs,  # passed to get_known_structures
-) -> List[Structure]:
+) -> list[Structure]:
     """
     Predicts the most likely element substitutions for a composition, and then
     based off the predictions, it will go through all database tables in the

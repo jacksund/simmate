@@ -14,8 +14,8 @@ spacegroup 166, I can see:
 """
 
 
-from selenium import webdriver
 import pandas as pd
+from selenium import webdriver
 from tqdm import tqdm
 
 # launch the webbrowser

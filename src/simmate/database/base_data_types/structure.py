@@ -2,12 +2,8 @@
 
 from scipy.constants import Avogadro
 
+from simmate.database.base_data_types import DatabaseTable, Spacegroup, table_column
 from simmate.toolkit import Structure as ToolkitStructure
-from simmate.database.base_data_types import (
-    DatabaseTable,
-    table_column,
-    Spacegroup,
-)
 
 
 class Structure(DatabaseTable):

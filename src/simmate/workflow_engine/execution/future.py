@@ -17,13 +17,13 @@ class SimmateFuture:
     # locking rows is done by...
     # https://docs.djangoproject.com/en/3.1/ref/models/querysets/#select-for-update
 
-    def __init__(self, pk):
+    def __init__(self, pk: int):
 
         # This is the WorkItem personal key which tells us which row in the table
         # we should loook at.
         self.pk = pk
 
-    def cancel(self):
+    def cancel(self) -> bool:
         """
         Attempt to cancel the call. If the call is currently being executed or
         finished running and cannot be cancelled then the method will return
@@ -46,7 +46,7 @@ class SimmateFuture:
             workitem.save()
             return True
 
-    def is_cancelled(self):
+    def is_cancelled(self) -> bool:
         """
         Return True if the call was successfully cancelled.
         """
@@ -59,7 +59,7 @@ class SimmateFuture:
         else:
             return False
 
-    def is_running(self):
+    def is_running(self) -> bool:
         """
         Return True if the call is currently being executed and cannot be cancelled.
         """
@@ -72,7 +72,7 @@ class SimmateFuture:
         else:
             return False
 
-    def is_done(self):
+    def is_done(self) -> bool:
         """
         Return True if the call was successfully cancelled or finished running.
         """
@@ -85,7 +85,7 @@ class SimmateFuture:
         else:
             return False
 
-    def result(self, timeout=None, sleep_step=0.1):
+    def result(self, timeout: float = None, sleep_step: float = 0.1) -> any:
         """
         Return the value returned by the call. If the call hasn’t yet completed
         then this method will wait up to timeout seconds. If the call hasn’t

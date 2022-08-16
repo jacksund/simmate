@@ -7,11 +7,11 @@ This defines the base "simmate" command that all other commands stem from.
 import click
 
 from simmate.command_line.database import database
-from simmate.command_line.workflows import workflows
-from simmate.command_line.workflow_engine import workflow_engine
 from simmate.command_line.run_server import run_server
 from simmate.command_line.start_project import start_project
 from simmate.command_line.utilities import utilities
+from simmate.command_line.workflow_engine import workflow_engine
+from simmate.command_line.workflows import workflows
 
 
 @click.group()
