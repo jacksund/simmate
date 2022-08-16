@@ -26,6 +26,9 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
 
     # BUG: Why doesn't call_command("flush") do this? How is it different?
 
+    # We can now proceed with reseting the database
+    logging.info("Removing database and rebuilding...")
+
     # BUG: this is only for SQLite3
     # Consider wrapping the django-extensions function for this instead:
     #   https://django-extensions.readthedocs.io/en/latest/reset_db.html
@@ -68,6 +71,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     if using_sqlite and use_prebuilt:
         from simmate.database.third_parties import load_default_sqlite3_build
 
+        logging.info("Setting up prebuilt database...")
         load_default_sqlite3_build()
 
     # Otherwise we leave the empty database.
@@ -76,7 +80,11 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     else:
         from simmate.database.base_data_types import Spacegroup
 
+        logging.info("Loading default data...")
         Spacegroup._load_database_from_toolkit()
+
+    # Let the user know everything succeeded
+    logging.info("Success! Your database has been reset.")
 
 
 def dump_database_to_json(filename="database_dump.json", exclude=[]):

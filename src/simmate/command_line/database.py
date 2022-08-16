@@ -53,16 +53,10 @@ def reset(confirm_delete, use_prebuilt):
             "space will be used). We recommend answering 'yes' for beginners."
         )
 
-    # We can now proceed with reseting the database
-    click.echo("Removing database and rebuilding...")
-
     from simmate.database import connect
     from simmate.database.utilities import reset_database
 
     reset_database(use_prebuilt=use_prebuilt)
-
-    # Let the user know everything succeeded
-    click.echo("Success! Your database has been reset.")
 
 
 @database.command()

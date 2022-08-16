@@ -14,7 +14,7 @@ __doc__ = get_doc_from_readme(__file__)
 # Configure our logger to output timestamps and "SIMMATE" with logs
 # Also changes the logging level to info
 logging.basicConfig(
-    format="[SIMMATE-%(levelname)-s %(asctime)-s] %(message)s",
+    format="[SIMMATE-%(levelname)-s | %(asctime)-s] %(message)s",
     level=logging.INFO,
     datefmt="%Y-%m-%d %H:%M:%S",
 )
