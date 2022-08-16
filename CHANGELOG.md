@@ -35,6 +35,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Refactors**
 - evolutionary search now delay creations, transformations, and validation until runtime (used to be at time of structure submission)
 - `directory`, `compress_ouput`, and `run_id` are now default input parameters for subclasses of `Workflow`. If these are unused, the `run_config` must include `**kwargs`
+- add `isort` for organizing module imports throughout package
 
 **Fixes**
 - fixed when `source` is not being registered by several workflows

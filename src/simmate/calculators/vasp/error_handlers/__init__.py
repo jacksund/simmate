@@ -30,7 +30,6 @@ from .rotation_matrix import RotationMatrix
 from .rotation_matrix_nonint import RotationNonIntMatrix
 from .subspace_matrix import SubspaceMatrix
 from .symprec_noise import SymprecNoise
-from .tetirr import Tetirr
 from .tetrahedron_mesh import TetrahedronMesh
 from .triple_product import TripleProduct
 from .unconverged import Unconverged
@@ -38,3 +37,8 @@ from .walltime import Walltime
 from .zbrent import Zbrent
 from .zheev import Zheev
 from .zpotrf import Zpotrf
+
+# These handlers depend on other handlers above. So we make sure they are
+# imported last and disable isort for them.
+# isort: split
+from .tetirr import Tetirr
