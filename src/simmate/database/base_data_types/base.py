@@ -15,7 +15,6 @@ import warnings
 import yaml
 import json
 from pathlib import Path
-from typing import List, Union
 import logging
 
 import pandas
@@ -57,7 +56,7 @@ class SearchResults(models.QuerySet):
 
     def to_dataframe(
         self,
-        fieldnames: List[str] = (),
+        fieldnames: list[str] = (),
         verbose: bool = True,
         index: str = None,
         coerce_float: str = False,
@@ -120,7 +119,7 @@ class SearchResults(models.QuerySet):
         # pymatgen objects as a list
         return [obj.to_toolkit() for obj in self]
 
-    def to_archive(self, filename: Union[str, Path] = None):
+    def to_archive(self, filename: Path | str = None):
         """
         Writes a compressed zip file using the table's base_info attribute.
         Underneath, the file is written in a csv format.
@@ -230,7 +229,7 @@ class DatabaseTable(models.Model):
     class Meta:
         abstract = True
 
-    base_info: List[str] = []
+    base_info: list[str] = []
     """
     The base information for this database table and only these fields are stored
     when the `to_archive` method is used. Using the columns in this list, all 
@@ -540,7 +539,7 @@ class DatabaseTable(models.Model):
     @classmethod
     def load_archive(
         cls,
-        filename: Union[str, Path] = None,
+        filename: str | Path = None,
         delete_on_completion: bool = False,
         confirm_override: bool = False,
         parallel: bool = False,
@@ -778,7 +777,7 @@ class DatabaseTable(models.Model):
         logging.info("Done.")
 
     @classmethod
-    def get_column_names(cls) -> List[str]:
+    def get_column_names(cls) -> list[str]:
         """
         Returns a list of all the column names for this table and indicates which
         columns are related to other tables. This is primarily used to help
@@ -824,7 +823,7 @@ class DatabaseTable(models.Model):
         ]
 
     @classmethod
-    def get_mixin_names(cls) -> List[str]:
+    def get_mixin_names(cls) -> list[str]:
         """
         Grabs the mix-in Tables that were used to make this class and returns
         a list of their names.
@@ -832,7 +831,7 @@ class DatabaseTable(models.Model):
         return [mixin.__name__ for mixin in cls.get_mixins()]
 
     @classmethod
-    def get_extra_columns(cls) -> List[str]:
+    def get_extra_columns(cls) -> list[str]:
         """
         Finds all columns that aren't covered by the supported Table mix-ins.
 

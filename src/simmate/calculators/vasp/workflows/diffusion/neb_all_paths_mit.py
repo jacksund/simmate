@@ -23,7 +23,6 @@ simmate-task-12345/  # determined by simmate.utilities.get_directory
 """
 
 from pathlib import Path
-from typing import List
 
 from simmate.toolkit import Structure
 from simmate.toolkit.diffusion import DistinctPathFinder
@@ -167,7 +166,7 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
         vacancy_mode: bool,
         directory: Path = None,
         **kwargs,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Given a bulk crystal structure, returns all symmetrically unique pathways
         for the migrating specie (up until the path is percolating). This

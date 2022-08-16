@@ -176,7 +176,6 @@ import platform
 import time
 import signal
 import subprocess
-from typing import List, Tuple
 from pathlib import Path
 import logging
 
@@ -216,7 +215,7 @@ class S3Workflow(Workflow):
     and before `execute` is called. By default, no input files are required.
     """
 
-    error_handlers: List[ErrorHandler] = []
+    error_handlers: list[ErrorHandler] = []
     """
     A list of ErrorHandler objects to use in order of priority (that is, highest
     priority is first). If one handler is triggered, the correction will be 
@@ -452,7 +451,7 @@ class S3Workflow(Workflow):
         return True  # indicates all files are present
 
     @classmethod
-    def execute(cls, directory: Path, command: str) -> List[Tuple[str]]:
+    def execute(cls, directory: Path, command: str) -> list[tuple[str]]:
         """
         This calls the command within the target directory and handles all error
         handling as well as monitoring of the job.

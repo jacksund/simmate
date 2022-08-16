@@ -65,6 +65,11 @@ other connects all ionic steps to a specific calculation and result.
 
 from pathlib import Path
 
+
+from plotly.subplots import make_subplots
+import plotly.graph_objects as plotly_go
+from pymatgen.io.vasp.outputs import Vasprun
+
 from simmate.database.base_data_types import (
     table_column,
     Structure,
@@ -72,12 +77,6 @@ from simmate.database.base_data_types import (
     Thermodynamics,
     Calculation,
 )
-
-from plotly.subplots import make_subplots
-import plotly.graph_objects as plotly_go
-
-from typing import List
-from pymatgen.io.vasp.outputs import Vasprun
 
 
 class Relaxation(Structure, Thermodynamics, Calculation):
@@ -208,7 +207,7 @@ class Relaxation(Structure, Thermodynamics, Calculation):
     def update_from_vasp_run(
         self,
         vasprun: Vasprun,
-        corrections: List,
+        corrections: list,
         directory: Path,
     ):
         """

@@ -11,7 +11,6 @@ Structure.composition will still return a pymatgen composition object.
 
 import warnings
 import itertools
-from typing import List
 
 import numpy
 
@@ -189,7 +188,7 @@ class Composition(PymatgenComposition):
         return element_distance_matrix
 
     @property
-    def chemical_subsystems(self) -> List[str]:
+    def chemical_subsystems(self) -> list[str]:
         """
         Returns all chemical systems of this composition's chemical system.
 

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import Callable
-
 from simmate.calculators.vasp.inputs.incar_modifiers import (
     keyword_modifier_density,
     keyword_modifier_density_a,
@@ -465,7 +463,7 @@ class Incar(dict):
         return Incar(**new_parameters)
 
     @classmethod
-    def add_keyword_modifier(cls, keyword_modifier: Callable):
+    def add_keyword_modifier(cls, keyword_modifier: callable):
         """
         Dynamically sets a keyword_modifier function to the Incar class. When
         loaded onto the Incar class, you can then use the modifiers name to

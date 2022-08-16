@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Callable
 from dask.distributed import wait, TimeoutError
 from simmate.configuration.dask.client import get_dask_client
 
 
 def batch_submit(
-    function: Callable,
-    args_list: List[dict],
+    function: callable,
+    args_list: list[dict],
     batch_size: int,
     batch_timeout: float = None,
 ):

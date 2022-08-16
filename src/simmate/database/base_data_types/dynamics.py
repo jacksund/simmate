@@ -6,6 +6,8 @@ This module is experimental and subject to change.
 
 from pathlib import Path
 
+from pymatgen.io.vasp.outputs import Vasprun
+
 from simmate.database.base_data_types import (
     table_column,
     Structure,
@@ -13,9 +15,6 @@ from simmate.database.base_data_types import (
     Thermodynamics,
     Calculation,
 )
-
-from typing import List
-from pymatgen.io.vasp.outputs import Vasprun
 
 
 class DynamicsRun(Structure, Calculation):
@@ -56,7 +55,7 @@ class DynamicsRun(Structure, Calculation):
     def update_from_vasp_run(
         self,
         vasprun: Vasprun,
-        corrections: List,
+        corrections: list[tuple[str]],
         directory: Path,
     ):
         """

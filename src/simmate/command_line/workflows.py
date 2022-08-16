@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
 import pathlib
 
 import click
@@ -13,7 +12,7 @@ def workflows():
     pass
 
 
-def list_options(options: List) -> int:
+def list_options(options: list) -> int:
     """
     This is a utility for click (cli) that prints of list of items as a numbered
     list. It prompts users to select an option from the list.

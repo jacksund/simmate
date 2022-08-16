@@ -10,8 +10,6 @@ from pymatgen.analysis.diffusion.neb.pathfinder import (
     IDPPSolver,
 )
 
-from typing import List
-
 
 class MigrationImages(list):
     """
@@ -30,7 +28,7 @@ class MigrationImages(list):
     to MigrationHops.
     """
 
-    def __init__(self, structures: List[Structure]):
+    def __init__(self, structures: list[Structure]):
         # This init function does nothing except apply typing -- specifically,
         # it says that it expects a list of structures.
         super().__init__(structures)
