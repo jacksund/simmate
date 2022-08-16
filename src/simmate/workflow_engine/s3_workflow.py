@@ -184,15 +184,6 @@ import pandas
 from simmate.utilities import get_directory, make_error_archive
 from simmate.workflow_engine import ErrorHandler, Workflow
 
-# cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
-# reset the working directory between task retries -- in some cases we may
-# want to delete the entire directory.
-
-# OPTIMIZE: I think this class would greatly benefit from asyncio so that we
-# know exactly when a shelltask completes, rather than looping and checking every
-# set timestep.
-# https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
-
 
 class S3Workflow(Workflow):
     """
@@ -254,6 +245,15 @@ class S3Workflow(Workflow):
     default values of polling_timestep=10 and monitor_freq=30 indicate that
     we run monitoring functions every 5 minutes (10x30=300s=5min).
     """
+
+    # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
+    # reset the working directory between task retries -- in some cases we may
+    # want to delete the entire directory.
+
+    # OPTIMIZE: I think this class would greatly benefit from asyncio so that we
+    # know exactly when a shelltask completes, rather than looping and checking every
+    # set timestep.
+    # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.create_subprocess_exec
 
     @classmethod
     def run_config(

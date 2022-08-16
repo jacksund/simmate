@@ -8,7 +8,7 @@ from tempfile import mkdtemp
 
 def start_cluster(
     nworkers: int,
-    worker_command="simmate workflow-engine start-worker",
+    worker_command: str = "simmate workflow-engine start-worker",
 ):
 
     cluster_directory = mkdtemp(prefix="simmate-cluster-", dir=Path.cwd())
