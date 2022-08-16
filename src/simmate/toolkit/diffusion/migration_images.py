@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import numpy
+from pymatgen.analysis.diffusion.neb.pathfinder import DistinctPathFinder, IDPPSolver
+from pymatgen.analysis.diffusion.neb.pathfinder import (
+    MigrationHop as PymatgenMigrationHop,
+)
 
 from simmate.toolkit import Structure
-
-from pymatgen.analysis.diffusion.neb.pathfinder import (
-    DistinctPathFinder,
-    MigrationHop as PymatgenMigrationHop,
-    IDPPSolver,
-)
 
 
 class MigrationImages(list):

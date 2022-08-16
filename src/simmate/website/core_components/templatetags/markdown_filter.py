@@ -4,9 +4,7 @@ from textwrap import dedent
 
 from django import template
 from django.utils.safestring import mark_safe
-
 from pdoc.render_helpers import to_html
-
 
 # We need a registration instance in order to configure everything with Django
 register = template.Library()

@@ -2,10 +2,7 @@
 
 import pytest
 
-from simmate.workflows.utilities import (
-    get_list_of_all_workflows,
-    get_workflow,
-)
+from simmate.workflows.utilities import get_list_of_all_workflows, get_workflow
 
 
 # @pytest.mark.prefect_db
@@ -18,8 +15,8 @@ def test_all_workflow_runs(tmp_path, sample_structures):
 
     # -------------
     # https://stackoverflow.com/questions/41742317/
-    import os
     import contextlib
+    import os
     from pathlib import Path
 
     @contextlib.contextmanager

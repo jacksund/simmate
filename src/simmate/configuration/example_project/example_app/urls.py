@@ -10,7 +10,7 @@ feature, so we can prioritize it!
 
 from django.urls import path
 
-from .views import example_view, ExampleRelaxationViewSet
+from .views import ExampleRelaxationViewSet, example_view
 
 urlpatterns = [
     path(

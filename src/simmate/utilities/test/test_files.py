@@ -3,13 +3,8 @@
 import shutil
 
 from simmate.conftest import copy_test_files
-from simmate.utilities.files import (
-    get_directory,
-    # make_archive,
-    make_error_archive,
-    archive_old_runs,
-    empty_directory,
-)
+from simmate.utilities.files import archive_old_runs  # make_archive,
+from simmate.utilities.files import empty_directory, get_directory, make_error_archive
 
 
 def test_get_directory(tmp_path):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import json
 import itertools
+import json
 import subprocess
 from pathlib import Path
 

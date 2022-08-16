@@ -7,9 +7,8 @@ This file generates our html documentation using pdoc.
 import os
 from pathlib import Path
 
-import pdoc
-
 import django
+import pdoc
 
 # grab current directory of this file. This is also where we want to write the output.
 here = Path(__file__).parent

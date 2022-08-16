@@ -6,12 +6,13 @@ functions for grabbing all available workflows as well as dynamically loading
 a workflow using its name.
 """
 
-import yaml
-import shutil
+import logging
 import pkgutil
+import shutil
 from importlib import import_module
 from pathlib import Path
-import logging
+
+import yaml
 
 from simmate import workflows
 from simmate.utilities import get_directory, make_archive

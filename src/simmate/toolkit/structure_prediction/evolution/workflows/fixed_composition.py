@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import time
 import logging
+import time
 
+from simmate.database.workflow_results import EvolutionarySearch as SearchDatatable
 from simmate.toolkit import Composition
 from simmate.workflow_engine import Workflow
-from simmate.database.workflow_results import EvolutionarySearch as SearchDatatable
 
 # TODO
 # StructurePrediction__Python__VariableTernaryComposition

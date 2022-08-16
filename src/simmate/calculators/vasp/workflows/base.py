@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-import shutil
 import logging
+import shutil
+from pathlib import Path
 
 import yaml
-
 from pymatgen.analysis.structure_matcher import StructureMatcher
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.io.vasp.outputs import Vasprun
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
+from simmate.calculators.vasp.inputs import Incar, Kpoints, Poscar, Potcar
 from simmate.toolkit import Structure
-from simmate.calculators.vasp.inputs import Incar, Poscar, Kpoints, Potcar
 from simmate.workflow_engine import S3Workflow
 
 

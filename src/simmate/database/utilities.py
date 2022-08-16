@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import shutil
 from pathlib import Path
-import logging
 
 from django.apps import apps
 from django.core.management import call_command

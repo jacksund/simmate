@@ -16,12 +16,12 @@ For other options such as the REST API, check out http://oqmd.org/static/docs/re
 
 """
 
-from tqdm import tqdm
 import pandas
 from django.db import transaction
+from tqdm import tqdm
 
-from simmate.toolkit import Structure
 from simmate.database.third_parties import OqmdStructure
+from simmate.toolkit import Structure
 
 
 @transaction.atomic

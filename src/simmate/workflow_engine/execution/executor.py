@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # import pickle
-import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 import logging
+
+import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 
 from simmate.workflow_engine.execution.database import WorkItem
 from simmate.workflow_engine.execution.future import SimmateFuture

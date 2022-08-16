@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.conftest import copy_test_files, make_dummy_files
 from simmate.calculators.vasp.inputs import Potcar
+from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
 from simmate.calculators.vasp.workflows.electronic_structure.matproj_band_structure import (
     ElectronicStructure__Vasp__MatprojBandStructure,
 )
-from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
+from simmate.conftest import copy_test_files, make_dummy_files
 
 
 def test_band_structure_setup(structure, tmp_path, mocker):

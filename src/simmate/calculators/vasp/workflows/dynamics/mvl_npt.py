@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.toolkit import Structure
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.workflows.dynamics.mit import Dynamics__Vasp__Mit
+from simmate.toolkit import Structure
 
 
 class Dynamics__Vasp__MvlNpt(Dynamics__Vasp__Mit):

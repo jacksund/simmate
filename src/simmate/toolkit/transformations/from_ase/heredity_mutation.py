@@ -4,7 +4,6 @@ import numpy
 
 from simmate.toolkit.transformations.base import Transformation
 
-
 #!!! I need to figure out how to implement more than two structures
 
 
@@ -28,11 +27,10 @@ class Heredity(Transformation):
 
         # we can assume the user has ASE installed because it is a dependency of PyMatgen
         #!!! it looks like the ase.ga module is actively changing so version may introduce errors
-        from ase.ga.utilities import closest_distances_generator
-
         # the slab variable is there to specify dimensionality. The code really just uses the pbc setting
         #!!! I need to doublecheck this
         from ase import Atoms
+        from ase.ga.utilities import closest_distances_generator
 
         self.slab = Atoms(
             pbc=True

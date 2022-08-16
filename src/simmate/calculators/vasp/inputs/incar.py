@@ -6,10 +6,10 @@ from simmate.calculators.vasp.inputs.incar_modifiers import (
     keyword_modifier_density_b,
     keyword_modifier_density_c,
     keyword_modifier_per_atom,
-    keyword_modifier_smart_magmom,
-    keyword_modifier_smart_lmaxmix,
-    keyword_modifier_smart_ldau,
     keyword_modifier_smart_ismear,
+    keyword_modifier_smart_ldau,
+    keyword_modifier_smart_lmaxmix,
+    keyword_modifier_smart_magmom,
 )
 
 

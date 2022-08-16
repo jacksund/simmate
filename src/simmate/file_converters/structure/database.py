@@ -55,9 +55,9 @@ database_structure = toolkit_structure.database_object
 
 from django.utils.module_loading import import_string
 
-from simmate.toolkit import Structure as ToolkitStructure
 from simmate.database import connect
 from simmate.database.base_data_types import Structure as DatabaseStructure
+from simmate.toolkit import Structure as ToolkitStructure
 from simmate.website.workflows import models as all_datatables
 
 

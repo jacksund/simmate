@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import shutil
-import yaml
-import numpy
-from pathlib import Path
 import logging
+import shutil
+from pathlib import Path
 
+import numpy
+import yaml
 from pymatgen.analysis.transition_state import NEBAnalysis
 
-from simmate.toolkit.diffusion import MigrationImages
 from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
 from simmate.calculators.vasp.workflows.base import VaspWorkflow
+from simmate.toolkit.diffusion import MigrationImages
 
 
 class VaspNebFromImagesWorkflow(VaspWorkflow):

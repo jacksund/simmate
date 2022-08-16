@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import yaml
 from pathlib import Path
+
+import yaml
 from pandas import DataFrame
-
-from pymatgen.io.vasp.outputs import Chgcar
 from pymatgen.io.vasp import Potcar
+from pymatgen.io.vasp.outputs import Chgcar
 
-from simmate.workflow_engine import S3Workflow
 from simmate.calculators.bader.outputs import ACF
+from simmate.workflow_engine import S3Workflow
 
 
 class PopulationAnalysis__Bader__Bader(S3Workflow):

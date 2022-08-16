@@ -4,12 +4,12 @@ import pytest
 
 from simmate.conftest import copy_test_files
 from simmate.workflows.utilities import (
-    get_workflow_types,
     get_list_of_all_workflows,
     get_list_of_workflows_by_type,
-    get_workflow,
-    load_results_from_directories,
     get_unique_parameters,
+    get_workflow,
+    get_workflow_types,
+    load_results_from_directories,
 )
 
 
@@ -86,9 +86,7 @@ def test_list_of_workflows_by_type():
 
 def test_get_workflow():
 
-    from simmate.workflows.static_energy import (
-        StaticEnergy__Vasp__Matproj as workflow,
-    )
+    from simmate.workflows.static_energy import StaticEnergy__Vasp__Matproj as workflow
 
     assert get_workflow("static-energy.vasp.matproj") == workflow
 

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.core_components.filters import (
-    Structure,
-    Forces,
-    Thermodynamics,
-    Calculation,
-)
 from simmate.database.base_data_types.dynamics import (
-    DynamicsRun as DynamicsRunTable,
     DynamicsIonicStep as DynamicsIonicStepTable,
+)
+from simmate.database.base_data_types.dynamics import DynamicsRun as DynamicsRunTable
+from simmate.website.core_components.filters import (
+    Calculation,
+    Forces,
+    Structure,
+    Thermodynamics,
 )
 
 

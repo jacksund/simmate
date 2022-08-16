@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from simmate.database.base_data_types.relaxation import IonicStep as IonicStepTable
+from simmate.database.base_data_types.relaxation import Relaxation as RelaxationTable
 from simmate.website.core_components.filters import (
-    Structure,
-    Forces,
-    Thermodynamics,
     Calculation,
-)
-from simmate.database.base_data_types.relaxation import (
-    Relaxation as RelaxationTable,
-    IonicStep as IonicStepTable,
+    Forces,
+    Structure,
+    Thermodynamics,
 )
 
 

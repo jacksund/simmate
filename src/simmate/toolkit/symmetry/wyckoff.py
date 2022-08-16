@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-import pandas as pd
 import itertools
+from pathlib import Path
+
+import pandas as pd
 
 
 def loadWyckoffData():

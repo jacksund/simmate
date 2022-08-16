@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.core_components.filters import (
-    Structure,
-    Forces,
-    Thermodynamics,
-    Calculation,
-)
 from simmate.database.base_data_types import StaticEnergy as StaticEnergyTable
+from simmate.website.core_components.filters import (
+    Calculation,
+    Forces,
+    Structure,
+    Thermodynamics,
+)
 
 
 class StaticEnergy(

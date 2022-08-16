@@ -3,10 +3,11 @@
 import itertools
 import logging
 
-from pymatgen.core import Species
 from pymatgen.analysis.structure_prediction.substitutor import Substitutor
+from pymatgen.core import Species
 
 from simmate.toolkit import Composition, Structure
+
 from .known import get_known_structures
 
 

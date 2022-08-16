@@ -171,18 +171,18 @@ into one class, we make things much easier for users and creating new Tasks.
 
 """
 
+import logging
 import os
 import platform
-import time
 import signal
 import subprocess
+import time
 from pathlib import Path
-import logging
 
 import pandas
 
-from simmate.workflow_engine import Workflow, ErrorHandler
 from simmate.utilities import get_directory, make_error_archive
+from simmate.workflow_engine import ErrorHandler, Workflow
 
 # cleanup_on_fail=False, # TODO I should add a Prefect state_handler that can
 # reset the working directory between task retries -- in some cases we may

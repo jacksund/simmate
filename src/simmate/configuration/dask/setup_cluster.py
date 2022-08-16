@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from dask.distributed import LocalCluster
 import dask_jobqueue
+from dask.distributed import LocalCluster
 from distributed.deploy.spec import SpecCluster
-
 
 # These are the different Cluster types that you can import from dask_jobqueue
 # TODO: Is there a way to dynamically determine this?

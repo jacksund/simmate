@@ -13,14 +13,13 @@ convert to pymatgen.
 
 """
 
-from tqdm import tqdm
-
 from django.db import transaction
 
 # This looks like the easiest way to grab all of the data -- as AFLOW doesn't
 # have any good documentation on doing this.
 from pymatgen.analysis.prototypes import AFLOW_PROTOTYPE_LIBRARY
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+from tqdm import tqdm
 
 from simmate.database.third_parties import AflowPrototype
 

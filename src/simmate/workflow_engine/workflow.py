@@ -454,18 +454,19 @@ Prefect now too.
 
 """
 
-import logging
-import json
-import cloudpickle
-import yaml
-import re
 import inspect
+import json
+import logging
+import re
 import uuid
 from pathlib import Path
 
+import cloudpickle
+import yaml
+
 import simmate
 from simmate.database.base_data_types import Calculation
-from simmate.utilities import get_directory, copy_directory, make_archive
+from simmate.utilities import copy_directory, get_directory, make_archive
 from simmate.workflow_engine.execution import SimmateExecutor, WorkItem
 
 
@@ -531,16 +532,6 @@ class Workflow:
     # Core methods that handle how and what a workflow run does
     # and how it is submitted
     # -------------------------------------------------------------------------
-
-    @classmethod
-    def run_config(cls, **kwargs):
-        """
-        The workflow method, which can be overwritten when inheriting from this
-        class. This can be either a `staticmethod` or `classmethod`.
-        """
-        raise NotImplementedError(
-            "When creating a custom workflow, make sure you set a run_config method!"
-        )
 
     @classmethod
     def run(cls, **kwargs) -> DummyState:
@@ -629,22 +620,27 @@ class Workflow:
         logging.info(f"Completed {cls.name_full}")
         return result
 
-    @staticmethod
-    def _get_run_id():
-        """
-        generates a random id to use as a workflow run id
-        """
-        # This is a separate method in order to allow the prefect executor to
-        # overwrite this method.
-        unique_id = str(uuid.uuid4())
-        return unique_id
-
     @classmethod
     def run_cloud(
-        cls, return_state: bool = True, tags: list[str] = None, **kwargs
-    ) -> str:
+        cls,
+        return_state: bool = True,
+        tags: list[str] = None,
+        **kwargs,
+    ):
         """
-        submits the workflow run to cloud database to be ran by a worker
+        Submits the workflow run to cloud database to be ran by a worker.
+
+        #### Parameters
+
+        - `return_state`:
+            Whether to return a State-like object or just the run_id. Defaults
+            to true, which returns a State.
+
+        - `tags`:
+            A list of flags/labels/tags that the workflow run should be scheduled
+            with. This helps with limiting which workers are allow to pickup
+            and run the workflow. Defaults to the `tags` property of the
+            workflow.
         """
 
         logging.info(f"Submitting new run of {cls.name_full} to cloud")
@@ -683,6 +679,16 @@ class Workflow:
 
         return run_id
 
+    @classmethod
+    def run_config(cls, **kwargs) -> any:
+        """
+        The workflow method, which can be overwritten when inheriting from this
+        class. This can be either a `staticmethod` or `classmethod`.
+        """
+        raise NotImplementedError(
+            "When creating a custom workflow, make sure you set a run_config method!"
+        )
+
     # -------------------------------------------------------------------------
     # Methods that interact with the Executor class in order to see what
     # has been submitted to cloud.
@@ -695,7 +701,10 @@ class Workflow:
         Queries the Simmate database to see how many workflows are in a
         running or pending state.
         """
-        return WorkItem.objects.filter(status__in=["P", "R"], tags=cls.tags).count()
+        return WorkItem.objects.filter(
+            status__in=["P", "R"],
+            tags=cls.tags,
+        ).count()
 
     # -------------------------------------------------------------------------
     # Methods that help with accessing the database and saving results
@@ -757,11 +766,11 @@ class Workflow:
             raise NotImplementedError("Unable to detect proper database table")
 
     @classmethod
-    def all_results(cls):
+    def all_results(cls):  # -> SearchResults
         return cls.database_table.objects.filter(workflow_name=cls.name_full)
 
     @classmethod
-    def _save_to_database(cls, result, run_id):
+    def _save_to_database(cls, result: any, run_id: str):
 
         # split our results and corrections (which are given as a dict) into
         # separate variables
@@ -1130,6 +1139,18 @@ class Workflow:
         # to be used by the workflow
         return parameters_cleaned
 
+    @staticmethod
+    def _get_run_id():
+        """
+        Generates a random id to use as a workflow run id.
+
+        This is called automatically within `_load_input_and_register`
+        """
+        # This is a separate method in order to allow the prefect executor to
+        # overwrite this method.
+        unique_id = str(uuid.uuid4())
+        return unique_id
+
     @classmethod
     @property
     def _parameters_to_register(cls) -> list[str]:
@@ -1234,6 +1255,10 @@ class Workflow:
 
         return calculation
 
+    # -------------------------------------------------------------------------
+    # Methods that hanlde serialization and deserialization of input parameters.
+    # -------------------------------------------------------------------------
+
     @classmethod
     def _serialize_parameters(cls, **parameters) -> dict:
         """
@@ -1306,7 +1331,7 @@ class Workflow:
         converts all parameters to appropriate python objects
         """
 
-        from simmate.toolkit import Structure, Composition
+        from simmate.toolkit import Composition, Structure
         from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 
         parameters_cleaned = parameters.copy()

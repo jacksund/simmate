@@ -9,11 +9,10 @@ is currently NOT used by Simmate's Structure class. For Simmate,
 Structure.composition will still return a pymatgen composition object.
 """
 
-import warnings
 import itertools
+import warnings
 
 import numpy
-
 from pymatgen.core import Composition as PymatgenComposition
 
 

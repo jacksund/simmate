@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
 
-from simmate.database.base_data_types import DatabaseTable
 from simmate import workflows as workflow_module
-from simmate.workflows.utilities import (
-    # WORKFLOW_TYPES,
-    get_workflow,
-    get_list_of_workflows_by_type,
-)
-from simmate.website.workflows.forms import SubmitWorkflow
+from simmate.database.base_data_types import DatabaseTable
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
+from simmate.website.workflows.forms import SubmitWorkflow
+from simmate.workflows.utilities import (  # WORKFLOW_TYPES,
+    get_list_of_workflows_by_type,
+    get_workflow,
+)
 
 
 def workflows_all(request):

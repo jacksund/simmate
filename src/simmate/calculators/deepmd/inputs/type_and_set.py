@@ -3,11 +3,10 @@
 from pathlib import Path
 
 import numpy
-
-from sklearn.model_selection import train_test_split
 from django_pandas.io import read_frame
+from sklearn.model_selection import train_test_split
 
-from simmate.toolkit import Structure, Composition
+from simmate.toolkit import Composition, Structure
 from simmate.utilities import get_directory
 
 

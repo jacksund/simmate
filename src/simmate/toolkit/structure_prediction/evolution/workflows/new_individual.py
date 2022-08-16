@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
 import logging
+from pathlib import Path
 
-from simmate.workflow_engine import Workflow
 from simmate.database.workflow_results import EvolutionarySearch
+from simmate.workflow_engine import Workflow
 
 
 class StructurePrediction__Python__NewIndividual(Workflow):

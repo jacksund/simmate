@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import argparse
 import json
 import sys
-import argparse
 
-import numpy
-
-import bpy
 import bmesh
+import bpy
+import numpy
 
 # These are the RGB values that JMol uses to color atoms
 JMOL_COLORING = {

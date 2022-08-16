@@ -9,14 +9,14 @@ import os
 import sys
 from pathlib import Path
 
+import dj_database_url  # needed for DigitalOcean database connection
 import yaml
+
+from simmate import website  # needed to specify location of built-in apps
+from simmate.utilities import get_conda_env, get_directory
 
 # from django.core.management.utils import get_random_secret_key
 
-import dj_database_url  # needed for DigitalOcean database connection
-
-from simmate import website  # needed to specify location of built-in apps
-from simmate.utilities import get_directory, get_conda_env
 
 # --------------------------------------------------------------------------------------
 

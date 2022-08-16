@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from io import BytesIO
 import base64
+from io import BytesIO
 
 from django import template
 from django.utils.safestring import mark_safe

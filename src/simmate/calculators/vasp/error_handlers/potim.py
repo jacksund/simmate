@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
-from simmate.toolkit import Structure
-from simmate.workflow_engine import ErrorHandler
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.outputs import Oszicar
+from simmate.toolkit import Structure
+from simmate.workflow_engine import ErrorHandler
 
 
 class Potim(ErrorHandler):

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.conftest import copy_test_files
-from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.error_handlers import PositiveEnergy
+from simmate.calculators.vasp.inputs import Incar
+from simmate.conftest import copy_test_files
 
 
 def test_positive_energy(tmp_path):

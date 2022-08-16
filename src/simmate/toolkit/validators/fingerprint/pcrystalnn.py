@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 
-import numpy
-from tqdm import tqdm
 import logging
-
-from django.utils import timezone
 
 # BUG: This prints a tqdm error so we silence it here.
 import warnings
+
+import numpy
+from django.utils import timezone
+from tqdm import tqdm
 
 with warnings.catch_warnings(record=True):
     from matminer.featurizers.site import CrystalNNFingerprint
 
 # BUG: waiting on this pSS to be added to matminer. See the following PR:
 #   https://github.com/hackingmaterials/matminer/pull/809
-from matminer.featurizers.structure.sites import (
+from matminer.featurizers.structure.sites import (  # PartialsSiteStatsFingerprint
     SiteStatsFingerprint,
-)  # PartialsSiteStatsFingerprint
+)
 
 logging.warning(
     "PartialsSiteStatsFingerprint current acts as a SiteStatsFingerprint. "

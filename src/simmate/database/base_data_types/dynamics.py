@@ -9,11 +9,11 @@ from pathlib import Path
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.database.base_data_types import (
-    table_column,
-    Structure,
-    Forces,
-    Thermodynamics,
     Calculation,
+    Forces,
+    Structure,
+    Thermodynamics,
+    table_column,
 )
 
 

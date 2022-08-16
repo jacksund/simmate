@@ -2,11 +2,11 @@
 
 from django_filters import rest_framework as filters
 
-from simmate.website.core_components.filters import Calculation, Structure
+from simmate.database.base_data_types import DensityofStates as DensityofStatesTable
 from simmate.database.base_data_types import (
-    DensityofStates as DensityofStatesTable,
     DensityofStatesCalc as DensityofStatesCalcTable,
 )
+from simmate.website.core_components.filters import Calculation, Structure
 
 
 class DensityofStates(filters.FilterSet):

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import time
-import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 import logging
+import time
 import traceback
 
+import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from django.db import transaction
 
 from simmate.workflow_engine.execution.database import WorkItem

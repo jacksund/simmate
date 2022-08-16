@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import table_column, Calculation
+from simmate.database.base_data_types import Calculation, table_column
 
 
 class NestedCalculation(Calculation):

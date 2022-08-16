@@ -2,11 +2,9 @@
 
 from django_filters import rest_framework as filters
 
+from simmate.database.base_data_types import BandStructure as BandStructureTable
+from simmate.database.base_data_types import BandStructureCalc as BandStructureCalcTable
 from simmate.website.core_components.filters import Calculation, Structure
-from simmate.database.base_data_types import (
-    BandStructure as BandStructureTable,
-    BandStructureCalc as BandStructureCalcTable,
-)
 
 
 class BandStructure(filters.FilterSet):

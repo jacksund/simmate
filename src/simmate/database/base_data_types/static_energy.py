@@ -2,15 +2,15 @@
 
 from pathlib import Path
 
-from simmate.database.base_data_types import (
-    table_column,
-    Structure,
-    Forces,
-    Thermodynamics,
-    Calculation,
-)
-
 from pymatgen.io.vasp.outputs import Vasprun
+
+from simmate.database.base_data_types import (
+    Calculation,
+    Forces,
+    Structure,
+    Thermodynamics,
+    table_column,
+)
 
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):

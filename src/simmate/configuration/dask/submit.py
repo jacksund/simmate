@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from dask.distributed import wait, TimeoutError
+from dask.distributed import TimeoutError, wait
+
 from simmate.configuration.dask.client import get_dask_client
 
 

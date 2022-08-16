@@ -9,19 +9,15 @@ this one) for example usage.
 """
 
 import inspect
+import json
+import logging
 import shutil
 import urllib
 import warnings
-import yaml
-import json
 from pathlib import Path
-import logging
 
 import pandas
-from django.db import models  # , transaction
-from django_pandas.io import read_frame
-from django.utils.timezone import datetime
-
+import yaml
 
 # This line does NOTHING but rename a module. I have this because I want to use
 # "table_column.CharField(...)" instead of "models.CharField(...)" in my Models.
@@ -29,7 +25,10 @@ from django.utils.timezone import datetime
 # each thing represents -- without them needing to understand
 # that Django Model == Database Table. Experts may find this annoying, so I'm
 # sorry :(
+from django.db import models  # , transaction
 from django.db import models as table_column
+from django.utils.timezone import datetime
+from django_pandas.io import read_frame
 
 
 class SearchResults(models.QuerySet):
@@ -594,6 +593,7 @@ class DatabaseTable(models.Model):
         )
 
         from tqdm import tqdm
+
         from simmate.toolkit import Structure as ToolkitStructure
 
         # generate the file name if one wasn't given

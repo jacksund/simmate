@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-
 from pandas import DataFrame
 
-# from pymatgen.io.vasp.outputs import Vasprun
-
+from simmate.database.base_data_types import DynamicsIonicStep, DynamicsRun
 from simmate.toolkit import Structure
-from simmate.database.base_data_types import DynamicsRun, DynamicsIonicStep
+
+# from pymatgen.io.vasp.outputs import Vasprun
 
 
 @pytest.mark.django_db

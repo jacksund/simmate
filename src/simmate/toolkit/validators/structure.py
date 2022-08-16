@@ -2,8 +2,9 @@
 
 ##############################################################################
 
-import numpy
 import itertools
+
+import numpy
 
 from simmate.toolkit.validators.base import Validator
 

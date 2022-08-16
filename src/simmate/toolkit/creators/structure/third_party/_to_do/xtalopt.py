@@ -4,6 +4,7 @@ from numpy.random import choice
 
 from simmate.toolkit import Structure
 
+
 #!!! NOT TESTED
 class XtalOptStructure:
 
@@ -26,7 +27,7 @@ class XtalOptStructure:
 
         #!!! this is inside the init because not all users will have this installed!
         try:
-            from pyrandspg import RandSpgInput, LatticeStruct, RandSpg
+            from pyrandspg import LatticeStruct, RandSpg, RandSpgInput
 
             # save for reference later
             self.RandSpgInput = RandSpgInput

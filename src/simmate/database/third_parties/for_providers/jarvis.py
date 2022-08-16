@@ -17,11 +17,10 @@ Alternatively, we could manually download
 """
 
 from django.db import transaction
-
 from tqdm import tqdm
-from simmate.toolkit import Structure
 
 from simmate.database.third_parties import JarvisStructure
+from simmate.toolkit import Structure
 
 
 @transaction.atomic

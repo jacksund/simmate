@@ -74,6 +74,7 @@ dependencies=[
     "pytest-xdist >=2.5.0, <=2.5.0",
     "black >=22.1.0, <=22.6.0",
     "coverage >=6.2, <=6.4.3",
+    "isort >=5.10.1, <=5.10.1",
     #
     # These are from the MP stack and I want to phase them out over time
     "pymatgen >=2022.1.9, <=2022.7.25",
@@ -198,5 +199,13 @@ omit = ["*/test_*", "*/conftest.py", "*/*_test.py"]
 
 # consider adding for coverage of templates
 # plugins = django_coverage_plugin  
+
+# -----------------------------------------------------------------------------
+
+# isort is a tool for organizing imports at the top of python files. By default,
+# it conflicts with the black formatter we use, so we need to configure it here.
+
+[tool.isort]
+profile = "black"
 
 # -----------------------------------------------------------------------------

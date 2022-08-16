@@ -2,11 +2,10 @@
 
 # These are dictionaries that tell us which POTCARs we should grab based on
 # the type of calculation as well as where to find them
-from simmate.calculators.vasp.inputs.potcar_mappings import (
+from simmate.calculators.vasp.inputs.potcar_mappings import (  # TODO: LDA_ELEMENT_MAPPINGS
     FOLDER_MAPPINGS,
     PBE_ELEMENT_MAPPINGS,
     PBE_GW_ELEMENT_MAPPINGS,
-    # TODO: LDA_ELEMENT_MAPPINGS
 )
 
 

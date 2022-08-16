@@ -24,12 +24,13 @@
 
 ##############################################################################
 
-# for progress monitoring and time recording
-from tqdm import tqdm
+import os
 
 # from time import time # incorrectly gives 0 seconds in some cases
 from timeit import default_timer as time
-import os
+
+# for progress monitoring and time recording
+from tqdm import tqdm
 
 
 def time_test_struct_creation(creator, n):
@@ -47,9 +48,10 @@ def time_test_struct_creation(creator, n):
 
 ##############################################################################
 
+import numpy
+
 # I'll store the data in these two variables
 import pandas
-import numpy
 
 times_all = []
 mapping = [

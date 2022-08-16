@@ -2,9 +2,9 @@
 
 import pytest
 
-from simmate.conftest import copy_test_files
-from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.error_handlers import MeshSymmetry
+from simmate.calculators.vasp.inputs import Incar
+from simmate.conftest import copy_test_files
 
 
 def test_mesh_symmetry(tmp_path):

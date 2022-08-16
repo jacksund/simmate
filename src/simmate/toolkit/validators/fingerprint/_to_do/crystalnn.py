@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-
 from matminer.featurizers.site import CrystalNNFingerprint as cnnf
 
 #!!! is it faster to import these all at once?
-from matminer.featurizers.structure import SiteStatsFingerprint as ssf
-from matminer.featurizers.structure import RadialDistributionFunction as rdf
 from matminer.featurizers.structure import PartialRadialDistributionFunction as prdf
+from matminer.featurizers.structure import RadialDistributionFunction as rdf
+from matminer.featurizers.structure import SiteStatsFingerprint as ssf
 
 
 class CrystalNNFingerprint:

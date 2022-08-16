@@ -2,8 +2,8 @@
 
 from abc import ABC, abstractmethod
 
-from dask.diagnostics import ProgressBar
 from dask import bag
+from dask.diagnostics import ProgressBar
 
 
 class Validator(ABC):

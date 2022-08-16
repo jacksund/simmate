@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from simmate.toolkit import Composition, Structure
 from simmate.database import connect
 from simmate.database.third_parties import (
     AflowStructure,
@@ -9,6 +8,7 @@ from simmate.database.third_parties import (
     MatprojStructure,
     OqmdStructure,
 )
+from simmate.toolkit import Composition, Structure
 
 
 def get_known_structures(

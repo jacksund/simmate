@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from django.urls import path
-from simmate.website.third_parties import views
 
+from simmate.website.third_parties import views
 
 urlpatterns = [
     path(

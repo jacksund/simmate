@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
+from simmate.calculators.vasp.error_handlers import IncorrectShift, TetrahedronMesh
 from simmate.workflow_engine import ErrorHandler
-from simmate.calculators.vasp.error_handlers import TetrahedronMesh, IncorrectShift
 
 
 class Tetirr(ErrorHandler):

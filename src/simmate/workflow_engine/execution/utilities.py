@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import subprocess
 from pathlib import Path
 from tempfile import mkdtemp
-import logging
 
 
 def start_cluster(

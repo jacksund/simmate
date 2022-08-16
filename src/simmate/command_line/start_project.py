@@ -19,7 +19,9 @@ def start_project(project_name):
     """
 
     from pathlib import Path
+
     from django.core.management import call_command
+
     from simmate import configuration  # needed just for the filepath
 
     # This directory is where our template folder is located. We find this

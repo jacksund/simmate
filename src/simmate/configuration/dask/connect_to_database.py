@@ -22,15 +22,15 @@ client = get_dask_client()
 # --------------------------------------------------------------------------------------
 
 
-# First setup django settings for simmate
-from simmate.database import connect
-
 # The settings (including the database) are all set up now, but django doesn't
 # actually connect to the database until a query is made. So here, we do a
 # very simple query that should work for any django database. We don't actaully
 # need the output. We just want make a call that establishes a connection.
 # Let's just use the ContentType table because it's typically small.
 from django.contrib.contenttypes.models import ContentType
+
+# First setup django settings for simmate
+from simmate.database import connect
 
 # and make a quick query
 ContentType.objects.count()

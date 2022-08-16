@@ -2,15 +2,15 @@
 
 from pathlib import Path
 
-from simmate.toolkit import Structure
-from simmate.workflow_engine import Workflow
-from simmate.calculators.vasp.workflows.static_energy.matproj import (
-    StaticEnergy__Vasp__Matproj,
-)
 from simmate.calculators.bader.workflows import (
     PopulationAnalysis__Bader__Bader,
     PopulationAnalysis__Bader__CombineChgcars,
 )
+from simmate.calculators.vasp.workflows.static_energy.matproj import (
+    StaticEnergy__Vasp__Matproj,
+)
+from simmate.toolkit import Structure
+from simmate.workflow_engine import Workflow
 
 
 class PopulationAnalysis__Vasp__BaderMatproj(Workflow):

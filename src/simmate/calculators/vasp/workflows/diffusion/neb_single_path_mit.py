@@ -2,17 +2,17 @@
 
 from pathlib import Path
 
-from simmate.toolkit.diffusion import MigrationHop
-from simmate.workflow_engine import Workflow
+from simmate.calculators.vasp.workflows.diffusion.neb_from_images_mit import (
+    Diffusion__Vasp__NebFromImagesMit,
+)
 from simmate.calculators.vasp.workflows.diffusion.utilities import (
     get_migration_images_from_endpoints,
 )
 from simmate.calculators.vasp.workflows.relaxation.mvl_neb_endpoint import (
     Relaxation__Vasp__MvlNebEndpoint,
 )
-from simmate.calculators.vasp.workflows.diffusion.neb_from_images_mit import (
-    Diffusion__Vasp__NebFromImagesMit,
-)
+from simmate.toolkit.diffusion import MigrationHop
+from simmate.workflow_engine import Workflow
 
 
 class Diffusion__Vasp__NebSinglePathMit(Workflow):

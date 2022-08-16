@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from simmate.toolkit import Composition
-from simmate.database.base_data_types import table_column, DatabaseTable
-from simmate.workflow_engine.execution import WorkItem
-import simmate.toolkit.transformations.from_ase as transform_module
 import simmate.toolkit.creators as creation_module
+import simmate.toolkit.transformations.from_ase as transform_module
+from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.toolkit import Composition
+from simmate.workflow_engine.execution import WorkItem
 
 
 class StructureSource(DatabaseTable):

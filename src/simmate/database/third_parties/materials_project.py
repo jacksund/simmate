@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import table_column, Structure, Thermodynamics
+from simmate.database.base_data_types import Structure, Thermodynamics, table_column
 
 
 class MatprojStructure(Structure, Thermodynamics):

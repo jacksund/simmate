@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from pymatgen.io.vasp.outputs import Elfcar, Chgcar
+from pymatgen.io.vasp.outputs import Chgcar, Elfcar
 
 from simmate.toolkit import Structure
 

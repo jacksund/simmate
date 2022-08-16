@@ -38,7 +38,7 @@ command: mpirun -n 5 vasp_std > vasp.out
 
 import logging
 
-from simmate.workflow_engine import Workflow, S3Workflow
+from simmate.workflow_engine import S3Workflow, Workflow
 
 
 class Customized__Vasp__UserConfig(Workflow):

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from django.shortcuts import render
-from django.db.models import F
 from django.contrib.auth.decorators import login_required
+from django.db.models import F
+from django.shortcuts import render
 
-from simmate.website.third_parties.forms import ChemicalSystemForm
 from simmate.database.third_parties import (
     AflowStructure,
     CodStructure,
@@ -12,6 +11,7 @@ from simmate.database.third_parties import (
     MatprojStructure,
     OqmdStructure,
 )
+from simmate.website.third_parties.forms import ChemicalSystemForm
 
 
 @login_required

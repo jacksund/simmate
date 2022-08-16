@@ -16,14 +16,12 @@ this provider after talking with their team.
 """
 
 from django.db import transaction
-
-from tqdm import tqdm
-from simmate.toolkit import Structure
 from mpds_client import MPDSDataRetrieval, MPDSDataTypes
+from tqdm import tqdm
 
 from simmate.database import connect
-
 from simmate.database.third_parties.mpds import MpdsStructure
+from simmate.toolkit import Structure
 
 
 @transaction.atomic

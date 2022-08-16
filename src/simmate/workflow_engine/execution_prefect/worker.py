@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import anyio
+import logging
 import time
 import uuid
 from functools import cached_property
-import logging
 
+import anyio
+from prefect.agent import OrionAgent
 from prefect.client import get_client
 from prefect.exceptions import PrefectHTTPStatusError
-from prefect.agent import OrionAgent
-from prefect.settings import PREFECT_AGENT_QUERY_INTERVAL
 from prefect.orion.schemas.filters import FlowRunFilter  # FlowFilter,
+from prefect.settings import PREFECT_AGENT_QUERY_INTERVAL
 
 from simmate.utilities import async_to_sync
 

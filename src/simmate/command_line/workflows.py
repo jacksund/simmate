@@ -110,9 +110,9 @@ def explore():
 
     click.echo("\nGathering all available workflows...")
     from simmate.workflows.utilities import (
-        get_workflow_types,
         get_list_of_workflows_by_type,
         get_workflow,
+        get_workflow_types,
     )
 
     click.echo("\n\nWhat type of analysis are you interested in?")

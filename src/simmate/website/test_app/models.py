@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from simmate.database.base_data_types import (
-    DatabaseTable,
-    table_column,
-    Structure,
     Calculation,
+    DatabaseTable,
     Forces,
+    Structure,
     Thermodynamics,
+    table_column,
 )
 
 

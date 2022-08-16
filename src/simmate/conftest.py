@@ -21,9 +21,9 @@ import pytest
 from click.testing import CliRunner
 from django.contrib.auth.models import User
 
-from simmate.utilities import get_directory
-from simmate.toolkit import Structure, Composition, base_data_types
 from simmate.database.base_data_types import Spacegroup
+from simmate.toolkit import Composition, Structure, base_data_types
+from simmate.utilities import get_directory
 from simmate.website.test_app.models import TestStructure
 
 COMPOSITIONS_STRS = [

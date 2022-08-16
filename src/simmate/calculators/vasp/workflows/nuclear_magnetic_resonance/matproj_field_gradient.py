@@ -2,11 +2,11 @@
 
 from pymatgen.core import Species
 
-from simmate.toolkit import Structure
 from simmate.calculators.vasp.inputs import Incar
 from simmate.calculators.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
+from simmate.toolkit import Structure
 
 
 class Nmr__Vasp__MatprojFieldGradient(StaticEnergy__Vasp__Matproj):

@@ -2,8 +2,8 @@
 
 from pymatgen.analysis.elasticity.strain import Strain, convert_strain_to_deformation
 
-from simmate.toolkit.transformations.base import Transformation
 from simmate.toolkit.creators.vector import UniformlyDistributedVectors
+from simmate.toolkit.transformations.base import Transformation
 
 
 class LatticeStrain(Transformation):
