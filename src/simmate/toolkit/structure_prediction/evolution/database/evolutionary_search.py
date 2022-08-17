@@ -520,7 +520,13 @@ class EvolutionarySearch(DatabaseTable):
         df.to_csv(csv_filename)
 
     def write_individuals_completed(self, directory: Path):
-        columns = ["id", "energy_per_atom", "updated_at", "source"]
+        columns = [
+            "id",
+            "energy_per_atom",
+            "updated_at",
+            "source",
+            "spacegroup__number",
+        ]
         df = (
             self.individuals_completed.order_by(self.fitness_field)
             .only(*columns)
@@ -544,6 +550,9 @@ class EvolutionarySearch(DatabaseTable):
             return source.get("creator", None) or source.get("transformation", None)
 
         df["source"] = df.source.apply(format_source)
+
+        # shorten the column name for easier reading
+        df.rename(columns={"spacegroup__number": "spacegroup"}, inplace=True)
 
         md_filename = directory / "individuals_completed.md"
         df.to_markdown(md_filename)
