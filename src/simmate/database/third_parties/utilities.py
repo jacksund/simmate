@@ -56,7 +56,7 @@ def load_default_sqlite3_build():
     """
     # DEV NOTE: the prebuild filename is updated when new versions call for it.
     # Therefore, this value hardcoded specifically for each simmate version
-    archive_filename = "prebuild-2022-08-11.zip"
+    archive_filename = "prebuild-2022-08-17.zip"
 
     # Make sure the backend is using SQLite3 as this is the only allowed format
     assert DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
@@ -72,12 +72,14 @@ def load_default_sqlite3_build():
         # Download the archive zip file from the URL to the current working dir
         logging.info("Downloading database file...")
         urllib.request.urlretrieve(remote_archive_link, archive_filename_full)
-        logging.info("Done.")
+        logging.info("Done downloading.")
     else:
         logging.info(
             f"Found past download at {archive_filename_full}. Using archive as base."
         )
-
+    
+    
+    logging.info("Unpacking prebuilt to active database...")
     # uncompress the zip file to archive directory
     shutil.unpack_archive(
         archive_filename_full,
@@ -88,3 +90,4 @@ def load_default_sqlite3_build():
     db_filename_orig = archive_filename_full.with_suffix(".sqlite3")  # was .zip
     db_filename_new = DATABASES["default"]["NAME"]
     shutil.move(db_filename_orig, db_filename_new)
+    logging.info("Done unpacking.")

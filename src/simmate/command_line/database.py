@@ -48,8 +48,8 @@ def reset(confirm_delete, use_prebuilt):
             "It looks like you are using the default database backend (sqlite3). "
             "Would you like to use a prebuilt-database with all third-party data "
             "already loaded? If this is the first time you using the prebuild, "
-            "this will involve a ~3GB download and will unpack to roughly 7GB. A "
-            "backup of the download will be stored as well (so another ~3GB disk "
+            "this will involve a ~1.5GB download and will unpack to roughly 5GB. A "
+            "backup of the download will be stored as well (so another ~1.5GB disk "
             "space will be used). We recommend answering 'yes' for beginners."
         )
 

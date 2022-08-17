@@ -30,7 +30,7 @@ def start_cluster(
         )
         all_popens.append(popen)
 
-    logging.info(f"A total of {nworkers} have been started.")
+    logging.info(f"A total of {nworkers} workers have been started.")
     logging.info("Waiting until all workers workers shut down...")
 
     # Now just wait for the process to finish. Note we use communicate
