@@ -77,8 +77,7 @@ def load_default_sqlite3_build():
         logging.info(
             f"Found past download at {archive_filename_full}. Using archive as base."
         )
-    
-    
+
     logging.info("Unpacking prebuilt to active database...")
     # uncompress the zip file to archive directory
     shutil.unpack_archive(
