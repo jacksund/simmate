@@ -21,6 +21,10 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Refactors**
 **Fixes**
 -->
+- no new changes have been merged into the `main` branch yet
+
+
+# v0.9.0 (2022.08.17)
 
 **Enhancements**
 - improve the warning associated with workflow failure because of "command not found" issues
@@ -39,6 +43,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Fixes**
 - fixed when `source` is not being registered by several workflows
+
 
 
 # v0.8.0 (2022.08.11)
