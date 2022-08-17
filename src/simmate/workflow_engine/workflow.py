@@ -1234,7 +1234,7 @@ class Workflow:
         # to be in a JSON-serialized form for the database
         if "source" in register_kwargs_cleaned:
             register_kwargs_cleaned["source"] = cls._serialize_parameters(
-                source=kwargs["source"]
+                source=kwargs.get("source", None)
             )["source"]
             # !!! This is a hacky bug fix that needs refactored
 
