@@ -31,7 +31,7 @@ def run_cluster(
     n_workers: int = None,
     **cluster_kwargs,
 ) -> SpecCluster:
-    
+
     try:
         import dask_jobqueue
     except:

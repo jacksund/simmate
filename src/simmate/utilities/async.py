@@ -53,7 +53,7 @@ try:
     # HERE --> we are in Spyder or an ipython terminal
 
     import nest_asyncio
-    
+
     try:
         nest_asyncio
     except:
@@ -69,5 +69,5 @@ except RuntimeError:
     # When possible, we'd like to switch to the django-recommended decorator,
     # it's use is more robust and ensures best practices.
     # https://docs.djangoproject.com/en/4.0/topics/async/#async-adapter-functions
-    
+
     from asgiref.sync import async_to_sync
