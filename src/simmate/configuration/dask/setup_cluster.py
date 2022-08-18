@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import dask_jobqueue
 from dask.distributed import LocalCluster
 from distributed.deploy.spec import SpecCluster
 
@@ -32,6 +31,14 @@ def run_cluster(
     n_workers: int = None,
     **cluster_kwargs,
 ) -> SpecCluster:
+
+    try:
+        import dask_jobqueue
+    except:
+        raise Exception(
+            "To use this method, Dask-Jobqueue is required. Please install it "
+            "with `conda install -c conda-forge dask_jobqueue"
+        )
 
     # make sure we have a legal cluster type
     if cluster_type not in ALLOWED_CLUSTER_TYPES:

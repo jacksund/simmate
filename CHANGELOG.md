@@ -21,7 +21,13 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Refactors**
 **Fixes**
 -->
-- no new changes have been merged into the `main` branch yet
+
+**Refactors**
+- isolate optional dependencies so that our install is smaller
+
+**Fixes**
+- fix `module not found` error by adding ASE to dependencies
+
 
 
 # v0.9.0 (2022.08.17)
