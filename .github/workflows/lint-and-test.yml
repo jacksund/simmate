@@ -68,6 +68,11 @@ jobs:
         conda info
         conda list
 
+    - name: Check dependencies
+      shell: bash -l {0}
+      run: |
+        pip check
+
     - name: Run default tests
       shell: bash -l {0}
       run: |
@@ -75,8 +80,3 @@ jobs:
     # "-vv" makes the pytest output verbose so errors are more useful
     # and "duration=0" has pytest print how long every test took. We ask for
     # the 15 slowest ones.
-
-    # Marked tests can be dropped for now. I'll re-add this test when needed.
-    # - name: Run no_django_setup tests
-    #   run: |
-    #     pytest -m no_django_setup -p no:django

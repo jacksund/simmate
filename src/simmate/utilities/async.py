@@ -48,11 +48,18 @@ def async_to_sync(to_await):
 # we are within an ipython console (like in Spyder or Jupyter notebooks).
 # If not, there is a normal async_to_sync that we can use.
 try:
-    loop = asyncio.get_running_loop()  # will fail no loop is available
+    loop = asyncio.get_running_loop()  # will fail when no loop is available
 
     # HERE --> we are in Spyder or an ipython terminal
 
     import nest_asyncio
+    
+    try:
+        nest_asyncio
+    except:
+        raise ModuleNotFoundError(
+            "You must install nest_asyncio with `conda install -c conda-forge nest_asyncio`"
+        )
 
     nest_asyncio.apply()
 
@@ -62,5 +69,5 @@ except RuntimeError:
     # When possible, we'd like to switch to the django-recommended decorator,
     # it's use is more robust and ensures best practices.
     # https://docs.djangoproject.com/en/4.0/topics/async/#async-adapter-functions
-
+    
     from asgiref.sync import async_to_sync

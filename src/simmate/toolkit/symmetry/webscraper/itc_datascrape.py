@@ -15,8 +15,15 @@ spacegroup 166, I can see:
 
 
 import pandas as pd
-from selenium import webdriver
 from tqdm import tqdm
+
+try:
+    from selenium import webdriver
+except:
+    raise Exception(
+        "To use this method, Selenium is required. Please install it "
+        "with `conda install -c conda-forge selenium"
+    )
 
 # launch the webbrowser
 driver = webdriver.Chrome(

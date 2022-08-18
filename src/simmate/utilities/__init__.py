@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .async_wrapper import async_to_sync
 from .files import (
     archive_old_runs,
     copy_directory,
