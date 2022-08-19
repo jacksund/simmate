@@ -7,6 +7,12 @@
 #   https://github.com/digitalocean/sample-dockerfile
 #   https://github.com/digitalocean/sample-python
 
+
+# TO RUN THIS FILE: (be sure to update version)
+# cd ~/Documents/github/simmate/
+# docker build -t jacksund/simmate:v0.9.0 -f .do/Dockerfile .
+# docker push jacksund/simmate:v0.9.0
+
 # Consider switching to latest instead of fixed version
 #   https://hub.docker.com/_/ubuntu
 FROM ubuntu:22.04
