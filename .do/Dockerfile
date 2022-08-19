@@ -10,16 +10,15 @@
 
 # TO RUN THIS FILE: (be sure to update version)
 # cd ~/Documents/github/simmate/
+# docker login -u jacksund
 # docker build -t jacksund/simmate:v0.9.0 -f .do/Dockerfile .
 # docker push jacksund/simmate:v0.9.0
 
 # Consider switching to latest instead of fixed version
 #   https://hub.docker.com/_/ubuntu
-#FROM ubuntu:22.04
+FROM ubuntu:22.04
 
-#WORKDIR /root/
-
-# This is our "build command", which installs Miniconda, Blender, Simmate, and all of Simmates dependencies
+WORKDIR /root/
 
 # Install OS dependencies
 # Many of these are for blender, where we got the full list from:
@@ -62,10 +61,13 @@ ENV CMD_PREFIX="conda run -n simmate_dev"
 
 # This line copies the github repo's contents into our image
 COPY . simmate_source
-RUN $CMD_PREFIX pip install ./simmate_source
+RUN $CMD_PREFIX pip install ./simmate_source && \
+    $CMD_PREFIX pip install gunicorn psycopg2
 
 # This is our "run command" that starts the Django server 
-# CMD ["HELLO"]
+# CMD $CMD_PREFIX gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi
+# --worker-tmp-dir is becuase of a DigitalOcean bug:
+# https://docs.digitalocean.com/products/app-platform/reference/dockerfile/
 
 # DEV NOTES:
 # I could alternatively use third-party builds for miniconda and blender.
