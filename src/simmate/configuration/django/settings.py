@@ -80,6 +80,21 @@ SECRET_KEY = os.getenv(
 
 # DATBASE CONNECTION
 
+# Normally in Django, you can set the database like so: (using Postgres)
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "NAME": "simmate-database-pool",  # default on DigitalOcean is defaultdb
+#         "USER": "doadmin",
+#         "PASSWORD": "dibi5n3varep5ad8",
+#         "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
+#         "PORT": 25061,
+#         "OPTIONS": {"sslmode": "require"},
+#         # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
+#     }
+# }
+# But this section instead determines the database through a series of checks.
+
 # There are three types of database files that we check for -- in order of priority:
 #   1. database.yaml
 #   2. my_env-database.yaml
@@ -102,9 +117,9 @@ elif CONDA_DATABASE_YAML.exists():
     with CONDA_DATABASE_YAML.open() as file:
         DATABASES = yaml.full_load(file)
 
-# This is the default behavior
-# Our 3rd prioirity is a local sqlite database name "my_env-database.sqlite3"
 
+# Our 3rd prioirity is a local sqlite database name "my_env-database.sqlite3".
+# This is the default behavior.
 elif USE_LOCAL_DATABASE is True:
     DATABASES = {
         "default": {
@@ -114,11 +129,8 @@ elif USE_LOCAL_DATABASE is True:
     }
 
 # Lastly, if we make it to this point, we are likely using DigitalOcean and
-# running a server. When DigitalOcean runs the "collectstatic" command, we don't
-#  want to connect any database. So we use the "sys" library to look at the
-# command and ensure it doesn't involve "collectstatic". Otherwise we use the
-# URL that is set with our enviornment variable.
-elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
+# running a server. Then DATABASE_URL should be set in the ENV
+else:
     # ensure that we have the database URL properly configured in DigitalOcean
     if os.getenv("DATABASE_URL", None) is None:
         raise Exception("DATABASE_URL environment variable not defined")
@@ -126,20 +138,6 @@ elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
     DATABASES = {
         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
     }
-
-# Here is an example of connecting to a Postgres server normally...
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql_psycopg2",
-#         "NAME": "simmate-database-pool",  # default on DigitalOcean is defaultdb
-#         "USER": "doadmin",
-#         "PASSWORD": "dibi5n3varep5ad8",
-#         "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-#         "PORT": 25061,
-#         "OPTIONS": {"sslmode": "require"},  # !!! is this needed?
-#         # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
-#     }
-# }
 
 # --------------------------------------------------------------------------------------
 
