@@ -20,6 +20,13 @@ FROM ubuntu:22.04
 
 WORKDIR /root/
 
+# Setup up env variables. We do this before installing
+# simmate + deps to keep the layer sizes down.
+ENV PATH=/root/miniconda/bin:$PATH
+ENV CMD_PREFIX="conda run -n simmate_dev"
+ENV DJANGO_SETTINGS_MODULE="simmate.configuration.django.settings"
+ENV DEBUG=False
+
 # Install OS dependencies
 # Many of these are for blender, where we got the full list from:
 #   https://wiki.blender.org/wiki/Building_Blender/Linux/Ubuntu
@@ -50,27 +57,20 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
     bash miniconda.sh -b -p miniconda && \
     rm miniconda.sh
 
-# Make sure we are always using the simmate_dev env with
-# any commands below.
-
-# Setup up env variables. We do this before installing
-# simmate to keep the layer sizes down.
-ENV PATH=/root/miniconda/bin:$PATH
-ENV CMD_PREFIX="conda run -n simmate_dev"
-ENV DJANGO_SETTINGS_MODULE="simmate.configuration.django.settings"
-
 # Install Simmate's Python dependencies 
 COPY tutorials/Guides_for_contributors/environment.yaml .
 RUN conda env update -f environment.yaml
 
 # This line copies the github repo's contents into our image
 COPY . simmate_source
-RUN $CMD_PREFIX pip install ./simmate_source && \
-    $CMD_PREFIX pip install gunicorn psycopg2
+RUN $CMD_PREFIX pip install -e ./simmate_source && \
+    $CMD_PREFIX pip install gunicorn psycopg2 && \
+    $CMD_PREFIX django-admin collectstatic
 
-# This is our "run command" that starts the Django server 
-# CMD $CMD_PREFIX gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi
-# --worker-tmp-dir is becuase of a DigitalOcean bug:
+# This is our "run command" that starts the Django server
+CMD $CMD_PREFIX gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi
+# Note, using $CMD_PREFIX does not work for some reason.
+# The 'worker-tmp-dir' is becuase of a DigitalOcean bug:
 # https://docs.digitalocean.com/products/app-platform/reference/dockerfile/
 
 # DEV NOTES:
