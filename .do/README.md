@@ -293,3 +293,10 @@ This build fails at the moment, but I still include the `Dockerfile` and `deploy
 Taha Fatima was trying help troubleshoot, but I dropped my attempt once I ran into "memory exceeded" errors during my build. Taha mentioned that this can be fixed using Github Actions, so the following links would be the  best place to give this another attempt:
   - https://github.com/digitalocean/app_action
   - https://github.com/tahafatimaDO/test-DOCR
+
+Docker docs on building images automatically using github actions:
+- https://docs.docker.com/docker-hub/builds/link-source/
+- https://docs.docker.com/docker-hub/repos/
+
+Open-source projects might be able to get GithubActions+DockerHub for free:
+- https://www.docker.com/community/open-source/application/
