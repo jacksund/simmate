@@ -97,5 +97,5 @@ ENV PATH /opt/conda/bin:$PATH
 #ENV CMD_PREFIX="conda run -n simmate_dev"
 #
 # This line copies the github repo's contents into our image
-#COPY . simmate_source
-#RUN $CMD_PREFIX pip install ./simmate_source
+COPY . simmate_source
+RUN $CMD_PREFIX pip install ./simmate_source
