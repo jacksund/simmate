@@ -49,15 +49,19 @@ RUN wget https://download.blender.org/release/Blender3.1/blender-3.1.0-linux-x64
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
     bash miniconda.sh -b -p miniconda && \
     rm miniconda.sh
-# Add conda to the path
+
+# Make sure we are always using the simmate_dev env with
+# any commands below.
+
+# Setup up env variables. We do this before installing
+# simmate to keep the layer sizes down.
 ENV PATH=/root/miniconda/bin:$PATH
+ENV CMD_PREFIX="conda run -n simmate_dev"
+ENV DJANGO_SETTINGS_MODULE="simmate.configuration.django.settings"
 
 # Install Simmate's Python dependencies 
 COPY tutorials/Guides_for_contributors/environment.yaml .
 RUN conda env update -f environment.yaml
-# Make sure we are always using the simmate_dev env with
-# any commands below.
-ENV CMD_PREFIX="conda run -n simmate_dev"
 
 # This line copies the github repo's contents into our image
 COPY . simmate_source
