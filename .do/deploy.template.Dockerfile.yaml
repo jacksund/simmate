@@ -4,24 +4,29 @@
 # For details on the specification see... 
 #   https://docs.digitalocean.com/products/app-platform/references/app-specification-reference/
 
+# This is the app spec for the working version. I store it here
+# for future reference
 databases:
 - engine: PG
-  name: db-test
+  name: db-test-dockerstatic
   num_nodes: 1
   size: basic-xs
   version: "12"
-name: monkfish-app
+envs:
+- key: DJANGO_ALLOWED_HOSTS
+  scope: RUN_AND_BUILD_TIME
+  value: ${APP_DOMAIN}
+- key: DEBUG
+  scope: RUN_AND_BUILD_TIME
+  value: "False"
+- key: DJANGO_SECRET_KEY
+  scope: RUN_AND_BUILD_TIME
+  type: SECRET
+  value: EV[1:UzGN6BEKhJRtaJsUxJvjSa8xG1Wp9z6x:+4DPyGS1zXN61KVHMwWiIt64UCVTO13jjD3KL0yMVDr9yM2GPzUBeZmJObCkDTJEztPZnif919oSeyhaCHVa8ez/]
+name: seal-app
 region: nyc
 services:
-- envs:
-  - key: DJANGO_ALLOWED_HOSTS
-    scope: RUN_AND_BUILD_TIME
-    value: ${APP_DOMAIN}
-  - key: DJANGO_SECRET_KEY
-    scope: RUN_AND_BUILD_TIME
-    type: SECRET
-    value: EV[1:rwoXEbQyIu3MgO2pXNrloPiAFScgcHFt:KbyRWPP/XvcER/krbkUndaCvo32x8Aoh+f94EgWmEyOf3m3mIRcWh2PIr7RdE2pdYNL3rpkLKLSlVlp5HFP2VVAC]
-  http_port: 8080
+- http_port: 8080
   image:
     registry: jacksund
     registry_type: DOCKER_HUB
@@ -32,4 +37,14 @@ services:
   name: jacksund-simmate
   routes:
   - path: /
-  run_command: conda run -n simmate_dev gunicorn --worker-tmp-dir /dev/shm simmate.website.core.wsgi
+static_sites:
+- environment_slug: python
+  github:
+    branch: fix-docker
+    deploy_on_push: true
+    repo: jacksund/simmate
+  name: simmate-static
+  output_dir: /src/simmate/website/static
+  routes:
+  - path: /static
+  source_dir: /
