@@ -11,7 +11,7 @@ body:
 
         **PLEASE READ THIS PARAGRAPH - this helps us identify the root cause and fix the issue:**
 
-        If you have a question about getting started or how a feature works, please report your question via our [Discussions Page](https://github.com/jacksund/simmate/discussions/categories/q-a). In many cases, an error message corresponds to using Simmate incorrectly rather than a bug. If you're unsure, stick to a discussion post. We'll then investigate any issues and open a bug report when necessary.
+        If you have a question about getting started or how a feature works, please report your question via our [Discussions Page](https://github.com/jacksund/simmate/discussions/categories/q-a).
 
         If you indeed have a bug, it helps to include things like the structure you used, the code, & input files while completing this form. For the code, try not to add long scripts if the error is only happening in one small part of it. Instead, try to generate your issue/error with as little code as possible or even using a illustrative example.
 

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# This file is for running Django's configuration commands. While Simmate
-# makes these commands available through the django-admin command, we still
-# include this file because DigitalOcean uses it for their App Platform.
-# Beginners can just ignore this file.
+"""
+This file is for running Django's configuration commands. While Simmate
+makes these commands available through the django-admin command, we still
+include this file because DigitalOcean uses it for their App Platform.
+Beginners can just ignore this file.
+"""
 
 import os
 import sys
