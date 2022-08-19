@@ -1,7 +1,7 @@
 # This file sets up the environment for DigitalOcean to use on it's app platform.
 # It is therefore only relevent if you are serving a Simmate website in production.
 # We need this because we'd like to install all packages using Anaconda and 
-# we'd also like to have Blender installed using the snapcraft store.
+# we'd also like to have Blender installed as well.
 #
 # This file was modified from DigitalOcean's examples located at...
 #   https://github.com/digitalocean/sample-dockerfile
@@ -44,7 +44,7 @@ RUN apt-get update && \
 RUN wget https://download.blender.org/release/Blender3.1/blender-3.1.0-linux-x64.tar.xz -O blender.tar.xz && \
     tar -xvf blender.tar.xz --strip-components=1 -C /bin && \
     rm blender.tar.xz
-# Blender is automaticall added to path
+# Blender is automatically added to path
 
 # Download and install Miniconda
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
