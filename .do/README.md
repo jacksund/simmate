@@ -4,8 +4,8 @@
 
 In this guide, you will learn how to setup a cloud database and webserver for Simmate using DigitalOcean.
 
-1. [Setting up an account](#setting-up-an-account)
-2. [Autotomic setup: DigitalOcean database and servers in a few clicks](#autotomically-setting-up-our-digitalocean-database-and-servers)
+1. [Create an account](#create-an-account)
+2. [Automatic setup](#automatic-setup)
 2. [Manual setup (stage 1): Setting up our PostgreSQL Database](#stage-1-setting-up-our-postgresql-database)
     - [creating the cloud database](#creating-the-database-server)
     - [connecting to the database](#connecting-to-the-database)
@@ -17,23 +17,20 @@ In this guide, you will learn how to setup a cloud database and webserver for Si
 <br/><br/>
 
 
-## Setting up an account
+## Create an account
 
 To start, make an account on DigitalOcean using [this link](https://m.do.co/c/8aeef2ea807c) (which uses our refferal). We recommend using your Github account to sign in. This referral link does two things:
 
 1. DigitialOcean gives you $100 credit for servers (for 60 days)
 2. DigitialOcean gives the Simmate team $10 credit, which will help fund our servers
 
-If you have issues with this, please make sure that DigitalOcean is still actually offering this deal [here](https://try.digitalocean.com/freetrialoffer/). Simmate is not affiliated with DigitalOcean, so please contact them with issues!
+If you have any issues, please make sure that DigitalOcean is still actually offering this deal [here](https://try.digitalocean.com/freetrialoffer/). Simmate is not affiliated with DigitalOcean.
 
 <br/>
 
-## Autotomically setting up our DigitalOcean database and servers
+## Automatic setup
 
-This button below will launch a new DigitalOcean app (server+database) using a template from our team. Make sure you have already signed-in to your DigitalOcean account before opening the link. 
-
-Once open, you can provide your Prefect API key (optional) and a  secret key for Django.
-
+The button below will launch a new DigitalOcean app (server+database) using a template from our team. Make sure you have already signed-in to your DigitalOcean account before opening the link:
 
 <!-- button that starts up DigitalOcean app -->
 <a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/jacksund/simmate/tree/main&refcode=8aeef2ea807c">
@@ -46,9 +43,9 @@ Steps to set up servers on DigitalOcean:
 
 1. Make sure you created a DigitalOcean account (you can use your Github account) and are signed in
 2. Select the "Deploy to DigitalOcean" button above. On this new page, you'll see "Python Detected".
-3. Under "Environment Variables", update `DJANGO_SECRET_KEY` to a random password using only numbers and letters. You can use [this random-password site](https://passwordsgenerator.net/) to generate your random key.
-4. (if you'd like to use Prefect) Under "Environment Variables", update `PREFECT__CLOUD__API_KEY` to an API key from your [Prefect dashboard](https://cloud.prefect.io/team/service-accounts). You can also use your github account for Prefect.
-5. Move on to the next page, and complete the information as you see fit! When selecting server size, you can go as small as you'd like -- even the basic plan for 500MB + 1CPU will suffice. Note, the starter database is can be switched out later on.
+3. Under "Environment Variables", update `DJANGO_SECRET_KEY` to a random password using only numbers and letters. You can use [this random-password site](https://djecrety.ir/) to generate your random key.
+4. (if you'd like to use Prefect, which not recommended at this time) Under "Environment Variables", update `PREFECT__CLOUD__API_KEY` to an API key from your [Prefect dashboard](https://cloud.prefect.io/team/service-accounts). You can also use your github account for Prefect.
+5. Move on to the next page, and complete the information as you see fit! When selecting server size, you can go as small as you'd like -- even the basic plan for 500MB + 1CPU will suffice ($5/mo at the time of writing this guide). Note, the starter database is can be switched out later on.
 6. Once you launch your app, the first build can take 15-30 minutes. Once complete, you should be able to view your new Simmate website at the link shown.
 7. The website won't work properly right away. This is because we haven't built database tables. Go to the "Console" tab and initalize your database with...
 ``` bash
