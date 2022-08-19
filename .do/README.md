@@ -300,3 +300,6 @@ Docker docs on building images automatically using github actions:
 
 Open-source projects might be able to get GithubActions+DockerHub for free:
 - https://www.docker.com/community/open-source/application/
+
+I could also use DigitalOcean to store images, but this is meant for private images, which we don't want:
+- https://cloud.digitalocean.com/registry
