@@ -59,12 +59,9 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 # enviornment variable isn't set yet, then we just defaul to the localhost.
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
-# This decides wether we use a local sqlite database. The order of priority for
-# databases goes...
-#   (1) Check for a "database.yaml" file in the user's home directory
-#   (2) Check for the USE_LOCAL_DATABASE enviornment variable (defaults to True)
-#   (3) If USE_LOCAL_DATABASE=False, then check for DATABASE_URL enviornment variable
-USE_LOCAL_DATABASE = os.getenv("USE_LOCAL_DATABASE", "True") == "True"
+# This is for setting the database via an connection URL. This is done as
+# an environment variable to allow setup with DigitalOcean
+DATABASE_URL = os.getenv("DATABASE_URL", None)
 # this is not a typical Django setting
 
 # Keep the secret key used in production secret!
@@ -98,8 +95,8 @@ SECRET_KEY = os.getenv(
 # There are three types of database files that we check for -- in order of priority:
 #   1. database.yaml
 #   2. my_env-database.yaml
-#   3. my_env-database.sqlite3 (if USE_LOCAL_DATABASE=True) <-- and create this if doesn't exist
-#   4. use a DATABASE_URL env variable
+#   3. use a DATABASE_URL env variable
+#   4. my_env-database.sqlite3 <-- and create this if doesn't exist
 DATABASE_YAML = SIMMATE_DIRECTORY / "database.yaml"
 CONDA_DATABASE_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-database.yaml"
 CONDA_DATABASE_SQLITE3 = SIMMATE_DIRECTORY / f"{CONDA_ENV}-database.sqlite3".strip("-")
@@ -118,25 +115,22 @@ elif CONDA_DATABASE_YAML.exists():
         DATABASES = yaml.full_load(file)
 
 
-# Our 3rd prioirity is a local sqlite database name "my_env-database.sqlite3".
-# This is the default behavior.
-elif USE_LOCAL_DATABASE is True:
+# Our 3rd prioirity is Digital Ocean setup.
+# Lastly, if we make it to this point, we are likely using DigitalOcean and
+# running a server. Here, we simply require a ENV variable to be set.
+elif DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(DATABASE_URL),
+    }
+
+# Our final prioirity is a local sqlite database name "my_env-database.sqlite3".
+# This is the default setting used when simmate is first installed.
+else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": CONDA_DATABASE_SQLITE3,
         }
-    }
-
-# Lastly, if we make it to this point, we are likely using DigitalOcean and
-# running a server. Then DATABASE_URL should be set in the ENV
-else:
-    # ensure that we have the database URL properly configured in DigitalOcean
-    if os.getenv("DATABASE_URL", None) is None:
-        raise Exception("DATABASE_URL environment variable not defined")
-    # Now connect our DigitalOcean to this database!
-    DATABASES = {
-        "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
     }
 
 # --------------------------------------------------------------------------------------

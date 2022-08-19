@@ -245,11 +245,8 @@ This section follows the tutorials listed here. If you are struggling with our g
 DJANGO_ALLOWED_HOSTS=${APP_DOMAIN}
 DEBUG=False
 DJANGO_SECRET_KEY=randomly-generated-passord-12345
-USE_LOCAL_DATABASE=False
-PREFECT__CLOUD__API_KEY=your-prefect-api-key
 ```
 > note to simmate devs: [consider switching to setting all database variables directly](https://docs.digitalocean.com/products/app-platform/how-to/use-environment-variables/)
-> note for prefect: in the future, I may want to link API keys to profiles so that we can submit to proper clouds -- rather than assume all go through a single prefect account.
 
 6. Change our "Build Command" to... (`pip install .` is ran automatically)
 ```

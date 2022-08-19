@@ -49,6 +49,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Fixes**
 - fixed when `source` is not being registered by several workflows
+- fix docker image for installing anaconda, blender, and simmate on ubuntu
 
 
 
