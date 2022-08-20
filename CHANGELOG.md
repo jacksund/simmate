@@ -22,6 +22,9 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
+**Enhancements**
+- add NEB base classes to inherit from for making new subflows
+
 **Refactors**
 - isolate optional dependencies so that our install is smaller
 

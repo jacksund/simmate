@@ -146,7 +146,7 @@ class SimmateAPIViewSet(GenericViewSet):
             intial_queryset = intial_queryset.select_related("spacegroup")
 
         NewViewSet = type(
-            f"{table.__name__}ViewSet",
+            f"{table.table_name}ViewSet",
             (cls,),
             dict(
                 queryset=intial_queryset,

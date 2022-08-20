@@ -18,13 +18,15 @@ from matminer.featurizers.structure.sites import (  # PartialsSiteStatsFingerpri
     SiteStatsFingerprint,
 )
 
+from simmate.toolkit.validators.base import Validator
+
 logging.warning(
     "PartialsSiteStatsFingerprint current acts as a SiteStatsFingerprint. "
     "We are waiting on a new MatMiner release to fix this issue."
 )
 
 
-class PartialCrystalNNFingerprint:
+class PartialCrystalNNFingerprint(Validator):
     def __init__(
         self,
         composition,

@@ -174,7 +174,7 @@ class EvolutionarySearch(DatabaseTable):
         # singleshot_sources_db = []
         # for source in self.singleshot_sources:
         #     source_db = SourceDatatable(
-        #         name=source.__class__.__name__,
+        #         name=source.table_name,
         #         is_steadystate=False,
         #         is_singleshot=True,
         #         search=self.search_datatable,

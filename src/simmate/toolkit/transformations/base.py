@@ -32,6 +32,15 @@ class Transformation(ABC):
     see https://pymatgen.org/pymatgen.transformations.transformation_abc.html
     """
 
+    @classmethod
+    @property
+    def name(cls):
+        """
+        A nice string name for the transformation. By default it just returns
+        the name of this class.
+        """
+        return cls.__name__
+
     @property
     # @abstractmethod #!!! uncomment when I no longer assume the value
     def io_type(self):
@@ -91,8 +100,8 @@ class Transformation(ABC):
         **kwargs,  # for apply_transformation_with_validation
     ):
 
-        logging.info(f"Creating a transformed structure with {self.__class__.__name__}")
-        logging.info(f"Parent(s) will be selected using {selector.__class__.__name__}")
+        logging.info(f"Creating a transformed structure with {self.name}")
+        logging.info(f"Parent(s) will be selected using {selector.name}")
 
         # grab parent structures using the selection method
         parent_ids, parent_structures = selector.select_from_datatable(
@@ -160,7 +169,7 @@ class Transformation(ABC):
                         # try the loop again.
                         logging.debug(
                             "Generated structure failed validation by "
-                            f"{validator.__class__.__name__}. Trying again."
+                            f"{validator.name}. Trying again."
                         )
                         new_structure = None
 

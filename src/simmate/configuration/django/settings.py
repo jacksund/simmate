@@ -6,7 +6,6 @@ database backend being used.
 """
 
 import os
-import sys
 from pathlib import Path
 
 import dj_database_url  # needed for DigitalOcean database connection
@@ -14,9 +13,6 @@ import yaml
 
 from simmate import website  # needed to specify location of built-in apps
 from simmate.utilities import get_conda_env, get_directory
-
-# from django.core.management.utils import get_random_secret_key
-
 
 # --------------------------------------------------------------------------------------
 
@@ -72,6 +68,7 @@ SECRET_KEY = os.getenv(
 )
 # !!! I removed get_random_secret_key() so I don't have to sign out every time
 # while testing my server. I may change this back in the future.
+# from django.core.management.utils import get_random_secret_key
 
 # --------------------------------------------------------------------------------------
 

@@ -7,6 +7,15 @@ from dask.diagnostics import ProgressBar
 
 
 class Validator(ABC):
+    @classmethod
+    @property
+    def name(cls):
+        """
+        A nice string name for the validator. By default it just returns the name
+        of this class.
+        """
+        return cls.__name__
+
     @abstractmethod
     def check_structure(self, structure):
         # User needs to define this function where one structure is input.

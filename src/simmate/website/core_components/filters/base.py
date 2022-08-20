@@ -100,7 +100,7 @@ class DatabaseTableFilter(filters.FilterSet):
         # First we need to grab the parent mixin classes of the table. For example,
         # the MatprojStructure uses the database mixins ['Structure', 'Thermodynamics']
         # while MatprojStaticEnergy uses ["StaticEnergy"].
-        mixin_names = [base.__name__ for base in table.__bases__]
+        table_mixin_names = table.get_mixin_names()
 
         # Because our Forms follow the same naming conventions as
         # simmate.database.base_data_types, we can simply use these mixin names to
@@ -109,7 +109,7 @@ class DatabaseTableFilter(filters.FilterSet):
         filter_mixins = [cls]
         filter_mixins += [
             getattr(simmate_filters, name)
-            for name in mixin_names
+            for name in table_mixin_names
             if hasattr(simmate_filters, name)
         ]
 
@@ -141,6 +141,6 @@ class DatabaseTableFilter(filters.FilterSet):
         # these forms elsewhere, so there's no need to set it now.
 
         # Now we dynamically create a new form class that we can return.
-        NewClass = type(table.__name__, tuple(filter_mixins), extra_attributes)
+        NewClass = type(table.table_name, tuple(filter_mixins), extra_attributes)
 
         return NewClass

@@ -49,7 +49,7 @@ class ElectronicStructureWorkflow(Workflow):
 
         dos_state = cls.density_of_states_workflow.run(
             structure={
-                "database_table": cls.static_energy_workflow.database_table.__name__,
+                "database_table": cls.static_energy_workflow.database_table.table_name,
                 "directory": static_result["directory"],
             },
             command=command,
@@ -59,7 +59,7 @@ class ElectronicStructureWorkflow(Workflow):
 
         bs_state = cls.band_structure_workflow.run(
             structure={
-                "database_table": cls.static_energy_workflow.database_table.__name__,
+                "database_table": cls.static_energy_workflow.database_table.table_name,
                 "directory": static_result["directory"],
             },
             command=command,
