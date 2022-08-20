@@ -48,6 +48,8 @@ def load_remote_archives(**kwargs):
     logging.info("Loading COD data")
     CodStructure.load_remote_archive(**kwargs)  # BUG: this crashes the IDE.
 
+    logging.info("Success! Your database now contains all third-party data.")
+
 
 def load_default_sqlite3_build():
     """

@@ -24,9 +24,12 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Enhancements**
 - add NEB base classes to inherit from for making new subflows
+- improve formatting of logging and cli using `typer` and `rich`
+- cli now supports auto-completion to help with long commands
 
 **Refactors**
 - isolate optional dependencies so that our install is smaller
+- remove click in favor of higher-level package (typer)
 
 **Fixes**
 - fix `module not found` error by adding ASE to dependencies

@@ -5,38 +5,33 @@ This defines commands for managing your Simmate workflow engine. All commands ar
 accessible through the "simmate workflow-engine" command.
 """
 
-import pathlib
+from pathlib import Path
 
-import click
+import typer
+
+utilities_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@click.group()
+@utilities_app.callback()
 def utilities():
     """
-    A group of commands for various simple tasks - such as file handling.
+    A group of commands for various simple tasks (such as file handling)
     """
     pass
 
 
-@utilities.command()
-@click.argument(
-    "directory",
-    default=pathlib.Path.cwd(),
-    type=click.Path(exists=True, path_type=pathlib.Path),
-)
-@click.option(
-    "--time_cutoff",
-    "-t",
-    default=3 * 7 * 24 * 60 * 60,  # equal to 3 weeks
-    type=float,
-    help=(
-        "if the queue is empty, the time (in seconds) the worker should wait"
-        " before checking the queue again"
-    ),
-)
-def archive_old_runs(directory, time_cutoff):
+@utilities_app.command()
+def archive_old_runs(
+    directory: Path = Path.cwd(),
+    time_cutoff: float = 3 * 7 * 24 * 60 * 60,  # equal to 3 weeks
+):
     """
-    This starts a Simmate Worker which will query the database for jobs to run.
+    Compresses old simmate-task-* folders to zip files
+
+    - `directory`: the folder to search for old runs
+
+    - `time_cutoff`: the time (in seconds) that a folder hasn't been editted in
+    order to consider the run "old"
     """
 
     from simmate.utilities import archive_old_runs
@@ -45,6 +40,6 @@ def archive_old_runs(directory, time_cutoff):
 
 
 # explicitly list functions so that pdoc doesn't skip them
-__all__ = [
-    "archive_old_runs",
-]
+# __all__ = [
+#     "archive_old_runs",
+# ]
