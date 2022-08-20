@@ -40,6 +40,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `start-cluster` command for starting many local workers
 - add `structure-prediction` workflows
 - add plotting/output utilities to `EvolutionarySearch` and `relaxation.vasp.staged`
+- add NEB base classes to inherit from for making new subflows
 
 
 **Refactors**
