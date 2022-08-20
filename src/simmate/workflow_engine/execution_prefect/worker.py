@@ -5,14 +5,21 @@ import time
 import uuid
 from functools import cached_property
 
-import anyio
-from prefect.agent import OrionAgent
-from prefect.client import get_client
-from prefect.exceptions import PrefectHTTPStatusError
-from prefect.orion.schemas.filters import FlowRunFilter  # FlowFilter,
-from prefect.settings import PREFECT_AGENT_QUERY_INTERVAL
+try:
+    import anyio
+    from prefect.agent import OrionAgent
+    from prefect.client import get_client
+    from prefect.exceptions import PrefectHTTPStatusError
+    from prefect.orion.schemas.filters import FlowRunFilter  # FlowFilter,
+    from prefect.settings import PREFECT_AGENT_QUERY_INTERVAL
 
-from simmate.utilities import async_to_sync
+    from simmate.utilities.async_wrapper import async_to_sync
+except:
+    raise Exception(
+        "Please install prefect with `conda install -c conda-forge prefect anyio`. "
+        "All prefect features will be broken until this is fixed"
+    )
+
 
 # This string is just something fancy to display in the console when a worker
 # starts up.
@@ -45,6 +52,7 @@ class PrefectWorker:
         timeout: float = None,
         close_on_empty_queue: bool = False,
     ):
+
         # This will be used when creating the queue
         self.concurrency_limit = concurrency_limit
 

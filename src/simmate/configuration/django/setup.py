@@ -6,6 +6,8 @@ import os
 import django
 from django.conf import settings
 
+from simmate.utilities import check_if_using_latest_version
+
 
 def setup_django():
     """
@@ -26,7 +28,14 @@ def setup_django():
     # BUG: originally I used the code below, but it didn't work with Prefect+Dask:
     #   if "DJANGO_SETTINGS_MODULE" in os.environ:
 
-    logging.info("Configuring database and workflows...")
+    # Check if there is a newer Simmate version available, and if the current
+    # installation is out of date, print a message for the user.
+    try:
+        check_if_using_latest_version()
+    except:
+        logging.warning("Unable to check if using the latest Simmate version.")
+
+    logging.info("Configuring database and workflows :hammer_and_wrench:")
     # The code below is the equiv of running 'python manage.py shell'
     # This sets up all of django for its full use. You can being importing
     # models after this is setup.
@@ -34,7 +43,7 @@ def setup_django():
         "DJANGO_SETTINGS_MODULE", "simmate.configuration.django.settings"
     )
     django.setup()
-    logging.info("Configuration complete.")
+    logging.info("Configuration complete :rocket:")
 
 
 # When I import this module, it automatically configures django for us, including

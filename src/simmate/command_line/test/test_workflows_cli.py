@@ -3,7 +3,7 @@
 import yaml
 
 from simmate.calculators.vasp.inputs import Potcar
-from simmate.command_line.workflows import workflows
+from simmate.command_line.workflows import workflows_app
 from simmate.conftest import make_dummy_files
 from simmate.workflow_engine import Workflow
 from simmate.workflow_engine.workflow import DummyState
@@ -11,7 +11,7 @@ from simmate.workflow_engine.workflow import DummyState
 
 def test_workflows_list_all(command_line_runner):
     # list the workflows
-    result = command_line_runner.invoke(workflows, ["list-all"])
+    result = command_line_runner.invoke(workflows_app, ["list-all"])
     assert result.exit_code == 0
 
 
@@ -19,14 +19,14 @@ def test_workflows_show_config(command_line_runner):
 
     # list the config for one workflow
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         ["show-config", "static-energy.vasp.mit"],
     )
     assert result.exit_code == 0
 
     # ensure the flow fails when a incorrect name is given
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         ["show-config", "non-existant-flow"],
     )
     assert result.exit_code == 1
@@ -36,7 +36,7 @@ def test_workflows_explore(command_line_runner):
 
     # Make sure it passes when args match
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         ["explore"],
         input="6\n2\n",  # gives 6 and then 2 for prompts
     )
@@ -44,11 +44,11 @@ def test_workflows_explore(command_line_runner):
 
     # Make sure it fails when args don't match
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         ["explore"],
         input="1\n99\n",  # gives 1 and then 99 for prompts
     )
-    assert result.exit_code == 1
+    assert result.exit_code == 2
 
 
 def test_workflows_setup_only(command_line_runner, structure, mocker, tmp_path):
@@ -71,7 +71,7 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmp_path):
 
     # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         [
             "setup-only",
             "static-energy.vasp.mit",
@@ -86,10 +86,10 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmp_path):
 
     # ensure failure when a nested workflow is given
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         ["setup-only", "relaxation.vasp.staged", cif_filename],
     )
-    assert result.exit_code == 1
+    assert result.exit_code == 2
 
 
 def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
@@ -113,7 +113,7 @@ def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
 
     # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         [
             "run",
             "static-energy.vasp.mit",
@@ -131,10 +131,10 @@ def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
 
     # ensure failure on improperly matched kwargs
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         ["run", "static-energy.vasp.mit", "hangingkwarg"],
     )
-    assert result.exit_code == 1
+    assert result.exit_code == 2
 
 
 def test_workflows_run_cloud(command_line_runner, structure, mocker, tmp_path):
@@ -158,7 +158,7 @@ def test_workflows_run_cloud(command_line_runner, structure, mocker, tmp_path):
 
     # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         [
             "run-cloud",
             "static-energy.vasp.mit",
@@ -206,7 +206,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
 
     # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
-        workflows,
+        workflows_app,
         ["run-yaml", yaml_filename],
     )
     assert result.exit_code == 0

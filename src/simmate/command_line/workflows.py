@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import pathlib
+import logging
+from pathlib import Path
 
-import click
-from click import Context
+import typer
+from rich import print
+from typer import Context
+
+workflows_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@click.group()
+@workflows_app.callback()
 def workflows():
-    """A group of commands for running workflows or viewing their settings."""
+    """A group of commands for running workflows or viewing their settings"""
     pass
 
 
@@ -40,17 +44,17 @@ def list_options(options: list) -> int:
 
     for i, item in enumerate(options):
         number = str(i + 1).zfill(2)
-        click.echo(f"\t({number}) {item}")
+        print(f"\t({number}) {item}")
 
     # Have the user select an option. We use -1 because indexing count is from 0, not 1.
-    selected_index = click.prompt("\n\nPlease choose a number:", type=int) - 1
+    selected_index = typer.prompt("\n\nPlease choose a number:", type=int) - 1
 
     if selected_index >= len(options) or selected_index < 0:
-        raise click.ClickException(
+        raise typer.BadParameter(
             "Number does not match any the options provided. Exiting."
         )
 
-    click.echo(f"You have selectd `{options[selected_index]}`.")
+    print(f"You have selectd `{options[selected_index]}`.")
 
     return selected_index
 
@@ -92,7 +96,7 @@ def parse_parameters(context: Context) -> dict:
         }
 
     except:
-        raise click.ClickException(
+        raise typer.BadParameter(
             "This workflow command appears to be improperly formatted. \n"
             "When giving workflow parameters, make sure you provide both the \n"
             "keyword and the value (such as `--example_kwarg example_value`)."
@@ -101,21 +105,24 @@ def parse_parameters(context: Context) -> dict:
     return kwargs_cleaned
 
 
-@workflows.command()
+@workflows_app.command()
 def explore():
     """
     Let's you interactively view all available workflows and see the documentation
     on the one you select.
     """
 
-    click.echo("\nGathering all available workflows...")
+    # when printing statements, we often want to add this to the start of the
+    # string, so we save this up front
+    prefix = "\n\n[bold green]"
+
     from simmate.workflows.utilities import (
         get_list_of_workflows_by_type,
         get_workflow,
         get_workflow_types,
     )
 
-    click.echo("\n\nWhat type of analysis are you interested in?")
+    print(f"{prefix}What type of analysis are you interested in?")
     workflow_types = get_workflow_types()
     type_index = list_options(workflow_types)
     selected_type = workflow_types[type_index]
@@ -123,7 +130,7 @@ def explore():
     # TODO: have the user select a calculator for this analysis. For now,
     # we are assuming VASP because those are our only workflows
 
-    click.echo("\n\nWhat settings preset do you want to see the description for?")
+    print(f"{prefix}What settings preset do you want to see the description for?")
     presets = get_list_of_workflows_by_type(selected_type, full_name=False)
     present_index = list_options(presets)
     selected_preset = presets[present_index]
@@ -132,7 +139,7 @@ def explore():
     # BUG: I assume vasp for now, but this should change when I add workflows
     # from new calculators.
 
-    click.echo(f"\n\n===================== {final_workflow_name} =====================")
+    print(f"{prefix}===================== {final_workflow_name} =====================")
 
     # now we load this workflow and print the docstring.
     workflow = get_workflow(
@@ -141,42 +148,50 @@ def explore():
         print_equivalent_import=True,
     )
 
-    click.echo("Description:")
-    click.echo(workflow.__doc__)
+    # extra import in order to render markdown in the terminal
+    # from: https://rich.readthedocs.io/en/stable/markdown.html
+    # Docstrings often have the entire string indented a number of times.
+    # We need to strip those idents away to render properly. This is the dedent.
+    from textwrap import dedent
 
-    click.echo("Parameters:")
+    from rich.console import Console
+    from rich.markdown import Markdown
+
+    console = Console()
+
+    print(f"{prefix}Description:\n")
+    description = Markdown(dedent(workflow.__doc__))
+    console.print(description)
+
+    print(f"{prefix}Parameters:\n")
     workflow.show_parameters()
 
-    click.echo("==================================================================")
+    print(f"{prefix}==================================================================")
 
 
-@workflows.command()
+@workflows_app.command()
 def list_all():
     """
     This lists off all available workflows.
     """
 
-    click.echo("Gathering all available workflows...")
-
     from simmate.workflows.utilities import get_list_of_all_workflows
 
-    click.echo("These are the workflows that have been registerd:")
+    print("These are the workflows that have been registerd:")
     all_workflows = get_list_of_all_workflows()
     for i, workflow in enumerate(all_workflows):
         workflow_number = str(i + 1).zfill(2)
-        click.echo(f"\t({workflow_number}) {workflow}")  # gives "(01) example-flow"
+        print(f"\t({workflow_number}) {workflow}")  # gives "(01) example-flow"
 
 
-@workflows.command()
-@click.argument("workflow_name")
-def show_config(workflow_name):
+@workflows_app.command()
+def show_config(workflow_name: str):
     """
     If the workflow is a single task, the calculation's configuration settings
     are displayed. For example, a VASP workflow will show a dictionary that
     details how INCAR settings are selected.
     """
 
-    click.echo("LOADING WORKFLOW...")
     from simmate.workflows.utilities import get_workflow
 
     workflow = get_workflow(
@@ -185,26 +200,20 @@ def show_config(workflow_name):
         print_equivalent_import=True,
     )
 
-    click.echo("PRINTING WORKFLOW CONFIG...")
-
     workflow.show_config()
 
 
-@workflows.command(
+@workflows_app.command(
     context_settings=dict(
         ignore_unknown_options=True,
         allow_extra_args=True,
     )
 )
-@click.argument("workflow_name")
-@click.pass_context
-def setup_only(context, workflow_name):
+def setup_only(context: Context, workflow_name: str):
     """
     If the workflow is a single task, the calculation is set up but not ran. This
     is useful when you just want the input files to view/edit.
     """
-
-    click.echo("LOADING STRUCTURE AND WORKFLOW...")
 
     from simmate.workflows.utilities import get_workflow
 
@@ -215,8 +224,6 @@ def setup_only(context, workflow_name):
     )
     kwargs_input = parse_parameters(context=context)
     kwargs_cleaned = workflow._deserialize_parameters(**kwargs_input)
-
-    click.echo("WRITING INPUT FILES...")
 
     # if no folder was given, just name it after the workflow. We also replace
     # spaces with underscores
@@ -229,6 +236,8 @@ def setup_only(context, workflow_name):
     # ensure a path obj and that directory is created
     kwargs_cleaned["directory"] = get_directory(directory)
 
+    logging.info("Writing inputs")
+
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
     from simmate.workflow_engine import S3Workflow
@@ -237,27 +246,23 @@ def setup_only(context, workflow_name):
 
         workflow.setup(**kwargs_cleaned)
     else:
-        raise click.ClickException(
+        raise typer.BadParameter(
             "This is not a S3-based workflow. It is likely a NestedWorkflow, "
             "meaning it is made up of multiple smaller workflows. We have not "
             "added a setup-only feature for these yet. "
         )
 
-    click.echo(f"Done! Your input files are located in {directory}")
+    logging.info(f"Done! Your input files are located in {directory}")
 
 
-@workflows.command(
+@workflows_app.command(
     context_settings=dict(
         ignore_unknown_options=True,
         allow_extra_args=True,
     )
 )
-@click.argument("workflow_name")
-@click.pass_context
-def run(context, workflow_name):
+def run(context: Context, workflow_name: str):
     """Runs a workflow using provided parameters"""
-
-    click.echo("LOADING WORKFLOW & INPUT PARAMETERS...")
 
     from simmate.workflows.utilities import get_workflow
 
@@ -267,28 +272,22 @@ def run(context, workflow_name):
         print_equivalent_import=True,
     )
     kwargs_cleaned = parse_parameters(context=context)
-
-    click.echo("RUNNING WORKFLOW...")
 
     result = workflow.run(**kwargs_cleaned)
 
     # Let the user know everything succeeded
     if result.is_completed():
-        click.echo("Success! All results are also stored in your database.")
+        logging.info("Success! All results are also stored in your database.")
 
 
-@workflows.command(
+@workflows_app.command(
     context_settings=dict(
         ignore_unknown_options=True,
         allow_extra_args=True,
     )
 )
-@click.argument("workflow_name")
-@click.pass_context
-def run_cloud(context, workflow_name):
-    """Submits a workflow to Prefect cloud"""
-
-    click.echo("LOADING WORKFLOW & INPUT PARAMETERS...")
+def run_cloud(context: Context, workflow_name: str):
+    """Submits a workflow to cloud for remote running"""
 
     from simmate.workflows.utilities import get_workflow
 
@@ -299,26 +298,17 @@ def run_cloud(context, workflow_name):
     )
     kwargs_cleaned = parse_parameters(context=context)
 
-    click.echo("RUNNING WORKFLOW...")
-
     result = workflow.run_cloud(**kwargs_cleaned)
 
-    # Let the user know everything succeeded
-    if result.is_completed():
-        click.echo("Success! All results are also stored in your database.")
 
-
-@workflows.command(
+@workflows_app.command(
     context_settings=dict(
         ignore_unknown_options=True,
         allow_extra_args=True,
     )
 )
-@click.argument("filename", type=click.Path(exists=True, path_type=pathlib.Path))
-def run_yaml(filename):
+def run_yaml(filename: Path):
     """Runs a workflow where parameters are loaded from a yaml file."""
-
-    click.echo("LOADING WORKFLOW & INPUT PARAMETERS...")
 
     import yaml
 
@@ -368,25 +358,4 @@ def run_yaml(filename):
 
     # -------------------------------------------------------------------------
 
-    click.echo("RUNNING WORKFLOW...")
-
     result = workflow.run(**parameters)
-
-    # Let the user know everything succeeded
-    if result.is_completed():
-        click.echo("Success! All results are also stored in your database.")
-
-
-# explicitly list functions so that pdoc doesn't skip them
-__all__ = [
-    "workflows",
-    "explore",
-    "list_all",
-    "show_config",
-    "setup_only",
-    "run",
-    "run_cloud",
-    "run_yaml",
-    "list_options",
-    "parse_parameters",
-]

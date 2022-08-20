@@ -52,10 +52,8 @@ try:
 
     # HERE --> we are in Spyder or an ipython terminal
 
-    import nest_asyncio
-
     try:
-        nest_asyncio
+        import nest_asyncio
     except:
         raise ModuleNotFoundError(
             "You must install nest_asyncio with `conda install -c conda-forge nest_asyncio`"

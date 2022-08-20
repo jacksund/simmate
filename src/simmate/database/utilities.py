@@ -15,11 +15,19 @@ from simmate.configuration.django.settings import DATABASES
 APPS_TO_MIGRATE = list(apps.app_configs.keys())
 
 
-def update_database(apps_to_migrate=APPS_TO_MIGRATE):
+def update_database(apps_to_migrate=APPS_TO_MIGRATE, show_logs: bool = True):
+
+    # check Django if there are any updates to be made
+    if show_logs:
+        logging.info("Checking for and applying updates...")
 
     # execute the following commands to update the database
     call_command("makemigrations", *apps_to_migrate)
     call_command("migrate")
+
+    # Let the user know everything succeeded
+    if show_logs:
+        logging.info("Success! Your database tables are now up to date. :sparkles:")
 
 
 def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
@@ -64,7 +72,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
             continue
 
     # now update the database based on the registered models
-    update_database(apps_to_migrate)
+    update_database(apps_to_migrate, show_logs=False)
 
     # instead of building the database from scratch, we instead download a
     # prebuilt database file.
@@ -84,16 +92,27 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         Spacegroup._load_database_from_toolkit()
 
     # Let the user know everything succeeded
-    logging.info("Success! Your database has been reset.")
+    logging.info("Success! Your database has been reset. :sparkles:")
 
 
 def dump_database_to_json(filename="database_dump.json", exclude=[]):
 
+    # Begin writing the database to the json file.
+    logging.info("Writing all data to JSON...")
+
     # execute the following commands to write the database to a json file
     call_command("dumpdata", output=filename, exclude=exclude)
 
+    # Let the user know everything succeeded
+    logging.info(
+        f"Success! You should now see the file {filename} with all of your data."
+    )
+
 
 def load_database_from_json(filename="database_dump.json"):
+
+    # Begin writing the database to the json file.
+    logging.info("Loading all data from JSON...")
 
     # OPTIMIZE: this function is very slow. Consider speed-up options such as
     # making this function a transaction or manually writing a bulk_create. It
@@ -105,6 +124,11 @@ def load_database_from_json(filename="database_dump.json"):
     # set. Simply ignore this table and everything works. The contenttypes is
     # simply a table that lists all of our different models.
     call_command("loaddata", filename, exclude=["contenttypes"])
+
+    # Let the user know everything succeeded
+    logging.info(
+        f"Success! You now have all the data from {filename} available in your database."
+    )
 
 
 # BUG: This function isn't working as intended

@@ -29,7 +29,7 @@ conda create -n my_env -c conda-forge python=3.10 simmate
 conda install -n my_env -c conda-forge spyder  # optional but recommended
 conda activate my_env
 ```
-3. Run the `simmate` command to make sure it's installed correctly
+3. Run the `simmate --help` command to make sure it's installed correctly
 4. For first-time setup, initialize your local database with `simmate database reset`
 5. Run the command `simmate run-server` (and leave this command running)
 6. Go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/) and you'll see you local server!
@@ -187,26 +187,32 @@ Just like we used `conda --help` above, we can also ask for help with Simmate. S
 simmate --help
 ```
 
-```
-Usage: simmate [OPTIONS] COMMAND [ARGS]...
-
-  This is the base command that all others stem from.
-
-  If you are a beginner to the command line, be sure to start with our
-  tutorials: https://github.com/jacksund/simmate/tree/main/tutorials
-
-  Below you will see a list of sub-commands to try. For example, you can run
-  `simmate database --help` to learn more about it.
-
-Options:
-  --help  Show this message and exit.
-
-Commands:
-  database         A group of commands for managing your database.
-  run-server       This runs a website test server locally for Simmate.
-  start-project    This creates a new folder and fills it with an example...
-  workflow-engine  A group of commands for starting up Prefect Agents and...
-  workflows        A group of commands for running workflows or viewing...
+```                                                                                                           
+ Usage: simmate [OPTIONS] COMMAND [ARGS]...                                                                     
+                                                                                                                
+ This is the base command that all other Simmate commands stem from 🔥🔥🚀                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ If you are a beginner to the command line, be sure to start with our tutorials. Below you will see a list of   
+ sub-commands to try. For example, you can run simmate database --help to learn more about it.                  
+                                                                                                                
+ TIP: Many Simmate commands are long and verbose. You can use --install-completion to add ipython-like          
+ autocomplete to your shell.                                                                                    
+                                                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --install-completion          Install completion for the current shell.                                      │
+│ --show-completion             Show completion for the current shell, to copy it or customize the             │
+│                               installation.                                                                  │
+│ --help                        Show this message and exit.                                                    │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ database         A group of commands for managing your database                                              │
+│ run-server       Runs a local test server for the Simmate website interface                                  │
+│ start-project    Creates a new folder and fills it with an example project to get you started with custom    │
+│                  Simmate workflows/datatables                                                                │
+│ utilities        A group of commands for various simple tasks (such as file handling)                        │
+│ workflow-engine  A group of commands for starting up computational resources (Workers, Agents, and Clusters) │
+│ workflows        A group of commands for running workflows or viewing their settings                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 You can see there are many other commands like `simmate database` and `simmate workflows` that we will explore in other tutorials. 

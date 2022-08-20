@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from simmate.command_line.database import database
+from simmate.command_line.database import database_app
 
 
 @pytest.fixture  # BUG: is this test actually running...?
@@ -17,12 +17,13 @@ def test_database_reset(django_db_blocker, command_line_runner):
 
         # reset the database
         result = command_line_runner.invoke(
-            database, ["reset", "--confirm-delete", "--use-prebuilt=False"]
+            database_app,
+            ["reset", "--confirm-delete", "--use-prebuilt=False"],
         )
         assert result.exit_code == 0
 
         # update the database
-        result = command_line_runner.invoke(database, ["update"])
+        result = command_line_runner.invoke(database_app, ["update"])
         assert result.exit_code == 0
 
         # OPTIMIZE: Is there a way to test this without downloading the large archive?
@@ -37,11 +38,11 @@ def test_database_reset(django_db_blocker, command_line_runner):
 def test_database_dump_and_load(command_line_runner):
 
     # dump the database to json
-    result = command_line_runner.invoke(database, ["dumpdata"])
+    result = command_line_runner.invoke(database_app, ["dump-data"])
     assert result.exit_code == 0
 
     # load the database to json
-    result = command_line_runner.invoke(database, ["loaddata"])
+    result = command_line_runner.invoke(database_app, ["load-data"])
     assert result.exit_code == 0
 
     # delete the dump file
