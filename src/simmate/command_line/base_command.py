@@ -125,6 +125,3 @@ simmate_app.add_typer(database_app, name="database")
 simmate_app.add_typer(workflows_app, name="workflows")
 simmate_app.add_typer(workflow_engine_app, name="workflow-engine")
 simmate_app.add_typer(utilities_app, name="utilities")
-
-# # explicitly list functions so that pdoc doesn't skip them
-# __all__ = ["simmate"]

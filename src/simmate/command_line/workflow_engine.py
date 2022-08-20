@@ -96,12 +96,3 @@ def start_cluster(
         nworkers=nworkers,
         worker_command=worker_command,
     )
-
-
-# explicitly list functions so that pdoc doesn't skip them
-# __all__ = [
-#     "workflow_engine",
-#     "start_worker",
-#     "start_singleflow_worker",
-#     "start_cluster",
-# ]

@@ -3,6 +3,9 @@
 """
 This defines commands for managing your Simmate workflow engine. All commands are 
 accessible through the "simmate workflow-engine" command.
+
+WARNING: This module is experimental and not used in the final CLI at the moment.
+
 """
 
 import click
@@ -180,12 +183,3 @@ def run_cluster(
     from simmate.configuration.prefect.setup_resources import run_cluster_and_agent
 
     run_cluster_and_agent(**agent_kwargs)
-
-
-# explicitly list functions so that pdoc doesn't skip them
-__all__ = [
-    "workflow_engine",
-    "start_worker",
-    "start_singleflow_worker",
-    "run_cluster",
-]

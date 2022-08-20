@@ -359,18 +359,3 @@ def run_yaml(filename: Path):
     # -------------------------------------------------------------------------
 
     result = workflow.run(**parameters)
-
-
-# explicitly list functions so that pdoc doesn't skip them
-# __all__ = [
-#     "workflows",
-#     "explore",
-#     "list_all",
-#     "show_config",
-#     "setup_only",
-#     "run",
-#     "run_cloud",
-#     "run_yaml",
-#     "list_options",
-#     "parse_parameters",
-# ]

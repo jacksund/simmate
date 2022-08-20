@@ -37,9 +37,3 @@ def archive_old_runs(
     from simmate.utilities import archive_old_runs
 
     archive_old_runs(directory, time_cutoff)
-
-
-# explicitly list functions so that pdoc doesn't skip them
-# __all__ = [
-#     "archive_old_runs",
-# ]

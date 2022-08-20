@@ -122,14 +122,3 @@ def load_remote_archives(parallel: bool = False):
     from simmate.database.third_parties import load_remote_archives
 
     load_remote_archives(parallel=parallel)
-
-
-# # explicitly list functions so that pdoc doesn't skip them
-# __all__ = [
-#     "database",
-#     "reset",
-#     "update",
-#     "dumpdata",
-#     "loaddata",
-#     "load_remote_archives",
-# ]
