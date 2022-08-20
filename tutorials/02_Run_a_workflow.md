@@ -279,17 +279,16 @@ simmate workflows list-all
 The output will be similar to...
 
 ```
-Gathering all available workflows...
 These are the workflows that have been registerd:
-    	(01) customized.vasp.user-config
-    	(02) diffusion.vasp.neb-all-paths
-    	(03) diffusion.vasp.neb-from-endpoints
-    	(04) diffusion.vasp.neb-from-images
-    	(05) diffusion.vasp.neb-single-path
-    	(06) dynamics.vasp.mit
-    	(07) electronic-structure.vasp.matproj-full
-    	(08) population-analysis.vasp.badelf-matproj
-    	(09) population-analysis.vasp.bader-matproj
+        (01) customized.vasp.user-config
+        (02) diffusion.vasp.neb-all-paths-mit
+        (03) diffusion.vasp.neb-from-endpoints-mit
+        (04) diffusion.vasp.neb-from-images-mit
+        (05) diffusion.vasp.neb-single-path-mit
+        (06) dynamics.vasp.matproj
+        (07) dynamics.vasp.mit
+        (08) dynamics.vasp.mvl-npt
+        (09) electronic-structure.vasp.matproj-full
   ... << plus others that are cut-off for clarity >>
 ```
 
@@ -304,36 +303,34 @@ When prompted to choose a type of workflow or a specific preset, choose whicheve
 ```
 ===================== relaxation/staged =====================
 
-Using: 
+Using:
 
-	from simmate.workflows.relaxation import Relaxation__Vasp__Staged 
+        from simmate.workflows.relaxation import Relaxation__Vasp__Quality00 
 
 You can find the source code for this workflow in the follwing module: 
 
-	simmate.calculators.vasp.workflows.relaxation
+        simmate.calculators.vasp.workflows.relaxation
+
 
 Description:
 
-    Runs a series of increasing-quality relaxations and then finishes with a single
-    static energy calculation.
+Runs a very rough VASP geometry optimization with fixed lattice volume. Quality 00 indicates these are absolute lowest quality settings used 
+in our available presets.                                                                                                                    
 
-    This is therefore a "Nested Workflow" made of the following smaller workflows:
+Typically, you'd only want to run this relaxation on structures that were randomly created (and thus likely very unreasonable). More precise 
+relaxations should be done afterwards. Therefore, instead of using this calculation, we recommend only using the relaxation/staged workflow, 
+which uses this calculation as a first step.                                                                                                 
 
-        - relaxation.vasp.quality00
-        - relaxation.vasp.quality01
-        - relaxation.vasp.quality02
-        - relaxation.vasp.quality03
-        - relaxation.vasp.quality04
-        - static-energy.vasp.quality04
 
-    This workflow is most useful for randomly-created structures or extremely
-    large supercells. More precise relaxations+energy calcs should be done
-    afterwards because ettings are still below MIT and Materials Project quality.
-    
 Parameters:
+
 - command
-- copy_previous_directory
+- compress_output
 - directory
+- is_restart
+- pre_sanitize_structure
+- pre_standardize_structure
+- run_id
 - source
 - structure
 
