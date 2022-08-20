@@ -13,6 +13,7 @@ from importlib import import_module
 from pathlib import Path
 
 import yaml
+from rich import print
 
 from simmate import workflows
 from simmate.utilities import get_directory, make_archive
@@ -179,9 +180,9 @@ def get_workflow(
 
     # If requested, print a message indicating the import we are using
     if print_equivalent_import:
+        print("\n\n[bold green]Using:")
         print(
-            "Using: \n\n\t"
-            f"from simmate.workflows.{project_name} import {workflow_class_name} \n\n"
+            f"\n\tfrom simmate.workflows.{project_name} import {workflow_class_name} \n\n"
             "You can find the source code for this workflow in the follwing module: \n\n\t"
             f"simmate.calculators.{calculator_name}.workflows.{project_name}"
         )

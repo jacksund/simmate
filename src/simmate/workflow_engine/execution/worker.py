@@ -6,6 +6,7 @@ import traceback
 
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from django.db import transaction
+from rich import print
 
 from simmate.workflow_engine.execution.database import WorkItem
 
@@ -13,11 +14,13 @@ from simmate.workflow_engine.execution.database import WorkItem
 # starts up.
 # This uses "Small Slant" from https://patorjk.com/software/taag/
 HEADER_ART = r"""
+=====================================================================
    _____                  __        _      __         __
   / __(_)_ _  __ _  ___ _/ /____   | | /| / /__  ____/ /_____ ____
  _\ \/ /  ' \/  ' \/ _ `/ __/ -_)  | |/ |/ / _ \/ __/  '_/ -_) __/
 /___/_/_/_/_/_/_/_/\_,_/\__/\__/   |__/|__/\___/_/ /_/\_\\__/_/
 
+=====================================================================
 """
 
 
@@ -91,7 +94,7 @@ class SimmateWorker:
         """
 
         # print the header in the console to let the user know the worker started
-        logging.info("\n" + HEADER_ART)
+        print("[bold cyan]" + HEADER_ART)
 
         # loggin helpful info
         logging.info(f"Starting worker with tags {list(self.tags)}")

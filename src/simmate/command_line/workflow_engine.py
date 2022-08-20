@@ -5,66 +5,45 @@ This defines commands for managing your Simmate workflow engine. All commands ar
 accessible through the "simmate workflow-engine" command.
 """
 
-import click
+import typer
+
+workflow_engine_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@click.group()
+@workflow_engine_app.callback()
 def workflow_engine():
     """
-    A group of commands for starting up Simmate Workers, Prefect Agents, and
-    Dask Clusters. These are meant for setting up remote computational resources.
+    A group of commands for starting up computational resources (Workers,
+    Agents, and Clusters)
     """
     pass
 
 
-@workflow_engine.command()
-@click.option(
-    "--nitems_max",
-    "-n",
-    default=None,
-    type=int,
-    help="the number of task run to submit before shutdown",
-)
-@click.option(
-    "--timeout",
-    "-t",
-    default=None,
-    type=float,
-    help="the time (in seconds) after which this worker will stop running jobs and shutdown",
-)
-@click.option(
-    "--close_on_empty_queue",
-    "-e",
-    default=False,
-    type=bool,
-    help="whether to shutdown when the queue is empty",
-)
-@click.option(
-    "--waittime_on_empty_queue",
-    "-w",
-    default=1,
-    type=float,
-    help=(
-        "if the queue is empty, the time (in seconds) the worker should wait"
-        " before checking the queue again"
-    ),
-)
-@click.option(
-    "--tags",
-    "-t",
-    default=["simmate"],
-    help="tags to filter tasks by for submission. defaults to just 'simmate'",
-    multiple=True,
-)
+@workflow_engine_app.command()
 def start_worker(
-    nitems_max,
-    timeout,
-    close_on_empty_queue,
-    waittime_on_empty_queue,
-    tags,
+    nitems_max: int = None,
+    timeout: float = None,
+    close_on_empty_queue: bool = False,
+    waittime_on_empty_queue: float = 1,
+    tag: list[str] = ["simmate"],
 ):
     """
-    This starts a Simmate Worker which will query the database for jobs to run.
+    Starts a Simmate Worker which will query the database for jobs to run
+
+    By default this worker will run endlessly and not close.
+
+    - `nitems_max`: the number of task run to submit before shutdown
+    - `timeout`: the time (in seconds) after which this worker will stop running
+    jobs and shutdown
+
+    - `close_on_empty_queue`: whether the worker should shut down when the
+    queue is empty
+
+    - `waittime_on_empty_queue`: if the queue is empty, the time (in seconds)
+    the worker should wait before checking the queue again
+
+    - `tags`: tags to filter tasks by for submission. defaults to just 'simmate'
+
     """
 
     from simmate.workflow_engine import Worker
@@ -74,12 +53,12 @@ def start_worker(
         timeout,
         close_on_empty_queue,
         waittime_on_empty_queue,
-        tags,
+        tag,  # this is actually "tags" --> a list of strings
     )
     worker.start()
 
 
-@workflow_engine.command()
+@workflow_engine_app.command()
 def start_singleflow_worker():
     """
     This starts a Simmate Worker that only runs one job and then shuts down. Also,
@@ -89,7 +68,7 @@ def start_singleflow_worker():
     this is such a common use-case, we include this command for convienence.
     It is the same as...
 
-    simmate workflow-engine start-worker -n 1 -e True -t simmate
+    `simmate workflow-engine start-worker --nitems-max 1 --close-on-empty-queue`
     """
 
     from simmate.workflow_engine import Worker
@@ -97,21 +76,18 @@ def start_singleflow_worker():
     Worker.run_singleflow_worker()
 
 
-@workflow_engine.command()
-@click.argument(
-    "nworkers",
-    type=int,
-)
-@click.option(
-    "--worker_command",
-    "-c",
-    default="simmate workflow-engine start-worker",
-    type=str,
-    help="the command to start each worker with. See start-worker for options",
-)
-def start_cluster(nworkers, worker_command):
+@workflow_engine_app.command()
+def start_cluster(
+    nworkers: int, worker_command: str = "simmate workflow-engine start-worker"
+):
     """
-    This starts many Simmate Workers that each run in a local subprocess.
+    This starts many Simmate Workers that each run in a local subprocess
+
+    - `nworkers`: the number of workers to start
+
+    - `worker_command`: the command to start each worker with. See start-worker
+    for options
+
     """
 
     from simmate.workflow_engine.execution.utilities import start_cluster
@@ -123,9 +99,9 @@ def start_cluster(nworkers, worker_command):
 
 
 # explicitly list functions so that pdoc doesn't skip them
-__all__ = [
-    "workflow_engine",
-    "start_worker",
-    "start_singleflow_worker",
-    "start_cluster",
-]
+# __all__ = [
+#     "workflow_engine",
+#     "start_worker",
+#     "start_singleflow_worker",
+#     "start_cluster",
+# ]

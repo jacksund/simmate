@@ -18,8 +18,8 @@ import shutil
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner
 from django.contrib.auth.models import User
+from typer.testing import CliRunner
 
 from simmate.database.base_data_types import Spacegroup
 from simmate.toolkit import Composition, Structure, base_data_types
