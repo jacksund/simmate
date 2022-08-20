@@ -18,7 +18,7 @@ Simmate
       <div class="page-title-right">
         <ol class="breadcrumb m-0">
           <li class="breadcrumb-item"><a href="{% url 'third_parties:home' %}">Third-Parties</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'third_parties:provider' calculation.get_table_name %}">{{ calculation.get_table_name }}</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'third_parties:provider' calculation.table_name %}">{{ calculation.table_name }}</a></li>
           <li class="breadcrumb-item active">{{ calculation.id }}</li>
         </ol>
       </div>

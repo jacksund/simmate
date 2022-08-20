@@ -20,6 +20,15 @@ class StructureCreator(ABC):
         """
         pass
 
+    @classmethod
+    @property
+    def name(cls):
+        """
+        A nice string name for the creator. By default it just returns the name
+        of this class.
+        """
+        return cls.__name__
+
     @abstractmethod
     def create_structure(self, spacegroup=None):
         """
@@ -108,7 +117,7 @@ class StructureCreator(ABC):
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
         # proven otherwise
-        logging.info(f"Creating new structure with {self.__class__.__name__}")
+        logging.info(f"Creating new structure with {self.name}")
         new_structure = False
         attempt = 0
         while not new_structure and attempt <= max_attempts:
@@ -128,7 +137,7 @@ class StructureCreator(ABC):
                         # try the loop again.
                         logging.info(
                             "Generated structure is failed validation by "
-                            f"{validator.__class__.__name__}. Trying again."
+                            f"{validator.name}. Trying again."
                         )
                         new_structure = None
 

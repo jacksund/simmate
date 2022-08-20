@@ -96,12 +96,12 @@ class Diffusion__Vasp__NebSinglePathMit(Workflow):
 
         images = get_migration_images_from_endpoints(
             supercell_start={
-                "database_table": Relaxation__Vasp__MvlNebEndpoint.database_table.__name__,
+                "database_table": Relaxation__Vasp__MvlNebEndpoint.database_table.table_name,
                 "directory": endpoint_start_result["directory"],
                 "structure_field": "structure_final",
             },
             supercell_end={
-                "database_table": Relaxation__Vasp__MvlNebEndpoint.database_table.__name__,
+                "database_table": Relaxation__Vasp__MvlNebEndpoint.database_table.table_name,
                 "directory": endpoint_end_result["directory"],
                 "structure_field": "structure_final",
             },

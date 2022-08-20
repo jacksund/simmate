@@ -111,7 +111,7 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
         # required for NEB, but it takes very little time.
         bulk_static_energy_result = StaticEnergy__Vasp__Mit.run(
             structure={
-                "database_table": Relaxation__Vasp__Mit.database_table.__name__,
+                "database_table": Relaxation__Vasp__Mit.database_table.table_name,
                 "directory": bulk_relax_result["directory"],
                 "structure_field": "structure_final",
             },
@@ -124,7 +124,7 @@ class Diffusion__Vasp__NebAllPathsMit(Workflow):
         # diffusion pathways and builds the necessary database entries.
         migration_hop_ids = cls._build_diffusion_analysis(
             structure={
-                "database_table": StaticEnergy__Vasp__Mit.database_table.__name__,
+                "database_table": StaticEnergy__Vasp__Mit.database_table.table_name,
                 "directory": bulk_static_energy_result["directory"],
             },
             migrating_specie=migrating_specie,

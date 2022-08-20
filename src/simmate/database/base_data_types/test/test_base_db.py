@@ -13,7 +13,7 @@ def test_database_table():
     x.save()
 
     # check name
-    assert x.get_table_name() == x.__class__.__name__
+    assert x.table_name == x.__class__.__name__
 
 
 @pytest.mark.django_db

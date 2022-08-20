@@ -52,7 +52,7 @@ class Restart__Simmate__Automatic(Workflow):
         # update the source
         input_parameters.pop("source", None)
         input_parameters["source"] = {
-            "database_table": workflow.database_table.__name__,
+            "database_table": workflow.database_table.table_name,
             "directory": directory_old,
             # BUG: I should force directory_old to be an absolute path in order
             # to store it here, but I'm unsure how to properly handle different

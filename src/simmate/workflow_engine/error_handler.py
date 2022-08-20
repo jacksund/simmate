@@ -155,13 +155,14 @@ class ErrorHandler(ABC):
         # SupervisedStagedTask and other features
         pass
 
+    @classmethod
     @property
-    def name(self):
+    def name(cls):
         """
         A nice string name for the handler. By default it just returns the name
         of this class.
         """
-        return self.__class__.__name__
+        return cls.__name__
 
     def terminate_job(directory: Path, process: subprocess.Popen, command: str):
         """

@@ -27,6 +27,15 @@ class Selector:
         # of the fitnesses that were selected
         raise NotImplementedError()
 
+    @classmethod
+    @property
+    def name(cls):
+        """
+        A nice string name for the selector. By default it just returns the name
+        of this class.
+        """
+        return cls.__name__
+
     def select_from_datatable(
         self,
         nselect,

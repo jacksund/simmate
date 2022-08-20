@@ -148,7 +148,7 @@ class SearchResults(models.QuerySet):
             today = datetime.today()
             filename_base = "-".join(
                 [
-                    self.model.__name__,
+                    self.model.table_name,
                     str(today.year),
                     str(today.month).zfill(2),
                     str(today.day).zfill(2),
@@ -366,11 +366,15 @@ class DatabaseTable(models.Model):
     """
 
     @classmethod
-    def get_table_name(cls) -> str:
+    @property
+    def table_name(cls) -> str:
         """
         Returns the name of this database table, which will simply match the
-        class name. Using `Table.__name__` is often easier. This method simply
-        makes the name accessible in Django Templates.
+        class name.
+
+        Note, we use "table_name" instead of "name" because users may want
+        a column titled "name", which would break features. To reduce
+        occurance of of this issue, we use "table_name" instead.
         """
         return cls.__name__
 
@@ -604,12 +608,12 @@ class DatabaseTable(models.Model):
             matching_files = [
                 file
                 for file in Path.cwd().iterdir()
-                if file.name.startswith(cls.__name__) and file.suffix == ".zip"
+                if file.name.startswith(cls.table_name) and file.suffix == ".zip"
             ]
             # make sure there is at least one file
             if not matching_files:
                 raise FileNotFoundError(
-                    f"No file found matching the {cls.__name__}-*.zip format"
+                    f"No file found matching the {cls.table_name}-*.zip format"
                 )
             # sort the files by date and grab the first
             matching_files.sort(reverse=True)
@@ -795,7 +799,7 @@ class DatabaseTable(models.Model):
         # Iterate through and grab the columns. Note we don't use get_column_names
         # here because we are attaching relation data as well.
         column_names = [
-            column.name + f" (relation to {column.related_model.__name__})"
+            column.name + f" (relation to {column.related_model.table_name})"
             if column.is_relation
             else column.name
             for column in cls._meta.get_fields()
@@ -818,8 +822,8 @@ class DatabaseTable(models.Model):
         return [
             parent
             for parent in cls.__bases__
-            if hasattr(simmate_mixins, parent.__name__)
-            and parent.__name__ != "DatabaseTable"
+            if hasattr(simmate_mixins, parent.table_name)
+            and parent.table_name != "DatabaseTable"
         ]
 
     @classmethod
@@ -828,7 +832,7 @@ class DatabaseTable(models.Model):
         Grabs the mix-in Tables that were used to make this class and returns
         a list of their names.
         """
-        return [mixin.__name__ for mixin in cls.get_mixins()]
+        return [mixin.table_name for mixin in cls.get_mixins()]
 
     @classmethod
     def get_extra_columns(cls) -> list[str]:
