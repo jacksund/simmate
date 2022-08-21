@@ -230,15 +230,18 @@ Unique to the `restart.simmate.automatic` workflow, this is the original folder 
 
 
 ## fitness_field
-(advanced users only) For evolutionary searches, this is the value that should be optimized. Specifically, it should minimized this value (lower value = better fitness). The default is `energy_per_atom`, but you may want to set this to a custom column in a custom database table.
+(advanced users only)
+For evolutionary searches, this is the value that should be optimized. Specifically, it should minimized this value (lower value = better fitness). The default is `energy_per_atom`, but you may want to set this to a custom column in a custom database table.
 
 
 ## input_parameters
-(experimental feature) Unique to `customized.vasp.user-config`. This is a list of parameters to pass to `workflow_base`.
+(experimental feature)
+Unique to `customized.vasp.user-config`. This is a list of parameters to pass to `workflow_base`.
 
 
 ## is_restart
-(experimental feature) Whether the calculation is a restarted workflow run. Default is False. If set to true, the workflow will go through the given directory (which must be provided) and see where to pick up.
+(experimental feature)
+Whether the calculation is a restarted workflow run. Default is False. If set to true, the workflow will go through the given directory (which must be provided) and see where to pick up.
 ``` python
 # python example
 directory = "my-old-calc-folder"
@@ -297,7 +300,8 @@ migrating_specie: Li
 
 
 ## migration_hop
-(advanced users only) The atomic path that should be analyzed. Inputs are anything compatible with the `MigrationHop` class of the `simmate.toolkit.diffusion` module. This includes:
+(advanced users only)
+The atomic path that should be analyzed. Inputs are anything compatible with the `MigrationHop` class of the `simmate.toolkit.diffusion` module. This includes:
 
 - `MigrationHop` object
 - a database entry in the `MigrationHop` table
@@ -391,51 +395,280 @@ nsteadystate: 50
 ```
 
 ## nsteps
+The total number of steps to run the calculation on. For example, in molecular dynamics workflows, this will stop the simulation after this many steps.
+``` python
+# python example
+nsteps = 10000
+```
+``` yaml
+# yaml file example
+nsteps: 10000
+```
+
 
 ## pre_sanitize_structure
+In some cases, we may want to "sanitize" the structure during our setup() and before we actually run a calculation on it. By "sanitize", we mean converting to the LLL-reduced primitive cell (which is made to be as cubic as possible). This modified structure is what will be evaluated. We recommend using this feature when your unitcell is "squished" (small angles) or if you are generating structures randomly.
+``` python
+# python example
+pre_sanitize_structure = True
+```
+``` yaml
+# yaml file example
+pre_sanitize_structure: True
+```
+
 
 ## pre_standardize_structure
+In some cases, we may want to convert the structure to the standard primitive that follow conventions. For example, this is required when calculating band structures
+and ensuring we have a standardized high-symmetry path. Existing band-structure workflows use this automatically.
+``` python
+# python example
+pre_standardize_structure = True
+```
+``` yaml
+# yaml file example
+pre_standardize_structure: True
+```
+
 
 ## run_id
+The id assigned to a specific workflow run / calculation. If not provided this will be randomly generated, and we highly recommended leaving this at the default value. Note, this is based on unique-ids (UUID), so every id should be 100% unique and in a string format.
+``` python
+# python example
+run_id = "my-unique-id-123"
+```
+``` yaml
+# yaml file example
+run_id: my-unique-id-123
+```
 
 ## search_id
+(advanced users only)
+The evolutionary search that this individual is associated with. This allows us to determine which `Selector`, `Validator`, and `StopCondition` should be used when creating and evaluating the individual. When running a search, this is set automatically when submitting a new flow.
+
 
 ## selector_kwargs
+(advanced users only)
+Extra conditions to use when initializing the selector class. `MySelector(**selector_kwargs)`. The input should be given as a dictionary. Note, for evolutionary searches, the composition kwarg is added automatically. This is closely tied with the `selector_name` parameter so be sure to read that section as well.
+
 
 ## selector_name
+(experimental feature; advanced users only)
+The base selector class that should be used. The class will be initialized using `MySelector(**selector_kwargs)`. The input should be given as a string.
+
+WARNING: Currently, we only support truncated selection, so this should be left at its default value.
+
 
 ## singleshot_sources
+(experimental feature; advanced users only)
+A list of structure sources that run once and never again. This includes generating input structures from known structures (from third-party databases), prototypes, or substituiting known structures.
+
+In the current version of simmate, these features are not enabled and this input should be ignored.
+
 
 ## sleep_step
+When there is a cycle within a workflow (such as iteratively checking the number of subworkflows submitted and updating results), this is the amount of time in seconds that the workflow will shutdown before restarting the cycle. For evolutionary searches, setting this to a larger value will save on computation resources and database load, so we recommend increasing it where possible.
+``` python
+# python example
+sleep_step = 180  # 3 minutes
+```
+``` yaml
+# yaml file example
+run_id: 180
+```
 
 ## source
+(experimental feature; advanced users only)
+This column indicates where the input data (and other parameters) came from. The source could be a number of things including...
+ - a third party id
+ - a structure from a different Simmate datbase table
+ - a transformation of another structure
+ - a creation method
+ - a custom submission by the user
+
+By default, this is a dictionary to account for the many different scenarios. Here are some examples of values used in this column:
+
+``` python
+# from a thirdparty database or separate table
+source = {
+    "database_table": "MatprojStructure",
+    "database_id": "mp-123",
+}
+
+# from a random structure creator
+source = {"creator": "PyXtalStructure"}
+
+# from a templated structure creator (e.g. substituition or prototypes)
+source = {
+    "creator": "PrototypeStructure",
+    "database_table": "AFLOWPrototypes",
+    "id": 123,
+}
+
+# from a transformation
+source = {
+    "transformation": "MirrorMutation",
+    "database_table":"MatprojStructure",
+    "parent_ids": ["mp-12", "mp-34"],
+}
+```
+
+Typically, the `source` is set automatically, and users do not need to update it.
+
 
 ## steadystate_sources
+(experimental feature; advanced users only)
+The sources that will be scheduled at a "steady-state", meaning there will always be a set number of individuals scheduled/running for this type of structure source. This should be defined as a dictionary where each is `{"source_name": percent}`. The percent determines the number of steady stage calculations that will be running for this at any given time. It will be a percent of the `nsteadystate` parameter, which sets the total number of individuals to be scheduled/running. For example, if `nsteadystate=40` and we add a source of `{"RandomSymStructure": 0.30, ...}`, this means 0.25*40=10 randomly-created individuals will be running/submitted at all times. The source can be from either the `toolkit.creator` or `toolkit.transformations` modules.
+``` python
+# python example
+singleshot_sources = {
+    "RandomSymStructure": 0.30,
+    "from_ase.Heredity": 0.30,
+    "from_ase.SoftMutation": 0.10,
+    "from_ase.MirrorMutation": 0.10,
+    "from_ase.LatticeStrain": 0.05,
+    "from_ase.RotationalMutation": 0.05,
+    "from_ase.AtomicPermutation": 0.05,
+    "from_ase.CoordinatePerturbation": 0.05,
+}
+```
+``` yaml
+# yaml file example
+singleshot_sources:
+    RandomSymStructure: 0.30
+    from_ase.Heredity: 0.30
+    from_ase.SoftMutation: 0.10
+    from_ase.MirrorMutation: 0.10
+    from_ase.LatticeStrain: 0.05
+    from_ase.RotationalMutation: 0.05
+    from_ase.AtomicPermutation: 0.05
+    from_ase.CoordinatePerturbation: 0.05
+```
+
+Note: if your percent values do not sum to 1, they will be rescaled. When calculating `percent*nsteadystate`, the value will be rounded to the nearest integer.
+
+We are moving towards allowing kwargs or class objects as well, but this is not yet allowed. For example, anything other than `percent` would be treated as a kwarg:
+``` yaml
+singleshot_sources:
+    RandomSymStructure:
+        percent: 0.30
+        spacegroups_exclude:
+            - 1
+            - 2
+            - 3
+        site_generation_method: MyCustomMethod
+```
+
 
 ## structure
 
 ## structure_source_id
+(advanced users only)
+The structure source that this individual is associated with. This allows us to determine how the new individual should be created. When running a search, this is set automatically when submitting a new flow.
 
 ## subworkflow_kwargs
+Make sure you read about `subworkflow_name` parameter first. This is a dictionary of parameters to pass to each subworkflow run. For example, the workflow will be ran as `subworkflow.run(**subworkflow_kwargs)`. Note, many workflows that use this argument will automatically pass information that is unique to each call (such as `structure`).
+``` python
+# python example
+subworkflow_kwargs=dict(
+    command="mpirun -n 4 vasp_std > vasp.out",
+    compress_output=True,
+)
+```
+``` yaml
+# yaml file example
+subworkflow_kwargs:
+    command: mpirun -n 4 vasp_std > vasp.out
+    compress_output: True
+```
 
 ## subworkflow_name
+The name of workflow that used to evaluate structures generated. For example, in evolutionary searches, individuals are created and then relaxed using the `relaxation.vasp.staged` workflow. Any workflow that is registered and accessible via the `get_workflow` utility can be used instead. (note: in the future we will allow unregisterd flows as well). If you wish to submit extra arguments to each workflow run, you can use the `subworkflow_kwargs` parameter.
+``` python
+# python example
+subworkflow_name = "relaxation.vasp.staged"
+```
+``` yaml
+# yaml file example
+subworkflow_name: relaxation.vasp.staged
+```
+
 
 ## supercell_end
+The endpoint image supercell to use. This is really just a `structure` parameter under a different name, so everything about the `structure` parameter also applies here.
+
 
 ## supercell_start
+The starting image supercell to use. This is really just a `structure` parameter under a different name, so everything about the `structure` parameter also applies here.
+
 
 ## tags
+When submitting workflows via the `run_cloud` command, tags are 'labels' that help control which workers are allowed to pick up and run the submitted workflow. Workers should be started with matching tags in order for these scheduled flows to run.
+``` python
+# python example
+tags = ["my-tag-01", "my-tag-02"]
+```
+``` yaml
+# yaml file example
+tags:
+    - my-tag-01
+    - my-tag-02
+```
+
 
 ## temperature_end
+For molecular dynamics simulations, this is the temperature to end the simulation at (in Kelvin). This temperatue will be reached through a linear transition from the `temperature_start` parameter.
+``` python
+# python example
+temperature_end = 1000
+```
+``` yaml
+# yaml file example
+temperature_end: 1000
+```
+
 
 ## temperature_start
+For molecular dynamics simulations, this is the temperature to begin the simulation at (in Kelvin).
+``` python
+# python example
+temperature_start = 250
+```
+``` yaml
+# yaml file example
+temperature_start: 250
+```
+
 
 ## time_step
+For molecular dynamics simulations, this is time time between each ionic step (in femtoseconds).
+``` python
+# python example
+time_step = 1.5
+```
+``` yaml
+# yaml file example
+time_step: 1.5
+```
+
 
 ## updated_settings
+(experimental feature)
+Unique to `customized.vasp.user-config`. This is a list of parameters to update the `workflow_base` with. This often involves updating the base class attributes.
+
 
 ## validator_kwargs
+(advanced users only)
+Extra conditions to use when initializing the validator class. `MyValidator(**validator_kwargs)`. The input should be given as a dictionary. Note, for evolutionary searches, the composition kwarg is added automatically. This is closely tied with the `validator_name` parameter so be sure to read that section as well.
+
 
 ## validator_name
+(experimental feature; advanced users only)
+The base validator class that should be used. The class will be initialized using `MyValidator(**validator_kwargs)`. The input should be given as a string.
+
+WARNING: Currently, we only support `CrystallNNFingerprint` validation, so this should be left at its default value.
+
 
 ## workflow_base
+(experimental feature)
+Unique to `customized.vasp.user-config`. This is the base workflow to use when updating critical settings.
