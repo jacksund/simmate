@@ -32,7 +32,7 @@ class Restart__Simmate__Automatic(Workflow):
         directory_new_cleaned = copy_directory(directory_old, directory_new)
 
         # grab the metadata file in the new dir
-        metadata_filename = directory_new_cleaned / "simmate_metadata.yaml"
+        metadata_filename = directory_new_cleaned / "simmate_metadata_01.yaml"
         with metadata_filename.open() as file:
             metadata = yaml.full_load(file)
 

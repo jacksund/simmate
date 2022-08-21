@@ -30,8 +30,6 @@ class Relaxation__Vasp__Quality00(VaspWorkflow):
 
     # Make the unitcell relatively cubic before relaxing
     standardize_structure = "primitive-LLL"
-    symmetry_tolerance = 0.01
-    angle_tolerance = 5.0
 
     # These are all input settings for this task.
     incar = dict(

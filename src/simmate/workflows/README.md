@@ -187,6 +187,17 @@ compress_output=True
 command: true
 ```
 
+## convergence_limit
+For evolutionary searches, the search will be considered converged when the best structure is not changing by this amount (in eV). In order to officially signal the end of the search, the best structure must survive within this convergence limit for a specific number of new individuals -- this is controlled by the `limit_best_survival`. The default of 1meV is typically sufficient and does not need to be changed. More often, users should update `limit_best_survival` instead.
+``` python
+# python example
+convergence_limit = 0.005
+```
+``` yaml
+# yaml file example
+convergence_limit: 0.005
+```
+
 
 ## copy_previous_directory
 Whether to copy the directory from the previous calculation (if there is one) and then use it as a starting point for this new calculation. This is only possible if you provided an input that points to a previous calculation. For example, `structure` would need to use a database-like input:
@@ -269,7 +280,7 @@ is_restart: true
 
 
 ## limit_best_survival
-For evolutionary searches, fixed compositions will be stopped when the best individual remains unbeaten for this number of new individuals. The default is typically set based on the number of atoms in the composition.
+For evolutionary searches, fixed compositions will be stopped when the best individual remains unbeaten for this number of new individuals. In order to absorb similar structures (e.g. identical structures but with minor energy differences), structures within the `convergence_limit` parameter (e.g. +1meV) are not considered when counting historical structures. This helps to prevent the search from continuing in cases where the search is likely already converged but making <0.1meV improvements. The default is typically set based on the number of atoms in the composition.
 ``` python
 # python example
 limit_best_survival = 100

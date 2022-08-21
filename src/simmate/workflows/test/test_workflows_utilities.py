@@ -97,6 +97,7 @@ def test_get_unique_paramters():
         "command",
         "composition",
         "compress_output",
+        "convergence_limit",
         "copy_previous_directory",
         "diffusion_analysis_id",
         "directory",

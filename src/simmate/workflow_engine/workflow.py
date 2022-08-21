@@ -643,7 +643,7 @@ class Workflow:
             workflow.
         """
 
-        logging.info(f"Submitting new run of {cls.name_full} to cloud")
+        logging.info(f"Submitting new run of `{cls.name_full}` to cloud")
 
         # To help with tracking the flow in cloud, we create the flow_id up front.
         kwargs["run_id"] = kwargs.get("run_id", None) or cls._get_run_id()
@@ -1133,8 +1133,23 @@ class Workflow:
         )
 
         # now write the summary to file in the same directory as the calc.
-        input_summary_filename = directory_cleaned / "simmate_metadata.yaml"
-        with input_summary_filename.open("w") as file:
+        # check the directory and see how many other "simmate_metadata*.yaml" files
+        # already exist. Our new file will be based off of this. Simply,
+        # if the biggest number is 04 --> then we will write a file named
+        # simmate_metadata__05.yaml to keep the count going.
+        count = (
+            len(
+                [
+                    f
+                    for f in directory_cleaned.iterdir()
+                    if f.name.startswith("simmate_metadata_")
+                ]
+            )
+            + 1
+        )
+        count_str = str(count).zfill(2)
+        input_summary_file = directory_cleaned / f"simmate_metadata_{count_str}.yaml"
+        with input_summary_file.open("w") as file:
             content = yaml.dump(input_summary)
             file.write(content)
 

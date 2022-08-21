@@ -35,6 +35,7 @@ class EvolutionarySearch(DatabaseTable):
     limit_best_survival = table_column.IntegerField()
     nfirst_generation = table_column.IntegerField()
     nsteadystate = table_column.IntegerField()
+    convergence_limit = table_column.FloatField()
 
     # Key classes to use during the search
     selector_name = table_column.CharField(max_length=200)
@@ -92,9 +93,15 @@ class EvolutionarySearch(DatabaseTable):
 
         # count the number of new individuals added AFTER the best one. If it is
         # more than limit_best_survival, we stop the search.
+        # Note, we look at all structures that have an energy_per_atom greater
+        # than 1meV/atom higher than the best structure. The +1meV ensures
+        # we aren't prolonging the calculation for insignificant changes in
+        # the best structure. Looking at the energy also ensures that we are
+        # only counting completed calculations.
+        # BUG: this filter needs to be updated to fitness_value and not
+        # assume we are using energy_per_atom
         num_new_structures_since_best = self.individuals.filter(
-            # check energies to ensure we only count completed calculations
-            energy_per_atom__gt=best.energy_per_atom,
+            energy_per_atom__gt=best.energy_per_atom + self.convergence_limit,
             created_at__gte=best.created_at,
         ).count()
         if num_new_structures_since_best > self.limit_best_survival:
@@ -507,8 +514,10 @@ class EvolutionarySearch(DatabaseTable):
         best = self.get_nbest_indiviudals(nbest)
         structures = best.only("structure_string", "id").to_toolkit()
         for rank, structure in enumerate(structures):
+            rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
             structure_filename = (
-                directory / f"rank-{rank}__id-{structure.database_object.id}.cif"
+                directory
+                / f"rank-{str(rank_cleaned)}__id-{structure.database_object.id}.cif"
             )
             structure.to("cif", structure_filename)
 

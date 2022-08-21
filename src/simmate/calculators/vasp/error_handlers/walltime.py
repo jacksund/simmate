@@ -141,7 +141,7 @@ class Walltime(ErrorHandler):
             # was ran outside of a Workflow), then we say that wall_time cannot
             # be determined. (checking files like INCAR won't work bc of other
             # handlers updating them)
-            filename = directory / "simmate_metadata.yaml"
+            filename = directory / "simmate_metadata_01.yaml"
             if not filename.exists():
                 logging.warning(
                     "Unable to detect the time remaining. Ignoring Timeout."
