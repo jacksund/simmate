@@ -150,7 +150,7 @@ class VaspWorkflow(S3Workflow):
     if the sites are symmetrically equivalent. (in Angstroms)
     """
 
-    angle_tolerance: float = 5.0
+    angle_tolerance: float = 0.5
     """
     If standardize_structure=True, then this is the cutoff value used to determine
     if the angles between sites are symmetrically equivalent. (in Degrees)
