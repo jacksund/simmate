@@ -87,9 +87,14 @@ from simmate.calculators.vasp.workflows.static_energy.matproj import StaticEnerg
 
 Knowing which parameters are available and how to use them is essential to use Simmate to the fullest. We therefore outline ALL unique parameters for ALL workflows here.
 
-To see which parameters are allow for a given workflow, you can use the `simmate explore` command to list them. Alternatively, in python, you can use `workflow.show_parameters()`.
+To see which parameters are allow for a given workflow, you can use the explore command to list them:
 
-For example:
+``` bash
+simmate workflows explore
+```
+
+
+Alternatively, in python, you can use `workflow.show_parameters()`. For example:
 
 ```
 workflow.show_parameters()
@@ -269,14 +274,69 @@ max_atoms: 100
 ```
 
 ## max_structures
+For workflows that generate new structures (and potentially run calculations on them), this will be the maximum number of structures allowed. The workflow will end at this number of structures regardless of whether the calculation/search is converged or not.
+``` python
+# python example
+max_structures = 100
+```
+``` yaml
+# yaml file example
+max_structures: 100
+```
 
 ## migrating_specie
+This is the atomic species/element that will be moving in the analysis (typically NEB or MD diffusion calculations). Note, oxidation states (e.g. "Ca2+") can be used, but this requires your input structure to be oxidation-state decorated as well.
+``` python
+# python example
+migrating_specie = "Li"
+```
+``` yaml
+# yaml file example
+migrating_specie: Li
+```
+
 
 ## migration_hop
+(advanced users only) The atomic path that should be analyzed. Inputs are anything compatible with the `MigrationHop` class of the `simmate.toolkit.diffusion` module. This includes:
+
+- `MigrationHop` object
+- a database entry in the `MigrationHop` table
+
+(TODO: if you'd like full examples, please ask our team to add them)
+
 
 ## migration_hop_id
+(advanced users only) The entry id from the `MigrationHop` table to link the results to. This is set automatically by higher-level workflows and rarely (if ever) set by the user. If used, you'll likely need to set `diffusion_analysis_id` as well.
+
 
 ## migration_images
+The full set of images (including endpoint images) that should be analyzed. Inputs are anything compatible with the `MigrationImages` class of the `simmate.toolkit.diffusion` module, which is effectively a list of `structure` inputs. This includes:
+
+- `MigrationImages` object
+
+- a list of `Structure` objects
+
+- a list of filenames (cif or POSCAR)
+``` python
+# python example
+migration_images = [
+    "image_01.cif",
+    "image_02.cif",
+    "image_03.cif",
+    "image_04.cif",
+    "image_05.cif",
+]
+```
+``` yaml
+# yaml file example
+migration_images:
+    - image_01.cif
+    - image_02.cif
+    - image_03.cif
+    - image_04.cif
+    - image_05.cif
+```
+
 
 
 ## min_atoms
@@ -284,12 +344,51 @@ This is the opposite of `max_atoms` as this will be the minimum number of sites 
 
 
 ## min_length
+When generating a supercell, this is the minimum length for each lattice vector of the generate cell (in Angstroms).
+``` python
+# python example
+min_length = 7.5
+```
+``` yaml
+# yaml file example
+min_length: 7.5
+```
 
 ## nfirst_generation
+For evolutionary searches, no mutations or "child" individuals will be scheduled until this
+number of individuals have been calculated. This ensures we have a good pool of candidates calculated before we start selecting parents and mutating them.
+``` python
+# python example
+nfirst_generation = 15
+```
+``` yaml
+# yaml file example
+nfirst_generation: 15
+```
 
 ## nimages
+The number of images (or structures) to use in the analysis. This does NOT include the endpoint images (start/end structures). More is better, but computationally expensive. We recommend keeping this value odd in order to ensure there is an image at the midpoint.
+``` python
+# python example
+nimages = 5
+```
+``` yaml
+# yaml file example
+nimages: 5
+```
+WARNING: For calculators such as VASP, your `command` parameter must use a number of cores that is divisible by `nimages`. For example, `nimages=3` and `command="mpirun -n 10 vasp_std > vasp.out"` will fail because 10 is not divisible by 3.
+
 
 ## nsteadystate
+The number of individual workflows to have scheduled at once. This therefore sets the queue size of an evolutionary search. Note, the number of workflows ran in parallel is determined by the number of `Workers` started (i.e. starting 3 workers will run 3 workflows in parallel, even if 100 workflows are in the queue). The steady-state does, however, set the **maximum** number of parallel runs because the queue size will never exceed the `nsteadystate` value. This parameter is closely tied with `steadystate_sources`, so be sure to read about that parameter as well.
+``` python
+# python example
+nsteadystate = 50
+```
+``` yaml
+# yaml file example
+nsteadystate: 50
+```
 
 ## nsteps
 

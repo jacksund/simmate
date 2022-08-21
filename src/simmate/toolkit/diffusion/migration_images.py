@@ -330,7 +330,7 @@ class MigrationImages(list):
         """
         is_from_past_calc = False
 
-        # assume any list is in the MigrationHop format if there are more than
+        # assume any list is in the MigrationImages format if there are more than
         # two structures (i.e. there is at least one midpoint image)
         if isinstance(migration_images, cls):
             migration_images_cleaned = migration_images
