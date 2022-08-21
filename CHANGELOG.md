@@ -36,6 +36,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Fixes**
 - fix `module not found` error by adding ASE to dependencies
+- fix bug with postgres database trying to delete sqlite locally
 
 
 
