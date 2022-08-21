@@ -768,7 +768,11 @@ class Workflow:
     @classmethod
     @property
     def all_results(cls):  # -> SearchResults
-        return cls.database_table.objects.filter(workflow_name=cls.name_full).all()
+        # BUG: pdoc raises an error because name_full fails.
+        try:
+            return cls.database_table.objects.filter(workflow_name=cls.name_full).all()
+        except:
+            return
 
     @classmethod
     def _save_to_database(cls, result: any, run_id: str):
