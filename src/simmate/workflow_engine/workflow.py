@@ -670,7 +670,7 @@ class Workflow:
             **parameters_serialized,
         )
 
-        logging.info(f"Successfully submitted (run_id={run_id})")
+        logging.info(f"Successfully submitted (workitem_id={state.pk})")
 
         # If the user wants the future, return that instead of the run_id
         if return_state:

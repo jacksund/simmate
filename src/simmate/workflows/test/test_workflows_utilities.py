@@ -93,6 +93,7 @@ def test_get_workflow():
 
 def test_get_unique_paramters():
     assert get_unique_parameters() == [
+        "angle_tolerance",
         "command",
         "composition",
         "compress_output",
@@ -117,8 +118,6 @@ def test_get_unique_paramters():
         "nimages",
         "nsteadystate",
         "nsteps",
-        "pre_sanitize_structure",
-        "pre_standardize_structure",
         "run_id",
         "search_id",
         "selector_kwargs",
@@ -126,6 +125,7 @@ def test_get_unique_paramters():
         "singleshot_sources",
         "sleep_step",
         "source",
+        "standardize_structure",
         "steadystate_sources",
         "structure",
         "structure_source_id",
@@ -133,6 +133,7 @@ def test_get_unique_paramters():
         "subworkflow_name",
         "supercell_end",
         "supercell_start",
+        "symmetry_precision",
         "tags",
         "temperature_end",
         "temperature_start",

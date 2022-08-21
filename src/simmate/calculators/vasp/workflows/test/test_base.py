@@ -18,7 +18,10 @@ class Testing__Vasp__Dummy(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
     confirm_convergence = True
-    pre_sanitize_structure = True
+    standardize_structure = "primitive-LLL"
+    symmetry_tolerance = 0.1
+    angle_tolerance = 10.0
+
     incar = dict(
         PREC="Low",
         EDIFF__per_atom=2e-3,  # to ensure structure-specific kwargs

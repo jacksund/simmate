@@ -206,6 +206,7 @@ INPUT_MAPPINGS = {
         "command",
         "migrating_specie",
         "run_id",
+        "standardize_structure",
     ],
     "integer": [
         "nsteps",
@@ -216,11 +217,11 @@ INPUT_MAPPINGS = {
         "temperature_end",
         "temperature_start",
         "time_step",
+        "symmetry_precision",
+        "angle_tolerance",
     ],
     "boolean": [
         "copy_previous_directory",
-        "pre_standardize_structure",
-        "pre_sanitize_structure",
         "is_restart",
         "compress_output",
     ],

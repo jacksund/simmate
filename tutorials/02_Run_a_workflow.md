@@ -326,10 +326,8 @@ Parameters:
 
 - command
 - compress_output
+- copy_previous_directory
 - directory
-- is_restart
-- pre_sanitize_structure
-- pre_standardize_structure
 - run_id
 - source
 - structure

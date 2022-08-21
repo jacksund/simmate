@@ -30,6 +30,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Refactors**
 - isolate optional dependencies so that our install is smaller
 - remove click in favor of higher-level package (typer)
+- `pre_standardize_structure` and `pre_sanitize_structure` functionality is now merged in to a `standardize_structure` parameter that accepts different mode. `symmetry_tolerance` and `angle_tolerance` parameters can also modify the symmetry analysis done.
 
 **Fixes**
 - fix `module not found` error by adding ASE to dependencies
