@@ -166,6 +166,13 @@ def explore():
     print(f"{prefix}Parameters:\n")
     workflow.show_parameters()
 
+    endnote = Markdown(
+        "To understand each parameter, you can read through "
+        "[our parameter docs](https://jacksund.github.io/simmate/simmate/workflows.html#parameters)"
+        ", which give full descriptions and examples."
+    )
+    console.print(endnote)
+
     print(f"{prefix}==================================================================")
 
 
