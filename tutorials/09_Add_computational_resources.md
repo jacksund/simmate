@@ -172,7 +172,7 @@ simmate workflow-engine start-singleflow-worker
 ```
 > :warning::warning::warning: If you are on a cluster, start-worker should be called within your submit script (e.g. inside `submit.sh` for SLURM). Don't run workers on the head node! :warning::warning::warning:
 
-When you run this "singleflow" worker, you'll notice that the Worker will start, run 1 workflow, then shutdown. This is the recommend approach for HPC clusters because it follow best practices for sharing resources. You don't want a worker hogging computational resources if there aren't any workflows scheduled to run! 
+When you run this "singleflow" worker, you'll notice that the Worker will start, run 1 workflow, then shutdown. This is the recommended approach for HPC clusters because it follow best practices for sharing resources. You don't want a worker hogging computational resources if there aren't any workflows scheduled to run! 
 
 However, if you would like more control over how many workflows are ran or even run a worker endlessly, you can use the command:
 ``` bash
