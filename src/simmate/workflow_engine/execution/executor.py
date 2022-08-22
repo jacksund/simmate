@@ -5,7 +5,6 @@ import logging
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 
 from simmate.workflow_engine.execution.database import WorkItem
-from simmate.workflow_engine.execution.future import SimmateFuture
 
 
 class SimmateExecutor:
@@ -39,7 +38,7 @@ class SimmateExecutor:
         *args,
         tags: list[str] = [],
         **kwargs,
-    ) -> SimmateFuture:
+    ) -> WorkItem:
 
         # The *args and **kwargs input separates args into a tuple and kwargs into
         # a dictionary for me, which makes their storage very easy!
@@ -58,32 +57,29 @@ class SimmateExecutor:
             tags=tags,  # should be json serializable already
         )
 
-        # create the future object
-        future = SimmateFuture(pk=workitem.pk)
-
-        # and return the future for use
-        return future
+        # and return the workitem/future for use
+        return workitem
 
     @staticmethod
-    def wait(futures: SimmateFuture):
+    def wait(workitems: list[WorkItem]):
         """
         Waits for all futures to complete before returning a list of their results
         """
         # If a dictionary of {key1: future1, key2: future2, ...} is given,
         # then we return a dictionary of which futures replaced by results.
         # NOTE: this is really for compatibility with Prefect's FlowRunner.
-        if isinstance(futures, dict):
+        if isinstance(workitems, dict):
             logging.info("waiting for workflows to finish")
             import time
 
             time.sleep(10)
-            for key, future in futures.items():
-                print((key, future, future.pk, future.done()))
+            for key, workitem in workitems.items():
+                print((key, workitem, workitem.pk, workitem.done()))
                 # print(future.result())
-            return {key: future.result() for key, future in futures.items()}
+            return {key: workitem.result() for key, workitem in workitems.items()}
         # otherwise this is a list of futures, so return a list of results
         else:
-            return [future.result() for future in futures]
+            return [workitem.result() for workitem in workitems]
 
     # -------------------------------------------------------------------------
     # These methods are for managing and monitoring the queue

@@ -21,6 +21,10 @@ client = get_dask_client()
 
 # --------------------------------------------------------------------------------------
 
+# The order that we import these different modules is important to prevent
+# circular imports errors, so we prevent isort from changing this file.
+# isort: skip_file
+
 import logging
 
 # We need to disable logging
