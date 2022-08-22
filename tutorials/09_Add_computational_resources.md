@@ -47,7 +47,7 @@ simmate workflow-engine start-singleflow-worker
 simmate workflow-engine start-worker
 ```
 
-10. Scale out your cluster! Start workers anywhere you'd like, and start as many as you'd like. Just make sure you follow steps  4 and 5 for every worker. If you need to start many workers at once, you can use the `start-cluster` command as well.
+10. Scale out your cluster! Start workers anywhere you'd like, and start as many as you'd like. Just make sure you follow steps 4 and 5 for every worker. If you need to start many workers at once, you can use the `start-cluster` command as well.
 ``` bash
 # starts 5 local workers
 simmate workflow-engine start-cluster 5
