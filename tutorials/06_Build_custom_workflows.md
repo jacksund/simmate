@@ -15,7 +15,7 @@ In this tutorial, you will learn how to build customized workflows.
 
 ## Why isn't there a `custom_settings` option?
 
-We intentionally avoid the use of `workflow.run(custom_settings=...)`. **This will NOT work.** Simmate does this because we do not want to store results from customized settings in the same results table -- as this would (a) complicate analysis of many structuers/systems and (b) make navigating results extremely difficult for beginners. For example, reducing the `ENCUT` or changing the dispersion correction of a VASP calculation makes it so energies cannot be compared between all materials in the table, and thus, features like calculated hull energies would become inaccruate.
+We intentionally avoid the use of `workflow.run(custom_settings=...)`. **This will NOT work.** Simmate does this because we do not want to store results from customized settings in the same results table -- as this would (a) complicate analysis of many structures/systems and (b) make navigating results extremely difficult for beginners. For example, reducing the `ENCUT` or changing the dispersion correction of a VASP calculation makes it so energies cannot be compared between all materials in the table, and thus, features like calculated hull energies would become inaccruate.
 
 Instead, Simmate encourages the creation of new workflows and result tables when you want to customize settings. This puts Simmate's emphasis on "scaling up" workflows (i.e. running a fixed workflow on thousands on materials) as opposed to "scaling out" workflows (i.e. a flexible workflow that changes on a structure-by-structure basis).
 
@@ -84,31 +84,31 @@ Both of these approaches are only suitable for customizing settings for a few ca
 
 > :warning: Naming is very import! If you skip this step, your workflows will fail and cause errors elsewhere.
 
-Naming your new workflow is an important step in Simmate. Higher level features such as the website interface require that workflow names follow a certain format because this let's us do things such as determine where in the website interface we can find your new workflow. Followings a set of rules is how we arrive at workflows like `relaxation.vasp.mit`
+Naming your new workflow is an important step in Simmate. Features (such as the website interface) require that workflow names follow a certain format because this let's us do things such as determine where we can find your new workflow in the website interface. We follow a set of rules to arrive at workflow names like `relaxation.vasp.mit`.
 
 First, we need to update the workflow name to match Simmate's naming
 conventions, which includes:
-    1.  The type of analysis the workflow is doing
-    2.  The "calculator" (or program) that the workflow uses to run
-    3.  A unique name to identify the settings used
+1.  The type of analysis the workflow is doing
+2.  The "calculator" (or program) that the workflow uses to run
+3.  A unique name to identify the settings used
 
 Examples for each part would be:
-    1. relaxation, static-energy, dynamics, ...
-    2. vasp, abinit, qe, deepmd, ...
-    3. jacks-test, matproj, quality00, ...
+1. relaxation, static-energy, dynamics, ...
+2. vasp, abinit, qe, deepmd, ...
+3. jacks-test, matproj, quality00, ...
 
 Together, an example workflow names would be:
-    - `relaxation.vasp.jacks-test`
-    - `static-energy.abinit.matproj`
-    - `dynamics.qe.quality00`
+- `relaxation.vasp.jacks-test`
+- `static-energy.abinit.matproj`
+- `dynamics.qe.quality00`
 
 When converting this to our workflow name in python, we need to replace
 periods with 2 underscores each and convert our words to
 [pascal case](https://khalilstemmler.com/blogs/camel-case-snake-case-pascal-case/).
 For example, our workflow names become:
-    - `Relaxation__Vasp__JacksTest`
-    - `StaticEnergy__Abinit__Matproj`
-    - `Dynamics__Qe__Quality00`
+- `Relaxation__Vasp__JacksTest`
+- `StaticEnergy__Abinit__Matproj`
+- `Dynamics__Qe__Quality00`
 
 > :bulb: Capitalization is very important here so make sure you double check your workflow names.
 
@@ -176,7 +176,7 @@ class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
     )
 
 # make sure we have new settings updated and that we didn't change the original
-assert original_workflow.incat != StaticEnergy__Vasp__MyCustomPreset
+assert original_workflow.incar != StaticEnergy__Vasp__MyCustomPreset
 ```
 
 You can now run and interact with your workflow like any other one!
