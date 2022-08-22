@@ -35,7 +35,7 @@ simmate workflows run-cloud relaxation.vasp.mit --structure POSCAR
 
 > :bulb: This workflow is now scheduled but it won't run until we start a worker.
 
-8. Whereever you'd like to run the workflow, start a worker with:
+8. Wherever you'd like to run the workflow, start a worker with:
 ``` bash
 simmate workflow-engine start-singleflow-worker
 ```
