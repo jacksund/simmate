@@ -17,7 +17,7 @@ class Heredity(Transformation):
 
     io_scale = "many_to_one"
     ninput = 2
-    use_multiprocessing = False
+    allow_parallel = False
 
     def __init__(
         self,

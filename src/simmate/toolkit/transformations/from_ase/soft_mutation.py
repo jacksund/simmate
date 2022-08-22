@@ -23,7 +23,7 @@ class SoftMutation(Transformation):
 
     io_scale = "one_to_one"
     ninput = 1
-    use_multiprocessing = False
+    allow_parallel = False
 
     def __init__(
         self,

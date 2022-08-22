@@ -10,15 +10,17 @@ class ExtremeSymmetry(Transformation):
     """
     Applies a series of increasingly excessive symmetry checks -- starting
     at 0.1 Angstrom + 0.5 Deg and ending at ~3 Angstrom + ~40 Deg. The final
-    tolerance checks are massive tolerances that are intended to change
+    tolerance checks are massive tolerances that are intended to reduce the
+    structure to a new and distinct one.
 
     This will return the highly symmetrized structure, which is often useful
-    for evolutionary searches where many disordered structures exist.
+    for evolutionary searches where many disordered structures exist. We expect
+    it to be most effective for structures with high site counts.
     """
 
     ninput = 1
     io_scale = "one_to_one"
-    use_multiprocessing = True
+    allow_parallel = True
 
     @classmethod
     def apply_transformation(cls, structure: Structure):
@@ -61,7 +63,6 @@ class ExtremeSymmetry(Transformation):
             # We only store the results if we generated a brand-new spacegroup
             if new_spacegroup not in results.keys():
                 results.update({new_spacegroup: sga.get_primitive_standard_structure()})
-                print(f"NEW SPACEGROUP {new_spacegroup}")
 
             # For the next cycle, I simple scale the angle and distance tolerances
             # by a fixed percent. This results in the following overall checks:
@@ -91,7 +92,7 @@ class ExtremeSymmetry(Transformation):
             #   Ang: 2.8625176191121406, DEG: 39.74842360169539
             symprec *= 1.15
             angle_tol *= 1.2
-            print(f"Ang: {symprec}, DEG: {angle_tol}")  # --> generates comment above
+            # print(f"Ang: {symprec}, DEG: {angle_tol}") --> generates comment above
 
         # Grab the final & highest symmetry result.
         max_spacegroup = max(list(results.keys()))
