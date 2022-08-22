@@ -73,7 +73,7 @@ class SoftMutation(Transformation):
             return False
 
         # first I need to convert the structure to an ASE atoms object
-        structure_ase = self.adaptor.get_atoms(structure)
+        structure_ase = AseAtomsAdaptor.get_atoms(structure)
 
         # their code searches for a atoms.info['confid'] to check for
         # previously used modes -- it's unfortunately dependent on the entire

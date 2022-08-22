@@ -48,7 +48,7 @@ class AtomicPermutation(Transformation):
             return False
 
         # first I need to convert the structures to an ASE atoms object
-        structure_ase = self.adaptor.get_atoms(structure)
+        structure_ase = AseAtomsAdaptor.get_atoms(structure)
 
         perm = PermutationMutation(
             n_top=int(

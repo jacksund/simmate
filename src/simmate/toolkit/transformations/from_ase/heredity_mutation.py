@@ -109,8 +109,8 @@ class Heredity(Transformation):
         )
 
         # first I need to convert the structures to an ASE atoms object
-        structure1_ase = self.adaptor.get_atoms(structure1)
-        structure2_ase = self.adaptor.get_atoms(structure2)
+        structure1_ase = AseAtomsAdaptor.get_atoms(structure1)
+        structure2_ase = AseAtomsAdaptor.get_atoms(structure2)
 
         #!!! Their code suggests the use of .get_new_individual() but I think
         # .cross() is what we'd like

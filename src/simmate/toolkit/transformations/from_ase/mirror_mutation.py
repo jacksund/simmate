@@ -41,7 +41,7 @@ class MirrorMutation(Transformation):
         # that I'm actually returning a new structure
 
         # first I need to convert the structures to an ASE atoms object
-        structure_ase = self.adaptor.get_atoms(structure)
+        structure_ase = AseAtomsAdaptor.get_atoms(structure)
 
         # now we can make the generator
         mirror = ASEMirrorMutation(

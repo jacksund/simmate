@@ -37,7 +37,7 @@ class CoordinatePerturbation(Transformation):
     def apply_transformation(self, structure: Structure) -> Structure:
 
         # first I need to convert the structures to an ASE atoms object
-        structure_ase = self.adaptor.get_atoms(structure)
+        structure_ase = AseAtomsAdaptor.get_atoms(structure)
 
         # now we can make the generator
         self.rattle = RattleMutation(

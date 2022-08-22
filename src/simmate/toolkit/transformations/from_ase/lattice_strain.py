@@ -59,7 +59,7 @@ class LatticeStrain(Transformation):
     def apply_transformation(self, structure: Structure) -> Structure:
 
         # first I need to convert the structures to an ASE atoms object
-        structure_ase = self.adaptor.get_atoms(structure)
+        structure_ase = AseAtomsAdaptor.get_atoms(structure)
 
         #!!! Their code suggests the use of .get_new_individual() but
         # I think .mutate() is what we'd like

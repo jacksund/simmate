@@ -223,7 +223,7 @@ class EvolutionarySearch(DatabaseTable):
         sum_proportions = sum(steadystate_source_proportions)
         if sum_proportions != 1:
             logging.warning(
-                "fractions for steady-state sources do not add to 1."
+                "fractions for steady-state sources do not add to 1. "
                 "We have scaled all sources to equal one to fix this."
             )
             steadystate_source_proportions = [
@@ -253,6 +253,7 @@ class EvolutionarySearch(DatabaseTable):
             ]
             is_creator = True if source_name in known_creators else False
             known_transformations = [
+                "ExtremeSymmetry",
                 "from_ase.Heredity",
                 "from_ase.SoftMutation",
                 "from_ase.MirrorMutation",

@@ -34,11 +34,6 @@ class RotationalMutation(Transformation):
             element_ints, ratio_of_covalent_radii
         )
 
-        # we also need to convert pymatgen Structures to ase Atoms below
-        #!!! is it faster and more memory efficient to import below?
-
-        self.adaptor = AseAtomsAdaptor
-
     def apply_transformation(self, structure: Structure) -> Structure:
 
         #!!! TO-DO. In many cases, you can perform this operation and simply
@@ -46,7 +41,7 @@ class RotationalMutation(Transformation):
         # that I'm actually returning a new structure
 
         # first I need to convert the structures to an ASE atoms object
-        structure_ase = self.adaptor.get_atoms(structure)
+        structure_ase = AseAtomsAdaptor.get_atoms(structure)
 
         # now we can make the generator
         rotate = ASERotationalMutation(
