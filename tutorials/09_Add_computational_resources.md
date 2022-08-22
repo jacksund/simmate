@@ -82,7 +82,7 @@ Recall from tutorial 2, there are 4 steps to a workflow:
 - `execute`: writes our input files, runs the calculation (e.g. calling VASP), and checks the results for errors
 - `save`: saves the results to our database
 
-This tuturial will give an overview of how to modify the `schedule` and determine which computer `execute` is called on. Up until now, we have been using the default behavior for these two steps. But now we want to instead do the following:
+This tutorial will give an overview of how to modify the `schedule` and determine which computer `execute` is called on. Up until now, we have been using the default behavior for these two steps. But now we want to instead do the following:
 - `schedule`: submits the workflow to a scheduler queue of many other workflows
 - `execute`: run the calculation on a remote cluster
 
