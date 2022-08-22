@@ -22,7 +22,7 @@ In this tutorial, you will learn how to run workflows on distributed computation
 
 3. If your computational resources are distributed on different computers, make sure you have set up a cloud database (see the previous tutorial on how to do this). If you want to schedule AND run things entirely on your local computer (or file system), then you can skip this step.
 
-4. If you have remote resources, make sure you have ALL simmate installations connected to the same database (i.e. you database connection file should be on all resources).
+4. If you have remote resources, make sure you have ALL simmate installations connected to the same database (i.e. your database connection file should be on all resources).
 
 5. If you have custom workflows, make sure you are using a simmate project and all resources have this app installed
 
