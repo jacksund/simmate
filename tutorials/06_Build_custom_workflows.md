@@ -15,7 +15,7 @@ In this tutorial, you will learn how to build customized workflows.
 
 ## Why isn't there a `custom_settings` option?
 
-We intentionally avoid the use of `workflow.run(custom_settings=...)`. **This will NOT work.** Simmate does this because we do not want to store results from customized settings in the same results table -- as this would (a) complicate analysis of many structuers/systems and (b) make navigating results extremely difficult for beginners. For example, reducing the `ENCUT` or changing the dispersion correction of a VASP calculation makes it so energies cannot be compared between all materials in the table, and thus, features like calculated hull energies would become inaccruate.
+We intentionally avoid the use of `workflow.run(custom_settings=...)`. **This will NOT work.** Simmate does this because we do not want to store results from customized settings in the same results table -- as this would (a) complicate analysis of many structures/systems and (b) make navigating results extremely difficult for beginners. For example, reducing the `ENCUT` or changing the dispersion correction of a VASP calculation makes it so energies cannot be compared between all materials in the table, and thus, features like calculated hull energies would become inaccruate.
 
 Instead, Simmate encourages the creation of new workflows and result tables when you want to customize settings. This puts Simmate's emphasis on "scaling up" workflows (i.e. running a fixed workflow on thousands on materials) as opposed to "scaling out" workflows (i.e. a flexible workflow that changes on a structure-by-structure basis).
 
