@@ -305,15 +305,10 @@ def run_cloud(context: Context, workflow_name: str):
     )
     kwargs_cleaned = parse_parameters(context=context)
 
-    result = workflow.run_cloud(**kwargs_cleaned)
+    workflow.run_cloud(**kwargs_cleaned)
 
 
-@workflows_app.command(
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    )
-)
+@workflows_app.command()
 def run_yaml(filename: Path):
     """Runs a workflow where parameters are loaded from a yaml file."""
 
@@ -365,4 +360,4 @@ def run_yaml(filename: Path):
 
     # -------------------------------------------------------------------------
 
-    result = workflow.run(**parameters)
+    workflow.run(**parameters).result()

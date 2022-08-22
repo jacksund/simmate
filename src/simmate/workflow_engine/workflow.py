@@ -596,7 +596,7 @@ class Workflow:
         """
         # This method is isolated only because we want to wrap it as a prefect
         # workflow in some cases.
-        logging.info(f"Starting {cls.name_full}")
+        logging.info(f"Starting '{cls.name_full}'")
         kwargs_cleaned = cls._load_input_and_register(
             run_id=run_id,
             directory=directory,

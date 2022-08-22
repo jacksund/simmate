@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import simmate.toolkit.creators as creation_module
 import simmate.toolkit.transformations.from_ase as transform_module
 from simmate.database.base_data_types import DatabaseTable, table_column
@@ -36,6 +38,35 @@ class StructureSource(DatabaseTable):
         or pending state from the list of run ids that are associate with this
         structure source.
         """
+
+        # Before updating our run ids, we first want to see if any of them
+        # failed (or "E" for ERRORED) -- so that we can warn the use to
+        # check their logs.
+        failed_ids = WorkItem.objects.filter(
+            id__in=self.workitem_ids,
+            status__in=["E", "C"],
+        ).values_list("id", flat=True)
+
+        if failed_ids:
+            logging.warning(
+                f"The following WorkItem IDs failed or were cancelled: {list(failed_ids)}."
+            )
+
+            print("\n------------------------------------------------------------\n")
+            print(
+                "Make sure you check your worker logs for more info. "
+                "Alternatively, you can run the following in python to get "
+                "the error traceback locally:\n"
+            )
+            print("from simmate.workflow_engine.execution import WorkItem")
+            print(f"item = WorkItem.objects.get(id={failed_ids[0]})")
+            print("item.result()\n")
+            print(
+                "The call to `result()` will raise the error that caused your job "
+                "to fail. Please report this error if you think it's a bug "
+                "with Simmate.\n "
+            )
+            print("------------------------------------------------------------\n")
 
         # check which ids are still running. Note, this is a separate
         # method in case it's an async call to Prefect client

@@ -30,6 +30,10 @@ class SimmateWorker:
     via the `run_cloud` method.
     """
 
+    # Consider making this a database object so that we can track workers in
+    # the UI and know how many are running. If linked to the database, we could
+    # even send an update for the worker to shut down.
+
     # Ideally, this worker would involve multiple threads threads going. One
     # thread would update the queue database with a "heartbeat" to let it know
     # that it is still working on tasks. The other thread will run the given
@@ -37,9 +41,6 @@ class SimmateWorker:
     # worker can run multiple workitems at once and in parallel.
     # However, if this level of implementation is needed, we should instead
     # switch to using Prefect, which has it built in.
-
-    # Consider making this a database object so that we can track workers in
-    # the UI and know how many are running.
 
     def __init__(
         self,
@@ -226,7 +227,7 @@ class SimmateWorker:
                             )
 
                             workitem.command_not_found_failures = nfailures
-                            workitem.status = "P"
+                            workitem.status = "P"  # marked as PENDING to retry
                             workitem.save()
                     logging.info("Shutting down to prevent repeated issues.")
                     return
@@ -248,8 +249,9 @@ class SimmateWorker:
             with transaction.atomic():
                 # pickle the result and update the workitem's result and status
                 # !!! should I have the pickle inside of a Try?
-                workitem.result = result_pickled
-                workitem.status = "F"
+                workitem.result_binary = result_pickled
+                # mark as finished or errored depending on result value
+                workitem.status = "E" if isinstance(result, Exception) else "F"
                 workitem.save()
 
             # mark down that we've completed one WorkItem
