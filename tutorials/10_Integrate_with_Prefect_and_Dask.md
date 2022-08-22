@@ -1,6 +1,6 @@
 # Integrate with Prefect and Dask
 
-> :warning::warning::warning: We do not recommend this tutorial for users at the moment. This tutorial is for Prefect v1, but much of Simmate now depends on Prefect v2. As we adjust to the new backend, parts of this tutorial may be broken and recommended proceedures are subject to change. :warning::warning::warning: 
+> :warning::warning::warning: We do not recommend this tutorial for users at the moment. This tutorial is for Prefect v1, but much of Simmate now depends on Prefect v2. As we adjust to the new backend, parts of this tutorial may be broken and recommended procedures are subject to change. :warning::warning::warning: 
 
 In this tutorial, you will learn how to run workflows on distributed computational resources -- with full scheduling and monitoring.
 
