@@ -130,12 +130,13 @@ def test_workflow_submit_view(client, sample_structures, mocker):
         labels=["test_label1"],
         compress_output=False,
         wait_for_run=False,
-        pre_sanitize_structure=False,
-        pre_standardize_structure=False,
         # parameters not deserialized yet so these will still be present
         command="",
         directory="",
         source=None,
         run_id="",
         is_restart=False,
+        standardize_structure="",
+        angle_tolerance=None,
+        symmetry_precision=None,
     )

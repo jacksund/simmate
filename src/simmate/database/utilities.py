@@ -56,7 +56,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     db_filename = DATABASES["default"]["NAME"]
 
     # delete the sqlite3 database file if it exists
-    if db_filename.exists():
+    if using_sqlite and db_filename.exists():
         db_filename.unlink()
 
     # go through each app directory and delete all folders named 'migrations'

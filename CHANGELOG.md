@@ -26,13 +26,17 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add NEB base classes to inherit from for making new subflows
 - improve formatting of logging and cli using `typer` and `rich`
 - cli now supports auto-completion to help with long commands
+- add `convergence_limit` parameter to evolutionary search that works alongside `limit_best_survival`. This will absorb minor changes in energy with equivalent structures from prolonging the search.
 
 **Refactors**
 - isolate optional dependencies so that our install is smaller
 - remove click in favor of higher-level package (typer)
+- `pre_standardize_structure` and `pre_sanitize_structure` functionality is now merged in to a `standardize_structure` parameter that accepts different mode. `symmetry_tolerance` and `angle_tolerance` parameters can also modify the symmetry analysis done.
+- metadata files are now numbered to allow multiple metadata files in the same directory
 
 **Fixes**
 - fix `module not found` error by adding ASE to dependencies
+- fix bug with postgres database trying to delete sqlite locally
 
 
 

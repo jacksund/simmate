@@ -241,7 +241,7 @@ def load_results_from_directories(base_directory: Path | str = "."):
                 foldername = foldername.removesuffix(".zip")
 
             # Grab the metadata file which tells us key information
-            filename = foldername / "simmate_metadata.yaml"
+            filename = foldername / "simmate_metadata_01.yaml"
             with filename.open() as file:
                 metadata = yaml.full_load(file)
 

@@ -30,7 +30,7 @@ class Relaxation__Vasp__Quality01(VaspWorkflow):
     confirm_convergence = False
 
     # Make the unitcell relatively cubic before relaxing
-    pre_sanitize_structure = True
+    standardize_structure = "primitive-LLL"
 
     # These are all input settings for this task.
     incar = dict(

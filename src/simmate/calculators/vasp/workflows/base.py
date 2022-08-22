@@ -117,65 +117,99 @@ class VaspWorkflow(S3Workflow):
     # attribute that is used in the .check() method. and If fix_error=False, I
     # simply print a warning & also add that warning to simmate_corrections.csv
 
-    pre_sanitize_structure: bool = False
+    standardize_structure: str | bool = False
     """
-    In some cases, we may want to sanitize the structure during our setup().
-    This means converting to the LLL-reduced primitive cell. This simply does:
-    ``` python
-    structure_sanitzed = structure.copy(santize=True)
-    ```
+    In some cases, we may want to standardize the structure during our setup().
+    
+    This means running symmetry analysis on the structure in order to reduce
+    the symmetry and also converting it to some standardized form. There
+    are three different forms to choose from and thus 3 different values that
+    `standardize_structure` can be set to:
+    
+    - `primitive`: for the standard primitive unitcell
+    - `conventional`: for the standard conventional unitcell
+    - `primitive-LLL`: for the standard primitive unitcell that is then LLL-reduced
+    - `False`: this is the default and will disable this feature
+    
+    We recommend using `primitive-LLL` when the smallest possible and most cubic
+    unitcell is desired.
+    
+    We recommend using `primitive` when calculating band structures and 
+    ensuring we have a standardized high-symmetry path. Note, existing band
+    structure workflows automatically adjust this value for you.
+    
+    To control the tolerances used to symmetrize the structure, you can use the
+    symmetry_precision and angle_tolerance attributes.
+    
+    By default, no standardization is applied.
     """
 
-    pre_standardize_structure: bool = False
+    symmetry_precision: float = 0.01
     """
-    In some cases, we may want to convert the structure to the standard primitive
-    of a structure. For example, this is required when calculating band structures
-    and ensuring we have a standardized high-symmetry path.
+    If standardize_structure=True, then this is the cutoff value used to determine
+    if the sites are symmetrically equivalent. (in Angstroms)
+    """
+
+    angle_tolerance: float = 0.5
+    """
+    If standardize_structure=True, then this is the cutoff value used to determine
+    if the angles between sites are symmetrically equivalent. (in Degrees)
     """
 
     @classmethod
     def _get_clean_structure(
         cls,
         structure: Structure,
-        pre_sanitize_structure: bool = None,
-        pre_standardize_structure: bool = None,
+        standardize_structure: str | bool = None,
+        symmetry_precision: float = None,
+        angle_tolerance: float = None,
         **kwargs,
     ) -> Structure:
         """
-        Uses the class attributes for `pre_sanitize_structure` and
-        `pre_standardize_structure`. If either of these are set to True, then
-        the structure unitcell is converted using the proper methods.
+        Uses the class attribute for `standardize_structure`. If this is set
+        to any of the listed modes, then the structure unitcell is converted
+        using the proper methods.
 
         Note, this method is typically called within `setup` before any input
         files are written. You should never have to call it directly.
         """
 
-        # See if these values were provided, or default to class attribute
-        pre_sanitize_structure = pre_sanitize_structure or cls.pre_sanitize_structure
-        pre_standardize_structure = (
-            pre_standardize_structure or cls.pre_standardize_structure
-        )
+        # See if these values were provided, or default to class attribute.
+        # We rename this to "standardize mode" to accurately descibe the
+        # variable if it is set
+        standardize_mode = standardize_structure or cls.standardize_structure
+        symmetry_precision = symmetry_precision or cls.symmetry_precision
+        angle_tolerance = angle_tolerance or cls.angle_tolerance
 
-        # if both pre_standardize_structure and pre_sanitize_structure are set,
-        # we raise an error. I may want to change this in the future though
-        if pre_sanitize_structure and pre_standardize_structure:
+        # if standardize_structure is not requested, then we just return the
+        # orignal input structure.
+        if not standardize_mode:
+
+            return structure
+
+        # Make sure the user
+        if standardize_mode not in ["primitive-LLL", "conventional", "primitive"]:
             raise Exception(
-                "For this VaspWorkflow, only one of `pre_sanitize_structure` or "
-                " `pre_standardize_structure` can be set to True, not both."
+                f"Standardization mode {standardize_mode} is not supported."
             )
+
+        # Both cleaning steps start with looking at the symmetry analysis
+        sym_finder = SpacegroupAnalyzer(
+            structure,
+            symprec=symmetry_precision,
+            angle_tolerance=angle_tolerance,
+        )
 
         # If requested, we convert to the LLL-reduced unit cell, which aims to
         # be as cubic as possible.
-        if pre_sanitize_structure:
-            structure_cleaned = structure.copy(sanitize=True)
+        if standardize_mode == "primitive-LLL":
+            structure_prim = sym_finder.get_primitive_standard_structure()
+            structure_cleaned = structure_prim.copy(sanitize=True)
             return structure_cleaned
 
         # For band structures, we need to make sure the structure is in the
         # standardized primitive form.
-        # We use the same SYMPREC from the INCAR, which is 1e-5 if not set.
-        if pre_standardize_structure:
-            sym_prec = cls.incar.get("SYMPREC", 1e-5) if cls.incar else 1e-5
-            sym_finder = SpacegroupAnalyzer(structure, symprec=sym_prec)
+        if standardize_mode == "primitive":
             structure_cleaned = sym_finder.get_primitive_standard_structure(
                 international_monoclinic=False,
             )
@@ -183,9 +217,10 @@ class VaspWorkflow(S3Workflow):
             check_for_standardization_bugs(structure, structure_cleaned)
             return structure_cleaned
 
-        # if none of the flags above were used, then we just return the orignal
-        # input structure.
-        return structure
+        # lastly is the conventional standard, which is used the least.
+        if standardize_mode == "conventional":
+            structure_cleaned = sym_finder.get_conventional_standard_structure()
+            return structure_cleaned
 
     @classmethod
     def setup(cls, directory: Path, structure: Structure, **kwargs):
@@ -328,7 +363,6 @@ class VaspWorkflow(S3Workflow):
             key: getattr(cls, key)
             for key in [
                 "__module__",
-                "pre_sanitize_structure",
                 "confirm_convergence",
                 "functional",
                 "incar",

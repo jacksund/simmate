@@ -99,18 +99,32 @@ Alternatively, in python, you can use `workflow.show_parameters()`. For example:
 ```
 workflow.show_parameters()
 
+- angle_tolerance
 - command
 - compress_output
 - directory
 - is_restart
-- pre_sanitize_structure
-- pre_standardize_structure
 - run_id
 - source
+- standardize_structure
 - structure
+- symmetry_precision
 ```
 
 You can then search for these parameters below to learn more about them.
+
+
+## angle_tolerance
+If standardize_structure=True, then this is the cutoff value used to determine
+if the angles between sites are symmetrically equivalent. (in Degrees)
+``` python
+# python example
+angle_tolerance = 10.0
+```
+``` yaml
+# yaml file example
+angle_tolerance: 10.0
+```
 
 
 ## command
@@ -171,6 +185,17 @@ compress_output=True
 ``` yaml
 # yaml file example
 command: true
+```
+
+## convergence_limit
+For evolutionary searches, the search will be considered converged when the best structure is not changing by this amount (in eV). In order to officially signal the end of the search, the best structure must survive within this convergence limit for a specific number of new individuals -- this is controlled by the `limit_best_survival`. The default of 1meV is typically sufficient and does not need to be changed. More often, users should update `limit_best_survival` instead.
+``` python
+# python example
+convergence_limit = 0.005
+```
+``` yaml
+# yaml file example
+convergence_limit: 0.005
 ```
 
 
@@ -255,7 +280,7 @@ is_restart: true
 
 
 ## limit_best_survival
-For evolutionary searches, fixed compositions will be stopped when the best individual remains unbeaten for this number of new individuals. The default is typically set based on the number of atoms in the composition.
+For evolutionary searches, fixed compositions will be stopped when the best individual remains unbeaten for this number of new individuals. In order to absorb similar structures (e.g. identical structures but with minor energy differences), structures within the `convergence_limit` parameter (e.g. +1meV) are not considered when counting historical structures. This helps to prevent the search from continuing in cases where the search is likely already converged but making <0.1meV improvements. The default is typically set based on the number of atoms in the composition.
 ``` python
 # python example
 limit_best_survival = 100
@@ -406,31 +431,6 @@ nsteps: 10000
 ```
 
 
-## pre_sanitize_structure
-In some cases, we may want to "sanitize" the structure during our setup() and before we actually run a calculation on it. By "sanitize", we mean converting to the LLL-reduced primitive cell (which is made to be as cubic as possible). This modified structure is what will be evaluated. We recommend using this feature when your unitcell is "squished" (small angles) or if you are generating structures randomly.
-``` python
-# python example
-pre_sanitize_structure = True
-```
-``` yaml
-# yaml file example
-pre_sanitize_structure: True
-```
-
-
-## pre_standardize_structure
-In some cases, we may want to convert the structure to the standard primitive that follow conventions. For example, this is required when calculating band structures
-and ensuring we have a standardized high-symmetry path. Existing band-structure workflows use this automatically.
-``` python
-# python example
-pre_standardize_structure = True
-```
-``` yaml
-# yaml file example
-pre_standardize_structure: True
-```
-
-
 ## run_id
 The id assigned to a specific workflow run / calculation. If not provided this will be randomly generated, and we highly recommended leaving this at the default value. Note, this is based on unique-ids (UUID), so every id should be 100% unique and in a string format.
 ``` python
@@ -514,6 +514,34 @@ source = {
 ```
 
 Typically, the `source` is set automatically, and users do not need to update it.
+
+
+## standardize_structure
+In some cases, we may want to standardize the structure during our setup().
+
+This means running symmetry analysis on the structure in order to reduce the symmetry and also convert it to some standardized form. There are three different forms to choose from and thus 3 different values that `standardize_structure` can be set to:
+
+- `primitive`: for the standard primitive unitcell
+- `conventional`: for the standard conventional unitcell
+- `primitive-LLL`: for the standard primitive unitcell that is then LLL-reduced
+- `False`: this is the default and will disable this feature
+
+We recommend using `primitive-LLL` when the smallest possible and most cubic unitcell is desired.
+
+We recommend using `primitive` when calculating band structures and ensuring we have a standardized high-symmetry path. Note,Existing band-structure workflows use this automatically.
+
+To control the tolerances used to symmetrize the structure, you can use the symmetry_precision and angle_tolerance attributes.
+
+By default, no standardization is applied.
+
+``` python
+# python example
+standardize_structure = "primitive-LLL"
+```
+``` yaml
+# yaml file example
+standardize_structure: primitive-LLL
+```
 
 
 ## steadystate_sources
@@ -664,6 +692,19 @@ The endpoint image supercell to use. This is really just a `structure` parameter
 
 ## supercell_start
 The starting image supercell to use. This is really just a `structure` parameter under a different name, so everything about the `structure` parameter also applies here.
+
+
+## symmetry_precision
+If standardize_structure=True, then this is the cutoff value used to determine
+if the sites are symmetrically equivalent. (in Angstroms)
+``` python
+# python example
+symmetry_precision = 0.1
+```
+``` yaml
+# yaml file example
+symmetry_precision: 0.1
+```
 
 
 ## tags
