@@ -9,21 +9,20 @@ from simmate.toolkit.transformations.base import Transformation
 class LatticeStrain(Transformation):
     """
     Applies a large amount of strain to a lattice by shifting lattice vectors.
-    The volume is then scaled back to the original volume. This is meant to 
-    break symmetries and allow a structure to relax. 
+    The volume is then scaled back to the original volume. This is meant to
+    break symmetries and allow a structure to relax.
     """
-    
-    
-    #!!! should I mutate atomic sites too? USPEX is unclear if they do this 
-    # in addition to lattice strain. If so, I should look at the 
+
+    #!!! should I mutate atomic sites too? USPEX is unclear if they do this
+    # in addition to lattice strain. If so, I should look at the
     # CoordinateMutation transfomation class
 
-    # strain is applied to the lattice and then the lattice is scaled back 
+    # strain is applied to the lattice and then the lattice is scaled back
     # to target volume
     # https://uspex-team.org/static/file/CPC-USPEX-2006.pdf
 
     # It looks like structure.apply_strain() is simply scaling each lattice
-    # vector and not exactly what we'd like. Instead, I found 
+    # vector and not exactly what we'd like. Instead, I found
     # pymatgen.analysis.elasticity.strain module
     # https://pymatgen.org/pymatgen.analysis.elasticity.strain.html
     # Here, my understanding is that a strain matrix is not equivalent to a
@@ -41,7 +40,7 @@ class LatticeStrain(Transformation):
 
         # following along with USPEX paper, we need to first establish boundries
         # for the symmetric strain matrix
-        # when generating components for this matrix, they randomly select 
+        # when generating components for this matrix, they randomly select
         # values between -1 and 1 in a guassian distribution
         self.component_generator = UniformlyDistributedVectors(
             min_value=-1, max_value=1
