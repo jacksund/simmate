@@ -1,36 +1,94 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from abc import ABC, abstractmethod
+
+from simmate.toolkit import Structure
 
 
-class Transformation(ABC):
-
+class Transformation:
     """
-    This is an abstract base class (ABC) that shows you how to write your
-    own Transformation class. It defines the requirements for you and raises
-    errors if you forgot to define something.
+    Transformations (aka "mutations") alter an input structure (or structures)
+    in some way. For now we assume all transformations are for toolkit
+    `Structure` objects
 
-    Using this abstract class, here's an example subclass that you could write
-    -------------------------------------
+    Different transformation can take a different number of structures as inputs
+    and also potentially return more than one structure. Therefore, pay close
+    attention to setting `io_scale` and `ninput`
+
+    ## Example use
+
+    When writing a custom transformation class, you can use the following example:
+
+    ``` python
     class SubClass(Transformation):
-        io_type = 'one_to_one'
+        io_scale = 'one_to_one'
         ninput = 1
-        use_multiprocessing = False
+        allow_parallel = True
         def apply_transformation(self, structure):
             # do some transform on the input
             return new_structure
-    -------------------------------------
+
     # example use
     t = SubClass()
     new_structure = t.apply_transformation(structure)
-    -------------------------------------
+    ```
 
-    This is an updated version of pymatgen's transformation class because they
-    do not support many_to_one or many_to_many:
-    pymatgen.transformations.transformation_abc
-    see https://pymatgen.org/pymatgen.transformations.transformation_abc.html
+    This is a refactored version of pymatgen's
+    [Transformation](https://pymatgen.org/pymatgen.transformations.transformation_abc.html)
+    class because they do not support many_to_one or many_to_many
+    (see pymatgen.transformations.transformation_abc)
     """
+
+    io_type: str = "structure"
+    """
+    Should I do StructureTransformation, LatticeTransformation, and
+    SiteTransformation subclasses? Here, io_type could be either
+    'structure', 'lattice', or 'site' as to indicate the input.
+    """
+    #!!! For now, I have all transformations as StructureTransformation
+    #!!! so I assume io_type here. This may change in the future.
+
+    allow_parallel: bool = False
+    """
+    Whether or not this transformation can be done in parallel.
+    
+    In pymatgen, this parameter is named `use_multiprocessing`
+    """
+
+    @property
+    def io_scale(self) -> str:
+        """
+        The input/output type for the class.
+        This should be one of the following choices:
+            - one_to_one
+            - one_to_many
+            - many_to_one
+            - many_to_many # I have no examples of this yet
+        """
+        raise NotImplementedError(
+            "Make sure you set a `io_scale` for your Transformation class"
+        )
+
+    @property
+    def ninput(self):
+        """
+        Number of inputs required. For example, some transformations require
+        two structures to be input. If one_to_* we know ninput = 1.
+        """
+        raise NotImplementedError(
+            "Make sure you set `ninput` for your Transformation class"
+        )
+
+    def apply_transformation(self, structure: Structure) -> Structure:
+        """
+        This method carries out the transformation. The typing shown above
+        is an example of a `one_to_one` transformation that accepts a
+        single structure and returns a single one.
+        """
+        raise NotImplementedError(
+            "Make sure you define a new `apply_transformation` for "
+            "your Transformation class"
+        )
 
     @classmethod
     @property
@@ -40,56 +98,6 @@ class Transformation(ABC):
         the name of this class.
         """
         return cls.__name__
-
-    @property
-    # @abstractmethod #!!! uncomment when I no longer assume the value
-    def io_type(self):
-        """
-        Should I do StructureTransformation, LatticeTransformation, and
-        SiteTransformation subclasses? Here, io_type could be either
-        'structure', 'lattice', or 'site' as to indicate the input.
-        """
-        #!!! For now, I have all transformations as StructureTransformation
-        #!!! so I assume io_type here. This may change in the future.
-        return "structure"
-
-    @property
-    @abstractmethod
-    def io_scale(self):
-        """
-        The input/output type for the class.
-        This should be one of the following choices:
-            - one_to_one
-            - one_to_many
-            - many_to_one
-            - many_to_many # I have no examples of this yet
-        """
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def use_multiprocessing(self):
-        """
-        Whether or not this transformation can be done in parallel.
-        Simply set to True or False.
-        """
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def ninput(self):
-        """
-        Number of inputs required. For example, some transformations require
-        two structures to be input. If one_to_* we know ninput = 1.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def apply_transformation(self):
-        """
-        The code that carries out the
-        """
-        raise NotImplementedError
 
     def apply_from_database_and_selector(
         self,
