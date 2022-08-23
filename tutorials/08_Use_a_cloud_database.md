@@ -14,7 +14,7 @@ In this tutorial, you will learn how to switch from saving results locally to sa
 # The quick tutorial
 
 1. Consider collaborating! Simmate is built for sharing results, so email simmate.team@gmail.com to discuss joining our effort. This will let you avoid the complexities of managing your own database. If you decide to join, you'll only have to complete steps 3 and 4 of this tutorial.
-2. Set up a cloud database that is [supported by django](https://docs.djangoproject.com/en/4.0/ref/databases/#third-party-notes). We recommend using [Postgres](https://www.postgresql.org/) through [DigitalOcean](https://www.digitalocean.com/). If you do not have a Digital Ocean account, we ask that you sign up using [our referal link](https://m.do.co/c/8aeef2ea807c). The button below will then take you to the relevant page.
+2. Set up a cloud database that is [supported by django](https://docs.djangoproject.com/en/4.0/ref/databases/#third-party-notes). We recommend using [Postgres](https://www.postgresql.org/) through [DigitalOcean](https://www.digitalocean.com/). If you do not have a Digital Ocean account, we ask that you sign up using [our referral link](https://m.do.co/c/8aeef2ea807c). The button below will then take you to the relevant page.
 
 <!-- button that starts up DigitalOcean app -->
 <a href="https://cloud.digitalocean.com/databases/new">

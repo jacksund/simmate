@@ -14,7 +14,7 @@ In this tutorial, you will learn how to run workflows on distributed computation
 
 # The quick tutorial
 
-> :bulb: This tutorial will use the default scheduler/executor, "SimmateExecutor". However, you can also use Prefect and/or Dask to build out your cluster. This is cover in the next tutorial, but it is not recommended at the moment.
+> :bulb: This tutorial will use the default scheduler/executor, "SimmateExecutor". However, you can also use Prefect and/or Dask to build out your cluster. This is covered in the next tutorial, but it is not recommended at the moment.
 
 1. Be aware that you can share a cloud database *without* sharing computational resources. This flexibility is very important for many collaborations. 
 
@@ -22,7 +22,7 @@ In this tutorial, you will learn how to run workflows on distributed computation
 
 3. If your computational resources are distributed on different computers, make sure you have set up a cloud database (see the previous tutorial on how to do this). If you want to schedule AND run things entirely on your local computer (or file system), then you can skip this step.
 
-4. If you have remote resources, make sure you have ALL simmate installations connected to the same database (i.e. you database connection file should be on all resources).
+4. If you have remote resources, make sure you have ALL simmate installations connected to the same database (i.e. your database connection file should be on all resources).
 
 5. If you have custom workflows, make sure you are using a simmate project and all resources have this app installed
 
@@ -35,7 +35,7 @@ simmate workflows run-cloud relaxation.vasp.mit --structure POSCAR
 
 > :bulb: This workflow is now scheduled but it won't run until we start a worker.
 
-8. Whereever you'd like to run the workflow, start a worker with:
+8. Wherever you'd like to run the workflow, start a worker with:
 ``` bash
 simmate workflow-engine start-singleflow-worker
 ```
@@ -47,7 +47,7 @@ simmate workflow-engine start-singleflow-worker
 simmate workflow-engine start-worker
 ```
 
-10. Scale out your cluster! Start workers anywhere you'd like, and start as many as you'd like. Just make sure you follow steps  4 and 5 for every worker. If you need to start many workers at once, you can use the `start-cluster` command as well.
+10. Scale out your cluster! Start workers anywhere you'd like, and start as many as you'd like. Just make sure you follow steps 4 and 5 for every worker. If you need to start many workers at once, you can use the `start-cluster` command as well.
 ``` bash
 # starts 5 local workers
 simmate workflow-engine start-cluster 5
@@ -82,13 +82,13 @@ Recall from tutorial 2, there are 4 steps to a workflow:
 - `execute`: writes our input files, runs the calculation (e.g. calling VASP), and checks the results for errors
 - `save`: saves the results to our database
 
-This tuturial will give an overview of how to modify the `schedule` and determine which computer `execute` is called on. Up until now, we have been using the default behavior for these two steps. But now we want to instead do the following:
+This tutorial will give an overview of how to modify the `schedule` and determine which computer `execute` is called on. Up until now, we have been using the default behavior for these two steps. But now we want to instead do the following:
 - `schedule`: submits the workflow to a scheduler queue of many other workflows
 - `execute`: run the calculation on a remote cluster
 
 A **scheduler** is something we submit workflows to and controls when to run them. The terms "scheduler" and "executor" are sometimes used interchangeably. As a bunch of workflows are submitted, our scheduler forms a queue and keeps track of which ones to run next. To do this, we can use the built-in `SimmateExecutor`, [Dask](https://docs.dask.org/en/stable/futures.html), or [Prefect](https://www.prefect.io/) as our scheduler. For this tutorial, we will use the `SimmateExecutor` because it is the default one and it's already set up for us.
 
-A **cluster** is a group of computational resources that actually run the workflows. So our scheduler will find whichever workflow should be ran next, and send it to our cluster to run. Clusters are often made up of **workers** -- where a worker is just a single resource and it works through one job at a time. For example, say we have 10 computers (or slurm jobs) that each run one workflow at a time. All computers together are our cluster. Each computer is a worker. At any given time, 10 workflows will be running because each worker will have one it is in charge of. Because we are using the `SimmateExectuor`, we will be using `SimmateWorker`s to set up each worker and therefore our cluster. Set for each worker is the same -- whether your resources are on a cloud service, a supercomputer, or just simple desktops.
+A **cluster** is a group of computational resources that actually run the workflows. So our scheduler will find whichever workflow should be ran next, and send it to our cluster to run. Clusters are often made up of **workers** -- where a worker is just a single resource and it works through one job at a time. For example, say we have 10 computers (or slurm jobs) that each run one workflow at a time. All computers together are our cluster. Each computer is a worker. At any given time, 10 workflows will be running because each worker will have one it is in charge of. Because we are using the `SimmateExectuor`, we will be using `SimmateWorker`s to set up each worker and therefore our cluster. Set-up for each worker is the same -- whether your resources are on a cloud service, a supercomputer, or just simple desktops.
 
 <br/>
 
@@ -148,7 +148,7 @@ Because we are using the "SimmateExecutor" all we need is a connection to the cl
 
 **4. Connecting custom projects**
 
-> :warning: Because SimmateExecutor uses cloudpickle when submitting tasks, many custom workflows will work just fine without this step. Our team is still working how to guide users and make this as easy as possible. For now, we suggest just trying out your workflow when you skip this step -- as most times it will work. If not, then the text below explains why.
+> :warning: Because SimmateExecutor uses cloudpickle when submitting tasks, many custom workflows will work just fine without this step. Our team is still working out how to guide users and make this as easy as possible. For now, we suggest just trying out your workflow when you skip this step -- as most times it will work. If not, then the text below explains why.
 
 If you have custom database tables or code, it's important that (a) the cloud database knows about these tables and (b) your remote resources can access your custom code. Therefore, your custom project/app should be installed and accessible by all of your computation resources. Be sure to `pip install your-cool-project` for all computers.
 
@@ -172,7 +172,7 @@ simmate workflow-engine start-singleflow-worker
 ```
 > :warning::warning::warning: If you are on a cluster, start-worker should be called within your submit script (e.g. inside `submit.sh` for SLURM). Don't run workers on the head node! :warning::warning::warning:
 
-When you run this "singleflow" worker, you'll notice that the Worker will start, run 1 workflow, then shutdown. This is the recommend approach for HPC clusters because it follow best practices for sharing resources. You don't want a worker hogging computational resources if there aren't any workflows scheduled to run! 
+When you run this "singleflow" worker, you'll notice that the Worker will start, run 1 workflow, then shutdown. This is the recommended approach for HPC clusters because it follow best practices for sharing resources. You don't want a worker hogging computational resources if there aren't any workflows scheduled to run! 
 
 However, if you would like more control over how many workflows are ran or even run a worker endlessly, you can use the command:
 ``` bash
