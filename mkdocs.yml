@@ -55,8 +55,17 @@ nav:
             - Structure methods: getting_started/analyze_and_modify_structures/structure_methods.md
             - Advanced classes: getting_started/analyze_and_modify_structures/advanced_classes.md
             - Extra learning resources: getting_started/analyze_and_modify_structures/extra_resources.md
+        
+        - Explore the code:
+            - Quickstart: getting_started/explore_the_code/quick_start.md
+            - Hints in Spyder: getting_started/explore_the_code/getting_help_in_spyder.md
+            - Intro to Python modules: getting_started/explore_the_code/intro_to_python_modules.md
+            - Exploring Simmate modules: getting_started/explore_the_code/exploring_simmate_modules.md
+            - Using the API docs: getting_started/explore_the_code/using_the_web_docs.md
 
-
+    - Workflow Parameters:
+        - test: DOESNOTEXIST.md
+    
     - Full Guides & Concepts:
         - test: DOESNOTEXIST.md
     - API Reference:
