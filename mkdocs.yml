@@ -68,6 +68,13 @@ nav:
             - Intro to Python inheritance: getting_started/access_the_database/intro_to_python_inheritance.md
             - Access workflow data: getting_started/access_the_database/access_workflow_data.md
             - Access third-party dat: getting_started/access_the_database/access_thirdparty_data.md
+        
+        - Build custom workflows:
+            - Quickstart: getting_started/custom_workflows/quick_start.md
+            - Update an existing workflow: getting_started/custom_workflows/update_an_existing_workflow.md
+            - Name your new workflow: getting_started/custom_workflows/name_your_new_workflow.md
+            - Creating your workflow: getting_started/custom_workflows/creating_your_workflow.md
+            - Next steps: getting_started/custom_workflows/next_steps.md
 
     - Workflow Parameters:
         - test: DOESNOTEXIST.md
