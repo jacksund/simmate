@@ -73,12 +73,13 @@ class FixedCompositionSearch(DatabaseTable):
         # least N structures with the input/expected number of sites have been
         # calculated.
         # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-        if self.individuals_completed.count() > self.max_structures:
-            logging.info(
-                "Maximum number of completed calculations hit "
-                f"(n={self.max_structures})."
-            )
-            return True
+        count_exact = self.individuals_datatable.objects.filter(
+            formula_full=self.composition,
+            workflow_name=self.subworkflow_name,
+            energy_per_atom__isnull=False,
+        ).count()
+        if count_exact < self.min_structures_exact:
+            return False
 
         # Next, see if we've hit our maximum limit for structures.
         # Note: because we are only looking at the results table, this is really

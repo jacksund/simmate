@@ -3,7 +3,7 @@
 import logging
 
 import simmate.toolkit.creators as creation_module
-import simmate.toolkit.transformations.from_ase as transform_module
+import simmate.toolkit.transformations as transform_module
 from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.toolkit import Composition
 from simmate.workflow_engine.execution import WorkItem
@@ -131,11 +131,11 @@ class StructureSource(DatabaseTable):
         ]:
             # all start with "from_ase" so I assume that import for now
             ase_class_str = self.name.split(".")[-1]
-            transformation_class = getattr(transform_module, ase_class_str)
+            transformation_class = getattr(transform_module.from_ase, ase_class_str)
             return transformation_class(composition, **self.kwargs)
         # !!! There aren't any common transformations that don't accept composition
         # as an input, but I expect this to change in the future.
-        elif self.name in []:
+        elif self.name in ["ExtremeSymmetry"]:
             transformation_class = getattr(transform_module, self.name)
             transformer = transformation_class(composition)
         else:

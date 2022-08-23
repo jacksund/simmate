@@ -131,7 +131,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         # to set an absolute minimum for these.
         n = composition.num_atoms
         min_structures_exact = min_structures_exact or max([int(30 * n), 100])
-        max_structures = min_structures_exact or max([int(n * 250 + n**2.75), 1500])
+        max_structures = max_structures or max([int(n * 250 + n**2.75), 1500])
         limit_best_survival = limit_best_survival or max([int(30 * n + n**2), 100])
 
         #  Add the search entry to the DB.

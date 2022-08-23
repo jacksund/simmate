@@ -116,6 +116,7 @@ def test_get_unique_paramters():
         "migration_images",
         "min_atoms",
         "min_length",
+        "min_structures_exact",
         "nfirst_generation",
         "nimages",
         "nsteadystate",
