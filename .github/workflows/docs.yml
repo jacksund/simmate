@@ -1,59 +1,21 @@
 # Documentation for this action is located here...
-#   https://pdoc.dev/docs/pdoc.html#deploying-to-github-pages
-# This file is copied from...
-#   https://github.com/mitmproxy/pdoc/blob/main/.github/workflows/docs.yml
+#   https://squidfunk.github.io/mkdocs-material/publishing-your-site/
 
-name: api-docs
+name: publish-docs
 
 # build the documentation whenever there are new commits on main
 on:
   push:
     branches:
       - main
-# TODO: switch to releases
-# on:
-#   release:
-#     types: [published]
-
-# security: restrict permissions for CI jobs.
-permissions:
-  contents: read
 
 jobs:
-  # Build the documentation and upload the static HTML files as an artifact.
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-      
-      # install all dependencies (including pdoc)
-      - run: pip install -e .
-      # TODO: switch to anaconda to match rest of CI
-      
-      # build your documentation into docs/.
-      # Note, we use a custom build script for pdoc itself, but ideally you 
-      # just run `pdoc -o docs/ ...` here.
-      - run: python docs/make_docs.py
-      
-      # upload the docs/ directory (which now has all the html files) as an artifact
-      - run: tar --directory docs/ -hcf artifact.tar .
-      - uses: actions/upload-artifact@v3
-        with:
-          name: github-pages
-          path: ./artifact.tar
-  
-  # Deploy the artifact to GitHub pages.
-  # This is a separate job so that only actions/deploy-pages has the necessary permissions.
   deploy:
-    needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: pip install mkdocs-material 
+      - run: mkdocs gh-deploy --force

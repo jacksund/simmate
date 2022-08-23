@@ -1,0 +1,47 @@
+site_name: Simmate
+site_url: https://simmate.org
+
+theme:
+  name: material
+  features:
+      - navigation.tabs
+      - content.code.annotate
+
+# For emojis, annotations, etc.
+markdown_extensions:
+  - attr_list
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - attr_list
+  - md_in_html
+
+nav:
+    
+    - Home: index.md
+    
+    - Getting Started: 
+        
+        - Introduction: getting_started/README.md
+        
+        - Installation:
+            - Quickstart: getting_started/installation/quick_start.md
+            - Intro to python terms: getting_started/installation/intro_to_python_terms.md
+            - Install Anaconda: getting_started/installation/install_anaconda.md
+            - Intro to the command line: getting_started/installation/command_line.md
+            - Create your environment: getting_started/installation/create_your_env.md
+            - Explore Simmate commands: getting_started/installation/explore_simmate_cli.md
+            - Set up a Local Server: getting_started/installation/local_server_setup.md
+            - Extra learning resources: getting_started/installation/extra.md
+            
+        - Run a workflow: getting_started/02_Run_a_workflow.md
+        
+    - Full Guides & Concepts:
+        - test: README.md
+    - API Reference:
+        - test: README.md
+    - Contributing:
+        - test: README.md
+    - Need help?:
+        -  test: README.md

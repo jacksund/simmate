@@ -4,7 +4,7 @@ from textwrap import dedent
 
 from django import template
 from django.utils.safestring import mark_safe
-from pdoc.render_helpers import to_html
+import markdown as MarkdownConverter
 
 # We need a registration instance in order to configure everything with Django
 register = template.Library()
@@ -21,7 +21,7 @@ def markdown_to_html(markdown_str):
     # We need to strip those idents away to render properly
     markdown_cleaned = dedent(markdown_str)
 
-    final_html = to_html(markdown_cleaned)
+    final_html = MarkdownConverter.markdown(markdown_cleaned)
 
     # Because we added new html to our script, we need to have Django check it
     # ensure it safe before returning. Read more about this here:

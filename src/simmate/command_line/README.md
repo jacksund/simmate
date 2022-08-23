@@ -14,4 +14,4 @@ reset_database()
 
 Our command-line is build using [Click](https://click.palletsprojects.com/en/8.0.x/) instead of Argparse. Be sure to read their documentation before contributing to this module.
 
-**WARNING**: for interacting with and using the command-line, we recommend using it directly, rather than exploring online documentation here. This is because we use [pdoc](https://pdoc.dev/) to generate our documentation, but it struggles to document click functions.
+**WARNING**: for interacting with and using the command-line, we recommend using it directly, rather than exploring online documentation here. This is because we use [typer](https://github.com/tiangolo/typer), which make reading through options much cleaner than api docs shown here.
