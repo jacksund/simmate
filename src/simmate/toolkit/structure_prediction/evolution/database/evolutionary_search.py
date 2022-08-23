@@ -13,7 +13,7 @@ from simmate.utilities import get_directory
 from simmate.workflow_engine.execution import WorkItem
 
 
-class EvolutionarySearch(DatabaseTable):
+class FixedCompositionSearch(DatabaseTable):
     """
     This database table holds all of the information related to an evolutionary
     search and also has convient methods to analyze the data + write output files.
@@ -31,6 +31,7 @@ class EvolutionarySearch(DatabaseTable):
     fitness_field = table_column.CharField(max_length=200)
 
     # Other settings for the search
+    min_structures_exact = table_column.IntegerField()
     max_structures = table_column.IntegerField()
     limit_best_survival = table_column.IntegerField()
     nfirst_generation = table_column.IntegerField()
@@ -67,7 +68,19 @@ class EvolutionarySearch(DatabaseTable):
 
     def check_stop_condition(self):
 
-        # first see if we've hit our maximum limit for structures.
+        # First, see if we have at least our minimum limit for *exact* structures.
+        # "Exact" refers to the nsites of the structures. We want to ensure at
+        # least N structures with the input/expected number of sites have been
+        # calculated.
+        # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
+        if self.individuals_completed.count() > self.max_structures:
+            logging.info(
+                "Maximum number of completed calculations hit "
+                f"(n={self.max_structures})."
+            )
+            return True
+
+        # Next, see if we've hit our maximum limit for structures.
         # Note: because we are only looking at the results table, this is really
         # only counting the number of successfully calculated individuals.
         # Nothing is done to stop those that are still running or to count
@@ -79,11 +92,11 @@ class EvolutionarySearch(DatabaseTable):
                 f"(n={self.max_structures})."
             )
             return True
-        # The 2nd stop condition is based on how long we've have the same
+
+        # The next stop condition is based on how long we've have the same
         # "best" individual. If the number of new individuals calculated (without
         # any becoming the new "best") is greater than limit_best_survival, then
         # we can stop the search.
-
         # grab the best individual for reference
         best = self.best_individual
 
@@ -382,8 +395,16 @@ class EvolutionarySearch(DatabaseTable):
     def individuals(self):
         # note we don't call "all()" on this queryset yet becuase this property
         # it often used as a "base" queryset (and additional filters are added)
+        composition = Composition(self.composition)
         return self.individuals_datatable.objects.filter(
-            formula_full=self.composition,
+            # You'd expect this filter to be...
+            #   formula_full=self.composition
+            # However, this misses structures that are reduced to a smaller
+            # unitcells during relaxation. Therefore, by default, we need to
+            # include all individuals that have fewer nsites. This is
+            # often what a user wants anyways during searches, so it works out.
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
             workflow_name=self.subworkflow_name,
         )
 
@@ -449,9 +470,12 @@ class EvolutionarySearch(DatabaseTable):
 
         # BUG: This is only for "relaxation.vasp.staged", which the assumed
         # workflow for now.
+        composition = Composition(self.composition)
         self.subworkflow.write_series_convergence_plot(
             directory=directory,
-            formula_full=self.composition,
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
             energy_per_atom__isnull=False,
         )
 

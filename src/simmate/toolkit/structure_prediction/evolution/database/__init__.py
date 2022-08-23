@@ -5,4 +5,4 @@
 # isort: skip_file
 
 from .structure_source import StructureSource
-from .evolutionary_search import EvolutionarySearch
+from .evolutionary_search import FixedCompositionSearch

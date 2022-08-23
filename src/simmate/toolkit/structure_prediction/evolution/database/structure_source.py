@@ -27,7 +27,7 @@ class StructureSource(DatabaseTable):
     workitem_ids = table_column.JSONField(default=list)
 
     search = table_column.ForeignKey(
-        "EvolutionarySearch",
+        "FixedCompositionSearch",
         on_delete=table_column.CASCADE,
         related_name="structure_sources",
     )

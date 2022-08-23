@@ -4,18 +4,9 @@ import logging
 import time
 from pathlib import Path
 
-from simmate.database.workflow_results import EvolutionarySearch as SearchDatatable
+from simmate.database.workflow_results import FixedCompositionSearch as SearchDatatable
 from simmate.toolkit import Composition
 from simmate.workflow_engine import Workflow
-
-# TODO
-# StructurePrediction__Python__VariableTernaryComposition
-#   --> calls VariableBinaryComposition strategically
-#   --> might call FixedCompositionVariableNsites strategically too
-# StructurePrediction__Python__VariableBinaryComposition
-#   --> calls FixedCompositionVariableNsites strategically
-# StructurePrediction__Python__FixedCompositionVariableNsites
-#   --> calls FixedComposition strategically
 
 
 class StructurePrediction__Python__FixedComposition(Workflow):
@@ -25,15 +16,15 @@ class StructurePrediction__Python__FixedComposition(Workflow):
     # Evolutionary Search is done automatically. It will also ease the
     # tracking of output files when many fixed compositions are submitted.
 
-    @classmethod
+    @staticmethod
     def run_config(
-        cls,
         composition: str | Composition,
         subworkflow_name: str | Workflow = "relaxation.vasp.staged",
         subworkflow_kwargs: dict = {},
         fitness_field: str = "energy_per_atom",
-        max_structures: int = 3000,
-        limit_best_survival: int = 250,
+        max_structures: int = None,
+        min_structures_exact: int = None,
+        limit_best_survival: int = None,
         convergence_limit: float = 0.001,
         nfirst_generation: int = 20,
         nsteadystate: int = 40,
@@ -133,10 +124,15 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         #######################################################################
 
         logging.info(f"Setting up evolutionary search for {composition}")
-        # TODO: Should I add logs to inform how the workflow will be ran? Or
-        # leave it to the simmate_metadata.yaml file and database for this?
-        # logging.info(f"Individuals will be evaulated using '{subworkflow_name}'")
-        # logging.info(f"Parent selection for mutations will use '{selector_name}'")
+
+        # Convergence criteria and stop conditions can be set based on the
+        # number of atoms in the composition. Here we try to set reasons criteria
+        # for these if a user-input was not given. Note we are using max(..., N)
+        # to set an absolute minimum for these.
+        n = composition.num_atoms
+        min_structures_exact = min_structures_exact or max([int(30 * n), 100])
+        max_structures = min_structures_exact or max([int(n * 250 + n**2.75), 1500])
+        limit_best_survival = limit_best_survival or max([int(30 * n + n**2), 100])
 
         #  Add the search entry to the DB.
         search_datatable = SearchDatatable(
@@ -145,6 +141,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
             subworkflow_kwargs=subworkflow_kwargs,
             fitness_field=fitness_field,
             max_structures=max_structures,
+            min_structures_exact=min_structures_exact,
             limit_best_survival=limit_best_survival,
             convergence_limit=convergence_limit,
             nfirst_generation=nfirst_generation,
@@ -173,7 +170,9 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         search_datatable._init_steadystate_sources_to_db(steadystate_sources)
 
         logging.info("Finished setup")
-        logging.info(f"Assigned this to EvolutionarySearch id={search_datatable.id}.")
+        logging.info(
+            f"Assigned this to FixedCompositionSearch id={search_datatable.id}."
+        )
 
         # this loop will go until I hit 'break' below
         while True:

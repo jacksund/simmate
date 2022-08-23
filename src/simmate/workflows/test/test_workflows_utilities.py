@@ -66,6 +66,7 @@ def test_list_of_all_workflows():
         "static-energy.vasp.quality04",
         "structure-prediction.python.fixed-composition",
         "structure-prediction.python.new-individual",
+        "structure-prediction.python.variable-composition",
     ]
 
 
