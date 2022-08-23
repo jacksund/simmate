@@ -47,6 +47,16 @@ nav:
             - Submit to a cluster: getting_started/run_a_workflow/submit_to_a_cluster.md
             - Viewing the results: getting_started/run_a_workflow/view_the_results.md
         
+        - Analyze & modify structures:
+            - Quickstart: getting_started/analyze_and_modify_structures/quick_start.md
+            - Intro to Spyder (IDE): getting_started/analyze_and_modify_structures/intro_to_spyder.md
+            - The structure class: getting_started/analyze_and_modify_structures/the_structure_class.md
+            - Structure properties: getting_started/analyze_and_modify_structures/structure_properties.md
+            - Structure methods: getting_started/analyze_and_modify_structures/structure_methods.md
+            - Advanced classes: getting_started/analyze_and_modify_structures/advanced_classes.md
+            - Extra learning resources: getting_started/analyze_and_modify_structures/extra_resources.md
+
+
     - Full Guides & Concepts:
         - test: DOESNOTEXIST.md
     - API Reference:
