@@ -15,4 +15,6 @@ If you are new to coding, we recommend you complete **one tutorial per day (1-2 
 
 
 </br>
-:sparkles::sparkles: ** Use the buttons below to begin! **
+:sparkles::sparkles::sparkles:
+** Use the buttons below to begin! **
+:sparkles::sparkles::sparkles:

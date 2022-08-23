@@ -23,7 +23,7 @@ nav:
     
     - Getting Started: 
         
-        - Introduction: getting_started/README.md
+        - Overview: getting_started/overview.md
         
         - Installation:
             - Quickstart: getting_started/installation/quick_start.md
@@ -35,13 +35,23 @@ nav:
             - Set up a Local Server: getting_started/installation/local_server_setup.md
             - Extra learning resources: getting_started/installation/extra.md
             
-        - Run a workflow: getting_started/02_Run_a_workflow.md
+        - Run a workflow:
+            - Quickstart: getting_started/run_a_workflow/quick_start.md
+            - Stages of a Workflow: getting_started/run_a_workflow/stages_of_a_workflow.md
+            - Configure VASP potentials: getting_started/run_a_workflow/configure_potcars.md
+            - Configure the database: getting_started/run_a_workflow/configure_database.md
+            - Make a input structure: getting_started/run_a_workflow/make_a_structure.md
+            - View all workflows: getting_started/run_a_workflow/view_all_workflows.md
+            - View workflow settings: getting_started/run_a_workflow/view_workflow_settings.md
+            - Run a workflow: getting_started/run_a_workflow/running_the_workflow.md
+            - Submit to a cluster: getting_started/run_a_workflow/submit_to_a_cluster.md
+            - Viewing the results: getting_started/run_a_workflow/view_the_results.md
         
     - Full Guides & Concepts:
-        - test: README.md
+        - test: DOESNOTEXIST.md
     - API Reference:
-        - test: README.md
+        - test: DOESNOTEXIST.md
     - Contributing:
-        - test: README.md
+        - test: DOESNOTEXIST.md
     - Need help?:
-        -  test: README.md
+        -  test: DOESNOTEXIST.md
