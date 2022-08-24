@@ -2,9 +2,9 @@
 
 from textwrap import dedent
 
+import markdown as MarkdownConverter
 from django import template
 from django.utils.safestring import mark_safe
-import markdown as MarkdownConverter
 
 # We need a registration instance in order to configure everything with Django
 register = template.Library()

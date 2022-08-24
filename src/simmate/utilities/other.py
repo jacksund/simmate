@@ -32,37 +32,6 @@ def get_conda_env() -> str:
     return env_name
 
 
-def get_doc_from_readme(file: str) -> str:
-    """
-    Loads the docstring from a README.md file in the same directory.
-
-    This is commonly used in __init__.py files because we like having our
-    documentation isolated (so that github renders it).
-
-    To use, simply pass the file property:
-
-    ``` python
-    from simmate.utilities import get_doc_from_readme
-
-    __doc__ = get_doc_from_readme(__file__)
-    ```
-
-    This is an alternative to using "include" in rst files, which
-    [pdoc recommends](https://pdoc.dev/docs/pdoc.html#include-markdown-files).
-    We prefer this utility because it allows Spyder to load the docs -- although
-    it's slower in production (bc of opening/closing files).
-    """
-
-    # convert to path obj
-    file = Path(file)
-
-    # We assume the file is in the same directory and named "README.md"
-    readme = file.absolute().parent / "README.md"
-    with readme.open(encoding="utf-8") as doc_file:
-        doc = doc_file.read()
-    return doc
-
-
 def get_latest_version() -> str:
     """
     Looks at the jacks/simmate repo and grabs the latest release version.
