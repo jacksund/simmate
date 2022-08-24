@@ -1,3 +1,9 @@
+###############
+# NOTE: This file of dependencies is copied and modified from pyproject.toml
+# It is meant only for dev and CI testing. You should refere to the toml file
+# for official dependencies.
+###############
+
 # This env file was creating using...
 # (1) anaconda docs
 #	https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
@@ -5,6 +11,7 @@
 #	https://www.marcelotrevisani.com/grayskull
 #
 # To install this env, use `conda env create -f environment.yaml`
+
 name: simmate_dev
 channels:
     - conda-forge
@@ -26,6 +33,7 @@ dependencies:
     - matminer >=0.7.6, <=0.7.8
     - markdown >=3.4.1, <=3.4.1
     - mkdocs-material >=8.4.1, <=8.4.1
+    - mkdocstrings >=0.4.1, <=0.4.1
     - numpy >=1.22.0, <=1.23.1
     - pandas >=1.3.5, <=1.4.3
     - plotly >=5.4.0, <=5.9.0

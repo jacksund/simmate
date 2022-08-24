@@ -39,14 +39,26 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
   - attr_list
   - md_in_html
   - toc:
       permalink: true
 
+
+# For search bar and automatic generation of api docs
+plugins:
+    - search
+    - mkdocstrings:
+        default_handler: python
+        watch:
+        - src/simmate
+
+# Main organization of website
 nav:
     
-    - Home: index.md
+    - Home: home.md
     
     - Getting Started: 
         
@@ -121,14 +133,12 @@ nav:
             - Checklist for each worker: getting_started/add_computational_resources/checklist_for_workers.md
             - Adding workers and clusters: getting_started/add_computational_resources/adding_clusters_and_workers.md
 
-    - Parameters:
-        - test: DOESNOTEXIST.md
+    - Parameters: parameters.md
     
     - Full Guides & Concepts:
         - test: DOESNOTEXIST.md
     
-    - API Reference:
-        - test: DOESNOTEXIST.md
+    - API Reference: test_api.md
 
     - Contributing:
         - Overview: contributing/overview.md
@@ -136,5 +146,3 @@ nav:
         - Creating & submitting changes: contributing/creating_and_submitting_changes.md
         - Extra notes & tips: contributing/extra.md
         - Maintainer notes: contributing/maintainer_notes.md
-
-    - Need help?: DOESNOTEXIST.md
