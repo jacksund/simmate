@@ -1,11 +1,36 @@
-site_name: Simmate
+site_name: Simmate Documentation
 site_url: https://simmate.org
+repo_url: https://github.com/jacksund/simmate
 
 theme:
   name: material
+  language: en
+   
+  logo: images/simmate-icon.svg
+  favicon: images/simmate-icon.svg
+  
+  icon:
+    repo: fontawesome/brands/github
+  
+  # Coloring for light/dark themes
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+      primary: teal
+      accent: teal
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to light mode
+      primary: teal
+      accent: teal
+
   features:
       - navigation.tabs
       - content.code.annotate
+
 
 # For emojis, annotations, etc.
 markdown_extensions:
@@ -16,6 +41,8 @@ markdown_extensions:
       emoji_generator: !!python/name:materialx.emoji.to_svg
   - attr_list
   - md_in_html
+  - toc:
+      permalink: true
 
 nav:
     
@@ -75,15 +102,32 @@ nav:
             - Name your new workflow: getting_started/custom_workflows/name_your_new_workflow.md
             - Creating your workflow: getting_started/custom_workflows/creating_your_workflow.md
             - Next steps: getting_started/custom_workflows/next_steps.md
+        
+        - Build custom tables and apps:
+            - Quickstart: getting_started/custom_tables_and_apps/quick_start.md
+            - Creating a custom project: getting_started/custom_tables_and_apps/create_a_custom_app.md
+            - Creating a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
+        
+        - Use a cloud database:
+            - Quickstart: getting_started/use_a_cloud_database/quick_start.md
+            - Consider collaborating: getting_started/use_a_cloud_database/consider_collaborating.md
+            - Build a Postgres database: getting_started/use_a_cloud_database/build_a_postgres_database.md
+            - Connect Simmate to your database: getting_started/use_a_cloud_database/connect_simmate_to_the_database.md
 
-    - Workflow Parameters:
+    - Parameters:
         - test: DOESNOTEXIST.md
     
     - Full Guides & Concepts:
         - test: DOESNOTEXIST.md
+    
     - API Reference:
         - test: DOESNOTEXIST.md
+
     - Contributing:
-        - test: DOESNOTEXIST.md
-    - Need help?:
-        -  test: DOESNOTEXIST.md
+        - Overview: contributing/overview.md
+        - First time setup: contributing/first_time_setup.md
+        - Creating & submitting changes: contributing/creating_and_submitting_changes.md
+        - Extra notes & tips: contributing/extra.md
+        - Maintainer notes: contributing/maintainer_notes.md
+
+    - Need help?: DOESNOTEXIST.md
