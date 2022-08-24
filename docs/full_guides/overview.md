@@ -1,12 +1,25 @@
 
-# Welcome!
+# The full Simmate guides & API reference
+
+## Before you begin
 
 To get started, make sure you have either completed our [introduction tutorials](https://github.com/jacksund/simmate/tree/main/tutorials)
 or are comfortable with python.
 
+
+## Organization of guides vs. code
+
+Though we try to keep the organization of our guides and code as close as possible, they do not exactly follow the same structure. We learned over time that code vs. guide organization needs to be handled separately -- in order to help new users learn how to use Simmate.
+
+### documentation
+
+- TODO
+
+### python modules
+
 `simmate` is the base module and contains all of the code that our package runs on. Within each subfolder (aka each python “module”), you’ll find more details on what it contains.
 
-**But as a brief summary…**
+But as a brief summary...
 
 - `calculators` = third-party programs that run analyses for us (e.g. VASP which runs DFT calculations)
 - `command_line` = makes some common functions available as commands in the terminal
@@ -23,3 +36,5 @@ or are comfortable with python.
 There is also one extra file…
 
 - `conftest` = this is for running Simmate tests and only for contributing devs
+
+

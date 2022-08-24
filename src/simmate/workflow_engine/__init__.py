@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
+"""
+This module defines the base class for all workflows in Simmate. When learning 
+how use workflows, make sure you have gone through our intro 
+[tutorials](https://github.com/jacksund/simmate/tree/main/tutorials). You
+can then read through these guides for more features.
+"""
+
 # The order that we import these different modules is important to prevent
 # circular imports errors, so we prevent isort from changing this file.
 # isort: skip_file
 
-from simmate.utilities import get_doc_from_readme
-
-__doc__ = get_doc_from_readme(__file__)
 
 # OPTIMIZE: These imports are particularly slow because we are configuring
 # django in the code below this. These two imports don't depend on the database

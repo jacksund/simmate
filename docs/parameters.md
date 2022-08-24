@@ -1,30 +1,36 @@
 # Parameters
 
-Knowing which parameters are available and how to use them is essential to use Simmate to the fullest. We therefore outline ALL unique parameters for ALL workflows here.
 
-To see which parameters are allow for a given workflow, you can use the explore command to list them:
+## Overview
 
-``` bash
-simmate workflows explore
-```
+Knowing which parameters are available and how to use them is essential. We therefore outline **all** unique parameters for **all** workflows here.
 
+To see which parameters are allowed for a given workflow, you can use the `explore` command or `workflow.show_parameters()`:
 
-Alternatively, in python, you can use `workflow.show_parameters()`. For example:
+=== "command line"
+    ``` bash
+    simmate workflows explore
+    ```
 
-```
-workflow.show_parameters()
+=== "python"
 
-- angle_tolerance
-- command
-- compress_output
-- directory
-- is_restart
-- run_id
-- source
-- standardize_structure
-- structure
-- symmetry_precision
-```
+    ``` python
+    workflow.show_parameters()
+    
+    - angle_tolerance
+    - command
+    - compress_output
+    - directory
+    - is_restart
+    - run_id
+    - source
+    - standardize_structure
+    - structure
+    - symmetry_precision
+    ```
+
+If you need more details on a parameter or would like to request a new one, just let us know!
+
 
 You can then search for these parameters below to learn more about them.
 

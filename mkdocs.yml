@@ -135,10 +135,46 @@ nav:
 
     - Parameters: parameters.md
     
-    - Full Guides & Concepts:
-        - test: DOESNOTEXIST.md
-    
-    - API Reference: test_api.md
+    - Full Guides & Reference:
+        
+        - Overview: full_guides/overview.md
+        
+        - Website:
+            - Overview: full_guides/website/overview.md
+            - REST API: full_guides/website/rest_api.md
+
+        - Workflows:
+            - Overview: full_guides/workflows/overview.md
+            - Using existing workflows: full_guides/workflows/using_existing_workflows.md
+            - Adding computational resources:
+                - Overview: test.md
+                - Workers: test.md
+            
+            - Third-party software: 
+                - What is a calculator?: full_guides/workflows/third_party_software/what_is_a_calculator.md
+                - VASP:
+                    - Overview: full_guides/workflows/third_party_software/overview.md
+                    - Installation: full_guides/workflows/third_party_software/installation.d
+                - Bader (henklman): full_guides/workflows/third_party_software/bader_henkelman.md
+                - DeepMD: full_guides/workflows/third_party_software/deepmd.md
+            
+            - Creating new workflows: full_guides/workflows/creating_new_workflows.md
+            - Creating S3 Workflows: full_guides/workflows/s3_workflows.md
+
+        - Database:
+            - Overview: full_guides/database/overview.md
+            - Basic use: full_guides/database/overview.md
+
+        - Toolkit:
+            - Overview: full_guides/toolkit/overview.md
+
+        - Extras:
+            - File converters: full_guides/file_converters.md
+            - Command line: full_guides/command_line.md
+            - Visualization: full_guides/visualization.md
+            - Utilities: full_guides/extras/utilities.md
+            - Configuration: full_guides/extras/configuration.md
+            - Testing: full_guides/extras/testing.md  # Move to contributing...?
 
     - Contributing:
         - Overview: contributing/overview.md

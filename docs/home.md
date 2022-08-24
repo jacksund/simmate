@@ -6,6 +6,8 @@
    <img src="https://github.com/jacksund/simmate/blob/main/src/simmate/website/static_files/images/simmate-logo-dark.svg?raw=true" width="80%" style="max-width: 1000px;">
 </p>
 
+> :warning: We are currently migrating our documentation from pdoc to mkdocs, so some sections may be incomplete or missing. We are actively working to fix this.
+
 ## About
 
 The Simulated Materials Ecosystem (Simmate) is a toolbox and framework for computational materials research. It lets you explore various crystal databases, predict new materials, and quickly calculate properties.

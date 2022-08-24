@@ -103,7 +103,8 @@ DEV = [
     "coverage >=6.2, <=6.4.3",
     "isort >=5.10.1, <=5.10.1",
     "mkdocs-material >=8.4.1, <=8.4.1",
-    "mkdocstrings >=0.4.1, <=0.4.1"
+    "mkdocstrings >=0.4.1, <=0.4.1",
+    "mkdocstrings-python >=0.7.1, <=0.7.1",
 ]
 
 EXE = [
