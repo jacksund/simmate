@@ -66,6 +66,7 @@ def test_list_of_all_workflows():
         "static-energy.vasp.quality04",
         "structure-prediction.python.fixed-composition",
         "structure-prediction.python.new-individual",
+        "structure-prediction.python.variable-composition",
     ]
 
 
@@ -115,6 +116,7 @@ def test_get_unique_paramters():
         "migration_images",
         "min_atoms",
         "min_length",
+        "min_structures_exact",
         "nfirst_generation",
         "nimages",
         "nsteadystate",
