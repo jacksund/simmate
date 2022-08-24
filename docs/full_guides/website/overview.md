@@ -1,20 +1,29 @@
 # The Simmate Website
 
-This module hosts everything for the website interface and API. Unlike other major projects, Simmate makes our website's source-code openly available to everyone! This means that you can host your own Simmate website on your own computer or even in production for your lab to privately use.
+The `simmate.website` module hosts everything for the website interface and API. 
+Unlike other major projects, Simmate makes our website's source-code openly 
+available to everyone! This means that you can host your own Simmate website on 
+your own computer or even in production for your lab to privately use.
 
 
 ## Running a server locally
 
 You can quickly get Simmate up-and-running on your local computer using the command...
-``` bash
-# set up your database if you haven't done so already
-simmate database reset
 
-# now run the website locally!
-simmate run-server
-```
+=== "command line"
+    ``` bash
+    # set up your database if you haven't done so already
+    simmate database reset
+    
+    # now run the website locally!
+    simmate run-server
+    ```
 
 While this command is running, open up your preferred browser (Chrome, Firefox, etc.) and go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/). While this looks just like our actaul website at `simmate.org`, this one is running locally on your desktop and using your personal database!
+
+!!! tip
+    Beyond a local server, beginners don't need anything else from the website 
+    interface documentation. Feel free to skip to the "Workflows" guides.
 
 
 ## Running a production-ready server
@@ -38,23 +47,29 @@ By default, servers will not display these sign-in buttons, so if you wish to co
 ### Github OAuth
 
 1. Create a new OAuth application with [this link](https://github.com/settings/applications/new) and the following information (note we are using `http://127.0.0.1:8000`, which is your local test server. Replace this with the link to your cloud server if it's available.):
-    - application name = My New Simmate Server (edit if you'd like)
-    - homepage url = http://127.0.0.1:8000
-    - authorization callback url = http://127.0.0.1:8000/accounts/github/login/callback/
+
+```
+application name = My New Simmate Server (edit if you'd like)
+homepage url = http://127.0.0.1:8000
+authorization callback url = http://127.0.0.1:8000/accounts/github/login/callback/
+```
 
 2. On the next page, select "Generate a new client secret" and copy this value to your clipboard.
 
 3. On your local computer (or production-ready server), set the environment variables:
-    - GITHUB_SECRET = examplekey1234 (value is what you copied from step 2)
-    - GITHUB_CLIENT_ID = exampleid1234 (value is listed on github as "Client ID")
-
+```
+GITHUB_SECRET = examplekey1234 (value is what you copied from step 2)
+GITHUB_CLIENT_ID = exampleid1234 (value is listed on github as "Client ID")
+```
 
 ### Google OAuth
 
 1. Follow steps from django-allauth ([here](https://django-allauth.readthedocs.io/en/latest/providers.html#google)) to configure the Google API application
 2. On your local computer (or production-ready server), set the environment variables:
-    - GOOGLE_SECRET = examplekey1234
-    - GOOGLE_CLIENT_ID = exampleid1234
+```
+GOOGLE_SECRET = examplekey1234
+GOOGLE_CLIENT_ID = exampleid1234
+```
 
 ## CSS and JS assets
 

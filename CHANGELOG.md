@@ -36,6 +36,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - metadata files are now numbered to allow multiple metadata files in the same directory
 - refactor & clean up transformation module for readability
 - remove `SimmateFuture` class and merge functionality into `WorkItem`
+- switch from pdoc to mkdocs for documentation and remove `get_doc_from_readme`. Code and doc organization are now decoupled.
+- depreciate the `run` command and replace it with the `run-yaml` command. The `run` command was rarely used and provided little in functionality
 
 **Fixes**
 - fix `module not found` error by adding ASE to dependencies

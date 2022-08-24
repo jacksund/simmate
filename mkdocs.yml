@@ -34,8 +34,14 @@ theme:
 
 # For emojis, annotations, etc.
 markdown_extensions:
+  - admonition
   - attr_list
-  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.superfences:
+        custom_fences:
+              - name: mermaid
+                class: mermaid
+                format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
@@ -145,11 +151,13 @@ nav:
 
         - Workflows:
             - Overview: full_guides/workflows/overview.md
+            - Workflow Names: full_guides/workflows/workflow_names.md
             - Using existing workflows: full_guides/workflows/using_existing_workflows.md
             - Adding computational resources:
                 - Overview: test.md
                 - Workers: test.md
-            
+            - Creating new workflows: full_guides/workflows/creating_new_workflows.md
+            - Creating S3 Workflows: full_guides/workflows/s3_workflows.md
             - Third-party software: 
                 - What is a calculator?: full_guides/workflows/third_party_software/what_is_a_calculator.md
                 - VASP:
@@ -157,9 +165,6 @@ nav:
                     - Installation: full_guides/workflows/third_party_software/installation.d
                 - Bader (henklman): full_guides/workflows/third_party_software/bader_henkelman.md
                 - DeepMD: full_guides/workflows/third_party_software/deepmd.md
-            
-            - Creating new workflows: full_guides/workflows/creating_new_workflows.md
-            - Creating S3 Workflows: full_guides/workflows/s3_workflows.md
 
         - Database:
             - Overview: full_guides/database/overview.md
@@ -174,7 +179,7 @@ nav:
             - Visualization: full_guides/visualization.md
             - Utilities: full_guides/extras/utilities.md
             - Configuration: full_guides/extras/configuration.md
-            - Testing: full_guides/extras/testing.md  # Move to contributing...?
+            # - Testing: full_guides/extras/testing.md  # Move to contributing...?
 
     - Contributing:
         - Overview: contributing/overview.md

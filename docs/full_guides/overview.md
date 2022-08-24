@@ -9,11 +9,28 @@ or are comfortable with python.
 
 ## Organization of guides vs. code
 
-Though we try to keep the organization of our guides and code as close as possible, they do not exactly follow the same structure. We learned over time that code vs. guide organization needs to be handled separately -- in order to help new users learn how to use Simmate.
+Though we try to keep the organization of our guides and code as close as possible, they do not exactly follow the same structure. We learned over time that code/guide organization needs to be handled separately in order to help new users use Simmate without having mastered all of it components.
 
 ### documentation
 
-- TODO
+We try to organize our guides by difficultly level and how a user would normally
+begin using Simmate features. We expect users will start with highest-level features
+(e.g. the website interface) and then work their way to the lowest level ones
+from there (e.g. the toolkit and python objects). We therefore have the following
+up front:
+
+``` mermaid
+graph LR
+  A[Website] --> B[Workflows];
+  B --> C[Database];
+  C --> D[Toolkit];
+  D --> E[Extras];
+```
+
+!!! tip
+    Advanced topics are located at the end of each section. Unlike the 
+    getting-started guides, you do **not** need to complete a section in order 
+    to move on to the next one.
 
 ### python modules
 

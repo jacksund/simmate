@@ -1,9 +1,13 @@
 
 # The REST API
 
-> :warning: This is only for experts! If you are trying to pull data from Simmate, then you should instead  use our python client that is introduced in [the database tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md). Grabbing data directly from our REST API is really only for teams that can't use python or Simmate's code but still want to pull data. Also note that grabbing data via our REST API is heavily throttled, so this is not a good way to grab large amounts of data.
+!!! warning
+    This section is only for experts! If you are trying to pull data from Simmate, then you should instead  use our python client that is introduced in [the database tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md). Grabbing data directly from our REST API is really only for teams that can't use python or Simmate's code but still want to pull data. Also note that grabbing data via our REST API is heavily throttled, so this is not a good way to grab large amounts of data.
 
 While the accronym may not be super intuitive for beginners, "REST API" stands for "**Re**presentational **s**tate **t**ransfer (REST) **A**pplication **P**rogramming **I**nterfaces (API)". In simple terms, this is how we can access databases from a website url. 
+
+
+## Our example endpoint
 
 The easiest way to understand our API is with some examples. In the examples below, we only look at the Materials Project database (at [`/third-parties/MatprojStructure/`](http://simmate.org/third-parties/MatprojStructure/)), but in addition to this example, nearly every URL within Simmate has REST API functionality! Our API endpoints are automatically built from our database module -- so it's very easy to implement new features and add new tables.
 

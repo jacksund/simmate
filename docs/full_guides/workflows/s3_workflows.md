@@ -1,7 +1,9 @@
 
-# The Supervised-Staged-Shell Workflow (aka "S3Workflow")
+# The Supervised-Staged-Shell Workflow 
 
-This class contains the core functionality to **supervise** a **staged** workflow
+## S3 = Supervised + Staged + Shell
+
+This type of workflow helps to **supervise** a **staged** workflow
 involving some **shell** command.
 
 Let's breakdown what this means...
@@ -12,7 +14,7 @@ calculation. We consider calling external programs a *staged* task made
 up of three steps:
 
 - setup = writing any input files required for the program
-- execution = actually calling the command and running our program
+- execute = actually calling the command and running our program
 - workup = loading data from output files back into python
 
 And for *supervising* the task, this means we monitor the program while the
@@ -21,46 +23,43 @@ output files for common errors/issues -- even while the other program is still
 running. If an error is found, we stop the program, fix the issue, and then 
 restart it.
 
+``` mermaid
+graph LR
+  A[Start] --> B[setup];
+  B --> C[execute];
+  C --> D[workup];
+  D --> E[Has errors?];
+  E -->|Yes| B;
+  E -->|No| F[Done!];
+```
 
-<!--
-TODO: Make a simple diagram to visualize the overall process and add it here.
-It will be similar to Custodian's, but we don't have a list of jobs here.
-https://materialsproject.github.io/custodian/index.html#usage
-The steps are...
-
-- Write Input Files based on custom+defualt settings
-- Run the calculation by calling the program
-- Load ouput files
-- check for errors
-- [correct them, rerun]
-- postprocess/analysis
--->
+!!! warning
+    This diagram is slightly misleading because the "Has Errors?" check
+    also happens **while the execute step is still running**. Therefore, you
+    can catch errors before your program even finishes & exits!
 
 Running S3Workflows is the same as normal workflows (e.g. using the `run` method),
 and this entire process of supervising, staging, and shell execution is done for you!
 
 
-# S3Workflows for common Calculators
+## S3Workflows for common Calculators
 
-For programs that are commonly used in material science, you should check the
-`simmate.calculators` module and then a given calculator's `workflow` module.
-Many have a subclass of `S3Workflow` already built for you. For example, VASP
-user can take advantage of the following class:
-`simmate.calculators.vasp.workflows.base.VaspWorkflow`
-
-
-
-# Building a custom S3Workflow
-
-Before starting a custom `S3Workflow`, make sure you have read the section 
-above this (on S3Workflows for common Calculators like VASP). You should also 
-have gone through the guides on building a custom `Workflow`.
-
-NOTE: Custom `S3Workflows` must also follow the naming conventions required
-of `Workflow`s
+For programs that are commonly used in material science, you should also read
+through their guides in the "Third-party Software" section. If your program is
+listed there, then there is likely a subclass of `S3Workflow` already built 
+for you. For example, VASP user can take advantage of `VaspWorkflow` to build
+workflows.
 
 
-## Simple command call
+## Building a custom S3Workflow
+
+!!! tip
+    Before starting a custom `S3Workflow`, make sure you have read the section 
+    above this (on S3Workflows for common Calculators like VASP). You should also 
+    have gone through the guides on building a custom `Workflow`.
+
+
+### Simple command call
 
 The most basic example of a S3Workflow is just calling some command -- without
 doing anything else (no input files, no error handling, etc.). 
@@ -89,7 +88,7 @@ IMPORTANT: Note that  we used "Echo" in our workflow name. This helps the user
 see what commands or programs will be called when a workflow is ran.
 
 
-## Custom setup and workup
+### Custom setup and workup
 
 Now what if we'd like to write input files or read output files that are created?
 Here, we need to update our `setup` and `workup` methods:
@@ -149,18 +148,12 @@ For a full (and advanced) example of a subclass take a look at
 `simmate.calculators.vasp.workflows.relaxation.matproj`.
 
 
-# Custom error handling
+### Custom error handling
 
-See the documentation located at `simmate.workflow_engine.error_handler` for
-more information.
-
-
-# Continuation of workflows
-
-This is an experimental feature and for advanced users only. (TODO)
+TODO -- Contact our team if you would like us to prioritize this guide
 
 
-# Alternatives
+## Alternatives to the S3Workflow
 
 For experts, this class can be viewed as a combination of prefect's ShellTask,
 a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
