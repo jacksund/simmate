@@ -2,7 +2,7 @@
 
 LongLeaf is a Linux-based computing system available for free to researchers across UNC Chapel Hill's campus. Workloads where each job requires a single compute host are best suited for this cluster.
 
-> :bulb: This guide should be used alongside tutorial 02 ([here](https://github.com/jacksund/simmate/blob/main/tutorials/02_Run_a_workflow.md#switching-to-a-remote-cluster)).
+> :bulb: This guide should be used alongside tutorial 02 ([here](https://jacksund.github.io/simmate/getting_started/run_a_workflow/submit_to_a_cluster/)).
 <br/>
 
 # The Simmate checklist
@@ -20,7 +20,7 @@ For the uncompleted requirements:
 
 2. you must create a profile on LongLeaf with your UNC onyen. Directions for this are located [here](https://its.unc.edu/research-computing/longleaf-cluster/).
 5. make your personal environment named `yourname_env` (e.g. `jacks_env`)
-6. follow tutorial 02 ([here](https://github.com/jacksund/simmate/blob/main/tutorials/02_Run_a_workflow.md#configuring-potentials-for-vasp-users)) to set up VASP potentials
+6. follow tutorial 02 ([here](https://jacksund.github.io/simmate/getting_started/run_a_workflow/configure_potcars/)) to set up VASP potentials
 
 <br/>
 

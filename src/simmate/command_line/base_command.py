@@ -26,7 +26,7 @@ def base_command():
     ---------
 
     If you are a beginner to the command line, be sure to start with
-    [our tutorials](https://github.com/jacksund/simmate/tree/main/tutorials).
+    [our tutorials](https://jacksund.github.io/simmate/getting_started/overview/).
     Below you will see a list of sub-commands to try. For example, you can run `simmate
     database --help` to learn more about it.
 

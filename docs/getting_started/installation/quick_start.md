@@ -8,7 +8,7 @@ In this tutorial, you will learn how to install Simmate with Anaconda and start 
     In this tutorial and others, **beginners without coding experience should skip the quick-start tutorial** section and jump straight to the full tutorial. *The critical steps in each are exactly the same*, but the full tutorial includes extra exploration of the software and how to use it.
 
 !!! note 
-    Simmate itself is <2MB, but when installed to a clean conda environment, the entire download for all it's dependencies comes to ~1.2GB. Additional disk space is also needed for optional downloads -- such as [third-party data](https://jacksund.github.io/simmate/simmate/database/third_parties.html).
+    Simmate itself is <2MB, but when installed to a clean conda environment, the entire download for all it's dependencies comes to ~1.2GB. Additional disk space is also needed for optional downloads -- such as [third-party data](https://jacksund.github.io/simmate/full_guides/database/third_party_data/).
 
 
 1. Install [anaconda](https://www.anaconda.com/products/distribution)
@@ -23,5 +23,5 @@ conda activate my_env
 5. Run the command `simmate run-server` (and leave this command running)
 6. Go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/) and you'll see you local server!
 
-Note, this server is only accessible on your local computer. For a production-ready server, see our [website documentation](https://jacksund.github.io/simmate/simmate/website.html#running-a-production-ready-server).
+Note, this server is only accessible on your local computer. For a production-ready server, see our [website documentation](https://jacksund.github.io/simmate/full_guides/website/overview/).
 

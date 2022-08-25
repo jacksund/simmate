@@ -7,7 +7,7 @@ Much like the `simmate.workflows` module, this module brings together all databa
 ## Loading results
 
 
-[Tutorials 01-05](https://github.com/jacksund/simmate/tree/main/tutorials) will teach you how to run workflows and access their results. But as a review:
+[Tutorials 01-05](https://jacksund.github.io/simmate/getting_started/overview/) will teach you how to run workflows and access their results. But as a review:
 
 ``` python
 from simmate.workflows.static_energy import mit_workflow

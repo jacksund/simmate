@@ -2,7 +2,7 @@
 
 This module hosts everything for defining and interacting with your database.
 
-For beginners, make sure you have completed [our database tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md).
+For beginners, make sure you have completed [our database tutorial](https://jacksund.github.io/simmate/getting_started/access_the_database/quick_start/).
 
 Submodules include...
 

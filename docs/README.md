@@ -1,6 +1,6 @@
 # Documentation
 
-This directory hosts the build script for Simmate's online API documentation. You can access the live docs [here](https://jacksund.github.io/simmate/simmate.html). If you would like to host our documentation locally for offline access, then you can run the following commands:
+This directory hosts the build script for Simmate's online API documentation. You can access the live docs [here](https://jacksund.github.io/simmate/home/). If you would like to host our documentation locally for offline access, then you can run the following commands:
 
 ``` bash
 mkdocs build

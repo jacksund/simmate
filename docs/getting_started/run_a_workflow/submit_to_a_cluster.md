@@ -8,7 +8,7 @@ Thus far, you've been running Simmate on your local desktop or laptop, but we sa
 
 ## A check-list before starting
 
-For teams that are actively using Simmate, we have a guides on submitting to that particular cluster. [Check to see if your university or federal cluster is listed](https://github.com/jacksund/simmate/tree/main/tutorials/Guides_for_HPC_clusters). Use these guides as you work through the rest of this section. If your cluster/university is not listed, contact your IT team for help in completing this tutorial.
+For teams that are actively using Simmate, we have a guides on submitting to that particular cluster. [Check to see if your university or federal cluster is listed](#). Use these guides as you work through the rest of this section. If your cluster/university is not listed, contact your IT team for help in completing this tutorial.
 
 For workflows to run correctly, the following requirements need to be met:
 

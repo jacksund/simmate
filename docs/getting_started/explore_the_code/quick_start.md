@@ -11,7 +11,7 @@ Even though you can run workflows without understanding what happens behind the 
 <!--
 # The quick tutorial
 
-1. Our API documentation is located [here](https://jacksund.github.io/simmate/simmate.html).
-2. You can explore our source code on github in the same way as the online API docs. For example, note that the [scr/simmate folder](https://github.com/jacksund/simmate/tree/main/src/simmate) has the same README as [our API documentation](https://jacksund.github.io/simmate/simmate.html).
+1. Our API documentation is located [here](https://jacksund.github.io/simmate/home/).
+2. You can explore our source code on github in the same way as the online API docs. For example, note that the [scr/simmate folder](https://github.com/jacksund/simmate/tree/main/src/simmate) has the same README as [our API documentation](https://jacksund.github.io/simmate/full_guides/overview/).
 3. We do this because we are a high-level code and want to avoid researchers using it as a [black box](https://en.wikipedia.org/wiki/Black_box). We accomplish this by using [pdoc](https://pdoc.dev/) for our documentation, rather than [Sphinx](https://www.sphinx-doc.org/en/master/examples.html).
 -->

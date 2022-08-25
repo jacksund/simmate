@@ -168,7 +168,7 @@ def explore():
 
     endnote = Markdown(
         "To understand each parameter, you can read through "
-        "[our parameter docs](https://jacksund.github.io/simmate/simmate/workflows.html#parameters)"
+        "[our parameter docs](https://jacksund.github.io/simmate/parameters/)"
         ", which give full descriptions and examples."
     )
     console.print(endnote)

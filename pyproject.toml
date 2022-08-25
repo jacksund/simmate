@@ -134,7 +134,7 @@ EXTRAS = [
 [project.urls]
 homepage = "https://simmate.org/"
 repository = "https://github.com/jacksund/simmate"
-documentation = "https://jacksund.github.io/simmate/simmate.html"
+documentation = "https://jacksund.github.io/simmate/home/"
 
 # Register command line interface
 [project.scripts]
