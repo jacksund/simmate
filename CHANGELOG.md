@@ -28,6 +28,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - cli now supports auto-completion to help with long commands
 - add `convergence_limit` parameter to evolutionary search that works alongside `limit_best_survival`. This will absorb minor changes in energy with equivalent structures from prolonging the search.
 - add `ExtremeSymmetry` transformation to attempt symmetry reduction on disordered structure
+- account for structures in `fixed-composition` having fewer nsites than input becuase of symmetry reduction during relaxation. Also, add `min_structures_exact` parameter to ensure we have at least N structures with the expected number of sites
+- add experimental `variable-composition` (variable refers to nsites, not stoichiometry) and `binary-composition` evolutionary searches
 
 **Refactors**
 - isolate optional dependencies so that our install is smaller
@@ -43,6 +45,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix `module not found` error by adding ASE to dependencies
 - fix bug with postgres database trying to delete sqlite locally
 - fix dask throwing errors with logging
+- fix bug where `fixed-composition` searches fail to detect individuals that have been symmetrically reduced (and therefore have fewer nsites than expected)
 
 
 # v0.9.0 (2022.08.17)

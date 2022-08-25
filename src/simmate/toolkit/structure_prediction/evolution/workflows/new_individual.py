@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from simmate.database.workflow_results import EvolutionarySearch
+from simmate.database.workflow_results import FixedCompositionSearch
 from simmate.workflow_engine import Workflow
 
 
@@ -19,7 +19,7 @@ class StructurePrediction__Python__NewIndividual(Workflow):
         **kwargs,
     ):
 
-        search_db = EvolutionarySearch.objects.get(id=search_id)
+        search_db = FixedCompositionSearch.objects.get(id=search_id)
         source_db = search_db.structure_sources.get(id=structure_source_id)
 
         # Check the stop condition of the search and see if this new individual

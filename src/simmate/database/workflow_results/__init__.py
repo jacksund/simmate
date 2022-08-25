@@ -15,6 +15,6 @@ from simmate.database.base_data_types import (
     StaticEnergy,
 )
 from simmate.toolkit.structure_prediction.evolution.database import (
-    EvolutionarySearch,
+    FixedCompositionSearch,
     StructureSource,
 )

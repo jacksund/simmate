@@ -44,6 +44,7 @@ def test_workflow_detail_view(client, workflow_name):
         "electronic-structure.vasp.matproj-full",
         "structure-prediction.python.fixed-composition",
         "structure-prediction.python.new-individual",
+        "structure-prediction.python.variable-composition",
     ]:
         return
 
