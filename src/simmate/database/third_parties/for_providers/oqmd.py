@@ -18,7 +18,7 @@ For other options such as the REST API, check out http://oqmd.org/static/docs/re
 
 import pandas
 from django.db import transaction
-from tqdm import tqdm
+from rich.progress import track
 
 from simmate.database.third_parties import OqmdStructure
 from simmate.toolkit import Structure
@@ -87,7 +87,7 @@ def load_all_structures_from_api():
     # Now iterate through all the data -- which is a list of dictionaries.
     # We convert the data into a pymatgen object and sanitize it before saving
     # to the Simmate database
-    for entry in tqdm(data):
+    for entry in track(data):
 
         # Parse the data into a pymatgen object
         # Also before converting into a pymatgen object, we need to parse the sites,
@@ -143,8 +143,8 @@ def load_all_structures_from_files(
     df = pandas.read_csv(base_directory / "all_oqmd_entry.csv")
 
     # iterate through the list and load the structures to our database!
-    # Use tqdm to monitor progress.
-    for _, row in tqdm(df.iterrows()):
+    # Use rich to monitor progress.
+    for _, row in track(df.iterrows()):
 
         # load the structure from the poscar file
         filename = base_directory / row.filename

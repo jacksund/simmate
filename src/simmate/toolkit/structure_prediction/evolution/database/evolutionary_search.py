@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pandas
 import plotly.graph_objects as plotly_go
+from rich.progress import track
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.toolkit import Composition
@@ -728,18 +729,16 @@ class FixedCompositionSearch(DatabaseTable):
             for _, s in structures_dataframe.iterrows()
         ]
 
-        from tqdm import tqdm
-
         structures_dataframe["fingerprint"] = [
             numpy.array(featurizer.featurize(s.structure))
-            for _, s in tqdm(structures_dataframe.iterrows())
+            for _, s in track(structures_dataframe.iterrows())
         ]
 
         fingerprint_known = numpy.array(featurizer.featurize(structure_known))
 
         structures_dataframe["fingerprint_distance"] = [
             numpy.linalg.norm(fingerprint_known - s.fingerprint)
-            for _, s in tqdm(structures_dataframe.iterrows())
+            for _, s in track(structures_dataframe.iterrows())
         ]
 
         # There's only one plot here, no subplot. So we make the scatter

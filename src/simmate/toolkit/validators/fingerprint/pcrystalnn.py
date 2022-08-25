@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import logging
-
-# BUG: This prints a tqdm error so we silence it here.
 import warnings
 
 import numpy
 from django.utils import timezone
-from tqdm import tqdm
+from rich.progress import track
 
+# BUG: This prints a tqdm error so we silence it here.
 with warnings.catch_warnings(record=True):
     from matminer.featurizers.site import CrystalNNFingerprint
 
@@ -74,7 +73,7 @@ class PartialCrystalNNFingerprint(Validator):
             self.fingerprint_database = numpy.array(
                 [
                     self.featurizer.featurize(structure)
-                    for structure in tqdm(structure_pool)
+                    for structure in track(structure_pool)
                 ]
             )
 
@@ -145,7 +144,7 @@ class PartialCrystalNNFingerprint(Validator):
         )
 
         # If there aren't any new structures, just exit without printing the
-        # message and tqdm progress bar below
+        # message and progress bar
         if not new_structures:
             return
 
@@ -154,7 +153,7 @@ class PartialCrystalNNFingerprint(Validator):
         )
 
         # calculate each fingerprint and add it to the database
-        for structure in tqdm(new_structures):
+        for structure in track(new_structures):
             fingerprint = numpy.array(self.featurizer.featurize(structure))
             self._add_fingerprint_to_database(fingerprint)
 

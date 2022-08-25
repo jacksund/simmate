@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pymatgen.symmetry.groups import SpaceGroup as PymatgenSpacegroup
+from rich.progress import track
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
@@ -56,7 +57,11 @@ class Spacegroup(DatabaseTable):
         See `simmate.database.utilities.reset_database`
         """
 
-        for number in range(1, 231):
+        for number in track(range(1, 231)):
+
+            # reverse() is 100% not needed but is nice for users to see progress
+            # get faster instead of slower.
+            number = 231 - number
 
             # load the pymatgen object that we can easily grab data from
             spacegroup = PymatgenSpacegroup.from_int_number(number)

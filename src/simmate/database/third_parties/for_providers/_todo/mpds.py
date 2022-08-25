@@ -17,7 +17,7 @@ this provider after talking with their team.
 
 from django.db import transaction
 from mpds_client import MPDSDataRetrieval, MPDSDataTypes
-from tqdm import tqdm
+from rich.progress import track
 
 from simmate.database import connect
 from simmate.database.third_parties.mpds import MpdsStructure

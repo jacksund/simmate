@@ -12,7 +12,7 @@ import typer
 utilities_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@utilities_app.callback()
+@utilities_app.callback(no_args_is_help=True)
 def utilities():
     """
     A group of commands for various simple tasks (such as file handling)

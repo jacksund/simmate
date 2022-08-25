@@ -12,7 +12,7 @@ import typer
 database_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@database_app.callback()
+@database_app.callback(no_args_is_help=True)
 def base_command():
     """A group of commands for managing your database"""
     pass

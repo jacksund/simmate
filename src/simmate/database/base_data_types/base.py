@@ -29,6 +29,7 @@ from django.db import models  # , transaction
 from django.db import models as table_column
 from django.utils.timezone import datetime
 from django_pandas.io import read_frame
+from rich.progress import track
 
 
 class SearchResults(models.QuerySet):
@@ -596,8 +597,6 @@ class DatabaseTable(models.Model):
             confirm_sqlite_parallel,
         )
 
-        from tqdm import tqdm
-
         from simmate.toolkit import Structure as ToolkitStructure
 
         # generate the file name if one wasn't given
@@ -677,8 +676,8 @@ class DatabaseTable(models.Model):
         # now iterate through all entries to save them to the database
         if not parallel:
             # If user doesn't want parallelization, we run these in the main
-            # thread and monitor progress with tqdm
-            for entry in tqdm(entries):
+            # thread and monitor progress
+            for entry in track(entries):
                 load_single_entry(entry)
         # otherwise we use dask to submit these in batches!
         else:
@@ -770,7 +769,7 @@ class DatabaseTable(models.Model):
         logging.info("Done.")
 
         # now that the archive is downloaded, we can load it into our db
-        logging.info("Loading data into Simmate database...")
+        logging.info("Loading data into Simmate database")
         cls.load_archive(
             archive_filename,
             delete_on_completion=True,

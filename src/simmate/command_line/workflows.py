@@ -10,7 +10,7 @@ from typer import Context
 workflows_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@workflows_app.callback()
+@workflows_app.callback(no_args_is_help=True)
 def workflows():
     """A group of commands for running workflows or viewing their settings"""
     pass
@@ -108,8 +108,8 @@ def parse_parameters(context: Context) -> dict:
 @workflows_app.command()
 def explore():
     """
-    Let's you interactively view all available workflows and see the documentation
-    on the one you select.
+    interactively view all available workflows to see docs & paramaters
+    available
     """
 
     # when printing statements, we often want to add this to the start of the
@@ -194,9 +194,10 @@ def list_all():
 @workflows_app.command()
 def show_config(workflow_name: str):
     """
-    If the workflow is a single task, the calculation's configuration settings
-    are displayed. For example, a VASP workflow will show a dictionary that
-    details how INCAR settings are selected.
+    The calculation's configuration settings are displayed
+
+    For example, a VASP workflow will show a dictionary that details how
+    INCAR settings are selected.
     """
 
     from simmate.workflows.utilities import get_workflow
@@ -218,8 +219,9 @@ def show_config(workflow_name: str):
 )
 def setup_only(context: Context, workflow_name: str):
     """
-    If the workflow is a single task, the calculation is set up but not ran. This
-    is useful when you just want the input files to view/edit.
+    the calculation is set up but not ran (S3Workflows only)
+
+    This is useful when you just want the input files to view/edit.
     """
 
     from simmate.workflows.utilities import get_workflow
@@ -269,7 +271,7 @@ def setup_only(context: Context, workflow_name: str):
     )
 )
 def run_quick(context: Context, workflow_name: str):
-    """Runs a workflow using provided parameters"""
+    """Runs a workflow using provided parameters as CLI arguments"""
 
     from simmate.workflows.utilities import get_workflow
 
@@ -289,7 +291,7 @@ def run_quick(context: Context, workflow_name: str):
 
 @workflows_app.command()
 def run(filename: Path):
-    """Runs a workflow where parameters are loaded from a yaml file."""
+    """Runs a workflow locally where parameters are loaded from a yaml file"""
 
     import yaml
 
@@ -344,7 +346,10 @@ def run(filename: Path):
 
 @workflows_app.command()
 def run_cloud(filename: Path):
-    """Submits a workflow to cloud for remote running"""
+    """
+    Submits a workflow to cloud for remote running where parameters are loaded
+    from a yaml file
+    """
     # !!! DEV NOTE: This is a copy/paste of the run() command. Condense these
     # when refactoring
 

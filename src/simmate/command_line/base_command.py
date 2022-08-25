@@ -17,7 +17,7 @@ from simmate.command_line.workflows import workflows_app
 simmate_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@simmate_app.callback()
+@simmate_app.callback(no_args_is_help=True)
 def base_command():
     """
     This is the base command that all other Simmate commands stem from

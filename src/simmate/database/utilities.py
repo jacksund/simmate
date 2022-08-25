@@ -88,7 +88,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     else:
         from simmate.database.base_data_types import Spacegroup
 
-        logging.info("Loading default data...")
+        logging.info("Loading default data")
         Spacegroup._load_database_from_toolkit()
 
     # Let the user know everything succeeded

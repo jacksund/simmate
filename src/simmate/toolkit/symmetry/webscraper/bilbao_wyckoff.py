@@ -21,7 +21,7 @@ misleading because we know that Ca2N has the spacegroup 166
 
 
 import pandas as pd
-from tqdm import tqdm
+from rich.progress import track
 
 try:
     from selenium import webdriver
@@ -37,7 +37,7 @@ driver = webdriver.Chrome(
 )  # /snap/bin/chromium gives errors
 
 table_info = []
-for spacegroup in tqdm(range(1, 231)):
+for spacegroup in track(range(1, 231)):
 
     # load the webpage
     driver.get("https://www.cryst.ehu.es/cryst/get_wp.html")

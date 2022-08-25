@@ -15,7 +15,7 @@ spacegroup 166, I can see:
 
 
 import pandas as pd
-from tqdm import tqdm
+from rich.progress import track
 
 try:
     from selenium import webdriver
@@ -32,7 +32,7 @@ driver = webdriver.Chrome(
 
 asym_data = []
 wy_data = []
-for spacegroup in tqdm(range(1, 231)):
+for spacegroup in track(range(1, 231)):
 
     # change the int spacegroup to a string in three digit format
     # for example, 15 will turn into 015 and 1 will turn into 001
