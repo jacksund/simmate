@@ -7,33 +7,29 @@
 <p align="center">
 <!-- Conda-forge OS support -->
 <a href="https://anaconda.org/conda-forge/simmate">
-    <img src="https://img.shields.io/badge/-Windows | Mac | Linux-043344">
+    <img src="https://img.shields.io/badge/-Windows | Mac | Linux-00666b">
 </a>
 <!-- Pricing statement for begineers that are new to github -->
 <a href="https://anaconda.org/conda-forge/simmate">
-    <img src="https://img.shields.io/badge/-Free & Open Source-043344">
+    <img src="https://img.shields.io/badge/-Free & Open Source-00666b">
 </a>
 <!-- link to JOSS paper -->
 <a href="https://doi.org/10.21105/joss.04364">
-    <img src="https://img.shields.io/badge/-DOI:10.21105/joss.04364-043344">
+    <img src="https://img.shields.io/badge/-DOI:10.21105/joss.04364-00666b">
 </a>
 
 </br>
 <!-- Link to API documentation -->
-<a href="https://jacksund.github.io/simmate/simmate.html">
-    <img src="https://img.shields.io/badge/-API docs-/?logo=microsoft-academic&color=043344&logoColor=white">
-</a>
-<!-- Link to Tutorials -->
-<a href="https://github.com/jacksund/simmate/tree/main/tutorials">
-    <img src="https://img.shields.io/badge/-Tutorials-/?logo=gitbook&color=043344&logoColor=white">
+<a href="https://jacksund.github.io/simmate/home/">
+    <img src="https://img.shields.io/badge/-Tutorials & Docs-/?logo=microsoft-academic&color=00666b&logoColor=white">
 </a>
 <!-- Link to Website -->
 <a href="https://simmate.org/">
-    <img src="https://img.shields.io/badge/-Website-/?logo=iCloud&color=043344&logoColor=white">
+    <img src="https://img.shields.io/badge/-Website-/?logo=iCloud&color=00666b&logoColor=white">
 </a>
 <!-- link to change-log -->
 <a href="https://github.com/jacksund/simmate/blob/main/CHANGELOG.md">
-    <img src="https://img.shields.io/badge/-Changes & Updates-/?logo=git-extensions&color=043344&logoColor=white">
+    <img src="https://img.shields.io/badge/-Changes & Updates-/?logo=git-extensions&color=00666b&logoColor=white">
 </a>
 </p>
 
@@ -68,14 +64,14 @@ At the other end of the spectrum, we provide an extremely powerful toolbox and A
 
 ## Installation
 
-**Don't panic** if you're new to coding and Python. When you're ready, head to our [tutorials](https://github.com/jacksund/simmate/tree/main/tutorials) where we teach you everything from the beginning.
+**Don't panic** if you're new to coding and Python. When you're ready, head to our [tutorials](https://jacksund.github.io/simmate/getting_started/overview/) where we teach you everything from the beginning.
 
 If you're comfortable with Python, you can install Simmate with...
 ``` bash
 conda install -c conda-forge simmate
 ```
 
-> :bulb: Simmate itself is <2MB, but when installed to a clean conda environment, the entire download for Simmate and all it's dependencies comes to ~1.2GB. Additional disk space is also needed for optional downloads -- such as [third-party data](https://jacksund.github.io/simmate/simmate/database/third_parties.html).
+> :bulb: Simmate itself is <2MB, but when installed to a clean conda environment, the entire download for Simmate and all it's dependencies comes to ~1.2GB. Additional disk space is also needed for optional downloads -- such as [third-party data](https://jacksund.github.io/simmate/full_guides/database/third_party_data/).
 
 ## Running a Server
 
@@ -91,7 +87,7 @@ simmate run-server
 
 After a few seconds, you can open http://127.0.0.1:8000/ in your browser to view your local server!
 
-> :bulb: Read our [website documentation](https://jacksund.github.io/simmate/simmate/website.html) and [tutorials](https://github.com/jacksund/simmate/tree/main/tutorials) in order to switch to a production-ready server that's accessible through the internet and can be shared among a team.
+> :bulb: Read our website [tutorials and documentation](https://jacksund.github.io/simmate/getting_started/overview/) in order to switch to a production-ready server that's accessible through the internet and can be shared among a team.
 
 
 ## A Sneak-Peak of Features
@@ -207,9 +203,8 @@ Even if it's something like "_How do I download all structures with x, y, and z 
 
 ## Extra resources
 
-- [Getting-started guides and tutorials](https://github.com/jacksund/simmate/tree/main/tutorials)
-- [API documentation](https://jacksund.github.io/simmate/simmate.html)
-- [Joining our community & helping contribute](https://github.com/jacksund/simmate/tree/main/tutorials/Guides_for_contributors)
+- [Getting-started guides and tutorials](https://jacksund.github.io/simmate/home/)
+- [Joining our community & helping contribute](https://jacksund.github.io/simmate/contributing/overview/)
 - [Requesting a new feature](https://github.com/jacksund/simmate/discussions/categories/ideas)
 - [Exploring alternatives to Simmate](https://github.com/jacksund/simmate/tree/main/benchmarks)
 - [Citing Simmate](https://doi.org/10.21105/joss.04364)
