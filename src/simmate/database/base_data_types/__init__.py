@@ -4,10 +4,6 @@
 # circular imports errors, so we prevent isort from changing this file.
 # isort: skip_file
 
-from simmate.utilities import get_doc_from_readme
-
-__doc__ = get_doc_from_readme(__file__)
-
 from .base import DatabaseTable, table_column
 
 from .symmetry import Spacegroup

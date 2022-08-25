@@ -268,7 +268,7 @@ def setup_only(context: Context, workflow_name: str):
         allow_extra_args=True,
     )
 )
-def run(context: Context, workflow_name: str):
+def run_quick(context: Context, workflow_name: str):
     """Runs a workflow using provided parameters"""
 
     from simmate.workflows.utilities import get_workflow
@@ -287,29 +287,8 @@ def run(context: Context, workflow_name: str):
         logging.info("Success! All results are also stored in your database.")
 
 
-@workflows_app.command(
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    )
-)
-def run_cloud(context: Context, workflow_name: str):
-    """Submits a workflow to cloud for remote running"""
-
-    from simmate.workflows.utilities import get_workflow
-
-    workflow = get_workflow(
-        workflow_name=workflow_name,
-        precheck_flow_exists=True,
-        print_equivalent_import=True,
-    )
-    kwargs_cleaned = parse_parameters(context=context)
-
-    workflow.run_cloud(**kwargs_cleaned)
-
-
 @workflows_app.command()
-def run_yaml(filename: Path):
+def run(filename: Path):
     """Runs a workflow where parameters are loaded from a yaml file."""
 
     import yaml
@@ -361,3 +340,60 @@ def run_yaml(filename: Path):
     # -------------------------------------------------------------------------
 
     workflow.run(**parameters).result()
+
+
+@workflows_app.command()
+def run_cloud(filename: Path):
+    """Submits a workflow to cloud for remote running"""
+    # !!! DEV NOTE: This is a copy/paste of the run() command. Condense these
+    # when refactoring
+
+    import yaml
+
+    with filename.open() as file:
+        parameters = yaml.full_load(file)  # this is updated below
+
+    from simmate.workflows.utilities import get_workflow
+
+    workflow = get_workflow(
+        # we pop the workflow name so that it is also removed from the rest of kwargs
+        workflow_name=parameters.pop("workflow_name"),
+        precheck_flow_exists=True,
+        print_equivalent_import=True,
+    )
+
+    # -------------------------------------------------------------------------
+
+    # SPECIAL CASE -- Running customized workflows from yaml.
+    # !!! When prefect 2.0 is available, I will be able to use **kwargs as an
+    # input for workflow parameters -- in which case, I can move this functionality
+    # to load_input_and_register.
+
+    # For customized workflows, we need to completely change the format
+    # that we provide the parameters. Customized workflows expect parameters
+    # broken into a dictionary of
+    #   {"workflow_base": ..., "input_parameters":..., "updated_settings": ...}
+    if "workflow_base" in parameters.keys():
+
+        parameters["input_parameters"] = {}
+        parameters["updated_settings"] = {}
+
+        for key, update_values in list(parameters.items()):
+            # Skip the base keys
+            if key in [
+                "workflow_base",
+                "input_parameters",
+                "updated_settings",
+            ]:
+                continue
+            # if there is no prefix, then we have a normal input parameter
+            elif not key.startswith("custom__"):
+                parameters["input_parameters"][key] = parameters.pop(key)
+            # Otherwise remove the prefix and add it to the custom settings.
+            else:
+                key_cleaned = key.removeprefix("custom__")
+                parameters["updated_settings"][key_cleaned] = parameters.pop(key)
+
+    # -------------------------------------------------------------------------
+
+    workflow.run_cloud(**parameters)

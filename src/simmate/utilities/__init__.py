@@ -12,9 +12,5 @@ from .other import (
     check_if_using_latest_version,
     get_chemical_subsystems,
     get_conda_env,
-    get_doc_from_readme,
     get_latest_version,
 )
-
-# must be last to prevent circular import
-__doc__ = get_doc_from_readme(__file__)

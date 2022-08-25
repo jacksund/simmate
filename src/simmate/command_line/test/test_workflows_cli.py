@@ -115,7 +115,7 @@ def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
     result = command_line_runner.invoke(
         workflows_app,
         [
-            "run",
+            "run-quick",
             "static-energy.vasp.mit",
             "--structure",
             cif_filename,
@@ -135,44 +135,6 @@ def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
         ["run", "static-energy.vasp.mit", "hangingkwarg"],
     )
     assert result.exit_code == 2
-
-
-def test_workflows_run_cloud(command_line_runner, structure, mocker, tmp_path):
-
-    # establish filenames
-    cif_filename = str(tmp_path / "test.cif")
-    new_dirname = str(tmp_path / "inputs")
-
-    # write the structure to file to be used
-    structure.to("cif", cif_filename)
-
-    # I don't want to actually run the workflow, so I override the run method
-    mocker.patch.object(
-        Workflow,
-        "run_cloud",
-        return_value=DummyState(None),
-    )
-    # the code above can be modified for a prefect executor
-    # from prefect.states import Completed
-    # return_value=Completed(),
-
-    # now try writing input files to the tmp_path
-    result = command_line_runner.invoke(
-        workflows_app,
-        [
-            "run-cloud",
-            "static-energy.vasp.mit",
-            "--structure",
-            cif_filename,
-            "--directory",
-            new_dirname,
-        ],
-    )
-    assert result.exit_code == 0
-    Workflow.run_cloud.assert_called_with(
-        structure=cif_filename,
-        directory=new_dirname,
-    )
 
 
 def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
@@ -207,10 +169,33 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
     # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
         workflows_app,
-        ["run-yaml", yaml_filename],
+        ["run", yaml_filename],
     )
     assert result.exit_code == 0
     Workflow.run.assert_called_with(
+        structure=cif_filename,
+        directory=new_dirname,
+    )
+
+    # --------------
+    # Testing run-cloud
+    # I don't want to actually run the workflow, so I override the run method
+    mocker.patch.object(
+        Workflow,
+        "run_cloud",
+        return_value=DummyState(None),
+    )
+    # the code above can be modified for a prefect executor
+    # from prefect.states import Completed
+    # return_value=Completed(),
+
+    # now try writing input files to the tmp_path
+    result = command_line_runner.invoke(
+        workflows_app,
+        ["run-cloud", yaml_filename],
+    )
+    assert result.exit_code == 0
+    Workflow.run_cloud.assert_called_with(
         structure=cif_filename,
         directory=new_dirname,
     )

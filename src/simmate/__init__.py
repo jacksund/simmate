@@ -7,12 +7,6 @@ from rich.logging import RichHandler
 
 __version__ = importlib.metadata.version("simmate")
 
-# Some of these utilities use the __version__ above, so this import must come after
-from simmate.utilities import get_doc_from_readme
-
-__doc__ = get_doc_from_readme(__file__)
-
-
 # Configure our logger to output timestamps and "SIMMATE" with logs
 # Also changes the logging level to info
 logging.basicConfig(

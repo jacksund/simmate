@@ -1,0 +1,210 @@
+site_name: Simmate Documentation
+site_url: https://simmate.org
+repo_url: https://github.com/jacksund/simmate
+
+theme:
+  name: material
+  language: en
+   
+  logo: images/simmate-icon.svg
+  favicon: images/simmate-icon.svg
+  
+  icon:
+    repo: fontawesome/brands/github
+  
+  # Coloring for light/dark themes
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+      primary: teal
+      accent: teal
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to light mode
+      primary: teal
+      accent: teal
+
+  features:
+      - navigation.tabs
+      - content.code.annotate
+
+
+# For emojis, annotations, etc.
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - pymdownx.details
+  - pymdownx.superfences:
+        custom_fences:
+              - name: mermaid
+                class: mermaid
+                format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+
+# For search bar and automatic generation of api docs
+plugins:
+    - search
+    - mkdocstrings:
+        default_handler: python
+        watch:
+        - src/simmate
+
+# Main organization of website
+nav:
+    
+    - Home: home.md
+    
+    - Getting Started: 
+        
+        - Overview: getting_started/overview.md
+        
+        - Installation:
+            - Quickstart: getting_started/installation/quick_start.md
+            - Intro to python terms: getting_started/installation/intro_to_python_terms.md
+            - Install Anaconda: getting_started/installation/install_anaconda.md
+            - Intro to the command line: getting_started/installation/command_line.md
+            - Create your environment: getting_started/installation/create_your_env.md
+            - Explore Simmate commands: getting_started/installation/explore_simmate_cli.md
+            - Set up a Local Server: getting_started/installation/local_server_setup.md
+            - Extra learning resources: getting_started/installation/extra.md
+            
+        - Run a workflow:
+            - Quickstart: getting_started/run_a_workflow/quick_start.md
+            - Stages of a Workflow: getting_started/run_a_workflow/stages_of_a_workflow.md
+            - Configure VASP potentials: getting_started/run_a_workflow/configure_potcars.md
+            - Configure the database: getting_started/run_a_workflow/configure_database.md
+            - Make a input structure: getting_started/run_a_workflow/make_a_structure.md
+            - View all workflows: getting_started/run_a_workflow/view_all_workflows.md
+            - View workflow settings: getting_started/run_a_workflow/view_workflow_settings.md
+            - Run a workflow: getting_started/run_a_workflow/running_the_workflow.md
+            - Submit to a cluster: getting_started/run_a_workflow/submit_to_a_cluster.md
+            - Viewing the results: getting_started/run_a_workflow/view_the_results.md
+        
+        - Analyze & modify structures:
+            - Quickstart: getting_started/analyze_and_modify_structures/quick_start.md
+            - Intro to Spyder (IDE): getting_started/analyze_and_modify_structures/intro_to_spyder.md
+            - The structure class: getting_started/analyze_and_modify_structures/the_structure_class.md
+            - Structure properties: getting_started/analyze_and_modify_structures/structure_properties.md
+            - Structure methods: getting_started/analyze_and_modify_structures/structure_methods.md
+            - Advanced classes: getting_started/analyze_and_modify_structures/advanced_classes.md
+            - Extra learning resources: getting_started/analyze_and_modify_structures/extra_resources.md
+        
+        - Explore the code:
+            - Quickstart: getting_started/explore_the_code/quick_start.md
+            - Hints in Spyder: getting_started/explore_the_code/getting_help_in_spyder.md
+            - Intro to Python modules: getting_started/explore_the_code/intro_to_python_modules.md
+            - Exploring Simmate modules: getting_started/explore_the_code/exploring_simmate_modules.md
+        
+        - Access the database:
+            - Quickstart: getting_started/access_the_database/quick_start.md
+            - Intro to Python inheritance: getting_started/access_the_database/intro_to_python_inheritance.md
+            - Access workflow data: getting_started/access_the_database/access_workflow_data.md
+            - Access third-party data: getting_started/access_the_database/access_thirdparty_data.md
+        
+        - Build custom workflows:
+            - Quickstart: getting_started/custom_workflows/quick_start.md
+            - Update an existing workflow: getting_started/custom_workflows/update_an_existing_workflow.md
+            - Name your new workflow: getting_started/custom_workflows/name_your_new_workflow.md
+            - Creating your workflow: getting_started/custom_workflows/creating_your_workflow.md
+            - Next steps: getting_started/custom_workflows/next_steps.md
+        
+        - Build custom tables and apps:
+            - Quickstart: getting_started/custom_tables_and_apps/quick_start.md
+            - Creating a custom project: getting_started/custom_tables_and_apps/create_a_custom_app.md
+            - Creating a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
+        
+        - Use a cloud database:
+            - Quickstart: getting_started/use_a_cloud_database/quick_start.md
+            - Consider collaborating: getting_started/use_a_cloud_database/consider_collaborating.md
+            - Build a Postgres database: getting_started/use_a_cloud_database/build_a_postgres_database.md
+            - Connect Simmate to your database: getting_started/use_a_cloud_database/connect_simmate_to_the_database.md
+        
+        - Add computational resources:
+            - Quickstart: getting_started/add_computational_resources/quick_start.md
+            - A review of concepts: getting_started/add_computational_resources/review_of_concepts.md
+            - Should you set up workers?: getting_started/add_computational_resources/should_you_setup.md
+            - Checklist for each worker: getting_started/add_computational_resources/checklist_for_workers.md
+            - Adding workers and clusters: getting_started/add_computational_resources/adding_clusters_and_workers.md
+        
+        - Wrap up: getting_started/wrap_up.md
+
+    - Parameters: parameters.md
+    
+    - Full Guides & Reference:
+        
+        - Overview: full_guides/overview.md
+        
+        - Website:
+            - Overview: full_guides/website/overview.md
+            - REST API: full_guides/website/rest_api.md
+
+        - Workflows:
+            - Overview: full_guides/workflows/overview.md
+            - Workflow Names: full_guides/workflows/workflow_names.md
+            - Using existing workflows: full_guides/workflows/using_existing_workflows.md
+            # - Adding computational resources:
+            #     - Overview: test.md
+            #     - Workers: test.md
+            - Creating new workflows: full_guides/workflows/creating_new_workflows.md
+            - Creating S3 Workflows: full_guides/workflows/s3_workflows.md
+            - Third-party software: 
+                - What is a calculator?: full_guides/workflows/third_party_software/what_is_a_calculator.md
+                - VASP:
+                    - Overview: full_guides/workflows/third_party_software/vasp/overview.md
+                    - Installation: full_guides/workflows/third_party_software/vasp/installation.md
+                    # - Workflows: full_guides/workflows/third_party_software/vasp/workflows.md
+                    # - Inputs: full_guides/workflows/third_party_software/vasp/inputs.md
+                    # - Outputs: full_guides/workflows/third_party_software/vasp/outputs.md
+                    # - Error Handlers: full_guides/workflows/third_party_software/vasp/error_handlers.md
+                - Bader (henklman):
+                    - Overview: full_guides/workflows/third_party_software/bader_henkelman/overview.md
+                    - Installation: full_guides/workflows/third_party_software/bader_henkelman/installation.md
+                    # - Workflows: full_guides/workflows/third_party_software/bader_henkelman/workflows.md
+                    # - Inputs: full_guides/workflows/third_party_software/bader_henkelman/inputs.md
+                    # - Outputs: full_guides/workflows/third_party_software/bader_henkelman/outputs.md
+                - DeepMD: full_guides/workflows/third_party_software/deepmd.md
+
+        - Database:
+            - Overview: full_guides/database/overview.md
+            - Basic use: full_guides/database/basic_use.md
+            - Workflow data: full_guides/database/workflow_data.md
+            - Third-party data: full_guides/database/third_party_data.md
+            - Contributing data: full_guides/database/contributing_data.md
+            - Creating custom tables: full_guides/database/custom_tables.md
+
+        - Toolkit:
+            - Overview: full_guides/toolkit.md
+
+        - Extras:
+            - File converters: 
+                - Overview: full_guides/extras/file_converters/overview.md
+                - Structures: full_guides/extras/file_converters/structures.md
+            - Command line: full_guides/extras/command_line.md
+            - Visualization:
+                - Overview: full_guides/extras/visualization/overview.md
+                - Structures: full_guides/extras/visualization/blender.md
+            - Utilities: full_guides/extras/utilities.md
+            # - Configuration: full_guides/extras/configuration.md
+            # - Testing: full_guides/extras/testing.md  # Move to contributing...?
+
+    - Contributing:
+        - Overview: contributing/overview.md
+        - First time setup: contributing/first_time_setup.md
+        - Creating & submitting changes: contributing/creating_and_submitting_changes.md
+        - Extra notes & tips: contributing/extra.md
+        - Maintainer notes: contributing/maintainer_notes.md

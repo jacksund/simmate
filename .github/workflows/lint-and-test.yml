@@ -50,7 +50,7 @@ jobs:
     - name: Create conda env and install deps
       uses: conda-incubator/setup-miniconda@v2
       with:
-        environment-file: tutorials/Guides_for_contributors/environment.yaml
+        environment-file: .github/environment.yaml
         python-version: ${{ matrix.python-version }}
         auto-activate-base: false
         channels: conda-forge
