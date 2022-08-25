@@ -6,10 +6,11 @@ functions for grabbing all available workflows as well as dynamically loading
 a workflow using its name.
 """
 
+import importlib
 import logging
 import pkgutil
 import shutil
-from importlib import import_module
+import sys
 from pathlib import Path
 
 import yaml
@@ -60,7 +61,7 @@ def get_list_of_workflows_by_type(
     flow_type_u = flow_type.replace("-", "_")
 
     # grab the relevent module
-    flow_module = import_module(f"simmate.workflows.{flow_type_u}")
+    flow_module = importlib.import_module(f"simmate.workflows.{flow_type_u}")
 
     # This loop goes through all attributes (as strings) of the workflow module
     # and select only those that are workflow or s3tasks.
@@ -147,6 +148,30 @@ def get_workflow(
         Defaults to false.
     """
 
+    # First check if the user is providing a custom workflow, where the path is
+    # given as "path/to/my/script:my_workflow_obj". If so, we need to load that
+    # file and grab the workflow like it's an object from a python module.
+    if ":" in workflow_name:
+
+        # Note, windows paths have multiple ":" so we need to use rsplit.
+        script_name, workflow_obj_name = workflow_name.rsplit(":", 1)
+        script_name = Path(script_name)
+        module_name = script_name.stem
+
+        # No idea how this works, but its from the official docs... This just
+        # loads our python file as if was a module
+        # https://stackoverflow.com/questions/19009932/
+        # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
+        spec = importlib.util.spec_from_file_location(module_name, script_name)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+
+        # now grab the workflow from the module!
+        workflow = getattr(module, workflow_obj_name)
+
+        return workflow
+
     # make sure we have a proper workflow name provided.
     # This is optional because it is slow and loads all other workflows, rather
     # than just the one we are interested in.
@@ -176,7 +201,7 @@ def get_workflow(
 
     # The naming convention matches the import path
     # BUG: What about user workflows...? Should I try each custom app import?
-    workflow_module = import_module(f"simmate.workflows.{project_name}")
+    workflow_module = importlib.import_module(f"simmate.workflows.{project_name}")
 
     # If requested, print a message indicating the import we are using
     if print_equivalent_import:

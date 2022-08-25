@@ -3,6 +3,7 @@
 import pytest
 
 from simmate.conftest import copy_test_files
+from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import (
     get_list_of_all_workflows,
     get_list_of_workflows_by_type,
@@ -90,6 +91,35 @@ def test_get_workflow():
     from simmate.workflows.static_energy import StaticEnergy__Vasp__Matproj as workflow
 
     assert get_workflow("static-energy.vasp.matproj") == workflow
+
+
+# This is for the test below on custom workflows
+WORKFLOW_SCRIPT = """
+from simmate.workflow_engine import Workflow
+
+class Example__Python__MyFavoriteSettings(Workflow):
+
+    use_database = False  # we don't have a database table yet
+
+    @staticmethod
+    def run_config(**kwargs):
+        print("This workflow doesn't do much")
+        return 42
+
+my_workflow = Example__Python__MyFavoriteSettings
+"""
+
+
+def test_get_custom_workflow(tmp_path):
+
+    script_name = tmp_path / "my_script.py"
+
+    with script_name.open("w") as file:
+        file.write(WORKFLOW_SCRIPT)
+
+    workflow = get_workflow(f"{script_name}:my_workflow")
+
+    assert issubclass(workflow, Workflow)
 
 
 def test_get_unique_paramters():
