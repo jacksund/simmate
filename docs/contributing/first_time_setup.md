@@ -1,7 +1,8 @@
 
 # First-time setup
 
-> :bulb: If you are a student or teacher, we recommend using your Github account with [Github's free Student/Teacher packages](https://education.github.com/). This includes Github Pro and many other softwares that you may find useful. This is optional.
+!!! tip
+    If you are a student or teacher, we recommend using your Github account with [Github's free Student/Teacher packages](https://education.github.com/). This includes Github Pro and many other softwares that you may find useful. This is optional.
 
 1. Fork the Simmate repo to your Github profile (e.g. `yourname/simmate`)
 

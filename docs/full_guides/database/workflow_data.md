@@ -1,10 +1,11 @@
-Local Calculations
-=================
+
+# Accessing workflow data
 
 Much like the `simmate.workflows` module, this module brings together all database tables that are linked to workflows and organizes them by application for convenience.
 
-Usage
-======
+
+## Loading results
+
 
 [Tutorials 01-05](https://github.com/jacksund/simmate/tree/main/tutorials) will teach you how to run workflows and access their results. But as a review:
 
@@ -32,8 +33,7 @@ MITStaticEnergy.objects.filter(...)
 ```
 
 
-Location of Each Table's Source-code
-=======================================
+## Location of Each Table's Source-code
 
 The code that defines these tables are located in the corresponding `simmate.calculators` module. We make tables accessible here because users often want to search for results by application -- not by their calculator name. For example, the results from all static energy calculations that use VASP under MIT project settings can be imported with...
 

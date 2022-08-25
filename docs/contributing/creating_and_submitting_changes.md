@@ -17,8 +17,6 @@ isort .
 black .
 ```
 
-> :bulb: you can optionally format files as you code with Spyder too. `Tools` -> `Preferences` -> `Completion and Linting` -> `Code Style and Formatting` > Under code formatting dropdown, select `black`. To format a file you have open in Spyder, use the the `Ctrl+Shift+I` shortcut.
-
 7. Simmate has test cases to make sure new changes don't break any of Simmate's existing features. These are written using [pytest](https://docs.pytest.org/en/6.2.x/). Run these to check your changes. Make sure you are in the `~/Documents/github/simmate` directory when you run this command:
 ``` shell
 # you can optionally run tests in parallel 
@@ -26,10 +24,15 @@ black .
 pytest
 ```
 
-> :warning: Spyder does not yet have a plugin for pytest. We are still waiting on this feature to be built alongside their [Unittest plugin](https://www.spyder-ide.org/blog/introducing-unittest-plugin/).
-
 8. If everything passes, your changes can be accepted into Simmate! :partying_face:
 
 9. Open GitKraken, and you should then see your changes listed. For changes that you are happy with, `stage` and then `commit` them to the `main` branch of your repo (`yourname/simmate`). Feel free to [add an emoji](https://github.com/ikatyang/emoji-cheat-sheet/blob/master/README.md) to the start of your commit message. These icons simply tell us that you read the tutorial (and also emojis are a fun distraction).
 
 10. Now [open a pull-request](https://support.gitkraken.com/working-with-repositories/pull-requests/) to merge your changes into our main code (currently at `jacksund/simmate`). We will review your changes and merge them if they pass all of our checks.
+
+!!! tip
+    you can optionally format files as you code with Spyder too. `Tools` -> `Preferences` -> `Completion and Linting` -> `Code Style and Formatting` > Under code formatting dropdown, select `black`. To format a file you have open in Spyder, use the the `Ctrl+Shift+I` shortcut.
+
+!!! note
+    Spyder does not yet have a plugin for pytest. We are still waiting on this feature to be built alongside their [Unittest plugin](https://www.spyder-ide.org/blog/introducing-unittest-plugin/).
+

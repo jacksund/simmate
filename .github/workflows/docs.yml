@@ -10,12 +10,32 @@ on:
       - main
 
 jobs:
+
   deploy:
     runs-on: ubuntu-latest
+    name: Deploy Docs to Github Pages
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
-      - run: pip install mkdocs-material 
-      - run: mkdocs gh-deploy --force
+    - name: Initial setup
+      uses: actions/checkout@v3
+    
+    # --------
+    # NOTE: this section is copied from lint-and-test.yml
+    - name: Create conda env and install deps
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        environment-file: .github/environment.yaml
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
+        channels: conda-forge
+        activate-environment: simmate_dev
+    - name: Install Simmate
+      shell: bash -l {0}
+      run: |
+        pip install -e .
+    # --------
+
+    - name: Make documentation
+      shell: bash -l {0}
+      run: |
+        mkdocs gh-deploy --force

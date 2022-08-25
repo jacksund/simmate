@@ -157,32 +157,49 @@ nav:
             - Overview: full_guides/workflows/overview.md
             - Workflow Names: full_guides/workflows/workflow_names.md
             - Using existing workflows: full_guides/workflows/using_existing_workflows.md
-            - Adding computational resources:
-                - Overview: test.md
-                - Workers: test.md
+            # - Adding computational resources:
+            #     - Overview: test.md
+            #     - Workers: test.md
             - Creating new workflows: full_guides/workflows/creating_new_workflows.md
             - Creating S3 Workflows: full_guides/workflows/s3_workflows.md
             - Third-party software: 
                 - What is a calculator?: full_guides/workflows/third_party_software/what_is_a_calculator.md
                 - VASP:
-                    - Overview: full_guides/workflows/third_party_software/overview.md
-                    - Installation: full_guides/workflows/third_party_software/installation.d
-                - Bader (henklman): full_guides/workflows/third_party_software/bader_henkelman.md
+                    - Overview: full_guides/workflows/third_party_software/vasp/overview.md
+                    - Installation: full_guides/workflows/third_party_software/vasp/installation.md
+                    # - Workflows: full_guides/workflows/third_party_software/vasp/workflows.md
+                    # - Inputs: full_guides/workflows/third_party_software/vasp/inputs.md
+                    # - Outputs: full_guides/workflows/third_party_software/vasp/outputs.md
+                    # - Error Handlers: full_guides/workflows/third_party_software/vasp/error_handlers.md
+                - Bader (henklman):
+                    - Overview: full_guides/workflows/third_party_software/bader_henkelman/overview.md
+                    - Installation: full_guides/workflows/third_party_software/bader_henkelman/installation.md
+                    # - Workflows: full_guides/workflows/third_party_software/bader_henkelman/workflows.md
+                    # - Inputs: full_guides/workflows/third_party_software/bader_henkelman/inputs.md
+                    # - Outputs: full_guides/workflows/third_party_software/bader_henkelman/outputs.md
                 - DeepMD: full_guides/workflows/third_party_software/deepmd.md
 
         - Database:
             - Overview: full_guides/database/overview.md
-            - Basic use: full_guides/database/overview.md
+            - Basic use: full_guides/database/basic_use.md
+            - Workflow data: full_guides/database/workflow_data.md
+            - Third-party data: full_guides/database/third_party_data.md
+            - Contributing data: full_guides/database/contributing_data.md
+            - Creating custom tables: full_guides/database/custom_tables.md
 
         - Toolkit:
-            - Overview: full_guides/toolkit/overview.md
+            - Overview: full_guides/toolkit.md
 
         - Extras:
-            - File converters: full_guides/file_converters.md
-            - Command line: full_guides/command_line.md
-            - Visualization: full_guides/visualization.md
+            - File converters: 
+                - Overview: full_guides/extras/file_converters/overview.md
+                - Structures: full_guides/extras/file_converters/structures.md
+            - Command line: full_guides/extras/command_line.md
+            - Visualization:
+                - Overview: full_guides/extras/visualization/overview.md
+                - Structures: full_guides/extras/visualization/blender.md
             - Utilities: full_guides/extras/utilities.md
-            - Configuration: full_guides/extras/configuration.md
+            # - Configuration: full_guides/extras/configuration.md
             # - Testing: full_guides/extras/testing.md  # Move to contributing...?
 
     - Contributing:

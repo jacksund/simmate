@@ -1,6 +1,5 @@
 
-Overview
-========
+# Third-party database access
 
 This module downloads data from third-parties and stores it to your local database.
 
@@ -8,24 +7,21 @@ This data is **NOT** from the Simmate team. These providers are independent grou
 
 Currently, we support the following providers:
 
-- [COD (Crystallography Open Database)](http://www.crystallography.net/cod/)
-- [JARVIS (Joint Automated Repository for Various Integrated Simulations)](https://jarvis.nist.gov/)
-- [Materials Project](https://materialsproject.org/)
-- [OQMD (Open Quantum Materials Database)](http://oqmd.org/)
+- [x] [COD (Crystallography Open Database)](http://www.crystallography.net/cod/)
+- [x] [JARVIS (Joint Automated Repository for Various Integrated Simulations)](https://jarvis.nist.gov/)
+- [x] [Materials Project](https://materialsproject.org/)
+- [x] [OQMD (Open Quantum Materials Database)](http://oqmd.org/)
 
 These providers are configured, but our team is waiting for permission to redistribute their data:
 
-- [AFLOW (Automatic FLOW for Materials Discovery)](http://www.aflowlib.org/)
+- [ ] [AFLOW (Automatic FLOW for Materials Discovery)](http://www.aflowlib.org/)
 
 
-Contributing your data
-======================
-
-If your team would like to make data available via Simmate, please see the `simmate.database.third_parties.for_providers` module. Even if its is a single table, don't hesistate to make a contribution! We outline the benefits of contributing and how to package your data within the `for_providers` module.
+!!! tip
+    If your team would like to make your own data available via Simmate, please see the Contributing data module. Even if its is a single table, don't hesistate to make a contribution! We outline the benefits of contributing and how to package your data within the `for_providers` module.
 
 
-Usage
-======
+## Downloading data
 
 Make sure you have completed [our introductory tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md) for downloading data from these providers. Below we show example usage with `MatprojStructure`, but the same process can be done with all other tables in this module. 
 
@@ -47,6 +43,8 @@ MatprojStructure.load_remote_archive()
 MatprojStructure.source_doi
 ```
 
+## Populating energy fields
+
 Some database providers give a calculated energy, which can be used to populate stability information:
 
 ``` python
@@ -60,11 +58,8 @@ MatprojStructure.update_all_stabilities()
 MatprojStructure.update_chemical_system_stabilities("Y-C-F")
 ```
 
-See `simmate.database` docs for a guide on filtering results and converting to toolkit/dataframes.
 
-
-Alternatives
-============
+## Alternatives
 
 This module can be viewed as an alternative to and/or an extension of the following codes:
 

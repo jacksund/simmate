@@ -1,7 +1,8 @@
 
 # Maintainers notes
 
-(currently this section is only relevant to @jacksund)
+!!! note
+    currently this section is only relevant to @jacksund
 
 To make a new release, you must follow these steps:
 

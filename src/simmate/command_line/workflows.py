@@ -341,6 +341,7 @@ def run(filename: Path):
 
     workflow.run(**parameters).result()
 
+
 @workflows_app.command()
 def run_cloud(filename: Path):
     """Submits a workflow to cloud for remote running"""

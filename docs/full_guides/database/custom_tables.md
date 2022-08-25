@@ -1,12 +1,10 @@
 
-The Base Data Types
-===================
+# Building custom database tables
 
 This module defines the fundamental building blocks for storing data. When building new and custom tables, you should inherit from one or more of these classes.
 
 
-Hierarchy of Types
-==================
+## The Base Data Types
 
 There are different "levels" of data types define here -- as some types inherit functionality from others.
 
@@ -34,8 +32,7 @@ These mixins are frequently combined in for types of calculations. We define som
 - `calculation_customized` : calculation that involves running a workflow with user-customized settings
 
 
-Usage Guide
-===========
+## Building an example table
 
 Creating a custom table involves the following steps:
 
@@ -87,7 +84,11 @@ class MyCustomTable(Structure, Thermodynamics):
 
 ```
 
-**NOTE:** Unless you are contributing to Simmate's source code, defining a new table does *NOT* automatically register it to your database. To do this, you must follow along with [our tutorial on adding custom workflows](https://github.com/jacksund/simmate/blob/main/tutorials/09_Add_custom_workflows.md).
+!!! warning
+    Unless you are contributing to Simmate's source code, defining a new table does *NOT* automatically register it to your database. To do this, you must follow along with [our tutorial on adding custom workflows](https://github.com/jacksund/simmate/blob/main/tutorials/09_Add_custom_workflows.md).
+
+
+## Loading data
 
 Once your table is created and registered, you can use the `from_toolkit` method to create and save your data to the database. Note, the information you pass to this method is entirely dependent on what you inherit from and define above.
 
@@ -112,6 +113,8 @@ new_row = MyCustomTable.from_toolkit(
 
 new_row.save()
 ```
+
+## Updating a column
 
 To modify a row, you can load it from your database, update the column, and then resave. Note, there are may more ways to do this, so consult the Django documentation for advanced usage.
 
