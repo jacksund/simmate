@@ -10,7 +10,7 @@ Whenever building new tables, be sure to start from the classes located in our
 columns and features -- rather than creating everything from scratch. 
 
 For more information and advanced guides, be sure to read through our
-[base_data_types documentation](https://jacksund.github.io/simmate/simmate/database/base_data_types.html)
+[base_data_types documentation](https://jacksund.github.io/simmate/full_guides/database/custom_tables/)
 """
 
 from simmate.database.base_data_types import (

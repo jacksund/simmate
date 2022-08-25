@@ -10,7 +10,7 @@ Our team uses SQLite (for local testing) and PostgreSQL (for production), so at 
 
 PostgreSQL is free and open-source, so you can avoid costs and set it up manually. There are many tutorials and guides available on how to do this ([1](https://www.postgresql.org/docs/current/tutorial.html), [2](https://www.prisma.io/dataguide/postgresql/setting-up-a-local-postgresql-database), etc.). However, this is can take a lot of time AND your final database connection may be slower if your team works accross multiple locations. We instead recommend using a database service such as [DigitalOcean](https://www.digitalocean.com/), [Linode](https://www.linode.com/), [GoogleCloud](https://cloud.google.com/), [AWS](https://aws.amazon.com), [Azure](https://azure.microsoft.com/), or another provider. 
 
-Our team uses DigitialOcean, where the starter database server (~$15/month) is plenty for Simmate usage. You'll only need >10GB if you are running >100,000 structure relaxations or frequently using unitcells with >1000 atoms. We have a separate tutorial on setting up a database with DigitalOcean located [here](https://github.com/jacksund/simmate/tree/main/src/simmate/configuration/digitalocean).
+Our team uses DigitialOcean, where the starter database server (~$15/month) is plenty for Simmate usage. You'll only need >10GB if you are running >100,000 structure relaxations or frequently using unitcells with >1000 atoms. We have a separate tutorial on setting up a database with DigitalOcean located [here](https://github.com/jacksund/simmate/tree/main/.do).
 
 If you decide to use Postgres, you'll also need to install the extra package `psycopg2`, which let's Django talk with Postgres. To install this, run the command:
 ``` bash

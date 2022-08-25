@@ -70,7 +70,7 @@ The `Student` datatable now looks like this:
 | scott  | 14  | 6.2  | 2021 | 3.2 |
 | ... | ... | ... | ... | ...|
 
-Simmate uses this idea with common materials science data -- such as structures, thermodynamic data, site forces, and more. You'll find our fundamental building blocks for tables in the `simmate.database.base_data_types` module ([here](https://github.com/jacksund/simmate/tree/main/src/simmate/database/base_data_types))
+Simmate uses this idea with common materials science data -- such as structures, thermodynamic data, site forces, and more. You'll find our fundamental building blocks for tables in the `simmate.database.base_data_types` module ([here](https://jacksund.github.io/simmate/full_guides/database/custom_tables/))
 
 All of our datatables start from these classes and build up. Up next, we'll look at an actual database table and learn how to use it to view data.
 

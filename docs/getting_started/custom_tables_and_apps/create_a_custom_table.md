@@ -3,7 +3,7 @@
 
 Inside your project, there are example database tables that show how to build simple ones. It may seems super minimal, but there's really nothing else to do! 
 
-Recall from [the section on inheritance](https://github.com/jacksund/simmate/blob/main/tutorials/05_Search_the_database.md#the-full-tutorial) from tutorial 04. This is why building out new tables is so easy!
+Recall from [the section on inheritance](https://jacksund.github.io/simmate/getting_started/access_the_database/intro_to_python_inheritance/) from tutorial 04. This is why building out new tables is so easy!
 
 Some thing as simple as...
 
@@ -55,5 +55,5 @@ new_entry.save()
 ```
 
 !!! tip
-    There are many more `base_data_types` that you can use, and all types build out features for you automatically. Be sure to read through our guides in the [`simmate.database`](https://jacksund.github.io/simmate/simmate/database.html) module for more info. Advanced database tables may require reading more on the [base data types](https://jacksund.github.io/simmate/simmate/database/base_data_types.html) too.
+    There are many more `base_data_types` that you can use, and all types build out features for you automatically. Be sure to read through our guides in the [`simmate.database`](https://jacksund.github.io/simmate/full_guides/database/overview/) module for more info. Advanced database tables may require reading more on the [base data types](https://jacksund.github.io/simmate/full_guides/database/custom_tables/) too.
 
