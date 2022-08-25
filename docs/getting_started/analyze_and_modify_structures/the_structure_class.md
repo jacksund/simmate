@@ -1,9 +1,18 @@
 
 # The `Structure` class
 
-In real life, we might say that McDonald's, Burger King, and Wendy's are examples of restauraunts.  In python, we could say that `mcdonalds`, `burgerking`, and `wendys` are **objects** of the **class** `Restaurants`.  By organizing **objects** into **class**es, python simplifies the way we program. For example, we could design the `Restaurants` class to have a property called `menu`.  Then, we could view the menu simply by typing `wendys.menu` because `wendys` belongs to the **class** `Restaraunts` and all `Restaraunts` have a `menu`.
+## What is a class?
 
-In materials science, the class we use most is crystal structure. In Simmate, we call this class `Structure`. A crystal structure is _**always**_ made up of a lattice and a list of atomic sites. Fortunately, this is exactly what we have in our `POSCAR` file from tutorial 2, so let's use Simmate to create an instance of the `Structure` class using our POSCAR file.
+"Classes" and "objects" are central concepts in python that are important to understand.
+
+In real life, we might say that McDonald's, Burger King, and Wendy's are examples of restauraunts.  In python, we could say that `mcdonalds`, `burgerking`, and `wendys` are **objects** of the **class** `Restaurants`.  By organizing **objects** into **class**es, python simplifies the way we program. For example, we could design the `Restaurants` class to have a property called `menu`.  Then, we could view the menu simply by typing `wendys.menu`. We (essentially) set a rule that -- no matter what restaurant we have -- the menu info can be accessed with `example_restaurant.menu`.
+
+This might seem silly, but it becomes very powerful once we want to start building out functionality and anaylses.
+
+In materials science, the class we use most is crystal structure. In Simmate, we call this class `Structure`. A crystal structure is _**always**_ made up of a lattice and a list of atomic sites. Fortunately, this is exactly what we have in our `POSCAR` file from tutorial 2, so let's use Simmate to create an object of the `Structure`.
+
+
+## Loading the Structure class
 
 Start by entering this line into the python console and hit enter:
 
@@ -13,9 +22,10 @@ from simmate.toolkit import Structure
 
 This line says we want to use the `Structure` class from Simmate's code. The `Structure` class is now loaded into memory and is waiting for you to do something with it.
 
-Next, make sure you have the correct working directory (just like we did with the command-line). Spyder lists this in the top right -- and you can hit the folder icon to change it. We want to be in the same folder as our POSCAR file.
 
-Next, run this line in your python terminal:
+## Loading our structure from a file
+
+Next, make sure you have the correct working directory (just like we did with the command-line). Spyder lists this in the top right -- and you can hit the folder icon to change it. We want to be in the same folder as our POSCAR file. Run this line in your python terminal:
 
 ```python
 nacl_structure = Structure.from_file("POSCAR")
@@ -42,7 +52,12 @@ PeriodicSite: Na (0.0000, 0.0000, 0.0000) [0.0000, 0.0000, 0.0000]
 PeriodicSite: Cl (2.3236, 1.6431, 4.0246) [0.5000, 0.5000, 0.5000]
 ```
 
-This is the same information from our POSCAR! Alternatively, we could have created this structure manually:
+This is the same information from our POSCAR! 
+
+
+## Manually create a structure in python
+
+Alternatively, we could have created this structure manually:
 
 ```python
 # note we can name the object whatever we want. We use 's' here.
@@ -60,23 +75,42 @@ s = Structure(
 )
 ```
 
+## Use the structure in a workflow
+
 Whatever your method for creating a structure, we now have our `Structure` object and we can use its properties (and methods) to simplify our calculations.
 
 For example, we can use it to run a workflow. We did this with the command-line in the last tutorial but can accomplish the same thing with python:
 
-``` shell
-# Using the command-line (from our previous tutorial)
-simmate workflows run static-energy/mit --structure POSCAR
-```
+=== "python"
+    ```python
+    # Using Python (in Spyder)
+    
+    from simmate.toolkit import Structure
+    from simmate.workflows.utilities import get_workflow
+    
+    workflow = get_workflow("static-energy.vasp.mit")
+    
+    nacl_structure = Structure.from_file("POSCAR")
+    
+    # ... modify your structure in some way ...
+    # (we will learn how in the next section)
+    
+    result = mit_workflow.run(structure=nacl_structure)
+    ```
 
-```python
-# Using Python (in Spyder)
+If we don't need to modify the structure, we could have just given the filename to our workflow:
 
-# This code does the exact same thing as the command above
+=== "python"
+    ```python
+    from simmate.workflows.utilities import get_workflow
+    
+    workflow = get_workflow("static-energy.vasp.mit")
+    result = mit_workflow.run(structure="POSCAR")
+    ```
 
-from simmate.toolkit import Structure
-from simmate.workflows.relaxation import mit_workflow
+=== "command line"
+    ``` yaml
+    workflow_name: static-energy.vasp.mit
+    structure: POSCAR
+    ```
 
-nacl_structure = Structure.from_file("POSCAR")
-result = mit_workflow.run(structure=nacl_structure)
-```

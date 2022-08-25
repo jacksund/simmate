@@ -13,7 +13,6 @@ from simmate.database.base_data_types import (
     Structure,
 )
 
-
 class MyCustomTable1(Structure):
     new_column = table_column.FloatField(null=True, blank=True)
 ```
@@ -55,5 +54,6 @@ new_entry = MyCustomTable1.from_toolkit(
 new_entry.save()
 ```
 
-There are many more `base_data_types` that you can use, and all types build out features for you automatically. Be sure to read through our guides in the [`simmate.database`](https://jacksund.github.io/simmate/simmate/database.html) module for more info. Advanced database tables may require reading more on the [base data types](https://jacksund.github.io/simmate/simmate/database/base_data_types.html) too.
+!!! tip
+    There are many more `base_data_types` that you can use, and all types build out features for you automatically. Be sure to read through our guides in the [`simmate.database`](https://jacksund.github.io/simmate/simmate/database.html) module for more info. Advanced database tables may require reading more on the [base data types](https://jacksund.github.io/simmate/simmate/database/base_data_types.html) too.
 

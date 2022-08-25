@@ -1,7 +1,9 @@
 
 # Getting help through Spyder
 
-Where we left off in Tutorial 3, we saw how to list all available properties and methods on an object. We did this by typing the object name plus a period (ex: `nacl_structure.`) and then hitting `tab`:
+## Auto-complete in python
+
+Where we left off in the last tutorial, we saw how to list all available properties and methods on an object. We did this by typing the object name plus a period (ex: `nacl_structure.`) and then hitting `tab`:
 
 ```python
 from simmate.toolkit import Structure
@@ -11,7 +13,11 @@ nacl_structure = Structure.from_file("POSCAR")
 nacl_structure.  # hit "tab" on your keyboard
 ```
 
-> :warning: for this next part, pymatgen's documentation isn't always complete or beginner-friendly. This is why you won't see much. We're working on this at Simmate, so we hope this improves in the future. For now, don't expect too much guidance from the `Structure` class.
+!!! warning
+    for this next part, pymatgen's documentation isn't always complete or beginner-friendly. This is why you won't see much. We're working on this at Simmate, so we hope this improves in the future. For now, don't expect too much guidance from the `Structure` class.
+
+
+## Searching for a method's guides
 
 Now let's take a step back and get a full guide on a these methods and properties. We'll start with the `Structure` class that we previously imported using `from simmate.toolkit import Structure` and try the line `Structure?`:
 
@@ -32,3 +38,6 @@ You can also get this help information by typing `nacl_structure.get_primitive_s
 ```python
 nacl_structure.get_primitive_structure  # hit "ctrl+I" BEFORE hitting enter on this line
 ```
+
+!!! tip
+    If the documentation is too short and not what you're looking for, chances are that we have more guides in the "Full Guides & Reference" section

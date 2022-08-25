@@ -1,12 +1,17 @@
 
 # Python Inheritance with Datatables
 
+## Review of concepts
+
 To review key concepts up until this point...
-- In tutorial 2, we setup our database and added calcution results to it.
-- In tutorials 3, we learned about python classes, and in particular, the importance of the `Structure` class.
-- In tutorial 4, we learned how to explore the documentation and use new classes.
+
+- we setup our database and added calcution results to it.
+- we learned about python classes, and in particular, the importance of the `Structure` class.
+- we learned how to explore the documentation and use new classes.
 
 Now, we want to bring these ideas together in order to expolore our database. 
+
+## An example table in python
 
 Let's start simple... All datatables are represented by a class, where the general format looks like this:
 
@@ -30,6 +35,9 @@ And the corresponding table (with random data added) would look like...
 | ... | ... | ...  |
 
 That's how all tables are made! We just make a class, say it is a `DatabaseTable` and then list off our desired columns.
+
+
+## Building tables with inheritance
 
 However, this could get really repetitive if we have a bunch of tables that contain similar information. For example, we may want to store structures in many different tables -- each one with columns like density, number of sites, number of elements, etc.. To save time, we use what is known as python "inheritance". Here's how it works:
 

@@ -1,6 +1,8 @@
 
 # Create new & advanced workflows
 
+## Create a flow from scratch
+
 Simmate defines a base `Workflow` class to help with common material science analyses. The simplest possible workflow can look something like...
 
 ``` python
@@ -16,6 +18,8 @@ class Example__Python__MyFavoriteSettings(Workflow):
         print("This workflow doesn't do much")
         return 42
 ```
+
+## Modify an existing workflow
 
 Building a workflow from scratch can be a lot of work. Most often, we don't want to create a new workflow. We just want to take an existing one and update a few settings. In python, we can do that with...
 
@@ -51,4 +55,7 @@ state = StaticEnergy__Vasp__MyCustomPreset.run(structure="NaCl.cif")
 result = state.result()
 ```
 
-There's much more that's possible. We'll look at a slightly more complex example in the next tutorial too. Be sure to keep going!
+
+!!! tip 
+    There's much more that's possible. We highly recommend going through the full guides when building your custom workflows.
+

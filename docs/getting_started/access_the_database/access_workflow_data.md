@@ -1,15 +1,20 @@
 
 # Accessing results from local calculations
 
-In Tutorial 2, we ran a calculation and then added results to our database table. Here, we will now go through the results. 
+## Loading a table
 
-We know our workflow's name was `energy-mit`, so let's start by grabbing that workflow again. The database table for results is always attached to the workflow as the `database_table` attribute. You can load it like this:
+In the "run a workflow" tutorial, we ran a calculation and then added results to our database table. Here, we will now go through the results. 
+
+The database table for results is always attached to the workflow as the `database_table` attribute. You can load it like this:
 
 ```python
 from simmate.workflows.utilities import get_workflow
+
 workflow = get_workflow("static-energy.vasp.mit")
 table = workflow.database_table
 ```
+
+## Seeing the available columns
 
 To see all of the data this table stores, we can use it's `show_columns()` method. Here, we'll see a bunch of columns printed for us...
 
@@ -65,6 +70,8 @@ table.show_columns()
 
 These are a lot of columns... and you may not need all of them. But Simmate still builds all of these for you right away because they don't take up very much storage space.
 
+## Convert to an excel-like table
+
 Next we'd want to see the table with all of its data. To access the table rows, we use the `objects` attribute, and then to get this into a table, we convert to a "dataframe". A dataframe is a filtered portion of a database table -- and because we didn't filter any of our results yet, our dataframe is just the whole table. 
 
 ```python
@@ -76,6 +83,8 @@ Open up this variable by double-clicking `data` in Spyder's variable explorer (t
 <p align="center" style="margin-bottom:40px;">
 <img src="https://www.spyder-ide.org/blog/spyder-variable-explorer/table-headings.png"  height=330 style="max-height: 330px;">
 </p>
+
+## Filtering results from the table
 
 Next, we can use our table columns to start filtering through our results. Your search results will be given back as a list of rows that met the filtering criteria. In the example above, we converted that list of results to into a dataframe for easy viewing. You can also convert each row into our `ToolkitStructure` from tutorial 3! There are a bunch of things to try, so play around with each:
 

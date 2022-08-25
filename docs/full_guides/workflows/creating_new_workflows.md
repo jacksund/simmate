@@ -55,7 +55,7 @@ state = MyFavoriteWorkflow.run()
 result = state.result()
 ```
 
-!!! info
+!!! note
     Behind the scenes, the `run` method is converting our `run_config` to a 
     workflow and doing extra setup tasks for us.
 

@@ -14,7 +14,7 @@ You should see something like this:
 
 <!-- This is an image of an empty terminal with anaconda installed -->
 <p align="center" style="margin-bottom:40px;">
-<img src="https://aws1.discourse-cdn.com/codecademy/original/5X/0/4/8/7/0487a63480b3b9cd0fc056877d8abaa2b1e90e3d.png"  height=330 style="max-height: 330px;">
+<img src="https://www.shaileshjha.com/wp-content/uploads/2020/03/anaconda_powershell_prompt-800x450.jpg"  height=330 style="max-height: 330px;">
 </p>
 
 You'll see `(base)` at the start of the line. This is our anaconda enviornment that we are currently using. After that, you'll see the "current working directory", which is the folder we currently have open and are sitting in. On Windows this will be your user folder (e.g. `C:\Users\jacksund`) and for Mac/Linux you'll see `~` which is shorthand for your user folder (e.g. `home/jacksund`).

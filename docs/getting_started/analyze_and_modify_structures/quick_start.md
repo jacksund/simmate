@@ -2,7 +2,8 @@
 
 In this tutorial, you will learn about the most important class in Simmate: the `Structure` class. Beginners will also be introduced to classes and the Spyder IDE.
 
-> :warning: Simmate still uses [pymatgen](https://pymatgen.org/) under the hood, so this tutorial is really one for using pymatgen. [Their guides](https://pymatgen.org/usage.html) also are useful, but they are written for those already familiar with python.
+!!! warning
+    Simmate uses [pymatgen](https://pymatgen.org/) under the hood, so this tutorial is really one for using pymatgen. [Their guides](https://pymatgen.org/usage.html) also are useful, but they are written for those already familiar with python.
 
 # The quick tutorial
 

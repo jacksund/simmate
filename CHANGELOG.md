@@ -37,7 +37,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - refactor & clean up transformation module for readability
 - remove `SimmateFuture` class and merge functionality into `WorkItem`
 - switch from pdoc to mkdocs for documentation and remove `get_doc_from_readme`. Code and doc organization are now decoupled.
-- depreciate the `run` command and replace it with the `run-yaml` command. The `run` command was rarely used and provided little in functionality
+- rename the `run` command to `run-quick` and replace it with the `run-yaml` command. The `run` command was rarely used and provided little in functionality, whereas users are interacting with the `run-yaml` command much more often
 
 **Fixes**
 - fix `module not found` error by adding ASE to dependencies

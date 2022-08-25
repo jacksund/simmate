@@ -36,6 +36,7 @@ theme:
 markdown_extensions:
   - admonition
   - attr_list
+  - def_list
   - pymdownx.details
   - pymdownx.superfences:
         custom_fences:
@@ -47,6 +48,8 @@ markdown_extensions:
       emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - attr_list
   - md_in_html
   - toc:
@@ -106,13 +109,12 @@ nav:
             - Hints in Spyder: getting_started/explore_the_code/getting_help_in_spyder.md
             - Intro to Python modules: getting_started/explore_the_code/intro_to_python_modules.md
             - Exploring Simmate modules: getting_started/explore_the_code/exploring_simmate_modules.md
-            - Using the API docs: getting_started/explore_the_code/using_the_web_docs.md
         
         - Access the database:
             - Quickstart: getting_started/access_the_database/quick_start.md
             - Intro to Python inheritance: getting_started/access_the_database/intro_to_python_inheritance.md
             - Access workflow data: getting_started/access_the_database/access_workflow_data.md
-            - Access third-party dat: getting_started/access_the_database/access_thirdparty_data.md
+            - Access third-party data: getting_started/access_the_database/access_thirdparty_data.md
         
         - Build custom workflows:
             - Quickstart: getting_started/custom_workflows/quick_start.md
@@ -138,6 +140,8 @@ nav:
             - Should you set up workers?: getting_started/add_computational_resources/should_you_setup.md
             - Checklist for each worker: getting_started/add_computational_resources/checklist_for_workers.md
             - Adding workers and clusters: getting_started/add_computational_resources/adding_clusters_and_workers.md
+        
+        - Wrap up: getting_started/wrap_up.md
 
     - Parameters: parameters.md
     

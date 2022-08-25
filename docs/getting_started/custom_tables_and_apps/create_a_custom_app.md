@@ -2,13 +2,11 @@
 # Creating a new project
 
 1. Let's create a project named `my_new_project`. To do this, navigate to a folder where you'd like to store your code and run...
-
 ``` bash
 simmate start-project my_new_project
 ```
 
 2. You will see a new folder named "my_new_project" which you can switch into.
-
 ``` bash
 cd my_new_project
 ```

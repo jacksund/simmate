@@ -11,7 +11,8 @@ simmate database reset # (1)
 
 1. When prompted, you can confirm that you want to reset/delete your "old" database. Also agree to download and use a prebuilt database.
 
-> :bulb: Unless you want to remove all of your data and start from scratch, you'll never have to run that command again.
+!!! tip
+    Unless you want to remove all of your data and start from scratch, you'll never have to run that command again.
 
 And then as our second step, we simply tell Simmate to start the server:
 

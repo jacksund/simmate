@@ -1,7 +1,11 @@
 
 # Advanced classes
 
+## Beyond the Structure class
+
 To give you a sneak-peak of some advanced classes and functionality, we outline some examples in this section. Note that Simmate is still early in development, so there are many more features available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) packages, which were installed alongside Simmate.
+
+## Example 1: Structure Creation
 
 Simmate's toolkit is (at the moment) most useful for structure creation. This includes creating structures from random symmetry, prototype structures, and more.
 We only need to give these "creator" classes a composition object:
@@ -16,6 +20,8 @@ creator = RandomSymStructure(composition)
 structure1 = creator.create_structure(spacegroup=166)
 structure2 = creator.create_structure(spacegroup=225)
 ```
+
+## Example 2: Fingerprint analysis
 
 Matminer is particularly useful for analyzing "features" of a structure and making machine-learning inputs. One common analysis gives the "fingerprint" of the structure, which helps characterize bonding in the crystal. The most basic fingerprint is the radial distribution function (rdf) -- it shows the distance of all atoms from one another. We take any structure object and can feed it to a matminer `Featurizer` object:
 
@@ -45,6 +51,8 @@ plt.plot(rdf_x, rdf1)
 plt.show()
 ```
 
+## Example 3: Structure matching
+
 Pymatgen is currently the largest package and has the most toolkit-like features. As an example, it's common to compare two structures and see if are symmetrically equivalent (within a given tolerance). You give it two structures and it will return True or False on whether they are matching:
 
 ```python
@@ -57,6 +65,6 @@ matcher = StructureMatcher()
 is_matching = matcher.fit(structure1, structure2)  
 ```
 
-If you're trying to follow a paper and analyze a structure, odds are that someone made a class/function for that analysis! Be sure to search around the documentation for it (next tutorial teaches you how to do this) or just [post a question](https://github.com/jacksund/simmate/discussions/categories/q-a) and we'll point you in the right direction.
+!!! tip
+    If you're trying to follow a paper and analyze a structure, odds are that someone made a class/function for that analysis! Be sure to search around the documentation for it (next tutorial teaches you how to do this) or just [post a question](https://github.com/jacksund/simmate/discussions/categories/q-a) and we'll point you in the right direction.
 
-Take some time to master Python and Spyder with the resources below, and when you're ready, advance to [the next tutorial](https://github.com/jacksund/simmate/blob/main/tutorials/04_Explore_the_code.md).

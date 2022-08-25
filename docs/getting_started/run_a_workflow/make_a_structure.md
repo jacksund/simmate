@@ -65,6 +65,8 @@ If you're using the command-line to create/edit this file, you can use the copy 
 cp POSCAR.txt POSCAR
 ```
 
-> :bulb: **fun fact**: a Microsoft Word document is just a folder of text files. The .docx file ending tells Word that we have the folder in their desired format. Try renaming a word file from `my_file.docx` to `my_file.zip` and open it up to explore. Nearly all programs do something like this!
-
 We now have our structure ready to go!
+
+!!! Fun-fact
+    a Microsoft Word document is just a folder of text files. The .docx file ending tells Word that we have the folder in their desired format. Try renaming a word file from `my_file.docx` to `my_file.zip` and open it up to explore. Nearly all programs do something like this!
+

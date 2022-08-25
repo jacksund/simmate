@@ -5,7 +5,8 @@ In this tutorial, you will learn how to run workflows on distributed computation
 
 ## The quick tutorial
 
-> :bulb: This tutorial will use the default scheduler/executor, "SimmateExecutor". However, you can also use Prefect and/or Dask to build out your cluster. This is covered elsewhere, but it is not recommended at the moment.
+!!! note
+    This tutorial will use the default scheduler/executor, "SimmateExecutor". However, you can also use Prefect and/or Dask to build out your cluster. This is covered elsewhere, but it is not recommended at the moment.
 
 1. Be aware that you can share a cloud database *without* sharing computational resources. This flexibility is very important for many collaborations. 
 

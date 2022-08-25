@@ -2,6 +2,7 @@
 # Taking things to next level 
 
 There are still a lot of things we would want to do with our new workflow. For example, what if we want to...
+
 - modify a complex workflow (such as `diffusion.vasp.neb-all-paths-mit`)
 - create a custom workflow using a new program like USPEX or ABINIT
 - use a custom database table to save our workflow results

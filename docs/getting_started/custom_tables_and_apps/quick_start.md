@@ -1,7 +1,8 @@
 
 # Build custom database tables and apps
 
-> :warning: There is no "quick tutorial" for this topic. Even advanced users should read everything!
+!!! warning
+    There is no "quick tutorial" for this topic. Even advanced users should read everything!
 
 In this tutorial, you will learn how to build customized database table and also learn how to build out your customized features into "projects" (or "apps").
 
@@ -25,7 +26,7 @@ All of these can be done using Simmate "projects". These projects are really jus
 
 ## Is this just creating a new package?
 
-For expert python users, you will notice that projects are indeed building a new python package. In fact, our "start-project" command is really just a cookie-cutter template! This can have huge implications for sharing research and code. With a fully-functional and published Simmate project (or "app"), you can upload your project for other labs to use via Github and PyPi! Then the entire Simmate community can install and use your custom workflows with Simmate. For them, it'd be as easy as doing
+For expert python users, you will notice that projects are indeed building a new python package. In fact, our `start-project` command is really just a cookie-cutter template! This can have huge implications for sharing research and code. With a fully-functional and published Simmate project (or "app"), you can upload your project for other labs to use via Github and PyPi! Then the entire Simmate community can install and use your custom workflows with Simmate. For them, it'd be as easy as doing
 
 1.  `pip install my_new_project`
 2.  adding `example_app.apps.ExampleAppConfig` to their `~/simmate/applications.yaml`
@@ -33,4 +34,5 @@ For expert python users, you will notice that projects are indeed building a new
 
 Alternatively, you can request that your app be merged into our Simmate repository, so that it is installed by default for all users. Whichever route you choose, your hard work should be much more accessible to the community and new users!
 
-> :bulb: In the future, we hope to have a page that lists off apps available for download, but because Simmate is brand new, there currently aren't any existing apps outside of Simmate itself. Reach out to our team if you're interested in kickstarting a downloads page!
+!!! note 
+    In the future, we hope to have a page that lists off apps available for download, but because Simmate is brand new, there currently aren't any existing apps outside of Simmate itself. Reach out to our team if you're interested in kickstarting a downloads page!

@@ -9,7 +9,8 @@ simmate database reset
 
 When you call this command, Simmate will print out a bunch of information -- this can be ignored for now. It's just making all of your tables.
 
-> :warning: Every time you run the command `simmate database reset`, your database is deleted and a new one is written with empty tables.  If you want to keep your previous runs, you should save a copy of your database, which can be done by just copy and pasting the database file
+!!! warning
+    Every time you run the command `simmate database reset`, your database is deleted and a new one is written with empty tables.  If you want to keep your previous runs, you should save a copy of your database, which can be done by just copy and pasting the database file
 
 So where is the database stored? After running `simmate database reset`, you'll find it in a file named `~/simmate/my_env-database.sqlite3`. Note that your conda envirnment (`my_env` here) is used in the database file name. Simmate does this so you can easily switch between databases just by switching your Anaconda environment. This is useful for testing and developing new workflows, which we will cover in a later tutorial. But let's focus on just finding this file for now. To find this file:
 

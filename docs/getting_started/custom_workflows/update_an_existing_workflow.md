@@ -1,7 +1,11 @@
 
 # Updating settings for a workflow
 
-> :warning: The methods described in this section are **generally considered bad practice**, but they are still useful for getting things started. After this section, we will cover to best way to update settings and create new workflows.
+!!! danger
+    The methods described in this section are **generally considered bad practice**, but they are still useful for getting things started. After this section, we will cover to best way to update settings and create new workflows.
+    
+!!! warning
+    This approaches are only possible with single-calcultion workflows (i.e. "nested" workflows that call several workflows within them are not supported)
 
 ## Why isn't there a `custom_settings` option?
 
@@ -65,5 +69,6 @@ command: mpirun -n 5 vasp_std > vasp.out
 # base workflow's results.
 simmate workflows run-yaml my_example.yaml
 ```
+
 
 Both of these approaches are only suitable for customizing settings for a few calculations -- and also you lose some key Simmate features. If you are submitting many calculations (>20) and this process doesn't suit your needs, keep reading!

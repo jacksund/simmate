@@ -1,7 +1,8 @@
 
 # Configuring Potentials (for VASP users)
 
-> :warning: once Simmate switches from VASP to a free DFT alternative, this section of the tutorial will be optional and removed.
+!!! warning
+    once Simmate switches from VASP to a free DFT alternative, this section of the tutorial will be optional and removed.
 
 VASP is a very popular software for running DFT calculations, but our team can't install it for you because VASP is commercially licensed (i.e. you need to [purchase it from their team](https://www.vasp.at/), which we are not affiliated with). Simmate is working to switch to another DFT software -- specifically one that is free/open-source, that can be preinstalled for you, and that you can use on Windows+Mac+Linux. Until Simmate reaches this milestone, you'll have to use VASP. We apologize for the inconvenience.
 
@@ -40,4 +41,5 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/jacksund/simmate/
 
 If you see this error, double-check your folder setup.
 
-> :warning: our team only has access to VASP v5.4.4, so if your folder structure differs for newer versions of VASP, please let our know by [opening an issue](https://github.com/jacksund/simmate/issues).
+!!! danger 
+    our team only has access to VASP v5.4.4, so if your folder structure differs for newer versions of VASP, please let our know by [opening an issue](https://github.com/jacksund/simmate/issues).
