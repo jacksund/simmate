@@ -19,7 +19,7 @@ from django.db import transaction
 # have any good documentation on doing this.
 from pymatgen.analysis.prototypes import AFLOW_PROTOTYPE_LIBRARY
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from tqdm import tqdm
+from rich.progress import track
 
 from simmate.database.third_parties import AflowPrototype
 
@@ -27,7 +27,7 @@ from simmate.database.third_parties import AflowPrototype
 @transaction.atomic
 def load_all_prototypes():
 
-    for prototype_data in tqdm(AFLOW_PROTOTYPE_LIBRARY):
+    for prototype_data in track(AFLOW_PROTOTYPE_LIBRARY):
 
         # first let's grab the structure
         structure = prototype_data["snl"].structure

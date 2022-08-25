@@ -3,7 +3,7 @@
 import logging
 
 from numpy.random import choice, randint
-from tqdm import tqdm
+from rich.progress import track
 
 from simmate.toolkit import Composition
 from simmate.toolkit.creators.vector import UniformlyDistributedVectors
@@ -72,8 +72,7 @@ class RandomWySites:
         self.lazily_generate_combinations = lazily_generate_combinations
         if not lazily_generate_combinations:
             logging.info("Generating Wyckoff combinations for every spacegroup")
-            # use tqdm to track progress
-            for spacegroup in tqdm(self.spacegroup_options):
+            for spacegroup in track(self.spacegroup_options):
                 self._setup_spacegroup_wyckoff_generator(
                     spacegroup,
                     show_logging=False,

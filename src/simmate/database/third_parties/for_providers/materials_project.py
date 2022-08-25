@@ -14,7 +14,7 @@ installed. For now, we only pull the mp-id, structure, and final energy.
 
 from django.db import transaction
 from pymatgen.ext.matproj import MPRester
-from tqdm import tqdm
+from rich.progress import track
 
 from simmate.database.third_parties import MatprojStructure
 
@@ -87,12 +87,7 @@ def load_all_structures(
 
     # Let's iterate through each structure and save it to the database
     # This also takes a while, so we use a progress bar
-    # BUG: We init and update tqdm separately beacuse it conflicts with MPRester's bar
-    progress_bar = tqdm(total=len(data), position=0)
-    for entry in data:
-
-        # update the progress bar
-        progress_bar.update(1)
+    for entry in track(data):
 
         # convert the data to a Simmate database object
         structure_db = MatprojStructure.from_toolkit(

@@ -208,10 +208,9 @@ Either way, here is a template of how that file will look like:
 ``` python
 
 from django.db import transaction
+from rich.progress import track
 
-from tqdm import tqdm
 from simmate.toolkit import Structure
-
 from simmate.database.third_parties import ExampleProviderData
 
 # If you want to use a custom package to load your data, be sure to let our team
@@ -236,8 +235,8 @@ def load_all_structures():
     data = get_my_data()
 
     # Now iterate through all the data -- which is a list of dictionaries.
-    # We use tqdm() to monitor progress.
-    for entry in tqdm(data):
+    # We use rich.progress.track to monitor progress.
+    for entry in track(data):
 
         # The structure is in the atoms field as a dictionary. We pull this data
         # out and convert it to a toolkit Structure object. Note, this class

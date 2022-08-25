@@ -29,6 +29,7 @@ to account for these problematic cif files though.
 """
 
 from pymatgen.io.cif import CifParser
+from rich.progress import track
 
 from simmate.configuration.dask import batch_submit
 from simmate.database.third_parties import CodStructure
@@ -86,9 +87,8 @@ def load_all_structures(
     if only_add_new_cifs:
         print("Removing existing cifs from to-do list...")
         new_cifs = []
-        from tqdm import tqdm
 
-        for cif_filepath in tqdm(all_cifs):
+        for cif_filepath in tracj(all_cifs):
             cif_id = "cod-" + cif_filepath.stem
             if not CodStructure.objects.filter(id=cif_id).exists():
                 new_cifs.append(cif_filepath)

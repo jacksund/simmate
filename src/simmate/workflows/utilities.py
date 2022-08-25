@@ -223,7 +223,6 @@ def load_results_from_directories(base_directory: Path | str = "."):
     for foldername in foldernames:
 
         # Print message for monitoring progress.
-        # TODO: consider switching to tqdm
         logging.info(f"Loading data from {foldername}")
 
         # There may be many folders that contain failed or incomplete data.

@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import logging
-
-# BUG: This prints a tqdm error so we silence it here.
 import warnings
 
-from tqdm import tqdm
+from rich.progress import track
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.utilities import get_chemical_subsystems
 
+# BUG: This prints a tqdm error so we silence it here.
 with warnings.catch_warnings(record=True):
     from pymatgen.analysis.phase_diagram import PDEntry, PhaseDiagram
 
@@ -176,7 +175,7 @@ class Thermodynamics(DatabaseTable):
         # Now  go through each and run the analysis.
         # OPTIMIZE: Some systems will be analyzed multiple times. For example,
         # C would be repeatedly updated through C, C-O, Y-C-F, etc.
-        for chemical_system in tqdm(chemical_systems):
+        for chemical_system in track(chemical_systems):
             try:
                 cls.update_chemical_system_stabilities(chemical_system)
             except ValueError as exception:

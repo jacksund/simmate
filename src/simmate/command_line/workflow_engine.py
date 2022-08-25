@@ -10,7 +10,7 @@ import typer
 workflow_engine_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@workflow_engine_app.callback()
+@workflow_engine_app.callback(no_args_is_help=True)
 def workflow_engine():
     """
     A group of commands for starting up computational resources (Workers,

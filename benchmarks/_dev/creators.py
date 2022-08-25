@@ -30,12 +30,12 @@ import os
 from timeit import default_timer as time
 
 # for progress monitoring and time recording
-from tqdm import tqdm
+from rich.progress import track
 
 
 def time_test_struct_creation(creator, n):
     times = []
-    for n in tqdm(range(n)):
+    for n in track(range(n)):
         structure = False
         while not structure:
             start = time()
@@ -386,7 +386,7 @@ plot(fig, config={"scrollZoom": True})
 #     os.chdir(name)
 #     # pick the composition
 #     distances_creator = []
-#     for comp_str, comp_obj in tqdm(zip(compositions_strs, compositions_objs)):
+#     for comp_str, comp_obj in track(zip(compositions_strs, compositions_objs)):
 #         if comp_str in ['Fe1'] and name == 'ASE': # Fails with...
 #             distances_creator.append([None]*limit) #!!!
 #             continue

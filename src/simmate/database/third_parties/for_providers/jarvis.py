@@ -17,7 +17,7 @@ Alternatively, we could manually download
 """
 
 from django.db import transaction
-from tqdm import tqdm
+from rich.progress import track
 
 from simmate.database.third_parties import JarvisStructure
 from simmate.toolkit import Structure
@@ -48,7 +48,7 @@ def load_all_structures():
     # Now iterate through all the data -- which is a list of dictionaries.
     # We convert the data into a pymatgen object and sanitize it before saving
     # to the Simmate database
-    for entry in tqdm(data):
+    for entry in track(data):
 
         # The structure is in the atoms field as a dictionary. We pull this data
         # out and convert it to a pymatgen Structure object

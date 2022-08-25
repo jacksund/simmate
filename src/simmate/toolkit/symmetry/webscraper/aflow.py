@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from tqdm import tqdm
+from rich.progress import track
 
 try:
     from selenium import webdriver
@@ -30,7 +30,7 @@ headers.append("POSCAR_url")
 
 # grab all the data from the rest of the rows
 data = []
-for row in tqdm(rows[1:]):
+for row in track(rows[1:]):
     row_data = []
 
     for column in row.find_elements_by_tag_name("td"):
@@ -51,7 +51,7 @@ for row in tqdm(rows[1:]):
 # add a POSCAR header
 headers.append("POSCAR")
 # add POSCARs to each data row
-for entry in tqdm(data):
+for entry in track(data):
 
     try:  # some POSCARs don't have a page... not sure why. I should contact their devs. see A_oC8_64_f.I (#179)
 

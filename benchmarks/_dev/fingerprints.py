@@ -26,7 +26,7 @@ print(test.check_structure(perovskite))
 
 import time
 
-from tqdm import tqdm
+from rich.progress import track
 
 # I will record structure sizes and times into lists
 num_sites = []
@@ -43,7 +43,7 @@ size = [
 ]  # because we start adding below - I have the first at 0, the first cycle will turn this into a 1
 
 # we are going to try 10 different supercell sizes
-for n in tqdm(range(10)):
+for n in track(range(10)):
 
     # reset the perovskite structure to its unitcell
     perovskite = mpr.get_structure_by_material_id("mp-5827")

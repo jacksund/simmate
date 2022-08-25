@@ -17,7 +17,7 @@ convert to pymatgen.
 """
 
 from pymatgen.io.ase import AseAtomsAdaptor
-from tqdm import tqdm
+from rich.progress import track
 
 from simmate.database.third_parties.aflow import AflowStructure
 
@@ -82,8 +82,8 @@ def load_all_structures():
     )
 
     # Let's sanitize all structures first. So iterate through each one in the list
-    # This also takes a while, so we use a progress bar (via tqdm)
-    for entry in tqdm(data):
+    # This also takes a while, so we use a progress bar
+    for entry in track(data):
 
         # grab the structure -- this is loaded as an ASE atoms object
         structure_ase = entry.atoms()
