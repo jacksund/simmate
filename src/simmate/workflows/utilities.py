@@ -152,7 +152,9 @@ def get_workflow(
     # given as "path/to/my/script:my_workflow_obj". If so, we need to load that
     # file and grab the workflow like it's an object from a python module.
     if ":" in workflow_name:
-        script_name, workflow_obj_name = workflow_name.split(":")
+
+        # Note, windows paths have multiple ":" so we need to use rsplit.
+        script_name, workflow_obj_name = workflow_name.rsplit(":", 1)
         script_name = Path(script_name)
         module_name = script_name.stem
 
