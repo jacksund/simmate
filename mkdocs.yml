@@ -1,6 +1,7 @@
 site_name: Simmate Documentation
 site_url: https://simmate.org
 repo_url: https://github.com/jacksund/simmate
+edit_uri: edit/main/docs/
 
 theme:
   name: material
