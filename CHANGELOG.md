@@ -30,6 +30,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `ExtremeSymmetry` transformation to attempt symmetry reduction on disordered structure
 - account for structures in `fixed-composition` having fewer nsites than input becuase of symmetry reduction during relaxation. Also, add `min_structures_exact` parameter to ensure we have at least N structures with the expected number of sites
 - add experimental `variable-composition` (variable refers to nsites, not stoichiometry) and `binary-composition` evolutionary searches
+- allow custom workflows to run from yaml
 
 **Refactors**
 - isolate optional dependencies so that our install is smaller
@@ -40,6 +41,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - remove `SimmateFuture` class and merge functionality into `WorkItem`
 - switch from pdoc to mkdocs for documentation and remove `get_doc_from_readme`. Code and doc organization are now decoupled.
 - rename run commands. the `run` is now `run-quick` while `run-yaml` is now `run`. `run-cloud` now accepts a yaml input.
+- remove `tqdm` dependency in favor of `rich.progress`
 
 **Fixes**
 - fix `module not found` error by adding ASE to dependencies
