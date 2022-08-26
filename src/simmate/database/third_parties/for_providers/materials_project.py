@@ -136,13 +136,35 @@ def load_all_structures(
         # a specific structure (so a single mp-id)
         # Note: this is a very large query, so make sure your computer has enough
         # memory (RAM >10GB) and a stable internet connection.
-        data = mpr.summary.search(
+        # data = mpr.summary.search(
+        #     all_fields=False,
+        #     fields=fields_to_load,
+        #     deprecated=False,
+        #     # !!! DEV NOTE: you can uncomment these lines for quick testing
+        #     # num_chunks=3,
+        #     chunk_size=100,
+        # )
+
+        # BUG: The search above is super unstable, so instad, I grab all mp-id
+        # in one search, then make individual queries for the data of each
+        # after that.
+        # This takes about 30 minutes.
+        mp_ids = mpr.summary.search(
             all_fields=False,
-            fields=fields_to_load,
-            # !!! DEV NOTE: you can uncomment these lines for quick testing
-            # num_chunks=3,
-            # chunk_size=250,
+            fields=["material_id"],
+            deprecated=False,
+            num_sites=(200, 1000),
         )
+        data = []
+        for entry in track(mp_ids):
+            result = mpr.summary.search(
+                material_ids=[entry.material_id],
+                all_fields=False,
+                fields=fields_to_load,
+            )
+            data.append(result)
+
+    # return data
 
     # Let's iterate through each structure and save it to the database
     # This also takes a while, so we use a progress bar

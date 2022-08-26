@@ -13,7 +13,7 @@ body:
 
         If you have a question about getting started or how a feature works, please report your question via our [Discussions Page](https://github.com/jacksund/simmate/discussions/categories/q-a).
 
-        If you indeed have a bug, it helps to include things like the structure you used, the code, & input files while completing this form. For the code, try not to add long scripts if the error is only happening in one small part of it. Instead, try to generate your issue/error with as little code as possible or even using a illustrative example.
+        If you have a bug, it helps to include things like the structure you used, the code, & input files while completing this form. For the code, try not to add long scripts if the error is only happening in one small part of it. Instead, try to generate your issue/error with as little code as possible or even using a illustrative example.
 
   - type: textarea
     attributes:
