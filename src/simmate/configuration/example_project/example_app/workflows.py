@@ -73,7 +73,7 @@ class Relaxation__Vasp__MyExample2(VaspWorkflow):
         # These settings are the same for all structures regardless of composition.
         PREC="Normal",
         EDIFF=1e-5,
-        ENCUT=450,  # !!! Should this be based on the element type?
+        ENCUT=450,
         ISIF=3,
         NSW=100,
         IBRION=1,
