@@ -41,7 +41,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - refactor & clean up transformation module for readability
 - remove `SimmateFuture` class and merge functionality into `WorkItem`
 - switch from pdoc to mkdocs for documentation and remove `get_doc_from_readme`. Code and doc organization are now decoupled.
-- rename run commands. the `run` is now `run-quick` while `run-yaml` is now `run`. `run-cloud` now accepts a yaml input.
+- rename run commands based on user preference. the `run` is now `run-quick`. `run-yaml` is now `run`. `run-cloud` now assumes a yaml input.
 - remove `tqdm` dependency in favor of `rich.progress`
 
 **Fixes**
@@ -49,6 +49,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix bug with postgres database trying to delete sqlite locally
 - fix dask throwing errors with logging
 - fix bug where `fixed-composition` searches fail to detect individuals that have been symmetrically reduced (and therefore have fewer nsites than expected)
+- fix evolutionary search failures when writing output files while files are opened/locked
 
 
 # v0.9.0 (2022.08.17)

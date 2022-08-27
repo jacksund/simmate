@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import traceback
 from pathlib import Path
 
 import pandas
@@ -459,29 +460,43 @@ class FixedCompositionSearch(DatabaseTable):
     def write_summary(self, directory: Path):
         logging.info(f"Writing search summary to {directory}")
 
-        # calls all the key methods defined below
-        best_cifs_directory = get_directory(directory / "best_structures_cifs")
-        self.write_best_structures(100, best_cifs_directory)
-        self.write_individuals_completed(directory)
-        self.write_individuals_completed_full(directory)
-        self.write_best_individuals_history(directory)
-        self.write_individuals_incomplete(directory)
-        self.write_convergence_plot(directory)
-        self.write_final_fitness_plot(directory)
-        self.write_subworkflow_times_plot(directory)
+        # If the output fails to write, we have a non-critical issue that
+        # doesn't affect the search. We therefore don't want to raise an
+        # error here -- but instead warn the user and then continue the search
+        try:
+            # calls all the key methods defined below
+            best_cifs_directory = get_directory(directory / "best_structures_cifs")
+            self.write_best_structures(100, best_cifs_directory)
+            self.write_individuals_completed(directory)
+            self.write_individuals_completed_full(directory)
+            self.write_best_individuals_history(directory)
+            self.write_individuals_incomplete(directory)
+            self.write_convergence_plot(directory)
+            self.write_final_fitness_plot(directory)
+            self.write_subworkflow_times_plot(directory)
 
-        # BUG: This is only for "relaxation.vasp.staged", which the assumed
-        # workflow for now.
-        composition = Composition(self.composition)
-        self.subworkflow.write_series_convergence_plot(
-            directory=directory,
-            # See `individuals` method for why we use these filters
-            formula_reduced=composition.reduced_formula,
-            nsites__lte=composition.num_atoms,
-            energy_per_atom__isnull=False,
-        )
+            # BUG: This is only for "relaxation.vasp.staged", which the assumed
+            # workflow for now.
+            composition = Composition(self.composition)
+            self.subworkflow.write_series_convergence_plot(
+                directory=directory,
+                # See `individuals` method for why we use these filters
+                formula_reduced=composition.reduced_formula,
+                nsites__lte=composition.num_atoms,
+                energy_per_atom__isnull=False,
+            )
 
-        logging.info("Done writing summary.")
+            logging.info("Done writing summary.")
+
+        except Exception:
+            logging.warning(
+                "Failed to write the output summary. This issue will be silenced "
+                "to avoid stopping the search. But please report the following "
+                "error to our github: https://github.com/jacksund/simmate/issues/"
+            )
+
+            # prints the most recent exception traceback
+            traceback.print_exc()
 
     # -------------------------------------------------------------------------
     # Methods for deserializing objects. Consider moving to the toolkit methods
@@ -536,7 +551,16 @@ class FixedCompositionSearch(DatabaseTable):
         # if the directory is filled, we need to delete all the files
         # before writing the new ones.
         for file in directory.iterdir():
-            file.unlink()
+            try:
+                file.unlink()
+            except OSError:
+                logging.warning("Unable to delete a CIF file: {file}")
+                logging.warning(
+                    "Updating the 'best structures' directory involves deleting "
+                    "and re-writing all CIF files each cycle. If you have a file "
+                    "open while this step occurs, then you'll see this warning."
+                    "Close your file for this to go away."
+                )
 
         best = self.get_nbest_indiviudals(nbest)
         structures = best.only("structure_string", "id").to_toolkit()
