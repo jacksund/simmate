@@ -63,5 +63,5 @@ def test_neb_workup(tmp_path):
     # run the full workup
     Diffusion__Vasp__NebFromImagesMit.workup(tmp_path)
     assert summary_filename.exists()
-    # assert os.path.exists(plot_filename)  # temporarily removed
+    assert plot_filename.exists()
     assert cif_filename.exists()
