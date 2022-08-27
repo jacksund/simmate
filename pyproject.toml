@@ -129,6 +129,11 @@ EXTRAS = [
     "django-extensions >=3.1.5",  # simple tools to help with django development
 ]
 
+# For downloading third-party data directly from source instead of Simmate
+DATA = [
+    "mp-api >=0.26.3, <=0.26.3",  # materials project
+]
+
 # Link to our homepage. Use github for now.
 [project.urls]
 homepage = "https://simmate.org/"

@@ -35,8 +35,8 @@ def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
     # make sure the user knows what they are doing and actually wants to continue
     if not confirm_delete:
         typer.confirm(
-            "WARNING: This deletes your current database and cannot be undone. \n"
-            "We highly recommend you make a copy of your database before doing this. \n"
+            "\nWARNING: This deletes your current database and cannot be undone. \n"
+            "We highly recommend you make a copy of your database before doing this. \n\n"
             "Do you still want to continue?",
             abort=True,
         )
@@ -48,11 +48,11 @@ def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
     using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
     if using_sqlite and use_prebuilt == None:
         use_prebuilt = typer.confirm(
-            "It looks like you are using the default database backend (sqlite3). \n"
+            "\nIt looks like you are using the default database backend (sqlite3). \n"
             "Would you like to use a prebuilt-database with all third-party data "
             "already loaded? \n"
             "If this is the first time you using the prebuild, this will "
-            "involve a ~1.5GB \ndownload and will unpack to roughly 5GB.\n"
+            "involve a ~1.5GB \ndownload and will unpack to roughly 5GB.\n\n"
             "We recommend answering 'yes' for beginners."
         )
 

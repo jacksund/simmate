@@ -13,18 +13,13 @@ body:
 
   - type: textarea
     attributes:
-      label: Current behavior and/or alternatives
-      description: A clear and concise description of any alternative solutions or features you have considered. How would you currently do this?
-
-  - type: textarea
-    attributes:
-      label: Example Use
-      description: Provide an example or description of how this would help users. 
-
-  - type: textarea
-    attributes:
       label: Additional context
       description: Provide additional context about the use case here.
+
+  - type: textarea
+    attributes:
+      label: To-do items
+      description: (for dev team) List of changes required to implement this
 
   - type: markdown
     attributes:

@@ -16,14 +16,63 @@ class MatprojStructure(Structure, Thermodynamics):
     class Meta:
         app_label = "third_parties"
 
-    base_info = ["id", "structure_string", "energy"]
+    base_info = [
+        "id",
+        "structure_string",
+        "energy",
+        "energy_uncorrected",
+        "band_gap",
+        "is_gap_direct",
+        "is_magnetic",
+        "total_magnetization",
+        "is_theoretical",
+        "updated_at",
+    ]
     source = "Materials Project"
     source_doi = "https://doi.org/10.1063/1.4812323"
-    remote_archive_link = "https://archives.simmate.org/MatProjStructure-2022-01-26.zip"
+    remote_archive_link = "https://archives.simmate.org/MatprojStructure-2022-08-27.zip"
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """
     The id used to represent the structure (ex: "mp-12345")
+    """
+
+    energy_uncorrected = table_column.FloatField(blank=True, null=True)
+    """
+    The reported energy of the system BEFORE Materials Project applies
+    their composition-based corrections.
+    """
+
+    band_gap = table_column.FloatField(blank=True, null=True)
+    """
+    The band gap energy in eV.
+    """
+
+    is_gap_direct = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the band gap is direct or indirect.
+    """
+
+    is_magnetic = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the material is magnetic
+    """
+
+    total_magnetization = table_column.FloatField(blank=True, null=True)
+    """
+    The total magnetization of the material
+    """
+
+    is_theoretical = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the material is from a theoretical structure. False indicates
+    that it is experimentally known.
+    """
+
+    updated_at = table_column.DateTimeField(blank=True, null=True)
+    """
+    Timestamp of when this row was was lasted changed / updated by the 
+    Materials Project
     """
 
     @property
