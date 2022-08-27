@@ -145,7 +145,7 @@ def load_all_structures(
         #     chunk_size=100,
         # )
 
-        # BUG: The search above is super unstable, so instad, I grab all mp-id
+        # BUG: The search above is super unstable, so instead, I grab all mp-id
         # in one search, then make individual queries for the data of each
         # after that.
         # This takes about 30 minutes.
@@ -153,7 +153,6 @@ def load_all_structures(
             all_fields=False,
             fields=["material_id"],
             deprecated=False,
-            num_sites=(200, 1000),
         )
         data = []
         for entry in track(mp_ids):
@@ -162,31 +161,36 @@ def load_all_structures(
                 all_fields=False,
                 fields=fields_to_load,
             )
-            data.append(result)
+            data.append(result[0])
 
     # return data
 
     # Let's iterate through each structure and save it to the database
     # This also takes a while, so we use a progress bar
+    failed_entries = []
     for entry in track(data):
+        try:
+            # convert the data to a Simmate database object
+            structure_db = MatprojStructure.from_toolkit(
+                id=str(entry.material_id),
+                structure=entry.structure,
+                energy=entry.energy_per_atom * entry.structure.num_sites,
+                energy_uncorrected=entry.uncorrected_energy_per_atom
+                * entry.structure.num_sites,
+                updated_at=fix_timezone(entry.last_updated),
+                band_gap=entry.band_gap,
+                is_gap_direct=entry.is_gap_direct,
+                is_magnetic=entry.is_magnetic,
+                total_magnetization=entry.total_magnetization,
+                is_theoretical=entry.theoretical,
+            )
 
-        # convert the data to a Simmate database object
-        structure_db = MatprojStructure.from_toolkit(
-            id=str(entry.material_id),
-            structure=entry.structure,
-            energy=entry.energy_per_atom * entry.structure.num_sites,
-            energy_uncorrected=entry.uncorrected_energy_per_atom
-            * entry.structure.num_sites,
-            updated_at=fix_timezone(entry.last_updated),
-            band_gap=entry.band_gap,
-            is_gap_direct=entry.is_gap_direct,
-            is_magnetic=entry.is_magnetic,
-            total_magnetization=entry.total_magnetization,
-            is_theoretical=entry.theoretical,
-        )
+            # and save it to our database!
+            structure_db.save()
+        except:
+            failed_entries.append(entry)
 
-        # and save it to our database!
-        structure_db.save()
+    return failed_entries
 
     # # once all structures are saved, let's update the Thermodynamic columns
     # if update_stabilities:

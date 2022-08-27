@@ -31,6 +31,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - account for structures in `fixed-composition` having fewer nsites than input becuase of symmetry reduction during relaxation. Also, add `min_structures_exact` parameter to ensure we have at least N structures with the expected number of sites
 - add experimental `variable-composition` (variable refers to nsites, not stoichiometry) and `binary-composition` evolutionary searches
 - allow custom workflows to run from yaml
+- update MatProj data to new api, and add severl new columns for data (e.g. mag + band gap)
 
 **Refactors**
 - isolate optional dependencies so that our install is smaller
