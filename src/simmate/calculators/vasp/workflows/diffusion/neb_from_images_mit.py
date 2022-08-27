@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from simmate.calculators.vasp.error_handlers import Walltime
 from simmate.calculators.vasp.workflows.diffusion.neb_from_images_base import (
     VaspNebFromImagesWorkflow,
 )
@@ -32,3 +33,11 @@ class Diffusion__Vasp__NebFromImagesMit(
         )
     )
     incar.pop("multiple_keywords__smart_ldau")
+
+    # Because of NEB's unique folder structure, many error handlers are broken
+    # and cannot be used. We go through the list that is broken and remove them
+    error_handlers = [
+        handler
+        for handler in Relaxation__Vasp__Mit.error_handlers
+        if type(handler) not in [Walltime]
+    ]

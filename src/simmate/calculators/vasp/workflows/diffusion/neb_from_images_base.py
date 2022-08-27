@@ -229,17 +229,32 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         - `directory`:
             Name of the base folder where all results are located.
         """
+
+        # Make sure there is "*.start" and "*.end" directory present. These
+        # will be our start/end folders. We go through all foldernames in the
+        # directory and grab the first that matches
         # BUG: For now I assume there are start/end image directories are located
         # in the working directory. These relaxation are actually ran by a
         # separate workflow, which is thus a prerequisite for this workflow.
-        start_dirname = directory / "relaxation.vasp.mvl-neb-endpoint.start"
-        end_dirname = directory / "relaxation.vasp.mvl-neb-endpoint.end"
+
+        # assume foldernames of start and end until proven otherwise
+        start_dirname = directory / "start"
+        end_dirname = directory / "end"
+
+        for name in directory.iterdir():
+            if name.suffix == ".start":
+                start_dirname = name
+            elif name.suffix == ".end":
+                end_dirname = name
+        print(start_dirname)
+        print(end_dirname)
         if not start_dirname.exists() or not end_dirname.exists():
             raise Exception(
-                "Your NEB calculation completed successfully. However, in order "
-                "to run the workup, Simmate needs the start/end point relaxations. "
-                "These should be in the same folder as your NEB run and named "
-                "relaxation.vasp.neb-endpoint.start and relaxation.vasp.neb-endpoint.end."
+                "Your NEB calculation finished (possibly successfully). However, "
+                "in order to run the workup, Simmate needs the start/end point "
+                "relaxations. These should be located in the same directory as "
+                "the NEB run and with folder names ending  with '*.start' and"
+                " '*.end' (e.g. 'image.start' and image.end' will work)"
             )
 
         ################

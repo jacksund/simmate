@@ -50,6 +50,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix dask throwing errors with logging
 - fix bug where `fixed-composition` searches fail to detect individuals that have been symmetrically reduced (and therefore have fewer nsites than expected)
 - fix evolutionary search failures when writing output files while files are opened/locked
+- fix NEB workflows failing due to Walltime handler
+- fix NEB workflows hints for `workup` failure due to missing start/end image folders
 
 
 # v0.9.0 (2022.08.17)
