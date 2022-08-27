@@ -13,6 +13,11 @@ from simmate.toolkit import Composition
 from simmate.toolkit.structure_prediction.evolution.database import StructureSource
 from simmate.utilities import get_directory
 from simmate.workflow_engine.execution import WorkItem
+from simmate.toolkit.structure_prediction import (
+    get_known_structures,
+    get_structures_from_prototypes,
+    get_structures_from_substitution_of_known,
+)
 
 
 class FixedCompositionSearch(DatabaseTable):
@@ -130,60 +135,41 @@ class FixedCompositionSearch(DatabaseTable):
         return False
 
     def _check_singleshot_sources(self, directory: Path):
-        logging.warning(
-            "Singleshot sources is still in testing. The found structures "
-            "are not submitted as part of the search."
+
+        composition = Composition(self.composition)
+
+        structures_known = get_known_structures(
+            composition,
+            allow_multiples=False,
         )
+        logging.info(
+            f"Generated {len(structures_known)} structures from other databases"
+        )
+        directory_known = get_directory(directory / "known_structures")
+        for i, s in enumerate(structures_known):
+            s.to("cif", directory_known / f"{i}.cif")
 
-        try:
+        structures_sub = get_structures_from_substitution_of_known(
+            composition,
+            strict_nsites=True,
+        )
+        logging.info(
+            f"Generated {len(structures_sub)} structures from substitutions"
+        )
+        directory_sub = get_directory(directory / "from_substitutions")
+        for i, s in enumerate(structures_sub):
+            s.to("cif", directory_sub / f"{i}.cif")
 
-            from simmate.toolkit.structure_prediction import (
-                get_known_structures,
-                get_structures_from_prototypes,
-                get_structures_from_substitution_of_known,
-            )
-
-            composition = Composition(self.composition)
-
-            structures_known = get_known_structures(
-                composition,
-                strict_nsites=True,
-            )
-            logging.info(
-                f"Generated {len(structures_known)} structures from other databases"
-            )
-            directory_known = get_directory(directory / "known_structures")
-            for i, s in enumerate(structures_known):
-                s.to("cif", directory_known / f"{i}.cif")
-
-            structures_sub = get_structures_from_substitution_of_known(
-                composition,
-                strict_nsites=True,
-            )
-            logging.info(
-                f"Generated {len(structures_sub)} structures from substitutions"
-            )
-            directory_sub = get_directory(directory / "from_substitutions")
-            for i, s in enumerate(structures_sub):
-                s.to("cif", directory_sub / f"{i}.cif")
-
-            structures_prototype = get_structures_from_prototypes(
-                composition,
-                max_sites=int(composition.num_atoms),
-            )
-            logging.info(
-                f"Generated {len(structures_prototype)} structures from prototypes"
-            )
-            directory_sub = get_directory(directory / "from_prototypes")
-            for i, s in enumerate(structures_prototype):
-                s.to("cif", directory_sub / f"{i}.cif")
-
-        except Exception as error:
-            logging.error(
-                f"Singleshot sources failed with {self.composition}. "
-                "Please report this issue."
-            )
-            raise error
+        structures_prototype = get_structures_from_prototypes(
+            composition,
+            max_sites=int(composition.num_atoms),
+        )
+        logging.info(
+            f"Generated {len(structures_prototype)} structures from prototypes"
+        )
+        directory_sub = get_directory(directory / "from_prototypes")
+        for i, s in enumerate(structures_prototype):
+            s.to("cif", directory_sub / f"{i}.cif")
 
         # Initialize the single-shot sources
         # singleshot_sources = []

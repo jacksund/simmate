@@ -125,14 +125,17 @@ class FromAflowPrototypes:
         # check for both -- just #1.
 
         # We allow for multiples so we want all multiples nsites in our
-        # desired composition. For example if our compositon, has 6 sites, we
+        # desired composition. For example if our compositon has 6 sites, we
         # would pull all prototypes that have 6, 12, 19, ..., 6*N sites.
-        # First generate a list of the allow number of sites
         if self.allow_multiples:
+            # First generate a list of the allow number of sites. Multiple also
+            # include "fewer-than" compositions, so we do this from the reduced
+            # composition as as starting point
+            reduced = self.composition.reduced_composition
             target_nsites_list = [
-                int(self.composition.num_atoms * n)
+                int(reduced.num_atoms * n)
                 for n in range(
-                    1, (self.max_sites // int(self.composition.num_atoms)) + 1
+                    1, (self.max_sites // int(reduced.num_atoms)) + 1
                 )
             ]
             # Now filter off the prototypes that have the proper number of sites

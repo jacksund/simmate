@@ -9,14 +9,6 @@ from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition 
 )
 from simmate.workflow_engine import Workflow
 
-# TODO
-# StructurePrediction__Python__VariableTernaryComposition
-#   --> calls VariableBinaryComposition strategically
-#   --> might call FixedCompositionVariableNsites strategically too
-# StructurePrediction__Python__VariableBinaryComposition
-#   --> calls FixedCompositionVariableNsites strategically
-#   --> limit compositions to N * reduced formula (e.g. 4 formula units)
-
 
 class StructurePrediction__Python__VariableComposition(Workflow):
 
