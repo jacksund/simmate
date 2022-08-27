@@ -246,8 +246,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
                 start_dirname = name
             elif name.suffix == ".end":
                 end_dirname = name
-        print(start_dirname)
-        print(end_dirname)
+
         if not start_dirname.exists() or not end_dirname.exists():
             raise Exception(
                 "Your NEB calculation finished (possibly successfully). However, "
