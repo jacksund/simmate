@@ -135,11 +135,17 @@ class SimmateExecutor:
 
         errored_jobs = WorkItem.objects.filter(status="E").all()
 
+        if not errored_jobs:
+            print("No errored jobs found. Everything looks good.")
+            return
+
+        print("ID | ERROR")
+
         for job in errored_jobs:
             try:
                 job.result()
             except Exception as error:
-                print(f"{job.id} {error}")
+                print(f"{job.id} | {error}")
 
     # -------------------------------------------------------------------------
     # Extra methods to add if I want to be consistent with other Executor classes

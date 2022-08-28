@@ -231,7 +231,7 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
                     min_structures_exact=min_structures_exact,
                     limit_best_survival=limit_best_survival,
                     max_structures=max_structures,
-                    directory=directory / "fixed-compositon-logs",
+                    directory=directory / composition.reduced_formula,
                     # Because we submitted all steady states above, we don't
                     # need the other workflows to do these anymore.
                     singleshot_sources=[],

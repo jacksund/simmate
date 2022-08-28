@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import math
 import traceback
 from pathlib import Path
 
@@ -221,7 +222,7 @@ class FixedCompositionSearch(DatabaseTable):
         # Make sure the proportions sum to 1, otherwise scale them. We then convert
         # these to steady-state integers (and round to the nearest integer)
         sum_proportions = sum(steadystate_source_proportions)
-        if sum_proportions != 1:
+        if not math.isclose(sum_proportions, 1, rel_tol=1e-6):
             logging.warning(
                 "fractions for steady-state sources do not add to 1. "
                 "We have scaled all sources to equal one to fix this."
@@ -326,7 +327,8 @@ class FixedCompositionSearch(DatabaseTable):
 
             if nflows_to_submit > 0:
                 logging.info(
-                    f"Submitting {nflows_to_submit} new individuals for {source_db.name}"
+                    f"Submitting {nflows_to_submit} new individuals for "
+                    f"'{source_db.name}'"
                 )
 
             # disable the logs while we submit
